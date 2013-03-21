@@ -1,0 +1,10 @@
+{ "development":
+  { "driver":   "jugglingdb-cozy-adapter"
+  }
+, "test":
+  { "driver":   "jugglingdb-cozy-adapter"
+  }
+, "production":
+  { "driver":   "jugglingdb-cozy-adapter"
+  }
+}
