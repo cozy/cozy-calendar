@@ -1,0 +1,1 @@
+class exports.Reminder extends Backbone.Model

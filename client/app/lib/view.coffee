@@ -1,19 +1,15 @@
 module.exports = class View extends Backbone.View
-    tagName: 'section'
 
     template: ->
 
     initialize: ->
-        @render()
 
-    getRenderData: ->
-        model: @model?.toJSON()
-
-    render: ->
-        # console.debug "Rendering #{@constructor.name}", @
+    render: (templateOptions) ->
         @beforeRender()
-        @$el.html @template({})
+        render =  @template().call null, templateOptions
+        @$el.html render
         @afterRender()
+
         @
 
     beforeRender: ->

@@ -1,7 +1,12 @@
-app.configure 'test', ->
-    app.use require('express').errorHandler dumpExceptions: true, showStack: true
-    app.settings.quiet = true
-    app.enable 'view cache'
-    app.enable 'model cache'
-    app.enable 'eval cache'
+express = require 'express'
 
+module.exports = (compound) ->
+    app = compound.app
+
+    app.configure 'test', ->
+        app.use express.errorHandler
+            dumpExceptions: true, showStack: true
+        app.enable 'quiet'
+        app.enable 'view cache'
+        app.enable 'model cache'
+        app.enable 'eval cache'

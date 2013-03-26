@@ -1,3 +1,3 @@
-Note = define 'Template', ->
+Reminder = define 'Reminder', ->
     property 'title', String
-    property 'content', String
+    property 'url', String
