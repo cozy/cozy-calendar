@@ -1,12 +1,12 @@
 module.exports = (compound) ->
     #requests = require "../../common/requests"
 
-    Reminder = compound.models.Reminder
+    VTodo = compound.models.VTodo
 
     all = (doc) ->
         emit doc.title, doc
 
-    Reminder.defineRequest "all", all, (err) ->
+    VTodo.defineRequest "all", all, (err) ->
         if err
-            compound.logger.write "Reminders All requests, cannot be created"
+            compound.logger.write "Request VTodo#All, cannot be created"
             compound.logger.write err

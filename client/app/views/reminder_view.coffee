@@ -1,25 +1,27 @@
 View = require '../lib/view'
+helpers = require '../helpers'
+
+###
+A reminder can hold mulitple alarm objects. It happens when there is
+mulitple alarms at the same day for the same object.
+Basically only the "action" would chance (mail, popup, ...) so we want
+to display the information in a single block.
+###
 
 module.exports = class ReminderView extends View
 
     tagName: 'div'
     className: 'reminder'
 
-    events:
-        "click button.delete": "onDeleteButtonClicked"
-
     render: ->
+
         super
-            title: @model.get 'title'
-            url: @model.get 'url'
+            actions: @model.pluck 'action'
+            date: @getDataModel().getDateObject()
+            description: @getDataModel().get 'description'
 
     template: ->
-        require('./templates/reminder')
+        require './templates/reminder'
 
-    onDeleteButtonClicked: =>
-        @model.destroy
-            wait: true
-            error: ->
-              alert "Server error occured, reminder was not deleted."
-
-
+    getDataModel: ->
+        return @model.at(0)

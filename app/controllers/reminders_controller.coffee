@@ -1,34 +1,41 @@
+###
+
+The application doesn't provide Todos functionalities in the 'iCal' meaning of
+the term. Therefore we use the VTODO format to wrap alarms in order to be
+compliant with the standard.
+
+###
+
 before ->
-    # Find bookmark
-    Reminder.find req.params.id, (err, reminder) =>
-        if err or not reminder
-            send error: true, msg: "Reminder not found", 404
+    VTodo.find req.params.id, (err, vtodo) =>
+        if err or not vtodo
+            send error: true, msg: "VTodo not found", 404
         else
-            @reminder = reminder
+            @reminder = vtodo
             next()
 # Make this pre-treatment only before destroy action.
 , only: ['destroy']
 
 action 'all', ->
 
-    Reminder.all (err, reminders) ->
+    VTodo.all (err, vtodos) ->
         if err
             send error: true, msg: 'Server error occurred while retrieving data'
         else
-            send reminders
+            send vtodos
 
 action 'create', ->
 
-    Reminder.create req.body, (err, reminder) =>
+    VTodo.create req.body, (err, vtodo) =>
         if err
-            send error: true, msg: "Server error while creating reminder.", 500
+            send error: true, msg: "Server error while creating vtodo.", 500
         else
-            send reminder
+            send vtodo
 
 action 'destroy', ->
-    @reminder.destroy (err) ->
+    @vtodo.destroy (err) ->
         if err
             compound.logger.write err
-            send error: 'Cannot destroy reminder', 500
+            send error: 'Cannot destroy vtodo', 500
         else
-            send success: 'reminder succesfuly deleted'
+            send success: 'VTodo succesfuly deleted'

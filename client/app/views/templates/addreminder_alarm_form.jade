@@ -1,0 +1,13 @@
+.controls.form-inline
+  select(id="action#{id}").input-small
+    each displayAction, action in actions
+        if action == defaultAction
+          option(value="#{action}", selected) #{displayAction}
+        else
+          option(value="#{action}") #{displayAction}
+  label(for="inputDate#{id}") &nbsp;Date&nbsp;
+  input(type="date", id="inputDate#{id}", value="#{defaultDate}")
+  label(for="inputTime#{id}") &nbsp;&nbsp;Time&nbsp;
+  input(type="time", id="inputTime#{id}", value="#{defaultTime}")
+  button.btn.add-alarm
+    i.icon-plus

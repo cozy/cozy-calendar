@@ -17,6 +17,7 @@ exports.config =
                 # even if they aren't specified in order.
                 before: [
                     'vendor/scripts/jquery-1.8.2.js'
+                    'vendor/scripts/bootstrap.js'
                     'vendor/scripts/lodash-0.9.1.js'
                     'vendor/scripts/backbone-1.0.0.js'
                 ]
@@ -24,7 +25,10 @@ exports.config =
         stylesheets:
             joinTo: 'stylesheets/app.css'
             order:
-                before: ['vendor/styles/normalize.css']
+                before: [
+                    'vendor/styles/normalize.css',
+                    'vendor/styles/bootstrap.css'
+                ]
                 after: ['vendor/styles/helpers.css']
 
         templates:
