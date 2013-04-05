@@ -22,21 +22,13 @@ module.exports = class AddReminderFormView extends View
             'DISPLAY': 'Popup'
             'EMAIL': 'Email'
 
-        scrollTop = @$el.offset().top
-        ###$(document).scroll () =>
-            currentScroll = $(document).scrollTop()
-            if currentScroll >= scrollTop
-                #$('#reminders').css 'margin-top', @$el.height() + 20
-                @$el.addClass 'affix'
-            else
-                #$('#reminders').css 'margin-top', 0
-                @$el.removeClass 'affix'###
-
     render: ->
         content = super()
         @$el.append content
 
-        @$el.affix({offset: { top: @$el.offset().top - 10 }})
+        @defaultMinHeight = @$el.height()
+
+        @$el.affix({offset: { top: @$el.offset().top - 10}})
 
         @alarmListView = @$ '#add-alarms'
 
@@ -51,11 +43,26 @@ module.exports = class AddReminderFormView extends View
         button.removeClass('add-alarm').addClass('remove-alarm')
         button.find('i').removeClass('icon-plus').addClass('icon-minus')
 
-        @renderAlarm(@getDefaultAction)
+        @renderAlarm(@getDefaultAction())
 
-    # TODO: if there is a DISPLAY alarm, default should be EMAIL
-    getDefaultAction: () ->
-        return "DISPLAY"
+    # defaultAction is an optional parameter
+    getDefaultAction: (defaultAction) ->
+
+        defaultAction = 'DISPLAY' unless defaultDefaultAction?
+
+        selectedOptions = @$('.controls.form-inline option').filter(':selected')
+        actionsAlreadySelected = []
+
+        selectedOptions.each (index, item) ->
+            itemValue =  $(item).val()
+            if actionsAlreadySelected.indexOf(itemValue) is -1
+                actionsAlreadySelected.push itemValue
+
+        for action of @actions
+            if actionsAlreadySelected.indexOf(action) is -1
+                return action
+
+        return defaultAction
 
     onRemoveAlarm: (event) ->
         alarm = $(event.currentTarget).parent().parent()
@@ -68,18 +75,20 @@ module.exports = class AddReminderFormView extends View
             item.id = "alarm-#{i}"
             item.$el.prop 'id', item.id
 
-    onFocus: (event) ->
+        @onBlur()
 
-        heightBeforeShow = @$el.height()
+    onFocus: ->
+
         @alarmListView.show 'slow', () =>
-            delta = @$el.height() - heightBeforeShow
+            @$el.parent().css 'min-height', @$el.height()
 
-            if @$el.hasClass 'affix'
-                console.debug @$el.height()
-                @$el
-
-    onBlur: (event) ->
-        @alarmListView.hide('slow') if $(event.target).val() is ''
+    onBlur: ->
+        if @$('#inputDesc').val() is ''
+            unless @$el.hasClass 'affix'
+                @$el.parent().css 'min-height', @defaultMinHeight
+            @alarmListView.hide 'slow', =>
+                if @$el.hasClass 'affix'
+                    @$el.parent().css 'min-height', @defaultMinHeight
 
     onKeydown: (event) ->
         if $(event.target).val() is ''
