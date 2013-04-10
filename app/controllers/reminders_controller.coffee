@@ -6,15 +6,17 @@ compliant with the standard.
 
 ###
 
+sleep = require 'sleep'
+
 before ->
     VTodo.find req.params.id, (err, vtodo) =>
         if err or not vtodo
             send error: true, msg: "VTodo not found", 404
         else
-            @reminder = vtodo
+            @vtodo = vtodo
             next()
-# Make this pre-treatment only before destroy action.
-, only: ['destroy']
+# Make this pre-treatment only before update action.
+, only: ['update']
 
 action 'all', ->
 
@@ -32,10 +34,10 @@ action 'create', ->
         else
             send vtodo
 
-action 'destroy', ->
-    @vtodo.destroy (err) ->
-        if err
-            compound.logger.write err
-            send error: 'Cannot destroy vtodo', 500
+action 'update', ->
+
+    @vtodo.updateAttributes body, (err, vtodo) ->
+        if err?
+            send error: true, msg: "Server error while saving vtodo", 500
         else
-            send success: 'VTodo succesfuly deleted'
+            send vtodo

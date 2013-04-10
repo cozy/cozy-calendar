@@ -15,6 +15,7 @@ module.exports = class AppView extends View
 
     events:
         "click #add-reminder button.add-reminder": "onAddReminderClicked"
+        "click #reminders .alarms p .icon-pencil": "onEditReminderClicked"
 
     template: ->
         require('./templates/home')
@@ -33,7 +34,7 @@ module.exports = class AppView extends View
             appModel: @reminders
 
         @reminders.fetch
-            success: ->
+            success: (collection, response, options) ->
                 console.log "Fetch: success"
             error: ->
                 console.log "Fetch: error"
@@ -45,33 +46,45 @@ module.exports = class AppView extends View
         if not description? or description is ''
             return
 
-        console.debug "add reminder"
-        console.debug @addReminderFormView.alarmViews
         alarmCollection = new AlarmCollection()
         for alarmView in @addReminderFormView.alarmViews
             id = alarmView.getIndex()
             date = alarmView.$("#inputDate#{id}").val()
             time = alarmView.$("#inputTime#{id}").val()
             dueDate = helpers.formatDateICal "#{date}:#{time}"
-            console.debug dueDate
+
             alarm = new Alarm
                 action: alarmView.$("#action#{id}").val()
                 trigger: dueDate
                 description: "Please, remind: #{description}"
             alarmCollection.add alarm
 
-        @addReminderFormView.resetForm()
+        if @addReminderFormView.editionMode
+            reminder = @addReminderFormView.data
+            reminder.save
+                description: description
+                alarms: alarmCollection.toJSON(),
+                    wait: true
+                    success: =>
+                        @addReminderFormView.resetForm()
+                        @addReminderFormView.collapse()
+                        console.log "Save: success (attributes updated)"
+                    error: ->
+                        console.log "Error during reminder save."
+        else
+            @reminders.create
+                description: description
+                alarms: alarmCollection.toJSON(),
+                    wait: true
+                    success: (model, response) =>
+                        @addReminderFormView.resetForm()
+                        @addRemidnerFormView.collapse()
+                        console.log 'Create reminder: success'
+                    error: (error, xhr, options) ->
+                        error = JSON.parse xhr.responseText
+                        console.log "Create reminder: error: #{error?.msg}"
 
-        @reminders.create
-            description: description
-            alarms: alarmCollection.toJSON(),
-                wait: true
-                success: ->
-                    console.log 'success'
-                error: (error, xhr, options) ->
-                    error = JSON.parse xhr.responseText
-                    console.log "error: #{error?.msg}"
-
-
-
-
+    onEditReminderClicked: (event) ->
+        reminderID = $(event.target).data('reminderid')
+        reminder = @reminders.get reminderID
+        @addReminderFormView.loadReminderData(reminder)

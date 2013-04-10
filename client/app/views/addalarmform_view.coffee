@@ -5,15 +5,14 @@ module.exports = class AddAlarmFormView extends View
     tagName: 'div'
     className: 'control-group'
 
-    render: (defaultAction, actions) ->
+    render: (options) ->
 
-
-        formattedDateObject = @getFormattedDateObject()
+        formattedDateObject = @getFormattedDateObject(options.defaultDateObject)
 
         super
             id: @getIndex()
-            actions: actions
-            defaultAction: defaultAction
+            actions: options.actions
+            defaultAction: options.defaultAction
             defaultDate: formattedDateObject.date
             defaultTime: formattedDateObject.time
 
@@ -23,19 +22,21 @@ module.exports = class AddAlarmFormView extends View
     getIndex: ->
         return @id.replace 'alarm-', ''
 
-    getFormattedDateObject: () ->
-        dateObject = new Date()
-        month = dateObject.getMonth() + 1
-        month = "0#{month}" if month <= 9
-        day = dateObject.getDate();
-        day = "0#{day}" if day <= 9
+    getFormattedDateObject: (dateObject) ->
 
-        hours = dateObject.getHours()
-        minutes = dateObject.getMinutes()
-        hours = "0#{hours}" if hours <= 9
-        minutes = "0#{minutes}" if minutes <= 9
+        if dateObject.month <= 9 and "#{dateObject.month}".length is 1
+            dateObject.month = "0#{dateObject.month}"
+
+        if dateObject.day <= 9 and "#{dateObject.day}".length is 1
+            dateObject.day = "0#{dateObject.day}"
+
+        if dateObject.hour <= 9 and "#{dateObject.hour}".length is 1
+            dateObject.hour = "0#{dateObject.hour}"
+
+        if dateObject.minute <= 9 and "#{dateObject.minute}".length is 1
+            dateObject.minute = "0#{dateObject.minute}"
 
         return formattedDateObject =
-            date: "#{dateObject.getFullYear()}-#{month}-#{day}"
-            time: "#{hours}:#{minutes}"
+            date: "#{dateObject.year}-#{dateObject.month}-#{dateObject.day}"
+            time: "#{dateObject.hour}:#{dateObject.minute}"
 

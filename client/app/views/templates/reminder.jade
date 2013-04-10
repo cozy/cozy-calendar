@@ -1,3 +1,4 @@
 p #{date.hour}:#{date.minute}
     | #{description} (#{actions})
-//button.delete &times;
+    i(data-reminderid="#{reminderID}").icon-pencil
+    i(data-reminderid="#{reminderID}", data-alarmids="#{alarmIDs}", data-datehash="#{dateHash}").icon-trash

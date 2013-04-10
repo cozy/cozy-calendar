@@ -2,6 +2,7 @@ View = require '../lib/view'
 DayProgramView = require './dayprogram_view'
 
 {AlarmCollection} = require '../collections/alarms'
+{Alarm} = require '../models/alarm'
 {DayProgramCollection} = require '../collections/dayprograms'
 {DayProgram} = require '../models/dayprogram'
 
@@ -9,20 +10,24 @@ module.exports = class RemindersView extends View
 
     el: '#reminders'
 
-    constructor: (attributes, options) ->
+    events:
+        "click .alarms p .icon-trash": "onTrashReminderClicked"
 
-        @appModel = attributes.appModel
-        attributes.model = new DayProgramCollection()
+    constructor: (options) ->
 
-        super attributes, options
+        @appModel = options.appModel
+        options.model = new DayProgramCollection()
+        @alarmsToDelete = {}
+
+        super options
 
     initialize: ->
         @listenTo @appModel, "add", @onAdd
-        @listenTo @appModel, "remove", @onRemove
-        @listenTo @appModel, "move", @onMove
+        @listenTo @appModel, "change", @onChange
         @listenTo @appModel, "reset", @onReset
 
         @listenTo @model, 'add', @onAddDayProgram
+        @listenTo @model, 'remove', @onRemoveDayProgram
 
         @views = {}
 
@@ -35,23 +40,19 @@ module.exports = class RemindersView extends View
     ###
     onAdd: (reminder) ->
 
-        reminder.get('alarms').forEach (alarm) =>
+        reminder.alarms.forEach (alarm) =>
 
-            dayDate =
-                year: alarm.getDateObject().year
-                month: alarm.getDateObject().month
-                day: alarm.getDateObject().day
-            dateHash = "#{dayDate.year}#{dayDate.month}#{dayDate.day}"
+            dateHash = alarm.getDateHash()
 
             dayProgram = @model.findWhere {dateHash: dateHash}
             if not dayProgram?
                 dayProgramAlarms = new AlarmCollection()
                 @model.add new DayProgram
-                                date: dayDate,
+                                date: alarm.getDateObject(),
                                 dateHash: dateHash
                                 alarms: dayProgramAlarms
             else
-                dayProgramAlarms = dayProgram.get 'alarms'
+                dayProgramAlarms = dayProgram.alarms
 
             dayProgramAlarms.add alarm
 
@@ -72,13 +73,64 @@ module.exports = class RemindersView extends View
             selector = ".#{dpView.className}:nth-of-type(#{index})"
             @$el.find(selector).before render
 
-    onRemove: (reminder) ->
-        console.log "item removed"
+    onRemoveDayProgram: (dayProgram, collection, options) ->
+        delete @views[dayProgram.get('dateHash')] if collection.length is 0
 
-    onMove: (event) =>
-        console.log "item moved"
+
+    onChange: (reminder) ->
+        #@reRender(); return;
+
+        oldAlarmCollection = new AlarmCollection()
+        oldAlarmCollection.reset(reminder.previous('alarms'))
+        oldAlarmCollection.forEach (item) =>
+            dayProgramModel = @views[item.getDateHash()].model
+            dayProgramModel.alarms.remove item
+            if dayProgramModel.alarms.length is 0
+                @model.remove dayProgramModel
+
+        reminder.alarms.forEach (alarm, index) =>
+
+            dateHash = alarm.getDateHash()
+            dayProgram = @model.findWhere {dateHash: dateHash}
+
+            if not dayProgram?
+                dayProgramAlarms = new AlarmCollection()
+                @model.add new DayProgram
+                                date: alarm.getDateObject(),
+                                dateHash: dateHash
+                                alarms: dayProgramAlarms
+            else
+                dayProgramAlarms = dayProgram.alarms
+
+            alarmToUpdate = dayProgramAlarms.findWhere({id: alarm.get('id')})
+            if alarmToUpdate?
+                alarmToUpdate.set alarm.toJSON()
+            else
+                dayProgramAlarms.add alarm
+
+    # easy way to display the view when model has changed
+    reRender: () ->
+        @$el.empty()
+        @views = {}
+        @model.reset()
+        @appModel.forEach (reminder) =>
+            @onAdd(reminder)
+
+    onTrashReminderClicked: (event) ->
+        reminderID = $(event.target).data('reminderid')
+        alarmIDs = ($(event.target).data('alarmids')+"").split(',')
+
+        reminder =  @appModel.get(reminderID)
+        alarmIDs.forEach (item) =>
+            alarmID = "#{reminderID}##{item}"
+            reminder.alarms.remove(alarmID)
+
+        reminder.save
+            alarms: reminder.alarms.toJSON(),
+                wait: true
+                success: (model, response) =>
+                    console.log 'Save: success (alarm removed)'
 
     onReset: (event) =>
         console.log "collection reset"
-
 

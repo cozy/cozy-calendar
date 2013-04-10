@@ -17,6 +17,17 @@ exports.icalDateToObject = (date) ->
 
     return formattedDate
 
+exports.jsDateToDateObject = (date) ->
+
+    formattedDate =
+        year: date.getFullYear()
+        month: date.getMonth() + 1
+        day: date.getDate()
+        hour: date.getHours()
+        minute: date.getMinutes()
+
+    return formattedDate
+
 exports.buildStandardDate = (dateObject) ->
 
     if not dateObject.hour

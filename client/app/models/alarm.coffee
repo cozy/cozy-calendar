@@ -9,13 +9,33 @@ class exports.Alarm extends Backbone.Model
 
         super attributes, options
 
-
-    getDateObject: () ->
+    getDateObject: ->
         return helpers.icalDateToObject(@get 'trigger')
 
-    getStandardDate: () ->
+    getPreviousDateObject: ->
+        if @previous('trigger')?
+            return helpers.icalDateToObject(@previous 'trigger')
+        else return false
+
+    getStandardDate: ->
         return new Date helpers.buildStandardDate @getDateObject()
 
-    getTimeHash: () ->
-        date = @getDateObject()
+    getDateHash: (date) ->
+        date = @getDateObject() unless date?
+        return "#{date.year}#{date.month}#{date.day}"
+
+    getPreviousDateHash: ->
+        previousDateObject = @getPreviousDateObject()
+        if previousDateObject
+            return @getDateHash(previousDateObject)
+        else return false
+
+    getTimeHash: (date) ->
+        date = @getDateObject() unless date?
         return "#{date.year}#{date.month}#{date.day}#{date.hour}#{date.minute}"
+
+    getPreviousTimeHash: ->
+        previousDateObject = @getPreviousDateObject()
+        if previousDateObject
+            return @getTimeHash(previousDateObject)
+        else return false

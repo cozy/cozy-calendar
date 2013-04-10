@@ -13,15 +13,43 @@ module.exports = class ReminderView extends View
     tagName: 'div'
     className: 'reminder'
 
+    events:
+        'hover': 'onMouseOver'
+
+    initialize:  ->
+        @listenTo @model, 'add', @render
+        @listenTo @model, 'change', @render
+        @listenTo @model, 'remove', @onRemove
+
+    onRemove: ->
+        if @model.length is 0
+            @destroy()
+        else
+            @render()
+
     render: ->
 
-        super
-            actions: @model.pluck 'action'
-            date: @getDataModel().getDateObject()
-            description: @getDataModel().get 'description'
+        if @model.length is 0
+            return  @
+        else
+
+            super
+                actions: @model.pluck 'action'
+                date: @getDataModel().getDateObject()
+                description: @getDataModel().get 'description'
+                reminderID: @getDataModel().get 'reminderID'
+                dateHash: @getDataModel().getDateHash()
+                alarmIDs: @model.pluck 'index'
 
     template: ->
         require './templates/reminder'
 
     getDataModel: ->
         return @model.at(0)
+
+    onMouseOver: (event) ->
+
+        if event.type is 'mouseenter'
+            @$('i').css 'display', 'inline-block'
+        else
+            @$('i').hide()

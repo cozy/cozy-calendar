@@ -1,5 +1,6 @@
 View = require '../lib/view'
 AddAlarmFormView = require './addalarmform_view'
+helpers = require '../helpers'
 
 module.exports = class AddReminderFormView extends View
 
@@ -22,6 +23,9 @@ module.exports = class AddReminderFormView extends View
             'DISPLAY': 'Popup'
             'EMAIL': 'Email'
 
+        @data = null
+        @editionMode = false
+
     render: ->
         content = super()
         @$el.append content
@@ -33,16 +37,22 @@ module.exports = class AddReminderFormView extends View
         @alarmListView = @$ '#add-alarms'
 
         @renderAlarm(@getDefaultAction())
-        @alarmListView.hide()
+        @collapse()
 
     template: ->
         require './templates/addreminder_form'
 
-    onAddAlarm: (event) ->
-        button = @$('.add-alarm')
-        button.removeClass('add-alarm').addClass('remove-alarm')
-        button.find('i').removeClass('icon-plus').addClass('icon-minus')
+    collapse: ->
+        unless @$el.hasClass 'affix'
+            @$el.parent().css 'min-height', @defaultMinHeight
+        @alarmListView.hide 'slow', =>
+            if @$el.hasClass 'affix'
+                @$el.parent().css 'min-height', @defaultMinHeight
+    expand: ->
+        @alarmListView.show 'slow', () =>
+            @$el.parent().css 'min-height', @$el.height()
 
+    onAddAlarm: (event) ->
         @renderAlarm(@getDefaultAction())
 
     # defaultAction is an optional parameter
@@ -70,39 +80,70 @@ module.exports = class AddReminderFormView extends View
 
         @alarmViews.splice index, 1 # remove the element from the collection
         alarm.remove()
-
         for i, item of @alarmViews
+            oldID = item.getIndex()
             item.id = "alarm-#{i}"
             item.$el.prop 'id', item.id
-
-        @onBlur()
+            item.$('select').prop 'id', "action#{i}"
+            item.$("label[for='inputDate#{oldID}']").prop 'for', "inputDate#{i}"
+            item.$("#inputDate#{oldID}").prop 'id', "inputDate#{i}"
+            item.$("label[for=\"inputTime#{oldID}\"]").prop 'for', "inputTime#{i}"
+            item.$("#inputTime#{oldID}").prop 'id', "inputTime#{i}"
 
     onFocus: ->
-
-        @alarmListView.show 'slow', () =>
-            @$el.parent().css 'min-height', @$el.height()
+        @expand()
 
     onBlur: ->
         if @$('#inputDesc').val() is ''
-            unless @$el.hasClass 'affix'
-                @$el.parent().css 'min-height', @defaultMinHeight
-            @alarmListView.hide 'slow', =>
-                if @$el.hasClass 'affix'
-                    @$el.parent().css 'min-height', @defaultMinHeight
+            @collapse()
 
     onKeydown: (event) ->
         if $(event.target).val() is ''
-            $('.add-reminder').addClass('disabled')
+            @disableSubmitButton()
         else
-            $('.add-reminder').removeClass('disabled')
+            @enableSubmitButton()
 
-    resetForm: ->
+    enableSubmitButton: ->
+        $('.add-reminder').removeClass('disabled')
+
+    disableSubmitButton: ->
+        $('.add-reminder').addClass('disabled')
+
+    loadReminderData: (reminder) ->
+        @resetForm(false)
+        @$('#inputDesc').val reminder.get 'description'
+
+        @data = reminder
+
+        @editionMode = true
+        @$('button.add-reminder').html 'Edit the reminder'
+
+        reminder.alarms.forEach (item) =>
+            @renderAlarm item.get('action'), item.getDateObject()
+
+        @enableSubmitButton()
+        @expand()
+
+    resetForm: (setNewAlarm) ->
+
+        setNewAlarm = true unless setNewAlarm?
+
+        @data = null
+        @editionMode = false
+        @$('button.add-reminder').html 'Add the reminder'
+        @disableSubmitButton()
+
         @$('input').val ''
         @alarmListView.empty()
         @alarmViews = new Array()
-        @renderAlarm(@getDefaultAction())
+        @renderAlarm(@getDefaultAction()) if setNewAlarm
 
-    renderAlarm: (defaultAction) ->
+    renderAlarm: (defaultAction, dateObject) ->
+
+        button = @$('.add-alarm')
+        button.removeClass('add-alarm').addClass('remove-alarm')
+        button.find('i').removeClass('icon-plus').addClass('icon-minus')
+
         newIndex = @alarmViews.length
 
         alarmView = new AddAlarmFormView
@@ -110,6 +151,13 @@ module.exports = class AddReminderFormView extends View
 
         @alarmViews.push alarmView
 
-        render = alarmView.render(defaultAction, @actions).$el
+        dateObject = helpers.jsDateToDateObject(new Date()) unless dateObject?
+
+        options =
+            defaultAction: defaultAction
+            defaultDateObject: dateObject
+            actions: @actions
+
+        render = alarmView.render(options).$el
         @alarmListView.append render
 
