@@ -11547,6 +11547,5034 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 
 }(window.jQuery);;
+// Underscore.js 1.4.4
+// ===================
+
+// > http://underscorejs.org
+// > (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
+// > Underscore may be freely distributed under the MIT license.
+
+// Baseline setup
+// --------------
+(function() {
+
+  // Establish the root object, `window` in the browser, or `global` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var push             = ArrayProto.push,
+      slice            = ArrayProto.slice,
+      concat           = ArrayProto.concat,
+      toString         = ObjProto.toString,
+      hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.4.4';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      for (var key in obj) {
+        if (_.has(obj, key)) {
+          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+        }
+      }
+    }
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results[results.length] = iterator.call(context, value, index, list);
+    });
+    return results;
+  };
+
+  var reduceError = 'Reduce of empty array with no initial value';
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var length = obj.length;
+    if (length !== +length) {
+      var keys = _.keys(obj);
+      length = keys.length;
+    }
+    each(obj, function(value, index, list) {
+      index = keys ? keys[--length] : --length;
+      if (!initial) {
+        memo = obj[index];
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, obj[index], index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    return _.filter(obj, function(value, index, list) {
+      return !iterator.call(context, value, index, list);
+    }, context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if the array or object contains a given value (using `===`).
+  // Aliased as `include`.
+  _.contains = _.include = function(obj, target) {
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function(value) {
+      return value === target;
+    });
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    var isFunc = _.isFunction(method);
+    return _.map(obj, function(value) {
+      return (isFunc ? method : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs, first) {
+    if (_.isEmpty(attrs)) return first ? null : [];
+    return _[first ? 'find' : 'filter'](obj, function(value) {
+      for (var key in attrs) {
+        if (attrs[key] !== value[key]) return false;
+      }
+      return true;
+    });
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.where(obj, attrs, true);
+  };
+
+  // Return the maximum element or (element-based computation).
+  // Can't optimize arrays of integers longer than 65,535 elements.
+  // See: https://bugs.webkit.org/show_bug.cgi?id=80797
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return -Infinity;
+    var result = {computed : -Infinity, value: -Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed >= result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return Infinity;
+    var result = {computed : Infinity, value: Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Shuffle an array.
+  _.shuffle = function(obj) {
+    var rand;
+    var index = 0;
+    var shuffled = [];
+    each(obj, function(value) {
+      rand = _.random(index++);
+      shuffled[index - 1] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // An internal function to generate lookup iterators.
+  var lookupIterator = function(value) {
+    return _.isFunction(value) ? value : function(obj){ return obj[value]; };
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, value, context) {
+    var iterator = lookupIterator(value);
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value : value,
+        index : index,
+        criteria : iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index < right.index ? -1 : 1;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(obj, value, context, behavior) {
+    var result = {};
+    var iterator = lookupIterator(value || _.identity);
+    each(obj, function(value, index) {
+      var key = iterator.call(context, value, index, obj);
+      behavior(result, key, value);
+    });
+    return result;
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = function(obj, value, context) {
+    return group(obj, value, context, function(result, key, value) {
+      (_.has(result, key) ? result[key] : (result[key] = [])).push(value);
+    });
+  };
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = function(obj, value, context) {
+    return group(obj, value, context, function(result, key) {
+      if (!_.has(result, key)) result[key] = 0;
+      result[key]++;
+    });
+  };
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator, context) {
+    iterator = iterator == null ? _.identity : lookupIterator(iterator);
+    var value = iterator.call(context, obj);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely convert anything iterable into a real, live array.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null) return void 0;
+    return (n != null) && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n != null) && !guard) {
+      return slice.call(array, Math.max(array.length - n, 0));
+    } else {
+      return array[array.length - 1];
+    }
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, (n == null) || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, _.identity);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, output) {
+    each(input, function(value) {
+      if (_.isArray(value)) {
+        shallow ? push.apply(output, value) : flatten(value, shallow, output);
+      } else {
+        output.push(value);
+      }
+    });
+    return output;
+  };
+
+  // Return a completely flattened version of an array.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+    if (_.isFunction(isSorted)) {
+      context = iterator;
+      iterator = isSorted;
+      isSorted = false;
+    }
+    var initial = iterator ? _.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function(value, index) {
+      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
+        seen.push(value);
+        results.push(array[index]);
+      }
+    });
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(concat.apply(ArrayProto, arguments));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var args = slice.call(arguments);
+    var length = _.max(_.pluck(args, 'length'));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) {
+      results[i] = _.pluck(args, "" + i);
+    }
+    return results;
+  };
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  _.object = function(list, values) {
+    if (list == null) return {};
+    var result = {};
+    for (var i = 0, l = list.length; i < l; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i = 0, l = array.length;
+    if (isSorted) {
+      if (typeof isSorted == 'number') {
+        i = (isSorted < 0 ? Math.max(0, l + isSorted) : isSorted);
+      } else {
+        i = _.sortedIndex(array, item);
+        return array[i] === item ? i : -1;
+      }
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < l; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item, from) {
+    if (array == null) return -1;
+    var hasIndex = from != null;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
+      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+    }
+    var i = (hasIndex ? from : array.length);
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(len);
+
+    while(idx < len) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = function(func, context) {
+    if (func.bind === nativeBind && nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    var args = slice.call(arguments, 2);
+    return function() {
+      return func.apply(context, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context.
+  _.partial = function(func) {
+    var args = slice.call(arguments, 1);
+    return function() {
+      return func.apply(this, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length === 0) funcs = _.functions(obj);
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time.
+  _.throttle = function(func, wait) {
+    var context, args, timeout, result;
+    var previous = 0;
+    var later = function() {
+      previous = new Date;
+      timeout = null;
+      result = func.apply(context, args);
+    };
+    return function() {
+      var now = new Date;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+      } else if (!timeout) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, result;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) result = func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) result = func.apply(context, args);
+      return result;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      memo = func.apply(this, arguments);
+      func = null;
+      return memo;
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func];
+      push.apply(args, arguments);
+      return wrapper.apply(this, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    if (times <= 0) return func();
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys[keys.length] = key;
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var values = [];
+    for (var key in obj) if (_.has(obj, key)) values.push(obj[key]);
+    return values;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  _.pairs = function(obj) {
+    var pairs = [];
+    for (var key in obj) if (_.has(obj, key)) pairs.push([key, obj[key]]);
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    for (var key in obj) if (_.has(obj, key)) result[obj[key]] = key;
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    each(keys, function(key) {
+      if (key in obj) copy[key] = obj[key];
+    });
+    return copy;
+  };
+
+   // Return a copy of the object without the blacklisted properties.
+  _.omit = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    for (var key in obj) {
+      if (!_.contains(keys, key)) copy[key] = obj[key];
+    }
+    return copy;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          if (obj[prop] == null) obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) return bStack[length] == b;
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
+        }
+      }
+    } else {
+      // Objects with different constructors are not equivalent, but `Object`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
+                               _.isFunction(bCtor) && (bCtor instanceof bCtor))) {
+        return false;
+      }
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return result;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, [], []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
+  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) == '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Optimize `isFunction` if appropriate.
+  if (typeof (/./) !== 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj === 'function';
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && obj != +obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iterator, context) {
+    var accum = Array(n);
+    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // List of HTML entities for escaping.
+  var entityMap = {
+    escape: {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '/': '&#x2F;'
+    }
+  };
+  entityMap.unescape = _.invert(entityMap.escape);
+
+  // Regexes containing the keys and values listed immediately above.
+  var entityRegexes = {
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
+  };
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  _.each(['escape', 'unescape'], function(method) {
+    _[method] = function(string) {
+      if (string == null) return '';
+      return ('' + string).replace(entityRegexes[method], function(match) {
+        return entityMap[method][match];
+      });
+    };
+  });
+
+  // If the value of the named property is a function then invoke it;
+  // otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return null;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name){
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return result.call(this, func.apply(_, args));
+      };
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    var render;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = new RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset)
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      }
+      if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      }
+      if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+      index = offset + match.length;
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
+
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj) {
+    return this._chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      return result.call(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return result.call(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  _.extend(_.prototype, {
+
+    // Start chaining a wrapped Underscore object.
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+
+    // Extracts the result from a wrapped and chained object.
+    value: function() {
+      return this._wrapped;
+    }
+
+  });
+
+}).call(this);
+;
+//     Backbone.js 1.0.0
+
+//     (c) 2010-2013 Jeremy Ashkenas, DocumentCloud Inc.
+//     Backbone may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://backbonejs.org
+
+(function(){
+
+  // Initial Setup
+  // -------------
+
+  // Save a reference to the global object (`window` in the browser, `exports`
+  // on the server).
+  var root = this;
+
+  // Save the previous value of the `Backbone` variable, so that it can be
+  // restored later on, if `noConflict` is used.
+  var previousBackbone = root.Backbone;
+
+  // Create local references to array methods we'll want to use later.
+  var array = [];
+  var push = array.push;
+  var slice = array.slice;
+  var splice = array.splice;
+
+  // The top-level namespace. All public Backbone classes and modules will
+  // be attached to this. Exported for both the browser and the server.
+  var Backbone;
+  if (typeof exports !== 'undefined') {
+    Backbone = exports;
+  } else {
+    Backbone = root.Backbone = {};
+  }
+
+  // Current version of the library. Keep in sync with `package.json`.
+  Backbone.VERSION = '1.0.0';
+
+  // Require Underscore, if we're on the server, and it's not already present.
+  var _ = root._;
+  if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
+
+  // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
+  // the `$` variable.
+  Backbone.$ = root.jQuery || root.Zepto || root.ender || root.$;
+
+  // Runs Backbone.js in *noConflict* mode, returning the `Backbone` variable
+  // to its previous owner. Returns a reference to this Backbone object.
+  Backbone.noConflict = function() {
+    root.Backbone = previousBackbone;
+    return this;
+  };
+
+  // Turn on `emulateHTTP` to support legacy HTTP servers. Setting this option
+  // will fake `"PUT"` and `"DELETE"` requests via the `_method` parameter and
+  // set a `X-Http-Method-Override` header.
+  Backbone.emulateHTTP = false;
+
+  // Turn on `emulateJSON` to support legacy servers that can't deal with direct
+  // `application/json` requests ... will encode the body as
+  // `application/x-www-form-urlencoded` instead and will send the model in a
+  // form param named `model`.
+  Backbone.emulateJSON = false;
+
+  // Backbone.Events
+  // ---------------
+
+  // A module that can be mixed in to *any object* in order to provide it with
+  // custom events. You may bind with `on` or remove with `off` callback
+  // functions to an event; `trigger`-ing an event fires all callbacks in
+  // succession.
+  //
+  //     var object = {};
+  //     _.extend(object, Backbone.Events);
+  //     object.on('expand', function(){ alert('expanded'); });
+  //     object.trigger('expand');
+  //
+  var Events = Backbone.Events = {
+
+    // Bind an event to a `callback` function. Passing `"all"` will bind
+    // the callback to all events fired.
+    on: function(name, callback, context) {
+      if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
+      this._events || (this._events = {});
+      var events = this._events[name] || (this._events[name] = []);
+      events.push({callback: callback, context: context, ctx: context || this});
+      return this;
+    },
+
+    // Bind an event to only be triggered a single time. After the first time
+    // the callback is invoked, it will be removed.
+    once: function(name, callback, context) {
+      if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
+      var self = this;
+      var once = _.once(function() {
+        self.off(name, once);
+        callback.apply(this, arguments);
+      });
+      once._callback = callback;
+      return this.on(name, once, context);
+    },
+
+    // Remove one or many callbacks. If `context` is null, removes all
+    // callbacks with that function. If `callback` is null, removes all
+    // callbacks for the event. If `name` is null, removes all bound
+    // callbacks for all events.
+    off: function(name, callback, context) {
+      var retain, ev, events, names, i, l, j, k;
+      if (!this._events || !eventsApi(this, 'off', name, [callback, context])) return this;
+      if (!name && !callback && !context) {
+        this._events = {};
+        return this;
+      }
+
+      names = name ? [name] : _.keys(this._events);
+      for (i = 0, l = names.length; i < l; i++) {
+        name = names[i];
+        if (events = this._events[name]) {
+          this._events[name] = retain = [];
+          if (callback || context) {
+            for (j = 0, k = events.length; j < k; j++) {
+              ev = events[j];
+              if ((callback && callback !== ev.callback && callback !== ev.callback._callback) ||
+                  (context && context !== ev.context)) {
+                retain.push(ev);
+              }
+            }
+          }
+          if (!retain.length) delete this._events[name];
+        }
+      }
+
+      return this;
+    },
+
+    // Trigger one or many events, firing all bound callbacks. Callbacks are
+    // passed the same arguments as `trigger` is, apart from the event name
+    // (unless you're listening on `"all"`, which will cause your callback to
+    // receive the true name of the event as the first argument).
+    trigger: function(name) {
+      if (!this._events) return this;
+      var args = slice.call(arguments, 1);
+      if (!eventsApi(this, 'trigger', name, args)) return this;
+      var events = this._events[name];
+      var allEvents = this._events.all;
+      if (events) triggerEvents(events, args);
+      if (allEvents) triggerEvents(allEvents, arguments);
+      return this;
+    },
+
+    // Tell this object to stop listening to either specific events ... or
+    // to every object it's currently listening to.
+    stopListening: function(obj, name, callback) {
+      var listeners = this._listeners;
+      if (!listeners) return this;
+      var deleteListener = !name && !callback;
+      if (typeof name === 'object') callback = this;
+      if (obj) (listeners = {})[obj._listenerId] = obj;
+      for (var id in listeners) {
+        listeners[id].off(name, callback, this);
+        if (deleteListener) delete this._listeners[id];
+      }
+      return this;
+    }
+
+  };
+
+  // Regular expression used to split event strings.
+  var eventSplitter = /\s+/;
+
+  // Implement fancy features of the Events API such as multiple event
+  // names `"change blur"` and jQuery-style event maps `{change: action}`
+  // in terms of the existing API.
+  var eventsApi = function(obj, action, name, rest) {
+    if (!name) return true;
+
+    // Handle event maps.
+    if (typeof name === 'object') {
+      for (var key in name) {
+        obj[action].apply(obj, [key, name[key]].concat(rest));
+      }
+      return false;
+    }
+
+    // Handle space separated event names.
+    if (eventSplitter.test(name)) {
+      var names = name.split(eventSplitter);
+      for (var i = 0, l = names.length; i < l; i++) {
+        obj[action].apply(obj, [names[i]].concat(rest));
+      }
+      return false;
+    }
+
+    return true;
+  };
+
+  // A difficult-to-believe, but optimized internal dispatch function for
+  // triggering events. Tries to keep the usual cases speedy (most internal
+  // Backbone events have 3 arguments).
+  var triggerEvents = function(events, args) {
+    var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
+    switch (args.length) {
+      case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
+      case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
+      case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
+      case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
+      default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args);
+    }
+  };
+
+  var listenMethods = {listenTo: 'on', listenToOnce: 'once'};
+
+  // Inversion-of-control versions of `on` and `once`. Tell *this* object to
+  // listen to an event in another object ... keeping track of what it's
+  // listening to.
+  _.each(listenMethods, function(implementation, method) {
+    Events[method] = function(obj, name, callback) {
+      var listeners = this._listeners || (this._listeners = {});
+      var id = obj._listenerId || (obj._listenerId = _.uniqueId('l'));
+      listeners[id] = obj;
+      if (typeof name === 'object') callback = this;
+      obj[implementation](name, callback, this);
+      return this;
+    };
+  });
+
+  // Aliases for backwards compatibility.
+  Events.bind   = Events.on;
+  Events.unbind = Events.off;
+
+  // Allow the `Backbone` object to serve as a global event bus, for folks who
+  // want global "pubsub" in a convenient place.
+  _.extend(Backbone, Events);
+
+  // Backbone.Model
+  // --------------
+
+  // Backbone **Models** are the basic data object in the framework --
+  // frequently representing a row in a table in a database on your server.
+  // A discrete chunk of data and a bunch of useful, related methods for
+  // performing computations and transformations on that data.
+
+  // Create a new model with the specified attributes. A client id (`cid`)
+  // is automatically generated and assigned for you.
+  var Model = Backbone.Model = function(attributes, options) {
+    var defaults;
+    var attrs = attributes || {};
+    options || (options = {});
+    this.cid = _.uniqueId('c');
+    this.attributes = {};
+    _.extend(this, _.pick(options, modelOptions));
+    if (options.parse) attrs = this.parse(attrs, options) || {};
+    if (defaults = _.result(this, 'defaults')) {
+      attrs = _.defaults({}, attrs, defaults);
+    }
+    this.set(attrs, options);
+    this.changed = {};
+    this.initialize.apply(this, arguments);
+  };
+
+  // A list of options to be attached directly to the model, if provided.
+  var modelOptions = ['url', 'urlRoot', 'collection'];
+
+  // Attach all inheritable methods to the Model prototype.
+  _.extend(Model.prototype, Events, {
+
+    // A hash of attributes whose current and previous value differ.
+    changed: null,
+
+    // The value returned during the last failed validation.
+    validationError: null,
+
+    // The default name for the JSON `id` attribute is `"id"`. MongoDB and
+    // CouchDB users may want to set this to `"_id"`.
+    idAttribute: 'id',
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // Return a copy of the model's `attributes` object.
+    toJSON: function(options) {
+      return _.clone(this.attributes);
+    },
+
+    // Proxy `Backbone.sync` by default -- but override this if you need
+    // custom syncing semantics for *this* particular model.
+    sync: function() {
+      return Backbone.sync.apply(this, arguments);
+    },
+
+    // Get the value of an attribute.
+    get: function(attr) {
+      return this.attributes[attr];
+    },
+
+    // Get the HTML-escaped value of an attribute.
+    escape: function(attr) {
+      return _.escape(this.get(attr));
+    },
+
+    // Returns `true` if the attribute contains a value that is not null
+    // or undefined.
+    has: function(attr) {
+      return this.get(attr) != null;
+    },
+
+    // Set a hash of model attributes on the object, firing `"change"`. This is
+    // the core primitive operation of a model, updating the data and notifying
+    // anyone who needs to know about the change in state. The heart of the beast.
+    set: function(key, val, options) {
+      var attr, attrs, unset, changes, silent, changing, prev, current;
+      if (key == null) return this;
+
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if (typeof key === 'object') {
+        attrs = key;
+        options = val;
+      } else {
+        (attrs = {})[key] = val;
+      }
+
+      options || (options = {});
+
+      // Run validation.
+      if (!this._validate(attrs, options)) return false;
+
+      // Extract attributes and options.
+      unset           = options.unset;
+      silent          = options.silent;
+      changes         = [];
+      changing        = this._changing;
+      this._changing  = true;
+
+      if (!changing) {
+        this._previousAttributes = _.clone(this.attributes);
+        this.changed = {};
+      }
+      current = this.attributes, prev = this._previousAttributes;
+
+      // Check for changes of `id`.
+      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+
+      // For each `set` attribute, update or delete the current value.
+      for (attr in attrs) {
+        val = attrs[attr];
+        if (!_.isEqual(current[attr], val)) changes.push(attr);
+        if (!_.isEqual(prev[attr], val)) {
+          this.changed[attr] = val;
+        } else {
+          delete this.changed[attr];
+        }
+        unset ? delete current[attr] : current[attr] = val;
+      }
+
+      // Trigger all relevant attribute changes.
+      if (!silent) {
+        if (changes.length) this._pending = true;
+        for (var i = 0, l = changes.length; i < l; i++) {
+          this.trigger('change:' + changes[i], this, current[changes[i]], options);
+        }
+      }
+
+      // You might be wondering why there's a `while` loop here. Changes can
+      // be recursively nested within `"change"` events.
+      if (changing) return this;
+      if (!silent) {
+        while (this._pending) {
+          this._pending = false;
+          this.trigger('change', this, options);
+        }
+      }
+      this._pending = false;
+      this._changing = false;
+      return this;
+    },
+
+    // Remove an attribute from the model, firing `"change"`. `unset` is a noop
+    // if the attribute doesn't exist.
+    unset: function(attr, options) {
+      return this.set(attr, void 0, _.extend({}, options, {unset: true}));
+    },
+
+    // Clear all attributes on the model, firing `"change"`.
+    clear: function(options) {
+      var attrs = {};
+      for (var key in this.attributes) attrs[key] = void 0;
+      return this.set(attrs, _.extend({}, options, {unset: true}));
+    },
+
+    // Determine if the model has changed since the last `"change"` event.
+    // If you specify an attribute name, determine if that attribute has changed.
+    hasChanged: function(attr) {
+      if (attr == null) return !_.isEmpty(this.changed);
+      return _.has(this.changed, attr);
+    },
+
+    // Return an object containing all the attributes that have changed, or
+    // false if there are no changed attributes. Useful for determining what
+    // parts of a view need to be updated and/or what attributes need to be
+    // persisted to the server. Unset attributes will be set to undefined.
+    // You can also pass an attributes object to diff against the model,
+    // determining if there *would be* a change.
+    changedAttributes: function(diff) {
+      if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
+      var val, changed = false;
+      var old = this._changing ? this._previousAttributes : this.attributes;
+      for (var attr in diff) {
+        if (_.isEqual(old[attr], (val = diff[attr]))) continue;
+        (changed || (changed = {}))[attr] = val;
+      }
+      return changed;
+    },
+
+    // Get the previous value of an attribute, recorded at the time the last
+    // `"change"` event was fired.
+    previous: function(attr) {
+      if (attr == null || !this._previousAttributes) return null;
+      return this._previousAttributes[attr];
+    },
+
+    // Get all of the attributes of the model at the time of the previous
+    // `"change"` event.
+    previousAttributes: function() {
+      return _.clone(this._previousAttributes);
+    },
+
+    // Fetch the model from the server. If the server's representation of the
+    // model differs from its current attributes, they will be overridden,
+    // triggering a `"change"` event.
+    fetch: function(options) {
+      options = options ? _.clone(options) : {};
+      if (options.parse === void 0) options.parse = true;
+      var model = this;
+      var success = options.success;
+      options.success = function(resp) {
+        if (!model.set(model.parse(resp, options), options)) return false;
+        if (success) success(model, resp, options);
+        model.trigger('sync', model, resp, options);
+      };
+      wrapError(this, options);
+      return this.sync('read', this, options);
+    },
+
+    // Set a hash of model attributes, and sync the model to the server.
+    // If the server returns an attributes hash that differs, the model's
+    // state will be `set` again.
+    save: function(key, val, options) {
+      var attrs, method, xhr, attributes = this.attributes;
+
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if (key == null || typeof key === 'object') {
+        attrs = key;
+        options = val;
+      } else {
+        (attrs = {})[key] = val;
+      }
+
+      // If we're not waiting and attributes exist, save acts as `set(attr).save(null, opts)`.
+      if (attrs && (!options || !options.wait) && !this.set(attrs, options)) return false;
+
+      options = _.extend({validate: true}, options);
+
+      // Do not persist invalid models.
+      if (!this._validate(attrs, options)) return false;
+
+      // Set temporary attributes if `{wait: true}`.
+      if (attrs && options.wait) {
+        this.attributes = _.extend({}, attributes, attrs);
+      }
+
+      // After a successful server-side save, the client is (optionally)
+      // updated with the server-side state.
+      if (options.parse === void 0) options.parse = true;
+      var model = this;
+      var success = options.success;
+      options.success = function(resp) {
+        // Ensure attributes are restored during synchronous saves.
+        model.attributes = attributes;
+        var serverAttrs = model.parse(resp, options);
+        if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
+        if (_.isObject(serverAttrs) && !model.set(serverAttrs, options)) {
+          return false;
+        }
+        if (success) success(model, resp, options);
+        model.trigger('sync', model, resp, options);
+      };
+      wrapError(this, options);
+
+      method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
+      if (method === 'patch') options.attrs = attrs;
+      xhr = this.sync(method, this, options);
+
+      // Restore attributes.
+      if (attrs && options.wait) this.attributes = attributes;
+
+      return xhr;
+    },
+
+    // Destroy this model on the server if it was already persisted.
+    // Optimistically removes the model from its collection, if it has one.
+    // If `wait: true` is passed, waits for the server to respond before removal.
+    destroy: function(options) {
+      options = options ? _.clone(options) : {};
+      var model = this;
+      var success = options.success;
+
+      var destroy = function() {
+        model.trigger('destroy', model, model.collection, options);
+      };
+
+      options.success = function(resp) {
+        if (options.wait || model.isNew()) destroy();
+        if (success) success(model, resp, options);
+        if (!model.isNew()) model.trigger('sync', model, resp, options);
+      };
+
+      if (this.isNew()) {
+        options.success();
+        return false;
+      }
+      wrapError(this, options);
+
+      var xhr = this.sync('delete', this, options);
+      if (!options.wait) destroy();
+      return xhr;
+    },
+
+    // Default URL for the model's representation on the server -- if you're
+    // using Backbone's restful methods, override this to change the endpoint
+    // that will be called.
+    url: function() {
+      var base = _.result(this, 'urlRoot') || _.result(this.collection, 'url') || urlError();
+      if (this.isNew()) return base;
+      return base + (base.charAt(base.length - 1) === '/' ? '' : '/') + encodeURIComponent(this.id);
+    },
+
+    // **parse** converts a response into the hash of attributes to be `set` on
+    // the model. The default implementation is just to pass the response along.
+    parse: function(resp, options) {
+      return resp;
+    },
+
+    // Create a new model with identical attributes to this one.
+    clone: function() {
+      return new this.constructor(this.attributes);
+    },
+
+    // A model is new if it has never been saved to the server, and lacks an id.
+    isNew: function() {
+      return this.id == null;
+    },
+
+    // Check if the model is currently in a valid state.
+    isValid: function(options) {
+      return this._validate({}, _.extend(options || {}, { validate: true }));
+    },
+
+    // Run validation against the next complete set of model attributes,
+    // returning `true` if all is well. Otherwise, fire an `"invalid"` event.
+    _validate: function(attrs, options) {
+      if (!options.validate || !this.validate) return true;
+      attrs = _.extend({}, this.attributes, attrs);
+      var error = this.validationError = this.validate(attrs, options) || null;
+      if (!error) return true;
+      this.trigger('invalid', this, error, _.extend(options || {}, {validationError: error}));
+      return false;
+    }
+
+  });
+
+  // Underscore methods that we want to implement on the Model.
+  var modelMethods = ['keys', 'values', 'pairs', 'invert', 'pick', 'omit'];
+
+  // Mix in each Underscore method as a proxy to `Model#attributes`.
+  _.each(modelMethods, function(method) {
+    Model.prototype[method] = function() {
+      var args = slice.call(arguments);
+      args.unshift(this.attributes);
+      return _[method].apply(_, args);
+    };
+  });
+
+  // Backbone.Collection
+  // -------------------
+
+  // If models tend to represent a single row of data, a Backbone Collection is
+  // more analagous to a table full of data ... or a small slice or page of that
+  // table, or a collection of rows that belong together for a particular reason
+  // -- all of the messages in this particular folder, all of the documents
+  // belonging to this particular author, and so on. Collections maintain
+  // indexes of their models, both in order, and for lookup by `id`.
+
+  // Create a new **Collection**, perhaps to contain a specific type of `model`.
+  // If a `comparator` is specified, the Collection will maintain
+  // its models in sort order, as they're added and removed.
+  var Collection = Backbone.Collection = function(models, options) {
+    options || (options = {});
+    if (options.url) this.url = options.url;
+    if (options.model) this.model = options.model;
+    if (options.comparator !== void 0) this.comparator = options.comparator;
+    this._reset();
+    this.initialize.apply(this, arguments);
+    if (models) this.reset(models, _.extend({silent: true}, options));
+  };
+
+  // Default options for `Collection#set`.
+  var setOptions = {add: true, remove: true, merge: true};
+  var addOptions = {add: true, merge: false, remove: false};
+
+  // Define the Collection's inheritable methods.
+  _.extend(Collection.prototype, Events, {
+
+    // The default model for a collection is just a **Backbone.Model**.
+    // This should be overridden in most cases.
+    model: Model,
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // The JSON representation of a Collection is an array of the
+    // models' attributes.
+    toJSON: function(options) {
+      return this.map(function(model){ return model.toJSON(options); });
+    },
+
+    // Proxy `Backbone.sync` by default.
+    sync: function() {
+      return Backbone.sync.apply(this, arguments);
+    },
+
+    // Add a model, or list of models to the set.
+    add: function(models, options) {
+      return this.set(models, _.defaults(options || {}, addOptions));
+    },
+
+    // Remove a model, or a list of models from the set.
+    remove: function(models, options) {
+      models = _.isArray(models) ? models.slice() : [models];
+      options || (options = {});
+      var i, l, index, model;
+      for (i = 0, l = models.length; i < l; i++) {
+        model = this.get(models[i]);
+        if (!model) continue;
+        delete this._byId[model.id];
+        delete this._byId[model.cid];
+        index = this.indexOf(model);
+        this.models.splice(index, 1);
+        this.length--;
+        if (!options.silent) {
+          options.index = index;
+          model.trigger('remove', model, this, options);
+        }
+        this._removeReference(model);
+      }
+      return this;
+    },
+
+    // Update a collection by `set`-ing a new list of models, adding new ones,
+    // removing models that are no longer present, and merging models that
+    // already exist in the collection, as necessary. Similar to **Model#set**,
+    // the core operation for updating the data contained by the collection.
+    set: function(models, options) {
+      options = _.defaults(options || {}, setOptions);
+      if (options.parse) models = this.parse(models, options);
+      if (!_.isArray(models)) models = models ? [models] : [];
+      var i, l, model, attrs, existing, sort;
+      var at = options.at;
+      var sortable = this.comparator && (at == null) && options.sort !== false;
+      var sortAttr = _.isString(this.comparator) ? this.comparator : null;
+      var toAdd = [], toRemove = [], modelMap = {};
+
+      // Turn bare objects into model references, and prevent invalid models
+      // from being added.
+      for (i = 0, l = models.length; i < l; i++) {
+        if (!(model = this._prepareModel(models[i], options))) continue;
+
+        // If a duplicate is found, prevent it from being added and
+        // optionally merge it into the existing model.
+        if (existing = this.get(model)) {
+          if (options.remove) modelMap[existing.cid] = true;
+          if (options.merge) {
+            existing.set(model.attributes, options);
+            if (sortable && !sort && existing.hasChanged(sortAttr)) sort = true;
+          }
+
+        // This is a new model, push it to the `toAdd` list.
+        } else if (options.add) {
+          toAdd.push(model);
+
+          // Listen to added models' events, and index models for lookup by
+          // `id` and by `cid`.
+          model.on('all', this._onModelEvent, this);
+          this._byId[model.cid] = model;
+          if (model.id != null) this._byId[model.id] = model;
+        }
+      }
+
+      // Remove nonexistent models if appropriate.
+      if (options.remove) {
+        for (i = 0, l = this.length; i < l; ++i) {
+          if (!modelMap[(model = this.models[i]).cid]) toRemove.push(model);
+        }
+        if (toRemove.length) this.remove(toRemove, options);
+      }
+
+      // See if sorting is needed, update `length` and splice in new models.
+      if (toAdd.length) {
+        if (sortable) sort = true;
+        this.length += toAdd.length;
+        if (at != null) {
+          splice.apply(this.models, [at, 0].concat(toAdd));
+        } else {
+          push.apply(this.models, toAdd);
+        }
+      }
+
+      // Silently sort the collection if appropriate.
+      if (sort) this.sort({silent: true});
+
+      if (options.silent) return this;
+
+      // Trigger `add` events.
+      for (i = 0, l = toAdd.length; i < l; i++) {
+        (model = toAdd[i]).trigger('add', model, this, options);
+      }
+
+      // Trigger `sort` if the collection was sorted.
+      if (sort) this.trigger('sort', this, options);
+      return this;
+    },
+
+    // When you have more items than you want to add or remove individually,
+    // you can reset the entire set with a new list of models, without firing
+    // any granular `add` or `remove` events. Fires `reset` when finished.
+    // Useful for bulk operations and optimizations.
+    reset: function(models, options) {
+      options || (options = {});
+      for (var i = 0, l = this.models.length; i < l; i++) {
+        this._removeReference(this.models[i]);
+      }
+      options.previousModels = this.models;
+      this._reset();
+      this.add(models, _.extend({silent: true}, options));
+      if (!options.silent) this.trigger('reset', this, options);
+      return this;
+    },
+
+    // Add a model to the end of the collection.
+    push: function(model, options) {
+      model = this._prepareModel(model, options);
+      this.add(model, _.extend({at: this.length}, options));
+      return model;
+    },
+
+    // Remove a model from the end of the collection.
+    pop: function(options) {
+      var model = this.at(this.length - 1);
+      this.remove(model, options);
+      return model;
+    },
+
+    // Add a model to the beginning of the collection.
+    unshift: function(model, options) {
+      model = this._prepareModel(model, options);
+      this.add(model, _.extend({at: 0}, options));
+      return model;
+    },
+
+    // Remove a model from the beginning of the collection.
+    shift: function(options) {
+      var model = this.at(0);
+      this.remove(model, options);
+      return model;
+    },
+
+    // Slice out a sub-array of models from the collection.
+    slice: function(begin, end) {
+      return this.models.slice(begin, end);
+    },
+
+    // Get a model from the set by id.
+    get: function(obj) {
+      if (obj == null) return void 0;
+      return this._byId[obj.id != null ? obj.id : obj.cid || obj];
+    },
+
+    // Get the model at the given index.
+    at: function(index) {
+      return this.models[index];
+    },
+
+    // Return models with matching attributes. Useful for simple cases of
+    // `filter`.
+    where: function(attrs, first) {
+      if (_.isEmpty(attrs)) return first ? void 0 : [];
+      return this[first ? 'find' : 'filter'](function(model) {
+        for (var key in attrs) {
+          if (attrs[key] !== model.get(key)) return false;
+        }
+        return true;
+      });
+    },
+
+    // Return the first model with matching attributes. Useful for simple cases
+    // of `find`.
+    findWhere: function(attrs) {
+      return this.where(attrs, true);
+    },
+
+    // Force the collection to re-sort itself. You don't need to call this under
+    // normal circumstances, as the set will maintain sort order as each item
+    // is added.
+    sort: function(options) {
+      if (!this.comparator) throw new Error('Cannot sort a set without a comparator');
+      options || (options = {});
+
+      // Run sort based on type of `comparator`.
+      if (_.isString(this.comparator) || this.comparator.length === 1) {
+        this.models = this.sortBy(this.comparator, this);
+      } else {
+        this.models.sort(_.bind(this.comparator, this));
+      }
+
+      if (!options.silent) this.trigger('sort', this, options);
+      return this;
+    },
+
+    // Figure out the smallest index at which a model should be inserted so as
+    // to maintain order.
+    sortedIndex: function(model, value, context) {
+      value || (value = this.comparator);
+      var iterator = _.isFunction(value) ? value : function(model) {
+        return model.get(value);
+      };
+      return _.sortedIndex(this.models, model, iterator, context);
+    },
+
+    // Pluck an attribute from each model in the collection.
+    pluck: function(attr) {
+      return _.invoke(this.models, 'get', attr);
+    },
+
+    // Fetch the default set of models for this collection, resetting the
+    // collection when they arrive. If `reset: true` is passed, the response
+    // data will be passed through the `reset` method instead of `set`.
+    fetch: function(options) {
+      options = options ? _.clone(options) : {};
+      if (options.parse === void 0) options.parse = true;
+      var success = options.success;
+      var collection = this;
+      options.success = function(resp) {
+        var method = options.reset ? 'reset' : 'set';
+        collection[method](resp, options);
+        if (success) success(collection, resp, options);
+        collection.trigger('sync', collection, resp, options);
+      };
+      wrapError(this, options);
+      return this.sync('read', this, options);
+    },
+
+    // Create a new instance of a model in this collection. Add the model to the
+    // collection immediately, unless `wait: true` is passed, in which case we
+    // wait for the server to agree.
+    create: function(model, options) {
+      options = options ? _.clone(options) : {};
+      if (!(model = this._prepareModel(model, options))) return false;
+      if (!options.wait) this.add(model, options);
+      var collection = this;
+      var success = options.success;
+      options.success = function(resp) {
+        if (options.wait) collection.add(model, options);
+        if (success) success(model, resp, options);
+      };
+      model.save(null, options);
+      return model;
+    },
+
+    // **parse** converts a response into a list of models to be added to the
+    // collection. The default implementation is just to pass it through.
+    parse: function(resp, options) {
+      return resp;
+    },
+
+    // Create a new collection with an identical list of models as this one.
+    clone: function() {
+      return new this.constructor(this.models);
+    },
+
+    // Private method to reset all internal state. Called when the collection
+    // is first initialized or reset.
+    _reset: function() {
+      this.length = 0;
+      this.models = [];
+      this._byId  = {};
+    },
+
+    // Prepare a hash of attributes (or other model) to be added to this
+    // collection.
+    _prepareModel: function(attrs, options) {
+      if (attrs instanceof Model) {
+        if (!attrs.collection) attrs.collection = this;
+        return attrs;
+      }
+      options || (options = {});
+      options.collection = this;
+      var model = new this.model(attrs, options);
+      if (!model._validate(attrs, options)) {
+        this.trigger('invalid', this, attrs, options);
+        return false;
+      }
+      return model;
+    },
+
+    // Internal method to sever a model's ties to a collection.
+    _removeReference: function(model) {
+      if (this === model.collection) delete model.collection;
+      model.off('all', this._onModelEvent, this);
+    },
+
+    // Internal method called every time a model in the set fires an event.
+    // Sets need to update their indexes when models change ids. All other
+    // events simply proxy through. "add" and "remove" events that originate
+    // in other collections are ignored.
+    _onModelEvent: function(event, model, collection, options) {
+      if ((event === 'add' || event === 'remove') && collection !== this) return;
+      if (event === 'destroy') this.remove(model, options);
+      if (model && event === 'change:' + model.idAttribute) {
+        delete this._byId[model.previous(model.idAttribute)];
+        if (model.id != null) this._byId[model.id] = model;
+      }
+      this.trigger.apply(this, arguments);
+    }
+
+  });
+
+  // Underscore methods that we want to implement on the Collection.
+  // 90% of the core usefulness of Backbone Collections is actually implemented
+  // right here:
+  var methods = ['forEach', 'each', 'map', 'collect', 'reduce', 'foldl',
+    'inject', 'reduceRight', 'foldr', 'find', 'detect', 'filter', 'select',
+    'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke',
+    'max', 'min', 'toArray', 'size', 'first', 'head', 'take', 'initial', 'rest',
+    'tail', 'drop', 'last', 'without', 'indexOf', 'shuffle', 'lastIndexOf',
+    'isEmpty', 'chain'];
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+  _.each(methods, function(method) {
+    Collection.prototype[method] = function() {
+      var args = slice.call(arguments);
+      args.unshift(this.models);
+      return _[method].apply(_, args);
+    };
+  });
+
+  // Underscore methods that take a property name as an argument.
+  var attributeMethods = ['groupBy', 'countBy', 'sortBy'];
+
+  // Use attributes instead of properties.
+  _.each(attributeMethods, function(method) {
+    Collection.prototype[method] = function(value, context) {
+      var iterator = _.isFunction(value) ? value : function(model) {
+        return model.get(value);
+      };
+      return _[method](this.models, iterator, context);
+    };
+  });
+
+  // Backbone.View
+  // -------------
+
+  // Backbone Views are almost more convention than they are actual code. A View
+  // is simply a JavaScript object that represents a logical chunk of UI in the
+  // DOM. This might be a single item, an entire list, a sidebar or panel, or
+  // even the surrounding frame which wraps your whole app. Defining a chunk of
+  // UI as a **View** allows you to define your DOM events declaratively, without
+  // having to worry about render order ... and makes it easy for the view to
+  // react to specific changes in the state of your models.
+
+  // Creating a Backbone.View creates its initial element outside of the DOM,
+  // if an existing element is not provided...
+  var View = Backbone.View = function(options) {
+    this.cid = _.uniqueId('view');
+    this._configure(options || {});
+    this._ensureElement();
+    this.initialize.apply(this, arguments);
+    this.delegateEvents();
+  };
+
+  // Cached regex to split keys for `delegate`.
+  var delegateEventSplitter = /^(\S+)\s*(.*)$/;
+
+  // List of view options to be merged as properties.
+  var viewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
+
+  // Set up all inheritable **Backbone.View** properties and methods.
+  _.extend(View.prototype, Events, {
+
+    // The default `tagName` of a View's element is `"div"`.
+    tagName: 'div',
+
+    // jQuery delegate for element lookup, scoped to DOM elements within the
+    // current view. This should be prefered to global lookups where possible.
+    $: function(selector) {
+      return this.$el.find(selector);
+    },
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // **render** is the core function that your view should override, in order
+    // to populate its element (`this.el`), with the appropriate HTML. The
+    // convention is for **render** to always return `this`.
+    render: function() {
+      return this;
+    },
+
+    // Remove this view by taking the element out of the DOM, and removing any
+    // applicable Backbone.Events listeners.
+    remove: function() {
+      this.$el.remove();
+      this.stopListening();
+      return this;
+    },
+
+    // Change the view's element (`this.el` property), including event
+    // re-delegation.
+    setElement: function(element, delegate) {
+      if (this.$el) this.undelegateEvents();
+      this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+      this.el = this.$el[0];
+      if (delegate !== false) this.delegateEvents();
+      return this;
+    },
+
+    // Set callbacks, where `this.events` is a hash of
+    //
+    // *{"event selector": "callback"}*
+    //
+    //     {
+    //       'mousedown .title':  'edit',
+    //       'click .button':     'save'
+    //       'click .open':       function(e) { ... }
+    //     }
+    //
+    // pairs. Callbacks will be bound to the view, with `this` set properly.
+    // Uses event delegation for efficiency.
+    // Omitting the selector binds the event to `this.el`.
+    // This only works for delegate-able events: not `focus`, `blur`, and
+    // not `change`, `submit`, and `reset` in Internet Explorer.
+    delegateEvents: function(events) {
+      if (!(events || (events = _.result(this, 'events')))) return this;
+      this.undelegateEvents();
+      for (var key in events) {
+        var method = events[key];
+        if (!_.isFunction(method)) method = this[events[key]];
+        if (!method) continue;
+
+        var match = key.match(delegateEventSplitter);
+        var eventName = match[1], selector = match[2];
+        method = _.bind(method, this);
+        eventName += '.delegateEvents' + this.cid;
+        if (selector === '') {
+          this.$el.on(eventName, method);
+        } else {
+          this.$el.on(eventName, selector, method);
+        }
+      }
+      return this;
+    },
+
+    // Clears all callbacks previously bound to the view with `delegateEvents`.
+    // You usually don't need to use this, but may wish to if you have multiple
+    // Backbone views attached to the same DOM element.
+    undelegateEvents: function() {
+      this.$el.off('.delegateEvents' + this.cid);
+      return this;
+    },
+
+    // Performs the initial configuration of a View with a set of options.
+    // Keys with special meaning *(e.g. model, collection, id, className)* are
+    // attached directly to the view.  See `viewOptions` for an exhaustive
+    // list.
+    _configure: function(options) {
+      if (this.options) options = _.extend({}, _.result(this, 'options'), options);
+      _.extend(this, _.pick(options, viewOptions));
+      this.options = options;
+    },
+
+    // Ensure that the View has a DOM element to render into.
+    // If `this.el` is a string, pass it through `$()`, take the first
+    // matching element, and re-assign it to `el`. Otherwise, create
+    // an element from the `id`, `className` and `tagName` properties.
+    _ensureElement: function() {
+      if (!this.el) {
+        var attrs = _.extend({}, _.result(this, 'attributes'));
+        if (this.id) attrs.id = _.result(this, 'id');
+        if (this.className) attrs['class'] = _.result(this, 'className');
+        var $el = Backbone.$('<' + _.result(this, 'tagName') + '>').attr(attrs);
+        this.setElement($el, false);
+      } else {
+        this.setElement(_.result(this, 'el'), false);
+      }
+    }
+
+  });
+
+  // Backbone.sync
+  // -------------
+
+  // Override this function to change the manner in which Backbone persists
+  // models to the server. You will be passed the type of request, and the
+  // model in question. By default, makes a RESTful Ajax request
+  // to the model's `url()`. Some possible customizations could be:
+  //
+  // * Use `setTimeout` to batch rapid-fire updates into a single request.
+  // * Send up the models as XML instead of JSON.
+  // * Persist models via WebSockets instead of Ajax.
+  //
+  // Turn on `Backbone.emulateHTTP` in order to send `PUT` and `DELETE` requests
+  // as `POST`, with a `_method` parameter containing the true HTTP method,
+  // as well as all requests with the body as `application/x-www-form-urlencoded`
+  // instead of `application/json` with the model in a param named `model`.
+  // Useful when interfacing with server-side languages like **PHP** that make
+  // it difficult to read the body of `PUT` requests.
+  Backbone.sync = function(method, model, options) {
+    var type = methodMap[method];
+
+    // Default options, unless specified.
+    _.defaults(options || (options = {}), {
+      emulateHTTP: Backbone.emulateHTTP,
+      emulateJSON: Backbone.emulateJSON
+    });
+
+    // Default JSON-request options.
+    var params = {type: type, dataType: 'json'};
+
+    // Ensure that we have a URL.
+    if (!options.url) {
+      params.url = _.result(model, 'url') || urlError();
+    }
+
+    // Ensure that we have the appropriate request data.
+    if (options.data == null && model && (method === 'create' || method === 'update' || method === 'patch')) {
+      params.contentType = 'application/json';
+      params.data = JSON.stringify(options.attrs || model.toJSON(options));
+    }
+
+    // For older servers, emulate JSON by encoding the request into an HTML-form.
+    if (options.emulateJSON) {
+      params.contentType = 'application/x-www-form-urlencoded';
+      params.data = params.data ? {model: params.data} : {};
+    }
+
+    // For older servers, emulate HTTP by mimicking the HTTP method with `_method`
+    // And an `X-HTTP-Method-Override` header.
+    if (options.emulateHTTP && (type === 'PUT' || type === 'DELETE' || type === 'PATCH')) {
+      params.type = 'POST';
+      if (options.emulateJSON) params.data._method = type;
+      var beforeSend = options.beforeSend;
+      options.beforeSend = function(xhr) {
+        xhr.setRequestHeader('X-HTTP-Method-Override', type);
+        if (beforeSend) return beforeSend.apply(this, arguments);
+      };
+    }
+
+    // Don't process data on a non-GET request.
+    if (params.type !== 'GET' && !options.emulateJSON) {
+      params.processData = false;
+    }
+
+    // If we're sending a `PATCH` request, and we're in an old Internet Explorer
+    // that still has ActiveX enabled by default, override jQuery to use that
+    // for XHR instead. Remove this line when jQuery supports `PATCH` on IE8.
+    if (params.type === 'PATCH' && window.ActiveXObject &&
+          !(window.external && window.external.msActiveXFilteringEnabled)) {
+      params.xhr = function() {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      };
+    }
+
+    // Make the request, allowing the user to override any Ajax options.
+    var xhr = options.xhr = Backbone.ajax(_.extend(params, options));
+    model.trigger('request', model, xhr, options);
+    return xhr;
+  };
+
+  // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
+  var methodMap = {
+    'create': 'POST',
+    'update': 'PUT',
+    'patch':  'PATCH',
+    'delete': 'DELETE',
+    'read':   'GET'
+  };
+
+  // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
+  // Override this if you'd like to use a different library.
+  Backbone.ajax = function() {
+    return Backbone.$.ajax.apply(Backbone.$, arguments);
+  };
+
+  // Backbone.Router
+  // ---------------
+
+  // Routers map faux-URLs to actions, and fire events when routes are
+  // matched. Creating a new one sets its `routes` hash, if not set statically.
+  var Router = Backbone.Router = function(options) {
+    options || (options = {});
+    if (options.routes) this.routes = options.routes;
+    this._bindRoutes();
+    this.initialize.apply(this, arguments);
+  };
+
+  // Cached regular expressions for matching named param parts and splatted
+  // parts of route strings.
+  var optionalParam = /\((.*?)\)/g;
+  var namedParam    = /(\(\?)?:\w+/g;
+  var splatParam    = /\*\w+/g;
+  var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+  // Set up all inheritable **Backbone.Router** properties and methods.
+  _.extend(Router.prototype, Events, {
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // Manually bind a single named route to a callback. For example:
+    //
+    //     this.route('search/:query/p:num', 'search', function(query, num) {
+    //       ...
+    //     });
+    //
+    route: function(route, name, callback) {
+      if (!_.isRegExp(route)) route = this._routeToRegExp(route);
+      if (_.isFunction(name)) {
+        callback = name;
+        name = '';
+      }
+      if (!callback) callback = this[name];
+      var router = this;
+      Backbone.history.route(route, function(fragment) {
+        var args = router._extractParameters(route, fragment);
+        callback && callback.apply(router, args);
+        router.trigger.apply(router, ['route:' + name].concat(args));
+        router.trigger('route', name, args);
+        Backbone.history.trigger('route', router, name, args);
+      });
+      return this;
+    },
+
+    // Simple proxy to `Backbone.history` to save a fragment into the history.
+    navigate: function(fragment, options) {
+      Backbone.history.navigate(fragment, options);
+      return this;
+    },
+
+    // Bind all defined routes to `Backbone.history`. We have to reverse the
+    // order of the routes here to support behavior where the most general
+    // routes can be defined at the bottom of the route map.
+    _bindRoutes: function() {
+      if (!this.routes) return;
+      this.routes = _.result(this, 'routes');
+      var route, routes = _.keys(this.routes);
+      while ((route = routes.pop()) != null) {
+        this.route(route, this.routes[route]);
+      }
+    },
+
+    // Convert a route string into a regular expression, suitable for matching
+    // against the current location hash.
+    _routeToRegExp: function(route) {
+      route = route.replace(escapeRegExp, '\\$&')
+                   .replace(optionalParam, '(?:$1)?')
+                   .replace(namedParam, function(match, optional){
+                     return optional ? match : '([^\/]+)';
+                   })
+                   .replace(splatParam, '(.*?)');
+      return new RegExp('^' + route + '$');
+    },
+
+    // Given a route, and a URL fragment that it matches, return the array of
+    // extracted decoded parameters. Empty or unmatched parameters will be
+    // treated as `null` to normalize cross-browser behavior.
+    _extractParameters: function(route, fragment) {
+      var params = route.exec(fragment).slice(1);
+      return _.map(params, function(param) {
+        return param ? decodeURIComponent(param) : null;
+      });
+    }
+
+  });
+
+  // Backbone.History
+  // ----------------
+
+  // Handles cross-browser history management, based on either
+  // [pushState](http://diveintohtml5.info/history.html) and real URLs, or
+  // [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange)
+  // and URL fragments. If the browser supports neither (old IE, natch),
+  // falls back to polling.
+  var History = Backbone.History = function() {
+    this.handlers = [];
+    _.bindAll(this, 'checkUrl');
+
+    // Ensure that `History` can be used outside of the browser.
+    if (typeof window !== 'undefined') {
+      this.location = window.location;
+      this.history = window.history;
+    }
+  };
+
+  // Cached regex for stripping a leading hash/slash and trailing space.
+  var routeStripper = /^[#\/]|\s+$/g;
+
+  // Cached regex for stripping leading and trailing slashes.
+  var rootStripper = /^\/+|\/+$/g;
+
+  // Cached regex for detecting MSIE.
+  var isExplorer = /msie [\w.]+/;
+
+  // Cached regex for removing a trailing slash.
+  var trailingSlash = /\/$/;
+
+  // Has the history handling already been started?
+  History.started = false;
+
+  // Set up all inheritable **Backbone.History** properties and methods.
+  _.extend(History.prototype, Events, {
+
+    // The default interval to poll for hash changes, if necessary, is
+    // twenty times a second.
+    interval: 50,
+
+    // Gets the true hash value. Cannot use location.hash directly due to bug
+    // in Firefox where location.hash will always be decoded.
+    getHash: function(window) {
+      var match = (window || this).location.href.match(/#(.*)$/);
+      return match ? match[1] : '';
+    },
+
+    // Get the cross-browser normalized URL fragment, either from the URL,
+    // the hash, or the override.
+    getFragment: function(fragment, forcePushState) {
+      if (fragment == null) {
+        if (this._hasPushState || !this._wantsHashChange || forcePushState) {
+          fragment = this.location.pathname;
+          var root = this.root.replace(trailingSlash, '');
+          if (!fragment.indexOf(root)) fragment = fragment.substr(root.length);
+        } else {
+          fragment = this.getHash();
+        }
+      }
+      return fragment.replace(routeStripper, '');
+    },
+
+    // Start the hash change handling, returning `true` if the current URL matches
+    // an existing route, and `false` otherwise.
+    start: function(options) {
+      if (History.started) throw new Error("Backbone.history has already been started");
+      History.started = true;
+
+      // Figure out the initial configuration. Do we need an iframe?
+      // Is pushState desired ... is it available?
+      this.options          = _.extend({}, {root: '/'}, this.options, options);
+      this.root             = this.options.root;
+      this._wantsHashChange = this.options.hashChange !== false;
+      this._wantsPushState  = !!this.options.pushState;
+      this._hasPushState    = !!(this.options.pushState && this.history && this.history.pushState);
+      var fragment          = this.getFragment();
+      var docMode           = document.documentMode;
+      var oldIE             = (isExplorer.exec(navigator.userAgent.toLowerCase()) && (!docMode || docMode <= 7));
+
+      // Normalize root to always include a leading and trailing slash.
+      this.root = ('/' + this.root + '/').replace(rootStripper, '/');
+
+      if (oldIE && this._wantsHashChange) {
+        this.iframe = Backbone.$('<iframe src="javascript:0" tabindex="-1" />').hide().appendTo('body')[0].contentWindow;
+        this.navigate(fragment);
+      }
+
+      // Depending on whether we're using pushState or hashes, and whether
+      // 'onhashchange' is supported, determine how we check the URL state.
+      if (this._hasPushState) {
+        Backbone.$(window).on('popstate', this.checkUrl);
+      } else if (this._wantsHashChange && ('onhashchange' in window) && !oldIE) {
+        Backbone.$(window).on('hashchange', this.checkUrl);
+      } else if (this._wantsHashChange) {
+        this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
+      }
+
+      // Determine if we need to change the base url, for a pushState link
+      // opened by a non-pushState browser.
+      this.fragment = fragment;
+      var loc = this.location;
+      var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === this.root;
+
+      // If we've started off with a route from a `pushState`-enabled browser,
+      // but we're currently in a browser that doesn't support it...
+      if (this._wantsHashChange && this._wantsPushState && !this._hasPushState && !atRoot) {
+        this.fragment = this.getFragment(null, true);
+        this.location.replace(this.root + this.location.search + '#' + this.fragment);
+        // Return immediately as browser will do redirect to new url
+        return true;
+
+      // Or if we've started out with a hash-based route, but we're currently
+      // in a browser where it could be `pushState`-based instead...
+      } else if (this._wantsPushState && this._hasPushState && atRoot && loc.hash) {
+        this.fragment = this.getHash().replace(routeStripper, '');
+        this.history.replaceState({}, document.title, this.root + this.fragment + loc.search);
+      }
+
+      if (!this.options.silent) return this.loadUrl();
+    },
+
+    // Disable Backbone.history, perhaps temporarily. Not useful in a real app,
+    // but possibly useful for unit testing Routers.
+    stop: function() {
+      Backbone.$(window).off('popstate', this.checkUrl).off('hashchange', this.checkUrl);
+      clearInterval(this._checkUrlInterval);
+      History.started = false;
+    },
+
+    // Add a route to be tested when the fragment changes. Routes added later
+    // may override previous routes.
+    route: function(route, callback) {
+      this.handlers.unshift({route: route, callback: callback});
+    },
+
+    // Checks the current URL to see if it has changed, and if it has,
+    // calls `loadUrl`, normalizing across the hidden iframe.
+    checkUrl: function(e) {
+      var current = this.getFragment();
+      if (current === this.fragment && this.iframe) {
+        current = this.getFragment(this.getHash(this.iframe));
+      }
+      if (current === this.fragment) return false;
+      if (this.iframe) this.navigate(current);
+      this.loadUrl() || this.loadUrl(this.getHash());
+    },
+
+    // Attempt to load the current URL fragment. If a route succeeds with a
+    // match, returns `true`. If no defined routes matches the fragment,
+    // returns `false`.
+    loadUrl: function(fragmentOverride) {
+      var fragment = this.fragment = this.getFragment(fragmentOverride);
+      var matched = _.any(this.handlers, function(handler) {
+        if (handler.route.test(fragment)) {
+          handler.callback(fragment);
+          return true;
+        }
+      });
+      return matched;
+    },
+
+    // Save a fragment into the hash history, or replace the URL state if the
+    // 'replace' option is passed. You are responsible for properly URL-encoding
+    // the fragment in advance.
+    //
+    // The options object can contain `trigger: true` if you wish to have the
+    // route callback be fired (not usually desirable), or `replace: true`, if
+    // you wish to modify the current URL without adding an entry to the history.
+    navigate: function(fragment, options) {
+      if (!History.started) return false;
+      if (!options || options === true) options = {trigger: options};
+      fragment = this.getFragment(fragment || '');
+      if (this.fragment === fragment) return;
+      this.fragment = fragment;
+      var url = this.root + fragment;
+
+      // If pushState is available, we use it to set the fragment as a real URL.
+      if (this._hasPushState) {
+        this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+
+      // If hash changes haven't been explicitly disabled, update the hash
+      // fragment to store history.
+      } else if (this._wantsHashChange) {
+        this._updateHash(this.location, fragment, options.replace);
+        if (this.iframe && (fragment !== this.getFragment(this.getHash(this.iframe)))) {
+          // Opening and closing the iframe tricks IE7 and earlier to push a
+          // history entry on hash-tag change.  When replace is true, we don't
+          // want this.
+          if(!options.replace) this.iframe.document.open().close();
+          this._updateHash(this.iframe.location, fragment, options.replace);
+        }
+
+      // If you've told us that you explicitly don't want fallback hashchange-
+      // based history, then `navigate` becomes a page refresh.
+      } else {
+        return this.location.assign(url);
+      }
+      if (options.trigger) this.loadUrl(fragment);
+    },
+
+    // Update the hash location, either replacing the current entry, or adding
+    // a new one to the browser history.
+    _updateHash: function(location, fragment, replace) {
+      if (replace) {
+        var href = location.href.replace(/(javascript:|#).*$/, '');
+        location.replace(href + '#' + fragment);
+      } else {
+        // Some browsers require that `hash` contains a leading #.
+        location.hash = '#' + fragment;
+      }
+    }
+
+  });
+
+  // Create the default Backbone.history.
+  Backbone.history = new History;
+
+  // Helpers
+  // -------
+
+  // Helper function to correctly set up the prototype chain, for subclasses.
+  // Similar to `goog.inherits`, but uses a hash of prototype properties and
+  // class properties to be extended.
+  var extend = function(protoProps, staticProps) {
+    var parent = this;
+    var child;
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent's constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+      child = protoProps.constructor;
+    } else {
+      child = function(){ return parent.apply(this, arguments); };
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.extend(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent`'s constructor function.
+    var Surrogate = function(){ this.constructor = child; };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+  };
+
+  // Set up inheritance for the model, collection, router, view and history.
+  Model.extend = Collection.extend = Router.extend = View.extend = History.extend = extend;
+
+  // Throw an error when a URL is needed, and none is supplied.
+  var urlError = function() {
+    throw new Error('A "url" property or function must be specified');
+  };
+
+  // Wrap an optional error callback with a fallback error event.
+  var wrapError = function (model, options) {
+    var error = options.error;
+    options.error = function(resp) {
+      if (error) error(model, resp, options);
+      model.trigger('error', model, resp, options);
+    };
+  };
+
+}).call(this);
+;
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab: */
+/**
+ * Backbone-relational.js 0.8.0
+ * (c) 2011-2013 Paul Uithol and contributors (https://github.com/PaulUithol/Backbone-relational/graphs/contributors)
+ * 
+ * Backbone-relational may be freely distributed under the MIT license; see the accompanying LICENSE.txt.
+ * For details and documentation: https://github.com/PaulUithol/Backbone-relational.
+ * Depends on Backbone (and thus on Underscore as well): https://github.com/documentcloud/backbone.
+ */
+( function( undefined ) {
+	"use strict";
+
+	/**
+	 * CommonJS shim
+	 **/
+	var _, Backbone, exports;
+	if ( typeof window === 'undefined' ) {
+		_ = require( 'underscore' );
+		Backbone = require( 'backbone' );
+		exports = module.exports = Backbone;
+	}
+	else {
+		_ = window._;
+		Backbone = window.Backbone;
+		exports = window;
+	}
+
+	Backbone.Relational = {
+		showWarnings: true
+	};
+
+	/**
+	 * Semaphore mixin; can be used as both binary and counting.
+	 **/
+	Backbone.Semaphore = {
+		_permitsAvailable: null,
+		_permitsUsed: 0,
+
+		acquire: function() {
+			if ( this._permitsAvailable && this._permitsUsed >= this._permitsAvailable ) {
+				throw new Error( 'Max permits acquired' );
+			}
+			else {
+				this._permitsUsed++;
+			}
+		},
+
+		release: function() {
+			if ( this._permitsUsed === 0 ) {
+				throw new Error( 'All permits released' );
+			}
+			else {
+				this._permitsUsed--;
+			}
+		},
+
+		isLocked: function() {
+			return this._permitsUsed > 0;
+		},
+
+		setAvailablePermits: function( amount ) {
+			if ( this._permitsUsed > amount ) {
+				throw new Error( 'Available permits cannot be less than used permits' );
+			}
+			this._permitsAvailable = amount;
+		}
+	};
+
+	/**
+	 * A BlockingQueue that accumulates items while blocked (via 'block'),
+	 * and processes them when unblocked (via 'unblock').
+	 * Process can also be called manually (via 'process').
+	 */
+	Backbone.BlockingQueue = function() {
+		this._queue = [];
+	};
+	_.extend( Backbone.BlockingQueue.prototype, Backbone.Semaphore, {
+		_queue: null,
+
+		add: function( func ) {
+			if ( this.isBlocked() ) {
+				this._queue.push( func );
+			}
+			else {
+				func();
+			}
+		},
+
+		process: function() {
+			while ( this._queue && this._queue.length ) {
+				this._queue.shift()();
+			}
+		},
+
+		block: function() {
+			this.acquire();
+		},
+
+		unblock: function() {
+			this.release();
+			if ( !this.isBlocked() ) {
+				this.process();
+			}
+		},
+
+		isBlocked: function() {
+			return this.isLocked();
+		}
+	});
+	/**
+	 * Global event queue. Accumulates external events ('add:<key>', 'remove:<key>' and 'change:<key>')
+	 * until the top-level object is fully initialized (see 'Backbone.RelationalModel').
+	 */
+	Backbone.Relational.eventQueue = new Backbone.BlockingQueue();
+
+	/**
+	 * Backbone.Store keeps track of all created (and destruction of) Backbone.RelationalModel.
+	 * Handles lookup for relations.
+	 */
+	Backbone.Store = function() {
+		this._collections = [];
+		this._reverseRelations = [];
+		this._orphanRelations = [];
+		this._subModels = [];
+		this._modelScopes = [ exports ];
+	};
+	_.extend( Backbone.Store.prototype, Backbone.Events, {
+		/**
+		 * Create a new `Relation`.
+		 * @param {Backbone.RelationalModel} [model]
+		 * @param {Object} relation
+		 * @param {Object} [options]
+		 */
+		initializeRelation: function( model, relation, options ) {
+			var type = !_.isString( relation.type ) ? relation.type : Backbone[ relation.type ] || this.getObjectByName( relation.type );
+			if ( type && type.prototype instanceof Backbone.Relation ) {
+				new type( model, relation, options ); // Also pushes the new Relation into `model._relations`
+			}
+			else {
+				Backbone.Relational.showWarnings && typeof console !== 'undefined' && console.warn( 'Relation=%o; missing or invalid relation type!', relation );
+			}
+		},
+
+		/**
+		 * Add a scope for `getObjectByName` to look for model types by name.
+		 * @param {Object} scope
+		 */
+		addModelScope: function( scope ) {
+			this._modelScopes.push( scope );
+		},
+
+		/**
+		 * Add a set of subModelTypes to the store, that can be used to resolve the '_superModel'
+		 * for a model later in 'setupSuperModel'.
+		 *
+		 * @param {Backbone.RelationalModel} subModelTypes
+		 * @param {Backbone.RelationalModel} superModelType
+		 */
+		addSubModels: function( subModelTypes, superModelType ) {
+			this._subModels.push({
+				'superModelType': superModelType,
+				'subModels': subModelTypes
+			});
+		},
+
+		/**
+		 * Check if the given modelType is registered as another model's subModel. If so, add it to the super model's
+		 * '_subModels', and set the modelType's '_superModel', '_subModelTypeName', and '_subModelTypeAttribute'.
+		 *
+		 * @param {Backbone.RelationalModel} modelType
+		 */
+		setupSuperModel: function( modelType ) {
+			_.find( this._subModels, function( subModelDef ) {
+				return _.find( subModelDef.subModels || [], function( subModelTypeName, typeValue ) {
+					var subModelType = this.getObjectByName( subModelTypeName );
+
+					if ( modelType === subModelType ) {
+						// Set 'modelType' as a child of the found superModel
+						subModelDef.superModelType._subModels[ typeValue ] = modelType;
+
+						// Set '_superModel', '_subModelTypeValue', and '_subModelTypeAttribute' on 'modelType'.
+						modelType._superModel = subModelDef.superModelType;
+						modelType._subModelTypeValue = typeValue;
+						modelType._subModelTypeAttribute = subModelDef.superModelType.prototype.subModelTypeAttribute;
+						return true;
+					}
+				}, this );
+			}, this );
+		},
+
+		/**
+		 * Add a reverse relation. Is added to the 'relations' property on model's prototype, and to
+		 * existing instances of 'model' in the store as well.
+		 * @param {Object} relation
+		 * @param {Backbone.RelationalModel} relation.model
+		 * @param {String} relation.type
+		 * @param {String} relation.key
+		 * @param {String|Object} relation.relatedModel
+		 */
+		addReverseRelation: function( relation ) {
+			var exists = _.any( this._reverseRelations, function( rel ) {
+				return _.all( relation || [], function( val, key ) {
+					return val === rel[ key ];
+				});
+			});
+			
+			if ( !exists && relation.model && relation.type ) {
+				this._reverseRelations.push( relation );
+				this._addRelation( relation.model, relation );
+				this.retroFitRelation( relation );
+			}
+		},
+
+		/**
+		 * Deposit a `relation` for which the `relatedModel` can't be resolved at the moment.
+		 *
+		 * @param {Object} relation
+		 */
+		addOrphanRelation: function( relation ) {
+			var exists = _.any( this._orphanRelations, function( rel ) {
+				return _.all( relation || [], function( val, key ) {
+					return val === rel[ key ];
+				});
+			});
+
+			if ( !exists && relation.model && relation.type ) {
+				this._orphanRelations.push( relation );
+			}
+		},
+
+		/**
+		 * Try to initialize any `_orphanRelation`s
+		 */
+		processOrphanRelations: function() {
+			// Make sure to operate on a copy since we're removing while iterating
+			_.each( this._orphanRelations.slice( 0 ), function( rel ) {
+				var relatedModel = Backbone.Relational.store.getObjectByName( rel.relatedModel );
+				if ( relatedModel ) {
+					this.initializeRelation( null, rel );
+					this._orphanRelations = _.without( this._orphanRelations, rel );
+				}
+			}, this );
+		},
+
+		/**
+		 *
+		 * @param {Backbone.RelationalModel.constructor} type
+		 * @param {Object} relation
+		 * @private
+		 */
+		_addRelation: function( type, relation ) {
+			if ( !type.prototype.relations ) {
+				type.prototype.relations = [];
+			}
+			type.prototype.relations.push( relation );
+
+			_.each( type._subModels || [], function( subModel ) {
+				this._addRelation( subModel, relation );
+			}, this );
+		},
+
+		/**
+		 * Add a 'relation' to all existing instances of 'relation.model' in the store
+		 * @param {Object} relation
+		 */
+		retroFitRelation: function( relation ) {
+			var coll = this.getCollection( relation.model, false );
+			coll && coll.each( function( model ) {
+				if ( !( model instanceof relation.model ) ) {
+					return;
+				}
+
+				new relation.type( model, relation );
+			}, this );
+		},
+
+		/**
+		 * Find the Store's collection for a certain type of model.
+		 * @param {Backbone.RelationalModel} type
+		 * @param {Boolean} [create=true] Should a collection be created if none is found?
+		 * @return {Backbone.Collection} A collection if found (or applicable for 'model'), or null
+		 */
+		getCollection: function( type, create ) {
+			if ( type instanceof Backbone.RelationalModel ) {
+				type = type.constructor;
+			}
+			
+			var rootModel = type;
+			while ( rootModel._superModel ) {
+				rootModel = rootModel._superModel;
+			}
+			
+			var coll = _.findWhere( this._collections, { model: rootModel } );
+			
+			if ( !coll && create !== false ) {
+				coll = this._createCollection( rootModel );
+			}
+			
+			return coll;
+		},
+
+		/**
+		 * Find a model type on one of the modelScopes by name. Names are split on dots.
+		 * @param {String} name
+		 * @return {Object}
+		 */
+		getObjectByName: function( name ) {
+			var parts = name.split( '.' ),
+				type = null;
+
+			_.find( this._modelScopes, function( scope ) {
+				type = _.reduce( parts || [], function( memo, val ) {
+					return memo ? memo[ val ] : undefined;
+				}, scope );
+
+				if ( type && type !== scope ) {
+					return true;
+				}
+			}, this );
+
+			return type;
+		},
+
+		_createCollection: function( type ) {
+			var coll;
+			
+			// If 'type' is an instance, take its constructor
+			if ( type instanceof Backbone.RelationalModel ) {
+				type = type.constructor;
+			}
+			
+			// Type should inherit from Backbone.RelationalModel.
+			if ( type.prototype instanceof Backbone.RelationalModel ) {
+				coll = new Backbone.Collection();
+				coll.model = type;
+				
+				this._collections.push( coll );
+			}
+			
+			return coll;
+		},
+
+		/**
+		 * Find the attribute that is to be used as the `id` on a given object
+		 * @param type
+		 * @param {String|Number|Object|Backbone.RelationalModel} item
+		 * @return {String|Number}
+		 */
+		resolveIdForItem: function( type, item ) {
+			var id = _.isString( item ) || _.isNumber( item ) ? item : null;
+
+			if ( id === null ) {
+				if ( item instanceof Backbone.RelationalModel ) {
+					id = item.id;
+				}
+				else if ( _.isObject( item ) ) {
+					id = item[ type.prototype.idAttribute ];
+				}
+			}
+
+			// Make all falsy values `null` (except for 0, which could be an id.. see '/issues/179')
+			if ( !id && id !== 0 ) {
+				id = null;
+			}
+
+			return id;
+		},
+
+		/**
+		 *
+		 * @param type
+		 * @param {String|Number|Object|Backbone.RelationalModel} item
+		 */
+		find: function( type, item ) {
+			var id = this.resolveIdForItem( type, item );
+			var coll = this.getCollection( type );
+			
+			// Because the found object could be of any of the type's superModel
+			// types, only return it if it's actually of the type asked for.
+			if ( coll ) {
+				var obj = coll.get( id );
+
+				if ( obj instanceof type ) {
+					return obj;
+				}
+			}
+
+			return null;
+		},
+
+		/**
+		 * Add a 'model' to its appropriate collection. Retain the original contents of 'model.collection'.
+		 * @param {Backbone.RelationalModel} model
+		 */
+		register: function( model ) {
+			var coll = this.getCollection( model );
+
+			if ( coll ) {
+				if ( coll.get( model ) ) {
+					if ( Backbone.Relational.showWarnings && typeof console !== 'undefined' ) {
+						console.warn( 'Duplicate id! Old RelationalModel=%o, new RelationalModel=%o', coll.get( model ), model );
+					}
+					throw new Error( "Cannot instantiate more than one Backbone.RelationalModel with the same id per type!" );
+				}
+
+				var modelColl = model.collection;
+				coll.add( model );
+				this.listenTo( model, 'destroy', this.unregister, this );
+				model.collection = modelColl;
+			}
+		},
+
+		/**
+		 * Explicitly update a model's id in its store collection
+		 * @param {Backbone.RelationalModel} model
+		*/
+		update: function( model ) {
+			var coll = this.getCollection( model );
+			coll._onModelEvent( 'change:' + model.idAttribute, model, coll );
+		},
+
+		/**
+		 * Remove a 'model' from the store.
+		 * @param {Backbone.RelationalModel} model
+		 */
+		unregister: function( model ) {
+			this.stopListening( model, 'destroy', this.unregister );
+			var coll = this.getCollection( model );
+			coll && coll.remove( model );
+		},
+
+		/**
+		 * Reset the `store` to it's original state. The `reverseRelations` are kept though, since attempting to
+		 * re-initialize these on models would lead to a large amount of warnings.
+		 */
+		reset: function() {
+			this.stopListening();
+			this._collections = [];
+			this._subModels = [];
+			this._modelScopes = [ exports ];
+		}
+	});
+	Backbone.Relational.store = new Backbone.Store();
+
+	/**
+	 * The main Relation class, from which 'HasOne' and 'HasMany' inherit. Internally, 'relational:<key>' events
+	 * are used to regulate addition and removal of models from relations.
+	 *
+	 * @param {Backbone.RelationalModel} [instance] Model that this relation is created for. If no model is supplied,
+	 *      Relation just tries to instantiate it's `reverseRelation` if specified, and bails out after that.
+	 * @param {Object} options
+	 * @param {string} options.key
+	 * @param {Backbone.RelationalModel.constructor} options.relatedModel
+	 * @param {Boolean|String} [options.includeInJSON=true] Serialize the given attribute for related model(s)' in toJSON, or just their ids.
+	 * @param {Boolean} [options.createModels=true] Create objects from the contents of keys if the object is not found in Backbone.store.
+	 * @param {Object} [options.reverseRelation] Specify a bi-directional relation. If provided, Relation will reciprocate
+	 *    the relation to the 'relatedModel'. Required and optional properties match 'options', except that it also needs
+	 *    {Backbone.Relation|String} type ('HasOne' or 'HasMany').
+	 * @param {Object} opts
+	 */
+	Backbone.Relation = function( instance, options, opts ) {
+		this.instance = instance;
+		// Make sure 'options' is sane, and fill with defaults from subclasses and this object's prototype
+		options = _.isObject( options ) ? options : {};
+		this.reverseRelation = _.defaults( options.reverseRelation || {}, this.options.reverseRelation );
+		this.options = _.defaults( options, this.options, Backbone.Relation.prototype.options );
+
+		this.reverseRelation.type = !_.isString( this.reverseRelation.type ) ? this.reverseRelation.type :
+			Backbone[ this.reverseRelation.type ] || Backbone.Relational.store.getObjectByName( this.reverseRelation.type );
+
+		this.key = this.options.key;
+		this.keySource = this.options.keySource || this.key;
+		this.keyDestination = this.options.keyDestination || this.keySource || this.key;
+
+		this.model = this.options.model || this.instance.constructor;
+		this.relatedModel = this.options.relatedModel;
+		if ( _.isString( this.relatedModel ) ) {
+			this.relatedModel = Backbone.Relational.store.getObjectByName( this.relatedModel );
+		}
+
+		if ( !this.checkPreconditions() ) {
+			return;
+		}
+
+		// Add the reverse relation on 'relatedModel' to the store's reverseRelations
+		if ( !this.options.isAutoRelation && this.reverseRelation.type && this.reverseRelation.key ) {
+			Backbone.Relational.store.addReverseRelation( _.defaults( {
+					isAutoRelation: true,
+					model: this.relatedModel,
+					relatedModel: this.model,
+					reverseRelation: this.options // current relation is the 'reverseRelation' for its own reverseRelation
+				},
+				this.reverseRelation // Take further properties from this.reverseRelation (type, key, etc.)
+			) );
+		}
+
+		if ( instance ) {
+			var contentKey = this.keySource;
+			if ( contentKey !== this.key && typeof this.instance.get( this.key ) === 'object' ) {
+				contentKey = this.key;
+			}
+
+			this.setKeyContents( this.instance.get( contentKey ) );
+			this.relatedCollection = Backbone.Relational.store.getCollection( this.relatedModel );
+
+			// Explicitly clear 'keySource', to prevent a leaky abstraction if 'keySource' differs from 'key'.
+			if ( this.keySource !== this.key ) {
+				this.instance.unset( this.keySource, { silent: true } );
+			}
+
+			// Add this Relation to instance._relations
+			this.instance._relations[ this.key ] = this;
+
+			this.initialize( opts );
+
+			if ( this.options.autoFetch ) {
+				this.instance.fetchRelated( this.key, _.isObject( this.options.autoFetch ) ? this.options.autoFetch : {} );
+			}
+
+			// When 'relatedModel' are created or destroyed, check if it affects this relation.
+			this.listenTo( this.instance, 'destroy', this.destroy )
+				.listenTo( this.relatedCollection, 'relational:add', this.tryAddRelated )
+				.listenTo( this.relatedCollection, 'relational:remove', this.removeRelated )
+		}
+	};
+	// Fix inheritance :\
+	Backbone.Relation.extend = Backbone.Model.extend;
+	// Set up all inheritable **Backbone.Relation** properties and methods.
+	_.extend( Backbone.Relation.prototype, Backbone.Events, Backbone.Semaphore, {
+		options: {
+			createModels: true,
+			includeInJSON: true,
+			isAutoRelation: false,
+			autoFetch: false,
+			parse: false
+		},
+
+		instance: null,
+		key: null,
+		keyContents: null,
+		relatedModel: null,
+		relatedCollection: null,
+		reverseRelation: null,
+		related: null,
+
+		/**
+		 * Check several pre-conditions.
+		 * @return {Boolean} True if pre-conditions are satisfied, false if they're not.
+		 */
+		checkPreconditions: function() {
+			var i = this.instance,
+				k = this.key,
+				m = this.model,
+				rm = this.relatedModel,
+				warn = Backbone.Relational.showWarnings && typeof console !== 'undefined';
+
+			if ( !m || !k || !rm ) {
+				warn && console.warn( 'Relation=%o: missing model, key or relatedModel (%o, %o, %o).', this, m, k, rm );
+				return false;
+			}
+			// Check if the type in 'model' inherits from Backbone.RelationalModel
+			if ( !( m.prototype instanceof Backbone.RelationalModel ) ) {
+				warn && console.warn( 'Relation=%o: model does not inherit from Backbone.RelationalModel (%o).', this, i );
+				return false;
+			}
+			// Check if the type in 'relatedModel' inherits from Backbone.RelationalModel
+			if ( !( rm.prototype instanceof Backbone.RelationalModel ) ) {
+				warn && console.warn( 'Relation=%o: relatedModel does not inherit from Backbone.RelationalModel (%o).', this, rm );
+				return false;
+			}
+			// Check if this is not a HasMany, and the reverse relation is HasMany as well
+			if ( this instanceof Backbone.HasMany && this.reverseRelation.type === Backbone.HasMany ) {
+				warn && console.warn( 'Relation=%o: relation is a HasMany, and the reverseRelation is HasMany as well.', this );
+				return false;
+			}
+			// Check if we're not attempting to create a relationship on a `key` that's already used.
+			if ( i && _.keys( i._relations ).length ) {
+				var existing = _.find( i._relations, function( rel ) {
+					return rel.key === k;
+				}, this );
+
+				if ( existing ) {
+					warn && console.warn( 'Cannot create relation=%o on %o for model=%o: already taken by relation=%o.',
+						this, k, i, existing );
+					return false;
+				}
+			}
+
+			return true;
+		},
+
+		/**
+		 * Set the related model(s) for this relation
+		 * @param {Backbone.Model|Backbone.Collection} related
+		 */
+		setRelated: function( related ) {
+			this.related = related;
+
+			this.instance.acquire();
+			this.instance.attributes[ this.key ] = related;
+			this.instance.release();
+		},
+
+		/**
+		 * Determine if a relation (on a different RelationalModel) is the reverse
+		 * relation of the current one.
+		 * @param {Backbone.Relation} relation
+		 * @return {Boolean}
+		 */
+		_isReverseRelation: function( relation ) {
+			return relation.instance instanceof this.relatedModel && this.reverseRelation.key === relation.key &&
+				this.key === relation.reverseRelation.key;
+		},
+
+		/**
+		 * Get the reverse relations (pointing back to 'this.key' on 'this.instance') for the currently related model(s).
+		 * @param {Backbone.RelationalModel} [model] Get the reverse relations for a specific model.
+		 *    If not specified, 'this.related' is used.
+		 * @return {Backbone.Relation[]}
+		 */
+		getReverseRelations: function( model ) {
+			var reverseRelations = [];
+			// Iterate over 'model', 'this.related.models' (if this.related is a Backbone.Collection), or wrap 'this.related' in an array.
+			var models = !_.isUndefined( model ) ? [ model ] : this.related && ( this.related.models || [ this.related ] );
+			_.each( models || [], function( related ) {
+				_.each( related.getRelations() || [], function( relation ) {
+						if ( this._isReverseRelation( relation ) ) {
+							reverseRelations.push( relation );
+						}
+					}, this );
+			}, this );
+			
+			return reverseRelations;
+		},
+
+		/**
+		 * When `this.instance` is destroyed, cleanup our relations.
+		 * Get reverse relation, call removeRelated on each.
+		 */
+		destroy: function() {
+			this.stopListening();
+
+			if ( this instanceof Backbone.HasOne ) {
+				this.setRelated( null );
+			}
+			else if ( this instanceof Backbone.HasMany ) {
+				this.setRelated( this._prepareCollection() );
+			}
+			
+			_.each( this.getReverseRelations(), function( relation ) {
+				relation.removeRelated( this.instance );
+			}, this );
+		}
+	});
+
+	Backbone.HasOne = Backbone.Relation.extend({
+		options: {
+			reverseRelation: { type: 'HasMany' }
+		},
+
+		initialize: function( opts ) {
+			this.listenTo( this.instance, 'relational:change:' + this.key, this.onChange );
+
+			var related = this.findRelated( opts );
+			this.setRelated( related );
+
+			// Notify new 'related' object of the new relation.
+			_.each( this.getReverseRelations(), function( relation ) {
+				relation.addRelated( this.instance, opts );
+			}, this );
+		},
+
+		/**
+		 * Find related Models.
+		 * @param {Object} [options]
+		 * @return {Backbone.Model}
+		 */
+		findRelated: function( options ) {
+			var related = null;
+
+			options = _.defaults( { parse: this.options.parse }, options );
+
+			if ( this.keyContents instanceof this.relatedModel ) {
+				related = this.keyContents;
+			}
+			else if ( this.keyContents || this.keyContents === 0 ) { // since 0 can be a valid `id` as well
+				var opts = _.defaults( { create: this.options.createModels }, options );
+				related = this.relatedModel.findOrCreate( this.keyContents, opts );
+			}
+
+			return related;
+		},
+
+		/**
+		 * Normalize and reduce `keyContents` to an `id`, for easier comparison
+		 * @param {String|Number|Backbone.Model} keyContents
+		 */
+		setKeyContents: function( keyContents ) {
+			this.keyContents = keyContents;
+			this.keyId = Backbone.Relational.store.resolveIdForItem( this.relatedModel, this.keyContents );
+		},
+
+		/**
+		 * Event handler for `change:<key>`.
+		 * If the key is changed, notify old & new reverse relations and initialize the new relation.
+		 */
+		onChange: function( model, attr, options ) {
+			// Don't accept recursive calls to onChange (like onChange->findRelated->findOrCreate->initializeRelations->addRelated->onChange)
+			if ( this.isLocked() ) {
+				return;
+			}
+			this.acquire();
+			options = options ? _.clone( options ) : {};
+			
+			// 'options.__related' is set by 'addRelated'/'removeRelated'. If it is set, the change
+			// is the result of a call from a relation. If it's not, the change is the result of 
+			// a 'set' call on this.instance.
+			var changed = _.isUndefined( options.__related ),
+				oldRelated = changed ? this.related : options.__related;
+			
+			if ( changed ) {
+				this.setKeyContents( attr );
+				var related = this.findRelated( options );
+				this.setRelated( related );
+			}
+			
+			// Notify old 'related' object of the terminated relation
+			if ( oldRelated && this.related !== oldRelated ) {
+				_.each( this.getReverseRelations( oldRelated ), function( relation ) {
+					relation.removeRelated( this.instance, null, options );
+				}, this );
+			}
+
+			// Notify new 'related' object of the new relation. Note we do re-apply even if this.related is oldRelated;
+			// that can be necessary for bi-directional relations if 'this.instance' was created after 'this.related'.
+			// In that case, 'this.instance' will already know 'this.related', but the reverse might not exist yet.
+			_.each( this.getReverseRelations(), function( relation ) {
+				relation.addRelated( this.instance, options );
+			}, this );
+			
+			// Fire the 'change:<key>' event if 'related' was updated
+			if ( !options.silent && this.related !== oldRelated ) {
+				var dit = this;
+				this.changed = true;
+				Backbone.Relational.eventQueue.add( function() {
+					dit.instance.trigger( 'change:' + dit.key, dit.instance, dit.related, options, true );
+					dit.changed = false;
+				});
+			}
+			this.release();
+		},
+
+		/**
+		 * If a new 'this.relatedModel' appears in the 'store', try to match it to the last set 'keyContents'
+		 */
+		tryAddRelated: function( model, coll, options ) {
+			if ( ( this.keyId || this.keyId === 0 ) && model.id === this.keyId ) { // since 0 can be a valid `id` as well
+				this.addRelated( model, options );
+				this.keyId = null;
+			}
+		},
+
+		addRelated: function( model, options ) {
+			// Allow 'model' to set up its relations before proceeding.
+			// (which can result in a call to 'addRelated' from a relation of 'model')
+			var dit = this;
+			model.queue( function() {
+				if ( model !== dit.related ) {
+					var oldRelated = dit.related || null;
+					dit.setRelated( model );
+					dit.onChange( dit.instance, model, _.defaults( { __related: oldRelated }, options ) );
+				}
+			});
+		},
+
+		removeRelated: function( model, coll, options ) {
+			if ( !this.related ) {
+				return;
+			}
+			
+			if ( model === this.related ) {
+				var oldRelated = this.related || null;
+				this.setRelated( null );
+				this.onChange( this.instance, model, _.defaults( { __related: oldRelated }, options ) );
+			}
+		}
+	});
+
+	Backbone.HasMany = Backbone.Relation.extend({
+		collectionType: null,
+
+		options: {
+			reverseRelation: { type: 'HasOne' },
+			collectionType: Backbone.Collection,
+			collectionKey: true,
+			collectionOptions: {}
+		},
+
+		initialize: function( opts ) {
+			this.listenTo( this.instance, 'relational:change:' + this.key, this.onChange );
+			
+			// Handle a custom 'collectionType'
+			this.collectionType = this.options.collectionType;
+			if ( _.isString( this.collectionType ) ) {
+				this.collectionType = Backbone.Relational.store.getObjectByName( this.collectionType );
+			}
+			if ( !this.collectionType.prototype instanceof Backbone.Collection ){
+				throw new Error( '`collectionType` must inherit from Backbone.Collection' );
+			}
+
+			var related = this.findRelated( opts );
+			this.setRelated( related );
+		},
+
+		/**
+		 * Bind events and setup collectionKeys for a collection that is to be used as the backing store for a HasMany.
+		 * If no 'collection' is supplied, a new collection will be created of the specified 'collectionType' option.
+		 * @param {Backbone.Collection} [collection]
+		 * @return {Backbone.Collection}
+		 */
+		_prepareCollection: function( collection ) {
+			if ( this.related ) {
+				this.stopListening( this.related );
+			}
+
+			if ( !collection || !( collection instanceof Backbone.Collection ) ) {
+				var options = _.isFunction( this.options.collectionOptions ) ?
+					this.options.collectionOptions( this.instance ) : this.options.collectionOptions;
+
+				collection = new this.collectionType( null, options );
+			}
+
+			collection.model = this.relatedModel;
+			
+			if ( this.options.collectionKey ) {
+				var key = this.options.collectionKey === true ? this.options.reverseRelation.key : this.options.collectionKey;
+				
+				if ( collection[ key ] && collection[ key ] !== this.instance ) {
+					if ( Backbone.Relational.showWarnings && typeof console !== 'undefined' ) {
+						console.warn( 'Relation=%o; collectionKey=%s already exists on collection=%o', this, key, this.options.collectionKey );
+					}
+				}
+				else if ( key ) {
+					collection[ key ] = this.instance;
+				}
+			}
+
+			this.listenTo( collection, 'relational:add', this.handleAddition )
+				.listenTo( collection, 'relational:remove', this.handleRemoval )
+				.listenTo( collection, 'relational:reset', this.handleReset );
+			
+			return collection;
+		},
+
+		/**
+		 * Find related Models.
+		 * @param {Object} [options]
+		 * @return {Backbone.Collection}
+		 */
+		findRelated: function( options ) {
+			var related = null;
+
+			options = _.defaults( { parse: this.options.parse }, options );
+
+			// Replace 'this.related' by 'this.keyContents' if it is a Backbone.Collection
+			if ( this.keyContents instanceof Backbone.Collection ) {
+				this._prepareCollection( this.keyContents );
+				related = this.keyContents;
+			}
+			// Otherwise, 'this.keyContents' should be an array of related object ids.
+			// Re-use the current 'this.related' if it is a Backbone.Collection; otherwise, create a new collection.
+			else {
+				var toAdd = [];
+
+				_.each( this.keyContents, function( attributes ) {
+					if ( attributes instanceof this.relatedModel ) {
+						var model = attributes;
+					}
+					else {
+						// If `merge` is true, update models here, instead of during update.
+						model = this.relatedModel.findOrCreate( attributes, _.extend( { merge: true }, options, { create: this.options.createModels } ) );
+					}
+
+					model && toAdd.push( model );
+				}, this );
+
+				if ( this.related instanceof Backbone.Collection ) {
+					related = this.related;
+				}
+				else {
+					related = this._prepareCollection();
+				}
+
+				related.update( toAdd, _.defaults( { merge: false, parse: false }, options ) );
+			}
+
+			return related;
+		},
+
+		/**
+		 * Normalize and reduce `keyContents` to a list of `ids`, for easier comparison
+		 * @param {String|Number|String[]|Number[]|Backbone.Collection} keyContents
+		 */
+		setKeyContents: function( keyContents ) {
+			this.keyContents = keyContents instanceof Backbone.Collection ? keyContents : null;
+			this.keyIds = [];
+
+			if ( !this.keyContents && ( keyContents || keyContents === 0 ) ) { // since 0 can be a valid `id` as well
+				// Handle cases the an API/user supplies just an Object/id instead of an Array
+				this.keyContents = _.isArray( keyContents ) ? keyContents : [ keyContents ];
+
+				_.each( this.keyContents, function( item ) {
+					var itemId = Backbone.Relational.store.resolveIdForItem( this.relatedModel, item );
+					if ( itemId || itemId === 0 ) {
+						this.keyIds.push( itemId );
+					}
+				}, this );
+			}
+		},
+
+		/**
+		 * Event handler for `change:<key>`.
+		 * If the contents of the key are changed, notify old & new reverse relations and initialize the new relation.
+		 */
+		onChange: function( model, attr, options ) {
+			options = options ? _.clone( options ) : {};
+			this.setKeyContents( attr );
+			this.changed = false;
+
+			var related = this.findRelated( options );
+			this.setRelated( related );
+
+			if ( !options.silent ) {
+				var dit = this;
+				Backbone.Relational.eventQueue.add( function() {
+					// The `changed` flag can be set in `handleAddition` or `handleRemoval`
+					if ( dit.changed ) {
+						dit.instance.trigger( 'change:' + dit.key, dit.instance, dit.related, options, true );
+						dit.changed = false;
+					}
+				});
+			}
+		},
+
+		/**
+		 * When a model is added to a 'HasMany', trigger 'add' on 'this.instance' and notify reverse relations.
+		 * (should be 'HasOne', must set 'this.instance' as their related).
+		*/
+		handleAddition: function( model, coll, options ) {
+			//console.debug('handleAddition called; args=%o', arguments);
+			options = options ? _.clone( options ) : {};
+			this.changed = true;
+			
+			_.each( this.getReverseRelations( model ), function( relation ) {
+				relation.addRelated( this.instance, options );
+			}, this );
+
+			// Only trigger 'add' once the newly added model is initialized (so, has its relations set up)
+			var dit = this;
+			!options.silent && Backbone.Relational.eventQueue.add( function() {
+				dit.instance.trigger( 'add:' + dit.key, model, dit.related, options );
+			});
+		},
+
+		/**
+		 * When a model is removed from a 'HasMany', trigger 'remove' on 'this.instance' and notify reverse relations.
+		 * (should be 'HasOne', which should be nullified)
+		 */
+		handleRemoval: function( model, coll, options ) {
+			//console.debug('handleRemoval called; args=%o', arguments);
+			options = options ? _.clone( options ) : {};
+			this.changed = true;
+			
+			_.each( this.getReverseRelations( model ), function( relation ) {
+				relation.removeRelated( this.instance, null, options );
+			}, this );
+			
+			var dit = this;
+			!options.silent && Backbone.Relational.eventQueue.add( function() {
+				 dit.instance.trigger( 'remove:' + dit.key, model, dit.related, options );
+			});
+		},
+
+		handleReset: function( coll, options ) {
+			var dit = this;
+			options = options ? _.clone( options ) : {};
+			!options.silent && Backbone.Relational.eventQueue.add( function() {
+				dit.instance.trigger( 'reset:' + dit.key, dit.related, options );
+			});
+		},
+
+		tryAddRelated: function( model, coll, options ) {
+			var item = _.contains( this.keyIds, model.id );
+
+			if ( item ) {
+				this.addRelated( model, options );
+				this.keyIds = _.without( this.keyIds, model.id );
+			}
+		},
+
+		addRelated: function( model, options ) {
+			// Allow 'model' to set up its relations before proceeding.
+			// (which can result in a call to 'addRelated' from a relation of 'model')
+			var dit = this;
+			model.queue( function() {
+				if ( dit.related && !dit.related.get( model ) ) {
+					dit.related.add( model, options );
+				}
+			});
+		},
+
+		removeRelated: function( model, coll, options ) {
+			if ( this.related.get( model ) ) {
+				this.related.remove( model, options );
+			}
+		}
+	});
+
+	/**
+	 * A type of Backbone.Model that also maintains relations to other models and collections.
+	 * New events when compared to the original:
+	 *  - 'add:<key>' (model, related collection, options)
+	 *  - 'remove:<key>' (model, related collection, options)
+	 *  - 'change:<key>' (model, related model or collection, options)
+	 */
+	Backbone.RelationalModel = Backbone.Model.extend({
+		relations: null, // Relation descriptions on the prototype
+		_relations: null, // Relation instances
+		_isInitialized: false,
+		_deferProcessing: false,
+		_queue: null,
+
+		subModelTypeAttribute: 'type',
+		subModelTypes: null,
+
+		constructor: function( attributes, options ) {
+			// Nasty hack, for cases like 'model.get( <HasMany key> ).add( item )'.
+			// Defer 'processQueue', so that when 'Relation.createModels' is used we trigger 'HasMany'
+			// collection events only after the model is really fully set up.
+			// Example: "p.get('jobs').add( { company: c, person: p } )".
+			if ( options && options.collection ) {
+				var dit = this,
+					collection = this.collection =  options.collection;
+
+				// Prevent this option from cascading down to related models; they shouldn't go into this `if` clause.
+				delete options.collection;
+
+				this._deferProcessing = true;
+
+				var processQueue = function( model ) {
+					if ( model === dit ) {
+						dit._deferProcessing = false;
+						dit.processQueue();
+						collection.off( 'relational:add', processQueue );
+					}
+				};
+				collection.on( 'relational:add', processQueue );
+
+				// So we do process the queue eventually, regardless of whether this model actually gets added to 'options.collection'.
+				_.defer( function() {
+					processQueue( dit );
+				});
+			}
+
+			Backbone.Relational.store.processOrphanRelations();
+			
+			this._queue = new Backbone.BlockingQueue();
+			this._queue.block();
+			Backbone.Relational.eventQueue.block();
+
+			try {
+				Backbone.Model.apply( this, arguments );
+			}
+			finally {
+				// Try to run the global queue holding external events
+				Backbone.Relational.eventQueue.unblock();
+			}
+		},
+
+		/**
+		 * Override 'trigger' to queue 'change' and 'change:*' events
+		 */
+		trigger: function( eventName ) {
+			if ( eventName.length > 5 && eventName.indexOf( 'change' ) === 0 ) {
+				var dit = this,
+					args = arguments;
+
+				Backbone.Relational.eventQueue.add( function() {
+					if ( !dit._isInitialized ) {
+						return;
+					}
+
+					// Determine if the `change` event is still valid, now that all relations are populated
+					var changed = true;
+					if ( eventName === 'change' ) {
+						changed = dit.hasChanged();
+					}
+					else {
+						var attr = eventName.slice( 7 ),
+							rel = dit.getRelation( attr );
+
+						if ( rel ) {
+							// If `attr` is a relation, `change:attr` get triggered from `Relation.onChange`.
+							// These take precedence over `change:attr` events triggered by `Model.set`.
+							// The relation set a fourth attribute to `true`. If this attribute is present,
+							// continue triggering this event; otherwise, it's from `Model.set` and should be stopped.
+							changed = ( args[ 4 ] === true );
+
+							// If this event was triggered by a relation, set the right value in `this.changed`
+							// (a Collection or Model instead of raw data).
+							if ( changed ) {
+								dit.changed[ attr ] = args[ 2 ];
+							}
+							// Otherwise, this event is from `Model.set`. If the relation doesn't report a change,
+							// remove attr from `dit.changed` so `hasChanged` doesn't take it into account.
+							else if ( !rel.changed ) {
+								delete dit.changed[ attr ];
+							}
+						}
+					}
+
+					changed && Backbone.Model.prototype.trigger.apply( dit, args );
+				});
+			}
+			else {
+				Backbone.Model.prototype.trigger.apply( this, arguments );
+			}
+			
+			return this;
+		},
+
+		/**
+		 * Initialize Relations present in this.relations; determine the type (HasOne/HasMany), then creates a new instance.
+		 * Invoked in the first call so 'set' (which is made from the Backbone.Model constructor).
+		 */
+		initializeRelations: function( options ) {
+			this.acquire(); // Setting up relations often also involve calls to 'set', and we only want to enter this function once
+			this._relations = {};
+			
+			_.each( this.relations || [], function( rel ) {
+				Backbone.Relational.store.initializeRelation( this, rel, options );
+			}, this );
+			
+			this._isInitialized = true;
+			this.release();
+			this.processQueue();
+		},
+
+		/**
+		 * When new values are set, notify this model's relations (also if options.silent is set).
+		 * (Relation.setRelated locks this model before calling 'set' on it to prevent loops)
+		 */
+		updateRelations: function( options ) {
+			if ( this._isInitialized && !this.isLocked() ) {
+				_.each( this._relations, function( rel ) {
+					// Update from data in `rel.keySource` if set, or `rel.key` otherwise
+					var val = this.attributes[ rel.keySource ] || this.attributes[ rel.key ];
+					if ( rel.related !== val ) {
+						this.trigger( 'relational:change:' + rel.key, this, val, options || {} );
+					}
+				}, this );
+			}
+		},
+
+		/**
+		 * Either add to the queue (if we're not initialized yet), or execute right away.
+		 */
+		queue: function( func ) {
+			this._queue.add( func );
+		},
+
+		/**
+		 * Process _queue
+		 */
+		processQueue: function() {
+			if ( this._isInitialized && !this._deferProcessing && this._queue.isBlocked() ) {
+				this._queue.unblock();
+			}
+		},
+
+		/**
+		 * Get a specific relation.
+		 * @param key {string} The relation key to look for.
+		 * @return {Backbone.Relation} An instance of 'Backbone.Relation', if a relation was found for 'key', or null.
+		 */
+		getRelation: function( key ) {
+			return this._relations[ key ];
+		},
+
+		/**
+		 * Get all of the created relations.
+		 * @return {Backbone.Relation[]}
+		 */
+		getRelations: function() {
+			return _.values( this._relations );
+		},
+
+		/**
+		 * Retrieve related objects.
+		 * @param key {string} The relation key to fetch models for.
+		 * @param [options] {Object} Options for 'Backbone.Model.fetch' and 'Backbone.sync'.
+		 * @param [refresh=false] {boolean} Fetch existing models from the server as well (in order to update them).
+		 * @return {jQuery.when[]} An array of request objects
+		 */
+		fetchRelated: function( key, options, refresh ) {
+			// Set default `options` for fetch
+			options = _.extend( { update: true, remove: false }, options );
+
+			var setUrl,
+				requests = [],
+				rel = this.getRelation( key ),
+				keys = rel && ( rel.keyIds || [ rel.keyId ] ),
+				toFetch = keys && _.select( keys || [], function( id ) {
+					return ( id || id === 0 ) && ( refresh || !Backbone.Relational.store.find( rel.relatedModel, id ) );
+				}, this );
+			
+			if ( toFetch && toFetch.length ) {
+				// Find (or create) a model for each one that is to be fetched
+				var created = [],
+					models = _.map( toFetch, function( id ) {
+						var model = Backbone.Relational.store.find( rel.relatedModel, id );
+						
+						if ( !model ) {
+							var attrs = {};
+							attrs[ rel.relatedModel.prototype.idAttribute ] = id;
+							model = rel.relatedModel.findOrCreate( attrs, options );
+							created.push( model );
+						}
+
+						return model;
+					}, this );
+				
+				// Try if the 'collection' can provide a url to fetch a set of models in one request.
+				if ( rel.related instanceof Backbone.Collection && _.isFunction( rel.related.url ) ) {
+					setUrl = rel.related.url( models );
+				}
+				
+				// An assumption is that when 'Backbone.Collection.url' is a function, it can handle building of set urls.
+				// To make sure it can, test if the url we got by supplying a list of models to fetch is different from
+				// the one supplied for the default fetch action (without args to 'url').
+				if ( setUrl && setUrl !== rel.related.url() ) {
+					var opts = _.defaults(
+						{
+							error: function() {
+								var args = arguments;
+								_.each( created, function( model ) {
+									model.trigger( 'destroy', model, model.collection, options );
+									options.error && options.error.apply( model, args );
+								});
+							},
+							url: setUrl
+						},
+						options
+					);
+
+					requests = [ rel.related.fetch( opts ) ];
+				}
+				else {
+					requests = _.map( models, function( model ) {
+						var opts = _.defaults(
+							{
+								error: function() {
+									if ( _.contains( created, model ) ) {
+										model.trigger( 'destroy', model, model.collection, options );
+										options.error && options.error.apply( model, arguments );
+									}
+								}
+							},
+							options
+						);
+						return model.fetch( opts );
+					}, this );
+				}
+			}
+			
+			return requests;
+		},
+
+		get: function( attr ) {
+			var originalResult = Backbone.Model.prototype.get.call( this, attr );
+
+			// Use `originalResult` get if dotNotation not enabled or not required because no dot is in `attr`
+			if ( !this.dotNotation || attr.indexOf( '.' ) === -1 ) {
+				return originalResult;
+			}
+
+			// Go through all splits and return the final result
+			var splits = attr.split( '.' );
+			var result = _.reduce(splits, function( model, split ) {
+				if ( !( model instanceof Backbone.Model ) ) {
+					throw new Error( 'Attribute must be an instanceof Backbone.Model. Is: ' + model + ', currentSplit: ' + split );
+				}
+
+				return Backbone.Model.prototype.get.call( model, split );
+			}, this );
+
+			if ( originalResult !== undefined && result !== undefined ) {
+				throw new Error( "Ambiguous result for '" + attr + "'. direct result: " + originalResult + ", dotNotation: " + result );
+			}
+
+			return originalResult || result;
+		},
+
+		set: function( key, value, options ) {
+			Backbone.Relational.eventQueue.block();
+			
+			// Duplicate backbone's behavior to allow separate key/value parameters, instead of a single 'attributes' object
+			var attributes;
+			if ( _.isObject( key ) || key == null ) {
+				attributes = key;
+				options = value;
+			}
+			else {
+				attributes = {};
+				attributes[ key ] = value;
+			}
+			
+			var result = Backbone.Model.prototype.set.apply( this, arguments );
+			
+			// Ideal place to set up relations :)
+			try {
+				if ( !this._isInitialized && !this.isLocked() ) {
+					this.constructor.initializeModelHierarchy();
+
+					Backbone.Relational.store.register( this );
+
+					this.initializeRelations( options );
+				}
+				// Update the 'idAttribute' in Backbone.store if; we don't want it to miss an 'id' update due to {silent:true}
+				else if ( attributes && this.idAttribute in attributes ) {
+					Backbone.Relational.store.update( this );
+				}
+
+				if ( attributes ) {
+					this.updateRelations( options );
+				}
+			}
+			finally {
+				// Try to run the global queue holding external events
+				Backbone.Relational.eventQueue.unblock();
+			}
+			
+			return result;
+		},
+
+		unset: function( attribute, options ) {
+			Backbone.Relational.eventQueue.block();
+			
+			var result = Backbone.Model.prototype.unset.apply( this, arguments );
+			this.updateRelations( options );
+			
+			// Try to run the global queue holding external events
+			Backbone.Relational.eventQueue.unblock();
+			
+			return result;
+		},
+
+		clear: function( options ) {
+			Backbone.Relational.eventQueue.block();
+			
+			var result = Backbone.Model.prototype.clear.apply( this, arguments );
+			this.updateRelations( options );
+			
+			// Try to run the global queue holding external events
+			Backbone.Relational.eventQueue.unblock();
+			
+			return result;
+		},
+
+		clone: function() {
+			var attributes = _.clone( this.attributes );
+			if ( !_.isUndefined( attributes[ this.idAttribute ] ) ) {
+				attributes[ this.idAttribute ] = null;
+			}
+
+			_.each( this.getRelations(), function( rel ) {
+				delete attributes[ rel.key ];
+			});
+
+			return new this.constructor( attributes );
+		},
+
+		/**
+		 * Convert relations to JSON, omits them when required
+		 */
+		toJSON: function( options ) {
+			// If this Model has already been fully serialized in this branch once, return to avoid loops
+			if ( this.isLocked() ) {
+				return this.id;
+			}
+			
+			this.acquire();
+			var json = Backbone.Model.prototype.toJSON.call( this, options );
+			
+			if ( this.constructor._superModel && !( this.constructor._subModelTypeAttribute in json ) ) {
+				json[ this.constructor._subModelTypeAttribute ] = this.constructor._subModelTypeValue;
+			}
+			
+			_.each( this._relations, function( rel ) {
+				var value = json[ rel.key ];
+
+				if ( rel.options.includeInJSON === true) {
+					if ( value && _.isFunction( value.toJSON ) ) {
+						json[ rel.keyDestination ] = value.toJSON( options );
+					}
+					else {
+						json[ rel.keyDestination ] = null;
+					}
+				}
+				else if ( _.isString( rel.options.includeInJSON ) ) {
+					if ( value instanceof Backbone.Collection ) {
+						json[ rel.keyDestination ] = value.pluck( rel.options.includeInJSON );
+					}
+					else if ( value instanceof Backbone.Model ) {
+						json[ rel.keyDestination ] = value.get( rel.options.includeInJSON );
+					}
+					else {
+						json[ rel.keyDestination ] = null;
+					}
+				}
+				else if ( _.isArray( rel.options.includeInJSON ) ) {
+					if ( value instanceof Backbone.Collection ) {
+						var valueSub = [];
+						value.each( function( model ) {
+							var curJson = {};
+							_.each( rel.options.includeInJSON, function( key ) {
+								curJson[ key ] = model.get( key );
+							});
+							valueSub.push( curJson );
+						});
+						json[ rel.keyDestination ] = valueSub;
+					}
+					else if ( value instanceof Backbone.Model ) {
+						var valueSub = {};
+						_.each( rel.options.includeInJSON, function( key ) {
+							valueSub[ key ] = value.get( key );
+						});
+						json[ rel.keyDestination ] = valueSub;
+					}
+					else {
+						json[ rel.keyDestination ] = null;
+					}
+				}
+				else {
+					delete json[ rel.key ];
+				}
+
+				if ( rel.keyDestination !== rel.key ) {
+					delete json[ rel.key ];
+				}
+			});
+			
+			this.release();
+			return json;
+		}
+	},
+	{
+		/**
+		 *
+		 * @param superModel
+		 * @returns {Backbone.RelationalModel.constructor}
+		 */
+		setup: function( superModel ) {
+			// We don't want to share a relations array with a parent, as this will cause problems with
+			// reverse relations.
+			this.prototype.relations = ( this.prototype.relations || [] ).slice( 0 );
+
+			this._subModels = {};
+			this._superModel = null;
+
+			// If this model has 'subModelTypes' itself, remember them in the store
+			if ( this.prototype.hasOwnProperty( 'subModelTypes' ) ) {
+				Backbone.Relational.store.addSubModels( this.prototype.subModelTypes, this );
+			}
+			// The 'subModelTypes' property should not be inherited, so reset it.
+			else {
+				this.prototype.subModelTypes = null;
+			}
+
+			// Initialize all reverseRelations that belong to this new model.
+			_.each( this.prototype.relations || [], function( rel ) {
+				if ( !rel.model ) {
+					rel.model = this;
+				}
+				
+				if ( rel.reverseRelation && rel.model === this ) {
+					var preInitialize = true;
+					if ( _.isString( rel.relatedModel ) ) {
+						/**
+						 * The related model might not be defined for two reasons
+						 *  1. it is related to itself
+						 *  2. it never gets defined, e.g. a typo
+						 *  3. the model hasn't been defined yet, but will be later
+						 * In neither of these cases do we need to pre-initialize reverse relations.
+						 * However, for 3. (which is, to us, indistinguishable from 2.), we do need to attempt
+						 * setting up this relation again later, in case the related model is defined later.
+						 */
+						var relatedModel = Backbone.Relational.store.getObjectByName( rel.relatedModel );
+						preInitialize = relatedModel && ( relatedModel.prototype instanceof Backbone.RelationalModel );
+					}
+
+					if ( preInitialize ) {
+						Backbone.Relational.store.initializeRelation( null, rel );
+					}
+					else if ( _.isString( rel.relatedModel ) ) {
+						Backbone.Relational.store.addOrphanRelation( rel );
+					}
+				}
+			}, this );
+			
+			return this;
+		},
+
+		/**
+		 * Create a 'Backbone.Model' instance based on 'attributes'.
+		 * @param {Object} attributes
+		 * @param {Object} [options]
+		 * @return {Backbone.Model}
+		 */
+		build: function( attributes, options ) {
+			var model = this;
+
+			// 'build' is a possible entrypoint; it's possible no model hierarchy has been determined yet.
+			this.initializeModelHierarchy();
+
+			// Determine what type of (sub)model should be built if applicable.
+			// Lookup the proper subModelType in 'this._subModels'.
+			if ( this._subModels && this.prototype.subModelTypeAttribute in attributes ) {
+				var subModelTypeAttribute = attributes[ this.prototype.subModelTypeAttribute ];
+				var subModelType = this._subModels[ subModelTypeAttribute ];
+				if ( subModelType ) {
+					model = subModelType;
+				}
+			}
+			
+			return new model( attributes, options );
+		},
+
+		/**
+		 *
+		 */
+		initializeModelHierarchy: function() {
+			// If we're here for the first time, try to determine if this modelType has a 'superModel'.
+			if ( _.isUndefined( this._superModel ) || _.isNull( this._superModel ) ) {
+				Backbone.Relational.store.setupSuperModel( this );
+
+				// If a superModel has been found, copy relations from the _superModel if they haven't been
+				// inherited automatically (due to a redefinition of 'relations').
+				// Otherwise, make sure we don't get here again for this type by making '_superModel' false so we fail
+				// the isUndefined/isNull check next time.
+				if ( this._superModel ) {
+					//
+					if ( this._superModel.prototype.relations ) {
+						var supermodelRelationsExist = _.any( this.prototype.relations || [], function( rel ) {
+							return rel.model && rel.model !== this;
+						}, this );
+
+						if ( !supermodelRelationsExist ) {
+							this.prototype.relations = this._superModel.prototype.relations.concat( this.prototype.relations );
+						}
+					}
+				}
+				else {
+					this._superModel = false;
+				}
+			}
+
+			// If we came here through 'build' for a model that has 'subModelTypes', and not all of them have been resolved yet, try to resolve each.
+			if ( this.prototype.subModelTypes && _.keys( this.prototype.subModelTypes ).length !== _.keys( this._subModels ).length ) {
+				_.each( this.prototype.subModelTypes || [], function( subModelTypeName ) {
+					var subModelType = Backbone.Relational.store.getObjectByName( subModelTypeName );
+					subModelType && subModelType.initializeModelHierarchy();
+				});
+			}
+		},
+
+		/**
+		 * Find an instance of `this` type in 'Backbone.Relational.store'.
+		 * - If `attributes` is a string or a number, `findOrCreate` will just query the `store` and return a model if found.
+		 * - If `attributes` is an object and is found in the store, the model will be updated with `attributes` unless `options.update` is `false`.
+		 *   Otherwise, a new model is created with `attributes` (unless `options.create` is explicitly set to `false`).
+		 * @param {Object|String|Number} attributes Either a model's id, or the attributes used to create or update a model.
+		 * @param {Object} [options]
+		 * @param {Boolean} [options.create=true]
+		 * @param {Boolean} [options.merge=true]
+		 * @param {Boolean} [options.parse=false]
+		 * @return {Backbone.RelationalModel}
+		 */
+		findOrCreate: function( attributes, options ) {
+			options || ( options = {} );
+			var parsedAttributes = ( _.isObject( attributes ) && options.parse && this.prototype.parse ) ?
+				this.prototype.parse( attributes ) : attributes;
+
+			// Try to find an instance of 'this' model type in the store
+			var model = Backbone.Relational.store.find( this, parsedAttributes );
+
+			// If we found an instance, update it with the data in 'item' (unless 'options.merge' is false).
+			// If not, create an instance (unless 'options.create' is false).
+			if ( _.isObject( attributes ) ) {
+				if ( model && options.merge !== false ) {
+					model.set( parsedAttributes, options );
+				}
+				else if ( !model && options.create !== false ) {
+					model = this.build( attributes, options );
+				}
+			}
+
+			return model;
+		}
+	});
+	_.extend( Backbone.RelationalModel.prototype, Backbone.Semaphore );
+
+	/**
+	 * Override Backbone.Collection._prepareModel, so objects will be built using the correct type
+	 * if the collection.model has subModels.
+	 * Attempts to find a model for `attrs` in Backbone.store through `findOrCreate`
+	 * (which sets the new properties on it if found), or instantiates a new model.
+	 */
+	Backbone.Collection.prototype.__prepareModel = Backbone.Collection.prototype._prepareModel;
+	Backbone.Collection.prototype._prepareModel = function ( attrs, options ) {
+		var model;
+		
+		if ( attrs instanceof Backbone.Model ) {
+			if ( !attrs.collection ) {
+				attrs.collection = this;
+			}
+			model = attrs;
+		}
+		else {
+			options || (options = {});
+			options.collection = this;
+			
+			if ( typeof this.model.findOrCreate !== 'undefined' ) {
+				model = this.model.findOrCreate( attrs, options );
+			}
+			else {
+				model = new this.model( attrs, options );
+			}
+			
+			if ( model && model.isNew() && !model._validate( attrs, options ) ) {
+				this.trigger( 'invalid', this, attrs, options );
+				model = false;
+			}
+		}
+		
+		return model;
+	};
+
+
+	/**
+	 * Override Backbone.Collection.add, so we'll create objects from attributes where required,
+	 * and update the existing models. Also, trigger 'relational:add'.
+	 */
+	var add = Backbone.Collection.prototype.__add = Backbone.Collection.prototype.add;
+	Backbone.Collection.prototype.add = function( models, options ) {
+		// Short-circuit if this Collection doesn't hold RelationalModels
+		if ( !( this.model.prototype instanceof Backbone.RelationalModel ) ) {
+			return add.apply( this, arguments );
+		}
+
+		models = _.isArray( models ) ? models.slice() : [ models ];
+		// Set default options to the same values as `add` uses, so `findOrCreate` will also respect those.
+		options = _.extend( { merge: false }, options );
+
+		var newModels = [],
+			toAdd = [];
+
+		//console.debug( 'calling add on coll=%o; model=%o, options=%o', this, models, options );
+		_.each( models, function( model ) {
+			if ( !( model instanceof Backbone.Model ) ) {
+				model = Backbone.Collection.prototype._prepareModel.call( this, model, options );
+			}
+
+			if ( model ) {
+				toAdd.push( model );
+
+				if ( !( this.get( model ) || this.get( model.cid ) ) ) {
+					newModels.push( model );
+				}
+				// If we arrive in `add` while performing a `set` (after a create, so the model gains an `id`),
+				// we may get here before `_onModelEvent` has had the chance to update `_byId`.
+				else if ( model.id != null ) {
+					this._byId[ model.id ] = model;
+				}
+			}
+		}, this );
+
+		// Add 'models' in a single batch, so the original add will only be called once (and thus 'sort', etc).
+		add.call( this, toAdd, options );
+
+		_.each( newModels, function( model ) {
+			// Fire a `relational:add` event for any model in `newModels` that has actually been added to the collection.
+			if ( this.get( model ) || this.get( model.cid ) ) {
+				this.trigger( 'relational:add', model, this, options );
+			}
+		}, this );
+		
+		return this;
+	};
+
+	/**
+	 * Override 'Backbone.Collection.remove' to trigger 'relational:remove'.
+	 */
+	var remove = Backbone.Collection.prototype.__remove = Backbone.Collection.prototype.remove;
+	Backbone.Collection.prototype.remove = function( models, options ) {
+		// Short-circuit if this Collection doesn't hold RelationalModels
+		if ( !( this.model.prototype instanceof Backbone.RelationalModel ) ) {
+			return remove.apply( this, arguments );
+		}
+
+		models = _.isArray( models ) ? models.slice() : [ models ];
+		options || ( options = {} );
+
+		var toRemove = [];
+
+		//console.debug('calling remove on coll=%o; models=%o, options=%o', this, models, options );
+		_.each( models, function( model ) {
+			model = this.get( model ) || this.get( model.cid );
+			model && toRemove.push( model );
+		}, this );
+
+		if ( toRemove.length ) {
+			remove.call( this, toRemove, options );
+
+			_.each( toRemove, function( model ) {
+				this.trigger('relational:remove', model, this, options);
+			}, this );
+		}
+		
+		return this;
+	};
+
+	/**
+	 * Override 'Backbone.Collection.reset' to trigger 'relational:reset'.
+	 */
+	var reset = Backbone.Collection.prototype.__reset = Backbone.Collection.prototype.reset;
+	Backbone.Collection.prototype.reset = function( models, options ) {
+		reset.call( this, models, options );
+
+		if ( this.model.prototype instanceof Backbone.RelationalModel ) {
+			this.trigger( 'relational:reset', this, options );
+		}
+
+		return this;
+	};
+
+	/**
+	 * Override 'Backbone.Collection.sort' to trigger 'relational:reset'.
+	 */
+	var sort = Backbone.Collection.prototype.__sort = Backbone.Collection.prototype.sort;
+	Backbone.Collection.prototype.sort = function( options ) {
+		sort.call( this, options );
+
+		if ( this.model.prototype instanceof Backbone.RelationalModel ) {
+			this.trigger( 'relational:reset', this, options );
+		}
+
+		return this;
+	};
+
+	/**
+	 * Override 'Backbone.Collection.trigger' so 'add', 'remove' and 'reset' events are queued until relations
+	 * are ready.
+	 */
+	var trigger = Backbone.Collection.prototype.__trigger = Backbone.Collection.prototype.trigger;
+	Backbone.Collection.prototype.trigger = function( eventName ) {
+		// Short-circuit if this Collection doesn't hold RelationalModels
+		if ( !( this.model.prototype instanceof Backbone.RelationalModel ) ) {
+			return trigger.apply( this, arguments );
+		}
+
+		if ( eventName === 'add' || eventName === 'remove' || eventName === 'reset' ) {
+			var dit = this,
+				args = arguments;
+			
+			if ( _.isObject( args[ 3 ] ) ) {
+				args = _.toArray( args );
+				// the fourth argument is the option object.
+				// we need to clone it, as it could be modified while we wait on the eventQueue to be unblocked
+				args[ 3 ] = _.clone( args[ 3 ] );
+			}
+			
+			Backbone.Relational.eventQueue.add( function() {
+				trigger.apply( dit, args );
+			});
+		}
+		else {
+			trigger.apply( this, arguments );
+		}
+		
+		return this;
+	};
+
+	// Override .extend() to automatically call .setup()
+	Backbone.RelationalModel.extend = function( protoProps, classProps ) {
+		var child = Backbone.Model.extend.apply( this, arguments );
+		
+		child.setup( this );
+
+		return child;
+	};
+})();
+;
+/**
+ * |-------------------|
+ * | Backbone-Mediator |
+ * |-------------------|
+ *  Backbone-Mediator is freely distributable under the MIT license.
+ *
+ *  <a href="https://github.com/chalbert/Backbone-Mediator">More details & documentation</a>
+ *
+ * @author Nicolas Gilbert
+ *
+ * @requires _
+ * @requires Backbone
+ */
+(function(factory){
+  'use strict';
+
+  if (typeof define === 'function' && define.amd) {
+    define(['underscore', 'backbone'], factory);
+  } else {
+    factory(_, Backbone);
+  }
+
+})(function (_, Backbone){
+  'use strict';
+
+  /**
+   * @static
+   */
+  var channels = {},
+      Subscriber,
+      /** @borrows Backbone.View#delegateEvents */
+      delegateEvents = Backbone.View.prototype.delegateEvents,
+      /** @borrows Backbone.View#delegateEvents */
+      undelegateEvents = Backbone.View.prototype.undelegateEvents;
+
+  /**
+   * @class
+   */
+  Backbone.Mediator = {
+
+    /**
+     * Subscribe to a channel
+     *
+     * @param channel
+     */
+    subscribe: function(channel, subscription, context, once) {
+      if (!channels[channel]) channels[channel] = [];
+      channels[channel].push({fn: subscription, context: context || this, once: once});
+    },
+
+    /**
+     * Trigger all callbacks for a channel
+     *
+     * @param channel
+     * @params N Extra parametter to pass to handler
+     */
+    publish: function(channel) {
+      if (!channels[channel]) return;
+
+      var args = [].slice.call(arguments, 1),
+          subscription;
+
+      for (var i = 0; i < channels[channel].length; i++) {
+        subscription = channels[channel][i];
+        subscription.fn.apply(subscription.context, args);
+        if (subscription.once) {
+          Backbone.Mediator.unsubscribe(channel, subscription.fn, subscription.context);
+          i--;
+        }
+      }
+    },
+
+    /**
+     * Cancel subscription
+     *
+     * @param channel
+     * @param fn
+     * @param context
+     */
+
+    unsubscribe: function(channel, fn, context){
+      if (!channels[channel]) return;
+
+      var subscription;
+      for (var i = 0; i < channels[channel].length; i++) {
+        subscription = channels[channel][i];
+        if (subscription.fn === fn && subscription.context === context) {
+          channels[channel].splice(i, 1);
+          i--;
+        }
+      }
+    },
+
+    /**
+     * Subscribing to one event only
+     *
+     * @param channel
+     * @param subscription
+     * @param context
+     */
+    subscribeOnce: function (channel, subscription, context) {
+      Backbone.Mediator.subscribe(channel, subscription, context, true);
+    }
+
+  };
+
+  /**
+   * Allow to define convention-based subscriptions
+   * as an 'subscriptions' hash on a view. Subscriptions
+   * can then be easily setup and cleaned.
+   *
+   * @class
+   */
+
+
+  Subscriber = {
+
+    /**
+     * Extend delegateEvents() to set subscriptions
+     */
+    delegateEvents: function(){
+      delegateEvents.apply(this, arguments);
+      this.setSubscriptions();
+    },
+
+    /**
+     * Extend undelegateEvents() to unset subscriptions
+     */
+    undelegateEvents: function(){
+      undelegateEvents.apply(this, arguments);
+      this.unsetSubscriptions();
+    },
+
+    /** @property {Object} List of subscriptions, to be defined */
+    subscriptions: {},
+
+    /**
+     * Subscribe to each subscription
+     * @param {Object} [subscriptions] An optional hash of subscription to add
+     */
+
+    setSubscriptions: function(subscriptions){
+      if (subscriptions) _.extend(this.subscriptions || {}, subscriptions);
+      subscriptions = subscriptions || this.subscriptions;
+      if (!subscriptions || _.isEmpty(subscriptions)) return;
+      // Just to be sure we don't set duplicate
+      this.unsetSubscriptions(subscriptions);
+
+      _.each(subscriptions, function(subscription, channel){
+        var once;
+        if (subscription.$once) {
+          subscription = subscription.$once;
+          once = true;
+        }
+        if (_.isString(subscription)) {
+          subscription = this[subscription];
+        }
+        Backbone.Mediator.subscribe(channel, subscription, this, once);
+      }, this);
+    },
+
+    /**
+     * Unsubscribe to each subscription
+     * @param {Object} [subscriptions] An optional hash of subscription to remove
+     */
+    unsetSubscriptions: function(subscriptions){
+      subscriptions = subscriptions || this.subscriptions;
+      if (!subscriptions || _.isEmpty(subscriptions)) return;
+      _.each(subscriptions, function(subscription, channel){
+        if (_.isString(subscription)) {
+          subscription = this[subscription];
+        }
+        Backbone.Mediator.unsubscribe(channel, subscription.$once || subscription, this);
+      }, this);
+    }
+  };
+
+  /**
+   * @lends Backbone.View.prototype
+   */
+  _.extend(Backbone.View.prototype, Subscriber);
+
+  /**
+   * @lends Backbone.Mediator
+   */
+  _.extend(Backbone.Mediator, {
+    /**
+     * Shortcut for publish
+     * @function
+     */
+    pub: Backbone.Mediator.publish,
+    /**
+     * Shortcut for subscribe
+     * @function
+     */
+    sub: Backbone.Mediator.subscribe
+  });
+
+  return Backbone;
+
+});
+;
+(function() {
+  var WebSocket = window.WebSocket || window.MozWebSocket;
+  var br = window.brunch || {};
+  var ar = br['auto-reload'] || {};
+  if (!WebSocket || !ar.enabled) return;
+
+  var cacheBuster = function(url){
+    var date = Math.round(Date.now() / 1000).toString();
+    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
+  };
+
+  var reloaders = {
+    page: function(){
+      window.location.reload(true);
+    },
+
+    stylesheet: function(){
+      [].slice
+        .call(document.querySelectorAll('link[rel="stylesheet"]'))
+        .filter(function(link){
+          return (link != null && link.href != null);
+        })
+        .forEach(function(link) {
+          link.href = cacheBuster(link.href);
+        });
+    }
+  };
+  var port = ar.port || 9485;
+  var host = (!br['server']) ? window.location.hostname : br['server'];
+  var connection = new WebSocket('ws://' + host + ':' + port);
+  connection.onmessage = function(event) {
+    var message = event.data;
+    var b = window.brunch;
+    if (!b || !b['auto-reload'] || !b['auto-reload'].enabled) return;
+    if (reloaders[message] != null) {
+      reloaders[message]();
+    } else {
+      reloaders.page();
+    }
+  };
+})();
+;
+
+jade = (function(exports){
+/*!
+ * Jade - runtime
+ * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
+ * MIT Licensed
+ */
+
+/**
+ * Lame Array.isArray() polyfill for now.
+ */
+
+if (!Array.isArray) {
+  Array.isArray = function(arr){
+    return '[object Array]' == Object.prototype.toString.call(arr);
+  };
+}
+
+/**
+ * Lame Object.keys() polyfill for now.
+ */
+
+if (!Object.keys) {
+  Object.keys = function(obj){
+    var arr = [];
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        arr.push(key);
+      }
+    }
+    return arr;
+  }
+}
+
+/**
+ * Merge two attribute objects giving precedence
+ * to values in object `b`. Classes are special-cased
+ * allowing for arrays and merging/joining appropriately
+ * resulting in a string.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Object} a
+ * @api private
+ */
+
+exports.merge = function merge(a, b) {
+  var ac = a['class'];
+  var bc = b['class'];
+
+  if (ac || bc) {
+    ac = ac || [];
+    bc = bc || [];
+    if (!Array.isArray(ac)) ac = [ac];
+    if (!Array.isArray(bc)) bc = [bc];
+    ac = ac.filter(nulls);
+    bc = bc.filter(nulls);
+    a['class'] = ac.concat(bc).join(' ');
+  }
+
+  for (var key in b) {
+    if (key != 'class') {
+      a[key] = b[key];
+    }
+  }
+
+  return a;
+};
+
+/**
+ * Filter null `val`s.
+ *
+ * @param {Mixed} val
+ * @return {Mixed}
+ * @api private
+ */
+
+function nulls(val) {
+  return val != null;
+}
+
+/**
+ * Render the given attributes object.
+ *
+ * @param {Object} obj
+ * @param {Object} escaped
+ * @return {String}
+ * @api private
+ */
+
+exports.attrs = function attrs(obj, escaped){
+  var buf = []
+    , terse = obj.terse;
+
+  delete obj.terse;
+  var keys = Object.keys(obj)
+    , len = keys.length;
+
+  if (len) {
+    buf.push('');
+    for (var i = 0; i < len; ++i) {
+      var key = keys[i]
+        , val = obj[key];
+
+      if ('boolean' == typeof val || null == val) {
+        if (val) {
+          terse
+            ? buf.push(key)
+            : buf.push(key + '="' + key + '"');
+        }
+      } else if (0 == key.indexOf('data') && 'string' != typeof val) {
+        buf.push(key + "='" + JSON.stringify(val) + "'");
+      } else if ('class' == key && Array.isArray(val)) {
+        buf.push(key + '="' + exports.escape(val.join(' ')) + '"');
+      } else if (escaped && escaped[key]) {
+        buf.push(key + '="' + exports.escape(val) + '"');
+      } else {
+        buf.push(key + '="' + val + '"');
+      }
+    }
+  }
+
+  return buf.join(' ');
+};
+
+/**
+ * Escape the given string of `html`.
+ *
+ * @param {String} html
+ * @return {String}
+ * @api private
+ */
+
+exports.escape = function escape(html){
+  return String(html)
+    .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+};
+
+/**
+ * Re-throw the given `err` in context to the
+ * the jade in `filename` at the given `lineno`.
+ *
+ * @param {Error} err
+ * @param {String} filename
+ * @param {String} lineno
+ * @api private
+ */
+
+exports.rethrow = function rethrow(err, filename, lineno){
+  if (!filename) throw err;
+
+  var context = 3
+    , str = require('fs').readFileSync(filename, 'utf8')
+    , lines = str.split('\n')
+    , start = Math.max(lineno - context, 0)
+    , end = Math.min(lines.length, lineno + context);
+
+  // Error context
+  var context = lines.slice(start, end).map(function(line, i){
+    var curr = i + start + 1;
+    return (curr == lineno ? '  > ' : '    ')
+      + curr
+      + '| '
+      + line;
+  }).join('\n');
+
+  // Alter exception message
+  err.path = filename;
+  err.message = (filename || 'Jade') + ':' + lineno
+    + '\n' + context + '\n\n' + err.message;
+  throw err;
+};
+
+  return exports;
+
+})({});
+;
 /*!
  * Lo-Dash v0.9.1 <http://lodash.com>
  * (c) 2012 John-David Dalton <http://allyoucanleet.com/>
@@ -15724,432 +20752,5221 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   }
 }(this));
 ;
-(function(){var t=this;var e=t.Backbone;var i=[];var r=i.push;var s=i.slice;var n=i.splice;var a;if(typeof exports!=="undefined"){a=exports}else{a=t.Backbone={}}a.VERSION="1.0.0";var h=t._;if(!h&&typeof require!=="undefined")h=require("underscore");a.$=t.jQuery||t.Zepto||t.ender||t.$;a.noConflict=function(){t.Backbone=e;return this};a.emulateHTTP=false;a.emulateJSON=false;var o=a.Events={on:function(t,e,i){if(!l(this,"on",t,[e,i])||!e)return this;this._events||(this._events={});var r=this._events[t]||(this._events[t]=[]);r.push({callback:e,context:i,ctx:i||this});return this},once:function(t,e,i){if(!l(this,"once",t,[e,i])||!e)return this;var r=this;var s=h.once(function(){r.off(t,s);e.apply(this,arguments)});s._callback=e;return this.on(t,s,i)},off:function(t,e,i){var r,s,n,a,o,u,c,f;if(!this._events||!l(this,"off",t,[e,i]))return this;if(!t&&!e&&!i){this._events={};return this}a=t?[t]:h.keys(this._events);for(o=0,u=a.length;o<u;o++){t=a[o];if(n=this._events[t]){this._events[t]=r=[];if(e||i){for(c=0,f=n.length;c<f;c++){s=n[c];if(e&&e!==s.callback&&e!==s.callback._callback||i&&i!==s.context){r.push(s)}}}if(!r.length)delete this._events[t]}}return this},trigger:function(t){if(!this._events)return this;var e=s.call(arguments,1);if(!l(this,"trigger",t,e))return this;var i=this._events[t];var r=this._events.all;if(i)c(i,e);if(r)c(r,arguments);return this},stopListening:function(t,e,i){var r=this._listeners;if(!r)return this;var s=!e&&!i;if(typeof e==="object")i=this;if(t)(r={})[t._listenerId]=t;for(var n in r){r[n].off(e,i,this);if(s)delete this._listeners[n]}return this}};var u=/\s+/;var l=function(t,e,i,r){if(!i)return true;if(typeof i==="object"){for(var s in i){t[e].apply(t,[s,i[s]].concat(r))}return false}if(u.test(i)){var n=i.split(u);for(var a=0,h=n.length;a<h;a++){t[e].apply(t,[n[a]].concat(r))}return false}return true};var c=function(t,e){var i,r=-1,s=t.length,n=e[0],a=e[1],h=e[2];switch(e.length){case 0:while(++r<s)(i=t[r]).callback.call(i.ctx);return;case 1:while(++r<s)(i=t[r]).callback.call(i.ctx,n);return;case 2:while(++r<s)(i=t[r]).callback.call(i.ctx,n,a);return;case 3:while(++r<s)(i=t[r]).callback.call(i.ctx,n,a,h);return;default:while(++r<s)(i=t[r]).callback.apply(i.ctx,e)}};var f={listenTo:"on",listenToOnce:"once"};h.each(f,function(t,e){o[e]=function(e,i,r){var s=this._listeners||(this._listeners={});var n=e._listenerId||(e._listenerId=h.uniqueId("l"));s[n]=e;if(typeof i==="object")r=this;e[t](i,r,this);return this}});o.bind=o.on;o.unbind=o.off;h.extend(a,o);var d=a.Model=function(t,e){var i;var r=t||{};e||(e={});this.cid=h.uniqueId("c");this.attributes={};h.extend(this,h.pick(e,p));if(e.parse)r=this.parse(r,e)||{};if(i=h.result(this,"defaults")){r=h.defaults({},r,i)}this.set(r,e);this.changed={};this.initialize.apply(this,arguments)};var p=["url","urlRoot","collection"];h.extend(d.prototype,o,{changed:null,validationError:null,idAttribute:"id",initialize:function(){},toJSON:function(t){return h.clone(this.attributes)},sync:function(){return a.sync.apply(this,arguments)},get:function(t){return this.attributes[t]},escape:function(t){return h.escape(this.get(t))},has:function(t){return this.get(t)!=null},set:function(t,e,i){var r,s,n,a,o,u,l,c;if(t==null)return this;if(typeof t==="object"){s=t;i=e}else{(s={})[t]=e}i||(i={});if(!this._validate(s,i))return false;n=i.unset;o=i.silent;a=[];u=this._changing;this._changing=true;if(!u){this._previousAttributes=h.clone(this.attributes);this.changed={}}c=this.attributes,l=this._previousAttributes;if(this.idAttribute in s)this.id=s[this.idAttribute];for(r in s){e=s[r];if(!h.isEqual(c[r],e))a.push(r);if(!h.isEqual(l[r],e)){this.changed[r]=e}else{delete this.changed[r]}n?delete c[r]:c[r]=e}if(!o){if(a.length)this._pending=true;for(var f=0,d=a.length;f<d;f++){this.trigger("change:"+a[f],this,c[a[f]],i)}}if(u)return this;if(!o){while(this._pending){this._pending=false;this.trigger("change",this,i)}}this._pending=false;this._changing=false;return this},unset:function(t,e){return this.set(t,void 0,h.extend({},e,{unset:true}))},clear:function(t){var e={};for(var i in this.attributes)e[i]=void 0;return this.set(e,h.extend({},t,{unset:true}))},hasChanged:function(t){if(t==null)return!h.isEmpty(this.changed);return h.has(this.changed,t)},changedAttributes:function(t){if(!t)return this.hasChanged()?h.clone(this.changed):false;var e,i=false;var r=this._changing?this._previousAttributes:this.attributes;for(var s in t){if(h.isEqual(r[s],e=t[s]))continue;(i||(i={}))[s]=e}return i},previous:function(t){if(t==null||!this._previousAttributes)return null;return this._previousAttributes[t]},previousAttributes:function(){return h.clone(this._previousAttributes)},fetch:function(t){t=t?h.clone(t):{};if(t.parse===void 0)t.parse=true;var e=this;var i=t.success;t.success=function(r){if(!e.set(e.parse(r,t),t))return false;if(i)i(e,r,t);e.trigger("sync",e,r,t)};R(this,t);return this.sync("read",this,t)},save:function(t,e,i){var r,s,n,a=this.attributes;if(t==null||typeof t==="object"){r=t;i=e}else{(r={})[t]=e}if(r&&(!i||!i.wait)&&!this.set(r,i))return false;i=h.extend({validate:true},i);if(!this._validate(r,i))return false;if(r&&i.wait){this.attributes=h.extend({},a,r)}if(i.parse===void 0)i.parse=true;var o=this;var u=i.success;i.success=function(t){o.attributes=a;var e=o.parse(t,i);if(i.wait)e=h.extend(r||{},e);if(h.isObject(e)&&!o.set(e,i)){return false}if(u)u(o,t,i);o.trigger("sync",o,t,i)};R(this,i);s=this.isNew()?"create":i.patch?"patch":"update";if(s==="patch")i.attrs=r;n=this.sync(s,this,i);if(r&&i.wait)this.attributes=a;return n},destroy:function(t){t=t?h.clone(t):{};var e=this;var i=t.success;var r=function(){e.trigger("destroy",e,e.collection,t)};t.success=function(s){if(t.wait||e.isNew())r();if(i)i(e,s,t);if(!e.isNew())e.trigger("sync",e,s,t)};if(this.isNew()){t.success();return false}R(this,t);var s=this.sync("delete",this,t);if(!t.wait)r();return s},url:function(){var t=h.result(this,"urlRoot")||h.result(this.collection,"url")||U();if(this.isNew())return t;return t+(t.charAt(t.length-1)==="/"?"":"/")+encodeURIComponent(this.id)},parse:function(t,e){return t},clone:function(){return new this.constructor(this.attributes)},isNew:function(){return this.id==null},isValid:function(t){return this._validate({},h.extend(t||{},{validate:true}))},_validate:function(t,e){if(!e.validate||!this.validate)return true;t=h.extend({},this.attributes,t);var i=this.validationError=this.validate(t,e)||null;if(!i)return true;this.trigger("invalid",this,i,h.extend(e||{},{validationError:i}));return false}});var v=["keys","values","pairs","invert","pick","omit"];h.each(v,function(t){d.prototype[t]=function(){var e=s.call(arguments);e.unshift(this.attributes);return h[t].apply(h,e)}});var g=a.Collection=function(t,e){e||(e={});if(e.url)this.url=e.url;if(e.model)this.model=e.model;if(e.comparator!==void 0)this.comparator=e.comparator;this._reset();this.initialize.apply(this,arguments);if(t)this.reset(t,h.extend({silent:true},e))};var m={add:true,remove:true,merge:true};var y={add:true,merge:false,remove:false};h.extend(g.prototype,o,{model:d,initialize:function(){},toJSON:function(t){return this.map(function(e){return e.toJSON(t)})},sync:function(){return a.sync.apply(this,arguments)},add:function(t,e){return this.set(t,h.defaults(e||{},y))},remove:function(t,e){t=h.isArray(t)?t.slice():[t];e||(e={});var i,r,s,n;for(i=0,r=t.length;i<r;i++){n=this.get(t[i]);if(!n)continue;delete this._byId[n.id];delete this._byId[n.cid];s=this.indexOf(n);this.models.splice(s,1);this.length--;if(!e.silent){e.index=s;n.trigger("remove",n,this,e)}this._removeReference(n)}return this},set:function(t,e){e=h.defaults(e||{},m);if(e.parse)t=this.parse(t,e);if(!h.isArray(t))t=t?[t]:[];var i,s,a,o,u,l;var c=e.at;var f=this.comparator&&c==null&&e.sort!==false;var d=h.isString(this.comparator)?this.comparator:null;var p=[],v=[],g={};for(i=0,s=t.length;i<s;i++){if(!(a=this._prepareModel(t[i],e)))continue;if(u=this.get(a)){if(e.remove)g[u.cid]=true;if(e.merge){u.set(a.attributes,e);if(f&&!l&&u.hasChanged(d))l=true}}else if(e.add){p.push(a);a.on("all",this._onModelEvent,this);this._byId[a.cid]=a;if(a.id!=null)this._byId[a.id]=a}}if(e.remove){for(i=0,s=this.length;i<s;++i){if(!g[(a=this.models[i]).cid])v.push(a)}if(v.length)this.remove(v,e)}if(p.length){if(f)l=true;this.length+=p.length;if(c!=null){n.apply(this.models,[c,0].concat(p))}else{r.apply(this.models,p)}}if(l)this.sort({silent:true});if(e.silent)return this;for(i=0,s=p.length;i<s;i++){(a=p[i]).trigger("add",a,this,e)}if(l)this.trigger("sort",this,e);return this},reset:function(t,e){e||(e={});for(var i=0,r=this.models.length;i<r;i++){this._removeReference(this.models[i])}e.previousModels=this.models;this._reset();this.add(t,h.extend({silent:true},e));if(!e.silent)this.trigger("reset",this,e);return this},push:function(t,e){t=this._prepareModel(t,e);this.add(t,h.extend({at:this.length},e));return t},pop:function(t){var e=this.at(this.length-1);this.remove(e,t);return e},unshift:function(t,e){t=this._prepareModel(t,e);this.add(t,h.extend({at:0},e));return t},shift:function(t){var e=this.at(0);this.remove(e,t);return e},slice:function(t,e){return this.models.slice(t,e)},get:function(t){if(t==null)return void 0;return this._byId[t.id!=null?t.id:t.cid||t]},at:function(t){return this.models[t]},where:function(t,e){if(h.isEmpty(t))return e?void 0:[];return this[e?"find":"filter"](function(e){for(var i in t){if(t[i]!==e.get(i))return false}return true})},findWhere:function(t){return this.where(t,true)},sort:function(t){if(!this.comparator)throw new Error("Cannot sort a set without a comparator");t||(t={});if(h.isString(this.comparator)||this.comparator.length===1){this.models=this.sortBy(this.comparator,this)}else{this.models.sort(h.bind(this.comparator,this))}if(!t.silent)this.trigger("sort",this,t);return this},sortedIndex:function(t,e,i){e||(e=this.comparator);var r=h.isFunction(e)?e:function(t){return t.get(e)};return h.sortedIndex(this.models,t,r,i)},pluck:function(t){return h.invoke(this.models,"get",t)},fetch:function(t){t=t?h.clone(t):{};if(t.parse===void 0)t.parse=true;var e=t.success;var i=this;t.success=function(r){var s=t.reset?"reset":"set";i[s](r,t);if(e)e(i,r,t);i.trigger("sync",i,r,t)};R(this,t);return this.sync("read",this,t)},create:function(t,e){e=e?h.clone(e):{};if(!(t=this._prepareModel(t,e)))return false;if(!e.wait)this.add(t,e);var i=this;var r=e.success;e.success=function(s){if(e.wait)i.add(t,e);if(r)r(t,s,e)};t.save(null,e);return t},parse:function(t,e){return t},clone:function(){return new this.constructor(this.models)},_reset:function(){this.length=0;this.models=[];this._byId={}},_prepareModel:function(t,e){if(t instanceof d){if(!t.collection)t.collection=this;return t}e||(e={});e.collection=this;var i=new this.model(t,e);if(!i._validate(t,e)){this.trigger("invalid",this,t,e);return false}return i},_removeReference:function(t){if(this===t.collection)delete t.collection;t.off("all",this._onModelEvent,this)},_onModelEvent:function(t,e,i,r){if((t==="add"||t==="remove")&&i!==this)return;if(t==="destroy")this.remove(e,r);if(e&&t==="change:"+e.idAttribute){delete this._byId[e.previous(e.idAttribute)];if(e.id!=null)this._byId[e.id]=e}this.trigger.apply(this,arguments)}});var _=["forEach","each","map","collect","reduce","foldl","inject","reduceRight","foldr","find","detect","filter","select","reject","every","all","some","any","include","contains","invoke","max","min","toArray","size","first","head","take","initial","rest","tail","drop","last","without","indexOf","shuffle","lastIndexOf","isEmpty","chain"];h.each(_,function(t){g.prototype[t]=function(){var e=s.call(arguments);e.unshift(this.models);return h[t].apply(h,e)}});var w=["groupBy","countBy","sortBy"];h.each(w,function(t){g.prototype[t]=function(e,i){var r=h.isFunction(e)?e:function(t){return t.get(e)};return h[t](this.models,r,i)}});var b=a.View=function(t){this.cid=h.uniqueId("view");this._configure(t||{});this._ensureElement();this.initialize.apply(this,arguments);this.delegateEvents()};var x=/^(\S+)\s*(.*)$/;var E=["model","collection","el","id","attributes","className","tagName","events"];h.extend(b.prototype,o,{tagName:"div",$:function(t){return this.$el.find(t)},initialize:function(){},render:function(){return this},remove:function(){this.$el.remove();this.stopListening();return this},setElement:function(t,e){if(this.$el)this.undelegateEvents();this.$el=t instanceof a.$?t:a.$(t);this.el=this.$el[0];if(e!==false)this.delegateEvents();return this},delegateEvents:function(t){if(!(t||(t=h.result(this,"events"))))return this;this.undelegateEvents();for(var e in t){var i=t[e];if(!h.isFunction(i))i=this[t[e]];if(!i)continue;var r=e.match(x);var s=r[1],n=r[2];i=h.bind(i,this);s+=".delegateEvents"+this.cid;if(n===""){this.$el.on(s,i)}else{this.$el.on(s,n,i)}}return this},undelegateEvents:function(){this.$el.off(".delegateEvents"+this.cid);return this},_configure:function(t){if(this.options)t=h.extend({},h.result(this,"options"),t);h.extend(this,h.pick(t,E));this.options=t},_ensureElement:function(){if(!this.el){var t=h.extend({},h.result(this,"attributes"));if(this.id)t.id=h.result(this,"id");if(this.className)t["class"]=h.result(this,"className");var e=a.$("<"+h.result(this,"tagName")+">").attr(t);this.setElement(e,false)}else{this.setElement(h.result(this,"el"),false)}}});a.sync=function(t,e,i){var r=k[t];h.defaults(i||(i={}),{emulateHTTP:a.emulateHTTP,emulateJSON:a.emulateJSON});var s={type:r,dataType:"json"};if(!i.url){s.url=h.result(e,"url")||U()}if(i.data==null&&e&&(t==="create"||t==="update"||t==="patch")){s.contentType="application/json";s.data=JSON.stringify(i.attrs||e.toJSON(i))}if(i.emulateJSON){s.contentType="application/x-www-form-urlencoded";s.data=s.data?{model:s.data}:{}}if(i.emulateHTTP&&(r==="PUT"||r==="DELETE"||r==="PATCH")){s.type="POST";if(i.emulateJSON)s.data._method=r;var n=i.beforeSend;i.beforeSend=function(t){t.setRequestHeader("X-HTTP-Method-Override",r);if(n)return n.apply(this,arguments)}}if(s.type!=="GET"&&!i.emulateJSON){s.processData=false}if(s.type==="PATCH"&&window.ActiveXObject&&!(window.external&&window.external.msActiveXFilteringEnabled)){s.xhr=function(){return new ActiveXObject("Microsoft.XMLHTTP")}}var o=i.xhr=a.ajax(h.extend(s,i));e.trigger("request",e,o,i);return o};var k={create:"POST",update:"PUT",patch:"PATCH","delete":"DELETE",read:"GET"};a.ajax=function(){return a.$.ajax.apply(a.$,arguments)};var S=a.Router=function(t){t||(t={});if(t.routes)this.routes=t.routes;this._bindRoutes();this.initialize.apply(this,arguments)};var $=/\((.*?)\)/g;var T=/(\(\?)?:\w+/g;var H=/\*\w+/g;var A=/[\-{}\[\]+?.,\\\^$|#\s]/g;h.extend(S.prototype,o,{initialize:function(){},route:function(t,e,i){if(!h.isRegExp(t))t=this._routeToRegExp(t);if(h.isFunction(e)){i=e;e=""}if(!i)i=this[e];var r=this;a.history.route(t,function(s){var n=r._extractParameters(t,s);i&&i.apply(r,n);r.trigger.apply(r,["route:"+e].concat(n));r.trigger("route",e,n);a.history.trigger("route",r,e,n)});return this},navigate:function(t,e){a.history.navigate(t,e);return this},_bindRoutes:function(){if(!this.routes)return;this.routes=h.result(this,"routes");var t,e=h.keys(this.routes);while((t=e.pop())!=null){this.route(t,this.routes[t])}},_routeToRegExp:function(t){t=t.replace(A,"\\$&").replace($,"(?:$1)?").replace(T,function(t,e){return e?t:"([^/]+)"}).replace(H,"(.*?)");return new RegExp("^"+t+"$")},_extractParameters:function(t,e){var i=t.exec(e).slice(1);return h.map(i,function(t){return t?decodeURIComponent(t):null})}});var I=a.History=function(){this.handlers=[];h.bindAll(this,"checkUrl");if(typeof window!=="undefined"){this.location=window.location;this.history=window.history}};var N=/^[#\/]|\s+$/g;var P=/^\/+|\/+$/g;var O=/msie [\w.]+/;var C=/\/$/;I.started=false;h.extend(I.prototype,o,{interval:50,getHash:function(t){var e=(t||this).location.href.match(/#(.*)$/);return e?e[1]:""},getFragment:function(t,e){if(t==null){if(this._hasPushState||!this._wantsHashChange||e){t=this.location.pathname;var i=this.root.replace(C,"");if(!t.indexOf(i))t=t.substr(i.length)}else{t=this.getHash()}}return t.replace(N,"")},start:function(t){if(I.started)throw new Error("Backbone.history has already been started");I.started=true;this.options=h.extend({},{root:"/"},this.options,t);this.root=this.options.root;this._wantsHashChange=this.options.hashChange!==false;this._wantsPushState=!!this.options.pushState;this._hasPushState=!!(this.options.pushState&&this.history&&this.history.pushState);var e=this.getFragment();var i=document.documentMode;var r=O.exec(navigator.userAgent.toLowerCase())&&(!i||i<=7);this.root=("/"+this.root+"/").replace(P,"/");if(r&&this._wantsHashChange){this.iframe=a.$('<iframe src="javascript:0" tabindex="-1" />').hide().appendTo("body")[0].contentWindow;this.navigate(e)}if(this._hasPushState){a.$(window).on("popstate",this.checkUrl)}else if(this._wantsHashChange&&"onhashchange"in window&&!r){a.$(window).on("hashchange",this.checkUrl)}else if(this._wantsHashChange){this._checkUrlInterval=setInterval(this.checkUrl,this.interval)}this.fragment=e;var s=this.location;var n=s.pathname.replace(/[^\/]$/,"$&/")===this.root;if(this._wantsHashChange&&this._wantsPushState&&!this._hasPushState&&!n){this.fragment=this.getFragment(null,true);this.location.replace(this.root+this.location.search+"#"+this.fragment);return true}else if(this._wantsPushState&&this._hasPushState&&n&&s.hash){this.fragment=this.getHash().replace(N,"");this.history.replaceState({},document.title,this.root+this.fragment+s.search)}if(!this.options.silent)return this.loadUrl()},stop:function(){a.$(window).off("popstate",this.checkUrl).off("hashchange",this.checkUrl);clearInterval(this._checkUrlInterval);I.started=false},route:function(t,e){this.handlers.unshift({route:t,callback:e})},checkUrl:function(t){var e=this.getFragment();if(e===this.fragment&&this.iframe){e=this.getFragment(this.getHash(this.iframe))}if(e===this.fragment)return false;if(this.iframe)this.navigate(e);this.loadUrl()||this.loadUrl(this.getHash())},loadUrl:function(t){var e=this.fragment=this.getFragment(t);var i=h.any(this.handlers,function(t){if(t.route.test(e)){t.callback(e);return true}});return i},navigate:function(t,e){if(!I.started)return false;if(!e||e===true)e={trigger:e};t=this.getFragment(t||"");if(this.fragment===t)return;this.fragment=t;var i=this.root+t;if(this._hasPushState){this.history[e.replace?"replaceState":"pushState"]({},document.title,i)}else if(this._wantsHashChange){this._updateHash(this.location,t,e.replace);if(this.iframe&&t!==this.getFragment(this.getHash(this.iframe))){if(!e.replace)this.iframe.document.open().close();this._updateHash(this.iframe.location,t,e.replace)}}else{return this.location.assign(i)}if(e.trigger)this.loadUrl(t)},_updateHash:function(t,e,i){if(i){var r=t.href.replace(/(javascript:|#).*$/,"");t.replace(r+"#"+e)}else{t.hash="#"+e}}});a.history=new I;var j=function(t,e){var i=this;var r;if(t&&h.has(t,"constructor")){r=t.constructor}else{r=function(){return i.apply(this,arguments)}}h.extend(r,i,e);var s=function(){this.constructor=r};s.prototype=i.prototype;r.prototype=new s;if(t)h.extend(r.prototype,t);r.__super__=i.prototype;return r};d.extend=g.extend=S.extend=b.extend=I.extend=j;var U=function(){throw new Error('A "url" property or function must be specified')};var R=function(t,e){var i=e.error;e.error=function(r){if(i)i(t,r,e);t.trigger("error",t,r,e)}}}).call(this);
-/*
-//@ sourceMappingURL=backbone-min.map
-*/;
 /**
- * |-------------------|
- * | Backbone-Mediator |
- * |-------------------|
- *  Backbone-Mediator is freely distributable under the MIT license.
- *
- *  <a href="https://github.com/chalbert/Backbone-Mediator">More details & documentation</a>
- *
- * @author Nicolas Gilbert
- *
- * @requires _
- * @requires Backbone
+ * @license
+ * Lo-Dash 1.1.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modern -o ./dist/lodash.js`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.4.4 <http://underscorejs.org/>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
+ * Available under MIT license <http://lodash.com/license>
  */
-(function(factory){
-  'use strict';
+;(function(window) {
 
-  if (typeof define === 'function' && define.amd) {
-    define(['underscore', 'backbone'], factory);
-  } else {
-    factory(_, Backbone);
+  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  var undefined;
+
+  /** Detect free variable `exports` */
+  var freeExports = typeof exports == 'object' && exports;
+
+  /** Detect free variable `module` */
+  var freeModule = typeof module == 'object' && module && module.exports == freeExports && module;
+
+  /** Detect free variable `global` and use it as `window` */
+  var freeGlobal = typeof global == 'object' && global;
+  if (freeGlobal.global === freeGlobal) {
+    window = freeGlobal;
   }
 
-})(function (_, Backbone){
-  'use strict';
+  /** Used to generate unique IDs */
+  var idCounter = 0;
+
+  /** Used internally to indicate various things */
+  var indicatorObject = {};
+
+  /** Used to match empty string literals in compiled template source */
+  var reEmptyStringLeading = /\b__p \+= '';/g,
+      reEmptyStringMiddle = /\b(__p \+=) '' \+/g,
+      reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
+
+  /** Used to match HTML entities */
+  var reEscapedHtml = /&(?:amp|lt|gt|quot|#39);/g;
 
   /**
-   * @static
+   * Used to match ES6 template delimiters
+   * http://people.mozilla.org/~jorendorff/es6-draft.html#sec-7.8.6
    */
-  var channels = {},
-      Subscriber,
-      /** @borrows Backbone.View#delegateEvents */
-      delegateEvents = Backbone.View.prototype.delegateEvents,
-      /** @borrows Backbone.View#delegateEvents */
-      undelegateEvents = Backbone.View.prototype.undelegateEvents;
+  var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
 
-  /**
-   * @class
-   */
-  Backbone.Mediator = {
+  /** Used to match regexp flags from their coerced string values */
+  var reFlags = /\w*$/;
 
-    /**
-     * Subscribe to a channel
-     *
-     * @param channel
-     */
-    subscribe: function(channel, subscription, context, once) {
-      if (!channels[channel]) channels[channel] = [];
-      channels[channel].push({fn: subscription, context: context || this, once: once});
-    },
+  /** Used to match "interpolate" template delimiters */
+  var reInterpolate = /<%=([\s\S]+?)%>/g;
 
-    /**
-     * Trigger all callbacks for a channel
-     *
-     * @param channel
-     * @params N Extra parametter to pass to handler
-     */
-    publish: function(channel) {
-      if (!channels[channel]) return;
+  /** Used to match leading zeros to be removed */
+  var reLeadingZeros = /^0+(?=.$)/;
 
-      var args = [].slice.call(arguments, 1),
-          subscription;
+  /** Used to ensure capturing order of template delimiters */
+  var reNoMatch = /($^)/;
 
-      for (var i = 0; i < channels[channel].length; i++) {
-        subscription = channels[channel][i];
-        subscription.fn.apply(subscription.context, args);
-        if (subscription.once) {
-          Backbone.Mediator.unsubscribe(channel, subscription.fn, subscription.context);
-          i--;
-        }
-      }
-    },
+  /** Used to match HTML characters */
+  var reUnescapedHtml = /[&<>"']/g;
 
-    /**
-     * Cancel subscription
-     *
-     * @param channel
-     * @param fn
-     * @param context
-     */
+  /** Used to match unescaped characters in compiled string literals */
+  var reUnescapedString = /['\n\r\t\u2028\u2029\\]/g;
 
-    unsubscribe: function(channel, fn, context){
-      if (!channels[channel]) return;
+  /** Used to assign default `context` object properties */
+  var contextProps = [
+    'Array', 'Boolean', 'Date', 'Function', 'Math', 'Number', 'Object', 'RegExp',
+    'String', '_', 'attachEvent', 'clearTimeout', 'isFinite', 'isNaN', 'parseInt',
+    'setImmediate', 'setTimeout'
+  ];
 
-      var subscription;
-      for (var i = 0; i < channels[channel].length; i++) {
-        subscription = channels[channel][i];
-        if (subscription.fn === fn && subscription.context === context) {
-          channels[channel].splice(i, 1);
-          i--;
-        }
-      }
-    },
+  /** Used to make template sourceURLs easier to identify */
+  var templateCounter = 0;
 
-    /**
-     * Subscribing to one event only
-     *
-     * @param channel
-     * @param subscription
-     * @param context
-     */
-    subscribeOnce: function (channel, subscription, context) {
-      Backbone.Mediator.subscribe(channel, subscription, context, true);
-    }
+  /** `Object#toString` result shortcuts */
+  var argsClass = '[object Arguments]',
+      arrayClass = '[object Array]',
+      boolClass = '[object Boolean]',
+      dateClass = '[object Date]',
+      funcClass = '[object Function]',
+      numberClass = '[object Number]',
+      objectClass = '[object Object]',
+      regexpClass = '[object RegExp]',
+      stringClass = '[object String]';
 
+  /** Used to identify object classifications that `_.clone` supports */
+  var cloneableClasses = {};
+  cloneableClasses[funcClass] = false;
+  cloneableClasses[argsClass] = cloneableClasses[arrayClass] =
+  cloneableClasses[boolClass] = cloneableClasses[dateClass] =
+  cloneableClasses[numberClass] = cloneableClasses[objectClass] =
+  cloneableClasses[regexpClass] = cloneableClasses[stringClass] = true;
+
+  /** Used to determine if values are of the language type Object */
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
   };
 
+  /** Used to escape characters for inclusion in compiled string literals */
+  var stringEscapes = {
+    '\\': '\\',
+    "'": "'",
+    '\n': 'n',
+    '\r': 'r',
+    '\t': 't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  /*--------------------------------------------------------------------------*/
+
   /**
-   * Allow to define convention-based subscriptions
-   * as an 'subscriptions' hash on a view. Subscriptions
-   * can then be easily setup and cleaned.
+   * Create a new `lodash` function using the given `context` object.
    *
-   * @class
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {Object} [context=window] The context object.
+   * @returns {Function} Returns the `lodash` function.
    */
+  function runInContext(context) {
+    // Avoid issues with some ES3 environments that attempt to use values, named
+    // after built-in constructors like `Object`, for the creation of literals.
+    // ES5 clears this up by stating that literals must use built-in constructors.
+    // See http://es5.github.com/#x11.1.5.
+    context = context ? _.defaults(window.Object(), context, _.pick(window, contextProps)) : window;
 
+    /** Native constructor references */
+    var Array = context.Array,
+        Boolean = context.Boolean,
+        Date = context.Date,
+        Function = context.Function,
+        Math = context.Math,
+        Number = context.Number,
+        Object = context.Object,
+        RegExp = context.RegExp,
+        String = context.String,
+        TypeError = context.TypeError;
 
-  Subscriber = {
+    /** Used for `Array` and `Object` method references */
+    var arrayRef = Array(),
+        objectRef = Object();
+
+    /** Used to restore the original `_` reference in `noConflict` */
+    var oldDash = context._;
+
+    /** Used to detect if a method is native */
+    var reNative = RegExp('^' +
+      String(objectRef.valueOf)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/valueOf|for [^\]]+/g, '.+?') + '$'
+    );
+
+    /** Native method shortcuts */
+    var ceil = Math.ceil,
+        clearTimeout = context.clearTimeout,
+        concat = arrayRef.concat,
+        floor = Math.floor,
+        getPrototypeOf = reNative.test(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf,
+        hasOwnProperty = objectRef.hasOwnProperty,
+        push = arrayRef.push,
+        setImmediate = context.setImmediate,
+        setTimeout = context.setTimeout,
+        toString = objectRef.toString;
+
+    /* Native method shortcuts for methods with the same name as other `lodash` methods */
+    var nativeBind = reNative.test(nativeBind = slice.bind) && nativeBind,
+        nativeIsArray = reNative.test(nativeIsArray = Array.isArray) && nativeIsArray,
+        nativeIsFinite = context.isFinite,
+        nativeIsNaN = context.isNaN,
+        nativeKeys = reNative.test(nativeKeys = Object.keys) && nativeKeys,
+        nativeMax = Math.max,
+        nativeMin = Math.min,
+        nativeParseInt = context.parseInt,
+        nativeRandom = Math.random;
+
+    /** Detect various environments */
+    var isIeOpera = reNative.test(context.attachEvent),
+        isV8 = nativeBind && !/\n|true/.test(nativeBind + isIeOpera);
+
+    /** Used to lookup a built-in constructor by [[Class]] */
+    var ctorByClass = {};
+    ctorByClass[arrayClass] = Array;
+    ctorByClass[boolClass] = Boolean;
+    ctorByClass[dateClass] = Date;
+    ctorByClass[objectClass] = Object;
+    ctorByClass[numberClass] = Number;
+    ctorByClass[regexpClass] = RegExp;
+    ctorByClass[stringClass] = String;
+
+    /*--------------------------------------------------------------------------*/
 
     /**
-     * Extend delegateEvents() to set subscriptions
+     * Creates a `lodash` object, that wraps the given `value`, to enable method
+     * chaining.
+     *
+     * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
+     * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
+     * and `unshift`
+     *
+     * Chaining is supported in custom builds as long as the `value` method is
+     * implicitly or explicitly included in the build.
+     *
+     * The chainable wrapper functions are:
+     * `after`, `assign`, `bind`, `bindAll`, `bindKey`, `chain`, `compact`,
+     * `compose`, `concat`, `countBy`, `createCallback`, `debounce`, `defaults`,
+     * `defer`, `delay`, `difference`, `filter`, `flatten`, `forEach`, `forIn`,
+     * `forOwn`, `functions`, `groupBy`, `initial`, `intersection`, `invert`,
+     * `invoke`, `keys`, `map`, `max`, `memoize`, `merge`, `min`, `object`, `omit`,
+     * `once`, `pairs`, `partial`, `partialRight`, `pick`, `pluck`, `push`, `range`,
+     * `reject`, `rest`, `reverse`, `shuffle`, `slice`, `sort`, `sortBy`, `splice`,
+     * `tap`, `throttle`, `times`, `toArray`, `union`, `uniq`, `unshift`, `values`,
+     * `where`, `without`, `wrap`, and `zip`
+     *
+     * The non-chainable wrapper functions are:
+     * `clone`, `cloneDeep`, `contains`, `escape`, `every`, `find`, `has`,
+     * `identity`, `indexOf`, `isArguments`, `isArray`, `isBoolean`, `isDate`,
+     * `isElement`, `isEmpty`, `isEqual`, `isFinite`, `isFunction`, `isNaN`,
+     * `isNull`, `isNumber`, `isObject`, `isPlainObject`, `isRegExp`, `isString`,
+     * `isUndefined`, `join`, `lastIndexOf`, `mixin`, `noConflict`, `parseInt`,
+     * `pop`, `random`, `reduce`, `reduceRight`, `result`, `shift`, `size`, `some`,
+     * `sortedIndex`, `runInContext`, `template`, `unescape`, `uniqueId`, and `value`
+     *
+     * The wrapper functions `first` and `last` return wrapped values when `n` is
+     * passed, otherwise they return unwrapped values.
+     *
+     * @name _
+     * @constructor
+     * @category Chaining
+     * @param {Mixed} value The value to wrap in a `lodash` instance.
+     * @returns {Object} Returns a `lodash` instance.
      */
-    delegateEvents: function(){
-      delegateEvents.apply(this, arguments);
-      this.setSubscriptions();
-    },
-
-    /**
-     * Extend undelegateEvents() to unset subscriptions
-     */
-    undelegateEvents: function(){
-      undelegateEvents.apply(this, arguments);
-      this.unsetSubscriptions();
-    },
-
-    /** @property {Object} List of subscriptions, to be defined */
-    subscriptions: {},
-
-    /**
-     * Subscribe to each subscription
-     * @param {Object} [subscriptions] An optional hash of subscription to add
-     */
-
-    setSubscriptions: function(subscriptions){
-      if (subscriptions) _.extend(this.subscriptions || {}, subscriptions);
-      subscriptions = subscriptions || this.subscriptions;
-      if (!subscriptions || _.isEmpty(subscriptions)) return;
-      // Just to be sure we don't set duplicate
-      this.unsetSubscriptions(subscriptions);
-
-      _.each(subscriptions, function(subscription, channel){
-        var once;
-        if (subscription.$once) {
-          subscription = subscription.$once;
-          once = true;
-        }
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-        Backbone.Mediator.subscribe(channel, subscription, this, once);
-      }, this);
-    },
-
-    /**
-     * Unsubscribe to each subscription
-     * @param {Object} [subscriptions] An optional hash of subscription to remove
-     */
-    unsetSubscriptions: function(subscriptions){
-      subscriptions = subscriptions || this.subscriptions;
-      if (!subscriptions || _.isEmpty(subscriptions)) return;
-      _.each(subscriptions, function(subscription, channel){
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-        Backbone.Mediator.unsubscribe(channel, subscription.$once || subscription, this);
-      }, this);
+    function lodash(value) {
+      // don't wrap if already wrapped, even if wrapped by a different `lodash` constructor
+      return (value && typeof value == 'object' && !isArray(value) && hasOwnProperty.call(value, '__wrapped__'))
+       ? value
+       : new lodashWrapper(value);
     }
-  };
 
-  /**
-   * @lends Backbone.View.prototype
-   */
-  _.extend(Backbone.View.prototype, Subscriber);
-
-  /**
-   * @lends Backbone.Mediator
-   */
-  _.extend(Backbone.Mediator, {
     /**
-     * Shortcut for publish
-     * @function
+     * An object used to flag environments features.
+     *
+     * @static
+     * @memberOf _
+     * @type Object
      */
-    pub: Backbone.Mediator.publish,
+    var support = lodash.support = {};
+
     /**
-     * Shortcut for subscribe
-     * @function
+     * Detect if `Function#bind` exists and is inferred to be fast (all but V8).
+     *
+     * @memberOf _.support
+     * @type Boolean
      */
-    sub: Backbone.Mediator.subscribe
-  });
+    support.fastBind = nativeBind && !isV8;
 
-  return Backbone;
+    /**
+     * By default, the template delimiters used by Lo-Dash are similar to those in
+     * embedded Ruby (ERB). Change the following template settings to use alternative
+     * delimiters.
+     *
+     * @static
+     * @memberOf _
+     * @type Object
+     */
+    lodash.templateSettings = {
 
-});
-;
-(function() {
-  var WebSocket = window.WebSocket || window.MozWebSocket;
-  var br = window.brunch || {};
-  var ar = br['auto-reload'] || {};
-  if (!WebSocket || !ar.enabled) return;
+      /**
+       * Used to detect `data` property values to be HTML-escaped.
+       *
+       * @memberOf _.templateSettings
+       * @type RegExp
+       */
+      'escape': /<%-([\s\S]+?)%>/g,
 
-  var cacheBuster = function(url){
-    var date = Math.round(Date.now() / 1000).toString();
-    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
-    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
-  };
+      /**
+       * Used to detect code to be evaluated.
+       *
+       * @memberOf _.templateSettings
+       * @type RegExp
+       */
+      'evaluate': /<%([\s\S]+?)%>/g,
 
-  var reloaders = {
-    page: function(){
-      window.location.reload(true);
-    },
+      /**
+       * Used to detect `data` property values to inject.
+       *
+       * @memberOf _.templateSettings
+       * @type RegExp
+       */
+      'interpolate': reInterpolate,
 
-    stylesheet: function(){
-      [].slice
-        .call(document.querySelectorAll('link[rel="stylesheet"]'))
-        .filter(function(link){
-          return (link != null && link.href != null);
-        })
-        .forEach(function(link) {
-          link.href = cacheBuster(link.href);
+      /**
+       * Used to reference the data object in the template text.
+       *
+       * @memberOf _.templateSettings
+       * @type String
+       */
+      'variable': '',
+
+      /**
+       * Used to import variables into the compiled template.
+       *
+       * @memberOf _.templateSettings
+       * @type Object
+       */
+      'imports': {
+
+        /**
+         * A reference to the `lodash` function.
+         *
+         * @memberOf _.templateSettings.imports
+         * @type Function
+         */
+        '_': lodash
+      }
+    };
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * The template used to create iterator functions.
+     *
+     * @private
+     * @param {Obect} data The data object used to populate the text.
+     * @returns {String} Returns the interpolated text.
+     */
+    var iteratorTemplate = function(obj) {
+
+      var __p = 'var index, iterable = ' +
+      (obj.firstArg) +
+      ', result = ' +
+      (obj.init) +
+      ';\nif (!iterable) return result;\n' +
+      (obj.top) +
+      ';\n';
+       if (obj.arrays) {
+      __p += 'var length = iterable.length; index = -1;\nif (' +
+      (obj.arrays) +
+      ') {\n  while (++index < length) {\n    ' +
+      (obj.loop) +
+      '\n  }\n}\nelse {  ';
+       }
+
+       if (obj.useHas && obj.useKeys) {
+      __p += '\n  var ownIndex = -1,\n      ownProps = objectTypes[typeof iterable] ? keys(iterable) : [],\n      length = ownProps.length;\n\n  while (++ownIndex < length) {\n    index = ownProps[ownIndex];\n    ' +
+      (obj.loop) +
+      '\n  }  ';
+       } else {
+      __p += '\n  for (index in iterable) {';
+          if (obj.useHas) {
+      __p += '\n    if (';
+            if (obj.useHas) {
+      __p += 'hasOwnProperty.call(iterable, index)';
+       }
+      __p += ') {    ';
+       }
+      __p += 
+      (obj.loop) +
+      ';    ';
+       if (obj.useHas) {
+      __p += '\n    }';
+       }
+      __p += '\n  }  ';
+       }
+
+       if (obj.arrays) {
+      __p += '\n}';
+       }
+      __p += 
+      (obj.bottom) +
+      ';\nreturn result';
+
+      return __p
+    };
+
+    /** Reusable iterator options for `assign` and `defaults` */
+    var defaultsIteratorOptions = {
+      'args': 'object, source, guard',
+      'top':
+        'var args = arguments,\n' +
+        '    argsIndex = 0,\n' +
+        "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+        'while (++argsIndex < argsLength) {\n' +
+        '  iterable = args[argsIndex];\n' +
+        '  if (iterable && objectTypes[typeof iterable]) {',
+      'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+      'bottom': '  }\n}'
+    };
+
+    /** Reusable iterator options shared by `each`, `forIn`, and `forOwn` */
+    var eachIteratorOptions = {
+      'args': 'collection, callback, thisArg',
+      'top': "callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg)",
+      'arrays': false,
+      'loop': 'if (callback(iterable[index], index, collection) === false) return result'
+    };
+
+    /** Reusable iterator options for `forIn` and `forOwn` */
+    var forOwnIteratorOptions = {
+      'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
+      'arrays': false
+    };
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Creates a function optimized to search large arrays for a given `value`,
+     * starting at `fromIndex`, using strict equality for comparisons, i.e. `===`.
+     *
+     * @private
+     * @param {Array} array The array to search.
+     * @param {Mixed} value The value to search for.
+     * @param {Number} fromIndex The index to search from.
+     * @param {Number} largeSize The length at which an array is considered large.
+     * @returns {Boolean} Returns `true`, if `value` is found, else `false`.
+     */
+    function cachedContains(array, fromIndex, largeSize) {
+      var length = array.length,
+          isLarge = (length - fromIndex) >= largeSize;
+
+      if (isLarge) {
+        var cache = {},
+            index = fromIndex - 1;
+
+        while (++index < length) {
+          // manually coerce `value` to a string because `hasOwnProperty`, in some
+          // older versions of Firefox, coerces objects incorrectly
+          var key = String(array[index]);
+          (hasOwnProperty.call(cache, key) ? cache[key] : (cache[key] = [])).push(array[index]);
+        }
+      }
+      return function(value) {
+        if (isLarge) {
+          var key = String(value);
+          return hasOwnProperty.call(cache, key) && indexOf(cache[key], value) > -1;
+        }
+        return indexOf(array, value, fromIndex) > -1;
+      }
+    }
+
+    /**
+     * Used by `_.max` and `_.min` as the default `callback` when a given
+     * `collection` is a string value.
+     *
+     * @private
+     * @param {String} value The character to inspect.
+     * @returns {Number} Returns the code unit of given character.
+     */
+    function charAtCallback(value) {
+      return value.charCodeAt(0);
+    }
+
+    /**
+     * Used by `sortBy` to compare transformed `collection` values, stable sorting
+     * them in ascending order.
+     *
+     * @private
+     * @param {Object} a The object to compare to `b`.
+     * @param {Object} b The object to compare to `a`.
+     * @returns {Number} Returns the sort order indicator of `1` or `-1`.
+     */
+    function compareAscending(a, b) {
+      var ai = a.index,
+          bi = b.index;
+
+      a = a.criteria;
+      b = b.criteria;
+
+      // ensure a stable sort in V8 and other engines
+      // http://code.google.com/p/v8/issues/detail?id=90
+      if (a !== b) {
+        if (a > b || typeof a == 'undefined') {
+          return 1;
+        }
+        if (a < b || typeof b == 'undefined') {
+          return -1;
+        }
+      }
+      return ai < bi ? -1 : 1;
+    }
+
+    /**
+     * Creates a function that, when called, invokes `func` with the `this` binding
+     * of `thisArg` and prepends any `partialArgs` to the arguments passed to the
+     * bound function.
+     *
+     * @private
+     * @param {Function|String} func The function to bind or the method name.
+     * @param {Mixed} [thisArg] The `this` binding of `func`.
+     * @param {Array} partialArgs An array of arguments to be partially applied.
+     * @param {Object} [idicator] Used to indicate binding by key or partially
+     *  applying arguments from the right.
+     * @returns {Function} Returns the new bound function.
+     */
+    function createBound(func, thisArg, partialArgs, indicator) {
+      var isFunc = isFunction(func),
+          isPartial = !partialArgs,
+          key = thisArg;
+
+      // juggle arguments
+      if (isPartial) {
+        var rightIndicator = indicator;
+        partialArgs = thisArg;
+      }
+      else if (!isFunc) {
+        if (!indicator) {
+          throw new TypeError;
+        }
+        thisArg = func;
+      }
+
+      function bound() {
+        // `Function#bind` spec
+        // http://es5.github.com/#x15.3.4.5
+        var args = arguments,
+            thisBinding = isPartial ? this : thisArg;
+
+        if (!isFunc) {
+          func = thisArg[key];
+        }
+        if (partialArgs.length) {
+          args = args.length
+            ? (args = slice(args), rightIndicator ? args.concat(partialArgs) : partialArgs.concat(args))
+            : partialArgs;
+        }
+        if (this instanceof bound) {
+          // ensure `new bound` is an instance of `func`
+          noop.prototype = func.prototype;
+          thisBinding = new noop;
+          noop.prototype = null;
+
+          // mimic the constructor's `return` behavior
+          // http://es5.github.com/#x13.2.2
+          var result = func.apply(thisBinding, args);
+          return isObject(result) ? result : thisBinding;
+        }
+        return func.apply(thisBinding, args);
+      }
+      return bound;
+    }
+
+    /**
+     * Creates compiled iteration functions.
+     *
+     * @private
+     * @param {Object} [options1, options2, ...] The compile options object(s).
+     *  arrays - A string of code to determine if the iterable is an array or array-like.
+     *  useHas - A boolean to specify using `hasOwnProperty` checks in the object loop.
+     *  args - A string of comma separated arguments the iteration function will accept.
+     *  top - A string of code to execute before the iteration branches.
+     *  loop - A string of code to execute in the object loop.
+     *  bottom - A string of code to execute after the iteration branches.
+     * @returns {Function} Returns the compiled function.
+     */
+    function createIterator() {
+      var data = {
+        // iterator options
+        'arrays': 'isArray(iterable)',
+        'bottom': '',
+        'init': 'iterable',
+        'loop': '',
+        'top': '',
+        'useHas': true,
+        'useKeys': !!keys
+      };
+
+      // merge options into a template data object
+      for (var object, index = 0; object = arguments[index]; index++) {
+        for (var key in object) {
+          data[key] = object[key];
+        }
+      }
+      var args = data.args;
+      data.firstArg = /^[^,]+/.exec(args)[0];
+
+      // create the function factory
+      var factory = Function(
+          'hasOwnProperty, isArguments, isArray, isString, keys, ' +
+          'lodash, objectTypes',
+        'return function(' + args + ') {\n' + iteratorTemplate(data) + '\n}'
+      );
+      // return the compiled function
+      return factory(
+        hasOwnProperty, isArguments, isArray, isString, keys,
+        lodash, objectTypes
+      );
+    }
+
+    /**
+     * Used by `template` to escape characters for inclusion in compiled
+     * string literals.
+     *
+     * @private
+     * @param {String} match The matched character to escape.
+     * @returns {String} Returns the escaped character.
+     */
+    function escapeStringChar(match) {
+      return '\\' + stringEscapes[match];
+    }
+
+    /**
+     * Used by `escape` to convert characters to HTML entities.
+     *
+     * @private
+     * @param {String} match The matched character to escape.
+     * @returns {String} Returns the escaped character.
+     */
+    function escapeHtmlChar(match) {
+      return htmlEscapes[match];
+    }
+
+    /**
+     * A fast path for creating `lodash` wrapper objects.
+     *
+     * @private
+     * @param {Mixed} value The value to wrap in a `lodash` instance.
+     * @returns {Object} Returns a `lodash` instance.
+     */
+    function lodashWrapper(value) {
+      this.__wrapped__ = value;
+    }
+    // ensure `new lodashWrapper` is an instance of `lodash`
+    lodashWrapper.prototype = lodash.prototype;
+
+    /**
+     * A no-operation function.
+     *
+     * @private
+     */
+    function noop() {
+      // no operation performed
+    }
+
+    /**
+     * A fallback implementation of `isPlainObject` that checks if a given `value`
+     * is an object created by the `Object` constructor, assuming objects created
+     * by the `Object` constructor have no inherited enumerable properties and that
+     * there are no `Object.prototype` extensions.
+     *
+     * @private
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if `value` is a plain object, else `false`.
+     */
+    function shimIsPlainObject(value) {
+      // avoid non-objects and false positives for `arguments` objects
+      var result = false;
+      if (!(value && toString.call(value) == objectClass)) {
+        return result;
+      }
+      // check that the constructor is `Object` (i.e. `Object instanceof Object`)
+      var ctor = value.constructor;
+
+      if (isFunction(ctor) ? ctor instanceof ctor : (support.nodeClass || !isNode(value))) {
+        // In most environments an object's own properties are iterated before
+        // its inherited properties. If the last iterated property is an object's
+        // own property then there are no inherited enumerable properties.
+        forIn(value, function(value, key) {
+          result = key;
         });
-    }
-  };
-  var port = ar.port || 9485;
-  var host = (!br['server']) ? window.location.hostname : br['server'];
-  var connection = new WebSocket('ws://' + host + ':' + port);
-  connection.onmessage = function(event) {
-    var message = event.data;
-    var b = window.brunch;
-    if (!b || !b['auto-reload'] || !b['auto-reload'].enabled) return;
-    if (reloaders[message] != null) {
-      reloaders[message]();
-    } else {
-      reloaders.page();
-    }
-  };
-})();
-;
-
-jade = (function(exports){
-/*!
- * Jade - runtime
- * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
- * MIT Licensed
- */
-
-/**
- * Lame Array.isArray() polyfill for now.
- */
-
-if (!Array.isArray) {
-  Array.isArray = function(arr){
-    return '[object Array]' == Object.prototype.toString.call(arr);
-  };
-}
-
-/**
- * Lame Object.keys() polyfill for now.
- */
-
-if (!Object.keys) {
-  Object.keys = function(obj){
-    var arr = [];
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        arr.push(key);
+        return result === false || hasOwnProperty.call(value, result);
       }
+      return result;
     }
-    return arr;
-  }
-}
 
-/**
- * Merge two attribute objects giving precedence
- * to values in object `b`. Classes are special-cased
- * allowing for arrays and merging/joining appropriately
- * resulting in a string.
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Object} a
- * @api private
- */
+    /**
+     * Slices the `collection` from the `start` index up to, but not including,
+     * the `end` index.
+     *
+     * Note: This function is used, instead of `Array#slice`, to support node lists
+     * in IE < 9 and to ensure dense arrays are returned.
+     *
+     * @private
+     * @param {Array|Object|String} collection The collection to slice.
+     * @param {Number} start The start index.
+     * @param {Number} end The end index.
+     * @returns {Array} Returns the new array.
+     */
+    function slice(array, start, end) {
+      start || (start = 0);
+      if (typeof end == 'undefined') {
+        end = array ? array.length : 0;
+      }
+      var index = -1,
+          length = end - start || 0,
+          result = Array(length < 0 ? 0 : length);
 
-exports.merge = function merge(a, b) {
-  var ac = a['class'];
-  var bc = b['class'];
-
-  if (ac || bc) {
-    ac = ac || [];
-    bc = bc || [];
-    if (!Array.isArray(ac)) ac = [ac];
-    if (!Array.isArray(bc)) bc = [bc];
-    ac = ac.filter(nulls);
-    bc = bc.filter(nulls);
-    a['class'] = ac.concat(bc).join(' ');
-  }
-
-  for (var key in b) {
-    if (key != 'class') {
-      a[key] = b[key];
+      while (++index < length) {
+        result[index] = array[start + index];
+      }
+      return result;
     }
-  }
 
-  return a;
-};
+    /**
+     * Used by `unescape` to convert HTML entities to characters.
+     *
+     * @private
+     * @param {String} match The matched character to unescape.
+     * @returns {String} Returns the unescaped character.
+     */
+    function unescapeHtmlChar(match) {
+      return htmlUnescapes[match];
+    }
 
-/**
- * Filter null `val`s.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
+    /*--------------------------------------------------------------------------*/
 
-function nulls(val) {
-  return val != null;
-}
+    /**
+     * Checks if `value` is an `arguments` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is an `arguments` object, else `false`.
+     * @example
+     *
+     * (function() { return _.isArguments(arguments); })(1, 2, 3);
+     * // => true
+     *
+     * _.isArguments([1, 2, 3]);
+     * // => false
+     */
+    function isArguments(value) {
+      return toString.call(value) == argsClass;
+    }
 
-/**
- * Render the given attributes object.
- *
- * @param {Object} obj
- * @param {Object} escaped
- * @return {String}
- * @api private
- */
+    /**
+     * Checks if `value` is an array.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is an array, else `false`.
+     * @example
+     *
+     * (function() { return _.isArray(arguments); })();
+     * // => false
+     *
+     * _.isArray([1, 2, 3]);
+     * // => true
+     */
+    var isArray = nativeIsArray || function(value) {
+      // `instanceof` may cause a memory leak in IE 7 if `value` is a host object
+      // http://ajaxian.com/archives/working-aroung-the-instanceof-memory-leak
+      return value instanceof Array || toString.call(value) == arrayClass;
+    };
 
-exports.attrs = function attrs(obj, escaped){
-  var buf = []
-    , terse = obj.terse;
+    /**
+     * A fallback implementation of `Object.keys` that produces an array of the
+     * given object's own enumerable property names.
+     *
+     * @private
+     * @type Function
+     * @param {Object} object The object to inspect.
+     * @returns {Array} Returns a new array of property names.
+     */
+    var shimKeys = createIterator({
+      'args': 'object',
+      'init': '[]',
+      'top': 'if (!(objectTypes[typeof object])) return result',
+      'loop': 'result.push(index)',
+      'arrays': false
+    });
 
-  delete obj.terse;
-  var keys = Object.keys(obj)
-    , len = keys.length;
+    /**
+     * Creates an array composed of the own enumerable property names of `object`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The object to inspect.
+     * @returns {Array} Returns a new array of property names.
+     * @example
+     *
+     * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
+     * // => ['one', 'two', 'three'] (order is not guaranteed)
+     */
+    var keys = !nativeKeys ? shimKeys : function(object) {
+      if (!isObject(object)) {
+        return [];
+      }
+      return nativeKeys(object);
+    };
 
-  if (len) {
-    buf.push('');
-    for (var i = 0; i < len; ++i) {
-      var key = keys[i]
-        , val = obj[key];
+    /**
+     * Used to convert characters to HTML entities:
+     *
+     * Though the `>` character is escaped for symmetry, characters like `>` and `/`
+     * don't require escaping in HTML and have no special meaning unless they're part
+     * of a tag or an unquoted attribute value.
+     * http://mathiasbynens.be/notes/ambiguous-ampersands (under "semi-related fun fact")
+     */
+    var htmlEscapes = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
 
-      if ('boolean' == typeof val || null == val) {
-        if (val) {
-          terse
-            ? buf.push(key)
-            : buf.push(key + '="' + key + '"');
+    /** Used to convert HTML entities to characters */
+    var htmlUnescapes = invert(htmlEscapes);
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Assigns own enumerable properties of source object(s) to the destination
+     * object. Subsequent sources will overwrite property assignments of previous
+     * sources. If a `callback` function is passed, it will be executed to produce
+     * the assigned values. The `callback` is bound to `thisArg` and invoked with
+     * two arguments; (objectValue, sourceValue).
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @alias extend
+     * @category Objects
+     * @param {Object} object The destination object.
+     * @param {Object} [source1, source2, ...] The source objects.
+     * @param {Function} [callback] The function to customize assigning values.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns the destination object.
+     * @example
+     *
+     * _.assign({ 'name': 'moe' }, { 'age': 40 });
+     * // => { 'name': 'moe', 'age': 40 }
+     *
+     * var defaults = _.partialRight(_.assign, function(a, b) {
+     *   return typeof a == 'undefined' ? b : a;
+     * });
+     *
+     * var food = { 'name': 'apple' };
+     * defaults(food, { 'name': 'banana', 'type': 'fruit' });
+     * // => { 'name': 'apple', 'type': 'fruit' }
+     */
+    var assign = createIterator(defaultsIteratorOptions, {
+      'top':
+        defaultsIteratorOptions.top.replace(';',
+          ';\n' +
+          "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+          '  var callback = lodash.createCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+          "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+          '  callback = args[--argsLength];\n' +
+          '}'
+        ),
+      'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+    });
+
+    /**
+     * Creates a clone of `value`. If `deep` is `true`, nested objects will also
+     * be cloned, otherwise they will be assigned by reference. If a `callback`
+     * function is passed, it will be executed to produce the cloned values. If
+     * `callback` returns `undefined`, cloning will be handled by the method instead.
+     * The `callback` is bound to `thisArg` and invoked with one argument; (value).
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to clone.
+     * @param {Boolean} [deep=false] A flag to indicate a deep clone.
+     * @param {Function} [callback] The function to customize cloning values.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @param- {Array} [stackA=[]] Tracks traversed source objects.
+     * @param- {Array} [stackB=[]] Associates clones with source counterparts.
+     * @returns {Mixed} Returns the cloned `value`.
+     * @example
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * var shallow = _.clone(stooges);
+     * shallow[0] === stooges[0];
+     * // => true
+     *
+     * var deep = _.clone(stooges, true);
+     * deep[0] === stooges[0];
+     * // => false
+     *
+     * _.mixin({
+     *   'clone': _.partialRight(_.clone, function(value) {
+     *     return _.isElement(value) ? value.cloneNode(false) : undefined;
+     *   })
+     * });
+     *
+     * var clone = _.clone(document.body);
+     * clone.childNodes.length;
+     * // => 0
+     */
+    function clone(value, deep, callback, thisArg, stackA, stackB) {
+      var result = value;
+
+      // allows working with "Collections" methods without using their `callback`
+      // argument, `index|key`, for this method's `callback`
+      if (typeof deep == 'function') {
+        thisArg = callback;
+        callback = deep;
+        deep = false;
+      }
+      if (typeof callback == 'function') {
+        callback = (typeof thisArg == 'undefined')
+          ? callback
+          : lodash.createCallback(callback, thisArg, 1);
+
+        result = callback(result);
+        if (typeof result != 'undefined') {
+          return result;
         }
-      } else if (0 == key.indexOf('data') && 'string' != typeof val) {
-        buf.push(key + "='" + JSON.stringify(val) + "'");
-      } else if ('class' == key && Array.isArray(val)) {
-        buf.push(key + '="' + exports.escape(val.join(' ')) + '"');
-      } else if (escaped && escaped[key]) {
-        buf.push(key + '="' + exports.escape(val) + '"');
+        result = value;
+      }
+      // inspect [[Class]]
+      var isObj = isObject(result);
+      if (isObj) {
+        var className = toString.call(result);
+        if (!cloneableClasses[className]) {
+          return result;
+        }
+        var isArr = isArray(result);
+      }
+      // shallow clone
+      if (!isObj || !deep) {
+        return isObj
+          ? (isArr ? slice(result) : assign({}, result))
+          : result;
+      }
+      var ctor = ctorByClass[className];
+      switch (className) {
+        case boolClass:
+        case dateClass:
+          return new ctor(+result);
+
+        case numberClass:
+        case stringClass:
+          return new ctor(result);
+
+        case regexpClass:
+          return ctor(result.source, reFlags.exec(result));
+      }
+      // check for circular references and return corresponding clone
+      stackA || (stackA = []);
+      stackB || (stackB = []);
+
+      var length = stackA.length;
+      while (length--) {
+        if (stackA[length] == value) {
+          return stackB[length];
+        }
+      }
+      // init cloned object
+      result = isArr ? ctor(result.length) : {};
+
+      // add array properties assigned by `RegExp#exec`
+      if (isArr) {
+        if (hasOwnProperty.call(value, 'index')) {
+          result.index = value.index;
+        }
+        if (hasOwnProperty.call(value, 'input')) {
+          result.input = value.input;
+        }
+      }
+      // add the source value to the stack of traversed objects
+      // and associate it with its clone
+      stackA.push(value);
+      stackB.push(result);
+
+      // recursively populate clone (susceptible to call stack limits)
+      (isArr ? forEach : forOwn)(value, function(objValue, key) {
+        result[key] = clone(objValue, deep, callback, undefined, stackA, stackB);
+      });
+
+      return result;
+    }
+
+    /**
+     * Creates a deep clone of `value`. If a `callback` function is passed,
+     * it will be executed to produce the cloned values. If `callback` returns
+     * `undefined`, cloning will be handled by the method instead. The `callback`
+     * is bound to `thisArg` and invoked with one argument; (value).
+     *
+     * Note: This function is loosely based on the structured clone algorithm. Functions
+     * and DOM nodes are **not** cloned. The enumerable properties of `arguments` objects and
+     * objects created by constructors other than `Object` are cloned to plain `Object` objects.
+     * See http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to deep clone.
+     * @param {Function} [callback] The function to customize cloning values.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the deep cloned `value`.
+     * @example
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * var deep = _.cloneDeep(stooges);
+     * deep[0] === stooges[0];
+     * // => false
+     *
+     * var view = {
+     *   'label': 'docs',
+     *   'node': element
+     * };
+     *
+     * var clone = _.cloneDeep(view, function(value) {
+     *   return _.isElement(value) ? value.cloneNode(true) : undefined;
+     * });
+     *
+     * clone.node == view.node;
+     * // => false
+     */
+    function cloneDeep(value, callback, thisArg) {
+      return clone(value, true, callback, thisArg);
+    }
+
+    /**
+     * Assigns own enumerable properties of source object(s) to the destination
+     * object for all destination properties that resolve to `undefined`. Once a
+     * property is set, additional defaults of the same property will be ignored.
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @category Objects
+     * @param {Object} object The destination object.
+     * @param {Object} [source1, source2, ...] The source objects.
+     * @param- {Object} [guard] Allows working with `_.reduce` without using its
+     *  callback's `key` and `object` arguments as sources.
+     * @returns {Object} Returns the destination object.
+     * @example
+     *
+     * var food = { 'name': 'apple' };
+     * _.defaults(food, { 'name': 'banana', 'type': 'fruit' });
+     * // => { 'name': 'apple', 'type': 'fruit' }
+     */
+    var defaults = createIterator(defaultsIteratorOptions);
+
+    /**
+     * This method is similar to `_.find`, except that it returns the key of the
+     * element that passes the callback check, instead of the element itself.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the key of the found element, else `undefined`.
+     * @example
+     *
+     * _.findKey({ 'a': 1, 'b': 2, 'c': 3, 'd': 4 }, function(num) { return num % 2 == 0; });
+     * // => 'b'
+     */
+    function findKey(collection, callback, thisArg) {
+      var result;
+      callback = lodash.createCallback(callback, thisArg);
+      forOwn(collection, function(value, key, collection) {
+        if (callback(value, key, collection)) {
+          result = key;
+          return false;
+        }
+      });
+      return result;
+    }
+
+    /**
+     * Iterates over `object`'s own and inherited enumerable properties, executing
+     * the `callback` for each property. The `callback` is bound to `thisArg` and
+     * invoked with three arguments; (value, key, object). Callbacks may exit iteration
+     * early by explicitly returning `false`.
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @category Objects
+     * @param {Object} object The object to iterate over.
+     * @param {Function} [callback=identity] The function called per iteration.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns `object`.
+     * @example
+     *
+     * function Dog(name) {
+     *   this.name = name;
+     * }
+     *
+     * Dog.prototype.bark = function() {
+     *   alert('Woof, woof!');
+     * };
+     *
+     * _.forIn(new Dog('Dagny'), function(value, key) {
+     *   alert(key);
+     * });
+     * // => alerts 'name' and 'bark' (order is not guaranteed)
+     */
+    var forIn = createIterator(eachIteratorOptions, forOwnIteratorOptions, {
+      'useHas': false
+    });
+
+    /**
+     * Iterates over an object's own enumerable properties, executing the `callback`
+     * for each property. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, key, object). Callbacks may exit iteration early by explicitly
+     * returning `false`.
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @category Objects
+     * @param {Object} object The object to iterate over.
+     * @param {Function} [callback=identity] The function called per iteration.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns `object`.
+     * @example
+     *
+     * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+     *   alert(key);
+     * });
+     * // => alerts '0', '1', and 'length' (order is not guaranteed)
+     */
+    var forOwn = createIterator(eachIteratorOptions, forOwnIteratorOptions);
+
+    /**
+     * Creates a sorted array of all enumerable properties, own and inherited,
+     * of `object` that have function values.
+     *
+     * @static
+     * @memberOf _
+     * @alias methods
+     * @category Objects
+     * @param {Object} object The object to inspect.
+     * @returns {Array} Returns a new array of property names that have function values.
+     * @example
+     *
+     * _.functions(_);
+     * // => ['all', 'any', 'bind', 'bindAll', 'clone', 'compact', 'compose', ...]
+     */
+    function functions(object) {
+      var result = [];
+      forIn(object, function(value, key) {
+        if (isFunction(value)) {
+          result.push(key);
+        }
+      });
+      return result.sort();
+    }
+
+    /**
+     * Checks if the specified object `property` exists and is a direct property,
+     * instead of an inherited property.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The object to check.
+     * @param {String} property The property to check for.
+     * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
+     * @example
+     *
+     * _.has({ 'a': 1, 'b': 2, 'c': 3 }, 'b');
+     * // => true
+     */
+    function has(object, property) {
+      return object ? hasOwnProperty.call(object, property) : false;
+    }
+
+    /**
+     * Creates an object composed of the inverted keys and values of the given `object`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The object to invert.
+     * @returns {Object} Returns the created inverted object.
+     * @example
+     *
+     *  _.invert({ 'first': 'moe', 'second': 'larry' });
+     * // => { 'moe': 'first', 'larry': 'second' }
+     */
+    function invert(object) {
+      var index = -1,
+          props = keys(object),
+          length = props.length,
+          result = {};
+
+      while (++index < length) {
+        var key = props[index];
+        result[object[key]] = key;
+      }
+      return result;
+    }
+
+    /**
+     * Checks if `value` is a boolean value.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a boolean value, else `false`.
+     * @example
+     *
+     * _.isBoolean(null);
+     * // => false
+     */
+    function isBoolean(value) {
+      return value === true || value === false || toString.call(value) == boolClass;
+    }
+
+    /**
+     * Checks if `value` is a date.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a date, else `false`.
+     * @example
+     *
+     * _.isDate(new Date);
+     * // => true
+     */
+    function isDate(value) {
+      return value instanceof Date || toString.call(value) == dateClass;
+    }
+
+    /**
+     * Checks if `value` is a DOM element.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a DOM element, else `false`.
+     * @example
+     *
+     * _.isElement(document.body);
+     * // => true
+     */
+    function isElement(value) {
+      return value ? value.nodeType === 1 : false;
+    }
+
+    /**
+     * Checks if `value` is empty. Arrays, strings, or `arguments` objects with a
+     * length of `0` and objects with no own enumerable properties are considered
+     * "empty".
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Array|Object|String} value The value to inspect.
+     * @returns {Boolean} Returns `true`, if the `value` is empty, else `false`.
+     * @example
+     *
+     * _.isEmpty([1, 2, 3]);
+     * // => false
+     *
+     * _.isEmpty({});
+     * // => true
+     *
+     * _.isEmpty('');
+     * // => true
+     */
+    function isEmpty(value) {
+      var result = true;
+      if (!value) {
+        return result;
+      }
+      var className = toString.call(value),
+          length = value.length;
+
+      if ((className == arrayClass || className == stringClass || className == argsClass ) ||
+          (className == objectClass && typeof length == 'number' && isFunction(value.splice))) {
+        return !length;
+      }
+      forOwn(value, function() {
+        return (result = false);
+      });
+      return result;
+    }
+
+    /**
+     * Performs a deep comparison between two values to determine if they are
+     * equivalent to each other. If `callback` is passed, it will be executed to
+     * compare values. If `callback` returns `undefined`, comparisons will be handled
+     * by the method instead. The `callback` is bound to `thisArg` and invoked with
+     * two arguments; (a, b).
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} a The value to compare.
+     * @param {Mixed} b The other value to compare.
+     * @param {Function} [callback] The function to customize comparing values.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @param- {Array} [stackA=[]] Tracks traversed `a` objects.
+     * @param- {Array} [stackB=[]] Tracks traversed `b` objects.
+     * @returns {Boolean} Returns `true`, if the values are equivalent, else `false`.
+     * @example
+     *
+     * var moe = { 'name': 'moe', 'age': 40 };
+     * var copy = { 'name': 'moe', 'age': 40 };
+     *
+     * moe == copy;
+     * // => false
+     *
+     * _.isEqual(moe, copy);
+     * // => true
+     *
+     * var words = ['hello', 'goodbye'];
+     * var otherWords = ['hi', 'goodbye'];
+     *
+     * _.isEqual(words, otherWords, function(a, b) {
+     *   var reGreet = /^(?:hello|hi)$/i,
+     *       aGreet = _.isString(a) && reGreet.test(a),
+     *       bGreet = _.isString(b) && reGreet.test(b);
+     *
+     *   return (aGreet || bGreet) ? (aGreet == bGreet) : undefined;
+     * });
+     * // => true
+     */
+    function isEqual(a, b, callback, thisArg, stackA, stackB) {
+      // used to indicate that when comparing objects, `a` has at least the properties of `b`
+      var whereIndicator = callback === indicatorObject;
+      if (callback && !whereIndicator) {
+        callback = (typeof thisArg == 'undefined')
+          ? callback
+          : lodash.createCallback(callback, thisArg, 2);
+
+        var result = callback(a, b);
+        if (typeof result != 'undefined') {
+          return !!result;
+        }
+      }
+      // exit early for identical values
+      if (a === b) {
+        // treat `+0` vs. `-0` as not equal
+        return a !== 0 || (1 / a == 1 / b);
+      }
+      var type = typeof a,
+          otherType = typeof b;
+
+      // exit early for unlike primitive values
+      if (a === a &&
+          (!a || (type != 'function' && type != 'object')) &&
+          (!b || (otherType != 'function' && otherType != 'object'))) {
+        return false;
+      }
+      // exit early for `null` and `undefined`, avoiding ES3's Function#call behavior
+      // http://es5.github.com/#x15.3.4.4
+      if (a == null || b == null) {
+        return a === b;
+      }
+      // compare [[Class]] names
+      var className = toString.call(a),
+          otherClass = toString.call(b);
+
+      if (className == argsClass) {
+        className = objectClass;
+      }
+      if (otherClass == argsClass) {
+        otherClass = objectClass;
+      }
+      if (className != otherClass) {
+        return false;
+      }
+      switch (className) {
+        case boolClass:
+        case dateClass:
+          // coerce dates and booleans to numbers, dates to milliseconds and booleans
+          // to `1` or `0`, treating invalid dates coerced to `NaN` as not equal
+          return +a == +b;
+
+        case numberClass:
+          // treat `NaN` vs. `NaN` as equal
+          return (a != +a)
+            ? b != +b
+            // but treat `+0` vs. `-0` as not equal
+            : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+        case regexpClass:
+        case stringClass:
+          // coerce regexes to strings (http://es5.github.com/#x15.10.6.4)
+          // treat string primitives and their corresponding object instances as equal
+          return a == String(b);
+      }
+      var isArr = className == arrayClass;
+      if (!isArr) {
+        // unwrap any `lodash` wrapped values
+        if (hasOwnProperty.call(a, '__wrapped__ ') || hasOwnProperty.call(b, '__wrapped__')) {
+          return isEqual(a.__wrapped__ || a, b.__wrapped__ || b, callback, thisArg, stackA, stackB);
+        }
+        // exit for functions and DOM nodes
+        if (className != objectClass) {
+          return false;
+        }
+        // in older versions of Opera, `arguments` objects have `Array` constructors
+        var ctorA = a.constructor,
+            ctorB = b.constructor;
+
+        // non `Object` object instances with different constructors are not equal
+        if (ctorA != ctorB && !(
+              isFunction(ctorA) && ctorA instanceof ctorA &&
+              isFunction(ctorB) && ctorB instanceof ctorB
+            )) {
+          return false;
+        }
+      }
+      // assume cyclic structures are equal
+      // the algorithm for detecting cyclic structures is adapted from ES 5.1
+      // section 15.12.3, abstract operation `JO` (http://es5.github.com/#x15.12.3)
+      stackA || (stackA = []);
+      stackB || (stackB = []);
+
+      var length = stackA.length;
+      while (length--) {
+        if (stackA[length] == a) {
+          return stackB[length] == b;
+        }
+      }
+      var size = 0;
+      result = true;
+
+      // add `a` and `b` to the stack of traversed objects
+      stackA.push(a);
+      stackB.push(b);
+
+      // recursively compare objects and arrays (susceptible to call stack limits)
+      if (isArr) {
+        length = a.length;
+        size = b.length;
+
+        // compare lengths to determine if a deep comparison is necessary
+        result = size == a.length;
+        if (!result && !whereIndicator) {
+          return result;
+        }
+        // deep compare the contents, ignoring non-numeric properties
+        while (size--) {
+          var index = length,
+              value = b[size];
+
+          if (whereIndicator) {
+            while (index--) {
+              if ((result = isEqual(a[index], value, callback, thisArg, stackA, stackB))) {
+                break;
+              }
+            }
+          } else if (!(result = isEqual(a[size], value, callback, thisArg, stackA, stackB))) {
+            break;
+          }
+        }
+        return result;
+      }
+      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+      // which, in this case, is more costly
+      forIn(b, function(value, key, b) {
+        if (hasOwnProperty.call(b, key)) {
+          // count the number of properties.
+          size++;
+          // deep compare each property value.
+          return (result = hasOwnProperty.call(a, key) && isEqual(a[key], value, callback, thisArg, stackA, stackB));
+        }
+      });
+
+      if (result && !whereIndicator) {
+        // ensure both objects have the same number of properties
+        forIn(a, function(value, key, a) {
+          if (hasOwnProperty.call(a, key)) {
+            // `size` will be `-1` if `a` has more properties than `b`
+            return (result = --size > -1);
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Checks if `value` is, or can be coerced to, a finite number.
+     *
+     * Note: This is not the same as native `isFinite`, which will return true for
+     * booleans and empty strings. See http://es5.github.com/#x15.1.2.5.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is finite, else `false`.
+     * @example
+     *
+     * _.isFinite(-101);
+     * // => true
+     *
+     * _.isFinite('10');
+     * // => true
+     *
+     * _.isFinite(true);
+     * // => false
+     *
+     * _.isFinite('');
+     * // => false
+     *
+     * _.isFinite(Infinity);
+     * // => false
+     */
+    function isFinite(value) {
+      return nativeIsFinite(value) && !nativeIsNaN(parseFloat(value));
+    }
+
+    /**
+     * Checks if `value` is a function.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a function, else `false`.
+     * @example
+     *
+     * _.isFunction(_);
+     * // => true
+     */
+    function isFunction(value) {
+      return typeof value == 'function';
+    }
+
+    /**
+     * Checks if `value` is the language type of Object.
+     * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is an object, else `false`.
+     * @example
+     *
+     * _.isObject({});
+     * // => true
+     *
+     * _.isObject([1, 2, 3]);
+     * // => true
+     *
+     * _.isObject(1);
+     * // => false
+     */
+    function isObject(value) {
+      // check if the value is the ECMAScript language type of Object
+      // http://es5.github.com/#x8
+      // and avoid a V8 bug
+      // http://code.google.com/p/v8/issues/detail?id=2291
+      return value ? objectTypes[typeof value] : false;
+    }
+
+    /**
+     * Checks if `value` is `NaN`.
+     *
+     * Note: This is not the same as native `isNaN`, which will return `true` for
+     * `undefined` and other values. See http://es5.github.com/#x15.1.2.4.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is `NaN`, else `false`.
+     * @example
+     *
+     * _.isNaN(NaN);
+     * // => true
+     *
+     * _.isNaN(new Number(NaN));
+     * // => true
+     *
+     * isNaN(undefined);
+     * // => true
+     *
+     * _.isNaN(undefined);
+     * // => false
+     */
+    function isNaN(value) {
+      // `NaN` as a primitive is the only value that is not equal to itself
+      // (perform the [[Class]] check first to avoid errors with some host objects in IE)
+      return isNumber(value) && value != +value
+    }
+
+    /**
+     * Checks if `value` is `null`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is `null`, else `false`.
+     * @example
+     *
+     * _.isNull(null);
+     * // => true
+     *
+     * _.isNull(undefined);
+     * // => false
+     */
+    function isNull(value) {
+      return value === null;
+    }
+
+    /**
+     * Checks if `value` is a number.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a number, else `false`.
+     * @example
+     *
+     * _.isNumber(8.4 * 5);
+     * // => true
+     */
+    function isNumber(value) {
+      return typeof value == 'number' || toString.call(value) == numberClass;
+    }
+
+    /**
+     * Checks if a given `value` is an object created by the `Object` constructor.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if `value` is a plain object, else `false`.
+     * @example
+     *
+     * function Stooge(name, age) {
+     *   this.name = name;
+     *   this.age = age;
+     * }
+     *
+     * _.isPlainObject(new Stooge('moe', 40));
+     * // => false
+     *
+     * _.isPlainObject([1, 2, 3]);
+     * // => false
+     *
+     * _.isPlainObject({ 'name': 'moe', 'age': 40 });
+     * // => true
+     */
+    var isPlainObject = function(value) {
+      if (!(value && toString.call(value) == objectClass)) {
+        return false;
+      }
+      var valueOf = value.valueOf,
+          objProto = typeof valueOf == 'function' && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
+
+      return objProto
+        ? (value == objProto || getPrototypeOf(value) == objProto)
+        : shimIsPlainObject(value);
+    };
+
+    /**
+     * Checks if `value` is a regular expression.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a regular expression, else `false`.
+     * @example
+     *
+     * _.isRegExp(/moe/);
+     * // => true
+     */
+    function isRegExp(value) {
+      return value instanceof RegExp || toString.call(value) == regexpClass;
+    }
+
+    /**
+     * Checks if `value` is a string.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is a string, else `false`.
+     * @example
+     *
+     * _.isString('moe');
+     * // => true
+     */
+    function isString(value) {
+      return typeof value == 'string' || toString.call(value) == stringClass;
+    }
+
+    /**
+     * Checks if `value` is `undefined`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is `undefined`, else `false`.
+     * @example
+     *
+     * _.isUndefined(void 0);
+     * // => true
+     */
+    function isUndefined(value) {
+      return typeof value == 'undefined';
+    }
+
+    /**
+     * Recursively merges own enumerable properties of the source object(s), that
+     * don't resolve to `undefined`, into the destination object. Subsequent sources
+     * will overwrite property assignments of previous sources. If a `callback` function
+     * is passed, it will be executed to produce the merged values of the destination
+     * and source properties. If `callback` returns `undefined`, merging will be
+     * handled by the method instead. The `callback` is bound to `thisArg` and
+     * invoked with two arguments; (objectValue, sourceValue).
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The destination object.
+     * @param {Object} [source1, source2, ...] The source objects.
+     * @param {Function} [callback] The function to customize merging properties.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @param- {Object} [deepIndicator] Indicates that `stackA` and `stackB` are
+     *  arrays of traversed objects, instead of source objects.
+     * @param- {Array} [stackA=[]] Tracks traversed source objects.
+     * @param- {Array} [stackB=[]] Associates values with source counterparts.
+     * @returns {Object} Returns the destination object.
+     * @example
+     *
+     * var names = {
+     *   'stooges': [
+     *     { 'name': 'moe' },
+     *     { 'name': 'larry' }
+     *   ]
+     * };
+     *
+     * var ages = {
+     *   'stooges': [
+     *     { 'age': 40 },
+     *     { 'age': 50 }
+     *   ]
+     * };
+     *
+     * _.merge(names, ages);
+     * // => { 'stooges': [{ 'name': 'moe', 'age': 40 }, { 'name': 'larry', 'age': 50 }] }
+     *
+     * var food = {
+     *   'fruits': ['apple'],
+     *   'vegetables': ['beet']
+     * };
+     *
+     * var otherFood = {
+     *   'fruits': ['banana'],
+     *   'vegetables': ['carrot']
+     * };
+     *
+     * _.merge(food, otherFood, function(a, b) {
+     *   return _.isArray(a) ? a.concat(b) : undefined;
+     * });
+     * // => { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot] }
+     */
+    function merge(object, source, deepIndicator) {
+      var args = arguments,
+          index = 0,
+          length = 2;
+
+      if (!isObject(object)) {
+        return object;
+      }
+      if (deepIndicator === indicatorObject) {
+        var callback = args[3],
+            stackA = args[4],
+            stackB = args[5];
       } else {
-        buf.push(key + '="' + val + '"');
+        stackA = [];
+        stackB = [];
+
+        // allows working with `_.reduce` and `_.reduceRight` without
+        // using their `callback` arguments, `index|key` and `collection`
+        if (typeof deepIndicator != 'number') {
+          length = args.length;
+        }
+        if (length > 3 && typeof args[length - 2] == 'function') {
+          callback = lodash.createCallback(args[--length - 1], args[length--], 2);
+        } else if (length > 2 && typeof args[length - 1] == 'function') {
+          callback = args[--length];
+        }
+      }
+      while (++index < length) {
+        (isArray(args[index]) ? forEach : forOwn)(args[index], function(source, key) {
+          var found,
+              isArr,
+              result = source,
+              value = object[key];
+
+          if (source && ((isArr = isArray(source)) || isPlainObject(source))) {
+            // avoid merging previously merged cyclic sources
+            var stackLength = stackA.length;
+            while (stackLength--) {
+              if ((found = stackA[stackLength] == source)) {
+                value = stackB[stackLength];
+                break;
+              }
+            }
+            if (!found) {
+              value = isArr
+                ? (isArray(value) ? value : [])
+                : (isPlainObject(value) ? value : {});
+
+              if (callback) {
+                result = callback(value, source);
+                if (typeof result != 'undefined') {
+                  value = result;
+                }
+              }
+              // add `source` and associated `value` to the stack of traversed objects
+              stackA.push(source);
+              stackB.push(value);
+
+              // recursively merge objects and arrays (susceptible to call stack limits)
+              if (!callback) {
+                value = merge(value, source, indicatorObject, callback, stackA, stackB);
+              }
+            }
+          }
+          else {
+            if (callback) {
+              result = callback(value, source);
+              if (typeof result == 'undefined') {
+                result = source;
+              }
+            }
+            if (typeof result != 'undefined') {
+              value = result;
+            }
+          }
+          object[key] = value;
+        });
+      }
+      return object;
+    }
+
+    /**
+     * Creates a shallow clone of `object` excluding the specified properties.
+     * Property names may be specified as individual arguments or as arrays of
+     * property names. If a `callback` function is passed, it will be executed
+     * for each property in the `object`, omitting the properties `callback`
+     * returns truthy for. The `callback` is bound to `thisArg` and invoked
+     * with three arguments; (value, key, object).
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The source object.
+     * @param {Function|String} callback|[prop1, prop2, ...] The properties to omit
+     *  or the function called per iteration.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns an object without the omitted properties.
+     * @example
+     *
+     * _.omit({ 'name': 'moe', 'age': 40 }, 'age');
+     * // => { 'name': 'moe' }
+     *
+     * _.omit({ 'name': 'moe', 'age': 40 }, function(value) {
+     *   return typeof value == 'number';
+     * });
+     * // => { 'name': 'moe' }
+     */
+    function omit(object, callback, thisArg) {
+      var isFunc = typeof callback == 'function',
+          result = {};
+
+      if (isFunc) {
+        callback = lodash.createCallback(callback, thisArg);
+      } else {
+        var props = concat.apply(arrayRef, arguments);
+      }
+      forIn(object, function(value, key, object) {
+        if (isFunc
+              ? !callback(value, key, object)
+              : indexOf(props, key, 1) < 0
+            ) {
+          result[key] = value;
+        }
+      });
+      return result;
+    }
+
+    /**
+     * Creates a two dimensional array of the given object's key-value pairs,
+     * i.e. `[[key1, value1], [key2, value2]]`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The object to inspect.
+     * @returns {Array} Returns new array of key-value pairs.
+     * @example
+     *
+     * _.pairs({ 'moe': 30, 'larry': 40 });
+     * // => [['moe', 30], ['larry', 40]] (order is not guaranteed)
+     */
+    function pairs(object) {
+      var index = -1,
+          props = keys(object),
+          length = props.length,
+          result = Array(length);
+
+      while (++index < length) {
+        var key = props[index];
+        result[index] = [key, object[key]];
+      }
+      return result;
+    }
+
+    /**
+     * Creates a shallow clone of `object` composed of the specified properties.
+     * Property names may be specified as individual arguments or as arrays of property
+     * names. If `callback` is passed, it will be executed for each property in the
+     * `object`, picking the properties `callback` returns truthy for. The `callback`
+     * is bound to `thisArg` and invoked with three arguments; (value, key, object).
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The source object.
+     * @param {Array|Function|String} callback|[prop1, prop2, ...] The function called
+     *  per iteration or properties to pick, either as individual arguments or arrays.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns an object composed of the picked properties.
+     * @example
+     *
+     * _.pick({ 'name': 'moe', '_userid': 'moe1' }, 'name');
+     * // => { 'name': 'moe' }
+     *
+     * _.pick({ 'name': 'moe', '_userid': 'moe1' }, function(value, key) {
+     *   return key.charAt(0) != '_';
+     * });
+     * // => { 'name': 'moe' }
+     */
+    function pick(object, callback, thisArg) {
+      var result = {};
+      if (typeof callback != 'function') {
+        var index = 0,
+            props = concat.apply(arrayRef, arguments),
+            length = isObject(object) ? props.length : 0;
+
+        while (++index < length) {
+          var key = props[index];
+          if (key in object) {
+            result[key] = object[key];
+          }
+        }
+      } else {
+        callback = lodash.createCallback(callback, thisArg);
+        forIn(object, function(value, key, object) {
+          if (callback(value, key, object)) {
+            result[key] = value;
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Creates an array composed of the own enumerable property values of `object`.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Object} object The object to inspect.
+     * @returns {Array} Returns a new array of property values.
+     * @example
+     *
+     * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+     * // => [1, 2, 3] (order is not guaranteed)
+     */
+    function values(object) {
+      var index = -1,
+          props = keys(object),
+          length = props.length,
+          result = Array(length);
+
+      while (++index < length) {
+        result[index] = object[props[index]];
+      }
+      return result;
+    }
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Creates an array of elements from the specified indexes, or keys, of the
+     * `collection`. Indexes may be specified as individual arguments or as arrays
+     * of indexes.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Array|Number|String} [index1, index2, ...] The indexes of
+     *  `collection` to retrieve, either as individual arguments or arrays.
+     * @returns {Array} Returns a new array of elements corresponding to the
+     *  provided indexes.
+     * @example
+     *
+     * _.at(['a', 'b', 'c', 'd', 'e'], [0, 2, 4]);
+     * // => ['a', 'c', 'e']
+     *
+     * _.at(['moe', 'larry', 'curly'], 0, 2);
+     * // => ['moe', 'curly']
+     */
+    function at(collection) {
+      var index = -1,
+          props = concat.apply(arrayRef, slice(arguments, 1)),
+          length = props.length,
+          result = Array(length);
+
+      while(++index < length) {
+        result[index] = collection[props[index]];
+      }
+      return result;
+    }
+
+    /**
+     * Checks if a given `target` element is present in a `collection` using strict
+     * equality for comparisons, i.e. `===`. If `fromIndex` is negative, it is used
+     * as the offset from the end of the collection.
+     *
+     * @static
+     * @memberOf _
+     * @alias include
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Mixed} target The value to check for.
+     * @param {Number} [fromIndex=0] The index to search from.
+     * @returns {Boolean} Returns `true` if the `target` element is found, else `false`.
+     * @example
+     *
+     * _.contains([1, 2, 3], 1);
+     * // => true
+     *
+     * _.contains([1, 2, 3], 1, 2);
+     * // => false
+     *
+     * _.contains({ 'name': 'moe', 'age': 40 }, 'moe');
+     * // => true
+     *
+     * _.contains('curly', 'ur');
+     * // => true
+     */
+    function contains(collection, target, fromIndex) {
+      var index = -1,
+          length = collection ? collection.length : 0,
+          result = false;
+
+      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex) || 0;
+      if (typeof length == 'number') {
+        result = (isString(collection)
+          ? collection.indexOf(target, fromIndex)
+          : indexOf(collection, target, fromIndex)
+        ) > -1;
+      } else {
+        forOwn(collection, function(value) {
+          if (++index >= fromIndex) {
+            return !(result = value === target);
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Creates an object composed of keys returned from running each element of the
+     * `collection` through the given `callback`. The corresponding value of each key
+     * is the number of times the key was returned by the `callback`. The `callback`
+     * is bound to `thisArg` and invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns the composed aggregate object.
+     * @example
+     *
+     * _.countBy([4.3, 6.1, 6.4], function(num) { return Math.floor(num); });
+     * // => { '4': 1, '6': 2 }
+     *
+     * _.countBy([4.3, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
+     * // => { '4': 1, '6': 2 }
+     *
+     * _.countBy(['one', 'two', 'three'], 'length');
+     * // => { '3': 2, '5': 1 }
+     */
+    function countBy(collection, callback, thisArg) {
+      var result = {};
+      callback = lodash.createCallback(callback, thisArg);
+
+      forEach(collection, function(value, key, collection) {
+        key = String(callback(value, key, collection));
+        (hasOwnProperty.call(result, key) ? result[key]++ : result[key] = 1);
+      });
+      return result;
+    }
+
+    /**
+     * Checks if the `callback` returns a truthy value for **all** elements of a
+     * `collection`. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias all
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Boolean} Returns `true` if all elements pass the callback check,
+     *  else `false`.
+     * @example
+     *
+     * _.every([true, 1, null, 'yes'], Boolean);
+     * // => false
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.every(stooges, 'age');
+     * // => true
+     *
+     * // using "_.where" callback shorthand
+     * _.every(stooges, { 'age': 50 });
+     * // => false
+     */
+    function every(collection, callback, thisArg) {
+      var result = true;
+      callback = lodash.createCallback(callback, thisArg);
+
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        while (++index < length) {
+          if (!(result = !!callback(collection[index], index, collection))) {
+            break;
+          }
+        }
+      } else {
+        forOwn(collection, function(value, index, collection) {
+          return (result = !!callback(value, index, collection));
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Examines each element in a `collection`, returning an array of all elements
+     * the `callback` returns truthy for. The `callback` is bound to `thisArg` and
+     * invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias select
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new array of elements that passed the callback check.
+     * @example
+     *
+     * var evens = _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+     * // => [2, 4, 6]
+     *
+     * var food = [
+     *   { 'name': 'apple',  'organic': false, 'type': 'fruit' },
+     *   { 'name': 'carrot', 'organic': true,  'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.filter(food, 'organic');
+     * // => [{ 'name': 'carrot', 'organic': true, 'type': 'vegetable' }]
+     *
+     * // using "_.where" callback shorthand
+     * _.filter(food, { 'type': 'fruit' });
+     * // => [{ 'name': 'apple', 'organic': false, 'type': 'fruit' }]
+     */
+    function filter(collection, callback, thisArg) {
+      var result = [];
+      callback = lodash.createCallback(callback, thisArg);
+
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        while (++index < length) {
+          var value = collection[index];
+          if (callback(value, index, collection)) {
+            result.push(value);
+          }
+        }
+      } else {
+        forOwn(collection, function(value, index, collection) {
+          if (callback(value, index, collection)) {
+            result.push(value);
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Examines each element in a `collection`, returning the first that the `callback`
+     * returns truthy for. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias detect
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the found element, else `undefined`.
+     * @example
+     *
+     * _.find([1, 2, 3, 4], function(num) { return num % 2 == 0; });
+     * // => 2
+     *
+     * var food = [
+     *   { 'name': 'apple',  'organic': false, 'type': 'fruit' },
+     *   { 'name': 'banana', 'organic': true,  'type': 'fruit' },
+     *   { 'name': 'beet',   'organic': false, 'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.where" callback shorthand
+     * _.find(food, { 'type': 'vegetable' });
+     * // => { 'name': 'beet', 'organic': false, 'type': 'vegetable' }
+     *
+     * // using "_.pluck" callback shorthand
+     * _.find(food, 'organic');
+     * // => { 'name': 'banana', 'organic': true, 'type': 'fruit' }
+     */
+    function find(collection, callback, thisArg) {
+      callback = lodash.createCallback(callback, thisArg);
+
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        while (++index < length) {
+          var value = collection[index];
+          if (callback(value, index, collection)) {
+            return value;
+          }
+        }
+      } else {
+        var result;
+        forOwn(collection, function(value, index, collection) {
+          if (callback(value, index, collection)) {
+            result = value;
+            return false;
+          }
+        });
+        return result;
       }
     }
+
+    /**
+     * Iterates over a `collection`, executing the `callback` for each element in
+     * the `collection`. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index|key, collection). Callbacks may exit iteration early
+     * by explicitly returning `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias each
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function} [callback=identity] The function called per iteration.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array|Object|String} Returns `collection`.
+     * @example
+     *
+     * _([1, 2, 3]).forEach(alert).join(',');
+     * // => alerts each number and returns '1,2,3'
+     *
+     * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, alert);
+     * // => alerts each number value (order is not guaranteed)
+     */
+    function forEach(collection, callback, thisArg) {
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);
+      if (typeof length == 'number') {
+        while (++index < length) {
+          if (callback(collection[index], index, collection) === false) {
+            break;
+          }
+        }
+      } else {
+        forOwn(collection, callback);
+      }
+      return collection;
+    }
+
+    /**
+     * Creates an object composed of keys returned from running each element of the
+     * `collection` through the `callback`. The corresponding value of each key is
+     * an array of elements passed to `callback` that returned the key. The `callback`
+     * is bound to `thisArg` and invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Object} Returns the composed aggregate object.
+     * @example
+     *
+     * _.groupBy([4.2, 6.1, 6.4], function(num) { return Math.floor(num); });
+     * // => { '4': [4.2], '6': [6.1, 6.4] }
+     *
+     * _.groupBy([4.2, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
+     * // => { '4': [4.2], '6': [6.1, 6.4] }
+     *
+     * // using "_.pluck" callback shorthand
+     * _.groupBy(['one', 'two', 'three'], 'length');
+     * // => { '3': ['one', 'two'], '5': ['three'] }
+     */
+    function groupBy(collection, callback, thisArg) {
+      var result = {};
+      callback = lodash.createCallback(callback, thisArg);
+
+      forEach(collection, function(value, key, collection) {
+        key = String(callback(value, key, collection));
+        (hasOwnProperty.call(result, key) ? result[key] : result[key] = []).push(value);
+      });
+      return result;
+    }
+
+    /**
+     * Invokes the method named by `methodName` on each element in the `collection`,
+     * returning an array of the results of each invoked method. Additional arguments
+     * will be passed to each invoked method. If `methodName` is a function, it will
+     * be invoked for, and `this` bound to, each element in the `collection`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|String} methodName The name of the method to invoke or
+     *  the function invoked per iteration.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
+     * @returns {Array} Returns a new array of the results of each invoked method.
+     * @example
+     *
+     * _.invoke([[5, 1, 7], [3, 2, 1]], 'sort');
+     * // => [[1, 5, 7], [1, 2, 3]]
+     *
+     * _.invoke([123, 456], String.prototype.split, '');
+     * // => [['1', '2', '3'], ['4', '5', '6']]
+     */
+    function invoke(collection, methodName) {
+      var args = slice(arguments, 2),
+          index = -1,
+          isFunc = typeof methodName == 'function',
+          length = collection ? collection.length : 0,
+          result = Array(typeof length == 'number' ? length : 0);
+
+      forEach(collection, function(value) {
+        result[++index] = (isFunc ? methodName : value[methodName]).apply(value, args);
+      });
+      return result;
+    }
+
+    /**
+     * Creates an array of values by running each element in the `collection`
+     * through the `callback`. The `callback` is bound to `thisArg` and invoked with
+     * three arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias collect
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new array of the results of each `callback` execution.
+     * @example
+     *
+     * _.map([1, 2, 3], function(num) { return num * 3; });
+     * // => [3, 6, 9]
+     *
+     * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { return num * 3; });
+     * // => [3, 6, 9] (order is not guaranteed)
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.map(stooges, 'name');
+     * // => ['moe', 'larry']
+     */
+    function map(collection, callback, thisArg) {
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      callback = lodash.createCallback(callback, thisArg);
+      if (typeof length == 'number') {
+        var result = Array(length);
+        while (++index < length) {
+          result[index] = callback(collection[index], index, collection);
+        }
+      } else {
+        result = [];
+        forOwn(collection, function(value, key, collection) {
+          result[++index] = callback(value, key, collection);
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Retrieves the maximum value of an `array`. If `callback` is passed,
+     * it will be executed for each value in the `array` to generate the
+     * criterion by which the value is ranked. The `callback` is bound to
+     * `thisArg` and invoked with three arguments; (value, index, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the maximum value.
+     * @example
+     *
+     * _.max([4, 2, 8, 6]);
+     * // => 8
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * _.max(stooges, function(stooge) { return stooge.age; });
+     * // => { 'name': 'larry', 'age': 50 };
+     *
+     * // using "_.pluck" callback shorthand
+     * _.max(stooges, 'age');
+     * // => { 'name': 'larry', 'age': 50 };
+     */
+    function max(collection, callback, thisArg) {
+      var computed = -Infinity,
+          result = computed;
+
+      if (!callback && isArray(collection)) {
+        var index = -1,
+            length = collection.length;
+
+        while (++index < length) {
+          var value = collection[index];
+          if (value > result) {
+            result = value;
+          }
+        }
+      } else {
+        callback = (!callback && isString(collection))
+          ? charAtCallback
+          : lodash.createCallback(callback, thisArg);
+
+        forEach(collection, function(value, index, collection) {
+          var current = callback(value, index, collection);
+          if (current > computed) {
+            computed = current;
+            result = value;
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Retrieves the minimum value of an `array`. If `callback` is passed,
+     * it will be executed for each value in the `array` to generate the
+     * criterion by which the value is ranked. The `callback` is bound to `thisArg`
+     * and invoked with three arguments; (value, index, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the minimum value.
+     * @example
+     *
+     * _.min([4, 2, 8, 6]);
+     * // => 2
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * _.min(stooges, function(stooge) { return stooge.age; });
+     * // => { 'name': 'moe', 'age': 40 };
+     *
+     * // using "_.pluck" callback shorthand
+     * _.min(stooges, 'age');
+     * // => { 'name': 'moe', 'age': 40 };
+     */
+    function min(collection, callback, thisArg) {
+      var computed = Infinity,
+          result = computed;
+
+      if (!callback && isArray(collection)) {
+        var index = -1,
+            length = collection.length;
+
+        while (++index < length) {
+          var value = collection[index];
+          if (value < result) {
+            result = value;
+          }
+        }
+      } else {
+        callback = (!callback && isString(collection))
+          ? charAtCallback
+          : lodash.createCallback(callback, thisArg);
+
+        forEach(collection, function(value, index, collection) {
+          var current = callback(value, index, collection);
+          if (current < computed) {
+            computed = current;
+            result = value;
+          }
+        });
+      }
+      return result;
+    }
+
+    /**
+     * Retrieves the value of a specified property from all elements in the `collection`.
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {String} property The property to pluck.
+     * @returns {Array} Returns a new array of property values.
+     * @example
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * _.pluck(stooges, 'name');
+     * // => ['moe', 'larry']
+     */
+    function pluck(collection, property) {
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        var result = Array(length);
+        while (++index < length) {
+          result[index] = collection[index][property];
+        }
+      }
+      return result || map(collection, property);
+    }
+
+    /**
+     * Reduces a `collection` to a value that is the accumulated result of running
+     * each element in the `collection` through the `callback`, where each successive
+     * `callback` execution consumes the return value of the previous execution.
+     * If `accumulator` is not passed, the first element of the `collection` will be
+     * used as the initial `accumulator` value. The `callback` is bound to `thisArg`
+     * and invoked with four arguments; (accumulator, value, index|key, collection).
+     *
+     * @static
+     * @memberOf _
+     * @alias foldl, inject
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function} [callback=identity] The function called per iteration.
+     * @param {Mixed} [accumulator] Initial value of the accumulator.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the accumulated value.
+     * @example
+     *
+     * var sum = _.reduce([1, 2, 3], function(sum, num) {
+     *   return sum + num;
+     * });
+     * // => 6
+     *
+     * var mapped = _.reduce({ 'a': 1, 'b': 2, 'c': 3 }, function(result, num, key) {
+     *   result[key] = num * 3;
+     *   return result;
+     * }, {});
+     * // => { 'a': 3, 'b': 6, 'c': 9 }
+     */
+    function reduce(collection, callback, accumulator, thisArg) {
+      if (!collection) return accumulator;
+      var noaccum = arguments.length < 3;
+      callback = lodash.createCallback(callback, thisArg, 4);
+
+      var index = -1,
+          length = collection.length;
+
+      if (typeof length == 'number') {
+        if (noaccum) {
+          accumulator = collection[++index];
+        }
+        while (++index < length) {
+          accumulator = callback(accumulator, collection[index], index, collection);
+        }
+      } else {
+        forOwn(collection, function(value, index, collection) {
+          accumulator = noaccum
+            ? (noaccum = false, value)
+            : callback(accumulator, value, index, collection)
+        });
+      }
+      return accumulator;
+    }
+
+    /**
+     * This method is similar to `_.reduce`, except that it iterates over a
+     * `collection` from right to left.
+     *
+     * @static
+     * @memberOf _
+     * @alias foldr
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function} [callback=identity] The function called per iteration.
+     * @param {Mixed} [accumulator] Initial value of the accumulator.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the accumulated value.
+     * @example
+     *
+     * var list = [[0, 1], [2, 3], [4, 5]];
+     * var flat = _.reduceRight(list, function(a, b) { return a.concat(b); }, []);
+     * // => [4, 5, 2, 3, 0, 1]
+     */
+    function reduceRight(collection, callback, accumulator, thisArg) {
+      var iterable = collection,
+          length = collection ? collection.length : 0,
+          noaccum = arguments.length < 3;
+
+      if (typeof length != 'number') {
+        var props = keys(collection);
+        length = props.length;
+      }
+      callback = lodash.createCallback(callback, thisArg, 4);
+      forEach(collection, function(value, index, collection) {
+        index = props ? props[--length] : --length;
+        accumulator = noaccum
+          ? (noaccum = false, iterable[index])
+          : callback(accumulator, iterable[index], index, collection);
+      });
+      return accumulator;
+    }
+
+    /**
+     * The opposite of `_.filter`, this method returns the elements of a
+     * `collection` that `callback` does **not** return truthy for.
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new array of elements that did **not** pass the
+     *  callback check.
+     * @example
+     *
+     * var odds = _.reject([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+     * // => [1, 3, 5]
+     *
+     * var food = [
+     *   { 'name': 'apple',  'organic': false, 'type': 'fruit' },
+     *   { 'name': 'carrot', 'organic': true,  'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.reject(food, 'organic');
+     * // => [{ 'name': 'apple', 'organic': false, 'type': 'fruit' }]
+     *
+     * // using "_.where" callback shorthand
+     * _.reject(food, { 'type': 'fruit' });
+     * // => [{ 'name': 'carrot', 'organic': true, 'type': 'vegetable' }]
+     */
+    function reject(collection, callback, thisArg) {
+      callback = lodash.createCallback(callback, thisArg);
+      return filter(collection, function(value, index, collection) {
+        return !callback(value, index, collection);
+      });
+    }
+
+    /**
+     * Creates an array of shuffled `array` values, using a version of the
+     * Fisher-Yates shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to shuffle.
+     * @returns {Array} Returns a new shuffled collection.
+     * @example
+     *
+     * _.shuffle([1, 2, 3, 4, 5, 6]);
+     * // => [4, 1, 6, 3, 5, 2]
+     */
+    function shuffle(collection) {
+      var index = -1,
+          length = collection ? collection.length : 0,
+          result = Array(typeof length == 'number' ? length : 0);
+
+      forEach(collection, function(value) {
+        var rand = floor(nativeRandom() * (++index + 1));
+        result[index] = result[rand];
+        result[rand] = value;
+      });
+      return result;
+    }
+
+    /**
+     * Gets the size of the `collection` by returning `collection.length` for arrays
+     * and array-like objects or the number of own enumerable properties for objects.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to inspect.
+     * @returns {Number} Returns `collection.length` or number of own enumerable properties.
+     * @example
+     *
+     * _.size([1, 2]);
+     * // => 2
+     *
+     * _.size({ 'one': 1, 'two': 2, 'three': 3 });
+     * // => 3
+     *
+     * _.size('curly');
+     * // => 5
+     */
+    function size(collection) {
+      var length = collection ? collection.length : 0;
+      return typeof length == 'number' ? length : keys(collection).length;
+    }
+
+    /**
+     * Checks if the `callback` returns a truthy value for **any** element of a
+     * `collection`. The function returns as soon as it finds passing value, and
+     * does not iterate over the entire `collection`. The `callback` is bound to
+     * `thisArg` and invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias any
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Boolean} Returns `true` if any element passes the callback check,
+     *  else `false`.
+     * @example
+     *
+     * _.some([null, 0, 'yes', false], Boolean);
+     * // => true
+     *
+     * var food = [
+     *   { 'name': 'apple',  'organic': false, 'type': 'fruit' },
+     *   { 'name': 'carrot', 'organic': true,  'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.some(food, 'organic');
+     * // => true
+     *
+     * // using "_.where" callback shorthand
+     * _.some(food, { 'type': 'meat' });
+     * // => false
+     */
+    function some(collection, callback, thisArg) {
+      var result;
+      callback = lodash.createCallback(callback, thisArg);
+
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        while (++index < length) {
+          if ((result = callback(collection[index], index, collection))) {
+            break;
+          }
+        }
+      } else {
+        forOwn(collection, function(value, index, collection) {
+          return !(result = callback(value, index, collection));
+        });
+      }
+      return !!result;
+    }
+
+    /**
+     * Creates an array of elements, sorted in ascending order by the results of
+     * running each element in the `collection` through the `callback`. This method
+     * performs a stable sort, that is, it will preserve the original sort order of
+     * equal elements. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index|key, collection).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new array of sorted elements.
+     * @example
+     *
+     * _.sortBy([1, 2, 3], function(num) { return Math.sin(num); });
+     * // => [3, 1, 2]
+     *
+     * _.sortBy([1, 2, 3], function(num) { return this.sin(num); }, Math);
+     * // => [3, 1, 2]
+     *
+     * // using "_.pluck" callback shorthand
+     * _.sortBy(['banana', 'strawberry', 'apple'], 'length');
+     * // => ['apple', 'banana', 'strawberry']
+     */
+    function sortBy(collection, callback, thisArg) {
+      var index = -1,
+          length = collection ? collection.length : 0,
+          result = Array(typeof length == 'number' ? length : 0);
+
+      callback = lodash.createCallback(callback, thisArg);
+      forEach(collection, function(value, key, collection) {
+        result[++index] = {
+          'criteria': callback(value, key, collection),
+          'index': index,
+          'value': value
+        };
+      });
+
+      length = result.length;
+      result.sort(compareAscending);
+      while (length--) {
+        result[length] = result[length].value;
+      }
+      return result;
+    }
+
+    /**
+     * Converts the `collection` to an array.
+     *
+     * @static
+     * @memberOf _
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to convert.
+     * @returns {Array} Returns the new converted array.
+     * @example
+     *
+     * (function() { return _.toArray(arguments).slice(1); })(1, 2, 3, 4);
+     * // => [2, 3, 4]
+     */
+    function toArray(collection) {
+      if (collection && typeof collection.length == 'number') {
+        return slice(collection);
+      }
+      return values(collection);
+    }
+
+    /**
+     * Examines each element in a `collection`, returning an array of all elements
+     * that have the given `properties`. When checking `properties`, this method
+     * performs a deep comparison between values to determine if they are equivalent
+     * to each other.
+     *
+     * @static
+     * @memberOf _
+     * @type Function
+     * @category Collections
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Object} properties The object of property values to filter by.
+     * @returns {Array} Returns a new array of elements that have the given `properties`.
+     * @example
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * _.where(stooges, { 'age': 40 });
+     * // => [{ 'name': 'moe', 'age': 40 }]
+     */
+    var where = filter;
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Creates an array with all falsey values of `array` removed. The values
+     * `false`, `null`, `0`, `""`, `undefined` and `NaN` are all falsey.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to compact.
+     * @returns {Array} Returns a new filtered array.
+     * @example
+     *
+     * _.compact([0, 1, false, 2, '', 3]);
+     * // => [1, 2, 3]
+     */
+    function compact(array) {
+      var index = -1,
+          length = array ? array.length : 0,
+          result = [];
+
+      while (++index < length) {
+        var value = array[index];
+        if (value) {
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Creates an array of `array` elements not present in the other arrays
+     * using strict equality for comparisons, i.e. `===`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to process.
+     * @param {Array} [array1, array2, ...] Arrays to check.
+     * @returns {Array} Returns a new array of `array` elements not present in the
+     *  other arrays.
+     * @example
+     *
+     * _.difference([1, 2, 3, 4, 5], [5, 2, 10]);
+     * // => [1, 3, 4]
+     */
+    function difference(array) {
+      var index = -1,
+          length = array ? array.length : 0,
+          flattened = concat.apply(arrayRef, arguments),
+          contains = cachedContains(flattened, length, 100),
+          result = [];
+
+      while (++index < length) {
+        var value = array[index];
+        if (!contains(value)) {
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * This method is similar to `_.find`, except that it returns the index of
+     * the element that passes the callback check, instead of the element itself.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array|Object|String} collection The collection to iterate over.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the index of the found element, else `-1`.
+     * @example
+     *
+     * _.findIndex(['apple', 'banana', 'beet'], function(food) { return /^b/.test(food); });
+     * // => 1
+     */
+    function findIndex(collection, callback, thisArg) {
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      callback = lodash.createCallback(callback, thisArg);
+      while (++index < length) {
+        if (callback(collection[index], index, collection)) {
+          return index;
+        }
+      }
+      return -1;
+    }
+
+    /**
+     * Gets the first element of the `array`. If a number `n` is passed, the first
+     * `n` elements of the `array` are returned. If a `callback` function is passed,
+     * elements at the beginning of the array are returned as long as the `callback`
+     * returns truthy. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index, array).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias head, take
+     * @category Arrays
+     * @param {Array} array The array to query.
+     * @param {Function|Object|Number|String} [callback|n] The function called
+     *  per element or the number of elements to return. If a property name or
+     *  object is passed, it will be used to create a "_.pluck" or "_.where"
+     *  style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the first element(s) of `array`.
+     * @example
+     *
+     * _.first([1, 2, 3]);
+     * // => 1
+     *
+     * _.first([1, 2, 3], 2);
+     * // => [1, 2]
+     *
+     * _.first([1, 2, 3], function(num) {
+     *   return num < 3;
+     * });
+     * // => [1, 2]
+     *
+     * var food = [
+     *   { 'name': 'banana', 'organic': true },
+     *   { 'name': 'beet',   'organic': false },
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.first(food, 'organic');
+     * // => [{ 'name': 'banana', 'organic': true }]
+     *
+     * var food = [
+     *   { 'name': 'apple',  'type': 'fruit' },
+     *   { 'name': 'banana', 'type': 'fruit' },
+     *   { 'name': 'beet',   'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.where" callback shorthand
+     * _.first(food, { 'type': 'fruit' });
+     * // => [{ 'name': 'apple', 'type': 'fruit' }, { 'name': 'banana', 'type': 'fruit' }]
+     */
+    function first(array, callback, thisArg) {
+      if (array) {
+        var n = 0,
+            length = array.length;
+
+        if (typeof callback != 'number' && callback != null) {
+          var index = -1;
+          callback = lodash.createCallback(callback, thisArg);
+          while (++index < length && callback(array[index], index, array)) {
+            n++;
+          }
+        } else {
+          n = callback;
+          if (n == null || thisArg) {
+            return array[0];
+          }
+        }
+        return slice(array, 0, nativeMin(nativeMax(0, n), length));
+      }
+    }
+
+    /**
+     * Flattens a nested array (the nesting can be to any depth). If `isShallow`
+     * is truthy, `array` will only be flattened a single level. If `callback`
+     * is passed, each element of `array` is passed through a callback` before
+     * flattening. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index, array).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to compact.
+     * @param {Boolean} [isShallow=false] A flag to indicate only flattening a single level.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new flattened array.
+     * @example
+     *
+     * _.flatten([1, [2], [3, [[4]]]]);
+     * // => [1, 2, 3, 4];
+     *
+     * _.flatten([1, [2], [3, [[4]]]], true);
+     * // => [1, 2, 3, [[4]]];
+     *
+     * var stooges = [
+     *   { 'name': 'curly', 'quotes': ['Oh, a wise guy, eh?', 'Poifect!'] },
+     *   { 'name': 'moe', 'quotes': ['Spread out!', 'You knucklehead!'] }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.flatten(stooges, 'quotes');
+     * // => ['Oh, a wise guy, eh?', 'Poifect!', 'Spread out!', 'You knucklehead!']
+     */
+    function flatten(array, isShallow, callback, thisArg) {
+      var index = -1,
+          length = array ? array.length : 0,
+          result = [];
+
+      // juggle arguments
+      if (typeof isShallow != 'boolean' && isShallow != null) {
+        thisArg = callback;
+        callback = isShallow;
+        isShallow = false;
+      }
+      if (callback != null) {
+        callback = lodash.createCallback(callback, thisArg);
+      }
+      while (++index < length) {
+        var value = array[index];
+        if (callback) {
+          value = callback(value, index, array);
+        }
+        // recursively flatten arrays (susceptible to call stack limits)
+        if (isArray(value)) {
+          push.apply(result, isShallow ? value : flatten(value));
+        } else {
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Gets the index at which the first occurrence of `value` is found using
+     * strict equality for comparisons, i.e. `===`. If the `array` is already
+     * sorted, passing `true` for `fromIndex` will run a faster binary search.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to search.
+     * @param {Mixed} value The value to search for.
+     * @param {Boolean|Number} [fromIndex=0] The index to search from or `true` to
+     *  perform a binary search on a sorted `array`.
+     * @returns {Number} Returns the index of the matched value or `-1`.
+     * @example
+     *
+     * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+     * // => 1
+     *
+     * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+     * // => 4
+     *
+     * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+     * // => 2
+     */
+    function indexOf(array, value, fromIndex) {
+      var index = -1,
+          length = array ? array.length : 0;
+
+      if (typeof fromIndex == 'number') {
+        index = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0) - 1;
+      } else if (fromIndex) {
+        index = sortedIndex(array, value);
+        return array[index] === value ? index : -1;
+      }
+      while (++index < length) {
+        if (array[index] === value) {
+          return index;
+        }
+      }
+      return -1;
+    }
+
+    /**
+     * Gets all but the last element of `array`. If a number `n` is passed, the
+     * last `n` elements are excluded from the result. If a `callback` function
+     * is passed, elements at the end of the array are excluded from the result
+     * as long as the `callback` returns truthy. The `callback` is bound to
+     * `thisArg` and invoked with three arguments; (value, index, array).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to query.
+     * @param {Function|Object|Number|String} [callback|n=1] The function called
+     *  per element or the number of elements to exclude. If a property name or
+     *  object is passed, it will be used to create a "_.pluck" or "_.where"
+     *  style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a slice of `array`.
+     * @example
+     *
+     * _.initial([1, 2, 3]);
+     * // => [1, 2]
+     *
+     * _.initial([1, 2, 3], 2);
+     * // => [1]
+     *
+     * _.initial([1, 2, 3], function(num) {
+     *   return num > 1;
+     * });
+     * // => [1]
+     *
+     * var food = [
+     *   { 'name': 'beet',   'organic': false },
+     *   { 'name': 'carrot', 'organic': true }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.initial(food, 'organic');
+     * // => [{ 'name': 'beet',   'organic': false }]
+     *
+     * var food = [
+     *   { 'name': 'banana', 'type': 'fruit' },
+     *   { 'name': 'beet',   'type': 'vegetable' },
+     *   { 'name': 'carrot', 'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.where" callback shorthand
+     * _.initial(food, { 'type': 'vegetable' });
+     * // => [{ 'name': 'banana', 'type': 'fruit' }]
+     */
+    function initial(array, callback, thisArg) {
+      if (!array) {
+        return [];
+      }
+      var n = 0,
+          length = array.length;
+
+      if (typeof callback != 'number' && callback != null) {
+        var index = length;
+        callback = lodash.createCallback(callback, thisArg);
+        while (index-- && callback(array[index], index, array)) {
+          n++;
+        }
+      } else {
+        n = (callback == null || thisArg) ? 1 : callback || n;
+      }
+      return slice(array, 0, nativeMin(nativeMax(0, length - n), length));
+    }
+
+    /**
+     * Computes the intersection of all the passed-in arrays using strict equality
+     * for comparisons, i.e. `===`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} [array1, array2, ...] Arrays to process.
+     * @returns {Array} Returns a new array of unique elements that are present
+     *  in **all** of the arrays.
+     * @example
+     *
+     * _.intersection([1, 2, 3], [101, 2, 1, 10], [2, 1]);
+     * // => [1, 2]
+     */
+    function intersection(array) {
+      var args = arguments,
+          argsLength = args.length,
+          cache = { '0': {} },
+          index = -1,
+          length = array ? array.length : 0,
+          isLarge = length >= 100,
+          result = [],
+          seen = result;
+
+      outer:
+      while (++index < length) {
+        var value = array[index];
+        if (isLarge) {
+          var key = String(value);
+          var inited = hasOwnProperty.call(cache[0], key)
+            ? !(seen = cache[0][key])
+            : (seen = cache[0][key] = []);
+        }
+        if (inited || indexOf(seen, value) < 0) {
+          if (isLarge) {
+            seen.push(value);
+          }
+          var argsIndex = argsLength;
+          while (--argsIndex) {
+            if (!(cache[argsIndex] || (cache[argsIndex] = cachedContains(args[argsIndex], 0, 100)))(value)) {
+              continue outer;
+            }
+          }
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Gets the last element of the `array`. If a number `n` is passed, the
+     * last `n` elements of the `array` are returned. If a `callback` function
+     * is passed, elements at the end of the array are returned as long as the
+     * `callback` returns truthy. The `callback` is bound to `thisArg` and
+     * invoked with three arguments;(value, index, array).
+     *
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to query.
+     * @param {Function|Object|Number|String} [callback|n] The function called
+     *  per element or the number of elements to return. If a property name or
+     *  object is passed, it will be used to create a "_.pluck" or "_.where"
+     *  style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Mixed} Returns the last element(s) of `array`.
+     * @example
+     *
+     * _.last([1, 2, 3]);
+     * // => 3
+     *
+     * _.last([1, 2, 3], 2);
+     * // => [2, 3]
+     *
+     * _.last([1, 2, 3], function(num) {
+     *   return num > 1;
+     * });
+     * // => [2, 3]
+     *
+     * var food = [
+     *   { 'name': 'beet',   'organic': false },
+     *   { 'name': 'carrot', 'organic': true }
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.last(food, 'organic');
+     * // => [{ 'name': 'carrot', 'organic': true }]
+     *
+     * var food = [
+     *   { 'name': 'banana', 'type': 'fruit' },
+     *   { 'name': 'beet',   'type': 'vegetable' },
+     *   { 'name': 'carrot', 'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.where" callback shorthand
+     * _.last(food, { 'type': 'vegetable' });
+     * // => [{ 'name': 'beet', 'type': 'vegetable' }, { 'name': 'carrot', 'type': 'vegetable' }]
+     */
+    function last(array, callback, thisArg) {
+      if (array) {
+        var n = 0,
+            length = array.length;
+
+        if (typeof callback != 'number' && callback != null) {
+          var index = length;
+          callback = lodash.createCallback(callback, thisArg);
+          while (index-- && callback(array[index], index, array)) {
+            n++;
+          }
+        } else {
+          n = callback;
+          if (n == null || thisArg) {
+            return array[length - 1];
+          }
+        }
+        return slice(array, nativeMax(0, length - n));
+      }
+    }
+
+    /**
+     * Gets the index at which the last occurrence of `value` is found using strict
+     * equality for comparisons, i.e. `===`. If `fromIndex` is negative, it is used
+     * as the offset from the end of the collection.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to search.
+     * @param {Mixed} value The value to search for.
+     * @param {Number} [fromIndex=array.length-1] The index to search from.
+     * @returns {Number} Returns the index of the matched value or `-1`.
+     * @example
+     *
+     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2);
+     * // => 4
+     *
+     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2, 3);
+     * // => 1
+     */
+    function lastIndexOf(array, value, fromIndex) {
+      var index = array ? array.length : 0;
+      if (typeof fromIndex == 'number') {
+        index = (fromIndex < 0 ? nativeMax(0, index + fromIndex) : nativeMin(fromIndex, index - 1)) + 1;
+      }
+      while (index--) {
+        if (array[index] === value) {
+          return index;
+        }
+      }
+      return -1;
+    }
+
+    /**
+     * Creates an array of numbers (positive and/or negative) progressing from
+     * `start` up to but not including `end`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Number} [start=0] The start of the range.
+     * @param {Number} end The end of the range.
+     * @param {Number} [step=1] The value to increment or decrement by.
+     * @returns {Array} Returns a new range array.
+     * @example
+     *
+     * _.range(10);
+     * // => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+     *
+     * _.range(1, 11);
+     * // => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+     *
+     * _.range(0, 30, 5);
+     * // => [0, 5, 10, 15, 20, 25]
+     *
+     * _.range(0, -10, -1);
+     * // => [0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
+     *
+     * _.range(0);
+     * // => []
+     */
+    function range(start, end, step) {
+      start = +start || 0;
+      step = +step || 1;
+
+      if (end == null) {
+        end = start;
+        start = 0;
+      }
+      // use `Array(length)` so V8 will avoid the slower "dictionary" mode
+      // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+      var index = -1,
+          length = nativeMax(0, ceil((end - start) / step)),
+          result = Array(length);
+
+      while (++index < length) {
+        result[index] = start;
+        start += step;
+      }
+      return result;
+    }
+
+    /**
+     * The opposite of `_.initial`, this method gets all but the first value of
+     * `array`. If a number `n` is passed, the first `n` values are excluded from
+     * the result. If a `callback` function is passed, elements at the beginning
+     * of the array are excluded from the result as long as the `callback` returns
+     * truthy. The `callback` is bound to `thisArg` and invoked with three
+     * arguments; (value, index, array).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias drop, tail
+     * @category Arrays
+     * @param {Array} array The array to query.
+     * @param {Function|Object|Number|String} [callback|n=1] The function called
+     *  per element or the number of elements to exclude. If a property name or
+     *  object is passed, it will be used to create a "_.pluck" or "_.where"
+     *  style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a slice of `array`.
+     * @example
+     *
+     * _.rest([1, 2, 3]);
+     * // => [2, 3]
+     *
+     * _.rest([1, 2, 3], 2);
+     * // => [3]
+     *
+     * _.rest([1, 2, 3], function(num) {
+     *   return num < 3;
+     * });
+     * // => [3]
+     *
+     * var food = [
+     *   { 'name': 'banana', 'organic': true },
+     *   { 'name': 'beet',   'organic': false },
+     * ];
+     *
+     * // using "_.pluck" callback shorthand
+     * _.rest(food, 'organic');
+     * // => [{ 'name': 'beet', 'organic': false }]
+     *
+     * var food = [
+     *   { 'name': 'apple',  'type': 'fruit' },
+     *   { 'name': 'banana', 'type': 'fruit' },
+     *   { 'name': 'beet',   'type': 'vegetable' }
+     * ];
+     *
+     * // using "_.where" callback shorthand
+     * _.rest(food, { 'type': 'fruit' });
+     * // => [{ 'name': 'beet', 'type': 'vegetable' }]
+     */
+    function rest(array, callback, thisArg) {
+      if (typeof callback != 'number' && callback != null) {
+        var n = 0,
+            index = -1,
+            length = array ? array.length : 0;
+
+        callback = lodash.createCallback(callback, thisArg);
+        while (++index < length && callback(array[index], index, array)) {
+          n++;
+        }
+      } else {
+        n = (callback == null || thisArg) ? 1 : nativeMax(0, callback);
+      }
+      return slice(array, n);
+    }
+
+    /**
+     * Uses a binary search to determine the smallest index at which the `value`
+     * should be inserted into `array` in order to maintain the sort order of the
+     * sorted `array`. If `callback` is passed, it will be executed for `value` and
+     * each element in `array` to compute their sort ranking. The `callback` is
+     * bound to `thisArg` and invoked with one argument; (value).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to iterate over.
+     * @param {Mixed} value The value to evaluate.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Number} Returns the index at which the value should be inserted
+     *  into `array`.
+     * @example
+     *
+     * _.sortedIndex([20, 30, 50], 40);
+     * // => 2
+     *
+     * // using "_.pluck" callback shorthand
+     * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+     * // => 2
+     *
+     * var dict = {
+     *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+     * };
+     *
+     * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+     *   return dict.wordToNumber[word];
+     * });
+     * // => 2
+     *
+     * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+     *   return this.wordToNumber[word];
+     * }, dict);
+     * // => 2
+     */
+    function sortedIndex(array, value, callback, thisArg) {
+      var low = 0,
+          high = array ? array.length : low;
+
+      // explicitly reference `identity` for better inlining in Firefox
+      callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
+      value = callback(value);
+
+      while (low < high) {
+        var mid = (low + high) >>> 1;
+        (callback(array[mid]) < value)
+          ? low = mid + 1
+          : high = mid;
+      }
+      return low;
+    }
+
+    /**
+     * Computes the union of the passed-in arrays using strict equality for
+     * comparisons, i.e. `===`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} [array1, array2, ...] Arrays to process.
+     * @returns {Array} Returns a new array of unique values, in order, that are
+     *  present in one or more of the arrays.
+     * @example
+     *
+     * _.union([1, 2, 3], [101, 2, 1, 10], [2, 1]);
+     * // => [1, 2, 3, 101, 10]
+     */
+    function union() {
+      return uniq(concat.apply(arrayRef, arguments));
+    }
+
+    /**
+     * Creates a duplicate-value-free version of the `array` using strict equality
+     * for comparisons, i.e. `===`. If the `array` is already sorted, passing `true`
+     * for `isSorted` will run a faster algorithm. If `callback` is passed, each
+     * element of `array` is passed through a callback` before uniqueness is computed.
+     * The `callback` is bound to `thisArg` and invoked with three arguments; (value, index, array).
+     *
+     * If a property name is passed for `callback`, the created "_.pluck" style
+     * callback will return the property value of the given element.
+     *
+     * If an object is passed for `callback`, the created "_.where" style callback
+     * will return `true` for elements that have the properties of the given object,
+     * else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias unique
+     * @category Arrays
+     * @param {Array} array The array to process.
+     * @param {Boolean} [isSorted=false] A flag to indicate that the `array` is already sorted.
+     * @param {Function|Object|String} [callback=identity] The function called per
+     *  iteration. If a property name or object is passed, it will be used to create
+     *  a "_.pluck" or "_.where" style callback, respectively.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a duplicate-value-free array.
+     * @example
+     *
+     * _.uniq([1, 2, 1, 3, 1]);
+     * // => [1, 2, 3]
+     *
+     * _.uniq([1, 1, 2, 2, 3], true);
+     * // => [1, 2, 3]
+     *
+     * _.uniq([1, 2, 1.5, 3, 2.5], function(num) { return Math.floor(num); });
+     * // => [1, 2, 3]
+     *
+     * _.uniq([1, 2, 1.5, 3, 2.5], function(num) { return this.floor(num); }, Math);
+     * // => [1, 2, 3]
+     *
+     * // using "_.pluck" callback shorthand
+     * _.uniq([{ 'x': 1 }, { 'x': 2 }, { 'x': 1 }], 'x');
+     * // => [{ 'x': 1 }, { 'x': 2 }]
+     */
+    function uniq(array, isSorted, callback, thisArg) {
+      var index = -1,
+          length = array ? array.length : 0,
+          result = [],
+          seen = result;
+
+      // juggle arguments
+      if (typeof isSorted != 'boolean' && isSorted != null) {
+        thisArg = callback;
+        callback = isSorted;
+        isSorted = false;
+      }
+      // init value cache for large arrays
+      var isLarge = !isSorted && length >= 75;
+      if (isLarge) {
+        var cache = {};
+      }
+      if (callback != null) {
+        seen = [];
+        callback = lodash.createCallback(callback, thisArg);
+      }
+      while (++index < length) {
+        var value = array[index],
+            computed = callback ? callback(value, index, array) : value;
+
+        if (isLarge) {
+          var key = String(computed);
+          var inited = hasOwnProperty.call(cache, key)
+            ? !(seen = cache[key])
+            : (seen = cache[key] = []);
+        }
+        if (isSorted
+              ? !index || seen[seen.length - 1] !== computed
+              : inited || indexOf(seen, computed) < 0
+            ) {
+          if (callback || isLarge) {
+            seen.push(computed);
+          }
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Creates an array with all occurrences of the passed values removed using
+     * strict equality for comparisons, i.e. `===`.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} array The array to filter.
+     * @param {Mixed} [value1, value2, ...] Values to remove.
+     * @returns {Array} Returns a new filtered array.
+     * @example
+     *
+     * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+     * // => [2, 3, 4]
+     */
+    function without(array) {
+      var index = -1,
+          length = array ? array.length : 0,
+          contains = cachedContains(arguments, 1, 30),
+          result = [];
+
+      while (++index < length) {
+        var value = array[index];
+        if (!contains(value)) {
+          result.push(value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Groups the elements of each array at their corresponding indexes. Useful for
+     * separate data sources that are coordinated through matching array indexes.
+     * For a matrix of nested arrays, `_.zip.apply(...)` can transpose the matrix
+     * in a similar fashion.
+     *
+     * @static
+     * @memberOf _
+     * @category Arrays
+     * @param {Array} [array1, array2, ...] Arrays to process.
+     * @returns {Array} Returns a new array of grouped elements.
+     * @example
+     *
+     * _.zip(['moe', 'larry'], [30, 40], [true, false]);
+     * // => [['moe', 30, true], ['larry', 40, false]]
+     */
+    function zip(array) {
+      var index = -1,
+          length = array ? max(pluck(arguments, 'length')) : 0,
+          result = Array(length);
+
+      while (++index < length) {
+        result[index] = pluck(arguments, index);
+      }
+      return result;
+    }
+
+    /**
+     * Creates an object composed from arrays of `keys` and `values`. Pass either
+     * a single two dimensional array, i.e. `[[key1, value1], [key2, value2]]`, or
+     * two arrays, one of `keys` and one of corresponding `values`.
+     *
+     * @static
+     * @memberOf _
+     * @alias object
+     * @category Arrays
+     * @param {Array} keys The array of keys.
+     * @param {Array} [values=[]] The array of values.
+     * @returns {Object} Returns an object composed of the given keys and
+     *  corresponding values.
+     * @example
+     *
+     * _.zipObject(['moe', 'larry'], [30, 40]);
+     * // => { 'moe': 30, 'larry': 40 }
+     */
+    function zipObject(keys, values) {
+      var index = -1,
+          length = keys ? keys.length : 0,
+          result = {};
+
+      while (++index < length) {
+        var key = keys[index];
+        if (values) {
+          result[key] = values[index];
+        } else {
+          result[key[0]] = key[1];
+        }
+      }
+      return result;
+    }
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * If `n` is greater than `0`, a function is created that is restricted to
+     * executing `func`, with the `this` binding and arguments of the created
+     * function, only after it is called `n` times. If `n` is less than `1`,
+     * `func` is executed immediately, without a `this` binding or additional
+     * arguments, and its result is returned.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Number} n The number of times the function must be called before
+     * it is executed.
+     * @param {Function} func The function to restrict.
+     * @returns {Function} Returns the new restricted function.
+     * @example
+     *
+     * var renderNotes = _.after(notes.length, render);
+     * _.forEach(notes, function(note) {
+     *   note.asyncSave({ 'success': renderNotes });
+     * });
+     * // `renderNotes` is run once, after all notes have saved
+     */
+    function after(n, func) {
+      if (n < 1) {
+        return func();
+      }
+      return function() {
+        if (--n < 1) {
+          return func.apply(this, arguments);
+        }
+      };
+    }
+
+    /**
+     * Creates a function that, when called, invokes `func` with the `this`
+     * binding of `thisArg` and prepends any additional `bind` arguments to those
+     * passed to the bound function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to bind.
+     * @param {Mixed} [thisArg] The `this` binding of `func`.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
+     * @returns {Function} Returns the new bound function.
+     * @example
+     *
+     * var func = function(greeting) {
+     *   return greeting + ' ' + this.name;
+     * };
+     *
+     * func = _.bind(func, { 'name': 'moe' }, 'hi');
+     * func();
+     * // => 'hi moe'
+     */
+    function bind(func, thisArg) {
+      // use `Function#bind` if it exists and is fast
+      // (in V8 `Function#bind` is slower except when partially applied)
+      return support.fastBind || (nativeBind && arguments.length > 2)
+        ? nativeBind.call.apply(nativeBind, arguments)
+        : createBound(func, thisArg, slice(arguments, 2));
+    }
+
+    /**
+     * Binds methods on `object` to `object`, overwriting the existing method.
+     * Method names may be specified as individual arguments or as arrays of method
+     * names. If no method names are provided, all the function properties of `object`
+     * will be bound.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Object} object The object to bind and assign the bound methods to.
+     * @param {String} [methodName1, methodName2, ...] Method names on the object to bind.
+     * @returns {Object} Returns `object`.
+     * @example
+     *
+     * var view = {
+     *  'label': 'docs',
+     *  'onClick': function() { alert('clicked ' + this.label); }
+     * };
+     *
+     * _.bindAll(view);
+     * jQuery('#docs').on('click', view.onClick);
+     * // => alerts 'clicked docs', when the button is clicked
+     */
+    function bindAll(object) {
+      var funcs = concat.apply(arrayRef, arguments),
+          index = funcs.length > 1 ? 0 : (funcs = functions(object), -1),
+          length = funcs.length;
+
+      while (++index < length) {
+        var key = funcs[index];
+        object[key] = bind(object[key], object);
+      }
+      return object;
+    }
+
+    /**
+     * Creates a function that, when called, invokes the method at `object[key]`
+     * and prepends any additional `bindKey` arguments to those passed to the bound
+     * function. This method differs from `_.bind` by allowing bound functions to
+     * reference methods that will be redefined or don't yet exist.
+     * See http://michaux.ca/articles/lazy-function-definition-pattern.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Object} object The object the method belongs to.
+     * @param {String} key The key of the method.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
+     * @returns {Function} Returns the new bound function.
+     * @example
+     *
+     * var object = {
+     *   'name': 'moe',
+     *   'greet': function(greeting) {
+     *     return greeting + ' ' + this.name;
+     *   }
+     * };
+     *
+     * var func = _.bindKey(object, 'greet', 'hi');
+     * func();
+     * // => 'hi moe'
+     *
+     * object.greet = function(greeting) {
+     *   return greeting + ', ' + this.name + '!';
+     * };
+     *
+     * func();
+     * // => 'hi, moe!'
+     */
+    function bindKey(object, key) {
+      return createBound(object, key, slice(arguments, 2), indicatorObject);
+    }
+
+    /**
+     * Creates a function that is the composition of the passed functions,
+     * where each function consumes the return value of the function that follows.
+     * For example, composing the functions `f()`, `g()`, and `h()` produces `f(g(h()))`.
+     * Each function is executed with the `this` binding of the composed function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} [func1, func2, ...] Functions to compose.
+     * @returns {Function} Returns the new composed function.
+     * @example
+     *
+     * var greet = function(name) { return 'hi ' + name; };
+     * var exclaim = function(statement) { return statement + '!'; };
+     * var welcome = _.compose(exclaim, greet);
+     * welcome('moe');
+     * // => 'hi moe!'
+     */
+    function compose() {
+      var funcs = arguments;
+      return function() {
+        var args = arguments,
+            length = funcs.length;
+
+        while (length--) {
+          args = [funcs[length].apply(this, args)];
+        }
+        return args[0];
+      };
+    }
+
+    /**
+     * Produces a callback bound to an optional `thisArg`. If `func` is a property
+     * name, the created callback will return the property value for a given element.
+     * If `func` is an object, the created callback will return `true` for elements
+     * that contain the equivalent object properties, otherwise it will return `false`.
+     *
+     * Note: All Lo-Dash methods, that accept a `callback` argument, use `_.createCallback`.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Mixed} [func=identity] The value to convert to a callback.
+     * @param {Mixed} [thisArg] The `this` binding of the created callback.
+     * @param {Number} [argCount=3] The number of arguments the callback accepts.
+     * @returns {Function} Returns a callback function.
+     * @example
+     *
+     * var stooges = [
+     *   { 'name': 'moe', 'age': 40 },
+     *   { 'name': 'larry', 'age': 50 }
+     * ];
+     *
+     * // wrap to create custom callback shorthands
+     * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
+     *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
+     *   return !match ? func(callback, thisArg) : function(object) {
+     *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+     *   };
+     * });
+     *
+     * _.filter(stooges, 'age__gt45');
+     * // => [{ 'name': 'larry', 'age': 50 }]
+     *
+     * // create mixins with support for "_.pluck" and "_.where" callback shorthands
+     * _.mixin({
+     *   'toLookup': function(collection, callback, thisArg) {
+     *     callback = _.createCallback(callback, thisArg);
+     *     return _.reduce(collection, function(result, value, index, collection) {
+     *       return (result[callback(value, index, collection)] = value, result);
+     *     }, {});
+     *   }
+     * });
+     *
+     * _.toLookup(stooges, 'name');
+     * // => { 'moe': { 'name': 'moe', 'age': 40 }, 'larry': { 'name': 'larry', 'age': 50 } }
+     */
+    function createCallback(func, thisArg, argCount) {
+      if (func == null) {
+        return identity;
+      }
+      var type = typeof func;
+      if (type != 'function') {
+        if (type != 'object') {
+          return function(object) {
+            return object[func];
+          };
+        }
+        var props = keys(func);
+        return function(object) {
+          var length = props.length,
+              result = false;
+          while (length--) {
+            if (!(result = isEqual(object[props[length]], func[props[length]], indicatorObject))) {
+              break;
+            }
+          }
+          return result;
+        };
+      }
+      if (typeof thisArg != 'undefined') {
+        if (argCount === 1) {
+          return function(value) {
+            return func.call(thisArg, value);
+          };
+        }
+        if (argCount === 2) {
+          return function(a, b) {
+            return func.call(thisArg, a, b);
+          };
+        }
+        if (argCount === 4) {
+          return function(accumulator, value, index, collection) {
+            return func.call(thisArg, accumulator, value, index, collection);
+          };
+        }
+        return function(value, index, collection) {
+          return func.call(thisArg, value, index, collection);
+        };
+      }
+      return func;
+    }
+
+    /**
+     * Creates a function that will delay the execution of `func` until after
+     * `wait` milliseconds have elapsed since the last time it was invoked. Pass
+     * `true` for `immediate` to cause debounce to invoke `func` on the leading,
+     * instead of the trailing, edge of the `wait` timeout. Subsequent calls to
+     * the debounced function will return the result of the last `func` call.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to debounce.
+     * @param {Number} wait The number of milliseconds to delay.
+     * @param {Boolean} immediate A flag to indicate execution is on the leading
+     *  edge of the timeout.
+     * @returns {Function} Returns the new debounced function.
+     * @example
+     *
+     * var lazyLayout = _.debounce(calculateLayout, 300);
+     * jQuery(window).on('resize', lazyLayout);
+     */
+    function debounce(func, wait, immediate) {
+      var args,
+          result,
+          thisArg,
+          timeoutId;
+
+      function delayed() {
+        timeoutId = null;
+        if (!immediate) {
+          result = func.apply(thisArg, args);
+        }
+      }
+      return function() {
+        var isImmediate = immediate && !timeoutId;
+        args = arguments;
+        thisArg = this;
+
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(delayed, wait);
+
+        if (isImmediate) {
+          result = func.apply(thisArg, args);
+        }
+        return result;
+      };
+    }
+
+    /**
+     * Defers executing the `func` function until the current call stack has cleared.
+     * Additional arguments will be passed to `func` when it is invoked.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to defer.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the function with.
+     * @returns {Number} Returns the timer id.
+     * @example
+     *
+     * _.defer(function() { alert('deferred'); });
+     * // returns from the function before `alert` is called
+     */
+    function defer(func) {
+      var args = slice(arguments, 1);
+      return setTimeout(function() { func.apply(undefined, args); }, 1);
+    }
+    // use `setImmediate` if it's available in Node.js
+    if (isV8 && freeModule && typeof setImmediate == 'function') {
+      defer = bind(setImmediate, context);
+    }
+
+    /**
+     * Executes the `func` function after `wait` milliseconds. Additional arguments
+     * will be passed to `func` when it is invoked.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to delay.
+     * @param {Number} wait The number of milliseconds to delay execution.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the function with.
+     * @returns {Number} Returns the timer id.
+     * @example
+     *
+     * var log = _.bind(console.log, console);
+     * _.delay(log, 1000, 'logged later');
+     * // => 'logged later' (Appears after one second.)
+     */
+    function delay(func, wait) {
+      var args = slice(arguments, 2);
+      return setTimeout(function() { func.apply(undefined, args); }, wait);
+    }
+
+    /**
+     * Creates a function that memoizes the result of `func`. If `resolver` is
+     * passed, it will be used to determine the cache key for storing the result
+     * based on the arguments passed to the memoized function. By default, the first
+     * argument passed to the memoized function is used as the cache key. The `func`
+     * is executed with the `this` binding of the memoized function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to have its output memoized.
+     * @param {Function} [resolver] A function used to resolve the cache key.
+     * @returns {Function} Returns the new memoizing function.
+     * @example
+     *
+     * var fibonacci = _.memoize(function(n) {
+     *   return n < 2 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+     * });
+     */
+    function memoize(func, resolver) {
+      var cache = {};
+      return function() {
+        var key = String(resolver ? resolver.apply(this, arguments) : arguments[0]);
+        return hasOwnProperty.call(cache, key)
+          ? cache[key]
+          : (cache[key] = func.apply(this, arguments));
+      };
+    }
+
+    /**
+     * Creates a function that is restricted to execute `func` once. Repeat calls to
+     * the function will return the value of the first call. The `func` is executed
+     * with the `this` binding of the created function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to restrict.
+     * @returns {Function} Returns the new restricted function.
+     * @example
+     *
+     * var initialize = _.once(createApplication);
+     * initialize();
+     * initialize();
+     * // `initialize` executes `createApplication` once
+     */
+    function once(func) {
+      var ran,
+          result;
+
+      return function() {
+        if (ran) {
+          return result;
+        }
+        ran = true;
+        result = func.apply(this, arguments);
+
+        // clear the `func` variable so the function may be garbage collected
+        func = null;
+        return result;
+      };
+    }
+
+    /**
+     * Creates a function that, when called, invokes `func` with any additional
+     * `partial` arguments prepended to those passed to the new function. This
+     * method is similar to `_.bind`, except it does **not** alter the `this` binding.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to partially apply arguments to.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
+     * @returns {Function} Returns the new partially applied function.
+     * @example
+     *
+     * var greet = function(greeting, name) { return greeting + ' ' + name; };
+     * var hi = _.partial(greet, 'hi');
+     * hi('moe');
+     * // => 'hi moe'
+     */
+    function partial(func) {
+      return createBound(func, slice(arguments, 1));
+    }
+
+    /**
+     * This method is similar to `_.partial`, except that `partial` arguments are
+     * appended to those passed to the new function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to partially apply arguments to.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
+     * @returns {Function} Returns the new partially applied function.
+     * @example
+     *
+     * var defaultsDeep = _.partialRight(_.merge, _.defaults);
+     *
+     * var options = {
+     *   'variable': 'data',
+     *   'imports': { 'jq': $ }
+     * };
+     *
+     * defaultsDeep(options, _.templateSettings);
+     *
+     * options.variable
+     * // => 'data'
+     *
+     * options.imports
+     * // => { '_': _, 'jq': $ }
+     */
+    function partialRight(func) {
+      return createBound(func, slice(arguments, 1), null, indicatorObject);
+    }
+
+    /**
+     * Creates a function that, when executed, will only call the `func`
+     * function at most once per every `wait` milliseconds. If the throttled
+     * function is invoked more than once during the `wait` timeout, `func` will
+     * also be called on the trailing edge of the timeout. Subsequent calls to the
+     * throttled function will return the result of the last `func` call.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Function} func The function to throttle.
+     * @param {Number} wait The number of milliseconds to throttle executions to.
+     * @returns {Function} Returns the new throttled function.
+     * @example
+     *
+     * var throttled = _.throttle(updatePosition, 100);
+     * jQuery(window).on('scroll', throttled);
+     */
+    function throttle(func, wait) {
+      var args,
+          result,
+          thisArg,
+          timeoutId,
+          lastCalled = 0;
+
+      function trailingCall() {
+        lastCalled = new Date;
+        timeoutId = null;
+        result = func.apply(thisArg, args);
+      }
+      return function() {
+        var now = new Date,
+            remaining = wait - (now - lastCalled);
+
+        args = arguments;
+        thisArg = this;
+
+        if (remaining <= 0) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+          lastCalled = now;
+          result = func.apply(thisArg, args);
+        }
+        else if (!timeoutId) {
+          timeoutId = setTimeout(trailingCall, remaining);
+        }
+        return result;
+      };
+    }
+
+    /**
+     * Creates a function that passes `value` to the `wrapper` function as its
+     * first argument. Additional arguments passed to the function are appended
+     * to those passed to the `wrapper` function. The `wrapper` is executed with
+     * the `this` binding of the created function.
+     *
+     * @static
+     * @memberOf _
+     * @category Functions
+     * @param {Mixed} value The value to wrap.
+     * @param {Function} wrapper The wrapper function.
+     * @returns {Function} Returns the new function.
+     * @example
+     *
+     * var hello = function(name) { return 'hello ' + name; };
+     * hello = _.wrap(hello, function(func) {
+     *   return 'before, ' + func('moe') + ', after';
+     * });
+     * hello();
+     * // => 'before, hello moe, after'
+     */
+    function wrap(value, wrapper) {
+      return function() {
+        var args = [value];
+        push.apply(args, arguments);
+        return wrapper.apply(this, args);
+      };
+    }
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Converts the characters `&`, `<`, `>`, `"`, and `'` in `string` to their
+     * corresponding HTML entities.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {String} string The string to escape.
+     * @returns {String} Returns the escaped string.
+     * @example
+     *
+     * _.escape('Moe, Larry & Curly');
+     * // => 'Moe, Larry &amp; Curly'
+     */
+    function escape(string) {
+      return string == null ? '' : String(string).replace(reUnescapedHtml, escapeHtmlChar);
+    }
+
+    /**
+     * This function returns the first argument passed to it.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Mixed} value Any value.
+     * @returns {Mixed} Returns `value`.
+     * @example
+     *
+     * var moe = { 'name': 'moe' };
+     * moe === _.identity(moe);
+     * // => true
+     */
+    function identity(value) {
+      return value;
+    }
+
+    /**
+     * Adds functions properties of `object` to the `lodash` function and chainable
+     * wrapper.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Object} object The object of function properties to add to `lodash`.
+     * @example
+     *
+     * _.mixin({
+     *   'capitalize': function(string) {
+     *     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+     *   }
+     * });
+     *
+     * _.capitalize('moe');
+     * // => 'Moe'
+     *
+     * _('moe').capitalize();
+     * // => 'Moe'
+     */
+    function mixin(object) {
+      forEach(functions(object), function(methodName) {
+        var func = lodash[methodName] = object[methodName];
+
+        lodash.prototype[methodName] = function() {
+          var value = this.__wrapped__,
+              args = [value];
+
+          push.apply(args, arguments);
+          var result = func.apply(lodash, args);
+          return (value && typeof value == 'object' && value == result)
+            ? this
+            : new lodashWrapper(result);
+        };
+      });
+    }
+
+    /**
+     * Reverts the '_' variable to its previous value and returns a reference to
+     * the `lodash` function.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @returns {Function} Returns the `lodash` function.
+     * @example
+     *
+     * var lodash = _.noConflict();
+     */
+    function noConflict() {
+      context._ = oldDash;
+      return this;
+    }
+
+    /**
+     * Converts the given `value` into an integer of the specified `radix`.
+     *
+     * Note: This method avoids differences in native ES3 and ES5 `parseInt`
+     * implementations. See http://es5.github.com/#E.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Mixed} value The value to parse.
+     * @returns {Number} Returns the new integer value.
+     * @example
+     *
+     * _.parseInt('08');
+     * // => 8
+     */
+    var parseInt = nativeParseInt('08') == 8 ? nativeParseInt : function(value, radix) {
+      // Firefox and Opera still follow the ES3 specified implementation of `parseInt`
+      return nativeParseInt(isString(value) ? value.replace(reLeadingZeros, '') : value, radix || 0);
+    };
+
+    /**
+     * Produces a random number between `min` and `max` (inclusive). If only one
+     * argument is passed, a number between `0` and the given number will be returned.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Number} [min=0] The minimum possible value.
+     * @param {Number} [max=1] The maximum possible value.
+     * @returns {Number} Returns a random number.
+     * @example
+     *
+     * _.random(0, 5);
+     * // => a number between 0 and 5
+     *
+     * _.random(5);
+     * // => also a number between 0 and 5
+     */
+    function random(min, max) {
+      if (min == null && max == null) {
+        max = 1;
+      }
+      min = +min || 0;
+      if (max == null) {
+        max = min;
+        min = 0;
+      }
+      return min + floor(nativeRandom() * ((+max || 0) - min + 1));
+    }
+
+    /**
+     * Resolves the value of `property` on `object`. If `property` is a function,
+     * it will be invoked with the `this` binding of `object` and its result returned,
+     * else the property value is returned. If `object` is falsey, then `undefined`
+     * is returned.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Object} object The object to inspect.
+     * @param {String} property The property to get the value of.
+     * @returns {Mixed} Returns the resolved value.
+     * @example
+     *
+     * var object = {
+     *   'cheese': 'crumpets',
+     *   'stuff': function() {
+     *     return 'nonsense';
+     *   }
+     * };
+     *
+     * _.result(object, 'cheese');
+     * // => 'crumpets'
+     *
+     * _.result(object, 'stuff');
+     * // => 'nonsense'
+     */
+    function result(object, property) {
+      var value = object ? object[property] : undefined;
+      return isFunction(value) ? object[property]() : value;
+    }
+
+    /**
+     * A micro-templating method that handles arbitrary delimiters, preserves
+     * whitespace, and correctly escapes quotes within interpolated code.
+     *
+     * Note: In the development build, `_.template` utilizes sourceURLs for easier
+     * debugging. See http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
+     *
+     * Note: Lo-Dash may be used in Chrome extensions by either creating a `lodash csp`
+     * build and using precompiled templates, or loading Lo-Dash in a sandbox.
+     *
+     * For more information on precompiling templates see:
+     * http://lodash.com/#custom-builds
+     *
+     * For more information on Chrome extension sandboxes see:
+     * http://developer.chrome.com/stable/extensions/sandboxingEval.html
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {String} text The template text.
+     * @param {Obect} data The data object used to populate the text.
+     * @param {Object} options The options object.
+     *  escape - The "escape" delimiter regexp.
+     *  evaluate - The "evaluate" delimiter regexp.
+     *  interpolate - The "interpolate" delimiter regexp.
+     *  sourceURL - The sourceURL of the template's compiled source.
+     *  variable - The data object variable name.
+     * @returns {Function|String} Returns a compiled function when no `data` object
+     *  is given, else it returns the interpolated text.
+     * @example
+     *
+     * // using a compiled template
+     * var compiled = _.template('hello <%= name %>');
+     * compiled({ 'name': 'moe' });
+     * // => 'hello moe'
+     *
+     * var list = '<% _.forEach(people, function(name) { %><li><%= name %></li><% }); %>';
+     * _.template(list, { 'people': ['moe', 'larry'] });
+     * // => '<li>moe</li><li>larry</li>'
+     *
+     * // using the "escape" delimiter to escape HTML in data property values
+     * _.template('<b><%- value %></b>', { 'value': '<script>' });
+     * // => '<b>&lt;script&gt;</b>'
+     *
+     * // using the ES6 delimiter as an alternative to the default "interpolate" delimiter
+     * _.template('hello ${ name }', { 'name': 'curly' });
+     * // => 'hello curly'
+     *
+     * // using the internal `print` function in "evaluate" delimiters
+     * _.template('<% print("hello " + epithet); %>!', { 'epithet': 'stooge' });
+     * // => 'hello stooge!'
+     *
+     * // using custom template delimiters
+     * _.templateSettings = {
+     *   'interpolate': /{{([\s\S]+?)}}/g
+     * };
+     *
+     * _.template('hello {{ name }}!', { 'name': 'mustache' });
+     * // => 'hello mustache!'
+     *
+     * // using the `sourceURL` option to specify a custom sourceURL for the template
+     * var compiled = _.template('hello <%= name %>', null, { 'sourceURL': '/basic/greeting.jst' });
+     * compiled(data);
+     * // => find the source of "greeting.jst" under the Sources tab or Resources panel of the web inspector
+     *
+     * // using the `variable` option to ensure a with-statement isn't used in the compiled template
+     * var compiled = _.template('hi <%= data.name %>!', null, { 'variable': 'data' });
+     * compiled.source;
+     * // => function(data) {
+     *   var __t, __p = '', __e = _.escape;
+     *   __p += 'hi ' + ((__t = ( data.name )) == null ? '' : __t) + '!';
+     *   return __p;
+     * }
+     *
+     * // using the `source` property to inline compiled templates for meaningful
+     * // line numbers in error messages and a stack trace
+     * fs.writeFileSync(path.join(cwd, 'jst.js'), '\
+     *   var JST = {\
+     *     "main": ' + _.template(mainText).source + '\
+     *   };\
+     * ');
+     */
+    function template(text, data, options) {
+      // based on John Resig's `tmpl` implementation
+      // http://ejohn.org/blog/javascript-micro-templating/
+      // and Laura Doktorova's doT.js
+      // https://github.com/olado/doT
+      var settings = lodash.templateSettings;
+      text || (text = '');
+
+      // avoid missing dependencies when `iteratorTemplate` is not defined
+      options = defaults({}, options, settings);
+
+      var imports = defaults({}, options.imports, settings.imports),
+          importsKeys = keys(imports),
+          importsValues = values(imports);
+
+      var isEvaluating,
+          index = 0,
+          interpolate = options.interpolate || reNoMatch,
+          source = "__p += '";
+
+      // compile the regexp to match each delimiter
+      var reDelimiters = RegExp(
+        (options.escape || reNoMatch).source + '|' +
+        interpolate.source + '|' +
+        (interpolate === reInterpolate ? reEsTemplate : reNoMatch).source + '|' +
+        (options.evaluate || reNoMatch).source + '|$'
+      , 'g');
+
+      text.replace(reDelimiters, function(match, escapeValue, interpolateValue, esTemplateValue, evaluateValue, offset) {
+        interpolateValue || (interpolateValue = esTemplateValue);
+
+        // escape characters that cannot be included in string literals
+        source += text.slice(index, offset).replace(reUnescapedString, escapeStringChar);
+
+        // replace delimiters with snippets
+        if (escapeValue) {
+          source += "' +\n__e(" + escapeValue + ") +\n'";
+        }
+        if (evaluateValue) {
+          isEvaluating = true;
+          source += "';\n" + evaluateValue + ";\n__p += '";
+        }
+        if (interpolateValue) {
+          source += "' +\n((__t = (" + interpolateValue + ")) == null ? '' : __t) +\n'";
+        }
+        index = offset + match.length;
+
+        // the JS engine embedded in Adobe products requires returning the `match`
+        // string in order to produce the correct `offset` value
+        return match;
+      });
+
+      source += "';\n";
+
+      // if `variable` is not specified, wrap a with-statement around the generated
+      // code to add the data object to the top of the scope chain
+      var variable = options.variable,
+          hasVariable = variable;
+
+      if (!hasVariable) {
+        variable = 'obj';
+        source = 'with (' + variable + ') {\n' + source + '\n}\n';
+      }
+      // cleanup code by stripping empty strings
+      source = (isEvaluating ? source.replace(reEmptyStringLeading, '') : source)
+        .replace(reEmptyStringMiddle, '$1')
+        .replace(reEmptyStringTrailing, '$1;');
+
+      // frame code as the function body
+      source = 'function(' + variable + ') {\n' +
+        (hasVariable ? '' : variable + ' || (' + variable + ' = {});\n') +
+        "var __t, __p = '', __e = _.escape" +
+        (isEvaluating
+          ? ', __j = Array.prototype.join;\n' +
+            "function print() { __p += __j.call(arguments, '') }\n"
+          : ';\n'
+        ) +
+        source +
+        'return __p\n}';
+
+      // Use a sourceURL for easier debugging and wrap in a multi-line comment to
+      // avoid issues with Narwhal, IE conditional compilation, and the JS engine
+      // embedded in Adobe products.
+      // http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
+      var sourceURL = '\n/*\n//@ sourceURL=' + (options.sourceURL || '/lodash/template/source[' + (templateCounter++) + ']') + '\n*/';
+
+      try {
+        var result = Function(importsKeys, 'return ' + source + sourceURL).apply(undefined, importsValues);
+      } catch(e) {
+        e.source = source;
+        throw e;
+      }
+      if (data) {
+        return result(data);
+      }
+      // provide the compiled function's source via its `toString` method, in
+      // supported environments, or the `source` property as a convenience for
+      // inlining compiled templates during the build process
+      result.source = source;
+      return result;
+    }
+
+    /**
+     * Executes the `callback` function `n` times, returning an array of the results
+     * of each `callback` execution. The `callback` is bound to `thisArg` and invoked
+     * with one argument; (index).
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {Number} n The number of times to execute the callback.
+     * @param {Function} callback The function called per iteration.
+     * @param {Mixed} [thisArg] The `this` binding of `callback`.
+     * @returns {Array} Returns a new array of the results of each `callback` execution.
+     * @example
+     *
+     * var diceRolls = _.times(3, _.partial(_.random, 1, 6));
+     * // => [3, 6, 4]
+     *
+     * _.times(3, function(n) { mage.castSpell(n); });
+     * // => calls `mage.castSpell(n)` three times, passing `n` of `0`, `1`, and `2` respectively
+     *
+     * _.times(3, function(n) { this.cast(n); }, mage);
+     * // => also calls `mage.castSpell(n)` three times
+     */
+    function times(n, callback, thisArg) {
+      n = (n = +n) > -1 ? n : 0;
+      var index = -1,
+          result = Array(n);
+
+      callback = lodash.createCallback(callback, thisArg, 1);
+      while (++index < n) {
+        result[index] = callback(index);
+      }
+      return result;
+    }
+
+    /**
+     * The opposite of `_.escape`, this method converts the HTML entities
+     * `&amp;`, `&lt;`, `&gt;`, `&quot;`, and `&#39;` in `string` to their
+     * corresponding characters.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {String} string The string to unescape.
+     * @returns {String} Returns the unescaped string.
+     * @example
+     *
+     * _.unescape('Moe, Larry &amp; Curly');
+     * // => 'Moe, Larry & Curly'
+     */
+    function unescape(string) {
+      return string == null ? '' : String(string).replace(reEscapedHtml, unescapeHtmlChar);
+    }
+
+    /**
+     * Generates a unique ID. If `prefix` is passed, the ID will be appended to it.
+     *
+     * @static
+     * @memberOf _
+     * @category Utilities
+     * @param {String} [prefix] The value to prefix the ID with.
+     * @returns {String} Returns the unique ID.
+     * @example
+     *
+     * _.uniqueId('contact_');
+     * // => 'contact_104'
+     *
+     * _.uniqueId();
+     * // => '105'
+     */
+    function uniqueId(prefix) {
+      var id = ++idCounter;
+      return String(prefix == null ? '' : prefix) + id;
+    }
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * Invokes `interceptor` with the `value` as the first argument, and then
+     * returns `value`. The purpose of this method is to "tap into" a method chain,
+     * in order to perform operations on intermediate results within the chain.
+     *
+     * @static
+     * @memberOf _
+     * @category Chaining
+     * @param {Mixed} value The value to pass to `interceptor`.
+     * @param {Function} interceptor The function to invoke.
+     * @returns {Mixed} Returns `value`.
+     * @example
+     *
+     * _([1, 2, 3, 4])
+     *  .filter(function(num) { return num % 2 == 0; })
+     *  .tap(alert)
+     *  .map(function(num) { return num * num; })
+     *  .value();
+     * // => // [2, 4] (alerted)
+     * // => [4, 16]
+     */
+    function tap(value, interceptor) {
+      interceptor(value);
+      return value;
+    }
+
+    /**
+     * Produces the `toString` result of the wrapped value.
+     *
+     * @name toString
+     * @memberOf _
+     * @category Chaining
+     * @returns {String} Returns the string result.
+     * @example
+     *
+     * _([1, 2, 3]).toString();
+     * // => '1,2,3'
+     */
+    function wrapperToString() {
+      return String(this.__wrapped__);
+    }
+
+    /**
+     * Extracts the wrapped value.
+     *
+     * @name valueOf
+     * @memberOf _
+     * @alias value
+     * @category Chaining
+     * @returns {Mixed} Returns the wrapped value.
+     * @example
+     *
+     * _([1, 2, 3]).valueOf();
+     * // => [1, 2, 3]
+     */
+    function wrapperValueOf() {
+      return this.__wrapped__;
+    }
+
+    /*--------------------------------------------------------------------------*/
+
+    // add functions that return wrapped values when chaining
+    lodash.after = after;
+    lodash.assign = assign;
+    lodash.at = at;
+    lodash.bind = bind;
+    lodash.bindAll = bindAll;
+    lodash.bindKey = bindKey;
+    lodash.compact = compact;
+    lodash.compose = compose;
+    lodash.countBy = countBy;
+    lodash.createCallback = createCallback;
+    lodash.debounce = debounce;
+    lodash.defaults = defaults;
+    lodash.defer = defer;
+    lodash.delay = delay;
+    lodash.difference = difference;
+    lodash.filter = filter;
+    lodash.flatten = flatten;
+    lodash.forEach = forEach;
+    lodash.forIn = forIn;
+    lodash.forOwn = forOwn;
+    lodash.functions = functions;
+    lodash.groupBy = groupBy;
+    lodash.initial = initial;
+    lodash.intersection = intersection;
+    lodash.invert = invert;
+    lodash.invoke = invoke;
+    lodash.keys = keys;
+    lodash.map = map;
+    lodash.max = max;
+    lodash.memoize = memoize;
+    lodash.merge = merge;
+    lodash.min = min;
+    lodash.omit = omit;
+    lodash.once = once;
+    lodash.pairs = pairs;
+    lodash.partial = partial;
+    lodash.partialRight = partialRight;
+    lodash.pick = pick;
+    lodash.pluck = pluck;
+    lodash.range = range;
+    lodash.reject = reject;
+    lodash.rest = rest;
+    lodash.shuffle = shuffle;
+    lodash.sortBy = sortBy;
+    lodash.tap = tap;
+    lodash.throttle = throttle;
+    lodash.times = times;
+    lodash.toArray = toArray;
+    lodash.union = union;
+    lodash.uniq = uniq;
+    lodash.values = values;
+    lodash.where = where;
+    lodash.without = without;
+    lodash.wrap = wrap;
+    lodash.zip = zip;
+    lodash.zipObject = zipObject;
+
+    // add aliases
+    lodash.collect = map;
+    lodash.drop = rest;
+    lodash.each = forEach;
+    lodash.extend = assign;
+    lodash.methods = functions;
+    lodash.object = zipObject;
+    lodash.select = filter;
+    lodash.tail = rest;
+    lodash.unique = uniq;
+
+    // add functions to `lodash.prototype`
+    mixin(lodash);
+
+    /*--------------------------------------------------------------------------*/
+
+    // add functions that return unwrapped values when chaining
+    lodash.clone = clone;
+    lodash.cloneDeep = cloneDeep;
+    lodash.contains = contains;
+    lodash.escape = escape;
+    lodash.every = every;
+    lodash.find = find;
+    lodash.findIndex = findIndex;
+    lodash.findKey = findKey;
+    lodash.has = has;
+    lodash.identity = identity;
+    lodash.indexOf = indexOf;
+    lodash.isArguments = isArguments;
+    lodash.isArray = isArray;
+    lodash.isBoolean = isBoolean;
+    lodash.isDate = isDate;
+    lodash.isElement = isElement;
+    lodash.isEmpty = isEmpty;
+    lodash.isEqual = isEqual;
+    lodash.isFinite = isFinite;
+    lodash.isFunction = isFunction;
+    lodash.isNaN = isNaN;
+    lodash.isNull = isNull;
+    lodash.isNumber = isNumber;
+    lodash.isObject = isObject;
+    lodash.isPlainObject = isPlainObject;
+    lodash.isRegExp = isRegExp;
+    lodash.isString = isString;
+    lodash.isUndefined = isUndefined;
+    lodash.lastIndexOf = lastIndexOf;
+    lodash.mixin = mixin;
+    lodash.noConflict = noConflict;
+    lodash.parseInt = parseInt;
+    lodash.random = random;
+    lodash.reduce = reduce;
+    lodash.reduceRight = reduceRight;
+    lodash.result = result;
+    lodash.runInContext = runInContext;
+    lodash.size = size;
+    lodash.some = some;
+    lodash.sortedIndex = sortedIndex;
+    lodash.template = template;
+    lodash.unescape = unescape;
+    lodash.uniqueId = uniqueId;
+
+    // add aliases
+    lodash.all = every;
+    lodash.any = some;
+    lodash.detect = find;
+    lodash.foldl = reduce;
+    lodash.foldr = reduceRight;
+    lodash.include = contains;
+    lodash.inject = reduce;
+
+    forOwn(lodash, function(func, methodName) {
+      if (!lodash.prototype[methodName]) {
+        lodash.prototype[methodName] = function() {
+          var args = [this.__wrapped__];
+          push.apply(args, arguments);
+          return func.apply(lodash, args);
+        };
+      }
+    });
+
+    /*--------------------------------------------------------------------------*/
+
+    // add functions capable of returning wrapped and unwrapped values when chaining
+    lodash.first = first;
+    lodash.last = last;
+
+    // add aliases
+    lodash.take = first;
+    lodash.head = first;
+
+    forOwn(lodash, function(func, methodName) {
+      if (!lodash.prototype[methodName]) {
+        lodash.prototype[methodName]= function(callback, thisArg) {
+          var result = func(this.__wrapped__, callback, thisArg);
+          return callback == null || (thisArg && typeof callback != 'function')
+            ? result
+            : new lodashWrapper(result);
+        };
+      }
+    });
+
+    /*--------------------------------------------------------------------------*/
+
+    /**
+     * The semantic version number.
+     *
+     * @static
+     * @memberOf _
+     * @type String
+     */
+    lodash.VERSION = '1.1.1';
+
+    // add "Chaining" functions to the wrapper
+    lodash.prototype.toString = wrapperToString;
+    lodash.prototype.value = wrapperValueOf;
+    lodash.prototype.valueOf = wrapperValueOf;
+
+    // add `Array` functions that return unwrapped values
+    forEach(['join', 'pop', 'shift'], function(methodName) {
+      var func = arrayRef[methodName];
+      lodash.prototype[methodName] = function() {
+        return func.apply(this.__wrapped__, arguments);
+      };
+    });
+
+    // add `Array` functions that return the wrapped value
+    forEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
+      var func = arrayRef[methodName];
+      lodash.prototype[methodName] = function() {
+        func.apply(this.__wrapped__, arguments);
+        return this;
+      };
+    });
+
+    // add `Array` functions that return new wrapped values
+    forEach(['concat', 'slice', 'splice'], function(methodName) {
+      var func = arrayRef[methodName];
+      lodash.prototype[methodName] = function() {
+        return new lodashWrapper(func.apply(this.__wrapped__, arguments));
+      };
+    });
+
+    return lodash;
   }
 
-  return buf.join(' ');
-};
+  /*--------------------------------------------------------------------------*/
 
-/**
- * Escape the given string of `html`.
- *
- * @param {String} html
- * @return {String}
- * @api private
- */
+  // expose Lo-Dash
+  var _ = runInContext();
 
-exports.escape = function escape(html){
-  return String(html)
-    .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-};
+  // some AMD build optimizers, like r.js, check for specific condition patterns like the following:
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // Expose Lo-Dash to the global object even when an AMD loader is present in
+    // case Lo-Dash was injected by a third-party script and not intended to be
+    // loaded as a module. The global assignment can be reverted in the Lo-Dash
+    // module via its `noConflict()` method.
+    window._ = _;
 
-/**
- * Re-throw the given `err` in context to the
- * the jade in `filename` at the given `lineno`.
- *
- * @param {Error} err
- * @param {String} filename
- * @param {String} lineno
- * @api private
- */
-
-exports.rethrow = function rethrow(err, filename, lineno){
-  if (!filename) throw err;
-
-  var context = 3
-    , str = require('fs').readFileSync(filename, 'utf8')
-    , lines = str.split('\n')
-    , start = Math.max(lineno - context, 0)
-    , end = Math.min(lines.length, lineno + context);
-
-  // Error context
-  var context = lines.slice(start, end).map(function(line, i){
-    var curr = i + start + 1;
-    return (curr == lineno ? '  > ' : '    ')
-      + curr
-      + '| '
-      + line;
-  }).join('\n');
-
-  // Alter exception message
-  err.path = filename;
-  err.message = (filename || 'Jade') + ':' + lineno
-    + '\n' + context + '\n\n' + err.message;
-  throw err;
-};
-
-  return exports;
-
-})({});
+    // define as an anonymous module so, through path mapping, it can be
+    // referenced as the "underscore" module
+    define(function() {
+      return _;
+    });
+  }
+  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  else if (freeExports && !freeExports.nodeType) {
+    // in Node.js or RingoJS v0.8.0+
+    if (freeModule) {
+      (freeModule.exports = _)._ = _;
+    }
+    // in Narwhal or RingoJS v0.7.0-
+    else {
+      freeExports._ = _;
+    }
+  }
+  else {
+    // in a browser or Rhino
+    window._ = _;
+  }
+}(this));
 ;

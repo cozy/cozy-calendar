@@ -204,6 +204,19 @@ window.require.register("helpers", function(exports, require, module) {
     return formattedDate;
   };
 
+  exports.jsDateToDateObject = function(date) {
+    var formattedDate;
+
+    formattedDate = {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      hour: date.getHours(),
+      minute: date.getMinutes()
+    };
+    return formattedDate;
+  };
+
   exports.buildStandardDate = function(dateObject) {
     if (!dateObject.hour) {
       dateObject.hour = "00";
@@ -368,15 +381,52 @@ window.require.register("models/alarm", function(exports, require, module) {
       return helpers.icalDateToObject(this.get('trigger'));
     };
 
+    Alarm.prototype.getPreviousDateObject = function() {
+      if (this.previous('trigger') != null) {
+        return helpers.icalDateToObject(this.previous('trigger'));
+      } else {
+        return false;
+      }
+    };
+
     Alarm.prototype.getStandardDate = function() {
       return new Date(helpers.buildStandardDate(this.getDateObject()));
     };
 
-    Alarm.prototype.getTimeHash = function() {
-      var date;
+    Alarm.prototype.getDateHash = function(date) {
+      if (date == null) {
+        date = this.getDateObject();
+      }
+      return "" + date.year + date.month + date.day;
+    };
 
-      date = this.getDateObject();
+    Alarm.prototype.getPreviousDateHash = function() {
+      var previousDateObject;
+
+      previousDateObject = this.getPreviousDateObject();
+      if (previousDateObject) {
+        return this.getDateHash(previousDateObject);
+      } else {
+        return false;
+      }
+    };
+
+    Alarm.prototype.getTimeHash = function(date) {
+      if (date == null) {
+        date = this.getDateObject();
+      }
       return "" + date.year + date.month + date.day + date.hour + date.minute;
+    };
+
+    Alarm.prototype.getPreviousTimeHash = function() {
+      var previousDateObject;
+
+      previousDateObject = this.getPreviousDateObject();
+      if (previousDateObject) {
+        return this.getTimeHash(previousDateObject);
+      } else {
+        return false;
+      }
     };
 
     return Alarm;
@@ -385,7 +435,7 @@ window.require.register("models/alarm", function(exports, require, module) {
   
 });
 window.require.register("models/dayprogram", function(exports, require, module) {
-  var helpers, _ref,
+  var helpers,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -394,9 +444,10 @@ window.require.register("models/dayprogram", function(exports, require, module) 
   exports.DayProgram = (function(_super) {
     __extends(DayProgram, _super);
 
-    function DayProgram() {
-      _ref = DayProgram.__super__.constructor.apply(this, arguments);
-      return _ref;
+    function DayProgram(attributes, options) {
+      this.alarms = attributes.alarms;
+      delete attributes.alarms;
+      DayProgram.__super__.constructor.call(this, attributes, options);
     }
 
     DayProgram.prototype.getStandardDate = function() {
@@ -409,7 +460,7 @@ window.require.register("models/dayprogram", function(exports, require, module) 
   
 });
 window.require.register("models/reminder", function(exports, require, module) {
-  var Alarm, AlarmCollection, _ref,
+  var Alarm, AlarmCollection,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -420,24 +471,44 @@ window.require.register("models/reminder", function(exports, require, module) {
   exports.Reminder = (function(_super) {
     __extends(Reminder, _super);
 
-    function Reminder() {
-      _ref = Reminder.__super__.constructor.apply(this, arguments);
-      return _ref;
+    function Reminder(attributes, options) {
+      this.alarms = new AlarmCollection();
+      Reminder.__super__.constructor.call(this, attributes, options);
     }
 
-    Reminder.prototype.parse = function(response, options) {
-      var alarm, alarms, i, rawAlarm, _i, _len, _ref1;
+    Reminder.prototype.set = function(key, val, options) {
+      var alarm, alarmList, index, reminderID, _i, _len;
 
-      alarms = (_ref1 = response.alarms) != null ? _ref1.slice(0) : void 0;
-      response.alarms = new AlarmCollection();
-      if (alarms != null) {
-        for (i = _i = 0, _len = alarms.length; _i < _len; i = ++_i) {
-          rawAlarm = alarms[i];
-          rawAlarm.reminderID = response.id;
-          rawAlarm.index = i;
-          alarm = new Alarm(rawAlarm);
-          response.alarms.add(alarm);
+      if (key === 'alarms' || ((key != null) && (key.alarms != null))) {
+        if (key === 'alarms') {
+          alarmList = val;
+        } else {
+          alarmList = key.alarms;
         }
+        for (index = _i = 0, _len = alarmList.length; _i < _len; index = ++_i) {
+          alarm = alarmList[index];
+          reminderID = this.get('id');
+          alarm.index = index;
+          if (reminderID != null) {
+            alarm.reminderID = reminderID;
+          }
+        }
+        this.alarms.reset(alarmList);
+      }
+      return Reminder.__super__.set.call(this, key, val, options);
+    };
+
+    Reminder.prototype.parse = function(response, options) {
+      var alarm, index, _i, _len, _ref;
+
+      if (response.alarms != null) {
+        _ref = response.alarms;
+        for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+          alarm = _ref[index];
+          alarm.reminderID = response.id;
+          alarm.index = index;
+        }
+        this.alarms.reset(response.alarms);
       }
       return Reminder.__super__.parse.call(this, response, options);
     };
@@ -488,14 +559,14 @@ window.require.register("views/addalarmform_view", function(exports, require, mo
 
     AddAlarmFormView.prototype.className = 'control-group';
 
-    AddAlarmFormView.prototype.render = function(defaultAction, actions) {
+    AddAlarmFormView.prototype.render = function(options) {
       var formattedDateObject;
 
-      formattedDateObject = this.getFormattedDateObject();
+      formattedDateObject = this.getFormattedDateObject(options.defaultDateObject);
       return AddAlarmFormView.__super__.render.call(this, {
         id: this.getIndex(),
-        actions: actions,
-        defaultAction: defaultAction,
+        actions: options.actions,
+        defaultAction: options.defaultAction,
         defaultDate: formattedDateObject.date,
         defaultTime: formattedDateObject.time
       });
@@ -509,29 +580,24 @@ window.require.register("views/addalarmform_view", function(exports, require, mo
       return this.id.replace('alarm-', '');
     };
 
-    AddAlarmFormView.prototype.getFormattedDateObject = function() {
-      var dateObject, day, formattedDateObject, hours, minutes, month;
+    AddAlarmFormView.prototype.getFormattedDateObject = function(dateObject) {
+      var formattedDateObject;
 
-      dateObject = new Date();
-      month = dateObject.getMonth() + 1;
-      if (month <= 9) {
-        month = "0" + month;
+      if (dateObject.month <= 9 && ("" + dateObject.month).length === 1) {
+        dateObject.month = "0" + dateObject.month;
       }
-      day = dateObject.getDate();
-      if (day <= 9) {
-        day = "0" + day;
+      if (dateObject.day <= 9 && ("" + dateObject.day).length === 1) {
+        dateObject.day = "0" + dateObject.day;
       }
-      hours = dateObject.getHours();
-      minutes = dateObject.getMinutes();
-      if (hours <= 9) {
-        hours = "0" + hours;
+      if (dateObject.hour <= 9 && ("" + dateObject.hour).length === 1) {
+        dateObject.hour = "0" + dateObject.hour;
       }
-      if (minutes <= 9) {
-        minutes = "0" + minutes;
+      if (dateObject.minute <= 9 && ("" + dateObject.minute).length === 1) {
+        dateObject.minute = "0" + dateObject.minute;
       }
       return formattedDateObject = {
-        date: "" + (dateObject.getFullYear()) + "-" + month + "-" + day,
-        time: "" + hours + ":" + minutes
+        date: "" + dateObject.year + "-" + dateObject.month + "-" + dateObject.day,
+        time: "" + dateObject.hour + ":" + dateObject.minute
       };
     };
 
@@ -541,13 +607,15 @@ window.require.register("views/addalarmform_view", function(exports, require, mo
   
 });
 window.require.register("views/addreminderform_view", function(exports, require, module) {
-  var AddAlarmFormView, AddReminderFormView, View,
+  var AddAlarmFormView, AddReminderFormView, View, helpers,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('../lib/view');
 
   AddAlarmFormView = require('./addalarmform_view');
+
+  helpers = require('../helpers');
 
   module.exports = AddReminderFormView = (function(_super) {
     __extends(AddReminderFormView, _super);
@@ -568,23 +636,12 @@ window.require.register("views/addreminderform_view", function(exports, require,
     }
 
     AddReminderFormView.prototype.initialize = function() {
-      var scrollTop;
-
       this.actions = {
         'DISPLAY': 'Popup',
         'EMAIL': 'Email'
       };
-      return scrollTop = this.$el.offset().top;
-      /*$(document).scroll () =>
-          currentScroll = $(document).scrollTop()
-          if currentScroll >= scrollTop
-              #$('#reminders').css 'margin-top', @$el.height() + 20
-              @$el.addClass 'affix'
-          else
-              #$('#reminders').css 'margin-top', 0
-              @$el.removeClass 'affix'
-      */
-
+      this.data = null;
+      return this.editionMode = false;
     };
 
     AddReminderFormView.prototype.render = function() {
@@ -592,6 +649,7 @@ window.require.register("views/addreminderform_view", function(exports, require,
 
       content = AddReminderFormView.__super__.render.call(this);
       this.$el.append(content);
+      this.defaultMinHeight = this.$el.height();
       this.$el.affix({
         offset: {
           top: this.$el.offset().top - 10
@@ -599,28 +657,64 @@ window.require.register("views/addreminderform_view", function(exports, require,
       });
       this.alarmListView = this.$('#add-alarms');
       this.renderAlarm(this.getDefaultAction());
-      return this.alarmListView.hide();
+      return this.collapse();
     };
 
     AddReminderFormView.prototype.template = function() {
       return require('./templates/addreminder_form');
     };
 
-    AddReminderFormView.prototype.onAddAlarm = function(event) {
-      var button;
+    AddReminderFormView.prototype.collapse = function() {
+      var _this = this;
 
-      button = this.$('.add-alarm');
-      button.removeClass('add-alarm').addClass('remove-alarm');
-      button.find('i').removeClass('icon-plus').addClass('icon-minus');
-      return this.renderAlarm(this.getDefaultAction);
+      if (!this.$el.hasClass('affix')) {
+        this.$el.parent().css('min-height', this.defaultMinHeight);
+      }
+      return this.alarmListView.hide('slow', function() {
+        if (_this.$el.hasClass('affix')) {
+          return _this.$el.parent().css('min-height', _this.defaultMinHeight);
+        }
+      });
     };
 
-    AddReminderFormView.prototype.getDefaultAction = function() {
-      return "DISPLAY";
+    AddReminderFormView.prototype.expand = function() {
+      var _this = this;
+
+      return this.alarmListView.show('slow', function() {
+        return _this.$el.parent().css('min-height', _this.$el.height());
+      });
+    };
+
+    AddReminderFormView.prototype.onAddAlarm = function(event) {
+      return this.renderAlarm(this.getDefaultAction());
+    };
+
+    AddReminderFormView.prototype.getDefaultAction = function(defaultAction) {
+      var action, actionsAlreadySelected, selectedOptions;
+
+      if (typeof defaultDefaultAction === "undefined" || defaultDefaultAction === null) {
+        defaultAction = 'DISPLAY';
+      }
+      selectedOptions = this.$('.controls.form-inline option').filter(':selected');
+      actionsAlreadySelected = [];
+      selectedOptions.each(function(index, item) {
+        var itemValue;
+
+        itemValue = $(item).val();
+        if (actionsAlreadySelected.indexOf(itemValue) === -1) {
+          return actionsAlreadySelected.push(itemValue);
+        }
+      });
+      for (action in this.actions) {
+        if (actionsAlreadySelected.indexOf(action) === -1) {
+          return action;
+        }
+      }
+      return defaultAction;
     };
 
     AddReminderFormView.prototype.onRemoveAlarm = function(event) {
-      var alarm, i, index, item, _ref, _results;
+      var alarm, i, index, item, oldID, _ref, _results;
 
       alarm = $(event.currentTarget).parent().parent();
       index = alarm.prop('id').replace('alarm-', '');
@@ -630,58 +724,95 @@ window.require.register("views/addreminderform_view", function(exports, require,
       _results = [];
       for (i in _ref) {
         item = _ref[i];
+        oldID = item.getIndex();
         item.id = "alarm-" + i;
-        _results.push(item.$el.prop('id', item.id));
+        item.$el.prop('id', item.id);
+        item.$('select').prop('id', "action" + i);
+        item.$("label[for='inputDate" + oldID + "']").prop('for', "inputDate" + i);
+        item.$("#inputDate" + oldID).prop('id', "inputDate" + i);
+        item.$("label[for=\"inputTime" + oldID + "\"]").prop('for', "inputTime" + i);
+        _results.push(item.$("#inputTime" + oldID).prop('id', "inputTime" + i));
       }
       return _results;
     };
 
-    AddReminderFormView.prototype.onFocus = function(event) {
-      var heightBeforeShow,
-        _this = this;
-
-      heightBeforeShow = this.$el.height();
-      return this.alarmListView.show('slow', function() {
-        var delta;
-
-        delta = _this.$el.height() - heightBeforeShow;
-        if (_this.$el.hasClass('affix')) {
-          console.debug(_this.$el.height());
-          return _this.$el;
-        }
-      });
+    AddReminderFormView.prototype.onFocus = function() {
+      return this.expand();
     };
 
-    AddReminderFormView.prototype.onBlur = function(event) {
-      if ($(event.target).val() === '') {
-        return this.alarmListView.hide('slow');
+    AddReminderFormView.prototype.onBlur = function() {
+      if (this.$('#inputDesc').val() === '') {
+        return this.collapse();
       }
     };
 
     AddReminderFormView.prototype.onKeydown = function(event) {
       if ($(event.target).val() === '') {
-        return $('.add-reminder').addClass('disabled');
+        return this.disableSubmitButton();
       } else {
-        return $('.add-reminder').removeClass('disabled');
+        return this.enableSubmitButton();
       }
     };
 
-    AddReminderFormView.prototype.resetForm = function() {
+    AddReminderFormView.prototype.enableSubmitButton = function() {
+      return $('.add-reminder').removeClass('disabled');
+    };
+
+    AddReminderFormView.prototype.disableSubmitButton = function() {
+      return $('.add-reminder').addClass('disabled');
+    };
+
+    AddReminderFormView.prototype.loadReminderData = function(reminder) {
+      var _this = this;
+
+      this.resetForm(false);
+      this.$('#inputDesc').val(reminder.get('description'));
+      this.data = reminder;
+      this.editionMode = true;
+      this.$('button.add-reminder').html('Edit the reminder');
+      reminder.alarms.forEach(function(item) {
+        return _this.renderAlarm(item.get('action'), item.getDateObject());
+      });
+      this.enableSubmitButton();
+      return this.expand();
+    };
+
+    AddReminderFormView.prototype.resetForm = function(setNewAlarm) {
+      if (setNewAlarm == null) {
+        setNewAlarm = true;
+      }
+      this.data = null;
+      this.editionMode = false;
+      this.$('button.add-reminder').html('Add the reminder');
+      this.disableSubmitButton();
       this.$('input').val('');
       this.alarmListView.empty();
       this.alarmViews = new Array();
-      return this.renderAlarm(this.getDefaultAction());
+      if (setNewAlarm) {
+        return this.renderAlarm(this.getDefaultAction());
+      }
     };
 
-    AddReminderFormView.prototype.renderAlarm = function(defaultAction) {
-      var alarmView, newIndex, render;
+    AddReminderFormView.prototype.renderAlarm = function(defaultAction, dateObject) {
+      var alarmView, button, newIndex, options, render;
 
+      button = this.$('.add-alarm');
+      button.removeClass('add-alarm').addClass('remove-alarm');
+      button.find('i').removeClass('icon-plus').addClass('icon-minus');
       newIndex = this.alarmViews.length;
       alarmView = new AddAlarmFormView({
         id: "alarm-" + newIndex
       });
       this.alarmViews.push(alarmView);
-      render = alarmView.render(defaultAction, this.actions).$el;
+      if (dateObject == null) {
+        dateObject = helpers.jsDateToDateObject(new Date());
+      }
+      options = {
+        defaultAction: defaultAction,
+        defaultDateObject: dateObject,
+        actions: this.actions
+      };
+      render = alarmView.render(options).$el;
       return this.alarmListView.append(render);
     };
 
@@ -724,7 +855,8 @@ window.require.register("views/app_view", function(exports, require, module) {
     AppView.prototype.el = 'body.application';
 
     AppView.prototype.events = {
-      "click #add-reminder button.add-reminder": "onAddReminderClicked"
+      "click #add-reminder button.add-reminder": "onAddReminderClicked",
+      "click #reminders .alarms p .icon-pencil": "onEditReminderClicked"
     };
 
     AppView.prototype.template = function() {
@@ -743,7 +875,7 @@ window.require.register("views/app_view", function(exports, require, module) {
         appModel: this.reminders
       });
       return this.reminders.fetch({
-        success: function() {
+        success: function(collection, response, options) {
           return console.log("Fetch: success");
         },
         error: function() {
@@ -753,14 +885,13 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddReminderClicked = function(event, callback) {
-      var alarm, alarmCollection, alarmView, date, description, dueDate, id, time, _i, _len, _ref1;
+      var alarm, alarmCollection, alarmView, date, description, dueDate, id, reminder, time, _i, _len, _ref1,
+        _this = this;
 
       description = this.$('#inputDesc').val();
       if ((description == null) || description === '') {
         return;
       }
-      console.debug("add reminder");
-      console.debug(this.addReminderFormView.alarmViews);
       alarmCollection = new AlarmCollection();
       _ref1 = this.addReminderFormView.alarmViews;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
@@ -769,7 +900,6 @@ window.require.register("views/app_view", function(exports, require, module) {
         date = alarmView.$("#inputDate" + id).val();
         time = alarmView.$("#inputTime" + id).val();
         dueDate = helpers.formatDateICal("" + date + ":" + time);
-        console.debug(dueDate);
         alarm = new Alarm({
           action: alarmView.$("#action" + id).val(),
           trigger: dueDate,
@@ -777,20 +907,47 @@ window.require.register("views/app_view", function(exports, require, module) {
         });
         alarmCollection.add(alarm);
       }
-      this.addReminderFormView.resetForm();
-      return this.reminders.create({
-        description: description,
-        alarms: alarmCollection.toJSON()
-      }, {
-        wait: true,
-        success: function() {
-          return console.log('success');
-        },
-        error: function(error, xhr, options) {
-          error = JSON.parse(xhr.responseText);
-          return console.log("error: " + (error != null ? error.msg : void 0));
-        }
-      });
+      if (this.addReminderFormView.editionMode) {
+        reminder = this.addReminderFormView.data;
+        return reminder.save({
+          description: description,
+          alarms: alarmCollection.toJSON()
+        }, {
+          wait: true,
+          success: function() {
+            _this.addReminderFormView.resetForm();
+            _this.addReminderFormView.collapse();
+            return console.log("Save: success (attributes updated)");
+          },
+          error: function() {
+            return console.log("Error during reminder save.");
+          }
+        });
+      } else {
+        return this.reminders.create({
+          description: description,
+          alarms: alarmCollection.toJSON()
+        }, {
+          wait: true,
+          success: function(model, response) {
+            _this.addReminderFormView.resetForm();
+            _this.addRemidnerFormView.collapse();
+            return console.log('Create reminder: success');
+          },
+          error: function(error, xhr, options) {
+            error = JSON.parse(xhr.responseText);
+            return console.log("Create reminder: error: " + (error != null ? error.msg : void 0));
+          }
+        });
+      }
+    };
+
+    AppView.prototype.onEditReminderClicked = function(event) {
+      var reminder, reminderID;
+
+      reminderID = $(event.target).data('reminderid');
+      reminder = this.reminders.get(reminderID);
+      return this.addReminderFormView.loadReminderData(reminder);
     };
 
     return AppView;
@@ -822,15 +979,26 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
     DayProgramView.prototype.className = 'dayprogram';
 
     DayProgramView.prototype.initialize = function() {
-      this.listenTo(this.model.get('alarms'), "add", this.onAdd);
+      this.listenTo(this.model.alarms, "add", this.onAdd);
+      this.listenTo(this.model.alarms, "change", this.onChange);
+      this.listenTo(this.model.alarms, "remove", this.onRemove);
       return this.views = {};
     };
 
     DayProgramView.prototype.onAdd = function(alarm, alarms) {
-      var alarmsOnSameObject, id, index, rView, render, selector;
+      var id, index;
 
       index = alarms.indexOf(alarm);
       id = alarm.get('reminderID') + alarm.getTimeHash();
+      return this.getReminderView(id, index).model.add(alarm);
+    };
+
+    DayProgramView.prototype.getReminderView = function(id, index) {
+      var alarmsOnSameObject, rView, render, selector;
+
+      if (index == null) {
+        index = 0;
+      }
       if (this.views[id] == null) {
         alarmsOnSameObject = new AlarmCollection();
         rView = new ReminderView({
@@ -838,18 +1006,49 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
           model: alarmsOnSameObject
         });
         this.views[id] = rView;
+        render = rView.render().$el;
+        if (index === 0) {
+          this.$el.find('.alarms').prepend(render);
+        } else if (index === this.model.alarms.length - 1) {
+          this.$el.find('.alarms').append(render);
+        } else {
+          selector = ".alarms ." + rView.className + ":nth-of-type(" + index + ")";
+          this.$el.find(selector).before(render);
+        }
       } else {
         rView = this.views[id];
       }
-      rView.model.add(alarm);
-      render = rView.render().$el;
-      if (index === 0) {
-        return this.$el.find('.alarms').prepend(render);
-      } else if (index === alarms.length - 1) {
-        return this.$el.find('.alarms').append(render);
+      return rView;
+    };
+
+    DayProgramView.prototype.onChange = function(alarm, options) {
+      var alarmToUpdate, id, index, oldID;
+
+      if (alarm.previous('trigger') === alarm.get('trigger')) {
+        id = alarm.get('reminderID') + alarm.getTimeHash();
+        alarmToUpdate = this.views[id].model.get(alarm.get('id'));
+        return alarmToUpdate.set(alarm.toJSON());
       } else {
-        selector = ".alarms ." + rView.className + ":nth-of-type(" + index + ")";
-        return this.$el.find(selector).before(render);
+        id = alarm.get('reminderID') + alarm.getTimeHash();
+        index = this.model.alarms.indexOf(alarm);
+        this.getReminderView(id, index).model.add(alarm);
+        oldID = alarm.get('reminderID') + alarm.getTimeHash(alarm.getPreviousDateObject());
+        return this.getReminderView(oldID).remove(alarm);
+      }
+    };
+
+    DayProgramView.prototype.onRemove = function(alarm, collection, options) {
+      var id, rView;
+
+      if (this.model.alarms.length === 0) {
+        return this.destroy();
+      } else {
+        id = alarm.get('reminderID') + alarm.getTimeHash();
+        rView = this.getReminderView(id);
+        rView.model.remove(alarm);
+        if (rView.model.length === 0) {
+          return delete this.views[id];
+        }
       }
     };
 
@@ -897,12 +1096,37 @@ window.require.register("views/reminder_view", function(exports, require, module
 
     ReminderView.prototype.className = 'reminder';
 
+    ReminderView.prototype.events = {
+      'hover': 'onMouseOver'
+    };
+
+    ReminderView.prototype.initialize = function() {
+      this.listenTo(this.model, 'add', this.render);
+      this.listenTo(this.model, 'change', this.render);
+      return this.listenTo(this.model, 'remove', this.onRemove);
+    };
+
+    ReminderView.prototype.onRemove = function() {
+      if (this.model.length === 0) {
+        return this.destroy();
+      } else {
+        return this.render();
+      }
+    };
+
     ReminderView.prototype.render = function() {
-      return ReminderView.__super__.render.call(this, {
-        actions: this.model.pluck('action'),
-        date: this.getDataModel().getDateObject(),
-        description: this.getDataModel().get('description')
-      });
+      if (this.model.length === 0) {
+        return this;
+      } else {
+        return ReminderView.__super__.render.call(this, {
+          actions: this.model.pluck('action'),
+          date: this.getDataModel().getDateObject(),
+          description: this.getDataModel().get('description'),
+          reminderID: this.getDataModel().get('reminderID'),
+          dateHash: this.getDataModel().getDateHash(),
+          alarmIDs: this.model.pluck('index')
+        });
+      }
     };
 
     ReminderView.prototype.template = function() {
@@ -913,13 +1137,21 @@ window.require.register("views/reminder_view", function(exports, require, module
       return this.model.at(0);
     };
 
+    ReminderView.prototype.onMouseOver = function(event) {
+      if (event.type === 'mouseenter') {
+        return this.$('i').css('display', 'inline-block');
+      } else {
+        return this.$('i').hide();
+      }
+    };
+
     return ReminderView;
 
   })(View);
   
 });
 window.require.register("views/reminders_view", function(exports, require, module) {
-  var AlarmCollection, DayProgram, DayProgramCollection, DayProgramView, RemindersView, View,
+  var Alarm, AlarmCollection, DayProgram, DayProgramCollection, DayProgramView, RemindersView, View,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -930,6 +1162,8 @@ window.require.register("views/reminders_view", function(exports, require, modul
 
   AlarmCollection = require('../collections/alarms').AlarmCollection;
 
+  Alarm = require('../models/alarm').Alarm;
+
   DayProgramCollection = require('../collections/dayprograms').DayProgramCollection;
 
   DayProgram = require('../models/dayprogram').DayProgram;
@@ -939,19 +1173,23 @@ window.require.register("views/reminders_view", function(exports, require, modul
 
     RemindersView.prototype.el = '#reminders';
 
-    function RemindersView(attributes, options) {
-      this.onReset = __bind(this.onReset, this);
-      this.onMove = __bind(this.onMove, this);    this.appModel = attributes.appModel;
-      attributes.model = new DayProgramCollection();
-      RemindersView.__super__.constructor.call(this, attributes, options);
+    RemindersView.prototype.events = {
+      "click .alarms p .icon-trash": "onTrashReminderClicked"
+    };
+
+    function RemindersView(options) {
+      this.onReset = __bind(this.onReset, this);    this.appModel = options.appModel;
+      options.model = new DayProgramCollection();
+      this.alarmsToDelete = {};
+      RemindersView.__super__.constructor.call(this, options);
     }
 
     RemindersView.prototype.initialize = function() {
       this.listenTo(this.appModel, "add", this.onAdd);
-      this.listenTo(this.appModel, "remove", this.onRemove);
-      this.listenTo(this.appModel, "move", this.onMove);
+      this.listenTo(this.appModel, "change", this.onChange);
       this.listenTo(this.appModel, "reset", this.onReset);
       this.listenTo(this.model, 'add', this.onAddDayProgram);
+      this.listenTo(this.model, 'remove', this.onRemoveDayProgram);
       return this.views = {};
     };
 
@@ -967,27 +1205,22 @@ window.require.register("views/reminders_view", function(exports, require, modul
     RemindersView.prototype.onAdd = function(reminder) {
       var _this = this;
 
-      return reminder.get('alarms').forEach(function(alarm) {
-        var dateHash, dayDate, dayProgram, dayProgramAlarms;
+      return reminder.alarms.forEach(function(alarm) {
+        var dateHash, dayProgram, dayProgramAlarms;
 
-        dayDate = {
-          year: alarm.getDateObject().year,
-          month: alarm.getDateObject().month,
-          day: alarm.getDateObject().day
-        };
-        dateHash = "" + dayDate.year + dayDate.month + dayDate.day;
+        dateHash = alarm.getDateHash();
         dayProgram = _this.model.findWhere({
           dateHash: dateHash
         });
         if (dayProgram == null) {
           dayProgramAlarms = new AlarmCollection();
           _this.model.add(new DayProgram({
-            date: dayDate,
+            date: alarm.getDateObject(),
             dateHash: dateHash,
             alarms: dayProgramAlarms
           }));
         } else {
-          dayProgramAlarms = dayProgram.get('alarms');
+          dayProgramAlarms = dayProgram.alarms;
         }
         return dayProgramAlarms.add(alarm);
       });
@@ -1013,12 +1246,87 @@ window.require.register("views/reminders_view", function(exports, require, modul
       }
     };
 
-    RemindersView.prototype.onRemove = function(reminder) {
-      return console.log("item removed");
+    RemindersView.prototype.onRemoveDayProgram = function(dayProgram, collection, options) {
+      if (collection.length === 0) {
+        return delete this.views[dayProgram.get('dateHash')];
+      }
     };
 
-    RemindersView.prototype.onMove = function(event) {
-      return console.log("item moved");
+    RemindersView.prototype.onChange = function(reminder) {
+      var oldAlarmCollection,
+        _this = this;
+
+      oldAlarmCollection = new AlarmCollection();
+      oldAlarmCollection.reset(reminder.previous('alarms'));
+      oldAlarmCollection.forEach(function(item) {
+        var dayProgramModel;
+
+        dayProgramModel = _this.views[item.getDateHash()].model;
+        dayProgramModel.alarms.remove(item);
+        if (dayProgramModel.alarms.length === 0) {
+          return _this.model.remove(dayProgramModel);
+        }
+      });
+      return reminder.alarms.forEach(function(alarm, index) {
+        var alarmToUpdate, dateHash, dayProgram, dayProgramAlarms;
+
+        dateHash = alarm.getDateHash();
+        dayProgram = _this.model.findWhere({
+          dateHash: dateHash
+        });
+        if (dayProgram == null) {
+          dayProgramAlarms = new AlarmCollection();
+          _this.model.add(new DayProgram({
+            date: alarm.getDateObject(),
+            dateHash: dateHash,
+            alarms: dayProgramAlarms
+          }));
+        } else {
+          dayProgramAlarms = dayProgram.alarms;
+        }
+        alarmToUpdate = dayProgramAlarms.findWhere({
+          id: alarm.get('id')
+        });
+        if (alarmToUpdate != null) {
+          return alarmToUpdate.set(alarm.toJSON());
+        } else {
+          return dayProgramAlarms.add(alarm);
+        }
+      });
+    };
+
+    RemindersView.prototype.reRender = function() {
+      var _this = this;
+
+      this.$el.empty();
+      this.views = {};
+      this.model.reset();
+      return this.appModel.forEach(function(reminder) {
+        return _this.onAdd(reminder);
+      });
+    };
+
+    RemindersView.prototype.onTrashReminderClicked = function(event) {
+      var alarmIDs, reminder, reminderID,
+        _this = this;
+
+      reminderID = $(event.target).data('reminderid');
+      alarmIDs = ($(event.target).data('alarmids') + "").split(',');
+      reminder = this.appModel.get(reminderID);
+      alarmIDs.forEach(function(item) {
+        var alarmID;
+
+        alarmID = "" + reminderID + "#" + item;
+        return reminder.alarms.remove(alarmID);
+      });
+      return reminder.save({
+        alarms: reminder.alarms.toJSON()
+      }, {
+        wait: true,
+        success: function(model, response) {
+          return console.log('Save: success (alarm removed)');
+        }
+      });
     };
 
     RemindersView.prototype.onReset = function(event) {
@@ -1123,7 +1431,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><h1>My Reminders</h1><div id="add-reminder"></div><div id="reminders" class="well"></div></div>');
+  buf.push('<div class="container"><h1>My Reminders</h1><div class="addform"><div id="add-reminder"></div></div><div id="reminders" class="well"></div></div>');
   }
   return buf.join("");
   };
@@ -1134,7 +1442,11 @@ window.require.register("views/templates/reminder", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p>' + escape((interp = date.hour) == null ? '' : interp) + ':' + escape((interp = date.minute) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = actions) == null ? '' : interp) + ')</p><!--button.delete &times;-->');
+  buf.push('<p>' + escape((interp = date.hour) == null ? '' : interp) + ':' + escape((interp = date.minute) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = actions) == null ? '' : interp) + ')<i');
+  buf.push(attrs({ 'data-reminderid':("" + (reminderID) + ""), "class": ('icon-pencil') }, {"data-reminderid":true}));
+  buf.push('></i><i');
+  buf.push(attrs({ 'data-reminderid':("" + (reminderID) + ""), 'data-alarmids':("" + (alarmIDs) + ""), 'data-datehash':("" + (dateHash) + ""), "class": ('icon-trash') }, {"data-reminderid":true,"data-alarmids":true,"data-datehash":true}));
+  buf.push('></i></p>');
   }
   return buf.join("");
   };
