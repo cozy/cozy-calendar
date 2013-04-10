@@ -6,8 +6,6 @@ compliant with the standard.
 
 ###
 
-sleep = require 'sleep'
-
 before ->
     VTodo.find req.params.id, (err, vtodo) =>
         if err or not vtodo
