@@ -174,7 +174,7 @@ window.require.register("collections/reminders", function(exports, require, modu
 
     ReminderCollection.prototype.model = Reminder;
 
-    ReminderCollection.prototype.url = '/reminders';
+    ReminderCollection.prototype.url = 'reminders';
 
     return ReminderCollection;
 

@@ -4,4 +4,4 @@
 class exports.ReminderCollection extends CozyCollection
 
     model: Reminder
-    url: '/reminders'
+    url: 'reminders'
