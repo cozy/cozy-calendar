@@ -5,6 +5,15 @@ exports.formatDateICal = (date) ->
 
     return dueDate
 
+exports.isICalDateValid = (date) ->
+
+    return false unless date.match(/[0-9]{8}T[0-9]{4}Z/)
+
+    date = new XDate(exports.icalToISO8601(date))
+
+    return date.valid()
+
+
 exports.icalToISO8601 = (icalDate, localOffset) ->
 
     localOffset = '' unless localOffset?

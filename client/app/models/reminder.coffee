@@ -8,6 +8,24 @@ class exports.Reminder extends Backbone.Model
         @alarms = new AlarmCollection()
         super attributes, options
 
+    validate: (attrs, options) ->
+
+        errors = []
+        if not attrs.description or attrs.description is ""
+            errors.push
+                field: 'description'
+                value: "The descript must be set."
+
+        tempCollection = new AlarmCollection(attrs.alarms)
+        tempCollection.forEach (alarm) ->
+            if not alarm.isValid()
+                errors.push
+                    field: 'alarms'
+                    value: alarm.validationError[0].value
+
+        if errors.length > 0
+            return errors
+
     set: (key, val, options) ->
 
         if key is 'alarms' or (key? and key.alarms?)
@@ -34,6 +52,7 @@ class exports.Reminder extends Backbone.Model
             @alarms.reset response.alarms
 
         return super response, options
+
 
 
 
