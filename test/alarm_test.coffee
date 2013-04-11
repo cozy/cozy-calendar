@@ -30,6 +30,11 @@ describe "Alarms management", ->
 
         it "should return all the alarms in database", (done) ->
             client.get "alarms/", (error, response, body) ->
+
+                should.not.exist error
+                should.exist response
+                should.exist body
+
                 response.statusCode.should.equal 200
                 body.length.should.equal 2
                 done()
@@ -47,6 +52,7 @@ describe "Alarms management", ->
 
             client.post "alarms/", @alarm, (error, response, body) =>
 
+                should.not.exist error
                 should.exist response
                 response.statusCode.should.equal 201
                 should.exist body
@@ -62,6 +68,8 @@ describe "Alarms management", ->
 
         it "should have persisted the alarm into database", (done) ->
             helpers.getAllAlarms (err, alarms) =>
+
+                should.not.exist err
                 should.exist alarms
                 alarms.length.should.equal 1
                 should.exist alarms[0].action
