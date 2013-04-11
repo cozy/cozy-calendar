@@ -6,8 +6,16 @@
         else
           option(value="#{action}") #{displayAction}
   label(for="inputDate#{id}") &nbsp;Date&nbsp;
-  input(type="date", id="inputDate#{id}", value="#{defaultDate}")
+  //input(type="date", id="inputDate#{id}", value="#{defaultDate}")
+  .input-append.date(id="inputDate#{id}", data-date="#{defaultDate}", data-date-format="dd/mm/yyyy")
+    input.span2(type="text", value="#{defaultDate}")
+    span.add-on
+      i.icon-th
   label(for="inputTime#{id}") &nbsp;&nbsp;Time&nbsp;
-  input(type="time", id="inputTime#{id}", value="#{defaultTime}")
-  button.btn.add-alarm
+  //input(type="time", id="inputTime#{id}", value="#{defaultTime}")
+  .input-append.bootstrap-timepicker
+    input.input-small(id="inputTime#{id}", type="text", value="#{defaultTime}")
+    span.add-on
+      i.icon-time
+  //button.btn.add-alarm
     i.icon-plus

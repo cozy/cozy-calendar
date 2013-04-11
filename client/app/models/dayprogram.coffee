@@ -9,5 +9,5 @@ class exports.DayProgram extends Backbone.Model
 
         super attributes, options
 
-    getStandardDate: () ->
-        return new Date helpers.buildStandardDate @get 'date'
+    getDateObject: () ->
+        return new XDate @get 'date'

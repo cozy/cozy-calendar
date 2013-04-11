@@ -18,8 +18,11 @@ exports.config =
                 before: [
                     'vendor/scripts/jquery-1.8.2.js'
                     'vendor/scripts/bootstrap.js'
+                    'vendor/scripts/bootstrap-datepicker.js'
+                    'vendor/scripts/bootstrap-timepicker.js'
                     'vendor/scripts/underscore-1.4.4.js'
                     'vendor/scripts/backbone-1.0.0.js'
+                    'vendor/scripts/xdate-0.8.js'
                 ]
 
         stylesheets:
@@ -27,7 +30,9 @@ exports.config =
             order:
                 before: [
                     'vendor/styles/normalize.css',
-                    'vendor/styles/bootstrap.css'
+                    'vendor/styles/bootstrap.css',
+                    'vendor/styles/bootstrap-datepicker.css'
+                    'vendor/styles/bootstrap-timepicker.css'
                 ]
                 after: ['vendor/styles/helpers.css']
 

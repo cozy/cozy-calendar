@@ -50,6 +50,8 @@ module.exports = class AddReminderFormView extends View
                 @$el.parent().css 'min-height', @defaultMinHeight
     expand: ->
         @alarmListView.show 'slow', () =>
+            # prevent timepicker from being cut
+            @alarmListView.css 'overflow', 'visible'
             @$el.parent().css 'min-height', @$el.height()
 
     onAddAlarm: (event) ->
@@ -151,7 +153,7 @@ module.exports = class AddReminderFormView extends View
 
         @alarmViews.push alarmView
 
-        dateObject = helpers.jsDateToDateObject(new Date()) unless dateObject?
+        dateObject = new XDate() unless dateObject?
 
         options =
             defaultAction: defaultAction

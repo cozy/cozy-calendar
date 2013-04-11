@@ -35,7 +35,7 @@ module.exports = class ReminderView extends View
 
             super
                 actions: @model.pluck 'action'
-                date: @getDataModel().getDateObject()
+                time: @getDataModel().getDateObject().toString 'HH:mm'
                 description: @getDataModel().get 'description'
                 reminderID: @getDataModel().get 'reminderID'
                 dateHash: @getDataModel().getDateHash()

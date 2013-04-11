@@ -1,39 +1,20 @@
 exports.formatDateICal = (date) ->
-    date = date.split(/[-:]/);
-    dueDate = "#{date[0]}#{date[1]}#{date[2]}T" + \
+    date = date.split(/[/:]/);
+    dueDate = "#{date[2]}#{date[1]}#{date[0]}T" + \
               "#{date[3]}#{date[4]}00Z"
 
     return dueDate
 
-exports.icalDateToObject = (date) ->
-    date = date.split('T')
+exports.icalToISO8601 = (icalDate, localOffset) ->
 
-    formattedDate =
-        year: date[0].slice 0, 4
-        month: date[0].slice 4, 6
-        day: date[0].slice 6, 8
-        hour: date[1].slice 0, 2
-        minute: date[1].slice 2, 4
+    localOffset = '' unless localOffset?
 
-    return formattedDate
+    date = icalDate.split('T')
 
-exports.jsDateToDateObject = (date) ->
+    year = date[0].slice 0, 4
+    month = date[0].slice 4, 6
+    day = date[0].slice 6, 8
+    hours = date[1].slice 0, 2
+    minutes = date[1].slice 2, 4
 
-    formattedDate =
-        year: date.getFullYear()
-        month: date.getMonth() + 1
-        day: date.getDate()
-        hour: date.getHours()
-        minute: date.getMinutes()
-
-    return formattedDate
-
-exports.buildStandardDate = (dateObject) ->
-
-    if not dateObject.hour
-        dateObject.hour = "00"
-    if not dateObject.minute
-        dateObject.minute = "00"
-
-    return "#{dateObject.year}/#{dateObject.month}/#{dateObject.day} " + \
-           "#{dateObject.hour}:#{dateObject.minute}:00"
+    return "#{year}-#{month}-#{day}T#{hours}:#{minutes}#{localOffset}"

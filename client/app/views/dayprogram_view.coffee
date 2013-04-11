@@ -72,7 +72,7 @@ module.exports = class DayProgramView extends View
 
     render: ->
         super
-            date: @model.get 'date'
+            date: @model.get('date').toString 'dd/MM/yyyy'
 
     template: ->
         require './templates/dayprogram'

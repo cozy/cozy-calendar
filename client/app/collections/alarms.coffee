@@ -7,8 +7,8 @@ class exports.AlarmCollection extends CozyCollection
 
     comparator: (alarm1, alarm2) ->
 
-        d1 = alarm1.getStandardDate()
-        d2 = alarm2.getStandardDate()
+        d1 = alarm1.getDateObject()
+        d2 = alarm2.getDateObject()
 
         if d1.getTime() < d2.getTime()
             return -1

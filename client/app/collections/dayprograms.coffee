@@ -5,10 +5,10 @@ class exports.DayProgramCollection extends CozyCollection
 
     model: DayProgram
 
-    comparator: (dp1, dp2) ->
+    comparator: (dayProg1, dayProg2) ->
 
-        d1 = dp1.getStandardDate()
-        d2 = dp2.getStandardDate()
+        d1 = dayProg1.getDateObject()
+        d2 = dayProg2.getDateObject()
 
         if d1.getTime() < d2.getTime()
             return -1

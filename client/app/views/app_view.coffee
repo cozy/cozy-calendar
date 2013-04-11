@@ -49,10 +49,9 @@ module.exports = class AppView extends View
         alarmCollection = new AlarmCollection()
         for alarmView in @addReminderFormView.alarmViews
             id = alarmView.getIndex()
-            date = alarmView.$("#inputDate#{id}").val()
+            date = alarmView.$("#inputDate#{id} input").val()
             time = alarmView.$("#inputTime#{id}").val()
             dueDate = helpers.formatDateICal "#{date}:#{time}"
-
             alarm = new Alarm
                 action: alarmView.$("#action#{id}").val()
                 trigger: dueDate
@@ -78,7 +77,7 @@ module.exports = class AppView extends View
                     wait: true
                     success: (model, response) =>
                         @addReminderFormView.resetForm()
-                        @addRemidnerFormView.collapse()
+                        @addReminderFormView.collapse()
                         console.log 'Create reminder: success'
                     error: (error, xhr, options) ->
                         error = JSON.parse xhr.responseText
