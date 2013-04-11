@@ -101,8 +101,8 @@ window.require.register("collections/alarms", function(exports, require, module)
     AlarmCollection.prototype.comparator = function(alarm1, alarm2) {
       var d1, d2;
 
-      d1 = alarm1.getStandardDate();
-      d2 = alarm2.getStandardDate();
+      d1 = alarm1.getDateObject();
+      d2 = alarm2.getDateObject();
       if (d1.getTime() < d2.getTime()) {
         return -1;
       } else if (d1.getTime() === d2.getTime()) {
@@ -136,11 +136,11 @@ window.require.register("collections/dayprograms", function(exports, require, mo
 
     DayProgramCollection.prototype.model = DayProgram;
 
-    DayProgramCollection.prototype.comparator = function(dp1, dp2) {
+    DayProgramCollection.prototype.comparator = function(dayProg1, dayProg2) {
       var d1, d2;
 
-      d1 = dp1.getStandardDate();
-      d2 = dp2.getStandardDate();
+      d1 = dayProg1.getDateObject();
+      d2 = dayProg2.getDateObject();
       if (d1.getTime() < d2.getTime()) {
         return -1;
       } else if (d1.getTime() === d2.getTime()) {
@@ -185,46 +185,24 @@ window.require.register("helpers", function(exports, require, module) {
   exports.formatDateICal = function(date) {
     var dueDate;
 
-    date = date.split(/[-:]/);
-    dueDate = ("" + date[0] + date[1] + date[2] + "T") + ("" + date[3] + date[4] + "00Z");
+    date = date.split(/[/:]/);
+    dueDate = ("" + date[2] + date[1] + date[0] + "T") + ("" + date[3] + date[4] + "00Z");
     return dueDate;
   };
 
-  exports.icalDateToObject = function(date) {
-    var formattedDate;
+  exports.icalToISO8601 = function(icalDate, localOffset) {
+    var date, day, hours, minutes, month, year;
 
-    date = date.split('T');
-    formattedDate = {
-      year: date[0].slice(0, 4),
-      month: date[0].slice(4, 6),
-      day: date[0].slice(6, 8),
-      hour: date[1].slice(0, 2),
-      minute: date[1].slice(2, 4)
-    };
-    return formattedDate;
-  };
-
-  exports.jsDateToDateObject = function(date) {
-    var formattedDate;
-
-    formattedDate = {
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDate(),
-      hour: date.getHours(),
-      minute: date.getMinutes()
-    };
-    return formattedDate;
-  };
-
-  exports.buildStandardDate = function(dateObject) {
-    if (!dateObject.hour) {
-      dateObject.hour = "00";
+    if (localOffset == null) {
+      localOffset = '';
     }
-    if (!dateObject.minute) {
-      dateObject.minute = "00";
-    }
-    return ("" + dateObject.year + "/" + dateObject.month + "/" + dateObject.day + " ") + ("" + dateObject.hour + ":" + dateObject.minute + ":00");
+    date = icalDate.split('T');
+    year = date[0].slice(0, 4);
+    month = date[0].slice(4, 6);
+    day = date[0].slice(6, 8);
+    hours = date[1].slice(0, 2);
+    minutes = date[1].slice(2, 4);
+    return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + localOffset;
   };
   
 });
@@ -378,26 +356,25 @@ window.require.register("models/alarm", function(exports, require, module) {
     }
 
     Alarm.prototype.getDateObject = function() {
-      return helpers.icalDateToObject(this.get('trigger'));
+      var date;
+
+      date = helpers.icalToISO8601(this.get('trigger'));
+      return new XDate(date);
     };
 
     Alarm.prototype.getPreviousDateObject = function() {
       if (this.previous('trigger') != null) {
-        return helpers.icalDateToObject(this.previous('trigger'));
+        return helpers.icalToISO8601(this.previous('trigger'));
       } else {
         return false;
       }
-    };
-
-    Alarm.prototype.getStandardDate = function() {
-      return new Date(helpers.buildStandardDate(this.getDateObject()));
     };
 
     Alarm.prototype.getDateHash = function(date) {
       if (date == null) {
         date = this.getDateObject();
       }
-      return "" + date.year + date.month + date.day;
+      return date.toString('yyyyMMdd');
     };
 
     Alarm.prototype.getPreviousDateHash = function() {
@@ -415,7 +392,7 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (date == null) {
         date = this.getDateObject();
       }
-      return "" + date.year + date.month + date.day + date.hour + date.minute;
+      return date.toString('yyyyMMddHHmm');
     };
 
     Alarm.prototype.getPreviousTimeHash = function() {
@@ -450,8 +427,8 @@ window.require.register("models/dayprogram", function(exports, require, module) 
       DayProgram.__super__.constructor.call(this, attributes, options);
     }
 
-    DayProgram.prototype.getStandardDate = function() {
-      return new Date(helpers.buildStandardDate(this.get('date')));
+    DayProgram.prototype.getDateObject = function() {
+      return new XDate(this.get('date'));
     };
 
     return DayProgram;
@@ -560,15 +537,12 @@ window.require.register("views/addalarmform_view", function(exports, require, mo
     AddAlarmFormView.prototype.className = 'control-group';
 
     AddAlarmFormView.prototype.render = function(options) {
-      var formattedDateObject;
-
-      formattedDateObject = this.getFormattedDateObject(options.defaultDateObject);
       return AddAlarmFormView.__super__.render.call(this, {
         id: this.getIndex(),
         actions: options.actions,
         defaultAction: options.defaultAction,
-        defaultDate: formattedDateObject.date,
-        defaultTime: formattedDateObject.time
+        defaultDate: options.defaultDateObject.toString('dd/MM/yyyy'),
+        defaultTime: options.defaultDateObject.toString('HH:mm')
       });
     };
 
@@ -576,29 +550,18 @@ window.require.register("views/addalarmform_view", function(exports, require, mo
       return require('./templates/addreminder_alarm_form');
     };
 
-    AddAlarmFormView.prototype.getIndex = function() {
-      return this.id.replace('alarm-', '');
+    AddAlarmFormView.prototype.afterRender = function() {
+      this.$("#inputDate" + (this.getIndex())).datepicker().on('changeDate', function() {
+        return $(this).datepicker('hide');
+      });
+      return this.$("#inputTime" + (this.getIndex())).timepicker({
+        minuteStep: 1,
+        showMeridian: false
+      });
     };
 
-    AddAlarmFormView.prototype.getFormattedDateObject = function(dateObject) {
-      var formattedDateObject;
-
-      if (dateObject.month <= 9 && ("" + dateObject.month).length === 1) {
-        dateObject.month = "0" + dateObject.month;
-      }
-      if (dateObject.day <= 9 && ("" + dateObject.day).length === 1) {
-        dateObject.day = "0" + dateObject.day;
-      }
-      if (dateObject.hour <= 9 && ("" + dateObject.hour).length === 1) {
-        dateObject.hour = "0" + dateObject.hour;
-      }
-      if (dateObject.minute <= 9 && ("" + dateObject.minute).length === 1) {
-        dateObject.minute = "0" + dateObject.minute;
-      }
-      return formattedDateObject = {
-        date: "" + dateObject.year + "-" + dateObject.month + "-" + dateObject.day,
-        time: "" + dateObject.hour + ":" + dateObject.minute
-      };
+    AddAlarmFormView.prototype.getIndex = function() {
+      return this.id.replace('alarm-', '');
     };
 
     return AddAlarmFormView;
@@ -681,6 +644,7 @@ window.require.register("views/addreminderform_view", function(exports, require,
       var _this = this;
 
       return this.alarmListView.show('slow', function() {
+        _this.alarmListView.css('overflow', 'visible');
         return _this.$el.parent().css('min-height', _this.$el.height());
       });
     };
@@ -805,7 +769,7 @@ window.require.register("views/addreminderform_view", function(exports, require,
       });
       this.alarmViews.push(alarmView);
       if (dateObject == null) {
-        dateObject = helpers.jsDateToDateObject(new Date());
+        dateObject = new XDate();
       }
       options = {
         defaultAction: defaultAction,
@@ -897,7 +861,7 @@ window.require.register("views/app_view", function(exports, require, module) {
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         alarmView = _ref1[_i];
         id = alarmView.getIndex();
-        date = alarmView.$("#inputDate" + id).val();
+        date = alarmView.$("#inputDate" + id + " input").val();
         time = alarmView.$("#inputTime" + id).val();
         dueDate = helpers.formatDateICal("" + date + ":" + time);
         alarm = new Alarm({
@@ -931,7 +895,7 @@ window.require.register("views/app_view", function(exports, require, module) {
           wait: true,
           success: function(model, response) {
             _this.addReminderFormView.resetForm();
-            _this.addRemidnerFormView.collapse();
+            _this.addReminderFormView.collapse();
             return console.log('Create reminder: success');
           },
           error: function(error, xhr, options) {
@@ -1054,7 +1018,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
     DayProgramView.prototype.render = function() {
       return DayProgramView.__super__.render.call(this, {
-        date: this.model.get('date')
+        date: this.model.get('date').toString('dd/MM/yyyy')
       });
     };
 
@@ -1120,7 +1084,7 @@ window.require.register("views/reminder_view", function(exports, require, module
       } else {
         return ReminderView.__super__.render.call(this, {
           actions: this.model.pluck('action'),
-          date: this.getDataModel().getDateObject(),
+          time: this.getDataModel().getDateObject().toString('HH:mm'),
           description: this.getDataModel().get('description'),
           reminderID: this.getDataModel().get('reminderID'),
           dateHash: this.getDataModel().getDateHash(),
@@ -1392,13 +1356,15 @@ window.require.register("views/templates/addreminder_alarm_form", function(expor
 
   buf.push('</select><label');
   buf.push(attrs({ 'for':("inputDate" + (id) + "") }, {"for":true}));
-  buf.push('>&nbsp;Date&nbsp;</label><input');
-  buf.push(attrs({ 'type':("date"), 'id':("inputDate" + (id) + ""), 'value':("" + (defaultDate) + "") }, {"type":true,"id":true,"value":true}));
-  buf.push('/><label');
+  buf.push('>&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
+  buf.push(attrs({ 'id':("inputDate" + (id) + ""), 'data-date':("" + (defaultDate) + ""), 'data-date-format':("dd/mm/yyyy"), "class": ('input-append') + ' ' + ('date') }, {"id":true,"data-date":true,"data-date-format":true}));
+  buf.push('><input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
+  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label');
   buf.push(attrs({ 'for':("inputTime" + (id) + "") }, {"for":true}));
-  buf.push('>&nbsp;&nbsp;Time&nbsp;</label><input');
-  buf.push(attrs({ 'type':("time"), 'id':("inputTime" + (id) + ""), 'value':("" + (defaultTime) + "") }, {"type":true,"id":true,"value":true}));
-  buf.push('/><button class="btn add-alarm"><i class="icon-plus"></i></button></div>');
+  buf.push('>&nbsp;&nbsp;Time&nbsp;</label><!--input(type="time", id="inputTime#{id}", value="#{defaultTime}")--><div class="input-append bootstrap-timepicker"><input');
+  buf.push(attrs({ 'id':("inputTime" + (id) + ""), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div><!--button.btn.add-alarm<i class="icon-plus"></i>--></div>');
   }
   return buf.join("");
   };
@@ -1420,7 +1386,7 @@ window.require.register("views/templates/dayprogram", function(exports, require,
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<h2>' + escape((interp = date.day) == null ? '' : interp) + '/' + escape((interp = date.month) == null ? '' : interp) + '/' + escape((interp = date.year) == null ? '' : interp) + '</h2><div class="alarms"></div>');
+  buf.push('<h2>' + escape((interp = date) == null ? '' : interp) + '</h2><div class="alarms"></div>');
   }
   return buf.join("");
   };
@@ -1442,7 +1408,7 @@ window.require.register("views/templates/reminder", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p>' + escape((interp = date.hour) == null ? '' : interp) + ':' + escape((interp = date.minute) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = actions) == null ? '' : interp) + ')<i');
+  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = actions) == null ? '' : interp) + ')<i');
   buf.push(attrs({ 'data-reminderid':("" + (reminderID) + ""), "class": ('icon-pencil') }, {"data-reminderid":true}));
   buf.push('></i><i');
   buf.push(attrs({ 'data-reminderid':("" + (reminderID) + ""), 'data-alarmids':("" + (alarmIDs) + ""), 'data-datehash':("" + (dateHash) + ""), "class": ('icon-trash') }, {"data-reminderid":true,"data-alarmids":true,"data-datehash":true}));
