@@ -1,5 +1,5 @@
 exports.routes = (map) ->
 
-    map.get 'reminders', 'reminders#all'
-    map.post 'reminders', 'reminders#create'
-    map.put 'reminders/:id', 'reminders#update'
+    map.get 'alarms', 'alarms#all'
+    map.post 'alarms', 'alarms#create'
+    map.put 'alarms/:id', 'alarms#update'

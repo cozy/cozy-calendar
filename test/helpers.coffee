@@ -2,27 +2,25 @@ Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 
 module.exports = (compound) ->
-    VTodo = compound.models.VTodo
+    Alarm = compound.models.Alarm
 
     helpers = {}
 
     # Remove all todolists and tree from DB.
     helpers.cleanDb = (callback) ->
-        VTodo.destroyAll callback
+        Alarm.destroyAll callback
+
+    helpers.getAllAlarms = (callback) ->
+        Alarm.all callback
 
     # Create a new todo list.
-    helpers.createReminder = (description) ->
+    helpers.createAlarm = (action, description, trigger) ->
         (callback) ->
             alarm =
-                action: 'DISPLAY'
-                trigger: '20130410T130000Z'
-                description: 'please remind me something'
-
-            vtodo =
+                action: action
                 description: description
-                alarms: [alarm]
+                trigg: trigger
 
-            VTodo.create vtodo, callback
-
+            Alarm.create alarm, callback
 
     helpers
