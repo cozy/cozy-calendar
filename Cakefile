@@ -39,7 +39,7 @@ task 'tests', 'run server tests, ./test is parsed by default, otherwise use -f o
     if not(options.dir or options.file)
         testFiles = walk("test", [])
     runTests testFiles
-    
+
 task 'tests:client', 'run client tests through mocha', (opts) ->
     options     = opts
     uiTestFiles = walk("client/test", [])
@@ -47,7 +47,7 @@ task 'tests:client', 'run client tests through mocha', (opts) ->
 
 
 runTests = (fileList) ->
-    command = "mocha " + fileList.join(" ") + " "
+    command = "NODE_ENV='test' mocha " + fileList.join(" ") + " "
     if options['debug-brk']
         command += "--debug-brk --forward-io --profile "
     if options.debug
