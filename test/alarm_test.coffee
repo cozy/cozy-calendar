@@ -128,5 +128,31 @@ describe "Alarms management", ->
                 done()
 
     describe "DELETE alarms/:id", ->
-        it "should return the deleted alarm"
-        it "should have removed the alarm from the database"
+
+        before (done) =>
+            @alarm =
+                action: 'DISPLAY'
+                trigg: '20130410T1500Z'
+                description: 'Something to remind'
+
+            helpers.cleanDb =>
+                helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                    @alarm.id = alarm.id
+                    done()
+
+        it "should return the deleted alarm", (done) =>
+
+            client.del "alarms/#{@alarm.id}", (err, resp, body) =>
+                should.not.exist err
+                should.exist resp
+                resp.should.have.status 200
+
+                done()
+
+        it "should have removed the alarm from the database", (done) =>
+
+            helpers.doesAlarmExist @alarm.id, (err, isExist) ->
+                should.not.exist err
+                should.exist isExist
+                isExist.should.be.false
+                done()

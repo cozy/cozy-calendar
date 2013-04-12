@@ -31,4 +31,7 @@ module.exports = (compound) ->
     helpers.getAlarmByID = (id, callback) ->
         Alarm.find id, callback
 
+    helpers.doesAlarmExist = (id, callback) ->
+        Alarm.exists id, callback
+
     helpers
