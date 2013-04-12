@@ -57,6 +57,8 @@ describe "Alarms management", ->
                 should.exist response
                 response.should.have.status 201
                 should.exist body
+                body.should.have.property 'id'
+                @alarm.id = body.id
                 body.should.have.property 'action', @alarm.action
                 body.should.have.property 'trigg', @alarm.trigg
                 body.should.have.property 'description', @alarm.description
@@ -64,22 +66,66 @@ describe "Alarms management", ->
                 done()
 
         it "should have persisted the alarm into database", (done) =>
+
+            helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                should.not.exist err
+                should.exist alarm
+                alarm.should.have.property 'action', @alarm.action
+                alarm.should.have.property 'trigg', @alarm.trigg
+                alarm.should.have.property 'description', @alarm.description
+
+                done()
+
+        it "should have only one item in the database", (done) =>
+
             helpers.getAllAlarms (err, alarms) =>
 
                 should.not.exist err
                 should.exist alarms
                 alarms.length.should.equal 1
-                should.exist alarms[0]
-
-                alarms[0].should.have.property 'action', @alarm.action
-                alarms[0].should.have.property 'trigg', @alarm.trigg
-                alarms[0].should.have.property 'description', @alarm.description
 
                 done()
 
     describe "PUT alarms/:id", ->
-        it "should return the alarm with the updated value"
-        it "should have persisted the alarm into database"
+
+        before (done) =>
+            @alarm =
+                action: 'DISPLAY'
+                trigg: '20130410T1500Z'
+                description: 'Something to remind'
+
+            helpers.cleanDb =>
+                helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                    @alarm.id = alarm.id
+                    done()
+
+        it "should return the alarm with the updated value", (done) =>
+
+            @alarm.action = 'EMAIL'
+            @alarm.trigg = '20130410T1530Z'
+            @alarm.description = 'Something updated to remind'
+
+            client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
+
+                should.not.exist err
+                should.exist resp
+                resp.should.have.status 200
+                should.exist body
+                body.should.have.property 'action', @alarm.action
+                body.should.have.property 'trigg', @alarm.trigg
+                body.should.have.property 'description', @alarm.description
+                done()
+
+        it "should have persisted the alarm into database", (done) =>
+
+            helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                should.not.exist err
+                should.exist alarm
+                alarm.should.have.property 'action', @alarm.action
+                alarm.should.have.property 'trigg', @alarm.trigg
+                alarm.should.have.property 'description', @alarm.description
+
+                done()
 
     describe "DELETE alarms/:id", ->
         it "should return the deleted alarm"
