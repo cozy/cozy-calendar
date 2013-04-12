@@ -1,9 +1,20 @@
-exports.formatDateICal = (date) ->
-    date = date.split(/[/:]/);
-    dueDate = "#{date[2]}#{date[1]}#{date[0]}T" + \
-              "#{date[3]}#{date[4]}00Z"
+exports.formatDateICal = (fullDate) ->
 
-    return dueDate
+    fullDate = fullDate.split /#/
+
+    date = fullDate[0].split /[\/]/
+    if date.length is 3
+        date = "#{date[2]}#{date[1]}#{date[0]}"
+    else
+        date = "undefined"
+
+    time = fullDate[1].split /:/
+    if time.length is 2
+        time = "#{time[0]}#{time[1]}00"
+    else
+        time = "undefined"
+
+    return "#{date}T#{time}Z"
 
 exports.isICalDateValid = (date) ->
 
@@ -12,6 +23,14 @@ exports.isICalDateValid = (date) ->
     date = new XDate(exports.icalToISO8601(date))
 
     return date.valid()
+
+exports.isDatePartValid = (date) ->
+    date = date.split('T')
+    return date[0].match(/[0-9]{8}/)?
+
+exports.isTimePartValid = (date) ->
+    date = date.split('T')
+    return date[1].match(/[0-9]{6}Z/)?
 
 
 exports.icalToISO8601 = (icalDate, localOffset) ->

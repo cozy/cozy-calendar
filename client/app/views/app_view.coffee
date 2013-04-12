@@ -39,12 +39,9 @@ module.exports = class AppView extends View
 
     onAddAlarmClicked: (event, callback) ->
 
-        return 0 unless not $(event.currentTarget).hasClass('disabled')
-
-
         date = @alarmFormView.dateField.val()
         time = @alarmFormView.timeField.val()
-        dueDate = helpers.formatDateICal "#{date}:#{time}"
+        dueDate = helpers.formatDateICal "#{date}##{time}"
 
         data =
             description: @alarmFormView.descriptionField.val()
@@ -71,9 +68,7 @@ module.exports = class AppView extends View
                         console.log "Create alarm: error: #{error?.msg}"
 
         if alarm.validationError?.length > 0
-            # TODO : the form must display the error
-            console.log "Invalid input for alarm!"
-            console.debug alarm.validationError
+            @alarmFormView.displayErrors(alarm.validationError)
 
     onEditAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')

@@ -8,6 +8,7 @@ module.exports = class AlarmFormView extends View
         'focus #inputDesc': 'onFocus'
         'blur #inputDesc': 'onBlur'
         'keyup #inputDesc': 'onKeydown'
+        'click .add-alarm': 'onSubmit'
 
     initialize: ->
         @actions =
@@ -47,6 +48,20 @@ module.exports = class AlarmFormView extends View
         @timeField = @$('#inputTime')
 
         @addAlarmButton = @$('button.add-alarm')
+
+        @validationMapper =
+            action:
+                field: @actionField
+                placement: 'left'
+            description:
+                field: @descriptionField
+                placement: 'top'
+            triggdate:
+                field: @dateField
+                placement: 'bottom'
+            triggtime:
+                field: @timeField.parent()
+                placement: 'right'
 
     template: ->
         require './templates/alarm_form'
@@ -105,3 +120,25 @@ module.exports = class AlarmFormView extends View
         todayDate = new XDate()
         @dateField.val todayDate.toString 'dd/MM/yyyy'
         @timeField.val todayDate.toString 'HH:mm'
+
+        @resetErrors()
+
+    displayErrors: (validationErrors) ->
+
+        validationErrors.forEach (err) =>
+
+            data = @validationMapper[err.field]
+            data.field
+                .tooltip(
+                        title: err.value
+                        placement: data.placement
+                        container: @$el
+                        trigger: 'manual')
+                .tooltip('show')
+
+    resetErrors: ->
+        for index, mappedElement of @validationMapper
+            mappedElement.field.tooltip('destroy')
+
+    onSubmit: ->
+        @resetErrors()

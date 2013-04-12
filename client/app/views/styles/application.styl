@@ -10,13 +10,27 @@
 @import '_layout'
 @import '_responsive'
 
-#add-alarm
-  margin-bottom: 0
-
 h1
   margin-top: 15px
   margin-bottom: 25px
   font-size: 36px
+
+errorColor = #DD3333
+
+.addform
+  .tooltip.top .tooltip-arrow
+      border-top-color: errorColor
+  .tooltip.bottom .tooltip-arrow
+      border-bottom-color: errorColor
+  .tooltip.left .tooltip-arrow
+      border-left-color: errorColor
+  .tooltip.right .tooltip-arrow
+      border-right-color: errorColor
+  .tooltip .tooltip-inner
+      background: errorColor
+
+  #add-alarm
+    margin-bottom: 0
 
 .form-horizontal
   margin-bottom: 0 !important
@@ -30,9 +44,6 @@ h1
     .add-on i
         margin-top: 2px !important
 
-#add-alarms
-  i
-    margin-top: 2px
 
 input[type="date"]
   width: 150px

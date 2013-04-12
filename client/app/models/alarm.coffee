@@ -5,6 +5,12 @@ class exports.Alarm extends Backbone.Model
     validate: (attrs, options) ->
 
         errors = []
+
+        if not attrs.description or attrs.description is ""
+            errors.push
+                field: 'description'
+                value: "A description must be set."
+
         if not attrs.action or attrs.action is ""
             errors.push
                 field: 'action'
@@ -14,12 +20,17 @@ class exports.Alarm extends Backbone.Model
         if allowedActions.indexOf(attrs.action) is -1
             errors.push
                 field: 'action'
-                value: "The action must be in #{allowedActions}."
+                value: "A valid action must be set."
 
-        if not attrs.trigg or not helpers.isICalDateValid(attrs.trigg)
+        if not attrs.trigg or not helpers.isDatePartValid(attrs.trigg)
             errors.push
-                field: 'trigg'
-                value: "The date format is invalid. Must be dd/mm/yyyy."
+                field: 'triggdate'
+                value: "The date format is invalid. It must be dd/mm/yyyy."
+
+        if not attrs.trigg or not helpers.isTimePartValid(attrs.trigg)
+            errors.push
+                field: 'triggtime'
+                value: "The time format is invalid. It must be hh:mm."
 
         if errors.length > 0
             return errors
