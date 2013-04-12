@@ -2,13 +2,6 @@ helpers = require '../helpers'
 
 class exports.Alarm extends Backbone.Model
 
-    constructor: (attributes, options) ->
-
-        if attributes.reminderID? and attributes.index?
-            attributes.id = "#{attributes.reminderID}##{attributes.index}"
-
-        super attributes, options
-
     validate: (attrs, options) ->
 
         errors = []
@@ -23,21 +16,20 @@ class exports.Alarm extends Backbone.Model
                 field: 'action'
                 value: "The action must be in #{allowedActions}."
 
-        if not attrs.trigger or not helpers.isICalDateValid(attrs.trigger)
+        if not attrs.trigg or not helpers.isICalDateValid(attrs.trigg)
             errors.push
-                field: 'trigger'
+                field: 'trigg'
                 value: "The date format is invalid. Must be dd/mm/yyyy."
 
         if errors.length > 0
             return errors
 
     getDateObject: ->
-        date = helpers.icalToISO8601 @get 'trigger'
-        return new XDate(date)
+        return new XDate(helpers.icalToISO8601 @get('trigg'))
 
     getPreviousDateObject: ->
-        if @previous('trigger')?
-            return helpers.icalToISO8601 @previous 'trigger'
+        if @previous('trigg')?
+            return new XDate(helpers.icalToISO8601 @previous('trigg'))
         else return false
 
     getDateHash: (date) ->

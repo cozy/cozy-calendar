@@ -1,6 +1,5 @@
 View = require '../lib/view'
-ReminderView = require './reminder_view'
-
+AlarmView = require './alarm_view'
 {AlarmCollection} = require '../collections/alarms'
 
 module.exports = class DayProgramView extends View
@@ -9,9 +8,9 @@ module.exports = class DayProgramView extends View
     className: 'dayprogram'
 
     initialize: ->
-        @listenTo @model.alarms, "add", @onAdd
-        @listenTo @model.alarms, "change", @onChange
-        @listenTo @model.alarms, "remove", @onRemove
+        @listenTo @model.get('alarms'), "add", @onAdd
+        @listenTo @model.get('alarms'), "change", @onChange
+        @listenTo @model.get('alarms'), "remove", @onRemove
 
         @views = {}
 
@@ -19,60 +18,34 @@ module.exports = class DayProgramView extends View
 
         index = alarms.indexOf alarm
 
-        id = alarm.get('reminderID') + alarm.getTimeHash()
+        rView = new AlarmView
+                        id: alarm.id
+                        model: alarm
 
-        @getReminderView(id, index).model.add(alarm)
-
-    getReminderView: (id, index) ->
-
-        index = 0 unless index?
-
-        if not @views[id]?
-            alarmsOnSameObject = new AlarmCollection()
-            rView = new ReminderView
-                        id: id
-                        model: alarmsOnSameObject
-
-            @views[id] = rView
-            render = rView.render().$el
-            if index is 0
-                @$el.find('.alarms').prepend render
-            else if index is @model.alarms.length - 1
-                @$el.find('.alarms').append render
-            else
-                selector = ".alarms .#{rView.className}:nth-of-type(#{index})"
-                @$el.find(selector).before render
+        render = rView.render().$el
+        if index is 0
+            @$el.find('.alarms').prepend render
+        else if index is @model.get('alarms').length - 1
+            @$el.find('.alarms').append render
         else
-            rView = @views[id]
+            selector = ".alarms .#{rView.className}:nth-of-type(#{index})"
+            @$el.find(selector).before render
 
-        return rView
+        @views[alarm.id] = rView
+
 
     onChange: (alarm, options) ->
-
-        if alarm.previous('trigger') is alarm.get('trigger')
-            id = alarm.get('reminderID') + alarm.getTimeHash()
-            alarmToUpdate = @views[id].model.get(alarm.get('id'))
-            alarmToUpdate.set alarm.toJSON()
-        else
-            id = alarm.get('reminderID') + alarm.getTimeHash()
-            index = @model.alarms.indexOf alarm
-            @getReminderView(id, index).model.add(alarm)
-            oldID = alarm.get('reminderID') + alarm.getTimeHash(alarm.getPreviousDateObject())
-            @getReminderView(oldID).remove alarm
+        @views[alarm.id].model.set(alarm.toJSON())
 
     onRemove: (alarm, collection, options) ->
-        if @model.alarms.length is 0
-            @destroy()
-        else
-            id = alarm.get('reminderID') + alarm.getTimeHash()
-            rView = @getReminderView(id)
-            rView.model.remove(alarm)
-            if rView.model.length is 0
-                delete @views[id]
+        @views[alarm.id].destroy()
+
+        if @model.get('alarms').length is 0
+            @model.collection.remove @model
 
     render: ->
         super
-            date: @model.get('date').toString 'dd/MM/yyyy'
+            date: @model.get 'date'
 
     template: ->
         require './templates/dayprogram'

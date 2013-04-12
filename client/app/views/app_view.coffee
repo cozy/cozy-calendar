@@ -1,9 +1,8 @@
 View      = require '../lib/view'
 AppRouter = require '../routers/app_router'
-RemindersView = require './reminders_view'
-AddReminderFormView = require './addreminderform_view'
-{ReminderCollection} = require '../collections/reminders'
-{Reminder} = require '../models/reminder'
+
+AlarmFormView = require './alarmform_view'
+AlarmsView = require '../views/alarms_view'
 
 {AlarmCollection} = require '../collections/alarms'
 {Alarm} = require '../models/alarm'
@@ -14,8 +13,9 @@ module.exports = class AppView extends View
     el: 'body.application'
 
     events:
-        "click #add-reminder button.add-reminder": "onAddReminderClicked"
-        "click #reminders .alarms p .icon-pencil": "onEditReminderClicked"
+        "click #add-alarm button.add-alarm": "onAddAlarmClicked"
+        "click #alarms .alarms p .icon-pencil": "onEditAlarmClicked"
+        "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
 
     template: ->
         require('./templates/home')
@@ -23,72 +23,70 @@ module.exports = class AppView extends View
     initialize: ->
         @router = CozyApp.Routers.AppRouter = new AppRouter()
 
-        @reminders = new ReminderCollection()
-
     afterRender: ->
 
-        @addReminderFormView = new AddReminderFormView()
-        @addReminderFormView.render()
+        (@alarmFormView = new AlarmFormView()).render()
 
-        @remindersView = new RemindersView
-            appModel: @reminders
+        @alarms = new AlarmCollection()
+        @alarmsView = new AlarmsView
+            model: @alarms
 
-        @reminders.fetch
+        @alarms.fetch
             success: (collection, response, options) ->
                 console.log "Fetch: success"
             error: ->
                 console.log "Fetch: error"
 
-    onAddReminderClicked: (event, callback) ->
+    onAddAlarmClicked: (event, callback) ->
 
-        description = @$('#inputDesc').val()
+        return 0 unless not $(event.currentTarget).hasClass('disabled')
 
-        if not description? or description is ''
-            return
 
-        alarmCollection = new AlarmCollection()
-        for alarmView in @addReminderFormView.alarmViews
-            id = alarmView.getIndex()
-            date = alarmView.$("#inputDate#{id} input").val()
-            time = alarmView.$("#inputTime#{id}").val()
-            dueDate = helpers.formatDateICal "#{date}:#{time}"
+        date = @alarmFormView.dateField.val()
+        time = @alarmFormView.timeField.val()
+        dueDate = helpers.formatDateICal "#{date}:#{time}"
 
-            alarm = new Alarm
-                action: alarmView.$("#action#{id}").val()
-                trigger: dueDate
-                description: "Please, remind: #{description}"
-            alarmCollection.add alarm
+        data =
+            description: @alarmFormView.descriptionField.val()
+            action: @alarmFormView.actionField.val()
+            trigg: dueDate
 
-        if @addReminderFormView.editionMode
-            reminder = @addReminderFormView.data
-            reminder.save
-                description: description
-                alarms: alarmCollection.toJSON(),
+        if @alarmFormView.editionMode
+            alarm = @alarmFormView.data
+            alarm.save data,
                     wait: true
                     success: =>
-                        @addReminderFormView.resetForm()
-                        @addReminderFormView.collapse()
+                        @alarmFormView.resetForm()
                         console.log "Save: success (attributes updated)"
                     error: ->
-                        console.log "Error during reminder save."
+                        console.log "Error during alarm save."
         else
-            reminder = @reminders.create
-                description: description
-                alarms: alarmCollection.toJSON(),
+            alarm = @alarms.create data,
                     wait: true
                     success: (model, response) =>
-                        @addReminderFormView.resetForm()
-                        @addReminderFormView.collapse()
-                        console.log 'Create reminder: success'
+                        @alarmFormView.resetForm()
+                        console.log 'Create alarm: success'
                     error: (error, xhr, options) ->
                         error = JSON.parse xhr.responseText
-                        console.log "Create reminder: error: #{error?.msg}"
+                        console.log "Create alarm: error: #{error?.msg}"
 
-        if reminder.validationError.length > 0
+        if alarm.validationError?.length > 0
             # TODO : the form must display the error
-            console.log "Invalid input for reminder!"
+            console.log "Invalid input for alarm!"
+            console.debug alarm.validationError
 
-    onEditReminderClicked: (event) ->
-        reminderID = $(event.target).data('reminderid')
-        reminder = @reminders.get reminderID
-        @addReminderFormView.loadReminderData(reminder)
+    onEditAlarmClicked: (event) ->
+        alarmID = $(event.target).data('alarmid')
+        alarm = @alarms.get alarmID
+        @alarmFormView.loadAlarmData(alarm)
+
+    onRemoveAlarmClicked: (event) ->
+        alarmID = $(event.target).data('alarmid')
+        alarm = @alarms.get alarmID
+        # TODO: add confirmation
+        alarm.destroy
+            wait: true
+            success: () ->
+                console.log "Delete alarm: success"
+            error: () ->
+                console.log "Delete alarm: error"

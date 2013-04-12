@@ -4,6 +4,7 @@
 class exports.AlarmCollection extends CozyCollection
 
     model: Alarm
+    url: 'alarms'
 
     comparator: (alarm1, alarm2) ->
 

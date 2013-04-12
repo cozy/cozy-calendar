@@ -10,22 +10,25 @@
 @import '_layout'
 @import '_responsive'
 
+#add-alarm
+  margin-bottom: 0
+
 h1
   margin-top: 15px
   margin-bottom: 25px
   font-size: 36px
 
-.form-horizontal .control-label
-  font-size: 13px
-  width: 100px
-.form-horizontal .controls
-  margin-left: 120px
+.form-horizontal
+  margin-bottom: 0 !important
 
-button.add-alarm, button.remove-alarm
-  padding: 1px
-  margin-left: 5px
-  height: 18px
-  line-height: 20px
+  .control-label
+    font-size: 13px
+    width: 100px
+  .controls
+    margin-left: 120px
+
+    .add-on i
+        margin-top: 2px !important
 
 #add-alarms
   i
@@ -65,8 +68,3 @@ input[type="time"]
   > div
     border-width: 5px
     border-radius: 0
-
-.addform
-  min-height: 115px
-.addform.expanded
-  min-height: 150px

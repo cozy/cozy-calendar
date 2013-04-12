@@ -7,7 +7,7 @@ exports.formatDateICal = (date) ->
 
 exports.isICalDateValid = (date) ->
 
-    return false unless date.match(/[0-9]{8}T[0-9]{4}Z/)
+    return false unless date.match(/[0-9]{8}T[0-9]{6}Z/)
 
     date = new XDate(exports.icalToISO8601(date))
 

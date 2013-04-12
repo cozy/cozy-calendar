@@ -1,0 +1,27 @@
+.form-horizontal.well
+  .control-group
+    label.control-label(for="inputDesc") Description
+    .controls
+      input.input-block-level(type="text", id="inputDesc", placeholder="What should I remind you ?")
+  .controls.form-inline
+      select(id="action").input-small
+        each displayAction, action in actions
+            if action == defaultAction
+              option(value="#{action}", selected) #{displayAction}
+            else
+              option(value="#{action}") #{displayAction}
+      label(for="inputDate") &nbsp;Date&nbsp;
+      //input(type="date", id="inputDate#{id}", value="#{defaultDate}")
+      .input-append.date(id="inputDate", data-date="#{defaultDate}", data-date-format="dd/mm/yyyy")
+        input.span2(type="text", value="#{defaultDate}")
+        span.add-on
+          i.icon-th
+      label(for="inputTime") &nbsp;&nbsp;Time&nbsp;
+      //input(type="time", id="inputTime#{id}", value="#{defaultTime}")
+      .input-append.bootstrap-timepicker
+        input.input-small(id="inputTime", type="text", value="#{defaultTime}")
+        span.add-on
+          i.icon-time
+
+  button.btn.pull-right.disabled.add-alarm Add the alarm
+  .clearfix

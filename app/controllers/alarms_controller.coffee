@@ -5,8 +5,8 @@ before ->
         else
             @alarm = alarm
             next()
-# Make this pre-treatment only before update action.
-, only: ['update']
+# Make this pre-treatment only before update and delete action.
+, only: ['update', 'delete']
 
 action 'all', ->
     Alarm.all (err, alarms) ->
@@ -27,4 +27,12 @@ action 'update', ->
         if err?
             send error: true, msg: "Server error while saving alarm", 500
         else
-            send alarm
+            send alarm, 200
+
+action 'delete', ->
+    @alarm.destroy (err) ->
+        if err?
+            send error: true, msg: "Server error while deleting the alarm", 500
+        else
+            send success: true, 200
+
