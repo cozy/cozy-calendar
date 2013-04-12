@@ -120,12 +120,23 @@ window.require.register("collections/alarms", function(exports, require, module)
   
 });
 window.require.register("helpers", function(exports, require, module) {
-  exports.formatDateICal = function(date) {
-    var dueDate;
+  exports.formatDateICal = function(fullDate) {
+    var date, time;
 
-    date = date.split(/[/:]/);
-    dueDate = ("" + date[2] + date[1] + date[0] + "T") + ("" + date[3] + date[4] + "00Z");
-    return dueDate;
+    fullDate = fullDate.split(/#/);
+    date = fullDate[0].split(/[\/]/);
+    if (date.length === 3) {
+      date = "" + date[2] + date[1] + date[0];
+    } else {
+      date = "undefined";
+    }
+    time = fullDate[1].split(/:/);
+    if (time.length === 2) {
+      time = "" + time[0] + time[1] + "00";
+    } else {
+      time = "undefined";
+    }
+    return "" + date + "T" + time + "Z";
   };
 
   exports.isICalDateValid = function(date) {
@@ -134,6 +145,16 @@ window.require.register("helpers", function(exports, require, module) {
     }
     date = new XDate(exports.icalToISO8601(date));
     return date.valid();
+  };
+
+  exports.isDatePartValid = function(date) {
+    date = date.split('T');
+    return date[0].match(/[0-9]{8}/) != null;
+  };
+
+  exports.isTimePartValid = function(date) {
+    date = date.split('T');
+    return date[1].match(/[0-9]{6}Z/) != null;
   };
 
   exports.icalToISO8601 = function(icalDate, localOffset) {
@@ -303,6 +324,12 @@ window.require.register("models/alarm", function(exports, require, module) {
       var allowedActions, errors;
 
       errors = [];
+      if (!attrs.description || attrs.description === "") {
+        errors.push({
+          field: 'description',
+          value: "A description must be set."
+        });
+      }
       if (!attrs.action || attrs.action === "") {
         errors.push({
           field: 'action',
@@ -313,13 +340,19 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (allowedActions.indexOf(attrs.action) === -1) {
         errors.push({
           field: 'action',
-          value: "The action must be in " + allowedActions + "."
+          value: "A valid action must be set."
         });
       }
-      if (!attrs.trigg || !helpers.isICalDateValid(attrs.trigg)) {
+      if (!attrs.trigg || !helpers.isDatePartValid(attrs.trigg)) {
         errors.push({
-          field: 'trigg',
-          value: "The date format is invalid. Must be dd/mm/yyyy."
+          field: 'triggdate',
+          value: "The date format is invalid. It must be dd/mm/yyyy."
+        });
+      }
+      if (!attrs.trigg || !helpers.isTimePartValid(attrs.trigg)) {
+        errors.push({
+          field: 'triggtime',
+          value: "The time format is invalid. It must be hh:mm."
         });
       }
       if (errors.length > 0) {
@@ -483,7 +516,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     AlarmFormView.prototype.events = {
       'focus #inputDesc': 'onFocus',
       'blur #inputDesc': 'onBlur',
-      'keyup #inputDesc': 'onKeydown'
+      'keyup #inputDesc': 'onKeydown',
+      'click .add-alarm': 'onSubmit'
     };
 
     AlarmFormView.prototype.initialize = function() {
@@ -526,7 +560,25 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
-      return this.addAlarmButton = this.$('button.add-alarm');
+      this.addAlarmButton = this.$('button.add-alarm');
+      return this.validationMapper = {
+        action: {
+          field: this.actionField,
+          placement: 'left'
+        },
+        description: {
+          field: this.descriptionField,
+          placement: 'top'
+        },
+        triggdate: {
+          field: this.dateField,
+          placement: 'bottom'
+        },
+        triggtime: {
+          field: this.timeField.parent(),
+          placement: 'right'
+        }
+      };
     };
 
     AlarmFormView.prototype.template = function() {
@@ -594,7 +646,40 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.descriptionField.val('');
       todayDate = new XDate();
       this.dateField.val(todayDate.toString('dd/MM/yyyy'));
-      return this.timeField.val(todayDate.toString('HH:mm'));
+      this.timeField.val(todayDate.toString('HH:mm'));
+      return this.resetErrors();
+    };
+
+    AlarmFormView.prototype.displayErrors = function(validationErrors) {
+      var _this = this;
+
+      return validationErrors.forEach(function(err) {
+        var data;
+
+        data = _this.validationMapper[err.field];
+        return data.field.tooltip({
+          title: err.value,
+          placement: data.placement,
+          container: _this.$el,
+          trigger: 'manual'
+        }).tooltip('show');
+      });
+    };
+
+    AlarmFormView.prototype.resetErrors = function() {
+      var index, mappedElement, _ref1, _results;
+
+      _ref1 = this.validationMapper;
+      _results = [];
+      for (index in _ref1) {
+        mappedElement = _ref1[index];
+        _results.push(mappedElement.field.tooltip('destroy'));
+      }
+      return _results;
+    };
+
+    AlarmFormView.prototype.onSubmit = function() {
+      return this.resetErrors();
     };
 
     return AlarmFormView;
@@ -805,12 +890,9 @@ window.require.register("views/app_view", function(exports, require, module) {
       var alarm, data, date, dueDate, time, _ref1,
         _this = this;
 
-      if (!!$(event.currentTarget).hasClass('disabled')) {
-        return 0;
-      }
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
-      dueDate = helpers.formatDateICal("" + date + ":" + time);
+      dueDate = helpers.formatDateICal("" + date + "#" + time);
       data = {
         description: this.alarmFormView.descriptionField.val(),
         action: this.alarmFormView.actionField.val(),
@@ -842,8 +924,7 @@ window.require.register("views/app_view", function(exports, require, module) {
         });
       }
       if (((_ref1 = alarm.validationError) != null ? _ref1.length : void 0) > 0) {
-        console.log("Invalid input for alarm!");
-        return console.debug(alarm.validationError);
+        return this.alarmFormView.displayErrors(alarm.validationError);
       }
     };
 
