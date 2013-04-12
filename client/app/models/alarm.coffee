@@ -27,6 +27,9 @@ class exports.Alarm extends Backbone.Model
     getDateObject: ->
         return new XDate(helpers.icalToISO8601 @get('trigg'))
 
+    getFormattedDate: (format) ->
+        return @getDateObject().toString format
+
     getPreviousDateObject: ->
         if @previous('trigg')?
             return new XDate(helpers.icalToISO8601 @previous('trigg'))

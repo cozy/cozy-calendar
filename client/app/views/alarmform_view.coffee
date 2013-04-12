@@ -85,8 +85,8 @@ module.exports = class AlarmFormView extends View
     loadAlarmData: (alarm) ->
         @resetForm()
         @descriptionField.val alarm.get 'description'
-        @dateField.val alarm.getDateObject().toString 'dd/MM/yyyy'
-        @timeField.val alarm.getDateObject().toString 'HH:mm'
+        @dateField.val alarm.getFormattedDate 'dd/MM/yyyy'
+        @timeField.val alarm.getFormattedDate 'HH:mm'
 
         @data = alarm
 

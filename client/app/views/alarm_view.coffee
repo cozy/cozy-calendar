@@ -15,7 +15,7 @@ module.exports = class AlarmView extends View
 
         super
             action: @model.get 'action'
-            time: @model.getDateObject().toString 'HH:mm'
+            time: @model.getFormattedDate 'HH:mm'
             description: @model.get 'description'
             alarmID: @model.id
 
