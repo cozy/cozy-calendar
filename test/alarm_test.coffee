@@ -35,49 +35,46 @@ describe "Alarms management", ->
                 should.exist response
                 should.exist body
 
+                response.should.have.property 'statusCode'
                 response.statusCode.should.equal 200
                 body.length.should.equal 2
                 done()
 
     describe "POST alarms/", ->
 
-        before (done) ->
+        before (done) =>
             helpers.cleanDb done
             @alarm =
                 action: 'DISPLAY'
                 trigg: '20130410T1500Z'
                 description: 'Something to remind'
 
-        it "should return the alarm json object", (done) ->
+        it "should return the alarm json object", (done) =>
 
             client.post "alarms/", @alarm, (error, response, body) =>
 
                 should.not.exist error
                 should.exist response
-                response.statusCode.should.equal 201
+                response.should.have.status 201
                 should.exist body
-                should.exist body.action
-                should.exist body.trigg
-                should.exist body.description
-
-                body.action.should.equal @alarm.action
-                body.trigg.should.equal @alarm.trigg
-                body.description.should.equal @alarm.description
+                body.should.have.property 'action', @alarm.action
+                body.should.have.property 'trigg', @alarm.trigg
+                body.should.have.property 'description', @alarm.description
 
                 done()
 
-        it "should have persisted the alarm into database", (done) ->
+        it "should have persisted the alarm into database", (done) =>
             helpers.getAllAlarms (err, alarms) =>
 
                 should.not.exist err
                 should.exist alarms
                 alarms.length.should.equal 1
-                should.exist alarms[0].action
-                should.exist alarms[0].trigg
-                should.exist alarms[0].description
-                alarms[0].action.should.equal @alarm.action
-                alarms[0].trigg.should.equal @alarm.trigg
-                alarms[0].description.should.equal @alarm.description
+                should.exist alarms[0]
+
+                alarms[0].should.have.property 'action', @alarm.action
+                alarms[0].should.have.property 'trigg', @alarm.trigg
+                alarms[0].should.have.property 'description', @alarm.description
+
                 done()
 
     describe "PUT alarms/:id", ->
