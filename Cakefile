@@ -41,9 +41,10 @@ task 'tests', 'run server tests, ./test is parsed by default, otherwise use -f o
     runTests testFiles
 
 task 'tests:client', 'run client tests through mocha', (opts) ->
-    options     = opts
-    uiTestFiles = walk("client/test", [])
-    runTests uiTestFiles
+    exec "mocha-phantomjs client/tests/index.html", (err, stdout, stderr) ->
+        if err
+            console.log "Running mocha caught exception: \n" + err
+        console.log stdout
 
 
 runTests = (fileList) ->
