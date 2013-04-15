@@ -124,14 +124,14 @@ window.require.register("helpers", function(exports, require, module) {
     var date, time;
 
     fullDate = fullDate.split(/#/);
-    date = fullDate[0].split(/[\/]/);
-    if (date.length === 3) {
+    if (fullDate[0].match(/([0-9]{2}\/){2}[0-9]{4}/)) {
+      date = fullDate[0].split(/[\/]/);
       date = "" + date[2] + date[1] + date[0];
     } else {
       date = "undefined";
     }
-    time = fullDate[1].split(/:/);
-    if (time.length === 2) {
+    if (fullDate[1].match(/[0-9]{2}:[0-9]{2}/)) {
+      time = fullDate[1].split(/:/);
       time = "" + time[0] + time[1] + "00";
     } else {
       time = "undefined";
