@@ -4,6 +4,8 @@ Alarm = define 'alarm', ->
     property 'trigg', String
     property 'description', String
 
+    property 'related', String, default: null
+
     # Further work to make the doctype iCal compliant
     # email properties
     #property 'summary', String, default: null
