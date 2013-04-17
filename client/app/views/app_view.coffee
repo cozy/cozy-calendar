@@ -41,7 +41,9 @@ module.exports = class AppView extends View
 
         date = @alarmFormView.dateField.val()
         time = @alarmFormView.timeField.val()
-        dueDate = helpers.formatDateICal "#{date}##{time}"
+        dueDate = helpers.formatDateISO8601 "#{date}##{time}"
+        iCalFormatter = '{yyyy}{MM}{dd}T{HH}{mm}00Z'
+        dueDate = Date.create(dueDate).utc(true).format(iCalFormatter)
 
         data =
             description: @alarmFormView.descriptionField.val()

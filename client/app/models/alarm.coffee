@@ -37,14 +37,14 @@ class exports.Alarm extends Backbone.Model
 
     getDateObject: ->
 
-        return new Date.create(helpers.icalToISO8601 @get('trigg'))
+        return new Date.utc.create(helpers.icalToISO8601 @get('trigg'))
 
     getFormattedDate: (formatter) ->
         return @getDateObject().format formatter
 
     getPreviousDateObject: ->
         if @previous('trigg')?
-            return new Date.create(helpers.icalToISO8601 @previous('trigg'))
+            return new Date.utc.create(helpers.icalToISO8601 @previous('trigg'))
         else return false
 
     getDateHash: (date) ->

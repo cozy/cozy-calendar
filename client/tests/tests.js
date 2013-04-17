@@ -118,44 +118,28 @@ describe('helpers', function() {
     invalidICalDates: ['undefinedT094000Z', '201415T094000Z'],
     invalidICalTimes: ['20130415T0940Z', '20130415TundefinedZ', '20130415TZ']
   };
-  describe('.formatDateICal', function() {
-    it('should return a valid ical full date if the input is correct', function() {
+  describe('.formatDateISO8601', function() {
+    it('should return a valid iso8601 full date if the input is correct', function() {
       var expected, given;
 
       given = '15/04/2013#09:40';
-      expected = '20130415T094000Z';
-      return expect(helpers.formatDateICal(given)).to.equal(expected);
+      expected = '2013-04-15T09:40:00';
+      return expect(helpers.formatDateISO8601(given)).to.equal(expected);
     });
     it('should return an undefined date part if the date is incorrect', function() {
       var expected;
 
-      expected = 'undefinedT094000Z';
+      expected = 'undefinedT09:40:00';
       return fixtures.invalidDates.forEach(function(item) {
-        return expect(helpers.formatDateICal(item)).to.equal(expected);
+        return expect(helpers.formatDateISO8601(item)).to.equal(expected);
       });
     });
     return it('should return an undefined time part if the time is incorrect', function() {
       var expected;
 
-      expected = '20130415TundefinedZ';
+      expected = '2013-04-15Tundefined';
       return fixtures.invalidTimes.forEach(function(item) {
-        return expect(helpers.formatDateICal(item)).to.equal(expected);
-      });
-    });
-  });
-  describe('.isICalDateValid', function() {
-    it('should be true if the input is valid', function() {
-      var given;
-
-      given = '20130415T094000Z';
-      return expect(helpers.isICalDateValid(given)).to.equal(true);
-    });
-    return it('should be false if the input is invalid', function() {
-      var fxtr;
-
-      fxtr = fixtures.invalidICal.concat(fixtures.invalidICalDates.concat(fixtures.invalidICalTimes));
-      return fxtr.forEach(function(item) {
-        return expect(helpers.isICalDateValid(item)).to.equal(false);
+        return expect(helpers.formatDateISO8601(item)).to.equal(expected);
       });
     });
   });
@@ -188,7 +172,7 @@ describe('helpers', function() {
       var expected, given;
 
       given = '20130415T094000Z';
-      expected = '2013-04-15T09:40';
+      expected = '2013-04-15T09:40Z';
       return expect(helpers.icalToISO8601(given)).to.equal(expected);
     });
   });

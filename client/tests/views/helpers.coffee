@@ -32,35 +32,22 @@ describe 'helpers', ->
             '20130415TZ'
         ]
 
-    describe '.formatDateICal', ->
+    describe '.formatDateISO8601', ->
 
-        it 'should return a valid ical full date if the input is correct', ->
+        it 'should return a valid iso8601 full date if the input is correct', ->
             given = '15/04/2013#09:40'
-            expected = '20130415T094000Z'
-            expect(helpers.formatDateICal given).to.equal expected
+            expected = '2013-04-15T09:40:00'
+            expect(helpers.formatDateISO8601 given).to.equal expected
 
         it 'should return an undefined date part if the date is incorrect', ->
-            expected = 'undefinedT094000Z'
+            expected = 'undefinedT09:40:00'
             fixtures.invalidDates.forEach (item) ->
-                expect(helpers.formatDateICal item).to.equal(expected)
+                expect(helpers.formatDateISO8601 item).to.equal(expected)
 
         it 'should return an undefined time part if the time is incorrect', ->
-            expected = '20130415TundefinedZ'
+            expected = '2013-04-15Tundefined'
             fixtures.invalidTimes.forEach (item) ->
-                expect(helpers.formatDateICal item).to.equal(expected)
-
-    describe '.isICalDateValid', ->
-
-        it 'should be true if the input is valid', ->
-            given = '20130415T094000Z'
-            expect(helpers.isICalDateValid given).to.equal true
-
-        it 'should be false if the input is invalid', ->
-            fxtr = fixtures.invalidICal
-                    .concat(fixtures.invalidICalDates
-                    .concat (fixtures.invalidICalTimes))
-            fxtr.forEach (item) ->
-                expect(helpers.isICalDateValid item).to.equal(false)
+                expect(helpers.formatDateISO8601 item).to.equal(expected)
 
     describe '.isDatePartValid', ->
 
@@ -87,5 +74,5 @@ describe 'helpers', ->
 
         it 'should return a valid full date', ->
             given = '20130415T094000Z'
-            expected = '2013-04-15T09:40'
+            expected = '2013-04-15T09:40Z'
             expect(helpers.icalToISO8601 given).to.equal expected

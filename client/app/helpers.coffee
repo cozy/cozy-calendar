@@ -1,28 +1,20 @@
-exports.formatDateICal = (fullDate) ->
+exports.formatDateISO8601 = (fullDate) ->
 
     fullDate = fullDate.split /#/
 
     if fullDate[0].match(/([0-9]{2}\/){2}[0-9]{4}/)
         date = fullDate[0].split /[\/]/
-        date = "#{date[2]}#{date[1]}#{date[0]}"
+        date = "#{date[2]}-#{date[1]}-#{date[0]}"
     else
         date = "undefined"
 
     if fullDate[1].match(/[0-9]{2}:[0-9]{2}/)
         time = fullDate[1].split /:/
-        time = "#{time[0]}#{time[1]}00"
+        time = "#{time[0]}:#{time[1]}:00"
     else
         time = "undefined"
 
-    return "#{date}T#{time}Z"
-
-exports.isICalDateValid = (date) ->
-
-    return false unless date.match(/[0-9]{8}T[0-9]{6}Z/)
-
-    date = new Date.create(exports.icalToISO8601(date))
-
-    return date.valid()
+    return "#{date}T#{time}"
 
 exports.isDatePartValid = (date) ->
     date = date.split('T')
@@ -33,9 +25,7 @@ exports.isTimePartValid = (date) ->
     return date[1].match(/[0-9]{6}Z/)?
 
 
-exports.icalToISO8601 = (icalDate, localOffset) ->
-
-    localOffset = '' unless localOffset?
+exports.icalToISO8601 = (icalDate) ->
 
     date = icalDate.split('T')
 
@@ -45,4 +35,4 @@ exports.icalToISO8601 = (icalDate, localOffset) ->
     hours = date[1].slice 0, 2
     minutes = date[1].slice 2, 4
 
-    return "#{year}-#{month}-#{day}T#{hours}:#{minutes}#{localOffset}"
+    return "#{year}-#{month}-#{day}T#{hours}:#{minutes}Z"
