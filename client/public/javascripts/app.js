@@ -120,31 +120,23 @@ window.require.register("collections/alarms", function(exports, require, module)
   
 });
 window.require.register("helpers", function(exports, require, module) {
-  exports.formatDateICal = function(fullDate) {
+  exports.formatDateISO8601 = function(fullDate) {
     var date, time;
 
     fullDate = fullDate.split(/#/);
     if (fullDate[0].match(/([0-9]{2}\/){2}[0-9]{4}/)) {
       date = fullDate[0].split(/[\/]/);
-      date = "" + date[2] + date[1] + date[0];
+      date = "" + date[2] + "-" + date[1] + "-" + date[0];
     } else {
       date = "undefined";
     }
     if (fullDate[1].match(/[0-9]{2}:[0-9]{2}/)) {
       time = fullDate[1].split(/:/);
-      time = "" + time[0] + time[1] + "00";
+      time = "" + time[0] + ":" + time[1] + ":00";
     } else {
       time = "undefined";
     }
-    return "" + date + "T" + time + "Z";
-  };
-
-  exports.isICalDateValid = function(date) {
-    if (!date.match(/[0-9]{8}T[0-9]{6}Z/)) {
-      return false;
-    }
-    date = new XDate(exports.icalToISO8601(date));
-    return date.valid();
+    return "" + date + "T" + time;
   };
 
   exports.isDatePartValid = function(date) {
@@ -157,19 +149,16 @@ window.require.register("helpers", function(exports, require, module) {
     return date[1].match(/[0-9]{6}Z/) != null;
   };
 
-  exports.icalToISO8601 = function(icalDate, localOffset) {
+  exports.icalToISO8601 = function(icalDate) {
     var date, day, hours, minutes, month, year;
 
-    if (localOffset == null) {
-      localOffset = '';
-    }
     date = icalDate.split('T');
     year = date[0].slice(0, 4);
     month = date[0].slice(4, 6);
     day = date[0].slice(6, 8);
     hours = date[1].slice(0, 2);
     minutes = date[1].slice(2, 4);
-    return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + localOffset;
+    return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
   };
   
 });
@@ -361,16 +350,16 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getDateObject = function() {
-      return new XDate(helpers.icalToISO8601(this.get('trigg')));
+      return new Date.utc.create(helpers.icalToISO8601(this.get('trigg')));
     };
 
-    Alarm.prototype.getFormattedDate = function(format) {
-      return this.getDateObject().toString(format);
+    Alarm.prototype.getFormattedDate = function(formatter) {
+      return this.getDateObject().format(formatter);
     };
 
     Alarm.prototype.getPreviousDateObject = function() {
       if (this.previous('trigg') != null) {
-        return new XDate(helpers.icalToISO8601(this.previous('trigg')));
+        return new Date.utc.create(helpers.icalToISO8601(this.previous('trigg')));
       } else {
         return false;
       }
@@ -380,7 +369,7 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (date == null) {
         date = this.getDateObject();
       }
-      return date.toString('yyyyMMdd');
+      return date.format('{yyyy}{MM}{dd}');
     };
 
     Alarm.prototype.getPreviousDateHash = function() {
@@ -398,7 +387,7 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (date == null) {
         date = this.getDateObject();
       }
-      return date.toString('yyyyMMddHHmm');
+      return date.format('{yyyy}{MM}{dd}{HH}{mm}');
     };
 
     Alarm.prototype.getPreviousTimeHash = function() {
@@ -469,7 +458,7 @@ window.require.register("views/alarm_view", function(exports, require, module) {
     AlarmView.prototype.render = function() {
       return AlarmView.__super__.render.call(this, {
         action: this.model.get('action'),
-        time: this.model.getFormattedDate('HH:mm'),
+        time: this.model.getFormattedDate('{HH}:{mm}'),
         description: this.model.get('description'),
         alarmID: this.model.id
       });
@@ -532,12 +521,12 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     AlarmFormView.prototype.render = function() {
       var content, todayDate;
 
-      todayDate = new XDate();
+      todayDate = Date.create('now');
       content = AlarmFormView.__super__.render.call(this, {
         actions: this.actions,
         defaultAction: this.getDefaultAction('DISPLAY'),
-        defaultDate: todayDate.toString('dd/MM/yyyy'),
-        defaultTime: todayDate.toString('HH:mm')
+        defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
+        defaultTime: todayDate.format('{HH}:{mm}')
       });
       this.$el.append(content);
       this.$el.parent().css('min-height', this.$el.height() + 20);
@@ -628,8 +617,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     AlarmFormView.prototype.loadAlarmData = function(alarm) {
       this.resetForm();
       this.descriptionField.val(alarm.get('description'));
-      this.dateField.val(alarm.getFormattedDate('dd/MM/yyyy'));
-      this.timeField.val(alarm.getFormattedDate('HH:mm'));
+      this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
+      this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
@@ -644,9 +633,9 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.addAlarmButton.html('Add the alarm');
       this.disableSubmitButton();
       this.descriptionField.val('');
-      todayDate = new XDate();
-      this.dateField.val(todayDate.toString('dd/MM/yyyy'));
-      this.timeField.val(todayDate.toString('HH:mm'));
+      todayDate = new Date.create('now');
+      this.dateField.val(todayDate.format('{dd}/{MM}/{yyyy}'));
+      this.timeField.val(todayDate.format('{HH}:{mm}'));
       return this.resetErrors();
     };
 
@@ -785,7 +774,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
     AlarmsView.prototype._getNewSubView = function(dateHash, alarm) {
       var date;
 
-      date = alarm.getFormattedDate('dd/MM/yyyy');
+      date = alarm.getFormattedDate('{dd}/{MM}/{yyyy}');
       this._buildSubView(dateHash, date);
       return this._renderSubView(dateHash);
     };
@@ -887,12 +876,14 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, time, _ref1,
+      var alarm, data, date, dueDate, iCalFormatter, time, _ref1,
         _this = this;
 
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
-      dueDate = helpers.formatDateICal("" + date + "#" + time);
+      dueDate = helpers.formatDateISO8601("" + date + "#" + time);
+      iCalFormatter = '{yyyy}{MM}{dd}T{HH}{mm}00Z';
+      dueDate = Date.create(dueDate).utc(true).format(iCalFormatter);
       data = {
         description: this.alarmFormView.descriptionField.val(),
         action: this.alarmFormView.actionField.val(),
