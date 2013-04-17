@@ -2,6 +2,8 @@ helpers = require '../helpers'
 
 class exports.Alarm extends Backbone.Model
 
+    urlRoot: 'alarms'
+
     validate: (attrs, options) ->
 
         errors = []

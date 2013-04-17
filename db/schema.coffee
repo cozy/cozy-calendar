@@ -1,4 +1,4 @@
-Alarm = define 'Alarm', ->
+Alarm = define 'alarm', ->
 
     property 'action', String, default: 'DISPLAY'
     property 'trigg', String

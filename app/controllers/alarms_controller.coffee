@@ -6,7 +6,7 @@ before ->
             @alarm = alarm
             next()
 # Make this pre-treatment only before update and delete action.
-, only: ['update', 'delete']
+, only: ['getOne', 'update', 'delete']
 
 action 'all', ->
     Alarm.all (err, alarms) ->
@@ -14,6 +14,9 @@ action 'all', ->
             send error: true, msg: 'Server error occurred while retrieving data'
         else
             send alarms
+
+action 'getOne', ->
+    send @alarm, 200
 
 action 'create', ->
     Alarm.create req.body, (err, alarm) =>

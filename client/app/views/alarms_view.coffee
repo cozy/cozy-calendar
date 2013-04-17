@@ -33,6 +33,8 @@ module.exports = class AlarmsView extends View
 
     onAdd: (alarm, alarms) ->
 
+        console.debug "new alarm !!!"
+
         dateHash = alarm.getDateHash()
         view = @getSubView dateHash, () => @_getNewSubView(dateHash, alarm)
 
@@ -55,6 +57,13 @@ module.exports = class AlarmsView extends View
         dateHash = dayProgram.get('dateHash')
         @views[dateHash].destroy()
         delete @views[dateHash]
+
+    onRemove: (alarm) ->
+        console.log 'remove alarm now'
+        dateHash = alarm.getDateHash()
+        view = @getSubView dateHash, () => return null
+
+        view.model.get('alarms').remove alarm if view?
 
     getSubView: (dateHash, callbackIfNotExist) ->
 

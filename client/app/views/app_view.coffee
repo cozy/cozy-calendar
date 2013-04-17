@@ -7,6 +7,8 @@ AlarmsView = require '../views/alarms_view'
 {AlarmCollection} = require '../collections/alarms'
 {Alarm} = require '../models/alarm'
 
+SocketListener = require '../lib/socket_listener'
+
 helpers = require '../helpers'
 
 module.exports = class AppView extends View
@@ -28,6 +30,8 @@ module.exports = class AppView extends View
         (@alarmFormView = new AlarmFormView()).render()
 
         @alarms = new AlarmCollection()
+        @alarms.socketListener = new SocketListener(@alarms)
+
         @alarmsView = new AlarmsView
             model: @alarms
 
@@ -38,7 +42,7 @@ module.exports = class AppView extends View
                 console.log "Fetch: error"
 
     onAddAlarmClicked: (event, callback) ->
-
+        @alarms.socketListener.pause()
         date = @alarmFormView.dateField.val()
         time = @alarmFormView.timeField.val()
         dueDate = helpers.formatDateISO8601 "#{date}##{time}"
@@ -56,17 +60,21 @@ module.exports = class AppView extends View
                     wait: true
                     success: =>
                         @alarmFormView.resetForm()
+                        @alarms.socketListener.resume()
                         console.log "Save: success (attributes updated)"
                     error: ->
+                        @alarms.socketListener.resume()
                         console.log "Error during alarm save."
         else
             alarm = @alarms.create data,
                     wait: true
                     success: (model, response) =>
                         @alarmFormView.resetForm()
+                        @alarms.socketListener.resume()
                         console.log 'Create alarm: success'
                     error: (error, xhr, options) ->
                         error = JSON.parse xhr.responseText
+                        @alarms.socketListener.resume()
                         console.log "Create alarm: error: #{error?.msg}"
 
         if alarm.validationError?.length > 0
