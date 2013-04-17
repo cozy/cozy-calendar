@@ -20,7 +20,7 @@ exports.isICalDateValid = (date) ->
 
     return false unless date.match(/[0-9]{8}T[0-9]{6}Z/)
 
-    date = new XDate(exports.icalToISO8601(date))
+    date = new Date.create(exports.icalToISO8601(date))
 
     return date.valid()
 

@@ -20,13 +20,13 @@ module.exports = class AlarmFormView extends View
 
     render: ->
 
-        todayDate = new XDate()
+        todayDate = Date.create('now')
 
         content = super
             actions: @actions
             defaultAction: @getDefaultAction('DISPLAY')
-            defaultDate: todayDate.toString 'dd/MM/yyyy'
-            defaultTime: todayDate.toString 'HH:mm'
+            defaultDate: todayDate.format '{dd}/{MM}/{yyyy}'
+            defaultTime: todayDate.format '{HH}:{mm}'
         @$el.append content
 
         # prevent the affix from bugging
@@ -100,8 +100,8 @@ module.exports = class AlarmFormView extends View
     loadAlarmData: (alarm) ->
         @resetForm()
         @descriptionField.val alarm.get 'description'
-        @dateField.val alarm.getFormattedDate 'dd/MM/yyyy'
-        @timeField.val alarm.getFormattedDate 'HH:mm'
+        @dateField.val alarm.getFormattedDate '{dd}/{MM}/{yyyy}'
+        @timeField.val alarm.getFormattedDate '{HH}:{mm}'
 
         @data = alarm
 
@@ -117,9 +117,9 @@ module.exports = class AlarmFormView extends View
         @disableSubmitButton()
 
         @descriptionField.val ''
-        todayDate = new XDate()
-        @dateField.val todayDate.toString 'dd/MM/yyyy'
-        @timeField.val todayDate.toString 'HH:mm'
+        todayDate = new Date.create('now')
+        @dateField.val todayDate.format '{dd}/{MM}/{yyyy}'
+        @timeField.val todayDate.format '{HH}:{mm}'
 
         @resetErrors()
 

@@ -30,7 +30,6 @@ exports.config =
                     'vendor/scripts/bootstrap-timepicker.js'
                     'vendor/scripts/underscore-1.4.4.js'
                     'vendor/scripts/backbone-1.0.0.js'
-                    'vendor/scripts/xdate-0.8.js'
                 ]
 
         stylesheets:

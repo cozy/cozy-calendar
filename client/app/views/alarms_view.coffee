@@ -68,7 +68,7 @@ module.exports = class AlarmsView extends View
                 return false
 
     _getNewSubView: (dateHash, alarm) ->
-        date = alarm.getFormattedDate 'dd/MM/yyyy'
+        date = alarm.getFormattedDate '{dd}/{MM}/{yyyy}'
         @_buildSubView(dateHash, date)
         return @_renderSubView(dateHash)
 

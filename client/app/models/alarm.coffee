@@ -36,19 +36,20 @@ class exports.Alarm extends Backbone.Model
             return errors
 
     getDateObject: ->
-        return new XDate(helpers.icalToISO8601 @get('trigg'))
 
-    getFormattedDate: (format) ->
-        return @getDateObject().toString format
+        return new Date.create(helpers.icalToISO8601 @get('trigg'))
+
+    getFormattedDate: (formatter) ->
+        return @getDateObject().format formatter
 
     getPreviousDateObject: ->
         if @previous('trigg')?
-            return new XDate(helpers.icalToISO8601 @previous('trigg'))
+            return new Date.create(helpers.icalToISO8601 @previous('trigg'))
         else return false
 
     getDateHash: (date) ->
         date = @getDateObject() unless date?
-        return date.toString 'yyyyMMdd'
+        return date.format '{yyyy}{MM}{dd}'
 
     getPreviousDateHash: ->
         previousDateObject = @getPreviousDateObject()
@@ -58,7 +59,7 @@ class exports.Alarm extends Backbone.Model
 
     getTimeHash: (date) ->
         date = @getDateObject() unless date?
-        return date.toString 'yyyyMMddHHmm'
+        return date.format '{yyyy}{MM}{dd}{HH}{mm}'
 
     getPreviousTimeHash: ->
         previousDateObject = @getPreviousDateObject()
