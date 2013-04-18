@@ -19,8 +19,8 @@ module.exports = class AlarmsView extends View
         # interesting enough
         @dayPrograms = new Backbone.Collection
         @dayPrograms.comparator = (dayProg1, dayProg2) ->
-            d1 = new XDate dayProg1.get('date')
-            d2 = new XDate dayProg2.get('date')
+            d1 = new Date.create dayProg1.get('date')
+            d2 = new Date.create dayProg2.get('date')
 
             if d1.getTime() < d2.getTime()
                 return -1
@@ -32,8 +32,6 @@ module.exports = class AlarmsView extends View
         @listenTo @dayPrograms, "remove", @onRemoveDayProgram
 
     onAdd: (alarm, alarms) ->
-
-        console.debug "new alarm !!!"
 
         dateHash = alarm.getDateHash()
         view = @getSubView dateHash, () => @_getNewSubView(dateHash, alarm)

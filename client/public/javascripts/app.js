@@ -829,8 +829,8 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       this.dayPrograms.comparator = function(dayProg1, dayProg2) {
         var d1, d2;
 
-        d1 = new XDate(dayProg1.get('date'));
-        d2 = new XDate(dayProg2.get('date'));
+        d1 = new Date.create(dayProg1.get('date'));
+        d2 = new Date.create(dayProg2.get('date'));
         if (d1.getTime() < d2.getTime()) {
           return -1;
         } else if (d1.getTime() === d2.getTime()) {
@@ -846,7 +846,6 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       var dateHash, view,
         _this = this;
 
-      console.debug("new alarm !!!");
       dateHash = alarm.getDateHash();
       view = this.getSubView(dateHash, function() {
         return _this._getNewSubView(dateHash, alarm);
