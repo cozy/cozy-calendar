@@ -453,16 +453,10 @@ window.require.register("models/alarm", function(exports, require, module) {
           value: "A valid action must be set."
         });
       }
-      if (!attrs.trigg || !helpers.isDatePartValid(attrs.trigg)) {
+      if (!attrs.trigg || !new Date.create(attrs.trigg).isValid()) {
         errors.push({
           field: 'triggdate',
-          value: "The date format is invalid. It must be dd/mm/yyyy."
-        });
-      }
-      if (!attrs.trigg || !helpers.isTimePartValid(attrs.trigg)) {
-        errors.push({
-          field: 'triggtime',
-          value: "The time format is invalid. It must be hh:mm."
+          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
         });
       }
       if (errors.length > 0) {
@@ -471,7 +465,7 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getDateObject = function() {
-      return new Date.utc.create(helpers.icalToISO8601(this.get('trigg')));
+      return new Date.create(this.get('trigg'));
     };
 
     Alarm.prototype.getFormattedDate = function(formatter) {
@@ -480,7 +474,7 @@ window.require.register("models/alarm", function(exports, require, module) {
 
     Alarm.prototype.getPreviousDateObject = function() {
       if (this.previous('trigg') != null) {
-        return new Date.utc.create(helpers.icalToISO8601(this.previous('trigg')));
+        return new Date.create(this.previous('trigg'));
       } else {
         return false;
       }
@@ -681,12 +675,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
           placement: 'top'
         },
         triggdate: {
-          field: this.dateField,
+          field: this.$('#date-control'),
           placement: 'bottom'
-        },
-        triggtime: {
-          field: this.timeField.parent(),
-          placement: 'right'
         }
       };
     };
@@ -1014,15 +1004,19 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, iCalFormatter, time, _ref1,
+      var alarm, data, date, dueDate, time, _ref1,
         _this = this;
 
       this.alarms.socketListener.pause();
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
       dueDate = helpers.formatDateISO8601("" + date + "#" + time);
-      iCalFormatter = '{yyyy}{MM}{dd}T{HH}{mm}00Z';
-      dueDate = Date.create(dueDate).utc(true).format(iCalFormatter);
+      dueDate = Date.utc.create(dueDate);
+      if (dueDate.isValid()) {
+        dueDate = dueDate.toISOString();
+      } else {
+        dueDate = 'undefined';
+      }
       data = {
         description: this.alarmFormView.descriptionField.val(),
         action: this.alarmFormView.actionField.val(),
@@ -1232,13 +1226,13 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><label for="inputDate">&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
+  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
   buf.push(attrs({ 'id':("inputDate"), 'data-date':("" + (defaultDate) + ""), 'data-date-format':("dd/mm/yyyy"), "class": ('input-append') + ' ' + ('date') }, {"id":true,"data-date":true,"data-date-format":true}));
   buf.push('><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;Time&nbsp;</label><!--input(type="time", id="inputTime#{id}", value="#{defaultTime}")--><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><button class="btn pull-right disabled add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right disabled add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
   }
   return buf.join("");
   };
@@ -1260,7 +1254,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><h1>My Alarms</h1><div class="addform"><div id="add-alarm"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><h1>My Alarms</h1><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };
