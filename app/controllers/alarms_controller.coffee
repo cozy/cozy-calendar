@@ -8,7 +8,7 @@ before ->
             @alarm = alarm
             next()
 # Make this pre-treatment only before update and delete action.
-, only: ['getOne', 'update', 'delete']
+, except: ['create']
 
 before ->
 
@@ -43,7 +43,7 @@ action 'all', ->
             send alarms
 
 action 'getOne', ->
-    @alarm = @convertAlarmDate(alarm, @userTimezone)
+    @alarm = @convertAlarmDate(@alarm, @userTimezone)
     send @alarm, 200
 
 action 'create', ->
