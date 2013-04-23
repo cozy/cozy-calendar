@@ -1,5 +1,5 @@
 module.exports = (compound) ->
 
-    initializer = require('socket_listener').serverInitializer
+    initializer = require('cozy-realtime-adapter')
 
     initializer compound, ['alarm.*']
