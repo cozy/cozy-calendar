@@ -47,10 +47,8 @@ module.exports = class AppView extends View
         time = @alarmFormView.timeField.val()
         dueDate = helpers.formatDateISO8601 "#{date}##{time}"
         dueDate = Date.create(dueDate)
-        if dueDate.isValid() # validation feedback is made later
-            formatter = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
-            dueDate = dueDate.format formatter
-            console.log dueDate
+        if dueDate.isValid() # validation feedback is done later
+            dueDate = dueDate.format Alarm.dateFormat
         else
             dueDate = 'undefined'
 

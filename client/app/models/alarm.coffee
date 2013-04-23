@@ -4,6 +4,8 @@ class exports.Alarm extends Backbone.Model
 
     urlRoot: 'alarms'
 
+    @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
+
     validate: (attrs, options) ->
 
         errors = []
@@ -34,7 +36,6 @@ class exports.Alarm extends Backbone.Model
             return errors
 
     getDateObject: ->
-        #console.debug @get 'trigg'
         return new Date.create(@get('trigg'))
 
     getFormattedDate: (formatter) ->
