@@ -15,9 +15,7 @@ before ->
     @convertAlarmDate = (alarm, timezone) ->
         timezonedDate = new time.Date(alarm.trigg)
         timezonedDate.setTimezone(timezone)
-        # the slice removes the timezone information
         alarm.trigg = timezonedDate.toString().slice(0, 24)
-        alarm.trigg = timezonedDate.getTime()
         return alarm
 
     @userTimezone = 'Europe/Paris'
@@ -35,7 +33,7 @@ before ->
 , except: ['delete']
 
 action 'all', ->
-    console.info @userTimezone
+
     Alarm.all (err, alarms) =>
         if err
             send error: true, msg: 'Server error occurred while retrieving data'
@@ -52,7 +50,7 @@ action 'create', ->
 
     triggerDate = new time.Date(req.body.trigg, @userTimezone)
     triggerDate.setTimezone('UTC')
-    req.body.trigg = triggerDate.getTime()
+    req.body.trigg = triggerDate.toString().slice(0, 24)
 
     Alarm.create req.body, (err, alarm) =>
         if err
@@ -65,7 +63,7 @@ action 'update', ->
 
     triggerDate = new time.Date(req.body.trigg, @userTimezone)
     triggerDate.setTimezone('UTC')
-    req.body.trigg = triggerDate.getTime()
+    req.body.trigg = triggerDate.toString().slice(0, 24)
 
     @alarm.updateAttributes body, (err, alarm) =>
         if err?
