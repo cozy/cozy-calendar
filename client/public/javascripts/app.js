@@ -252,122 +252,37 @@ window.require.register("lib/cozy_collection", function(exports, require, module
   
 });
 window.require.register("lib/socket_listener", function(exports, require, module) {
-  var SocketListener,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var SocketListener, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  SocketListener = (function() {
-    SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
+  SocketListener = (function(_super) {
+    __extends(SocketListener, _super);
 
-    SocketListener.prototype.stack = [];
-
-    SocketListener.prototype.paused = false;
-
-    function SocketListener(collection) {
-      var err;
-
-      this.collection = collection;
-      this.callbackFactory = __bind(this.callbackFactory, this);
-      try {
-        this.connect();
-      } catch (_error) {
-        err = _error;
-        console.log("Error while connecting to socket.io");
-        console.log(err.stack);
-      }
+    function SocketListener() {
+      _ref = SocketListener.__super__.constructor.apply(this, arguments);
+      return _ref;
     }
 
-    SocketListener.prototype.pause = function() {
-      return this.paused = true;
+    SocketListener.prototype.models = {
+      'alarm': require('models/alarm')
     };
 
-    SocketListener.prototype.resume = function() {
-      while (this.stack.length > 0) {
-        this.process(this.stack.shift());
-      }
-      return this.paused = false;
+    SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
+
+    SocketListener.prototype.onRemoteCreate = function(alarm) {
+      return this.collections[1].add(alarm);
     };
 
-    SocketListener.prototype.connect = function() {
-      var event, pathToSocketIO, socket, url, _i, _len, _ref, _results;
-
-      url = window.location.origin;
-      pathToSocketIO = "" + (window.location.pathname.substring(1)) + "socket.io";
-      socket = io.connect(url, {
-        resource: pathToSocketIO
-      });
-      _ref = this.events;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        event = _ref[_i];
-        _results.push(socket.on(event, this.callbackFactory(event)));
-      }
-      return _results;
-    };
-
-    SocketListener.prototype.callbackFactory = function(event) {
-      var _this = this;
-
-      return function(id) {
-        var doctype, fullevent, operation, _ref;
-
-        _ref = event.split('.'), doctype = _ref[0], operation = _ref[1];
-        fullevent = {
-          id: id,
-          doctype: doctype,
-          operation: operation
-        };
-        if (_this.paused) {
-          return _this.stack.push(fullevent);
-        } else {
-          return _this.process(fullevent);
-        }
-      };
-    };
-
-    SocketListener.prototype.process = function(event) {
-      var alarm, doctype, id, operation,
-        _this = this;
-
-      doctype = event.doctype, operation = event.operation, id = event.id;
-      console.log("socketio: " + operation);
-      switch (operation) {
-        case 'create':
-          if (!this.collection.get(id)) {
-            alarm = new this.collection.model({
-              id: id
-            });
-            console.log("fetching and adding to collection");
-            return alarm.fetch({
-              success: function() {
-                console.log("create alarm fetch success");
-                console.debug(alarm);
-                return _this.collection.add(alarm);
-              },
-              error: function() {
-                return console.log("create alarm fetch error");
-              }
-            });
-          } else {
-            return console.log("shouldn't be added");
-          }
-          break;
-        case 'update':
-          if (alarm = this.collection.get(id)) {
-            return alarm.fetch();
-          }
-          break;
-        case 'delete':
-          if (alarm = this.collection.get(id)) {
-            return alarm.trigger('destroy', alarm, this.collection);
-          }
-      }
+    SocketListener.prototype.onRemoteDelete = function(alarm) {
+      return this.collections[1].remove(alarm);
     };
 
     return SocketListener;
 
-  })();
+  })(CozySocketListener);
 
-  module.exports = SocketListener;
+  module.exports = new SocketListener();
   
 });
 window.require.register("lib/view", function(exports, require, module) {
@@ -989,7 +904,7 @@ window.require.register("views/app_view", function(exports, require, module) {
     AppView.prototype.afterRender = function() {
       (this.alarmFormView = new AlarmFormView()).render();
       this.alarms = new AlarmCollection();
-      this.alarms.socketListener = new SocketListener(this.alarms);
+      SocketListener.watch(this.alarms);
       this.alarmsView = new AlarmsView({
         model: this.alarms
       });
@@ -1007,7 +922,6 @@ window.require.register("views/app_view", function(exports, require, module) {
       var alarm, data, date, dueDate, formatter, time, _ref1,
         _this = this;
 
-      this.alarms.socketListener.pause();
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
       dueDate = helpers.formatDateISO8601("" + date + "#" + time);
@@ -1028,27 +942,25 @@ window.require.register("views/app_view", function(exports, require, module) {
         alarm = this.alarmFormView.data;
         alarm.save(data, {
           wait: true,
+          ignoreMySocketNotification: true,
           success: function() {
             _this.alarmFormView.resetForm();
-            _this.alarms.socketListener.resume();
             return console.log("Save: success (attributes updated)");
           },
           error: function() {
-            this.alarms.socketListener.resume();
             return console.log("Error during alarm save.");
           }
         });
       } else {
         alarm = this.alarms.create(data, {
+          ignoreMySocketNotification: true,
           wait: true,
           success: function(model, response) {
             _this.alarmFormView.resetForm();
-            _this.alarms.socketListener.resume();
             return console.log('Create alarm: success');
           },
           error: function(error, xhr, options) {
             error = JSON.parse(xhr.responseText);
-            this.alarms.socketListener.resume();
             return console.log("Create alarm: error: " + (error != null ? error.msg : void 0));
           }
         });
