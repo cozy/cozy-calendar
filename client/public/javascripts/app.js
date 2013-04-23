@@ -80,15 +80,15 @@
 })();
 
 window.require.register("collections/alarms", function(exports, require, module) {
-  var Alarm, CozyCollection, _ref,
+  var Alarm, AlarmCollection, CozyCollection, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  CozyCollection = require('../lib/cozy_collection').CozyCollection;
+  CozyCollection = require('../lib/cozy_collection');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
-  exports.AlarmCollection = (function(_super) {
+  module.exports = AlarmCollection = (function(_super) {
     __extends(AlarmCollection, _super);
 
     function AlarmCollection() {
@@ -222,7 +222,7 @@ window.require.register("lib/cozy_collection", function(exports, require, module
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  exports.CozyCollection = (function(_super) {
+  module.exports = exports.CozyCollection = (function(_super) {
     __extends(CozyCollection, _super);
 
     function CozyCollection() {
@@ -329,13 +329,13 @@ window.require.register("lib/view", function(exports, require, module) {
   
 });
 window.require.register("models/alarm", function(exports, require, module) {
-  var helpers, _ref,
+  var Alarm, helpers, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   helpers = require('../helpers');
 
-  exports.Alarm = (function(_super) {
+  module.exports = Alarm = (function(_super) {
     __extends(Alarm, _super);
 
     function Alarm() {
@@ -344,6 +344,8 @@ window.require.register("models/alarm", function(exports, require, module) {
     }
 
     Alarm.prototype.urlRoot = 'alarms';
+
+    Alarm.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
 
     Alarm.prototype.validate = function(attrs, options) {
       var allowedActions, errors;
@@ -711,9 +713,9 @@ window.require.register("views/alarms_view", function(exports, require, module) 
 
   DayProgramView = require('./dayprogram_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
   module.exports = AlarmsView = (function(_super) {
     __extends(AlarmsView, _super);
@@ -869,9 +871,9 @@ window.require.register("views/app_view", function(exports, require, module) {
 
   AlarmsView = require('../views/alarms_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
   SocketListener = require('../lib/socket_listener');
 
@@ -919,7 +921,7 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, formatter, time, _ref1,
+      var alarm, data, date, dueDate, time, _ref1,
         _this = this;
 
       date = this.alarmFormView.dateField.val();
@@ -927,9 +929,7 @@ window.require.register("views/app_view", function(exports, require, module) {
       dueDate = helpers.formatDateISO8601("" + date + "#" + time);
       dueDate = Date.create(dueDate);
       if (dueDate.isValid()) {
-        formatter = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
-        dueDate = dueDate.format(formatter);
-        console.log(dueDate);
+        dueDate = dueDate.format(Alarm.dateFormat);
       } else {
         dueDate = 'undefined';
       }
@@ -1008,7 +1008,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
   AlarmView = require('./alarm_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
   module.exports = DayProgramView = (function(_super) {
     __extends(DayProgramView, _super);
