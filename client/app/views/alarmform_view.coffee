@@ -57,11 +57,8 @@ module.exports = class AlarmFormView extends View
                 field: @descriptionField
                 placement: 'top'
             triggdate:
-                field: @dateField
+                field: @$('#date-control')
                 placement: 'bottom'
-            triggtime:
-                field: @timeField.parent()
-                placement: 'right'
 
     template: ->
         require './templates/alarm_form'
