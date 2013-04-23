@@ -8,7 +8,7 @@ before ->
             @alarm = alarm
             next()
 # Make this pre-treatment only before update and delete action.
-, except: ['create']
+, except: ['create', 'all']
 
 before ->
 
