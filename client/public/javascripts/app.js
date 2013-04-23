@@ -1004,16 +1004,18 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, time, _ref1,
+      var alarm, data, date, dueDate, formatter, time, _ref1,
         _this = this;
 
       this.alarms.socketListener.pause();
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
       dueDate = helpers.formatDateISO8601("" + date + "#" + time);
-      dueDate = Date.utc.create(dueDate);
+      dueDate = Date.create(dueDate);
       if (dueDate.isValid()) {
-        dueDate = dueDate.toISOString();
+        formatter = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
+        dueDate = dueDate.format(formatter);
+        console.log(dueDate);
       } else {
         dueDate = 'undefined';
       }

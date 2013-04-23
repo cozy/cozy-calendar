@@ -1,5 +1,6 @@
 should = require('should')
 async = require('async')
+time = require 'time'
 Client = require('request-json').JsonClient
 instantiateApp = require('../server')
 app = instantiateApp()
@@ -21,8 +22,8 @@ describe "Alarms management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createAlarm "DISPLAY", "Something to remind", "20130410T1500Z"
-                    helpers.createAlarm "EMAIL", "Something else to remind", "20130412T1630Z"
+                    helpers.createAlarm "DISPLAY", "Something to remind", "Tue Apr 23 2013 14:40:00 "
+                    helpers.createAlarm "EMAIL", "Something else to remind", "Tue Apr 24 2013 13:30:00"
                 ], ->
                     callback()
             helpers.cleanDb ->
@@ -46,7 +47,7 @@ describe "Alarms management", ->
             helpers.cleanDb done
             @alarm =
                 action: 'DISPLAY'
-                trigg: '20130410T1500Z'
+                trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
 
         it "should return the alarm json object", (done) =>
@@ -57,12 +58,12 @@ describe "Alarms management", ->
                 should.exist response
                 response.should.have.status 201
                 should.exist body
+
                 body.should.have.property 'id'
                 @alarm.id = body.id
                 body.should.have.property 'action', @alarm.action
                 body.should.have.property 'trigg', @alarm.trigg
                 body.should.have.property 'description', @alarm.description
-
                 done()
 
         it "should have persisted the alarm into database", (done) =>
@@ -71,7 +72,9 @@ describe "Alarms management", ->
                 should.not.exist err
                 should.exist alarm
                 alarm.should.have.property 'action', @alarm.action
-                alarm.should.have.property 'trigg', @alarm.trigg
+                exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
+                exepectedDate.setTimezone('UTC')
+                alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
                 alarm.should.have.property 'description', @alarm.description
 
                 done()
@@ -91,7 +94,7 @@ describe "Alarms management", ->
         before (done) =>
             @alarm =
                 action: 'DISPLAY'
-                trigg: '20130410T1500Z'
+                trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
 
             helpers.cleanDb =>
@@ -102,7 +105,7 @@ describe "Alarms management", ->
         it "should return the alarm with the updated value", (done) =>
 
             @alarm.action = 'EMAIL'
-            @alarm.trigg = '20130410T1530Z'
+            @alarm.trigg = "Tue Apr 23 2013 14:30:00"
             @alarm.description = 'Something updated to remind'
 
             client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
@@ -122,7 +125,9 @@ describe "Alarms management", ->
                 should.not.exist err
                 should.exist alarm
                 alarm.should.have.property 'action', @alarm.action
-                alarm.should.have.property 'trigg', @alarm.trigg
+                exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
+                exepectedDate.setTimezone('UTC')
+                alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
                 alarm.should.have.property 'description', @alarm.description
 
                 done()
@@ -132,7 +137,7 @@ describe "Alarms management", ->
         before (done) =>
             @alarm =
                 action: 'DISPLAY'
-                trigg: '20130410T1500Z'
+                trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
 
             helpers.cleanDb =>
