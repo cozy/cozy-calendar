@@ -22,7 +22,7 @@ before ->
     User.all (err, users) =>
         if err
             console.log err
-        else if users.length == 0
+        else if users.length is 0
             console.log 'No user registered.'
         else
             @userTimezone = users[0].timezone
