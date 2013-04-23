@@ -24,29 +24,24 @@ class exports.Alarm extends Backbone.Model
                 field: 'action'
                 value: "A valid action must be set."
 
-        if not attrs.trigg or not helpers.isDatePartValid(attrs.trigg)
+        if not attrs.trigg or not new Date.create(attrs.trigg).isValid()
             errors.push
                 field: 'triggdate'
-                value: "The date format is invalid. It must be dd/mm/yyyy."
-
-        if not attrs.trigg or not helpers.isTimePartValid(attrs.trigg)
-            errors.push
-                field: 'triggtime'
-                value: "The time format is invalid. It must be hh:mm."
+                value: "The date or time format might be invalid. " + \
+                        "It must be dd/mm/yyyy and hh:mm."
 
         if errors.length > 0
             return errors
 
     getDateObject: ->
-
-        return new Date.utc.create(helpers.icalToISO8601 @get('trigg'))
+        return new Date.create(@get('trigg'))
 
     getFormattedDate: (formatter) ->
         return @getDateObject().format formatter
 
     getPreviousDateObject: ->
         if @previous('trigg')?
-            return new Date.utc.create(helpers.icalToISO8601 @previous('trigg'))
+            return new Date.create @previous('trigg')
         else return false
 
     getDateHash: (date) ->
