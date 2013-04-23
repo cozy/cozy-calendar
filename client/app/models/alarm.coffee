@@ -1,6 +1,6 @@
 helpers = require '../helpers'
 
-class exports.Alarm extends Backbone.Model
+module.exports = class Alarm extends Backbone.Model
 
     urlRoot: 'alarms'
 

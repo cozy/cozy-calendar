@@ -1,8 +1,8 @@
 View = require '../lib/view'
 DayProgramView = require './dayprogram_view'
 
-{AlarmCollection} = require '../collections/alarms'
-{Alarm} = require '../models/alarm'
+AlarmCollection = require '../collections/alarms'
+Alarm = require '../models/alarm'
 
 module.exports = class AlarmsView extends View
 

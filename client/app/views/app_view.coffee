@@ -4,8 +4,8 @@ AppRouter = require '../routers/app_router'
 AlarmFormView = require './alarmform_view'
 AlarmsView = require '../views/alarms_view'
 
-{AlarmCollection} = require '../collections/alarms'
-{Alarm} = require '../models/alarm'
+AlarmCollection = require '../collections/alarms'
+Alarm = require '../models/alarm'
 
 SocketListener = require '../lib/socket_listener'
 

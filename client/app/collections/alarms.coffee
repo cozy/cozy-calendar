@@ -1,7 +1,7 @@
-{CozyCollection} = require '../lib/cozy_collection'
-{Alarm} = require '../models/alarm'
+CozyCollection = require '../lib/cozy_collection'
+Alarm = require '../models/alarm'
 
-class exports.AlarmCollection extends CozyCollection
+module.exports = class AlarmCollection extends CozyCollection
 
     model: Alarm
     url: 'alarms'
