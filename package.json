@@ -20,8 +20,7 @@
   , "jugglingdb":       "= 0.2.0-23"
   , "jugglingdb-cozy-adapter": "0.3.1"
   , "async":            "= 0.1.22"
-  , "socket.io":        ">0"
-  , "redis":            ">0"
+  , "cozy-realtime-adapter":"= 0.0.1"
   }
 , "devDependencies":
   { "should":           "= 1.2.0"
