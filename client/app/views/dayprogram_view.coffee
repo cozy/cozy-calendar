@@ -19,7 +19,7 @@ module.exports = class DayProgramView extends View
         index = alarms.indexOf alarm
 
         rView = new AlarmView
-                        id: alarm.id
+                        id: alarm.cid
                         model: alarm
 
         render = rView.render().$el
@@ -31,14 +31,14 @@ module.exports = class DayProgramView extends View
             selector = ".alarms .#{rView.className}:nth-of-type(#{index})"
             @$el.find(selector).before render
 
-        @views[alarm.id] = rView
+        @views[alarm.cid] = rView
 
 
     onChange: (alarm, options) ->
-        @views[alarm.id].model.set(alarm.toJSON())
+        @views[alarm.cid].model.set(alarm.toJSON())
 
     onRemove: (alarm, collection, options) ->
-        @views[alarm.id].destroy()
+        @views[alarm.cid].destroy()
 
         if @model.get('alarms').length is 0
             @model.collection.remove @model
