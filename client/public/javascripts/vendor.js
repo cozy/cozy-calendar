@@ -16683,7 +16683,7 @@ exports.rethrow = function rethrow(err, filename, lineno){
       }
       this.collections.push(collection);
       collection.socketListener = this;
-      return watchOne(collection);
+      return this.watchOne(collection);
     };
 
     CozySocketListener.prototype.stopWatching = function(toRemove) {
