@@ -6,10 +6,10 @@ class SocketListener extends CozySocketListener
     events: ['alarm.create','alarm.update', 'alarm.delete']
 
     onRemoteCreate: (alarm) ->
-        @collections[1].add alarm
+        @collection.add alarm
 
     onRemoteDelete: (alarm) ->
-        @collections[1].remove alarm
+        @collection.remove alarm
 
 
 module.exports = new SocketListener()
