@@ -271,11 +271,11 @@ window.require.register("lib/socket_listener", function(exports, require, module
     SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
 
     SocketListener.prototype.onRemoteCreate = function(alarm) {
-      return this.collections[1].add(alarm);
+      return this.collection.add(alarm);
     };
 
     SocketListener.prototype.onRemoteDelete = function(alarm) {
-      return this.collections[1].remove(alarm);
+      return this.collection.remove(alarm);
     };
 
     return SocketListener;
