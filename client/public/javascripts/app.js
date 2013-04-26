@@ -847,7 +847,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       } else if (index === this.dayPrograms.length - 1) {
         this.$el.append(render);
       } else {
-        selector = "." + view.className + ":nth-of-type(" + index + ")";
+        selector = "." + view.className + ":nth-of-type(" + (index + 1) + ")";
         this.$el.find(selector).before(render);
       }
       return view;
@@ -1034,7 +1034,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
       index = alarms.indexOf(alarm);
       rView = new AlarmView({
-        id: alarm.id,
+        id: alarm.cid,
         model: alarm
       });
       render = rView.render().$el;
@@ -1043,18 +1043,36 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
       } else if (index === this.model.get('alarms').length - 1) {
         this.$el.find('.alarms').append(render);
       } else {
-        selector = ".alarms ." + rView.className + ":nth-of-type(" + index + ")";
+        selector = ".alarms ." + rView.className + ":nth-of-type(" + (index + 1) + ")";
         this.$el.find(selector).before(render);
       }
-      return this.views[alarm.id] = rView;
+      return this.views[alarm.cid] = rView;
     };
 
     DayProgramView.prototype.onChange = function(alarm, options) {
-      return this.views[alarm.id].model.set(alarm.toJSON());
+      var newIndex, oldIndex, selector, view;
+
+      this.views[alarm.cid].model.set(alarm.toJSON());
+      if (alarm.changedAttributes().trigg != null) {
+        view = this.views[alarm.cid];
+        oldIndex = this.model.get('alarms').indexOf(alarm);
+        this.model.get('alarms').sort();
+        newIndex = this.model.get('alarms').indexOf(alarm);
+        if (newIndex !== oldIndex) {
+          if (newIndex === 0) {
+            return this.$el.find('.alarms').prepend(view.$el);
+          } else if (newIndex === this.model.get('alarms').length - 1) {
+            return this.$el.find('.alarms').append(view.$el);
+          } else {
+            selector = ".alarms ." + view.className + ":nth-of-type(" + (newIndex + 1) + ")";
+            return this.$el.find(selector).before(view.$el);
+          }
+        }
+      }
     };
 
     DayProgramView.prototype.onRemove = function(alarm, collection, options) {
-      this.views[alarm.id].destroy();
+      this.views[alarm.cid].destroy();
       if (this.model.get('alarms').length === 0) {
         return this.model.collection.remove(this.model);
       }
