@@ -1,8 +1,8 @@
 View = require '../lib/view'
 DayProgramView = require './dayprogram_view'
 
-{AlarmCollection} = require '../collections/alarms'
-{Alarm} = require '../models/alarm'
+AlarmCollection = require '../collections/alarms'
+Alarm = require '../models/alarm'
 
 module.exports = class AlarmsView extends View
 
@@ -101,7 +101,7 @@ module.exports = class AlarmsView extends View
         else if index is @dayPrograms.length - 1
             @$el.append render
         else
-            selector = ".#{view.className}:nth-of-type(#{index})"
+            selector = ".#{view.className}:nth-of-type(#{index+1})"
             @$el.find(selector).before render
 
         return view

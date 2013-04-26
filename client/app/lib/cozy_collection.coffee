@@ -1,4 +1,4 @@
-class exports.CozyCollection extends Backbone.Collection
+module.exports = class exports.CozyCollection extends Backbone.Collection
 
     move: (item, newIndex) ->
 

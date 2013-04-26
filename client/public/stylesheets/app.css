@@ -7493,6 +7493,9 @@ h1 {
 .addform .tooltip .tooltip-inner {
   background: #d33;
 }
+.addform #date-control {
+  display: inline-block;
+}
 .addform #add-alarm {
   margin-bottom: 0;
 }
@@ -7540,7 +7543,6 @@ input[type="time"] {
 .affix {
   position: fixed;
   top: 0px;
-  width: 940px;
   margin: auto;
 }
 .affix > div {

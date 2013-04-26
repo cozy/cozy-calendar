@@ -80,15 +80,15 @@
 })();
 
 window.require.register("collections/alarms", function(exports, require, module) {
-  var Alarm, CozyCollection, _ref,
+  var Alarm, AlarmCollection, CozyCollection, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  CozyCollection = require('../lib/cozy_collection').CozyCollection;
+  CozyCollection = require('../lib/cozy_collection');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
-  exports.AlarmCollection = (function(_super) {
+  module.exports = AlarmCollection = (function(_super) {
     __extends(AlarmCollection, _super);
 
     function AlarmCollection() {
@@ -222,7 +222,7 @@ window.require.register("lib/cozy_collection", function(exports, require, module
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  exports.CozyCollection = (function(_super) {
+  module.exports = exports.CozyCollection = (function(_super) {
     __extends(CozyCollection, _super);
 
     function CozyCollection() {
@@ -252,122 +252,37 @@ window.require.register("lib/cozy_collection", function(exports, require, module
   
 });
 window.require.register("lib/socket_listener", function(exports, require, module) {
-  var SocketListener,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var SocketListener, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  SocketListener = (function() {
-    SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
+  SocketListener = (function(_super) {
+    __extends(SocketListener, _super);
 
-    SocketListener.prototype.stack = [];
-
-    SocketListener.prototype.paused = false;
-
-    function SocketListener(collection) {
-      var err;
-
-      this.collection = collection;
-      this.callbackFactory = __bind(this.callbackFactory, this);
-      try {
-        this.connect();
-      } catch (_error) {
-        err = _error;
-        console.log("Error while connecting to socket.io");
-        console.log(err.stack);
-      }
+    function SocketListener() {
+      _ref = SocketListener.__super__.constructor.apply(this, arguments);
+      return _ref;
     }
 
-    SocketListener.prototype.pause = function() {
-      return this.paused = true;
+    SocketListener.prototype.models = {
+      'alarm': require('models/alarm')
     };
 
-    SocketListener.prototype.resume = function() {
-      while (this.stack.length > 0) {
-        this.process(this.stack.shift());
-      }
-      return this.paused = false;
+    SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
+
+    SocketListener.prototype.onRemoteCreate = function(alarm) {
+      return this.collection.add(alarm);
     };
 
-    SocketListener.prototype.connect = function() {
-      var event, pathToSocketIO, socket, url, _i, _len, _ref, _results;
-
-      url = window.location.origin;
-      pathToSocketIO = "" + (window.location.pathname.substring(1)) + "socket.io";
-      socket = io.connect(url, {
-        resource: pathToSocketIO
-      });
-      _ref = this.events;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        event = _ref[_i];
-        _results.push(socket.on(event, this.callbackFactory(event)));
-      }
-      return _results;
-    };
-
-    SocketListener.prototype.callbackFactory = function(event) {
-      var _this = this;
-
-      return function(id) {
-        var doctype, fullevent, operation, _ref;
-
-        _ref = event.split('.'), doctype = _ref[0], operation = _ref[1];
-        fullevent = {
-          id: id,
-          doctype: doctype,
-          operation: operation
-        };
-        if (_this.paused) {
-          return _this.stack.push(fullevent);
-        } else {
-          return _this.process(fullevent);
-        }
-      };
-    };
-
-    SocketListener.prototype.process = function(event) {
-      var alarm, doctype, id, operation,
-        _this = this;
-
-      doctype = event.doctype, operation = event.operation, id = event.id;
-      console.log("socketio: " + operation);
-      switch (operation) {
-        case 'create':
-          if (!this.collection.get(id)) {
-            alarm = new this.collection.model({
-              id: id
-            });
-            console.log("fetching and adding to collection");
-            return alarm.fetch({
-              success: function() {
-                console.log("create alarm fetch success");
-                console.debug(alarm);
-                return _this.collection.add(alarm);
-              },
-              error: function() {
-                return console.log("create alarm fetch error");
-              }
-            });
-          } else {
-            return console.log("shouldn't be added");
-          }
-          break;
-        case 'update':
-          if (alarm = this.collection.get(id)) {
-            return alarm.fetch();
-          }
-          break;
-        case 'delete':
-          if (alarm = this.collection.get(id)) {
-            return alarm.trigger('destroy', alarm, this.collection);
-          }
-      }
+    SocketListener.prototype.onRemoteDelete = function(alarm) {
+      return this.collection.remove(alarm);
     };
 
     return SocketListener;
 
-  })();
+  })(CozySocketListener);
 
-  module.exports = SocketListener;
+  module.exports = new SocketListener();
   
 });
 window.require.register("lib/view", function(exports, require, module) {
@@ -414,13 +329,13 @@ window.require.register("lib/view", function(exports, require, module) {
   
 });
 window.require.register("models/alarm", function(exports, require, module) {
-  var helpers, _ref,
+  var Alarm, helpers, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   helpers = require('../helpers');
 
-  exports.Alarm = (function(_super) {
+  module.exports = Alarm = (function(_super) {
     __extends(Alarm, _super);
 
     function Alarm() {
@@ -429,6 +344,8 @@ window.require.register("models/alarm", function(exports, require, module) {
     }
 
     Alarm.prototype.urlRoot = 'alarms';
+
+    Alarm.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
 
     Alarm.prototype.validate = function(attrs, options) {
       var allowedActions, errors;
@@ -453,16 +370,10 @@ window.require.register("models/alarm", function(exports, require, module) {
           value: "A valid action must be set."
         });
       }
-      if (!attrs.trigg || !helpers.isDatePartValid(attrs.trigg)) {
+      if (!attrs.trigg || !new Date.create(attrs.trigg).isValid()) {
         errors.push({
           field: 'triggdate',
-          value: "The date format is invalid. It must be dd/mm/yyyy."
-        });
-      }
-      if (!attrs.trigg || !helpers.isTimePartValid(attrs.trigg)) {
-        errors.push({
-          field: 'triggtime',
-          value: "The time format is invalid. It must be hh:mm."
+          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
         });
       }
       if (errors.length > 0) {
@@ -471,7 +382,7 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getDateObject = function() {
-      return new Date.utc.create(helpers.icalToISO8601(this.get('trigg')));
+      return new Date.create(this.get('trigg'));
     };
 
     Alarm.prototype.getFormattedDate = function(formatter) {
@@ -480,7 +391,7 @@ window.require.register("models/alarm", function(exports, require, module) {
 
     Alarm.prototype.getPreviousDateObject = function() {
       if (this.previous('trigg') != null) {
-        return new Date.utc.create(helpers.icalToISO8601(this.previous('trigg')));
+        return new Date.create(this.previous('trigg'));
       } else {
         return false;
       }
@@ -681,12 +592,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
           placement: 'top'
         },
         triggdate: {
-          field: this.dateField,
+          field: this.$('#date-control'),
           placement: 'bottom'
-        },
-        triggtime: {
-          field: this.timeField.parent(),
-          placement: 'right'
         }
       };
     };
@@ -806,9 +713,9 @@ window.require.register("views/alarms_view", function(exports, require, module) 
 
   DayProgramView = require('./dayprogram_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
   module.exports = AlarmsView = (function(_super) {
     __extends(AlarmsView, _super);
@@ -940,7 +847,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       } else if (index === this.dayPrograms.length - 1) {
         this.$el.append(render);
       } else {
-        selector = "." + view.className + ":nth-of-type(" + index + ")";
+        selector = "." + view.className + ":nth-of-type(" + (index + 1) + ")";
         this.$el.find(selector).before(render);
       }
       return view;
@@ -964,9 +871,9 @@ window.require.register("views/app_view", function(exports, require, module) {
 
   AlarmsView = require('../views/alarms_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
-  Alarm = require('../models/alarm').Alarm;
+  Alarm = require('../models/alarm');
 
   SocketListener = require('../lib/socket_listener');
 
@@ -999,7 +906,7 @@ window.require.register("views/app_view", function(exports, require, module) {
     AppView.prototype.afterRender = function() {
       (this.alarmFormView = new AlarmFormView()).render();
       this.alarms = new AlarmCollection();
-      this.alarms.socketListener = new SocketListener(this.alarms);
+      SocketListener.watch(this.alarms);
       this.alarmsView = new AlarmsView({
         model: this.alarms
       });
@@ -1014,15 +921,18 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, iCalFormatter, time, _ref1,
+      var alarm, data, date, dueDate, time, _ref1,
         _this = this;
 
-      this.alarms.socketListener.pause();
       date = this.alarmFormView.dateField.val();
       time = this.alarmFormView.timeField.val();
       dueDate = helpers.formatDateISO8601("" + date + "#" + time);
-      iCalFormatter = '{yyyy}{MM}{dd}T{HH}{mm}00Z';
-      dueDate = Date.create(dueDate).utc(true).format(iCalFormatter);
+      dueDate = Date.create(dueDate);
+      if (dueDate.isValid()) {
+        dueDate = dueDate.format(Alarm.dateFormat);
+      } else {
+        dueDate = 'undefined';
+      }
       data = {
         description: this.alarmFormView.descriptionField.val(),
         action: this.alarmFormView.actionField.val(),
@@ -1032,27 +942,25 @@ window.require.register("views/app_view", function(exports, require, module) {
         alarm = this.alarmFormView.data;
         alarm.save(data, {
           wait: true,
+          ignoreMySocketNotification: true,
           success: function() {
             _this.alarmFormView.resetForm();
-            _this.alarms.socketListener.resume();
             return console.log("Save: success (attributes updated)");
           },
           error: function() {
-            this.alarms.socketListener.resume();
             return console.log("Error during alarm save.");
           }
         });
       } else {
         alarm = this.alarms.create(data, {
+          ignoreMySocketNotification: true,
           wait: true,
           success: function(model, response) {
             _this.alarmFormView.resetForm();
-            _this.alarms.socketListener.resume();
             return console.log('Create alarm: success');
           },
           error: function(error, xhr, options) {
             error = JSON.parse(xhr.responseText);
-            this.alarms.socketListener.resume();
             return console.log("Create alarm: error: " + (error != null ? error.msg : void 0));
           }
         });
@@ -1100,7 +1008,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
   AlarmView = require('./alarm_view');
 
-  AlarmCollection = require('../collections/alarms').AlarmCollection;
+  AlarmCollection = require('../collections/alarms');
 
   module.exports = DayProgramView = (function(_super) {
     __extends(DayProgramView, _super);
@@ -1126,7 +1034,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
       index = alarms.indexOf(alarm);
       rView = new AlarmView({
-        id: alarm.id,
+        id: alarm.cid,
         model: alarm
       });
       render = rView.render().$el;
@@ -1135,18 +1043,36 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
       } else if (index === this.model.get('alarms').length - 1) {
         this.$el.find('.alarms').append(render);
       } else {
-        selector = ".alarms ." + rView.className + ":nth-of-type(" + index + ")";
+        selector = ".alarms ." + rView.className + ":nth-of-type(" + (index + 1) + ")";
         this.$el.find(selector).before(render);
       }
-      return this.views[alarm.id] = rView;
+      return this.views[alarm.cid] = rView;
     };
 
     DayProgramView.prototype.onChange = function(alarm, options) {
-      return this.views[alarm.id].model.set(alarm.toJSON());
+      var newIndex, oldIndex, selector, view;
+
+      this.views[alarm.cid].model.set(alarm.toJSON());
+      if (alarm.changedAttributes().trigg != null) {
+        view = this.views[alarm.cid];
+        oldIndex = this.model.get('alarms').indexOf(alarm);
+        this.model.get('alarms').sort();
+        newIndex = this.model.get('alarms').indexOf(alarm);
+        if (newIndex !== oldIndex) {
+          if (newIndex === 0) {
+            return this.$el.find('.alarms').prepend(view.$el);
+          } else if (newIndex === this.model.get('alarms').length - 1) {
+            return this.$el.find('.alarms').append(view.$el);
+          } else {
+            selector = ".alarms ." + view.className + ":nth-of-type(" + (newIndex + 1) + ")";
+            return this.$el.find(selector).before(view.$el);
+          }
+        }
+      }
     };
 
     DayProgramView.prototype.onRemove = function(alarm, collection, options) {
-      this.views[alarm.id].destroy();
+      this.views[alarm.cid].destroy();
       if (this.model.get('alarms').length === 0) {
         return this.model.collection.remove(this.model);
       }
@@ -1232,13 +1158,13 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><label for="inputDate">&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
+  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
   buf.push(attrs({ 'id':("inputDate"), 'data-date':("" + (defaultDate) + ""), 'data-date-format':("dd/mm/yyyy"), "class": ('input-append') + ' ' + ('date') }, {"id":true,"data-date":true,"data-date-format":true}));
   buf.push('><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;Time&nbsp;</label><!--input(type="time", id="inputTime#{id}", value="#{defaultTime}")--><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><button class="btn pull-right disabled add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right disabled add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
   }
   return buf.join("");
   };
@@ -1260,7 +1186,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><h1>My Alarms</h1><div class="addform"><div id="add-alarm"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><h1>My Alarms</h1><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

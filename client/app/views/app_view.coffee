@@ -4,8 +4,8 @@ AppRouter = require '../routers/app_router'
 AlarmFormView = require './alarmform_view'
 AlarmsView = require '../views/alarms_view'
 
-{AlarmCollection} = require '../collections/alarms'
-{Alarm} = require '../models/alarm'
+AlarmCollection = require '../collections/alarms'
+Alarm = require '../models/alarm'
 
 SocketListener = require '../lib/socket_listener'
 
@@ -30,7 +30,7 @@ module.exports = class AppView extends View
         (@alarmFormView = new AlarmFormView()).render()
 
         @alarms = new AlarmCollection()
-        @alarms.socketListener = new SocketListener(@alarms)
+        SocketListener.watch @alarms
 
         @alarmsView = new AlarmsView
             model: @alarms
@@ -42,12 +42,14 @@ module.exports = class AppView extends View
                 console.log "Fetch: error"
 
     onAddAlarmClicked: (event, callback) ->
-        @alarms.socketListener.pause()
         date = @alarmFormView.dateField.val()
         time = @alarmFormView.timeField.val()
         dueDate = helpers.formatDateISO8601 "#{date}##{time}"
-        iCalFormatter = '{yyyy}{MM}{dd}T{HH}{mm}00Z'
-        dueDate = Date.create(dueDate).utc(true).format(iCalFormatter)
+        dueDate = Date.create(dueDate)
+        if dueDate.isValid() # validation feedback is done later
+            dueDate = dueDate.format Alarm.dateFormat
+        else
+            dueDate = 'undefined'
 
         data =
             description: @alarmFormView.descriptionField.val()
@@ -58,23 +60,21 @@ module.exports = class AppView extends View
             alarm = @alarmFormView.data
             alarm.save data,
                     wait: true
+                    ignoreMySocketNotification: true #useless ?
                     success: =>
                         @alarmFormView.resetForm()
-                        @alarms.socketListener.resume()
                         console.log "Save: success (attributes updated)"
                     error: ->
-                        @alarms.socketListener.resume()
                         console.log "Error during alarm save."
         else
             alarm = @alarms.create data,
+                    ignoreMySocketNotification: true #useless ?
                     wait: true
                     success: (model, response) =>
                         @alarmFormView.resetForm()
-                        @alarms.socketListener.resume()
                         console.log 'Create alarm: success'
                     error: (error, xhr, options) ->
                         error = JSON.parse xhr.responseText
-                        @alarms.socketListener.resume()
                         console.log "Create alarm: error: #{error?.msg}"
 
         if alarm.validationError?.length > 0
