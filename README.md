@@ -6,7 +6,7 @@ The application currently manages reminders and only reminders. It is based on t
 
 Clone this repository, install dependencies and run server.
 
-    git clone https://github.com/jsilvestre/cozy-agenda.git
+    git clone https://github.com/mycozycloud/cozy-agenda.git
     cd cozy-agenda
     npm install
     cd client/ && npm install && cd ..
