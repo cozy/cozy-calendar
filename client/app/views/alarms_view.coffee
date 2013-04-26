@@ -101,7 +101,7 @@ module.exports = class AlarmsView extends View
         else if index is @dayPrograms.length - 1
             @$el.append render
         else
-            selector = ".#{view.className}:nth-of-type(#{index})"
+            selector = ".#{view.className}:nth-of-type(#{index+1})"
             @$el.find(selector).before render
 
         return view
