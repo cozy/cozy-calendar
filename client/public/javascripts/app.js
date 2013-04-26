@@ -1064,6 +1064,9 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
           } else if (newIndex === this.model.get('alarms').length - 1) {
             return this.$el.find('.alarms').append(view.$el);
           } else {
+            if (newIndex > oldIndex) {
+              newIndex++;
+            }
             selector = ".alarms ." + view.className + ":nth-of-type(" + (newIndex + 1) + ")";
             return this.$el.find(selector).before(view.$el);
           }

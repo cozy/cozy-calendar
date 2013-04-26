@@ -24,7 +24,6 @@ module.exports = class DayProgramView extends View
 
         render = rView.render().$el
 
-        #console.log index
         if index is 0
             @$el.find('.alarms').prepend render
         else if index is @model.get('alarms').length - 1
@@ -34,7 +33,6 @@ module.exports = class DayProgramView extends View
             @$el.find(selector).before render
 
         @views[alarm.cid] = rView
-
 
     onChange: (alarm, options) ->
         @views[alarm.cid].model.set(alarm.toJSON())
@@ -51,6 +49,7 @@ module.exports = class DayProgramView extends View
                 else if newIndex is @model.get('alarms').length - 1
                     @$el.find('.alarms').append view.$el
                 else
+                    newIndex++ if newIndex > oldIndex
                     selector = ".alarms .#{view.className}:nth-of-type(#{newIndex+1})"
                     @$el.find(selector).before view.$el
 
