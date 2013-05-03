@@ -7285,6 +7285,14 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 .icon-paste:before                { content: "\f0ea"; }
 
 .icon-user-md:before              { content: "\f200"; }
+@font-face {
+  font-family: styled;
+  src: url("/fonts/maven-pro-light-300.otf");
+}
+@font-face {
+  font-family: main;
+  src: url("/fonts/signika-regular.ttf");
+}
 html,
 body {
   height: 100%;
@@ -7292,6 +7300,7 @@ body {
 }
 body {
   text-rendering: optimizeLegibility;
+  background-image: url("../images/background.jpg");
 }
 body,
 input {
@@ -7472,17 +7481,6 @@ cursor not-allowed {
   .layout-container {
     width: 1170px;
   }
-}
-@font-face {
-  font-family: styled;
-  src: url("../fonts/maven-pro-light-300.otf");
-}
-@font-face {
-  font-family: main;
-  src: url("../fonts/signika-regular.ttf");
-}
-body {
-  background-image: url("../images/background.jpg");
 }
 h1 {
   margin-top: 15px;
