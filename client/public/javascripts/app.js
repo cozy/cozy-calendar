@@ -570,19 +570,12 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     };
 
     AlarmFormView.prototype.afterRender = function() {
-      this.$("#inputDate").datepicker().on('changeDate', function() {
-        return $(this).datepicker('hide');
-      });
-      this.$("#inputTime").timepicker({
-        minuteStep: 1,
-        showMeridian: false
-      });
       this.descriptionField = this.$('#inputDesc');
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
       this.addAlarmButton = this.$('button.add-alarm');
-      return this.validationMapper = {
+      this.validationMapper = {
         action: {
           field: this.actionField,
           placement: 'left'
@@ -596,6 +589,14 @@ window.require.register("views/alarmform_view", function(exports, require, modul
           placement: 'bottom'
         }
       };
+      this.dateField.datepicker().on('changeDate', function() {
+        return $(this).datepicker('hide');
+      });
+      this.timeField.timepicker({
+        minuteStep: 1,
+        showMeridian: false
+      });
+      return this.descriptionField.focus();
     };
 
     AlarmFormView.prototype.template = function() {
@@ -658,7 +659,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
 
       this.data = null;
       this.editionMode = false;
-      this.addAlarmButton.html('Add the alarm');
+      this.addAlarmButton.html('add the alarm');
       this.disableSubmitButton();
       this.descriptionField.val('');
       todayDate = new Date.create('now');
@@ -1117,7 +1118,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="form-horizontal well"><div class="control-group"><input type="text" id="inputDesc" placeholder="What should I remind you ?" class="input-block-level"/></div><div class="controls form-inline"><select id="action" class="input-small">');
+  buf.push('<div class="form-horizontal well"><div class="control-group"><input type="text" id="inputDesc" placeholder="What should I remind you ?" class="input-block-level"/></div><div class="form-inline"><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
     if ('number' == typeof actions.length) {
@@ -1161,13 +1162,13 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;Date&nbsp;</label><!--input(type="date", id="inputDate#{id}", value="#{defaultDate}")--><div');
+  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;date:&nbsp;</label><div');
   buf.push(attrs({ 'id':("inputDate"), 'data-date':("" + (defaultDate) + ""), 'data-date-format':("dd/mm/yyyy"), "class": ('input-append') + ' ' + ('date') }, {"id":true,"data-date":true,"data-date-format":true}));
   buf.push('><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;Time&nbsp;</label><!--input(type="time", id="inputTime#{id}", value="#{defaultTime}")--><div class="input-append bootstrap-timepicker"><input');
+  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;time:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-alarm">add the alarm</button><div class="clearfix"></div></div>');
   }
   return buf.join("");
   };
@@ -1189,7 +1190,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><div class="addform"><div id="add-alarm" class="container"></div></div><div class="well"><h1>my alarms</h1></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

@@ -1,7 +1,7 @@
 .form-horizontal.well
   .control-group
       input.input-block-level(type="text", id="inputDesc", placeholder="What should I remind you ?")
-  .controls.form-inline
+  .form-inline
       select(id="action").input-small
         each displayAction, action in actions
             if action == defaultAction
@@ -9,18 +9,16 @@
             else
               option(value="#{action}") #{displayAction}
       #date-control
-        label(for="inputDate") &nbsp;Date&nbsp;
-        //input(type="date", id="inputDate#{id}", value="#{defaultDate}")
+        label(for="inputDate") &nbsp;date:&nbsp;
         .input-append.date(id="inputDate", data-date="#{defaultDate}", data-date-format="dd/mm/yyyy")
           input.span2(type="text", value="#{defaultDate}")
           span.add-on
             i.icon-th
-        label(for="inputTime") &nbsp;&nbsp;Time&nbsp;
-        //input(type="time", id="inputTime#{id}", value="#{defaultTime}")
+        label(for="inputTime") &nbsp;&nbsp;time:&nbsp;
         .input-append.bootstrap-timepicker
           input.input-small(id="inputTime", type="text", value="#{defaultTime}")
           span.add-on
             i.icon-time
 
-  button.btn.pull-right.add-alarm Add the alarm
+  button.btn.pull-right.add-alarm add the alarm
   .clearfix

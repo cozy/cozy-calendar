@@ -10,24 +10,46 @@
 @import '_layout'
 @import '_responsive'
 
+blue = #34A6FF
+lightblue = #CBE4FB
+green = #5C5
+orange = #fe8800
+lightorange = #FFC47F
+darkgrey = #333
+lightgrey = #CCC
+grey = #AAA
+red = #DD3333
+
+
+@font-face
+    font-family: styled
+    src: url('../fonts/maven-pro-light-300.otf')
+
+@font-face
+    font-family: main
+    src: url('../fonts/signika-regular.ttf')
+
+
+body
+    background-image: url('../images/background.jpg')
+
 h1
   margin-top: 15px
   margin-bottom: 25px
   font-size: 36px
 
-errorColor = #DD3333
 
 .addform
   .tooltip.top .tooltip-arrow
-      border-top-color: errorColor
+      border-top-color: red
   .tooltip.bottom .tooltip-arrow
-      border-bottom-color: errorColor
+      border-bottom-color: red
   .tooltip.left .tooltip-arrow
-      border-left-color: errorColor
+      border-left-color: red
   .tooltip.right .tooltip-arrow
-      border-right-color: errorColor
+      border-right-color: red
   .tooltip .tooltip-inner
-      background: errorColor
+      background: red
 
   #date-control
     display: inline-block
@@ -82,28 +104,6 @@ input[type="time"]
     border-width: 5px
     border-radius: 0
 
-blue = #34A6FF
-lightblue = #CBE4FB
-green = #5C5
-orange = #fe8800
-lightorange = #FFC47F
-darkgrey = #333
-lightgrey = #CCC
-grey = #AAA
-
-
-@font-face
-    font-family: styled
-    src: url('/fonts/maven-pro-light-300.otf')
-
-@font-face
-    font-family: main
-    src: url('/fonts/signika-regular.ttf')
-
-
-body
-    background-image: url('images/background.jpg')
-
 .well
     border-radius: 0
     background: white
@@ -125,4 +125,52 @@ body
     color: white
     border-color: orange
     text-shadow: none
+
+#add-alarm
+    input
+    select
+        border: 1px solid lightgrey
+        box-shadow: 0
+        border-radius: 0px
+        shadow: none
+        font-family: styled, helvetica
+
+    input.disabled
+        border: 1px solid transparent
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+        border-radius: 0px
+        shadow: inset 1px 1px 2px rgba(100, 100, 100, 0.1)
+        color: #333
+
+    input:focus
+    input:active
+    select:active
+    select:focus
+        border: 1px solid blue
+        box-shadow: none
+
+    .add-on
+        border-radius: 0
+
+    .datepicker td.day:hover
+        background: lightorange
+
+    .bootstrap-timepicker-widget table td a:hover
+        background: lightorange
+        border: 1px solid transparent
+
+    #inputDesc
+        font-size: 24px
+        line-height: 40px
+        height: 40px
+
+#alarms
+    h2
+        font-family: styled
+
+.affix div.form-horizontal
+    border: 1px solid #DDD
 

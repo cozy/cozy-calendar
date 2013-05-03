@@ -35,13 +35,6 @@ module.exports = class AlarmFormView extends View
         @$el.affix({offset: { top: @$el.offset().top - 10}})
 
     afterRender: ->
-        @$("#inputDate").datepicker().on 'changeDate', ->
-            $(@).datepicker 'hide'
-
-        @$("#inputTime").timepicker
-                            minuteStep: 1
-                            showMeridian: false
-
         @descriptionField = @$('#inputDesc')
         @actionField = @$('#action')
         @dateField = @$('#inputDate input')
@@ -59,6 +52,15 @@ module.exports = class AlarmFormView extends View
             triggdate:
                 field: @$('#date-control')
                 placement: 'bottom'
+
+        @dateField.datepicker().on 'changeDate', ->
+            $(@).datepicker 'hide'
+
+        @timeField.timepicker
+            minuteStep: 1
+            showMeridian: false
+
+        @descriptionField.focus()
 
     template: ->
         require './templates/alarm_form'
@@ -110,7 +112,7 @@ module.exports = class AlarmFormView extends View
     resetForm: () ->
         @data = null
         @editionMode = false
-        @addAlarmButton.html 'Add the alarm'
+        @addAlarmButton.html 'add the alarm'
         @disableSubmitButton()
 
         @descriptionField.val ''
