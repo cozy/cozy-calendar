@@ -1117,7 +1117,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="form-horizontal well"><div class="control-group"><label for="inputDesc" class="control-label">Description</label><div class="controls"><input type="text" id="inputDesc" placeholder="What should I remind you ?" class="input-block-level"/></div></div><div class="controls form-inline"><select id="action" class="input-small">');
+  buf.push('<div class="form-horizontal well"><div class="control-group"><input type="text" id="inputDesc" placeholder="What should I remind you ?" class="input-block-level"/></div><div class="controls form-inline"><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
     if ('number' == typeof actions.length) {
@@ -1167,7 +1167,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;Time&nbsp;</label><!--input(type="time", id="inputTime#{id}", value="#{defaultTime}")--><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right disabled add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-alarm">Add the alarm</button><div class="clearfix"></div></div>');
   }
   return buf.join("");
   };
@@ -1189,7 +1189,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><h1>My Alarms</h1><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><div class="addform"><div id="add-alarm" class="container"></div></div><div class="well"><h1>my alarms</h1></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };
