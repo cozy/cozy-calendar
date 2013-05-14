@@ -41,6 +41,7 @@ module.exports = class AlarmFormView extends View
         @timeField = @$('#inputTime')
 
         @addAlarmButton = @$('button.add-alarm')
+        @disableSubmitButton()
 
         @validationMapper =
             action:

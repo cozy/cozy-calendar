@@ -575,6 +575,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
       this.addAlarmButton = this.$('button.add-alarm');
+      this.disableSubmitButton();
       this.validationMapper = {
         action: {
           field: this.actionField,

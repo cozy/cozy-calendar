@@ -7633,6 +7633,9 @@ input[type="time"] {
   line-height: 40px;
   height: 40px;
 }
+#add-alarm button.add-alarm.disabled {
+  border: 1px solid #aaa;
+}
 #alarms h2 {
   font-family: styled;
 }
