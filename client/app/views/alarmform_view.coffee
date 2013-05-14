@@ -30,7 +30,7 @@ module.exports = class AlarmFormView extends View
         @$el.append content
 
         # prevent the affix from bugging
-        @$el.parent().css 'min-height', @$el.height() + 20
+        @$el.parent().css 'min-height', @$el.height() + 40
 
         @$el.affix({offset: { top: @$el.offset().top - 10}})
 
