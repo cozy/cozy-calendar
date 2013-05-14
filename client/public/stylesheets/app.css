@@ -2807,6 +2807,7 @@ input[type="submit"].btn.btn-mini {
   background-image: url("../img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
+  background: none;
   margin-top: 1px;
 }
 /* White icons with optional class, or on hover/focus/active states of certain elements */
@@ -7300,7 +7301,7 @@ body {
 }
 body {
   text-rendering: optimizeLegibility;
-  background-image: url("../images/background.jpg");
+  background-image: url("../img/background.jpg");
 }
 body,
 input {
@@ -7584,6 +7585,9 @@ input[type="time"] {
   border-color: #fe8800;
   text-shadow: none;
 }
+#add-alarm {
+  margin-top: 20px;
+}
 #add-alarm input,
 #add-alarm select {
   border: 1px solid #ccc;
@@ -7628,6 +7632,9 @@ input[type="time"] {
   font-size: 24px;
   line-height: 40px;
   height: 40px;
+}
+#add-alarm button.add-alarm.disabled {
+  border: 1px solid #aaa;
 }
 #alarms h2 {
   font-family: styled;
