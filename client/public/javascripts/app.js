@@ -561,7 +561,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
         defaultTime: todayDate.format('{HH}:{mm}')
       });
       this.$el.append(content);
-      this.$el.parent().css('min-height', this.$el.height() + 20);
+      this.$el.parent().css('min-height', this.$el.height() + 40);
       return this.$el.affix({
         offset: {
           top: this.$el.offset().top - 10
@@ -575,6 +575,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
       this.addAlarmButton = this.$('button.add-alarm');
+      this.disableSubmitButton();
       this.validationMapper = {
         action: {
           field: this.actionField,
