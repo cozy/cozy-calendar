@@ -1,18 +1,15 @@
 View      = require '../lib/view'
-AppRouter = require '../routers/app_router'
-
 AlarmFormView = require './alarmform_view'
-AlarmsView = require '../views/alarms_view'
+AlarmsListView = require '../views/alarmsList_view'
 
 AlarmCollection = require '../collections/alarms'
 Alarm = require '../models/alarm'
 
-SocketListener = require '../lib/socket_listener'
-
 helpers = require '../helpers'
 
-module.exports = class AppView extends View
-    el: 'body.application'
+module.exports = class ListView extends View
+
+    el: '#viewContainer'
 
     events:
         "click #add-alarm button.add-alarm": "onAddAlarmClicked"
@@ -22,24 +19,12 @@ module.exports = class AppView extends View
     template: ->
         require('./templates/home')
 
-    initialize: ->
-        @router = CozyApp.Routers.AppRouter = new AppRouter()
-
     afterRender: ->
 
         (@alarmFormView = new AlarmFormView()).render()
 
-        @alarms = new AlarmCollection()
-        SocketListener.watch @alarms
-
-        @alarmsView = new AlarmsView
-            model: @alarms
-
-        @alarms.fetch
-            success: (collection, response, options) ->
-                console.log "Fetch: success"
-            error: ->
-                console.log "Fetch: error"
+        @alarmsListView = new AlarmsListView
+           model: @model
 
     onAddAlarmClicked: (event, callback) ->
         date = @alarmFormView.dateField.val()
