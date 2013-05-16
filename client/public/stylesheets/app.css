@@ -7483,10 +7483,16 @@ cursor not-allowed {
     width: 1170px;
   }
 }
-h1 {
-  margin-top: 15px;
-  margin-bottom: 25px;
-  font-size: 36px;
+ul#menu {
+  list-style-type: none;
+  text-align: right;
+}
+ul#menu li {
+  display: inline-block;
+  margin: 0 5px;
+}
+ul#menu li a {
+  color: #fff;
 }
 .addform .tooltip.top .tooltip-arrow {
   border-top-color: #d33;
@@ -7641,6 +7647,268 @@ input[type="time"] {
 }
 .affix div.form-horizontal {
   border: 1px solid #ddd;
+}
+@font-face {
+  font-family: styled;
+  src: url("/fonts/maven-pro-light-300.otf");
+}
+@font-face {
+  font-family: main;
+  src: url("/fonts/signika-regular.ttf");
+}
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+body {
+  text-rendering: optimizeLegibility;
+  background-image: url("../img/background.jpg");
+}
+body,
+input {
+  color: #444;
+  font: 300 16px Geneva, Verdana, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  line-height: 1.2;
+}
+a,
+a:visited {
+  color: #0086cc;
+  text-decoration: none;
+}
+a:hover,
+a:visited:hover {
+  text-decoration: underline;
+}
+.ui-button,
+a.ui-button,
+button.ui-button {
+  background-color: #eee;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fafafa), color-stop(1, #eaeaea));
+  background-image: -webkit-linear-gradient(top, #fafafa 0%, #eaeaea 100%);
+  background-image: -moz-linear-gradient(top, #fafafa 0%, #eaeaea 100%);
+  background-image: -o-linear-gradient(top, #fafafa 0%, #eaeaea 100%);
+  background-image: -ms-linear-gradient(top, #fafafa 0%, #eaeaea 100%);
+  background-image: linear-gradient(top, #fafafa 0%, #eaeaea 100%);
+  background-repeat: repeat-x;
+  border: 1px solid #c9c9c9;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.1);
+  color: #777;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: -1px -1px 0 #fff;
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  padding: 5px 10px;
+  vertical-align: middle;
+}
+.ui-button:hover,
+a.ui-button:hover,
+button.ui-button:hover {
+  color: #777;
+  text-decoration: none;
+}
+.ui-button:active,
+a.ui-button:active,
+button.ui-button:active,
+.ui-button[data-state="selected"],
+a.ui-button[data-state="selected"],
+button.ui-button[data-state="selected"] {
+  -webkit-box-shadow: inset 0 1px 10px rgba(0,0,0,0.2);
+  box-shadow: inset 0 1px 10px rgba(0,0,0,0.2);
+}
+.ui-list,
+.ui-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui-grid li {
+  display: inline-block;
+  margin-right: -1px;
+}
+.ui-grid li:last-child {
+  margin-right: 0;
+}
+@font-face {
+  font-family: 'fontawesome-selected';
+  src: url("../fonts/fontawesome/fontawesome-selected.eot");
+  src: url("../fonts/fontawesome/fontawesome-selected.eot?#iefix") format('embedded-opentype'), url("../fonts/fontawesome/fontawesome-selected.woff") format('woff'), url("../fonts/fontawesome/fontawesome-selected.ttf") format('truetype'), url("../fonts/fontawesome/fontawesome-selected.svg#fontawesome-selected") format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+#calendar-nav {
+  text-align: right;
+}
+#calendar-nav span {
+  display: inline-block;
+  margin-right: 5px;
+}
+#calendar-nav nav {
+  line-height: 30px;
+  display: inline-block;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#calendar-nav nav span {
+  font-family: 'fontawesome-selected';
+  width: 30px;
+  height: 30px;
+  background: #34a6ff;
+  font-size: 20px;
+  margin: 0 1px;
+  cursor: pointer;
+  -webkit-border-radius: 0 3px 3px 0;
+  border-radius: 0 3px 3px 0;
+  color: #fff;
+  display: inline-block;
+  text-align: center;
+}
+#calendar-nav nav span:first-child {
+  -webkit-border-radius: 3px 0 0 3px;
+  border-radius: 3px 0 0 3px;
+  margin-left: 20px;
+}
+#calendar-nav nav span:last-child {
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  margin-left: 25px;
+}
+#calendar-nav nav span#prev-month:before {
+  content: '\25c2';
+}
+#calendar-nav nav span#next-month:before {
+  content: '\25b8';
+}
+#calendar-nav nav span#go-today:before {
+  content: '\27a6';
+}
+.fc-calendar {
+  width: 100%;
+  height: 100%;
+  margin-top: 20px;
+}
+.fc-calendar .fc-head {
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  background: #008af6;
+  color: #fff;
+  -webkit-border-radius: 10px 10px 0 0;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid transparent;
+}
+.fc-calendar .fc-body {
+  width: 100%;
+  height: 600px;
+  background: #fff;
+  border: 1px solid #ddd;
+/*height: 100%
+  height: -moz-calc(100% - 30px)
+  height: -webkit-calc(100% - 30px)
+  height: calc(100% - 30px)*/
+}
+.fc-calendar .fc-row {
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+.fc-four-rows .fc-row {
+  height: 25%;
+}
+.fc-five-rows .fc-row {
+  height: 20%;
+}
+.fc-six-rows .fc-row {
+  height: 16.66%;
+  height: -moz-calc(16.666666666666668%);
+  height: -webkit-calc(16.666666666666668%);
+  height: calc(16.666666666666668%);
+}
+.fc-calendar .fc-row > div,
+.fc-calendar .fc-head > div {
+  display: inline-block;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 10px;
+  height: 100%;
+  width: 14.28%;
+/* 100% / 7 */
+  width: -moz-calc(14.285714285714286%);
+  width: -webkit-calc(14.285714285714286%);
+  width: calc(14.285714285714286%);
+}
+/* IE 9 is rounding up the calc it seems */
+.ie9 .fc-calendar .fc-row > div,
+.ie9 .fc-calendar .fc-head > div {
+  width: 14.2%;
+}
+.fc-calendar .fc-row > div {
+  border-right: 1px solid #ddd;
+  -webkit-box-shadow: -1px 0 0 rgba(255,255,255,0.2);
+  box-shadow: -1px 0 0 rgba(255,255,255,0.2);
+  padding: 10px;
+  vertical-align: top;
+}
+.fc-calendar .fc-row > div.fc-content > div {
+  font-size: 12px;
+}
+.fc-calendar .fc-row > div:empty::before {
+  content: ".";
+  visibility: hidden;
+/* css hack to have the right height */
+}
+.fc-calendar .fc-head > div {
+  text-align: center;
+}
+.fc-calendar .fc-row > div > span.fc-date {
+  display: inline-block;
+  width: 30px;
+  font-weight: 700;
+  color: #ddd;
+  margin: 0 5px 5px 0;
+  text-align: left;
+}
+.fc-calendar .fc-row > div > span.fc-weekday {
+  padding-left: 5px;
+  display: none;
+}
+.fc-calendar .fc-row > div.fc-today {
+  background: #cbe4fb;
+}
+.fc-calendar .fc-row > div.fc-today > span.fc-date {
+  color: #aaa;
+}
+.fc-calendar .fc-row > div.fc-out {
+  opacity: 0.6;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=60);
+  filter: alpha(opacity=60);
+}
+.fc-calendar .fc-row > div:last-child,
+.fc-calendar .fc-head > div:last-child {
+  border-right: none;
+}
+.fc-calendar .fc-row > div:first-child {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.fc-calendar .fc-row:last-child {
+  border-bottom: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }

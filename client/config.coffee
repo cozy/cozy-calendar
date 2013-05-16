@@ -25,6 +25,7 @@ exports.config =
                 # even if they aren't specified in order.
                 before: [
                     'vendor/scripts/jquery-1.8.2.js'
+                    'vendor/scripts/jquery.calendario.js'
                     'vendor/scripts/bootstrap.js'
                     'vendor/scripts/bootstrap-datepicker.js'
                     'vendor/scripts/bootstrap-timepicker.js'

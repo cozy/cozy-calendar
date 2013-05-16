@@ -8,12 +8,11 @@ module.exports = class Router extends Backbone.Router
     routes:
         ''                    : 'calendar'
         'calendar'            : 'calendar'
-        'alarms'              : 'alarmsList'
+        'list'                : 'alarmsList'
 
     calendar: ->
         console.log 'route:calendar'
         @displayView CalendarView, app.alarms
-
         @handleFetch()
 
     alarmsList: ->

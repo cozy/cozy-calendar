@@ -1,0 +1,158 @@
+// nib is a powerful lib for stylus that provides cross-browser css3 mixins.
+@import 'nib'
+
+@import '_base'
+@import '_ui'
+
+@font-face
+  font-family: 'fontawesome-selected'
+  src: url("../fonts/fontawesome/fontawesome-selected.eot")
+  src: url("../fonts/fontawesome/fontawesome-selected.eot?#iefix") format('embedded-opentype'), url("../fonts/fontawesome/fontawesome-selected.woff") format('woff'), url("../fonts/fontawesome/fontawesome-selected.ttf") format('truetype'), url("../fonts/fontawesome/fontawesome-selected.svg#fontawesome-selected") format('svg')
+  font-weight: normal
+  font-style: normal
+
+#calendar-nav
+  text-align: right
+
+  span
+    display: inline-block
+    margin-right: 5px
+
+  nav
+    line-height: 30px
+    display: inline-block
+    user-select none
+
+    span
+      font-family: 'fontawesome-selected'
+      width: 30px
+      height: 30px
+      background: blue
+      font-size: 20px
+      margin: 0 1px
+      cursor: pointer
+      border-radius: 0 3px 3px 0
+      color: #fff;
+      display: inline-block
+      text-align: center
+
+      &:first-child
+        border-radius: 3px 0 0 3px
+        margin-left: 20px
+
+      &:last-child
+        border-radius: 3px
+        margin-left: 25px
+
+      &#prev-month:before
+        content: '\25c2'
+      &#next-month:before
+        content: '\25b8'
+      &#go-today:before
+        content: '\27a6'
+
+
+.fc-calendar
+  width: 100%
+  height: 100%
+  margin-top: 20px
+
+.fc-calendar .fc-head
+  width: 100%
+  height: 30px
+  line-height: 30px
+  background: blue - 20%
+  color: #fff
+  border-radius 10px 10px 0 0
+  border: 1px solid transparent
+
+.fc-calendar .fc-body
+  width: 100%
+  height: 600px
+  background: #fff
+  border: 1px solid #ddd
+  /*height: 100%
+  height: -moz-calc(100% - 30px)
+  height: -webkit-calc(100% - 30px)
+  height: calc(100% - 30px)*/
+
+.fc-calendar .fc-row
+  width: 100%
+  border-bottom: 1px solid #ddd
+
+.fc-four-rows .fc-row
+  height: 25%
+
+.fc-five-rows .fc-row
+  height: 20%
+
+.fc-six-rows .fc-row
+  height: 16.66%
+  height: -moz-calc(100%/6)
+  height: -webkit-calc(100%/6)
+  height: calc(100%/6)
+
+.fc-calendar .fc-row > div,
+.fc-calendar .fc-head > div
+  display: inline-block
+  box-sizing: border-box
+  padding: 0 10px
+  height: 100%
+  width:  14.28% /* 100% / 7 */
+  width: -moz-calc(100%/7)
+  width: -webkit-calc(100%/7)
+  width: calc(100%/7)
+
+/* IE 9 is rounding up the calc it seems */
+.ie9 .fc-calendar .fc-row > div,
+.ie9 .fc-calendar .fc-head > div
+  width:  14.2%
+
+.fc-calendar .fc-row > div
+  border-right: 1px solid #ddd
+  box-shadow: -1px 0 0 rgba(255, 255, 255, 0.2)
+  padding: 10px
+  vertical-align: top
+
+.fc-calendar .fc-row > div.fc-content > div
+  font-size: 12px
+
+.fc-calendar .fc-row > div:empty::before
+  content: "."
+  visibility: hidden /* css hack to have the right height */
+
+.fc-calendar .fc-head > div
+  text-align: center
+
+.fc-calendar .fc-row > div > span.fc-date
+  display: inline-block
+  width: 30px
+  font-weight: 700
+  color: #ddd
+  margin: 0 5px 5px 0
+  text-align: left
+
+.fc-calendar .fc-row > div > span.fc-weekday
+  padding-left: 5px
+  display: none
+
+.fc-calendar .fc-row > div.fc-today
+  background: lightblue
+
+.fc-calendar .fc-row > div.fc-today > span.fc-date
+  color: #aaa
+
+.fc-calendar .fc-row > div.fc-out
+  opacity: 0.6
+
+.fc-calendar .fc-row > div:last-child,
+.fc-calendar .fc-head > div:last-child
+  border-right: none
+
+.fc-calendar .fc-row > div:first-child
+  box-shadow: none
+
+.fc-calendar .fc-row:last-child
+  border-bottom: none
+  box-shadow: none
+

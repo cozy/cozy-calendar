@@ -17,7 +17,7 @@ module.exports = class ListView extends View
         "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
 
     template: ->
-        require('./templates/home')
+        require('./templates/listview')
 
     afterRender: ->
 
@@ -52,7 +52,7 @@ module.exports = class ListView extends View
                     error: ->
                         console.log "Error during alarm save."
         else
-            alarm = @alarms.create data,
+            alarm = @model.create data,
                     ignoreMySocketNotification: true #useless ?
                     wait: true
                     success: (model, response) =>
@@ -67,12 +67,12 @@ module.exports = class ListView extends View
 
     onEditAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')
-        alarm = @alarms.get alarmID
+        alarm = @model.get alarmID
         @alarmFormView.loadAlarmData(alarm)
 
     onRemoveAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')
-        alarm = @alarms.get alarmID
+        alarm = @model.get alarmID
         # TODO: add confirmation
         alarm.destroy
             wait: true
