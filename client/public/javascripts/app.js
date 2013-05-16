@@ -919,7 +919,6 @@ window.require.register("views/alarmsList_view", function(exports, require, modu
 });
 window.require.register("views/calendar_view", function(exports, require, module) {
   var AlarmFormView, AlarmsListView, CalendarView, View, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -933,7 +932,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     __extends(CalendarView, _super);
 
     function CalendarView() {
-      this.updateMonthYear = __bind(this.updateMonthYear, this);    _ref = CalendarView.__super__.constructor.apply(this, arguments);
+      _ref = CalendarView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
@@ -950,24 +949,30 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.afterRender = function() {
-      var _this = this;
-
-      this.cal = this.$('#alarms').calendario();
-      this.updateMonthYear();
-      this.$('#prev-month').click(function() {
-        return _this.cal.gotoPreviousMonth(_this.updateMonthYear);
+      return this.cal = this.$('#alarms').fullCalendar({
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'month,agendaWeek,agendaDay'
+        },
+        editable: true,
+        firstDay: 1,
+        columnFormat: {
+          month: 'dddd',
+          week: 'ddd dd/MM',
+          day: 'dddd dd/MM'
+        },
+        timeFormat: {
+          '': 'HH:mm'
+        },
+        axisFormat: 'HH:mm',
+        buttonText: {
+          today: 'Go today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
+        }
       });
-      this.$('#next-month').click(function() {
-        return _this.cal.gotoNextMonth(_this.updateMonthYear);
-      });
-      return this.$('#go-today').click(function() {
-        return _this.cal.gotoNow(_this.updateMonthYear);
-      });
-    };
-
-    CalendarView.prototype.updateMonthYear = function() {
-      this.$('#current-month').html(this.cal.getMonthName());
-      return this.$('#current-year').html(this.cal.getYear());
     };
 
     CalendarView.prototype.onAdd = function(alarm, alarms) {
@@ -976,8 +981,23 @@ window.require.register("views/calendar_view", function(exports, require, module
       index = alarm.getFormattedDate("{MM}-{dd}-{yyyy}");
       time = alarm.getFormattedDate("{hh}:{mm}");
       content = "" + time + " " + (alarm.get("description"));
-      this.caldata[index] = content;
-      return this.cal.setData(this.caldata);
+      return this.cal.fullCalendar('addEventSource', function(start, end, callback) {
+        var endAlarm, event;
+
+        endAlarm = alarm.getDateObject().clone();
+        endAlarm.advance({
+          minutes: 30
+        });
+        event = {
+          title: alarm.get('description'),
+          start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
+          end: endAlarm.format(Date.ISO8601_DATETIME),
+          allDay: false,
+          backgroundColor: '#5C5',
+          borderColor: '#5C5'
+        };
+        return callback([event]);
+      });
     };
 
     CalendarView.prototype.onReset = function() {
@@ -1295,7 +1315,7 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a></li></ul><div id="calendar-nav"><span id="current-month"></span><span id="current-year"></span><nav><span id="prev-month"></span><span id="next-month"></span><span id="go-today"></span></nav></div><div id="alarms"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

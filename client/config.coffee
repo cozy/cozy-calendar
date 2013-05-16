@@ -24,8 +24,9 @@ exports.config =
                 # Files in `vendor` directories are compiled before other files
                 # even if they aren't specified in order.
                 before: [
-                    'vendor/scripts/jquery-1.8.2.js'
-                    'vendor/scripts/jquery.calendario.js'
+                    'vendor/scripts/jquery-1.9.1.min.js'
+                    'vendor/scripts/jquery-ui-1.10.2.custom.min.js'
+                    'vendor/scripts/fullcalendar.js'
                     'vendor/scripts/bootstrap.js'
                     'vendor/scripts/bootstrap-datepicker.js'
                     'vendor/scripts/bootstrap-timepicker.js'
@@ -41,6 +42,7 @@ exports.config =
                     'vendor/styles/bootstrap.css',
                     'vendor/styles/bootstrap-datepicker.css'
                     'vendor/styles/bootstrap-timepicker.css'
+                    'vendor/styles/fullcalendar.css'
                 ]
                 after: ['vendor/styles/helpers.css']
 

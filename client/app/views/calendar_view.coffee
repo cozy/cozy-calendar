@@ -17,20 +17,26 @@ module.exports = class CalendarView extends View
 
     afterRender: ->
 
-        @cal = @$('#alarms').calendario()
+        @cal = @$('#alarms').fullCalendar
+                header:
+                    left: 'prev,next today'
+                    center: 'title'
+                    right: 'month,agendaWeek,agendaDay'
+                editable: true
+                firstDay: 1 # first day of the week is monday ffs
+                columnFormat:
+                    month: 'dddd'
+                    week: 'ddd dd/MM'
+                    day: 'dddd dd/MM'
+                timeFormat:
+                    '': 'HH:mm'
+                axisFormat: 'HH:mm'
+                buttonText:
+                    today: 'Go today'
+                    month: 'Month'
+                    week: 'Week'
+                    day: 'Day'
 
-        @updateMonthYear()
-
-        @$('#prev-month').click =>
-            @cal.gotoPreviousMonth(@updateMonthYear)
-        @$('#next-month').click =>
-            @cal.gotoNextMonth(@updateMonthYear)
-        @$('#go-today').click =>
-            @cal.gotoNow(@updateMonthYear)
-
-    updateMonthYear: =>
-        @$('#current-month').html @cal.getMonthName()
-        @$('#current-year').html @cal.getYear()
 
     onAdd: (alarm, alarms) ->
 
@@ -38,8 +44,21 @@ module.exports = class CalendarView extends View
         time = alarm.getFormattedDate "{hh}:{mm}"
         content = "#{time} #{alarm.get("description")}"
 
-        @caldata[index] = content
-        @cal.setData @caldata
+        @cal.fullCalendar 'addEventSource', (start, end, callback) ->
+
+            endAlarm = alarm.getDateObject().clone()
+            endAlarm.advance {minutes: 30}
+
+            event =
+                title: alarm.get 'description'
+                start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
+                end: endAlarm.format(Date.ISO8601_DATETIME)
+                allDay: false
+                backgroundColor: '#5C5'
+                borderColor: '#5C5'
+
+            callback([event])
+
 
     onReset: ->
         @model.forEach (item) =>
