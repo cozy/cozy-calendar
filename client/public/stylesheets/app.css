@@ -7777,6 +7777,9 @@ button.ui-button[data-state="selected"] {
   display: inline-block;
   text-align: center;
 }
+#calendar-nav nav span:hover {
+  background: #fe8800;
+}
 #calendar-nav nav span:first-child {
   -webkit-border-radius: 3px 0 0 3px;
   border-radius: 3px 0 0 3px;
