@@ -1007,13 +1007,15 @@ window.require.register("views/calendar_view", function(exports, require, module
         firstDay: 1,
         weekMode: 'liquid',
         aspectRatio: 2.031,
+        defaultView: 'agendaDay',
         columnFormat: {
           month: 'dddd',
           week: 'ddd dd/MM',
           day: 'dddd dd/MM'
         },
         timeFormat: {
-          '': 'HH:mm'
+          '': 'HH:mm',
+          'agenda': 'HH:mm{ - HH:mm}'
         },
         axisFormat: 'HH:mm',
         buttonText: {
@@ -1023,7 +1025,8 @@ window.require.register("views/calendar_view", function(exports, require, module
           day: 'Day'
         },
         selectable: true,
-        selectHelper: true,
+        selectHelper: false,
+        unselectAuto: false,
         eventRender: function(event, element) {
           var selector, spinTarget;
 
@@ -1068,22 +1071,36 @@ window.require.register("views/calendar_view", function(exports, require, module
         },
         select: function(startDate, endDate, allDay, jsEvent, view) {
           if (view.name === "month") {
-            return _this.handleSelectionInMonthView(startDate, endDate, allDay, jsEvent);
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+          } else if (view.name === "agendaWeek") {
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+          } else if (view.name === "agendaDay") {
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
           }
         }
       });
     };
 
-    CalendarView.prototype.handleSelectionInMonthView = function(startDate, endDate, allDay, jsEvent) {
-      var direction, selectedWeekDay, target,
+    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
+      var direction, selectedHour, selectedWeekDay, target,
         _this = this;
 
       target = $(jsEvent.target);
-      selectedWeekDay = Date.create(startDate).format('{weekday}');
-      if (selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
-        direction = 'left';
+      if (!((isDayView != null) && isDayView)) {
+        selectedWeekDay = Date.create(startDate).format('{weekday}');
+        if (selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+          direction = 'left';
+        } else {
+          direction = 'right';
+        }
       } else {
-        direction = 'right';
+        selectedHour = Date.create(startDate).format('{HH}');
+        console.debug(selectedHour);
+        if (selectedHour >= 4) {
+          direction = 'top';
+        } else {
+          direction = 'bottom';
+        }
       }
       if ($('.popover').length > 0) {
         $(target).popover('destroy');
@@ -1156,7 +1173,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       content = "" + time + " " + (alarm.get("description"));
       endAlarm = alarm.getDateObject().clone();
       endAlarm.advance({
-        minutes: 30
+        minutes: 60
       });
       event = {
         title: alarm.get('description'),

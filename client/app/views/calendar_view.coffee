@@ -28,6 +28,7 @@ module.exports = class CalendarView extends View
                 firstDay: 1 # first day of the week is monday ffs
                 weekMode: 'liquid'
                 aspectRatio: 2.031
+                defaultView: 'agendaDay'
                 columnFormat:
                     month: 'dddd'
                     week: 'ddd dd/MM'
@@ -42,7 +43,8 @@ module.exports = class CalendarView extends View
                     week: 'Week'
                     day: 'Day'
                 selectable: true
-                selectHelper: true
+                selectHelper: false
+                unselectAuto: false
                 eventRender: (event, element) ->
 
                     # we don't want alarms to be resized
@@ -86,20 +88,32 @@ module.exports = class CalendarView extends View
                 select: (startDate, endDate, allDay, jsEvent, view) =>
 
                     if view.name is "month"
-                        @handleSelectionInMonthView(startDate, endDate, \
+                        @handleSelectionInView(startDate, endDate, \
                                                     allDay, jsEvent)
+                    else if view.name is "agendaWeek"
+                        @handleSelectionInView(startDate, endDate, \
+                                                    allDay, jsEvent)
+                    else if view.name is "agendaDay"
+                        @handleSelectionInView(startDate, endDate, \
+                                                    allDay, jsEvent, true)
 
-
-
-    handleSelectionInMonthView: (startDate, endDate, allDay, jsEvent) ->
+    handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
 
         target = $(jsEvent.target)
 
-        selectedWeekDay = Date.create(startDate).format('{weekday}')
-        if selectedWeekDay in ['saturday', 'sunday']
-            direction = 'left'
+        unless isDayView? and isDayView
+            selectedWeekDay = Date.create(startDate).format('{weekday}')
+            if selectedWeekDay in ['saturday', 'sunday']
+                direction = 'left'
+            else
+                direction = 'right'
         else
-            direction = 'right'
+            selectedHour = Date.create(startDate).format('{HH}')
+            console.debug selectedHour
+            if selectedHour >= 4
+                direction = 'top'
+            else
+                direction = 'bottom'
 
         # Removes the popover if it already exists
         $(target).popover('destroy') if $('.popover').length > 0
@@ -111,7 +125,7 @@ module.exports = class CalendarView extends View
             content: require('./templates/alarm_form_small'))
         .popover('show')
 
-        $('.popover button.close').click =>
+        $('.popover button.close').click ->
             $(target).popover('destroy')
 
         $('.popover button.add-alarm').click (event) =>
@@ -153,7 +167,6 @@ module.exports = class CalendarView extends View
             else
                 button.removeClass 'disabled'
 
-
     onAdd: (alarm, alarms) ->
 
         index = alarm.getFormattedDate "{MM}-{dd}-{yyyy}"
@@ -161,7 +174,7 @@ module.exports = class CalendarView extends View
         content = "#{time} #{alarm.get("description")}"
 
         endAlarm = alarm.getDateObject().clone()
-        endAlarm.advance {minutes: 30}
+        endAlarm.advance {minutes: 60}
 
         event =
             title: alarm.get 'description'
