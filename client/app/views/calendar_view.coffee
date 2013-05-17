@@ -28,7 +28,7 @@ module.exports = class CalendarView extends View
                 firstDay: 1 # first day of the week is monday ffs
                 weekMode: 'liquid'
                 aspectRatio: 2.031
-                defaultView: 'agendaDay'
+                defaultView: 'month'
                 columnFormat:
                     month: 'dddd'
                     week: 'ddd dd/MM'
@@ -68,7 +68,7 @@ module.exports = class CalendarView extends View
                 eventDrop: (event, dayDelta, minuteDelta, allDay, \
                             revertFunc, jsEvent, ui, view) =>
 
-                    alarm =  @model.get event.cid
+                    alarm =  @model.get event.id
                     alarm.getDateObject().advance
                                             days: dayDelta
                                             minutes: minuteDelta
@@ -97,36 +97,112 @@ module.exports = class CalendarView extends View
                         @handleSelectionInView(startDate, endDate, \
                                                     allDay, jsEvent, true)
 
+                eventClick: (event, jsEvent, view) =>
+
+                    target = $(jsEvent.currentTarget)
+
+                    unless view.name is 'agendaDay'
+                        selectedWeekDay = Date.create(event.start).format('{weekday}')
+                        if selectedWeekDay in ['friday', 'saturday', 'sunday']
+                            direction = 'left'
+                        else
+                            direction = 'right'
+                    else
+                        selectedHour = Date.create(event.start).format('{HH}')
+                        if selectedHour >= 4
+                            direction = 'top'
+                        else
+                            direction = 'bottom'
+
+                    @popoverTarget.popover('destroy') if @popoverTarget?
+                    @popoverTarget = $(target)
+                    template = require('./templates/alarm_form_small')
+                    @popoverTarget.popover(
+                        title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>'
+                        html: true
+                        placement: direction
+                        content: template
+                                    editionMode: true
+                                    defaultValue: event.title
+                    )
+                    .popover('show')
+
+                    $('.popover .alarm-remove').click =>
+                        alarm =  @model.get event.id
+
+                        event.isSaving = true
+                        @cal.fullCalendar('renderEvent', event)
+                        alarm.destroy
+                            success: =>
+                                event.isSaving = false
+                                # TODO: update from backbone collection 'remove' event
+                                @cal.fullCalendar('removeEvents', event.id)
+                            error: ->
+                                event.isSaving = false
+                                @cal.fullCalendar('renderEvent', event)
+
+                    $('.popover button.add-alarm').click =>
+                        alarm =  @model.get event.id
+
+                        data = {description: $('.popover input').val()}
+                        event.isSaving = true
+                        @cal.fullCalendar('renderEvent', event)
+                        alarm.save data,
+                            wait: true
+                            success: =>
+                                event.isSaving = false
+                                # TODO: update from backbone collection 'update' event
+                                event.title = data.description
+                                @cal.fullCalendar('renderEvent', event)
+                            error: ->
+                                event.isSaving = false
+                                @cal.fullCalendar('renderEvent', event)
+                                revertFunc()
+
+                    $('.popover button.add-alarm').removeClass 'disabled'
+                    $('.popover input').keyup (event) ->
+                        button = $('.popover button.add-alarm')
+                        if $(@).val() is ''
+                            button.addClass 'disabled'
+                        else
+                            button.removeClass 'disabled'
+
+                    $('.popover button.close').click =>
+                        @popoverTarget.popover('destroy')
+
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
 
         target = $(jsEvent.target)
 
         unless isDayView? and isDayView
             selectedWeekDay = Date.create(startDate).format('{weekday}')
-            if selectedWeekDay in ['saturday', 'sunday']
+            if selectedWeekDay in ['friday', 'saturday', 'sunday']
                 direction = 'left'
             else
                 direction = 'right'
         else
             selectedHour = Date.create(startDate).format('{HH}')
-            console.debug selectedHour
             if selectedHour >= 4
                 direction = 'top'
             else
                 direction = 'bottom'
 
         # Removes the popover if it already exists
-        $(target).popover('destroy') if $('.popover').length > 0
-        console.debug target
-        $(target).popover(
+        @popoverTarget.popover('destroy') if @popoverTarget?
+        @popoverTarget = $(target)
+        template = require('./templates/alarm_form_small')
+        @popoverTarget.popover(
             title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'
             html: true
             placement: direction
-            content: require('./templates/alarm_form_small'))
+            content: template
+                        editionMode: false
+                        defaultValue: ''
+        )
         .popover('show')
 
-        $('.popover button.close').click ->
-            $(target).popover('destroy')
+        $('.popover button.close').click =>
+            @popoverTarget.popover('destroy')
 
         $('.popover button.add-alarm').click (event) =>
 
@@ -177,6 +253,7 @@ module.exports = class CalendarView extends View
         endAlarm.advance {minutes: 60}
 
         event =
+            id: alarm.cid
             title: alarm.get 'description'
             start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
             end: endAlarm.format(Date.ISO8601_DATETIME)
@@ -184,7 +261,6 @@ module.exports = class CalendarView extends View
             backgroundColor: '#5C5'
             borderColor: '#5C5'
             type: 'alarm' # non standard field
-            cid: alarm.cid # non standard field
 
         @cal.fullCalendar 'addEventSource', [event]
 

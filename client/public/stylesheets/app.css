@@ -8326,6 +8326,7 @@ button.ui-button[data-state="selected"] {
 /* Styles for the calendar view */
 .popover {
   max-width: none;
+  width: 375px;
 }
 .popover .popover-title button {
   margin-top: -4px;

@@ -1007,7 +1007,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         firstDay: 1,
         weekMode: 'liquid',
         aspectRatio: 2.031,
-        defaultView: 'agendaDay',
+        defaultView: 'month',
         columnFormat: {
           month: 'dddd',
           week: 'ddd dd/MM',
@@ -1048,7 +1048,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
           var alarm, data;
 
-          alarm = _this.model.get(event.cid);
+          alarm = _this.model.get(event.id);
           alarm.getDateObject().advance({
             days: dayDelta,
             minutes: minuteDelta
@@ -1077,43 +1077,134 @@ window.require.register("views/calendar_view", function(exports, require, module
           } else if (view.name === "agendaDay") {
             return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
           }
+        },
+        eventClick: function(event, jsEvent, view) {
+          var direction, selectedHour, selectedWeekDay, target, template;
+
+          target = $(jsEvent.currentTarget);
+          if (view.name !== 'agendaDay') {
+            selectedWeekDay = Date.create(event.start).format('{weekday}');
+            if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+              direction = 'left';
+            } else {
+              direction = 'right';
+            }
+          } else {
+            selectedHour = Date.create(event.start).format('{HH}');
+            if (selectedHour >= 4) {
+              direction = 'top';
+            } else {
+              direction = 'bottom';
+            }
+          }
+          if (_this.popoverTarget != null) {
+            _this.popoverTarget.popover('destroy');
+          }
+          _this.popoverTarget = $(target);
+          template = require('./templates/alarm_form_small');
+          _this.popoverTarget.popover({
+            title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>',
+            html: true,
+            placement: direction,
+            content: template({
+              editionMode: true,
+              defaultValue: event.title
+            })
+          }).popover('show');
+          $('.popover .alarm-remove').click(function() {
+            var alarm;
+
+            alarm = _this.model.get(event.id);
+            event.isSaving = true;
+            _this.cal.fullCalendar('renderEvent', event);
+            return alarm.destroy({
+              success: function() {
+                event.isSaving = false;
+                return _this.cal.fullCalendar('removeEvents', event.id);
+              },
+              error: function() {
+                event.isSaving = false;
+                return this.cal.fullCalendar('renderEvent', event);
+              }
+            });
+          });
+          $('.popover button.add-alarm').click(function() {
+            var alarm, data;
+
+            alarm = _this.model.get(event.id);
+            data = {
+              description: $('.popover input').val()
+            };
+            event.isSaving = true;
+            _this.cal.fullCalendar('renderEvent', event);
+            return alarm.save(data, {
+              wait: true,
+              success: function() {
+                event.isSaving = false;
+                event.title = data.description;
+                return _this.cal.fullCalendar('renderEvent', event);
+              },
+              error: function() {
+                event.isSaving = false;
+                this.cal.fullCalendar('renderEvent', event);
+                return revertFunc();
+              }
+            });
+          });
+          $('.popover button.add-alarm').removeClass('disabled');
+          $('.popover input').keyup(function(event) {
+            var button;
+
+            button = $('.popover button.add-alarm');
+            if ($(this).val() === '') {
+              return button.addClass('disabled');
+            } else {
+              return button.removeClass('disabled');
+            }
+          });
+          return $('.popover button.close').click(function() {
+            return _this.popoverTarget.popover('destroy');
+          });
         }
       });
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, selectedHour, selectedWeekDay, target,
+      var direction, selectedHour, selectedWeekDay, target, template,
         _this = this;
 
       target = $(jsEvent.target);
       if (!((isDayView != null) && isDayView)) {
         selectedWeekDay = Date.create(startDate).format('{weekday}');
-        if (selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+        if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
           direction = 'left';
         } else {
           direction = 'right';
         }
       } else {
         selectedHour = Date.create(startDate).format('{HH}');
-        console.debug(selectedHour);
         if (selectedHour >= 4) {
           direction = 'top';
         } else {
           direction = 'bottom';
         }
       }
-      if ($('.popover').length > 0) {
-        $(target).popover('destroy');
+      if (this.popoverTarget != null) {
+        this.popoverTarget.popover('destroy');
       }
-      console.debug(target);
-      $(target).popover({
+      this.popoverTarget = $(target);
+      template = require('./templates/alarm_form_small');
+      this.popoverTarget.popover({
         title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
         html: true,
         placement: direction,
-        content: require('./templates/alarm_form_small')
+        content: template({
+          editionMode: false,
+          defaultValue: ''
+        })
       }).popover('show');
       $('.popover button.close').click(function() {
-        return $(target).popover('destroy');
+        return _this.popoverTarget.popover('destroy');
       });
       $('.popover button.add-alarm').click(function(event) {
         var data, dueDate, smartDetection, specifiedTime, value;
@@ -1176,14 +1267,14 @@ window.require.register("views/calendar_view", function(exports, require, module
         minutes: 60
       });
       event = {
+        id: alarm.cid,
         title: alarm.get('description'),
         start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
         end: endAlarm.format(Date.ISO8601_DATETIME),
         allDay: false,
         backgroundColor: '#5C5',
         borderColor: '#5C5',
-        type: 'alarm',
-        cid: alarm.cid
+        type: 'alarm'
       };
       return this.cal.fullCalendar('addEventSource', [event]);
     };
@@ -1503,7 +1594,23 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<input type="text" id="inputDesc" placeholder="What do you want to be reminded ?" class="input-xlarge"/><button class="btn pull-right add-alarm disabled">Add</button><p>ie: 9:00 important meeting</p>');
+  buf.push('<div><input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':("What do you want to be reminded ?"), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/><button class="btn pull-right add-alarm disabled">');
+  if ( editionMode)
+  {
+  buf.push('Edit');
+  }
+  else
+  {
+  buf.push('Add');
+  }
+  buf.push('</button>');
+  if (!( editionMode))
+  {
+  buf.push('<p>ie: 9:00 important meeting</p>');
+  }
+  buf.push('</div>');
   }
   return buf.join("");
   };
