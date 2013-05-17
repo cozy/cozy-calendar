@@ -188,7 +188,62 @@ window.require.register("initialize", function(exports, require, module) {
 
   $(function() {
     require('lib/app_helpers');
-    return app.initialize();
+    app.initialize();
+    return $.fn.spin = function(opts, color) {
+      var presets;
+
+      presets = {
+        tiny: {
+          lines: 8,
+          length: 2,
+          width: 2,
+          radius: 3
+        },
+        small: {
+          lines: 8,
+          length: 1,
+          width: 2,
+          radius: 5
+        },
+        large: {
+          lines: 10,
+          length: 8,
+          width: 4,
+          radius: 8
+        }
+      };
+      if (Spinner) {
+        return this.each(function() {
+          var $this, spinner;
+
+          $this = $(this);
+          spinner = $this.data("spinner");
+          if (spinner != null) {
+            spinner.stop();
+            return $this.data("spinner", null);
+          } else if (opts !== false) {
+            if (typeof opts === "string") {
+              if (opts in presets) {
+                opts = presets[opts];
+              } else {
+                opts = {};
+              }
+              if (color) {
+                opts.color = color;
+              }
+            }
+            spinner = new Spinner($.extend({
+              color: $this.css("color")
+            }, opts));
+            spinner.spin(this);
+            return $this.data("spinner", spinner);
+          }
+        });
+      } else {
+        console.log("Spinner class not available.");
+        return null;
+      }
+    };
   });
   
 });
@@ -377,7 +432,10 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getDateObject = function() {
-      return new Date.create(this.get('trigg'));
+      if (this.dateObject == null) {
+        this.dateObject = new Date.create(this.get('trigg'));
+      }
+      return this.dateObject;
     };
 
     Alarm.prototype.getFormattedDate = function(formatter) {
@@ -918,7 +976,7 @@ window.require.register("views/alarmsList_view", function(exports, require, modu
   
 });
 window.require.register("views/calendar_view", function(exports, require, module) {
-  var AlarmFormView, AlarmsListView, CalendarView, View, _ref,
+  var Alarm, AlarmFormView, AlarmsListView, CalendarView, View, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -927,6 +985,8 @@ window.require.register("views/calendar_view", function(exports, require, module
   AlarmFormView = require('./alarmform_view');
 
   AlarmsListView = require('../views/alarmsList_view');
+
+  Alarm = require('../models/alarm');
 
   module.exports = CalendarView = (function(_super) {
     __extends(CalendarView, _super);
@@ -949,6 +1009,8 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.afterRender = function() {
+      var _this = this;
+
       return this.cal = this.$('#alarms').fullCalendar({
         header: {
           left: 'prev,next today',
@@ -967,37 +1029,83 @@ window.require.register("views/calendar_view", function(exports, require, module
         },
         axisFormat: 'HH:mm',
         buttonText: {
-          today: 'Go today',
+          today: 'Today',
           month: 'Month',
           week: 'Week',
           day: 'Day'
+        },
+        selectable: true,
+        selectHelper: true,
+        eventRender: function(event, element) {
+          var selector, spinTarget;
+
+          if (event.type === 'alarm') {
+            selector = '.ui-resizable-handle.ui-resizable-s';
+            $(element).find(selector).remove();
+          }
+          if ((event.isSaving != null) && event.isSaving) {
+            spinTarget = $(element).find('.fc-event-time');
+            spinTarget.addClass('spinning');
+            spinTarget.html("&nbsp;");
+            spinTarget.spin("tiny");
+          }
+          return element;
+        },
+        eventDragStop: function(event, jsEvent, ui, view) {
+          return event.isSaving = true;
+        },
+        eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
+          var alarm, data;
+
+          alarm = _this.model.get(event.cid);
+          alarm.getDateObject().advance({
+            days: dayDelta,
+            minutes: minuteDelta
+          });
+          data = {
+            trigg: alarm.getFormattedDate(Alarm.dateFormat)
+          };
+          return alarm.save(data, {
+            wait: true,
+            success: function() {
+              event.isSaving = false;
+              return _this.cal.fullCalendar('renderEvent', event);
+            },
+            error: function() {
+              event.isSaving = false;
+              this.cal.fullCalendar('renderEvent', event);
+              return revertFunc();
+            }
+          });
+        },
+        select: function(startDate, endDate, allDay, jsEvent, view) {
+          console.log("select");
+          return console.debug(startDate, endDate, allDay);
         }
       });
     };
 
     CalendarView.prototype.onAdd = function(alarm, alarms) {
-      var content, index, time;
+      var content, endAlarm, event, index, time;
 
       index = alarm.getFormattedDate("{MM}-{dd}-{yyyy}");
       time = alarm.getFormattedDate("{hh}:{mm}");
       content = "" + time + " " + (alarm.get("description"));
-      return this.cal.fullCalendar('addEventSource', function(start, end, callback) {
-        var endAlarm, event;
-
-        endAlarm = alarm.getDateObject().clone();
-        endAlarm.advance({
-          minutes: 30
-        });
-        event = {
-          title: alarm.get('description'),
-          start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
-          end: endAlarm.format(Date.ISO8601_DATETIME),
-          allDay: false,
-          backgroundColor: '#5C5',
-          borderColor: '#5C5'
-        };
-        return callback([event]);
+      endAlarm = alarm.getDateObject().clone();
+      endAlarm.advance({
+        minutes: 30
       });
+      event = {
+        title: alarm.get('description'),
+        start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
+        end: endAlarm.format(Date.ISO8601_DATETIME),
+        allDay: false,
+        backgroundColor: '#5C5',
+        borderColor: '#5C5',
+        type: 'alarm',
+        cid: alarm.cid
+      };
+      return this.cal.fullCalendar('addEventSource', [event]);
     };
 
     CalendarView.prototype.onReset = function() {
