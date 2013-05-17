@@ -8131,6 +8131,9 @@ input[type="time"] {
   height: 14px;
   cursor: pointer;
 }
+.dayprogram .alarms p:hover i {
+  display: inline-block;
+}
 .dayprogram:nth-last-child(1) {
   border-bottom: 0;
   padding-bottom: 0;
@@ -8320,6 +8323,28 @@ button.ui-button[data-state="selected"] {
 .ui-grid li:last-child {
   margin-right: 0;
 }
+/* Styles for the calendar view */
+.popover {
+  max-width: none;
+}
+.popover .popover-title button {
+  margin-top: -4px;
+}
+.popover .popover-content button {
+  margin-left: 5px;
+}
+.popover .popover-content button.disabled {
+  border: 1px solid #aaa;
+}
+.popover .popover-content button.disabled:hover {
+  background: #e6e6e6;
+  color: #333;
+}
+.popover .popover-content p {
+  font-size: 12px;
+  margin-left: 5px;
+}
+/* Styles for the fullcalendar plugin */
 .fc-button-prev,
 .fc-button-next,
 .fc-button-today,

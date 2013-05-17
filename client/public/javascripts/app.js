@@ -520,13 +520,11 @@ window.require.register("router", function(exports, require, module) {
     };
 
     Router.prototype.calendar = function() {
-      console.log('route:calendar');
       this.displayView(CalendarView, app.alarms);
       return this.handleFetch();
     };
 
     Router.prototype.alarmsList = function() {
-      console.log('route:alarmsList');
       this.displayView(ListView, app.alarms);
       return this.handleFetch();
     };
@@ -585,10 +583,6 @@ window.require.register("views/alarm_view", function(exports, require, module) {
 
     AlarmView.prototype.className = 'alarm';
 
-    AlarmView.prototype.events = {
-      'hover': 'onMouseOver'
-    };
-
     AlarmView.prototype.initialize = function() {
       return this.listenTo(this.model, "change", this.onChange);
     };
@@ -608,14 +602,6 @@ window.require.register("views/alarm_view", function(exports, require, module) {
 
     AlarmView.prototype.onChange = function(alarm) {
       return this.render();
-    };
-
-    AlarmView.prototype.onMouseOver = function(event) {
-      if (event.type === 'mouseenter') {
-        return this.$('i').css('display', 'inline-block');
-      } else {
-        return this.$('i').hide();
-      }
     };
 
     return AlarmView;
@@ -1019,6 +1005,8 @@ window.require.register("views/calendar_view", function(exports, require, module
         },
         editable: true,
         firstDay: 1,
+        weekMode: 'liquid',
+        aspectRatio: 2.031,
         columnFormat: {
           month: 'dddd',
           week: 'ddd dd/MM',
@@ -1079,8 +1067,83 @@ window.require.register("views/calendar_view", function(exports, require, module
           });
         },
         select: function(startDate, endDate, allDay, jsEvent, view) {
-          console.log("select");
-          return console.debug(startDate, endDate, allDay);
+          if (view.name === "month") {
+            return _this.handleSelectionInMonthView(startDate, endDate, allDay, jsEvent);
+          }
+        }
+      });
+    };
+
+    CalendarView.prototype.handleSelectionInMonthView = function(startDate, endDate, allDay, jsEvent) {
+      var direction, selectedWeekDay, target,
+        _this = this;
+
+      target = $(jsEvent.target);
+      selectedWeekDay = Date.create(startDate).format('{weekday}');
+      if (selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+        direction = 'left';
+      } else {
+        direction = 'right';
+      }
+      if ($('.popover').length > 0) {
+        $(target).popover('destroy');
+      }
+      console.debug(target);
+      $(target).popover({
+        title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
+        html: true,
+        placement: direction,
+        content: require('./templates/alarm_form_small')
+      }).popover('show');
+      $('.popover button.close').click(function() {
+        return $(target).popover('destroy');
+      });
+      $('.popover button.add-alarm').click(function(event) {
+        var data, dueDate, smartDetection, specifiedTime, value;
+
+        dueDate = Date.create(startDate);
+        if (dueDate.format('{HH}:{mm}') === '00:00') {
+          dueDate.advance({
+            hours: 8
+          });
+        }
+        value = $('.popover input').val();
+        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
+        if ((smartDetection != null) && (smartDetection[1] != null)) {
+          specifiedTime = smartDetection[1];
+          specifiedTime = specifiedTime.split(/:/);
+          dueDate.set({
+            hours: specifiedTime[0],
+            minutes: specifiedTime[1]
+          });
+          value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
+          value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+        }
+        data = {
+          description: value,
+          action: 'DISPLAY',
+          trigg: dueDate.format(Alarm.dateFormat)
+        };
+        return _this.model.create(data, {
+          wait: true,
+          success: function() {
+            console.log("creation: success");
+            return $(target).popover('destroy');
+          },
+          error: function() {
+            console.log("creation: error");
+            return $(target).popover('destroy');
+          }
+        });
+      });
+      return $('.popover input').keyup(function(event) {
+        var button;
+
+        button = $('.popover button.add-alarm');
+        if ($(this).val() === '') {
+          return button.addClass('disabled');
+        } else {
+          return button.removeClass('disabled');
         }
       });
     };
@@ -1413,6 +1476,17 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;time:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-alarm">add the alarm</button><div class="clearfix"></div></div>');
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/alarm_form_small", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<input type="text" id="inputDesc" placeholder="What do you want to be reminded ?" class="input-xlarge"/><button class="btn pull-right add-alarm disabled">Add</button><p>ie: 9:00 important meeting</p>');
   }
   return buf.join("");
   };

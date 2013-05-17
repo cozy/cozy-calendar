@@ -1,9 +1,30 @@
-// nib is a powerful lib for stylus that provides cross-browser css3 mixins.
 @import 'nib'
 
 @import '_base'
 @import '_ui'
 
+/* Styles for the calendar view */
+.popover
+  max-width: none
+
+  .popover-title
+    button
+      margin-top: -4px
+
+  .popover-content
+    button
+      margin-left: 5px
+      &.disabled
+        border: 1px solid grey
+        &:hover
+          background: #e6e6e6
+          color: #333
+    p
+      font-size: 12px
+      margin-left: 5px
+
+
+/* Styles for the fullcalendar plugin */
 .fc-button-prev, .fc-button-next, .fc-button-today,
 .fc-button-month, .fc-button-week, .fc-button-agendaWeek
 .fc-button-day, .fc-button-agendaDay

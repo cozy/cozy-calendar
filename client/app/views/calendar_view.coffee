@@ -26,6 +26,8 @@ module.exports = class CalendarView extends View
                     right: 'month,agendaWeek,agendaDay'
                 editable: true
                 firstDay: 1 # first day of the week is monday ffs
+                weekMode: 'liquid'
+                aspectRatio: 2.031
                 columnFormat:
                     month: 'dddd'
                     week: 'ddd dd/MM'
@@ -80,9 +82,75 @@ module.exports = class CalendarView extends View
                             revertFunc()
 
                 # To manage the selection
-                select: (startDate, endDate, allDay, jsEvent, view) ->
-                    console.log "select"
-                    console.debug startDate, endDate, allDay
+                select: (startDate, endDate, allDay, jsEvent, view) =>
+
+                    if view.name is "month"
+                        @handleSelectionInMonthView(startDate, endDate, \
+                                                    allDay, jsEvent)
+
+
+
+    handleSelectionInMonthView: (startDate, endDate, allDay, jsEvent) ->
+
+        target = $(jsEvent.target)
+
+        selectedWeekDay = Date.create(startDate).format('{weekday}')
+        if selectedWeekDay in ['saturday', 'sunday']
+            direction = 'left'
+        else
+            direction = 'right'
+
+        # Removes the popover if it already exists
+        $(target).popover('destroy') if $('.popover').length > 0
+        console.debug target
+        $(target).popover(
+            title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'
+            html: true
+            placement: direction
+            content: require('./templates/alarm_form_small'))
+        .popover('show')
+
+        $('.popover button.close').click =>
+            $(target).popover('destroy')
+
+        $('.popover button.add-alarm').click (event) =>
+
+            dueDate = Date.create(startDate)
+            if dueDate.format('{HH}:{mm}') is '00:00'
+                dueDate.advance {hours: 8}
+
+            value = $('.popover input').val()
+            smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
+
+            if smartDetection? and smartDetection[1]?
+                specifiedTime = smartDetection[1]
+                specifiedTime = specifiedTime.split /:/
+                dueDate.set
+                    hours: specifiedTime[0]
+                    minutes: specifiedTime[1]
+
+                value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
+                value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
+            data =
+                description: value
+                action: 'DISPLAY'
+                trigg: dueDate.format Alarm.dateFormat
+
+            @model.create data,
+                wait: true
+                success: () ->
+                    console.log "creation: success"
+                    $(target).popover('destroy')
+                error: () ->
+                    console.log "creation: error"
+                    $(target).popover('destroy')
+
+        $('.popover input').keyup (event) ->
+            button = $('.popover button.add-alarm')
+            if $(@).val() is ''
+                button.addClass 'disabled'
+            else
+                button.removeClass 'disabled'
 
 
     onAdd: (alarm, alarms) ->

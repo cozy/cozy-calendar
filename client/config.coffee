@@ -26,12 +26,13 @@ exports.config =
                 before: [
                     'vendor/scripts/jquery-1.9.1.min.js'
                     'vendor/scripts/jquery-ui-1.10.2.custom.min.js'
-                    'vendor/scripts/fullcalendar.js'
                     'vendor/scripts/bootstrap.js'
                     'vendor/scripts/bootstrap-datepicker.js'
                     'vendor/scripts/bootstrap-timepicker.js'
                     'vendor/scripts/underscore-1.4.4.js'
                     'vendor/scripts/backbone-1.0.0.js'
+                    'vendor/scripts/spin.js'
+                    'vendor/scripts/fullcalendar.js'
                 ]
 
         stylesheets:
