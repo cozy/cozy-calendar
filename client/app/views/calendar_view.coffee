@@ -3,6 +3,7 @@ AlarmFormView = require './alarmform_view'
 AlarmsListView = require '../views/alarmsList_view'
 
 Alarm = require '../models/alarm'
+alarmFormSmallTemplate = require('./templates/alarm_form_small')
 
 module.exports = class CalendarView extends View
 
@@ -114,18 +115,25 @@ module.exports = class CalendarView extends View
                         else
                             direction = 'bottom'
 
-                    @popoverTarget.popover('destroy') if @popoverTarget?
-                    @popoverTarget = $(target)
-                    template = require('./templates/alarm_form_small')
-                    @popoverTarget.popover(
-                        title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>'
-                        html: true
-                        placement: direction
-                        content: template
-                                    editionMode: true
-                                    defaultValue: event.title
-                    )
-                    .popover('show')
+                    # Handles the popover over the calendar grid
+                    if not(@popoverTarget? and @popoverTarget.action is 'edit' and @popoverTarget.date.getTime() is event.start.getTime())
+
+                        @popoverTarget?.field.popover('destroy')
+
+                        @popoverTarget =
+                            field: $(target)
+                            date: event.start
+                            action: 'edit'
+
+                        @popoverTarget.field.popover(
+                            title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>'
+                            html: true
+                            placement: direction
+                            content: alarmFormSmallTemplate
+                                        editionMode: true
+                                        defaultValue: event.title
+                        )
+                        .popover('show')
 
                     $('.popover .alarm-remove').click =>
                         alarm =  @model.get event.id
@@ -168,7 +176,8 @@ module.exports = class CalendarView extends View
                             button.removeClass 'disabled'
 
                     $('.popover button.close').click =>
-                        @popoverTarget.popover('destroy')
+                        @popoverTarget.field.popover('destroy')
+                        @popoverTarget = null
 
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
 
@@ -187,22 +196,38 @@ module.exports = class CalendarView extends View
             else
                 direction = 'bottom'
 
-        # Removes the popover if it already exists
-        @popoverTarget.popover('destroy') if @popoverTarget?
-        @popoverTarget = $(target)
-        template = require('./templates/alarm_form_small')
-        @popoverTarget.popover(
-            title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'
-            html: true
-            placement: direction
-            content: template
-                        editionMode: false
-                        defaultValue: ''
-        )
-        .popover('show')
+        # Handles the popover over the calendar grid
+        if @popoverTarget? and @popoverTarget.action is "create"
+            if @popoverTarget.date.getTime() is startDate.getTime()
+                @popoverTarget.field.popover('toggle')
+            else
+                @popoverTarget.field.popover('show')
+
+            @popoverTarget.date = startDate
+        else
+            if @popoverTarget?
+                @popoverTarget.field.popover('destroy')
+                pouet = true
+            else
+                pouet = false
+
+            @popoverTarget =
+                field: $(target)
+                date: startDate
+                action: 'create'
+
+            @popoverTarget.field.popover(
+                title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'
+                html: true
+                placement: direction
+                content: alarmFormSmallTemplate
+                            editionMode: false
+                            defaultValue: ''
+            ).popover('show')
 
         $('.popover button.close').click =>
-            @popoverTarget.popover('destroy')
+            @popoverTarget.field.popover('destroy')
+            @popoverTarget = null
 
         $('.popover button.add-alarm').click (event) =>
 
@@ -210,6 +235,7 @@ module.exports = class CalendarView extends View
             if dueDate.format('{HH}:{mm}') is '00:00'
                 dueDate.advance {hours: 8}
 
+            # smart detection: set the time if the user input has a time
             value = $('.popover input').val()
             smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
 
@@ -222,6 +248,7 @@ module.exports = class CalendarView extends View
 
                 value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
                 value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
+
             data =
                 description: value
                 action: 'DISPLAY'
