@@ -5,9 +5,6 @@ module.exports = class AlarmView extends View
     tagName: 'div'
     className: 'alarm'
 
-    events:
-        'hover': 'onMouseOver'
-
     initialize: ->
         @listenTo @model, "change", @onChange
 
@@ -24,10 +21,3 @@ module.exports = class AlarmView extends View
 
     onChange: (alarm) ->
         @render()
-
-    onMouseOver: (event) ->
-
-        if event.type is 'mouseenter'
-            @$('i').css 'display', 'inline-block'
-        else
-            @$('i').hide()

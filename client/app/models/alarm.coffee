@@ -36,7 +36,9 @@ module.exports = class Alarm extends Backbone.Model
             return errors
 
     getDateObject: ->
-        return new Date.create(@get('trigg'))
+        if not @dateObject?
+            @dateObject = new Date.create(@get('trigg'))
+        return @dateObject
 
     getFormattedDate: (formatter) ->
         return @getDateObject().format formatter

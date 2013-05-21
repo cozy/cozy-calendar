@@ -1,18 +1,15 @@
 View      = require '../lib/view'
-AppRouter = require '../routers/app_router'
-
 AlarmFormView = require './alarmform_view'
-AlarmsView = require '../views/alarms_view'
+AlarmsListView = require '../views/alarmsList_view'
 
 AlarmCollection = require '../collections/alarms'
 Alarm = require '../models/alarm'
 
-SocketListener = require '../lib/socket_listener'
-
 helpers = require '../helpers'
 
-module.exports = class AppView extends View
-    el: 'body.application'
+module.exports = class ListView extends View
+
+    el: '#viewContainer'
 
     events:
         "click #add-alarm button.add-alarm": "onAddAlarmClicked"
@@ -20,26 +17,14 @@ module.exports = class AppView extends View
         "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
 
     template: ->
-        require('./templates/home')
-
-    initialize: ->
-        @router = CozyApp.Routers.AppRouter = new AppRouter()
+        require('./templates/listview')
 
     afterRender: ->
 
         (@alarmFormView = new AlarmFormView()).render()
 
-        @alarms = new AlarmCollection()
-        SocketListener.watch @alarms
-
-        @alarmsView = new AlarmsView
-            model: @alarms
-
-        @alarms.fetch
-            success: (collection, response, options) ->
-                console.log "Fetch: success"
-            error: ->
-                console.log "Fetch: error"
+        @alarmsListView = new AlarmsListView
+           model: @model
 
     onAddAlarmClicked: (event, callback) ->
         date = @alarmFormView.dateField.val()
@@ -67,7 +52,7 @@ module.exports = class AppView extends View
                     error: ->
                         console.log "Error during alarm save."
         else
-            alarm = @alarms.create data,
+            alarm = @model.create data,
                     ignoreMySocketNotification: true #useless ?
                     wait: true
                     success: (model, response) =>
@@ -82,12 +67,12 @@ module.exports = class AppView extends View
 
     onEditAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')
-        alarm = @alarms.get alarmID
+        alarm = @model.get alarmID
         @alarmFormView.loadAlarmData(alarm)
 
     onRemoveAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')
-        alarm = @alarms.get alarmID
+        alarm = @model.get alarmID
         # TODO: add confirmation
         alarm.destroy
             wait: true
