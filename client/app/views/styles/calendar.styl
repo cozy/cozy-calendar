@@ -1,0 +1,70 @@
+@import 'nib'
+
+@import '_base'
+@import '_ui'
+
+/* Styles for the calendar view */
+.popover
+  max-width: none
+  width: 375px
+
+  .popover-title
+    button
+      margin-top: -4px
+
+  .popover-content
+    button
+      margin-left: 5px
+      &.disabled
+        border: 1px solid grey
+        &:hover
+          background: #e6e6e6
+          color: #333
+    p
+      font-size: 12px
+      margin-left: 5px
+
+
+/* Styles for the fullcalendar plugin */
+.fc-button-prev, .fc-button-next, .fc-button-today,
+.fc-button-month, .fc-button-week, .fc-button-agendaWeek
+.fc-button-day, .fc-button-agendaDay
+  background: blue
+  color: #FFF
+
+  &:hover
+    background: orange
+    &.fc-state-disabled
+      background: blue
+
+  &.fc-state-active
+    background: blue - 20%
+
+.fc-content
+
+  thead
+    background: blue
+    color: #fff
+
+    tr
+      th
+        height: 30px
+        line-height: 30px
+        border: none
+
+        &:first-child
+          border-radius 10px  0 0 0
+        &:last-child
+          border-radius 0 10px 0 0
+
+  tbody
+      .fc-state-highlight
+        background: lightblue
+
+  .fc-event-inner .fc-event-time
+    &.spinning
+      display: inline-block
+      margin: 3px
+
+.fc-cell-overlay
+  background: green

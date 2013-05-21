@@ -1,0 +1,9 @@
+div
+    input.input-xlarge(type="text", value="#{defaultValue}", id="inputDesc", placeholder="What do you want to be reminded ?")
+    button.btn.pull-right.add-alarm.disabled
+        if editionMode
+            | Edit
+        else
+            | Add
+    unless editionMode
+        p ie: 9:00 important meeting

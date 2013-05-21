@@ -79,6 +79,25 @@
   globals.require.brunch = true;
 })();
 
+window.require.register("application", function(exports, require, module) {
+  module.exports = {
+    initialize: function() {
+      var AlarmCollection, Router, SocketListener;
+
+      Router = require('router');
+      SocketListener = require('../lib/socket_listener');
+      AlarmCollection = require('collections/alarms');
+      this.router = new Router();
+      this.alarms = new AlarmCollection();
+      SocketListener.watch(this.alarms);
+      Backbone.history.start();
+      if (typeof Object.freeze === 'function') {
+        return Object.freeze(this);
+      }
+    }
+  };
+  
+});
 window.require.register("collections/alarms", function(exports, require, module) {
   var Alarm, AlarmCollection, CozyCollection, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -163,37 +182,68 @@ window.require.register("helpers", function(exports, require, module) {
   
 });
 window.require.register("initialize", function(exports, require, module) {
-  var _ref, _ref1, _ref2, _ref3, _ref4;
+  var app;
 
-  if ((_ref = this.CozyApp) == null) {
-    this.CozyApp = {};
-  }
-
-  if ((_ref1 = CozyApp.Routers) == null) {
-    CozyApp.Routers = {};
-  }
-
-  if ((_ref2 = CozyApp.Views) == null) {
-    CozyApp.Views = {};
-  }
-
-  if ((_ref3 = CozyApp.Models) == null) {
-    CozyApp.Models = {};
-  }
-
-  if ((_ref4 = CozyApp.Collections) == null) {
-    CozyApp.Collections = {};
-  }
+  app = require('application');
 
   $(function() {
-    var AppView;
+    require('lib/app_helpers');
+    app.initialize();
+    return $.fn.spin = function(opts, color) {
+      var presets;
 
-    require('../lib/app_helpers');
-    CozyApp.Views.appView = new (AppView = require('views/app_view'));
-    CozyApp.Views.appView.render();
-    return Backbone.history.start({
-      pushState: true
-    });
+      presets = {
+        tiny: {
+          lines: 8,
+          length: 2,
+          width: 2,
+          radius: 3
+        },
+        small: {
+          lines: 8,
+          length: 1,
+          width: 2,
+          radius: 5
+        },
+        large: {
+          lines: 10,
+          length: 8,
+          width: 4,
+          radius: 8
+        }
+      };
+      if (Spinner) {
+        return this.each(function() {
+          var $this, spinner;
+
+          $this = $(this);
+          spinner = $this.data("spinner");
+          if (spinner != null) {
+            spinner.stop();
+            return $this.data("spinner", null);
+          } else if (opts !== false) {
+            if (typeof opts === "string") {
+              if (opts in presets) {
+                opts = presets[opts];
+              } else {
+                opts = {};
+              }
+              if (color) {
+                opts.color = color;
+              }
+            }
+            spinner = new Spinner($.extend({
+              color: $this.css("color")
+            }, opts));
+            spinner.spin(this);
+            return $this.data("spinner", spinner);
+          }
+        });
+      } else {
+        console.log("Spinner class not available.");
+        return null;
+      }
+    };
   });
   
 });
@@ -382,7 +432,10 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getDateObject = function() {
-      return new Date.create(this.get('trigg'));
+      if (this.dateObject == null) {
+        this.dateObject = new Date.create(this.get('trigg'));
+      }
+      return this.dateObject;
     };
 
     Alarm.prototype.getFormattedDate = function(formatter) {
@@ -438,24 +491,75 @@ window.require.register("models/alarm", function(exports, require, module) {
   })(Backbone.Model);
   
 });
-window.require.register("routers/app_router", function(exports, require, module) {
-  var AppRouter, _ref,
+window.require.register("router", function(exports, require, module) {
+  var AlarmCollection, CalendarView, ListView, Router, app, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  module.exports = AppRouter = (function(_super) {
-    __extends(AppRouter, _super);
+  app = require('application');
 
-    function AppRouter() {
-      _ref = AppRouter.__super__.constructor.apply(this, arguments);
+  ListView = require('views/list_view');
+
+  CalendarView = require('views/calendar_view');
+
+  AlarmCollection = require('collections/alarms');
+
+  module.exports = Router = (function(_super) {
+    __extends(Router, _super);
+
+    function Router() {
+      this.displayView = __bind(this.displayView, this);    _ref = Router.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    AppRouter.prototype.routes = {
-      '': function() {}
+    Router.prototype.routes = {
+      '': 'calendar',
+      'calendar': 'calendar',
+      'list': 'alarmsList'
     };
 
-    return AppRouter;
+    Router.prototype.calendar = function() {
+      this.displayView(CalendarView, app.alarms);
+      return this.handleFetch();
+    };
+
+    Router.prototype.alarmsList = function() {
+      this.displayView(ListView, app.alarms);
+      return this.handleFetch();
+    };
+
+    Router.prototype.handleFetch = function() {
+      if (!(app.alarms.length > 0)) {
+        return this.mainView.model.fetch({
+          success: function(collection, response, options) {
+            return console.log("Fetch: success");
+          },
+          error: function() {
+            return console.log("Fetch: error");
+          }
+        });
+      } else {
+        return this.mainView.model.reset(app.alarms.toJSON());
+      }
+    };
+
+    Router.prototype.displayView = function(classView, collection) {
+      var container;
+
+      if (this.mainView) {
+        this.mainView.remove();
+      }
+      container = $(document.createElement('div'));
+      container.prop('id', 'viewContainer');
+      $('body').prepend(container);
+      this.mainView = new classView({
+        model: collection
+      });
+      return this.mainView.render();
+    };
+
+    return Router;
 
   })(Backbone.Router);
   
@@ -479,10 +583,6 @@ window.require.register("views/alarm_view", function(exports, require, module) {
 
     AlarmView.prototype.className = 'alarm';
 
-    AlarmView.prototype.events = {
-      'hover': 'onMouseOver'
-    };
-
     AlarmView.prototype.initialize = function() {
       return this.listenTo(this.model, "change", this.onChange);
     };
@@ -502,14 +602,6 @@ window.require.register("views/alarm_view", function(exports, require, module) {
 
     AlarmView.prototype.onChange = function(alarm) {
       return this.render();
-    };
-
-    AlarmView.prototype.onMouseOver = function(event) {
-      if (event.type === 'mouseenter') {
-        return this.$('i').css('display', 'inline-block');
-      } else {
-        return this.$('i').hide();
-      }
     };
 
     return AlarmView;
@@ -706,8 +798,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
   })(View);
   
 });
-window.require.register("views/alarms_view", function(exports, require, module) {
-  var Alarm, AlarmCollection, AlarmsView, DayProgramView, View, _ref,
+window.require.register("views/alarmsList_view", function(exports, require, module) {
+  var Alarm, AlarmCollection, AlarmsListView, DayProgramView, View, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -719,20 +811,21 @@ window.require.register("views/alarms_view", function(exports, require, module) 
 
   Alarm = require('../models/alarm');
 
-  module.exports = AlarmsView = (function(_super) {
-    __extends(AlarmsView, _super);
+  module.exports = AlarmsListView = (function(_super) {
+    __extends(AlarmsListView, _super);
 
-    function AlarmsView() {
-      _ref = AlarmsView.__super__.constructor.apply(this, arguments);
+    function AlarmsListView() {
+      _ref = AlarmsListView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    AlarmsView.prototype.el = '#alarms';
+    AlarmsListView.prototype.el = '#alarms';
 
-    AlarmsView.prototype.initialize = function() {
+    AlarmsListView.prototype.initialize = function() {
       this.listenTo(this.model, "add", this.onAdd);
       this.listenTo(this.model, "change", this.onChange);
       this.listenTo(this.model, "remove", this.onRemove);
+      this.listenTo(this.model, "reset", this.onReset);
       this.views = {};
       this.dayPrograms = new Backbone.Collection;
       this.dayPrograms.comparator = function(dayProg1, dayProg2) {
@@ -751,7 +844,15 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       return this.listenTo(this.dayPrograms, "remove", this.onRemoveDayProgram);
     };
 
-    AlarmsView.prototype.onAdd = function(alarm, alarms) {
+    AlarmsListView.prototype.onReset = function() {
+      var _this = this;
+
+      return this.model.forEach(function(item) {
+        return _this.onAdd(item, _this.model);
+      });
+    };
+
+    AlarmsListView.prototype.onAdd = function(alarm, alarms) {
       var dateHash, view,
         _this = this;
 
@@ -762,7 +863,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       return view.model.get('alarms').add(alarm);
     };
 
-    AlarmsView.prototype.onChange = function(alarm) {
+    AlarmsListView.prototype.onChange = function(alarm) {
       var dateHash, prevDateHash, prevView, view,
         _this = this;
 
@@ -778,7 +879,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       }
     };
 
-    AlarmsView.prototype.onRemoveDayProgram = function(dayProgram) {
+    AlarmsListView.prototype.onRemoveDayProgram = function(dayProgram) {
       var dateHash;
 
       dateHash = dayProgram.get('dateHash');
@@ -786,7 +887,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       return delete this.views[dateHash];
     };
 
-    AlarmsView.prototype.onRemove = function(alarm) {
+    AlarmsListView.prototype.onRemove = function(alarm) {
       var dateHash, view,
         _this = this;
 
@@ -800,7 +901,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       }
     };
 
-    AlarmsView.prototype.getSubView = function(dateHash, callbackIfNotExist) {
+    AlarmsListView.prototype.getSubView = function(dateHash, callbackIfNotExist) {
       var tmp;
 
       if (this.views[dateHash] != null) {
@@ -815,7 +916,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       }
     };
 
-    AlarmsView.prototype._getNewSubView = function(dateHash, alarm) {
+    AlarmsListView.prototype._getNewSubView = function(dateHash, alarm) {
       var date;
 
       date = alarm.getFormattedDate('{dd}/{MM}/{yyyy}');
@@ -823,7 +924,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       return this._renderSubView(dateHash);
     };
 
-    AlarmsView.prototype._buildSubView = function(dateHash, date) {
+    AlarmsListView.prototype._buildSubView = function(dateHash, date) {
       var model;
 
       model = new Backbone.Model({
@@ -838,7 +939,7 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       });
     };
 
-    AlarmsView.prototype._renderSubView = function(dateHash) {
+    AlarmsListView.prototype._renderSubView = function(dateHash) {
       var index, render, selector, view;
 
       view = this.views[dateHash];
@@ -855,148 +956,362 @@ window.require.register("views/alarms_view", function(exports, require, module) 
       return view;
     };
 
-    return AlarmsView;
+    return AlarmsListView;
 
   })(View);
   
 });
-window.require.register("views/app_view", function(exports, require, module) {
-  var Alarm, AlarmCollection, AlarmFormView, AlarmsView, AppRouter, AppView, SocketListener, View, helpers, _ref,
+window.require.register("views/calendar_view", function(exports, require, module) {
+  var Alarm, AlarmFormView, AlarmsListView, CalendarView, View, alarmFormSmallTemplate, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('../lib/view');
 
-  AppRouter = require('../routers/app_router');
-
   AlarmFormView = require('./alarmform_view');
 
-  AlarmsView = require('../views/alarms_view');
-
-  AlarmCollection = require('../collections/alarms');
+  AlarmsListView = require('../views/alarmsList_view');
 
   Alarm = require('../models/alarm');
 
-  SocketListener = require('../lib/socket_listener');
+  alarmFormSmallTemplate = require('./templates/alarm_form_small');
 
-  helpers = require('../helpers');
+  module.exports = CalendarView = (function(_super) {
+    __extends(CalendarView, _super);
 
-  module.exports = AppView = (function(_super) {
-    __extends(AppView, _super);
-
-    function AppView() {
-      _ref = AppView.__super__.constructor.apply(this, arguments);
+    function CalendarView() {
+      _ref = CalendarView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    AppView.prototype.el = 'body.application';
+    CalendarView.prototype.el = '#viewContainer';
 
-    AppView.prototype.events = {
-      "click #add-alarm button.add-alarm": "onAddAlarmClicked",
-      "click #alarms .alarms p .icon-pencil": "onEditAlarmClicked",
-      "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
+    CalendarView.prototype.initialize = function() {
+      this.caldata = {};
+      this.listenTo(this.model, 'add', this.onAdd);
+      return this.listenTo(this.model, 'reset', this.onReset);
     };
 
-    AppView.prototype.template = function() {
-      return require('./templates/home');
+    CalendarView.prototype.template = function() {
+      return require('./templates/calendarview');
     };
 
-    AppView.prototype.initialize = function() {
-      return this.router = CozyApp.Routers.AppRouter = new AppRouter();
-    };
+    CalendarView.prototype.afterRender = function() {
+      var _this = this;
 
-    AppView.prototype.afterRender = function() {
-      (this.alarmFormView = new AlarmFormView()).render();
-      this.alarms = new AlarmCollection();
-      SocketListener.watch(this.alarms);
-      this.alarmsView = new AlarmsView({
-        model: this.alarms
-      });
-      return this.alarms.fetch({
-        success: function(collection, response, options) {
-          return console.log("Fetch: success");
+      return this.cal = this.$('#alarms').fullCalendar({
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'month,agendaWeek,agendaDay'
         },
-        error: function() {
-          return console.log("Fetch: error");
+        editable: true,
+        firstDay: 1,
+        weekMode: 'liquid',
+        aspectRatio: 2.031,
+        defaultView: 'month',
+        columnFormat: {
+          month: 'dddd',
+          week: 'ddd dd/MM',
+          day: 'dddd dd/MM'
+        },
+        timeFormat: {
+          '': 'HH:mm',
+          'agenda': 'HH:mm{ - HH:mm}'
+        },
+        axisFormat: 'HH:mm',
+        buttonText: {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
+        },
+        selectable: true,
+        selectHelper: false,
+        unselectAuto: false,
+        eventRender: function(event, element) {
+          var selector, spinTarget;
+
+          if (event.type === 'alarm') {
+            selector = '.ui-resizable-handle.ui-resizable-s';
+            $(element).find(selector).remove();
+          }
+          if ((event.isSaving != null) && event.isSaving) {
+            spinTarget = $(element).find('.fc-event-time');
+            spinTarget.addClass('spinning');
+            spinTarget.html("&nbsp;");
+            spinTarget.spin("tiny");
+          }
+          return element;
+        },
+        eventDragStop: function(event, jsEvent, ui, view) {
+          return event.isSaving = true;
+        },
+        eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
+          var alarm, data;
+
+          alarm = _this.model.get(event.id);
+          alarm.getDateObject().advance({
+            days: dayDelta,
+            minutes: minuteDelta
+          });
+          data = {
+            trigg: alarm.getFormattedDate(Alarm.dateFormat)
+          };
+          return alarm.save(data, {
+            wait: true,
+            success: function() {
+              event.isSaving = false;
+              return _this.cal.fullCalendar('renderEvent', event);
+            },
+            error: function() {
+              event.isSaving = false;
+              this.cal.fullCalendar('renderEvent', event);
+              return revertFunc();
+            }
+          });
+        },
+        select: function(startDate, endDate, allDay, jsEvent, view) {
+          if (view.name === "month") {
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+          } else if (view.name === "agendaWeek") {
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+          } else if (view.name === "agendaDay") {
+            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
+          }
+        },
+        eventClick: function(event, jsEvent, view) {
+          var direction, selectedHour, selectedWeekDay, target, _ref1;
+
+          target = $(jsEvent.currentTarget);
+          if (view.name !== 'agendaDay') {
+            selectedWeekDay = Date.create(event.start).format('{weekday}');
+            if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+              direction = 'left';
+            } else {
+              direction = 'right';
+            }
+          } else {
+            selectedHour = Date.create(event.start).format('{HH}');
+            if (selectedHour >= 4) {
+              direction = 'top';
+            } else {
+              direction = 'bottom';
+            }
+          }
+          if (!((_this.popoverTarget != null) && _this.popoverTarget.action === 'edit' && _this.popoverTarget.date.getTime() === event.start.getTime())) {
+            if ((_ref1 = _this.popoverTarget) != null) {
+              _ref1.field.popover('destroy');
+            }
+            _this.popoverTarget = {
+              field: $(target),
+              date: event.start,
+              action: 'edit'
+            };
+            _this.popoverTarget.field.popover({
+              title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>',
+              html: true,
+              placement: direction,
+              content: alarmFormSmallTemplate({
+                editionMode: true,
+                defaultValue: event.title
+              })
+            }).popover('show');
+          }
+          $('.popover .alarm-remove').click(function() {
+            var alarm;
+
+            alarm = _this.model.get(event.id);
+            event.isSaving = true;
+            _this.cal.fullCalendar('renderEvent', event);
+            return alarm.destroy({
+              success: function() {
+                event.isSaving = false;
+                return _this.cal.fullCalendar('removeEvents', event.id);
+              },
+              error: function() {
+                event.isSaving = false;
+                return this.cal.fullCalendar('renderEvent', event);
+              }
+            });
+          });
+          $('.popover button.add-alarm').click(function() {
+            var alarm, data;
+
+            alarm = _this.model.get(event.id);
+            data = {
+              description: $('.popover input').val()
+            };
+            event.isSaving = true;
+            _this.cal.fullCalendar('renderEvent', event);
+            return alarm.save(data, {
+              wait: true,
+              success: function() {
+                event.isSaving = false;
+                event.title = data.description;
+                return _this.cal.fullCalendar('renderEvent', event);
+              },
+              error: function() {
+                event.isSaving = false;
+                this.cal.fullCalendar('renderEvent', event);
+                return revertFunc();
+              }
+            });
+          });
+          $('.popover button.add-alarm').removeClass('disabled');
+          $('.popover input').keyup(function(event) {
+            var button;
+
+            button = $('.popover button.add-alarm');
+            if ($(this).val() === '') {
+              return button.addClass('disabled');
+            } else {
+              return button.removeClass('disabled');
+            }
+          });
+          return $('.popover button.close').click(function() {
+            _this.popoverTarget.field.popover('destroy');
+            return _this.popoverTarget = null;
+          });
         }
       });
     };
 
-    AppView.prototype.onAddAlarmClicked = function(event, callback) {
-      var alarm, data, date, dueDate, time, _ref1,
+    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
+      var direction, pouet, selectedHour, selectedWeekDay, target,
         _this = this;
 
-      date = this.alarmFormView.dateField.val();
-      time = this.alarmFormView.timeField.val();
-      dueDate = helpers.formatDateISO8601("" + date + "#" + time);
-      dueDate = Date.create(dueDate);
-      if (dueDate.isValid()) {
-        dueDate = dueDate.format(Alarm.dateFormat);
+      target = $(jsEvent.target);
+      if (!((isDayView != null) && isDayView)) {
+        selectedWeekDay = Date.create(startDate).format('{weekday}');
+        if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+          direction = 'left';
+        } else {
+          direction = 'right';
+        }
       } else {
-        dueDate = 'undefined';
+        selectedHour = Date.create(startDate).format('{HH}');
+        if (selectedHour >= 4) {
+          direction = 'top';
+        } else {
+          direction = 'bottom';
+        }
       }
-      data = {
-        description: this.alarmFormView.descriptionField.val(),
-        action: this.alarmFormView.actionField.val(),
-        trigg: dueDate
-      };
-      if (this.alarmFormView.editionMode) {
-        alarm = this.alarmFormView.data;
-        alarm.save(data, {
+      if ((this.popoverTarget != null) && this.popoverTarget.action === "create") {
+        if (this.popoverTarget.date.getTime() === startDate.getTime()) {
+          this.popoverTarget.field.popover('toggle');
+        } else {
+          this.popoverTarget.field.popover('show');
+        }
+        this.popoverTarget.date = startDate;
+      } else {
+        if (this.popoverTarget != null) {
+          this.popoverTarget.field.popover('destroy');
+          pouet = true;
+        } else {
+          pouet = false;
+        }
+        this.popoverTarget = {
+          field: $(target),
+          date: startDate,
+          action: 'create'
+        };
+        this.popoverTarget.field.popover({
+          title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
+          html: true,
+          placement: direction,
+          content: alarmFormSmallTemplate({
+            editionMode: false,
+            defaultValue: ''
+          })
+        }).popover('show');
+      }
+      $('.popover button.close').click(function() {
+        _this.popoverTarget.field.popover('destroy');
+        return _this.popoverTarget = null;
+      });
+      $('.popover button.add-alarm').click(function(event) {
+        var data, dueDate, smartDetection, specifiedTime, value;
+
+        dueDate = Date.create(startDate);
+        if (dueDate.format('{HH}:{mm}') === '00:00') {
+          dueDate.advance({
+            hours: 8
+          });
+        }
+        value = $('.popover input').val();
+        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
+        if ((smartDetection != null) && (smartDetection[1] != null)) {
+          specifiedTime = smartDetection[1];
+          specifiedTime = specifiedTime.split(/:/);
+          dueDate.set({
+            hours: specifiedTime[0],
+            minutes: specifiedTime[1]
+          });
+          value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
+          value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+        }
+        data = {
+          description: value,
+          action: 'DISPLAY',
+          trigg: dueDate.format(Alarm.dateFormat)
+        };
+        return _this.model.create(data, {
           wait: true,
-          ignoreMySocketNotification: true,
           success: function() {
-            _this.alarmFormView.resetForm();
-            return console.log("Save: success (attributes updated)");
+            console.log("creation: success");
+            return $(target).popover('destroy');
           },
           error: function() {
-            return console.log("Error during alarm save.");
+            console.log("creation: error");
+            return $(target).popover('destroy');
           }
         });
-      } else {
-        alarm = this.alarms.create(data, {
-          ignoreMySocketNotification: true,
-          wait: true,
-          success: function(model, response) {
-            _this.alarmFormView.resetForm();
-            return console.log('Create alarm: success');
-          },
-          error: function(error, xhr, options) {
-            error = JSON.parse(xhr.responseText);
-            return console.log("Create alarm: error: " + (error != null ? error.msg : void 0));
-          }
-        });
-      }
-      if (((_ref1 = alarm.validationError) != null ? _ref1.length : void 0) > 0) {
-        return this.alarmFormView.displayErrors(alarm.validationError);
-      }
-    };
+      });
+      return $('.popover input').keyup(function(event) {
+        var button;
 
-    AppView.prototype.onEditAlarmClicked = function(event) {
-      var alarm, alarmID;
-
-      alarmID = $(event.target).data('alarmid');
-      alarm = this.alarms.get(alarmID);
-      return this.alarmFormView.loadAlarmData(alarm);
-    };
-
-    AppView.prototype.onRemoveAlarmClicked = function(event) {
-      var alarm, alarmID;
-
-      alarmID = $(event.target).data('alarmid');
-      alarm = this.alarms.get(alarmID);
-      return alarm.destroy({
-        wait: true,
-        success: function() {
-          return console.log("Delete alarm: success");
-        },
-        error: function() {
-          return console.log("Delete alarm: error");
+        button = $('.popover button.add-alarm');
+        if ($(this).val() === '') {
+          return button.addClass('disabled');
+        } else {
+          return button.removeClass('disabled');
         }
       });
     };
 
-    return AppView;
+    CalendarView.prototype.onAdd = function(alarm, alarms) {
+      var content, endAlarm, event, index, time;
+
+      index = alarm.getFormattedDate("{MM}-{dd}-{yyyy}");
+      time = alarm.getFormattedDate("{hh}:{mm}");
+      content = "" + time + " " + (alarm.get("description"));
+      endAlarm = alarm.getDateObject().clone();
+      endAlarm.advance({
+        minutes: 60
+      });
+      event = {
+        id: alarm.cid,
+        title: alarm.get('description'),
+        start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
+        end: endAlarm.format(Date.ISO8601_DATETIME),
+        allDay: false,
+        backgroundColor: '#5C5',
+        borderColor: '#5C5',
+        type: 'alarm'
+      };
+      return this.cal.fullCalendar('addEventSource', [event]);
+    };
+
+    CalendarView.prototype.onReset = function() {
+      var _this = this;
+
+      return this.model.forEach(function(item) {
+        return _this.onAdd(item, _this.model);
+      });
+    };
+
+    return CalendarView;
 
   })(View);
   
@@ -1098,6 +1413,129 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
   })(View);
   
 });
+window.require.register("views/list_view", function(exports, require, module) {
+  var Alarm, AlarmCollection, AlarmFormView, AlarmsListView, ListView, View, helpers, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  AlarmFormView = require('./alarmform_view');
+
+  AlarmsListView = require('../views/alarmsList_view');
+
+  AlarmCollection = require('../collections/alarms');
+
+  Alarm = require('../models/alarm');
+
+  helpers = require('../helpers');
+
+  module.exports = ListView = (function(_super) {
+    __extends(ListView, _super);
+
+    function ListView() {
+      _ref = ListView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    ListView.prototype.el = '#viewContainer';
+
+    ListView.prototype.events = {
+      "click #add-alarm button.add-alarm": "onAddAlarmClicked",
+      "click #alarms .alarms p .icon-pencil": "onEditAlarmClicked",
+      "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
+    };
+
+    ListView.prototype.template = function() {
+      return require('./templates/listview');
+    };
+
+    ListView.prototype.afterRender = function() {
+      (this.alarmFormView = new AlarmFormView()).render();
+      return this.alarmsListView = new AlarmsListView({
+        model: this.model
+      });
+    };
+
+    ListView.prototype.onAddAlarmClicked = function(event, callback) {
+      var alarm, data, date, dueDate, time, _ref1,
+        _this = this;
+
+      date = this.alarmFormView.dateField.val();
+      time = this.alarmFormView.timeField.val();
+      dueDate = helpers.formatDateISO8601("" + date + "#" + time);
+      dueDate = Date.create(dueDate);
+      if (dueDate.isValid()) {
+        dueDate = dueDate.format(Alarm.dateFormat);
+      } else {
+        dueDate = 'undefined';
+      }
+      data = {
+        description: this.alarmFormView.descriptionField.val(),
+        action: this.alarmFormView.actionField.val(),
+        trigg: dueDate
+      };
+      if (this.alarmFormView.editionMode) {
+        alarm = this.alarmFormView.data;
+        alarm.save(data, {
+          wait: true,
+          ignoreMySocketNotification: true,
+          success: function() {
+            _this.alarmFormView.resetForm();
+            return console.log("Save: success (attributes updated)");
+          },
+          error: function() {
+            return console.log("Error during alarm save.");
+          }
+        });
+      } else {
+        alarm = this.model.create(data, {
+          ignoreMySocketNotification: true,
+          wait: true,
+          success: function(model, response) {
+            _this.alarmFormView.resetForm();
+            return console.log('Create alarm: success');
+          },
+          error: function(error, xhr, options) {
+            error = JSON.parse(xhr.responseText);
+            return console.log("Create alarm: error: " + (error != null ? error.msg : void 0));
+          }
+        });
+      }
+      if (((_ref1 = alarm.validationError) != null ? _ref1.length : void 0) > 0) {
+        return this.alarmFormView.displayErrors(alarm.validationError);
+      }
+    };
+
+    ListView.prototype.onEditAlarmClicked = function(event) {
+      var alarm, alarmID;
+
+      alarmID = $(event.target).data('alarmid');
+      alarm = this.model.get(alarmID);
+      return this.alarmFormView.loadAlarmData(alarm);
+    };
+
+    ListView.prototype.onRemoveAlarmClicked = function(event) {
+      var alarm, alarmID;
+
+      alarmID = $(event.target).data('alarmid');
+      alarm = this.model.get(alarmID);
+      return alarm.destroy({
+        wait: true,
+        success: function() {
+          return console.log("Delete alarm: success");
+        },
+        error: function() {
+          return console.log("Delete alarm: error");
+        }
+      });
+    };
+
+    return ListView;
+
+  })(View);
+  
+});
 window.require.register("views/templates/alarm", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
@@ -1174,6 +1612,44 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   return buf.join("");
   };
 });
+window.require.register("views/templates/alarm_form_small", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div><input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':("What do you want to be reminded ?"), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/><button class="btn pull-right add-alarm disabled">');
+  if ( editionMode)
+  {
+  buf.push('Edit');
+  }
+  else
+  {
+  buf.push('Add');
+  }
+  buf.push('</button>');
+  if (!( editionMode))
+  {
+  buf.push('<p>ie: 9:00 important meeting</p>');
+  }
+  buf.push('</div>');
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/calendarview", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a></li></ul><div id="alarms" class="well"></div></div>');
+  }
+  return buf.join("");
+  };
+});
 window.require.register("views/templates/dayprogram", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
@@ -1185,13 +1661,13 @@ window.require.register("views/templates/dayprogram", function(exports, require,
   return buf.join("");
   };
 });
-window.require.register("views/templates/home", function(exports, require, module) {
+window.require.register("views/templates/listview", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

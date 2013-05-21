@@ -4,7 +4,7 @@ DayProgramView = require './dayprogram_view'
 AlarmCollection = require '../collections/alarms'
 Alarm = require '../models/alarm'
 
-module.exports = class AlarmsView extends View
+module.exports = class AlarmsListView extends View
 
     el: '#alarms'
 
@@ -12,6 +12,7 @@ module.exports = class AlarmsView extends View
         @listenTo @model, "add", @onAdd
         @listenTo @model, "change", @onChange
         @listenTo @model, "remove", @onRemove
+        @listenTo @model, "reset", @onReset
 
         @views = {}
 
@@ -31,8 +32,11 @@ module.exports = class AlarmsView extends View
 
         @listenTo @dayPrograms, "remove", @onRemoveDayProgram
 
-    onAdd: (alarm, alarms) ->
+    onReset: ->
+        @model.forEach (item) =>
+            @onAdd item, @model
 
+    onAdd: (alarm, alarms) ->
         dateHash = alarm.getDateHash()
         view = @getSubView dateHash, () => @_getNewSubView(dateHash, alarm)
 
