@@ -662,6 +662,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     };
 
     AlarmFormView.prototype.afterRender = function() {
+      var datePicker;
+
       this.descriptionField = this.$('#inputDesc');
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
@@ -682,7 +684,11 @@ window.require.register("views/alarmform_view", function(exports, require, modul
           placement: 'bottom'
         }
       };
-      this.dateField.datepicker().on('changeDate', function() {
+      datePicker = this.dateField.datepicker({
+        weekStart: 1,
+        format: 'dd/mm/yyyy'
+      });
+      datePicker.on('changeDate', function() {
         return $(this).datepicker('hide');
       });
       this.timeField.timepicker({
@@ -1029,6 +1035,12 @@ window.require.register("views/calendar_view", function(exports, require, module
         selectable: true,
         selectHelper: false,
         unselectAuto: false,
+        viewDisplay: function(view) {
+          if (_this.popoverTarget) {
+            _this.popoverTarget.field.popover('destroy');
+            return _this.popoverTarget = null;
+          }
+        },
         eventRender: function(event, element) {
           var selector, spinTarget;
 
@@ -1601,9 +1613,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;date:&nbsp;</label><div');
-  buf.push(attrs({ 'id':("inputDate"), 'data-date':("" + (defaultDate) + ""), 'data-date-format':("dd/mm/yyyy"), "class": ('input-append') + ' ' + ('date') }, {"id":true,"data-date":true,"data-date-format":true}));
-  buf.push('><input');
+  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;date:&nbsp;</label><div id="inputDate" class="input-append date"><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;time:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
