@@ -21,7 +21,6 @@ module.exports = class AlarmFormView extends View
     render: ->
 
         todayDate = Date.create('now')
-
         content = super
             actions: @actions
             defaultAction: @getDefaultAction('DISPLAY')
@@ -54,7 +53,10 @@ module.exports = class AlarmFormView extends View
                 field: @$('#date-control')
                 placement: 'bottom'
 
-        @dateField.datepicker({weekStart: 1}).on 'changeDate', ->
+        datePicker = @dateField.datepicker
+                            weekStart: 1
+                            format: 'dd/mm/yyyy'
+        datePicker.on 'changeDate', ->
             $(@).datepicker 'hide'
 
         @timeField.timepicker
