@@ -54,7 +54,7 @@ module.exports = class AlarmFormView extends View
                 field: @$('#date-control')
                 placement: 'bottom'
 
-        @dateField.datepicker().on 'changeDate', ->
+        @dateField.datepicker({weekStart: 1}).on 'changeDate', ->
             $(@).datepicker 'hide'
 
         @timeField.timepicker
