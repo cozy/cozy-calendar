@@ -46,6 +46,10 @@ module.exports = class CalendarView extends View
                 selectable: true
                 selectHelper: false
                 unselectAuto: false
+                viewDisplay: (view) =>
+                    if @popoverTarget
+                        @popoverTarget.field.popover('destroy')
+                        @popoverTarget = null
                 eventRender: (event, element) ->
 
                     # we don't want alarms to be resized
