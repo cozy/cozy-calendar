@@ -5,3 +5,5 @@ exports.routes = (map) ->
     map.put 'alarms/:id', 'alarms#update'
     map.delete 'alarms/:id', 'alarms#delete'
     map.get 'alarms/:id', 'alarms#getOne'
+
+    map.get 'ical.ics', 'ical#ics'
