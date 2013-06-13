@@ -121,8 +121,14 @@ module.exports = class CalendarView extends View
             else
                 direction = 'bottom'
 
+        # if direction has changed, we rebuild the popover
+        if @popoverTarget? and @popoverTarget.direction isnt direction
+            @popoverTarget.field.popover('destroy')
+            @popoverTarget = null
+
         # Handles the popover over the calendar grid
         if @popoverTarget? and @popoverTarget.action is "create"
+            console.log direction
             if @popoverTarget.date.getTime() is startDate.getTime()
                 @popoverTarget.field.popover('toggle')
             else
@@ -131,13 +137,14 @@ module.exports = class CalendarView extends View
             @popoverTarget.date = startDate
         else
             if @popoverTarget?
-                console.log "selection"
                 @popoverTarget.field.popover('destroy')
+                @popoverTarget = null
 
             @popoverTarget =
                 field: $(target)
                 date: startDate
                 action: 'create'
+                direction: direction
 
             @popoverTarget.field.popover(
                 title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'

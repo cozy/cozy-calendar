@@ -1129,7 +1129,12 @@ window.require.register("views/calendar_view", function(exports, require, module
           direction = 'bottom';
         }
       }
+      if ((this.popoverTarget != null) && this.popoverTarget.direction !== direction) {
+        this.popoverTarget.field.popover('destroy');
+        this.popoverTarget = null;
+      }
       if ((this.popoverTarget != null) && this.popoverTarget.action === "create") {
+        console.log(direction);
         if (this.popoverTarget.date.getTime() === startDate.getTime()) {
           this.popoverTarget.field.popover('toggle');
         } else {
@@ -1138,13 +1143,14 @@ window.require.register("views/calendar_view", function(exports, require, module
         this.popoverTarget.date = startDate;
       } else {
         if (this.popoverTarget != null) {
-          console.log("selection");
           this.popoverTarget.field.popover('destroy');
+          this.popoverTarget = null;
         }
         this.popoverTarget = {
           field: $(target),
           date: startDate,
-          action: 'create'
+          action: 'create',
+          direction: direction
         };
         this.popoverTarget.field.popover({
           title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
