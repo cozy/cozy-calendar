@@ -969,6 +969,7 @@ window.require.register("views/alarmsList_view", function(exports, require, modu
 });
 window.require.register("views/calendar_view", function(exports, require, module) {
   var Alarm, AlarmFormView, AlarmsListView, CalendarView, View, alarmFormSmallTemplate, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -986,7 +987,10 @@ window.require.register("views/calendar_view", function(exports, require, module
     __extends(CalendarView, _super);
 
     function CalendarView() {
-      _ref = CalendarView.__super__.constructor.apply(this, arguments);
+      this.eventClick = __bind(this.eventClick, this);
+      this.select = __bind(this.select, this);
+      this.eventDrop = __bind(this.eventDrop, this);
+      this.viewDisplay = __bind(this.viewDisplay, this);    _ref = CalendarView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
@@ -1003,8 +1007,6 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.afterRender = function() {
-      var _this = this;
-
       return this.cal = this.$('#alarms').fullCalendar({
         header: {
           left: 'prev,next today',
@@ -1035,162 +1037,80 @@ window.require.register("views/calendar_view", function(exports, require, module
         selectable: true,
         selectHelper: false,
         unselectAuto: false,
-        viewDisplay: function(view) {
-          if (_this.popoverTarget) {
-            _this.popoverTarget.field.popover('destroy');
-            return _this.popoverTarget = null;
-          }
+        viewDisplay: this.viewDisplay,
+        eventRender: this.eventRender,
+        eventDragStop: this.eventDragStop,
+        eventDrop: this.eventDrop,
+        select: this.select,
+        eventClick: this.eventClick
+      });
+    };
+
+    CalendarView.prototype.viewDisplay = function(view) {
+      if (this.popoverTarget) {
+        this.popoverTarget.field.popover('destroy');
+        return this.popoverTarget = null;
+      }
+    };
+
+    CalendarView.prototype.eventRender = function(event, element) {
+      var selector, spinTarget;
+
+      if (event.type === 'alarm') {
+        selector = '.ui-resizable-handle.ui-resizable-s';
+        $(element).find(selector).remove();
+      }
+      if ((event.isSaving != null) && event.isSaving) {
+        spinTarget = $(element).find('.fc-event-time');
+        spinTarget.addClass('spinning');
+        spinTarget.html("&nbsp;");
+        spinTarget.spin("tiny");
+      }
+      return element;
+    };
+
+    CalendarView.prototype.eventDragStop = function(event, jsEvent, ui, view) {
+      return event.isSaving = true;
+    };
+
+    CalendarView.prototype.eventDrop = function(event, dayDelta, minuteDelta, allDay, revertFunc) {
+      var alarm, data,
+        _this = this;
+
+      alarm = this.model.get(event.id);
+      alarm.getDateObject().advance({
+        days: dayDelta,
+        minutes: minuteDelta
+      });
+      data = {
+        trigg: alarm.getFormattedDate(Alarm.dateFormat)
+      };
+      return alarm.save(data, {
+        wait: true,
+        success: function() {
+          event.isSaving = false;
+          return _this.cal.fullCalendar('renderEvent', event);
         },
-        eventRender: function(event, element) {
-          var selector, spinTarget;
-
-          if (event.type === 'alarm') {
-            selector = '.ui-resizable-handle.ui-resizable-s';
-            $(element).find(selector).remove();
-          }
-          if ((event.isSaving != null) && event.isSaving) {
-            spinTarget = $(element).find('.fc-event-time');
-            spinTarget.addClass('spinning');
-            spinTarget.html("&nbsp;");
-            spinTarget.spin("tiny");
-          }
-          return element;
-        },
-        eventDragStop: function(event, jsEvent, ui, view) {
-          return event.isSaving = true;
-        },
-        eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
-          var alarm, data;
-
-          alarm = _this.model.get(event.id);
-          alarm.getDateObject().advance({
-            days: dayDelta,
-            minutes: minuteDelta
-          });
-          data = {
-            trigg: alarm.getFormattedDate(Alarm.dateFormat)
-          };
-          return alarm.save(data, {
-            wait: true,
-            success: function() {
-              event.isSaving = false;
-              return _this.cal.fullCalendar('renderEvent', event);
-            },
-            error: function() {
-              event.isSaving = false;
-              this.cal.fullCalendar('renderEvent', event);
-              return revertFunc();
-            }
-          });
-        },
-        select: function(startDate, endDate, allDay, jsEvent, view) {
-          if (view.name === "month") {
-            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-          } else if (view.name === "agendaWeek") {
-            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-          } else if (view.name === "agendaDay") {
-            return _this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
-          }
-        },
-        eventClick: function(event, jsEvent, view) {
-          var direction, selectedHour, selectedWeekDay, target, _ref1;
-
-          target = $(jsEvent.currentTarget);
-          if (view.name !== 'agendaDay') {
-            selectedWeekDay = Date.create(event.start).format('{weekday}');
-            if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
-              direction = 'left';
-            } else {
-              direction = 'right';
-            }
-          } else {
-            selectedHour = Date.create(event.start).format('{HH}');
-            if (selectedHour >= 4) {
-              direction = 'top';
-            } else {
-              direction = 'bottom';
-            }
-          }
-          if (!((_this.popoverTarget != null) && _this.popoverTarget.action === 'edit' && _this.popoverTarget.date.getTime() === event.start.getTime())) {
-            if ((_ref1 = _this.popoverTarget) != null) {
-              _ref1.field.popover('destroy');
-            }
-            _this.popoverTarget = {
-              field: $(target),
-              date: event.start,
-              action: 'edit'
-            };
-            _this.popoverTarget.field.popover({
-              title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>',
-              html: true,
-              placement: direction,
-              content: alarmFormSmallTemplate({
-                editionMode: true,
-                defaultValue: event.title
-              })
-            }).popover('show');
-          }
-          $('.popover .alarm-remove').click(function() {
-            var alarm;
-
-            alarm = _this.model.get(event.id);
-            event.isSaving = true;
-            _this.cal.fullCalendar('renderEvent', event);
-            return alarm.destroy({
-              success: function() {
-                event.isSaving = false;
-                return _this.cal.fullCalendar('removeEvents', event.id);
-              },
-              error: function() {
-                event.isSaving = false;
-                return this.cal.fullCalendar('renderEvent', event);
-              }
-            });
-          });
-          $('.popover button.add-alarm').click(function() {
-            var alarm, data;
-
-            alarm = _this.model.get(event.id);
-            data = {
-              description: $('.popover input').val()
-            };
-            event.isSaving = true;
-            _this.cal.fullCalendar('renderEvent', event);
-            return alarm.save(data, {
-              wait: true,
-              success: function() {
-                event.isSaving = false;
-                event.title = data.description;
-                return _this.cal.fullCalendar('renderEvent', event);
-              },
-              error: function() {
-                event.isSaving = false;
-                this.cal.fullCalendar('renderEvent', event);
-                return revertFunc();
-              }
-            });
-          });
-          $('.popover button.add-alarm').removeClass('disabled');
-          $('.popover input').keyup(function(event) {
-            var button;
-
-            button = $('.popover button.add-alarm');
-            if ($(this).val() === '') {
-              return button.addClass('disabled');
-            } else {
-              return button.removeClass('disabled');
-            }
-          });
-          return $('.popover button.close').click(function() {
-            _this.popoverTarget.field.popover('destroy');
-            return _this.popoverTarget = null;
-          });
+        error: function() {
+          event.isSaving = false;
+          this.cal.fullCalendar('renderEvent', event);
+          return revertFunc();
         }
       });
     };
 
+    CalendarView.prototype.select = function(startDate, endDate, allDay, jsEvent, view) {
+      if (view.name === "month") {
+        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+      } else if (view.name === "agendaWeek") {
+        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
+      } else if (view.name === "agendaDay") {
+        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
+      }
+    };
+
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, pouet, selectedHour, selectedWeekDay, target,
+      var direction, selectedHour, selectedWeekDay, target,
         _this = this;
 
       target = $(jsEvent.target);
@@ -1209,7 +1129,12 @@ window.require.register("views/calendar_view", function(exports, require, module
           direction = 'bottom';
         }
       }
+      if ((this.popoverTarget != null) && this.popoverTarget.direction !== direction) {
+        this.popoverTarget.field.popover('destroy');
+        this.popoverTarget = null;
+      }
       if ((this.popoverTarget != null) && this.popoverTarget.action === "create") {
+        console.log(direction);
         if (this.popoverTarget.date.getTime() === startDate.getTime()) {
           this.popoverTarget.field.popover('toggle');
         } else {
@@ -1219,14 +1144,13 @@ window.require.register("views/calendar_view", function(exports, require, module
       } else {
         if (this.popoverTarget != null) {
           this.popoverTarget.field.popover('destroy');
-          pouet = true;
-        } else {
-          pouet = false;
+          this.popoverTarget = null;
         }
         this.popoverTarget = {
           field: $(target),
           date: startDate,
-          action: 'create'
+          action: 'create',
+          direction: direction
         };
         this.popoverTarget.field.popover({
           title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
@@ -1272,11 +1196,13 @@ window.require.register("views/calendar_view", function(exports, require, module
           wait: true,
           success: function() {
             console.log("creation: success");
-            return $(target).popover('destroy');
+            _this.popoverTarget.field.popover('destroy');
+            return _this.popoverTarget = null;
           },
           error: function() {
             console.log("creation: error");
-            return $(target).popover('destroy');
+            _this.popoverTarget.field.popover('destroy');
+            return _this.popoverTarget = null;
           }
         });
       });
@@ -1289,6 +1215,101 @@ window.require.register("views/calendar_view", function(exports, require, module
         } else {
           return button.removeClass('disabled');
         }
+      });
+    };
+
+    CalendarView.prototype.eventClick = function(event, jsEvent, view) {
+      var direction, selectedHour, selectedWeekDay, target, _ref1,
+        _this = this;
+
+      target = $(jsEvent.currentTarget);
+      if (view.name !== 'agendaDay') {
+        selectedWeekDay = Date.create(event.start).format('{weekday}');
+        if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+          direction = 'left';
+        } else {
+          direction = 'right';
+        }
+      } else {
+        selectedHour = Date.create(event.start).format('{HH}');
+        if (selectedHour >= 4) {
+          direction = 'top';
+        } else {
+          direction = 'bottom';
+        }
+      }
+      if (!((this.popoverTarget != null) && this.popoverTarget.action === 'edit' && this.popoverTarget.date.getTime() === event.start.getTime())) {
+        if ((_ref1 = this.popoverTarget) != null) {
+          _ref1.field.popover('destroy');
+        }
+        this.popoverTarget = {
+          field: $(target),
+          date: event.start,
+          action: 'edit'
+        };
+        this.popoverTarget.field.popover({
+          title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>',
+          html: true,
+          placement: direction,
+          content: alarmFormSmallTemplate({
+            editionMode: true,
+            defaultValue: event.title
+          })
+        }).popover('show');
+      }
+      $('.popover .alarm-remove').click(function() {
+        var alarm;
+
+        alarm = _this.model.get(event.id);
+        event.isSaving = true;
+        _this.cal.fullCalendar('renderEvent', event);
+        return alarm.destroy({
+          success: function() {
+            event.isSaving = false;
+            return _this.cal.fullCalendar('removeEvents', event.id);
+          },
+          error: function() {
+            event.isSaving = false;
+            return this.cal.fullCalendar('renderEvent', event);
+          }
+        });
+      });
+      $('.popover button.add-alarm').click(function() {
+        var alarm, data;
+
+        alarm = _this.model.get(event.id);
+        data = {
+          description: $('.popover input').val()
+        };
+        event.isSaving = true;
+        _this.cal.fullCalendar('renderEvent', event);
+        return alarm.save(data, {
+          wait: true,
+          success: function() {
+            event.isSaving = false;
+            event.title = data.description;
+            return _this.cal.fullCalendar('renderEvent', event);
+          },
+          error: function() {
+            event.isSaving = false;
+            return this.cal.fullCalendar('renderEvent', event);
+          }
+        });
+      });
+      $('.popover button.add-alarm').removeClass('disabled');
+      $('.popover input').keyup(function(event) {
+        var button;
+
+        button = $('.popover button.add-alarm');
+        if ($(this).val() === '') {
+          return button.addClass('disabled');
+        } else {
+          return button.removeClass('disabled');
+        }
+      });
+      return $('.popover button.close').click(function() {
+        _this.popoverTarget.field.popover('destroy');
+        return _this.popoverTarget = null;
       });
     };
 
