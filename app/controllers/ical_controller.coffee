@@ -27,7 +27,8 @@ action 'ics', ->
 
     buf = ""
     addLine = (line) ->
-        buf += (line + '\n')
+        buf += (line + '\r\n')
+        #buf += (line + '<br />') # for debug purpose
 
     addLine 'BEGIN:VCALENDAR'
     addLine 'VERSION:2.0'
@@ -42,10 +43,15 @@ action 'ics', ->
                 addLine 'BEGIN:VTODO'
                 addLine 'DTSTAMP:' + alarm.trigg
                 addLine 'UID:' + @userEmail
+                addLine 'SUMMARY:' + alarm.description
+                addLine 'BEGIN:VALARM'
                 addLine 'ACTION:AUDIO'
                 addLine 'TRIGGER:' + alarm.trigg
                 addLine 'REPEAT:1'
+                addLine 'END:VALARM'
                 addLine 'END:VTODO'
 
             addLine 'END:VCALENDAR'
             send buf
+
+
