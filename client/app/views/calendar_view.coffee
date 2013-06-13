@@ -131,6 +131,7 @@ module.exports = class CalendarView extends View
             @popoverTarget.date = startDate
         else
             if @popoverTarget?
+                console.log "selection"
                 @popoverTarget.field.popover('destroy')
 
             @popoverTarget =
@@ -178,12 +179,14 @@ module.exports = class CalendarView extends View
 
             @model.create data,
                 wait: true
-                success: () ->
+                success: () =>
                     console.log "creation: success"
-                    $(target).popover('destroy')
-                error: () ->
+                    @popoverTarget.field.popover('destroy')
+                    @popoverTarget = null
+                error: () =>
                     console.log "creation: error"
-                    $(target).popover('destroy')
+                    @popoverTarget.field.popover('destroy')
+                    @popoverTarget = null
 
         $('.popover input').keyup (event) ->
             button = $('.popover button.add-alarm')
@@ -258,7 +261,6 @@ module.exports = class CalendarView extends View
                 error: ->
                     event.isSaving = false
                     @cal.fullCalendar('renderEvent', event)
-                    revertFunc()
 
         $('.popover button.add-alarm').removeClass 'disabled'
         $('.popover input').keyup (event) ->
