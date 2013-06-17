@@ -1,6 +1,7 @@
 {
   "name": "cozy-agenda",
   "version": "0.0.1",
+  "description": "The application currently manages reminders and only reminders. It is based on the iCal standard.",
   "engines": [
     "node = 0.8.x"
   ],
@@ -37,5 +38,13 @@
   "scripts": {
     "test": "cake tests",
     "start": "coffee server.coffee"
+  },
+  "cozy-permissions": {
+    "Alarm": {
+      "description": "Creates and edits your alarms."
+      },
+    "User": {
+      "description": "Used to recover your timezone"
+    }
   }
 }
