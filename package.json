@@ -41,7 +41,7 @@
   },
   "cozy-permissions": {
     "Alarm": {
-      "description": "Creates and edit your alarms."
+      "description": "Creates and edits your alarms."
       },
     "User": {
       "description": "Used to recover your timezone"
