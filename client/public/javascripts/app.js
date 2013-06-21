@@ -925,7 +925,7 @@ window.require.register("views/alarmsList_view", function(exports, require, modu
     AlarmsListView.prototype._getNewSubView = function(dateHash, alarm) {
       var date;
 
-      date = alarm.getFormattedDate('{dd}/{MM}/{yyyy}');
+      date = alarm.getDateObject().beginningOfDay();
       this._buildSubView(dateHash, date);
       return this._renderSubView(dateHash);
     };
@@ -1433,7 +1433,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
 
     DayProgramView.prototype.render = function() {
       return DayProgramView.__super__.render.call(this, {
-        date: this.model.get('date')
+        date: this.model.get('date').format("{dd}/{MM}/{yyyy}")
       });
     };
 

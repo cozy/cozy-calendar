@@ -79,7 +79,7 @@ module.exports = class AlarmsListView extends View
                 return false
 
     _getNewSubView: (dateHash, alarm) ->
-        date = alarm.getFormattedDate '{dd}/{MM}/{yyyy}'
+        date = alarm.getDateObject().beginningOfDay()
         @_buildSubView(dateHash, date)
         return @_renderSubView(dateHash)
 
