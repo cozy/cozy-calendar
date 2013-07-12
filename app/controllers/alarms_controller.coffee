@@ -32,6 +32,27 @@ before ->
 
 , except: ['delete']
 
+
+action 'index', ->
+
+    Alarm.all (err, alarms) =>
+        if err
+            send error: true, msg: 'Server error occurred while retrieving data'
+        else
+            for alarm, index in alarms
+                alarms[index] = @convertAlarmDate(alarm, @userTimezone)
+
+        i18n.getLocale null, (err, locale) ->
+            console.log err if err
+
+            imports = """
+                window.locale = "#{locale}";
+                window.initalarms = #{JSON.stringify(alarms)};
+            """
+
+            render 'index.jade', imports: imports
+
+
 action 'all', ->
 
     Alarm.all (err, alarms) =>

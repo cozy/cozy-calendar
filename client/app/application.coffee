@@ -1,6 +1,19 @@
 module.exports =
 
     initialize: ->
+
+        @locale = window.locale
+        delete window.locale
+
+        @polyglot = new Polyglot()
+        try
+            locales = require 'locales/'+ @locale
+        catch e
+            locales = require 'locales/en'
+
+        @polyglot.extend locales
+        window.t = @polyglot.t.bind @polyglot
+
         Router = require 'router'
         SocketListener = require '../lib/socket_listener'
         AlarmCollection = require 'collections/alarms'
@@ -14,6 +27,11 @@ module.exports =
         SocketListener.watch @alarms
         SocketListener.watch @events
 
-        Backbone.history.start()
+        if window.initalarms?
+            @contacts.reset window.initalarms
+            delete window.initalarms
+            Backbone.history.start()
+        else
+            @contacts.fetch().done -> Backbone.history.start()
 
         Object.freeze this if typeof Object.freeze is 'function'
