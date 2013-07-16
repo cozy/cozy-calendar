@@ -16,9 +16,11 @@ exports.formatDateISO8601 = (fullDate) ->
 
     return "#{date}T#{time}"
 
+
 exports.isDatePartValid = (date) ->
     date = date.split('T')
     return date[0].match(/[0-9]{8}/)?
+
 
 exports.isTimePartValid = (date) ->
     date = date.split('T')
@@ -36,3 +38,19 @@ exports.icalToISO8601 = (icalDate) ->
     minutes = date[1].slice 2, 4
 
     return "#{year}-#{month}-#{day}T#{hours}:#{minutes}Z"
+
+
+exports.getPopoverDirection = (isDayView, startDate) ->
+    unless isDayView
+        selectedWeekDay = startDate.format('{weekday}')
+        if selectedWeekDay in ['friday', 'saturday', 'sunday']
+            direction = 'left'
+        else
+            direction = 'right'
+    else
+        selectedHour = startDate.format('{HH}')
+        if selectedHour >= 4
+            direction = 'top'
+        else
+            direction = 'bottom'
+    direction

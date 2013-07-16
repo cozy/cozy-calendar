@@ -1,9 +1,11 @@
 View = require '../lib/view'
 AlarmFormView = require './alarmform_view'
 AlarmsListView = require '../views/alarms_list_view'
+helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
 alarmFormSmallTemplate = require('./templates/alarm_form_small')
+
 
 module.exports = class CalendarView extends View
 
@@ -19,214 +21,198 @@ module.exports = class CalendarView extends View
         require('./templates/calendarview')
 
     afterRender: ->
-
         @cal = @$('#alarms').fullCalendar
-                header:
-                    left: 'prev,next today'
-                    center: 'title'
-                    right: 'month,agendaWeek,agendaDay'
-                editable: true
-                firstDay: 1 # first day of the week is monday ffs
-                weekMode: 'liquid'
-                aspectRatio: 2.031
-                defaultView: 'month'
-                columnFormat:
-                    month: 'dddd'
-                    week: 'ddd dd/MM'
-                    day: 'dddd dd/MM'
-                timeFormat:
-                    '': 'HH:mm'
-                    'agenda': 'HH:mm{ - HH:mm}'
-                axisFormat: 'HH:mm'
-                buttonText:
-                    today: 'Today'
-                    month: 'Month'
-                    week: 'Week'
-                    day: 'Day'
-                selectable: true
-                selectHelper: false
-                unselectAuto: false
-                viewDisplay: (view) =>
-                    if @popoverTarget
-                        @popoverTarget.field.popover('destroy')
-                        @popoverTarget = null
-                eventRender: (event, element) ->
+            header:
+                left: 'prev,next today'
+                center: 'title'
+                right: 'month,agendaWeek,agendaDay'
+            editable: true
+            firstDay: 1 # first day of the week is monday ffs
+            weekMode: 'liquid'
+            aspectRatio: 2.031
+            defaultView: 'month'
+            columnFormat:
+                month: 'dddd'
+                week: 'ddd dd/MM'
+                day: 'dddd dd/MM'
+            timeFormat:
+                '': 'HH:mm'
+                'agenda': 'HH:mm{ - HH:mm}AR'
+            axisFormat: 'HH:mm'
+            buttonText:
+                today: 'Today'
+                month: 'Month'
+                week: 'Week'
+                day: 'Day'
+            selectable: true
+            selectHelper: false
+            unselectAuto: false
+            eventRender: @onRender
+            viewDisplay: @deletePopOver
+            select: @onSelect
+            eventDragStop: @onEventDragStop
+            eventDrop: @onEventDrop
+            eventClick: @onEventClick
 
-                    # we don't want alarms to be resized
-                    if event.type is 'alarm'
-                        selector = '.ui-resizable-handle.ui-resizable-s'
-                        $(element).find(selector).remove()
+    onAdd: (alarm, alarms) ->
+        index = alarm.getFormattedDate "{MM}-{dd}-{yyyy}"
+        time = alarm.getFormattedDate "{hh}:{mm}"
+        content = "#{time} #{alarm.get("description")}"
+        endAlarm = alarm.getDateObject().clone()
+        endAlarm.advance minutes: 60
 
-                    if event.isSaving? and event.isSaving
-                        spinTarget = $(element).find('.fc-event-time')
-                        spinTarget.addClass 'spinning'
-                        spinTarget.html "&nbsp;"
-                        spinTarget.spin "tiny"
+        event =
+            id: alarm.cid
+            title: alarm.get 'description'
+            start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
+            end: endAlarm.format(Date.ISO8601_DATETIME)
+            allDay: false
+            backgroundColor: '#5C5'
+            borderColor: '#5C5'
+            type: 'alarm' # non standard field
 
-                    return element
+        @cal.fullCalendar 'addEventSource', [event]
 
-                eventDragStop: (event, jsEvent, ui, view) ->
-                    #triggers the loading wheel
-                    event.isSaving = true
+    onReset: ->
+        @model.forEach (item) => @onAdd item, @model
 
-                # Manage persistance when an edit action is performed
-                eventDrop: (event, dayDelta, minuteDelta, allDay, \
-                            revertFunc, jsEvent, ui, view) =>
+    onSelect: (startDate, endDate, allDay, jsEvent, view) =>
+        @popoverTarget?.field.popover 'destroy'
+        @popoverTarget = null
+        if view.name is "month"
+            @handleSelectionInView startDate, endDate, allDay, jsEvent
+        else if view.name is "agendaWeek"
+            @handleSelectionInView startDate, endDate, allDay, jsEvent
+        else if view.name is "agendaDay"
+            @handleSelectionInView startDate, endDate, allDay, jsEvent, true
 
-                    alarm =  @model.get event.id
-                    alarm.getDateObject().advance
-                                            days: dayDelta
-                                            minutes: minuteDelta
+    deletePopOver: (view) =>
+        if @popoverTarget
+            @popoverTarget.field.popover('destroy')
+            @popoverTarget = null
 
-                    data = {trigg: alarm.getFormattedDate Alarm.dateFormat}
-                    alarm.save data,
-                        wait: true
-                        success: =>
-                            event.isSaving = false
-                            @cal.fullCalendar('renderEvent', event)
-                        error: ->
-                            event.isSaving = false
-                            @cal.fullCalendar('renderEvent', event)
-                            revertFunc()
+    onRender: (event, element) ->
+        if event.type is 'alarm'
+            selector = '.ui-resizable-handle.ui-resizable-s'
+            $(element).find(selector).remove()
 
-                # To manage the selection
-                select: (startDate, endDate, allDay, jsEvent, view) =>
+        if event.isSaving? and event.isSaving
+            spinTarget = $(element).find('.fc-event-time')
+            spinTarget.addClass 'spinning'
+            spinTarget.html "&nbsp;"
+            spinTarget.spin "tiny"
 
-                    if view.name is "month"
-                        @handleSelectionInView(startDate, endDate, \
-                                                    allDay, jsEvent)
-                    else if view.name is "agendaWeek"
-                        @handleSelectionInView(startDate, endDate, \
-                                                    allDay, jsEvent)
-                    else if view.name is "agendaDay"
-                        @handleSelectionInView(startDate, endDate, \
-                                                    allDay, jsEvent, true)
+        return element
 
-                eventClick: (event, jsEvent, view) =>
+    onEventDragStop: (event, jsEvent, ui, view) -> event.isSaving = true
 
-                    target = $(jsEvent.currentTarget)
+    onEventDrop: (event, dayDelta, minuteDelta, allDay,
+                  revertFunc, jsEvent, ui, view) =>
 
-                    unless view.name is 'agendaDay'
-                        selectedWeekDay = Date.create(event.start).format('{weekday}')
-                        if selectedWeekDay in ['friday', 'saturday', 'sunday']
-                            direction = 'left'
-                        else
-                            direction = 'right'
-                    else
-                        selectedHour = Date.create(event.start).format('{HH}')
-                        if selectedHour >= 4
-                            direction = 'top'
-                        else
-                            direction = 'bottom'
+        alarm = @model.get event.id
+        alarm.getDateObject().advance
+            days: dayDelta
+            minutes: minuteDelta
 
-                    # Handles the popover over the calendar grid
-                    if not(@popoverTarget? and @popoverTarget.action is 'edit' and @popoverTarget.date.getTime() is event.start.getTime())
+        data = trigg: alarm.getFormattedDate Alarm.dateFormat
+        alarm.save data,
+            wait: true
+            success: =>
+                event.isSaving = false
+                @cal.fullCalendar 'renderEvent', event
+            error: ->
+                event.isSaving = false
+                @cal.fullCalendar 'renderEvent', event
+                revertFunc()
 
-                        @popoverTarget?.field.popover('destroy')
+    onEventClick: (event, jsEvent, view) =>
+        target = $(jsEvent.currentTarget)
+        console.log jsEvent
+        console.log jsEvent.start
+        console.log "blah"
 
-                        @popoverTarget =
-                            field: $(target)
-                            date: event.start
-                            action: 'edit'
 
-                        @popoverTarget.field.popover(
-                            title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>'
-                            html: true
-                            placement: direction
-                            content: alarmFormSmallTemplate
-                                        editionMode: true
-                                        defaultValue: event.title
-                        )
-                        .popover('show')
+        direction = helpers.getPopoverDirection view.name is 'agendaDay', event
+        eventStartTime = event.start.getTime()
 
-                    $('.popover .alarm-remove').click =>
-                        alarm =  @model.get event.id
+        unless @popoverTarget? and
+        @popoverTarget.action is 'edit' and
+        @popoverTarget.date.getTime() is eventStartTime
 
-                        event.isSaving = true
-                        @cal.fullCalendar('renderEvent', event)
-                        alarm.destroy
-                            success: =>
-                                event.isSaving = false
-                                # TODO: update from backbone collection 'remove' event
-                                @cal.fullCalendar('removeEvents', event.id)
-                            error: ->
-                                event.isSaving = false
-                                @cal.fullCalendar('renderEvent', event)
+            @popoverTarget.field.popover 'destroy'
+            @popoverTarget =
+                field: $(target)
+                date: event.start
+                action: 'edit'
 
-                    $('.popover button.add-alarm').click =>
-                        alarm =  @model.get event.id
+            formTemplate = alarmFormSmallTemplate
+                editionMode: true
+                defaultValue: event.title
 
-                        data = {description: $('.popover input').val()}
-                        event.isSaving = true
-                        @cal.fullCalendar('renderEvent', event)
-                        alarm.save data,
-                            wait: true
-                            success: =>
-                                event.isSaving = false
-                                # TODO: update from backbone collection 'update' event
-                                event.title = data.description
-                                @cal.fullCalendar('renderEvent', event)
-                            error: ->
-                                event.isSaving = false
-                                @cal.fullCalendar('renderEvent', event)
-                                revertFunc()
+            @popoverTarget.field.popover(
+                title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>'
+                html: true
+                placement: direction
+                content: formTemplate
+            ).popover('show')
 
-                    $('.popover button.add-alarm').removeClass 'disabled'
-                    $('.popover input').keyup (event) ->
-                        button = $('.popover button.add-alarm')
-                        if $(@).val() is ''
-                            button.addClass 'disabled'
-                        else
-                            button.removeClass 'disabled'
+        $('.popover .alarm-remove').click =>
+            alarm =  @model.get event.id
 
-                    $('.popover button.close').click =>
-                        @popoverTarget.field.popover('destroy')
-                        @popoverTarget = null
+            event.isSaving = true
+            @cal.fullCalendar('renderEvent', event)
+            alarm.destroy
+                success: =>
+                    event.isSaving = false
+                    # TODO: update from backbone collection 'remove' event
+                    @cal.fullCalendar('removeEvents', event.id)
+                error: ->
+                    event.isSaving = false
+                    @cal.fullCalendar('renderEvent', event)
+        $('.popover button.add-alarm').removeClass 'disabled'
+
+        $('.popover input').keyup (event) ->
+            button = $('.popover button.add-alarm')
+            if $(@).val() is ''
+                button.addClass 'disabled'
+            else
+                button.removeClass 'disabled'
+
+        $('.popover button.close').click =>
+            @popoverTarget.field.popover('destroy')
+            @popoverTarget = null
 
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
-
         target = $(jsEvent.target)
+        direction = helpers.getPopoverDirection isDayView, startDate
+        console.log direction
 
-        unless isDayView? and isDayView
-            selectedWeekDay = Date.create(startDate).format('{weekday}')
-            if selectedWeekDay in ['friday', 'saturday', 'sunday']
-                direction = 'left'
-            else
-                direction = 'right'
-        else
-            selectedHour = Date.create(startDate).format('{HH}')
-            if selectedHour >= 4
-                direction = 'top'
-            else
-                direction = 'bottom'
 
         # Handles the popover over the calendar grid
         if @popoverTarget? and @popoverTarget.action is "create"
             if @popoverTarget.date.getTime() is startDate.getTime()
-                @popoverTarget.field.popover('toggle')
+                @popoverTarget.field.popover 'toggle'
             else
-                @popoverTarget.field.popover('show')
+                @popoverTarget.field.popover 'show'
 
             @popoverTarget.date = startDate
         else
-            if @popoverTarget?
-                @popoverTarget.field.popover('destroy')
-                pouet = true
-            else
-                pouet = false
+            @popoverTarget?.field.popover 'destroy'
 
             @popoverTarget =
                 field: $(target)
                 date: startDate
                 action: 'create'
 
+            alarmFormTemplate =  alarmFormSmallTemplate
+                editionMode: false
+                defaultValue: ''
+
             @popoverTarget.field.popover(
                 title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>'
                 html: true
                 placement: direction
-                content: alarmFormSmallTemplate
-                            editionMode: false
-                            defaultValue: ''
+                content: alarmFormTemplate
             ).popover('show')
 
         $('.popover button.close').click =>
@@ -274,27 +260,4 @@ module.exports = class CalendarView extends View
             else
                 button.removeClass 'disabled'
 
-    onAdd: (alarm, alarms) ->
 
-        index = alarm.getFormattedDate "{MM}-{dd}-{yyyy}"
-        time = alarm.getFormattedDate "{hh}:{mm}"
-        content = "#{time} #{alarm.get("description")}"
-
-        endAlarm = alarm.getDateObject().clone()
-        endAlarm.advance {minutes: 60}
-
-        event =
-            id: alarm.cid
-            title: alarm.get 'description'
-            start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
-            end: endAlarm.format(Date.ISO8601_DATETIME)
-            allDay: false
-            backgroundColor: '#5C5'
-            borderColor: '#5C5'
-            type: 'alarm' # non standard field
-
-        @cal.fullCalendar 'addEventSource', [event]
-
-    onReset: ->
-        @model.forEach (item) =>
-            @onAdd item, @model

@@ -1,6 +1,7 @@
 .form-horizontal.well
   .control-group
-      input.input-block-level(type="text", id="inputDesc", placeholder="What should I remind you ?")
+      input#alarm-description-input.input-block-level(
+          type="text", placeholder="What should I remind you ?")
   .form-inline
       select(id="action").input-small
         each displayAction, action in actions
