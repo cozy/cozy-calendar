@@ -38,7 +38,7 @@ module.exports = class CalendarView extends View
                 day: 'dddd dd/MM'
             timeFormat:
                 '': 'HH:mm'
-                'agenda': 'HH:mm{ - HH:mm}AR'
+                'agenda': 'HH:mm{ - HH:mm}'
             axisFormat: 'HH:mm'
             buttonText:
                 today: 'Today'
