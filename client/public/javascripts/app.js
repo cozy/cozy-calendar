@@ -634,13 +634,14 @@ window.require.register("views/alarm_popover", function(exports, require, module
     };
 
     AlarmPopOver.prototype.show = function(title, direction, content) {
-      this.popoverWidget = $('.container .popover');
       this.field.popover({
         title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + 'icon-trash" /></span> <button type="button" class="close">' + '&times;</button>',
         html: true,
         placement: direction,
         content: content
       }).popover('show');
+      this.popoverWidget = $('.container .popover');
+      this.popoverWidget.find('input').focus();
       if (this.action === 'create') {
         return $('.alarm-remove').hide();
       } else {

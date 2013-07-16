@@ -25,7 +25,6 @@ module.exports = class AlarmPopOver extends View
         @event = data.event
 
     show: (title, direction, content) ->
-        @popoverWidget = $('.container .popover')
         @field.popover(
             title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + \
                 'icon-trash" /></span> <button type="button" class="close">' + \
@@ -34,6 +33,9 @@ module.exports = class AlarmPopOver extends View
             placement: direction
             content: content
         ).popover('show')
+        @popoverWidget = $('.container .popover')
+        @popoverWidget.find('input').focus()
+
         if @action is 'create'
             $('.alarm-remove').hide()
         else
