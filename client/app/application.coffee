@@ -28,10 +28,10 @@ module.exports =
         SocketListener.watch @events
 
         if window.initalarms?
-            @contacts.reset window.initalarms
+            @alarms.reset window.initalarms
             delete window.initalarms
             Backbone.history.start()
         else
-            @contacts.fetch().done -> Backbone.history.start()
+            @alarms.fetch().done -> Backbone.history.start()
 
         Object.freeze this if typeof Object.freeze is 'function'
