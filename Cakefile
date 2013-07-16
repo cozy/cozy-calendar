@@ -44,6 +44,7 @@ task 'tests:client', 'run client tests through mocha', (opts) ->
     exec "mocha-phantomjs client/tests/index.html", (err, stdout, stderr) ->
         if err
             console.log "Running mocha caught exception: \n" + err
+
         console.log stdout
 
 
@@ -55,9 +56,12 @@ runTests = (fileList) ->
         command += "--debug --forward-io --profile "
     command += " --reporter spec --require should --compilers coffee:coffee-script --colors"
     exec command, (err, stdout, stderr) ->
+        console.log stdout
         if err
             console.log "Running mocha caught exception: \n" + err
-        console.log stdout
+            process.exit 1
+        else
+            process.exit 0
 
 
 task "xunit", "", ->

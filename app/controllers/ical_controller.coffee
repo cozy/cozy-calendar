@@ -42,9 +42,16 @@ action 'ics', ->
                 addLine 'BEGIN:VTODO'
                 addLine 'DTSTAMP:' + alarm.trigg
                 addLine 'UID:' + @userEmail
+                addLine 'SEQUENCE:1'
+                addLine 'BEGIN:VALARM'
+                addLine 'DUE:' + alarm.trigg
+                addLine 'STATUS:NEEDS-ACTION'
+                addLine 'SUMMARY:Submit Income Taxes'
                 addLine 'ACTION:AUDIO'
                 addLine 'TRIGGER:' + alarm.trigg
+                addLine 'DURATION:PT1H'
                 addLine 'REPEAT:1'
+                addLine 'END:VALARM'
                 addLine 'END:VTODO'
 
             addLine 'END:VCALENDAR'

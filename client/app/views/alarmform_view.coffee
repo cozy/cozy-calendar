@@ -6,8 +6,8 @@ module.exports = class AlarmFormView extends View
 
     events:
         'focus #inputDesc': 'onFocus'
-        'blur #inputDesc': 'onBlur'
-        'keyup #inputDesc': 'onKeydown'
+        'blur #alarm-description-input': 'onBlur'
+        'keyup #alarm-description-input': 'onKeydown'
         'click .add-alarm': 'onSubmit'
 
     initialize: ->
@@ -34,7 +34,7 @@ module.exports = class AlarmFormView extends View
         @$el.affix({offset: { top: @$el.offset().top - 10}})
 
     afterRender: ->
-        @descriptionField = @$('#inputDesc')
+        @descriptionField = @$('#alarm-description-input')
         @actionField = @$('#action')
         @dateField = @$('#inputDate input')
         @timeField = @$('#inputTime')
@@ -88,8 +88,12 @@ module.exports = class AlarmFormView extends View
         return defaultAction
 
     onKeydown: (event) ->
+        console.log event.keyCode
+
         if @descriptionField.val() is ''
             @disableSubmitButton()
+        else if event.keyCode is 13 or event.which is 13
+            @onSubmit()
         else
             @enableSubmitButton()
 
@@ -142,5 +146,15 @@ module.exports = class AlarmFormView extends View
         for index, mappedElement of @validationMapper
             mappedElement.field.tooltip('destroy')
 
-    onSubmit: ->
+    onSubmit: =>
+        alarm = @model.get event.id
+        data = description: @descriptionField.val()
+        @cal.fullCalendar 'renderEvent', event
+        alarm.save data,
+            success: =>
+                event.title = data.description
+                @cal.fullCalendar 'renderEvent', event
+            error: ->
+                @cal.fullCalendar('renderEvent', event)
+
         @resetErrors()

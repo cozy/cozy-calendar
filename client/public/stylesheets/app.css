@@ -8173,10 +8173,24 @@ input[type="time"] {
   border-color: #fe8800;
   text-shadow: none;
 }
+.popover-title {
+  color: #fff;
+  background: #aaa;
+  border: 0;
+}
+.popover-title .close {
+  color: #fff;
+  opacity: 0.7;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
+  filter: alpha(opacity=70);
+}
+.popover-content,
 #add-alarm {
   margin-top: 20px;
 }
+.popover-content input,
 #add-alarm input,
+.popover-content select,
 #add-alarm select {
   border: 1px solid #ccc;
   -webkit-box-shadow: 0;
@@ -8186,10 +8200,13 @@ input[type="time"] {
   shadow: none;
   font-family: styled, helvetica;
 }
+.popover-content input.disabled,
 #add-alarm input.disabled {
   border: 1px solid transparent;
 }
+.popover-content input:hover,
 #add-alarm input:hover,
+.popover-content select:hover,
 #add-alarm select:hover {
   border: 1px solid #fe8800;
   -webkit-border-radius: 0px;
@@ -8197,30 +8214,39 @@ input[type="time"] {
   shadow: inset 1px 1px 2px rgba(100,100,100,0.1);
   color: #333;
 }
+.popover-content input:focus,
 #add-alarm input:focus,
+.popover-content input:active,
 #add-alarm input:active,
+.popover-content select:active,
 #add-alarm select:active,
+.popover-content select:focus,
 #add-alarm select:focus {
   border: 1px solid #34a6ff;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
+.popover-content .add-on,
 #add-alarm .add-on {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
+.popover-content .datepicker td.day:hover,
 #add-alarm .datepicker td.day:hover {
   background: #ffc47f;
 }
+.popover-content .bootstrap-timepicker-widget table td a:hover,
 #add-alarm .bootstrap-timepicker-widget table td a:hover {
   background: #ffc47f;
   border: 1px solid transparent;
 }
-#add-alarm #inputDesc {
+.popover-content #alarm-description-input,
+#add-alarm #alarm-description-input {
   font-size: 24px;
   line-height: 40px;
   height: 40px;
 }
+.popover-content button.add-alarm.disabled,
 #add-alarm button.add-alarm.disabled {
   border: 1px solid #aaa;
 }
@@ -8326,7 +8352,7 @@ button.ui-button[data-state="selected"] {
 /* Styles for the calendar view */
 .popover {
   max-width: none;
-  width: 375px;
+  width: 390px;
 }
 .popover .popover-title button {
   margin-top: -4px;
@@ -8356,6 +8382,14 @@ button.ui-button[data-state="selected"] {
 .fc-button-agendaDay {
   background: #34a6ff;
   color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  text-shadow: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border: 0;
+  padding-bottom: 3px;
+  font-family: main;
 }
 .fc-button-prev:hover,
 .fc-button-next:hover,
@@ -8413,6 +8447,37 @@ button.ui-button[data-state="selected"] {
 }
 .fc-cell-overlay {
   background: #5c5;
+}
+thead,
+thead > tr.fc-first,
+.fc-day-header,
+.fc-widget-header {
+  background: #34a6bb;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  color: #fff;
+}
+.fc-agenda-axis {
+  background: #fff;
+  color: #333;
+}
+.fc-agenda-axis.fc-first {
+  background: #34a6bb;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  color: #fff;
+}
+.fc-event-inner {
+  border: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+.alarm-remove {
+  cursor: pointer;
+}
+.fc-widget-content,
+.fc-cell-overlay {
+  cursor: pointer;
 }
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
