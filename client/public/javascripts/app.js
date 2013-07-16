@@ -804,7 +804,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
   })(View);
   
 });
-window.require.register("views/alarmsList_view", function(exports, require, module) {
+window.require.register("views/alarms_list_view", function(exports, require, module) {
   var Alarm, AlarmCollection, AlarmsListView, DayProgramView, View, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -976,7 +976,7 @@ window.require.register("views/calendar_view", function(exports, require, module
 
   AlarmFormView = require('./alarmform_view');
 
-  AlarmsListView = require('../views/alarmsList_view');
+  AlarmsListView = require('../views/alarms_list_view');
 
   Alarm = require('../models/alarm');
 
@@ -1434,7 +1434,7 @@ window.require.register("views/list_view", function(exports, require, module) {
 
   AlarmFormView = require('./alarmform_view');
 
-  AlarmsListView = require('../views/alarmsList_view');
+  AlarmsListView = require('../views/alarms_list_view');
 
   AlarmCollection = require('../collections/alarms');
 

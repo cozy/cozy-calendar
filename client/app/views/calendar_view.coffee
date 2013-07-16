@@ -1,6 +1,6 @@
 View = require '../lib/view'
 AlarmFormView = require './alarmform_view'
-AlarmsListView = require '../views/alarmsList_view'
+AlarmsListView = require '../views/alarms_list_view'
 
 Alarm = require '../models/alarm'
 alarmFormSmallTemplate = require('./templates/alarm_form_small')
