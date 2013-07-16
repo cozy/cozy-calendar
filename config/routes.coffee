@@ -7,3 +7,4 @@ exports.routes = (map) ->
     map.get 'alarms/:id', 'alarms#getOne'
 
     map.get 'ical.ics', 'ical#ics'
+    map.get 'public/ical.ics', 'ical#ics'

@@ -1010,7 +1010,7 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
   
 });
 window.require.register("views/calendar_view", function(exports, require, module) {
-  var Alarm, AlarmFormView, AlarmsListView, CalendarView, View, alarmFormSmallTemplate, helpers, _ref,
+  var Alarm, AlarmFormView, AlarmPopOver, AlarmsListView, CalendarView, View, alarmFormSmallTemplate, helpers, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1027,13 +1027,124 @@ window.require.register("views/calendar_view", function(exports, require, module
 
   alarmFormSmallTemplate = require('./templates/alarm_form_small');
 
+  AlarmPopOver = (function() {
+    function AlarmPopOver() {
+      this.onAlarmButtonClicked = __bind(this.onAlarmButtonClicked, this);
+      this.bindEvents = __bind(this.bindEvents, this);
+    }
+
+    AlarmPopOver.prototype.clean = function() {
+      var _ref, _ref1;
+
+      if ((_ref = this.field) != null) {
+        _ref.popover('destroy');
+      }
+      this.field = null;
+      this.date = null;
+      this.action = null;
+      if (this.popoverWidget != null) {
+        this.popoverWidget.find('button.close').unbind('click');
+        this.popoverWidget.find('button.add-alarm').unbind('click');
+        this.popoverWidget.find('input').unbind('keyup');
+        return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
+      }
+    };
+
+    AlarmPopOver.prototype.createNew = function(data) {
+      this.clean();
+      this.field = data.field;
+      this.date = data.date;
+      this.action = data.action;
+      return this.model = data.model;
+    };
+
+    AlarmPopOver.prototype.show = function(title, direction, content) {
+      this.popoverWidget = $('.container .popover');
+      return this.field.popover({
+        title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + 'icon-trash" /></span> <button type="button" class="close">' + '&times;</button>',
+        html: true,
+        placement: direction,
+        content: content
+      }).popover('show');
+    };
+
+    AlarmPopOver.prototype.bindEvents = function() {
+      var _this = this;
+
+      this.popoverWidget = $('.container .popover');
+      this.popoverWidget.find('button.close').click(function() {
+        return _this.clean();
+      });
+      this.addAlarmButton = this.popoverWidget.find('button.add-alarm');
+      this.addAlarmButton.click(function() {
+        return _this.onAlarmButtonClicked();
+      });
+      this.alarmDescription = this.popoverWidget.find('input');
+      return this.alarmDescription.keyup(function(event) {
+        if (_this.alarmDescription.val() === '') {
+          return _this.addAlarmButton.addClass('disabled');
+        } else if (event.keyCode === 13 || event.which === 13) {
+          return _this.onAlarmButtonClicked();
+        } else {
+          return _this.addAlarmButton.removeClass('disabled');
+        }
+      });
+    };
+
+    AlarmPopOver.prototype.onAlarmButtonClicked = function() {
+      var data, dueDate, smartDetection, specifiedTime, value,
+        _this = this;
+
+      dueDate = Date.create(this.date);
+      if (dueDate.format('{HH}:{mm}') === '00:00') {
+        dueDate.advance({
+          hours: 8
+        });
+      }
+      value = this.popoverWidget.find('input').val();
+      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
+      if ((smartDetection != null) && (smartDetection[1] != null)) {
+        specifiedTime = smartDetection[1];
+        specifiedTime = specifiedTime.split(/:/);
+        dueDate.set({
+          hours: specifiedTime[0],
+          minutes: specifiedTime[1]
+        });
+        value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
+        value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+      }
+      data = {
+        description: value,
+        action: 'DISPLAY',
+        trigg: dueDate.format(Alarm.dateFormat)
+      };
+      this.addAlarmButton.html('&nbsp;');
+      this.addAlarmButton.spin('small');
+      return this.model.create(data, {
+        wait: true,
+        success: function() {
+          _this.clean();
+          _this.addAlarmButton.spin();
+          return _this.addAlarmButton.html('Add');
+        },
+        error: function() {
+          _this.clean();
+          _this.addAlarmButton.spin();
+          return _this.addAlarmButton.html('Add');
+        }
+      });
+    };
+
+    return AlarmPopOver;
+
+  })();
+
   module.exports = CalendarView = (function(_super) {
     __extends(CalendarView, _super);
 
     function CalendarView() {
       this.onEventClick = __bind(this.onEventClick, this);
       this.onEventDrop = __bind(this.onEventDrop, this);
-      this.deletePopOver = __bind(this.deletePopOver, this);
       this.onSelect = __bind(this.onSelect, this);    _ref = CalendarView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -1051,6 +1162,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.afterRender = function() {
+      this.popover = new AlarmPopOver;
       return this.cal = this.$('#alarms').fullCalendar({
         header: {
           left: 'prev,next today',
@@ -1122,25 +1234,13 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
-      var _ref1;
-
-      if ((_ref1 = this.popoverTarget) != null) {
-        _ref1.field.popover('destroy');
-      }
-      this.popoverTarget = null;
+      this.popover.clean();
       if (view.name === "month") {
         return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
       } else if (view.name === "agendaWeek") {
         return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
       } else if (view.name === "agendaDay") {
         return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
-      }
-    };
-
-    CalendarView.prototype.deletePopOver = function(view) {
-      if (this.popoverTarget) {
-        this.popoverTarget.field.popover('destroy');
-        return this.popoverTarget = null;
       }
     };
 
@@ -1191,32 +1291,23 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var direction, eventStartTime, formTemplate, target,
+      var direction, eventStartTime, formTemplate, target, _ref1,
         _this = this;
 
       target = $(jsEvent.currentTarget);
-      console.log(jsEvent);
-      console.log(jsEvent.start);
-      console.log("blah");
       direction = helpers.getPopoverDirection(view.name === 'agendaDay', event);
       eventStartTime = event.start.getTime();
-      if (!((this.popoverTarget != null) && this.popoverTarget.action === 'edit' && this.popoverTarget.date.getTime() === eventStartTime)) {
-        this.popoverTarget.field.popover('destroy');
-        this.popoverTarget = {
+      if (!((this.popover.isExist != null) && this.popover.action === 'edit' && ((_ref1 = this.popover.date) != null ? _ref1.getTime() : void 0) === eventStartTime)) {
+        this.popover.createNew({
           field: $(target),
           date: event.start,
           action: 'edit'
-        };
+        });
         formTemplate = alarmFormSmallTemplate({
           editionMode: true,
           defaultValue: event.title
         });
-        this.popoverTarget.field.popover({
-          title: '<span>Alarm edition <i class="alarm-remove icon-trash" /></span> <button type="button" class="close">&times;</button>',
-          html: true,
-          placement: direction,
-          content: formTemplate
-        }).popover('show');
+        this.popover.show("alarm-remove icon-trash", direction, formTemplate);
       }
       $('.popover .alarm-remove').click(function() {
         var alarm;
@@ -1247,97 +1338,27 @@ window.require.register("views/calendar_view", function(exports, require, module
         }
       });
       return $('.popover button.close').click(function() {
-        _this.popoverTarget.field.popover('destroy');
-        return _this.popoverTarget = null;
+        return _this.popover.clean();
       });
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var alarmFormTemplate, direction, target, _ref1,
-        _this = this;
+      var alarmFormTemplate, direction, target;
 
       target = $(jsEvent.target);
       direction = helpers.getPopoverDirection(isDayView, startDate);
-      console.log(direction);
-      if ((this.popoverTarget != null) && this.popoverTarget.action === "create") {
-        if (this.popoverTarget.date.getTime() === startDate.getTime()) {
-          this.popoverTarget.field.popover('toggle');
-        } else {
-          this.popoverTarget.field.popover('show');
-        }
-        this.popoverTarget.date = startDate;
-      } else {
-        if ((_ref1 = this.popoverTarget) != null) {
-          _ref1.field.popover('destroy');
-        }
-        this.popoverTarget = {
-          field: $(target),
-          date: startDate,
-          action: 'create'
-        };
-        alarmFormTemplate = alarmFormSmallTemplate({
-          editionMode: false,
-          defaultValue: ''
-        });
-        this.popoverTarget.field.popover({
-          title: '<span>Alarm creation</span> <button type="button" class="close">&times;</button>',
-          html: true,
-          placement: direction,
-          content: alarmFormTemplate
-        }).popover('show');
-      }
-      $('.popover button.close').click(function() {
-        _this.popoverTarget.field.popover('destroy');
-        return _this.popoverTarget = null;
+      this.popover.createNew({
+        field: $(target),
+        date: startDate,
+        action: 'create',
+        model: this.model
       });
-      $('.popover button.add-alarm').click(function(event) {
-        var data, dueDate, smartDetection, specifiedTime, value;
-
-        dueDate = Date.create(startDate);
-        if (dueDate.format('{HH}:{mm}') === '00:00') {
-          dueDate.advance({
-            hours: 8
-          });
-        }
-        value = $('.popover input').val();
-        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
-        if ((smartDetection != null) && (smartDetection[1] != null)) {
-          specifiedTime = smartDetection[1];
-          specifiedTime = specifiedTime.split(/:/);
-          dueDate.set({
-            hours: specifiedTime[0],
-            minutes: specifiedTime[1]
-          });
-          value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
-          value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-        }
-        data = {
-          description: value,
-          action: 'DISPLAY',
-          trigg: dueDate.format(Alarm.dateFormat)
-        };
-        return _this.model.create(data, {
-          wait: true,
-          success: function() {
-            console.log("creation: success");
-            return $(target).popover('destroy');
-          },
-          error: function() {
-            console.log("creation: error");
-            return $(target).popover('destroy');
-          }
-        });
+      alarmFormTemplate = alarmFormSmallTemplate({
+        editionMode: false,
+        defaultValue: ''
       });
-      return $('.popover input').keyup(function(event) {
-        var button;
-
-        button = $('.popover button.add-alarm');
-        if ($(this).val() === '') {
-          return button.addClass('disabled');
-        } else {
-          return button.removeClass('disabled');
-        }
-      });
+      this.popover.show("Alarm creation", direction, alarmFormTemplate);
+      return this.popover.bindEvents(startDate);
     };
 
     return CalendarView;
