@@ -1,94 +1,11 @@
 View = require '../lib/view'
 AlarmFormView = require './alarmform_view'
+AlarmPopOver = require './alarm_popover'
 AlarmsListView = require '../views/alarms_list_view'
 helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
 alarmFormSmallTemplate = require('./templates/alarm_form_small')
-
-
-class AlarmPopOver
-
-    clean: ->
-        @field?.popover 'destroy'
-        @field = null
-        @date = null
-        @action = null
-        if @popoverWidget?
-            @popoverWidget.find('button.close').unbind 'click'
-            @popoverWidget.find('button.add-alarm').unbind 'click'
-            @popoverWidget.find('input').unbind 'keyup'
-            @popoverWidget?.hide()
-
-    createNew: (data) ->
-        @clean()
-        @field = data.field
-        @date = data.date
-        @action = data.action
-        @model = data.model
-
-    show: (title, direction, content) ->
-        @popoverWidget = $('.container .popover')
-        @field.popover(
-            title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + \
-                'icon-trash" /></span> <button type="button" class="close">' + \
-                '&times;</button>'
-            html: true
-            placement: direction
-            content: content
-        ).popover('show')
-
-    bindEvents: =>
-        @popoverWidget = $('.container .popover')
-        @popoverWidget.find('button.close').click => @clean()
-
-        @addAlarmButton = @popoverWidget.find('button.add-alarm')
-        @addAlarmButton.click => @onAlarmButtonClicked()
-
-        @alarmDescription = @popoverWidget.find('input')
-        @alarmDescription.keyup (event) =>
-            if @alarmDescription.val() is ''
-                @addAlarmButton.addClass 'disabled'
-            else if event.keyCode is 13 or event.which is 13
-                @onAlarmButtonClicked()
-            else
-                @addAlarmButton.removeClass 'disabled'
-
-    onAlarmButtonClicked: =>
-        dueDate = Date.create @date
-        dueDate.advance hours: 8 if dueDate.format('{HH}:{mm}') is '00:00'
-
-        # smart detection: set the time if the user input has a time
-        value = @popoverWidget.find('input').val()
-        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
-
-        if smartDetection? and smartDetection[1]?
-            specifiedTime = smartDetection[1]
-            specifiedTime = specifiedTime.split /:/
-            dueDate.set
-                hours: specifiedTime[0]
-                minutes: specifiedTime[1]
-
-            value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
-            value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
-
-        data =
-            description: value
-            action: 'DISPLAY'
-            trigg: dueDate.format Alarm.dateFormat
-
-        @addAlarmButton.html '&nbsp;'
-        @addAlarmButton.spin 'small'
-        @model.create data,
-            wait: true
-            success: =>
-                @clean()
-                @addAlarmButton.spin()
-                @addAlarmButton.html 'Add'
-            error: =>
-                @clean()
-                @addAlarmButton.spin()
-                @addAlarmButton.html 'Add'
 
 
 module.exports = class CalendarView extends View
@@ -105,7 +22,6 @@ module.exports = class CalendarView extends View
         require('./templates/calendarview')
 
     afterRender: ->
-        @popover = new AlarmPopOver
         @cal = @$('#alarms').fullCalendar
             header:
                 left: 'prev,next today'
@@ -138,6 +54,7 @@ module.exports = class CalendarView extends View
             eventDragStop: @onEventDragStop
             eventDrop: @onEventDrop
             eventClick: @onEventClick
+        @popover = new AlarmPopOver @cal
 
     onAdd: (alarm, alarms) ->
         index = alarm.getFormattedDate "{MM}-{dd}-{yyyy}"
@@ -207,8 +124,9 @@ module.exports = class CalendarView extends View
     onEventClick: (event, jsEvent, view) =>
         target = $(jsEvent.currentTarget)
 
-        direction = helpers.getPopoverDirection view.name is 'agendaDay', event
         eventStartTime = event.start.getTime()
+        isDayView = view.name is 'agendaDay'
+        direction = helpers.getPopoverDirection isDayView, event.start
 
         unless @popover.isExist? and
         @popover.action is 'edit' and
@@ -218,37 +136,16 @@ module.exports = class CalendarView extends View
                 field: $(target)
                 date: event.start
                 action: 'edit'
+                model: @model
+                event: event
 
             formTemplate = alarmFormSmallTemplate
                 editionMode: true
                 defaultValue: event.title
 
-            @popover.show "alarm-remove icon-trash", direction, formTemplate
+            @popover.show "Alarm edition", direction, formTemplate
 
-        $('.popover .alarm-remove').click =>
-            alarm =  @model.get event.id
-
-            event.isSaving = true
-            @cal.fullCalendar('renderEvent', event)
-            alarm.destroy
-                success: =>
-                    event.isSaving = false
-                    @cal.fullCalendar('removeEvents', event.id)
-                error: ->
-                    event.isSaving = false
-                    @cal.fullCalendar('renderEvent', event)
-        $('.popover button.add-alarm').removeClass 'disabled'
-
-        $('.popover input').keyup (event) ->
-            button = $('.popover button.add-alarm')
-            if $(@).val() is ''
-                button.addClass 'disabled'
-            else
-                button.removeClass 'disabled'
-
-        $('.popover button.close').click =>
-            @popover.clean()
-
+        @popover.bindEditEvents()
 
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
         target = $(jsEvent.target)
