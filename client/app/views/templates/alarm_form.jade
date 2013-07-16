@@ -1,25 +1,25 @@
 .form-horizontal.well
   .control-group
-      input#alarm-description-input.input-block-level(
-          type="text", placeholder="What should I remind you ?")
+      input.input-block-level(
+          type="text", id="inputDesc", placeholder=t("What should I remind you ?"))
   .form-inline
       select(id="action").input-small
         each displayAction, action in actions
             if action == defaultAction
-              option(value="#{action}", selected) #{displayAction}
+              option(value="#{action}", selected)= t(displayAction)
             else
-              option(value="#{action}") #{displayAction}
+              option(value="#{action}")= t(displayAction)
       #date-control
-        label(for="inputDate") &nbsp;date:&nbsp;
+        label(for="inputDate") &nbsp;#{t('date')}:&nbsp;
         .input-append.date(id="inputDate")
-          input.span2(type="text", value="#{defaultDate}")
+          input.span2(type="text", value=defaultDate)
           span.add-on
             i.icon-th
-        label(for="inputTime") &nbsp;&nbsp;time:&nbsp;
+        label(for="inputTime") &nbsp;&nbsp;#{t('time')}:&nbsp;
         .input-append.bootstrap-timepicker
-          input.input-small(id="inputTime", type="text", value="#{defaultTime}")
+          input.input-small(id="inputTime", type="text", value=defaultTime)
           span.add-on
             i.icon-time
 
-  button.btn.pull-right.add-alarm add the alarm
+  button.btn.pull-right.add-alarm= t('add the alarm')
   .clearfix
