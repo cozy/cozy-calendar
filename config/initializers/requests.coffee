@@ -15,3 +15,12 @@ module.exports = (compound) ->
         if err
             compound.logger.write "Request User#All, cannot be created"
             compound.logger.write err
+
+    byDate = (doc) ->
+        emit new Date(doc.trigg), doc
+
+    Alarm.defineRequest "byDate", byDate, (err) ->
+        if err
+            compound.logger.write "Request Alarm#byDate, cannot be created"
+            compound.logger.write err
+

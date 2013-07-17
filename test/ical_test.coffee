@@ -54,10 +54,32 @@ SUMMARY:ma description
 UID:superuser
 END:VTODO""".replace(/\n/g, '\r\n')
 
-        describe 'get vTodo string', ->
         describe 'get vCalendar with alarms', ->
+            it 'should return ical string', ->
+                date = new Date 2013, 5, 9, 15, 0, 0
+                cal = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
+                vtodo = new VTodo date, 'superuser', 'ma description'
+                vtodo.addAlarm date
+                cal.add vtodo
+                cal.toString().should.equal """
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
+BEGIN:VTODO
+DSTAMP:20130609T150000
+SUMMARY:ma description
+UID:superuser
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130609T150000
+END:VALARM
+END:VTODO
+END:VCALENDAR""".replace(/\n/g, '\r\n')
 
-    describe "GET /calendar/:startDate/:endDate/calendar.ics", ->
+
+
+    describe "GET /export/calendar.ics", ->
 
         before (done) ->
             initDb = (callback) ->
@@ -75,10 +97,44 @@ END:VTODO""".replace(/\n/g, '\r\n')
 
         it "when I require iCal file from january, first 1970 to january" + \
            ", first 2015", (done) ->
-            client.get "alarms/19700101/201501010/calendar.ics", \
+            client.get "export/calendar.ics", \
                        (error, response, body) ->
+                body.should.equal """
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
+BEGIN:VTODO
+DSTAMP:20130423T144000
+SUMMARY:Something to remind
+UID:undefined
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130423T144000
+END:VALARM
+END:VTODO
+BEGIN:VTODO
+DSTAMP:20130424T133000
+SUMMARY:Something else to remind
+UID:undefined
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130424T133000
+END:VALARM
+END:VTODO
+BEGIN:VTODO
+DSTAMP:20130425T113000
+SUMMARY:Another thing to remind
+UID:undefined
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130425T113000
+END:VALARM
+END:VTODO
+END:VCALENDAR
+""".replace(/\n/g, '\r\n')
+
                 done()
-        #it "then it should return an iCal compliant file with 3 " + \
-            #"alarms", (done) ->
-                #true.should.equal false
-                #done()
+            , false
