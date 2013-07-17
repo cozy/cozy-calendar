@@ -4,7 +4,7 @@ time = require 'time'
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 
-{VCalendar} = require '../lib/ical_helpers'
+{VCalendar, VAlarm, VTodo} = require '../lib/ical_helpers'
 
 instantiateApp = require('../server')
 app = instantiateApp()
@@ -33,6 +33,17 @@ PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
 END:VCALENDAR""".replace(/\n/g, '\r\n')
 
         describe 'get vAlarm string', ->
+            it 'should return default vAlarm string', ->
+                date = new Date(2013, 5, 9, 15, 0, 0)
+                valarm = new VAlarm date
+                valarm.toString().should.equal """
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130609T150000
+END:VALARM""".replace(/\n/g, '\r\n')
+
+        describe 'get vTodo string', ->
 
         describe 'get vCalendar with alarms', ->
 

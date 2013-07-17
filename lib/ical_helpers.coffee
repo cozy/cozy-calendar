@@ -1,3 +1,4 @@
+moment = require 'moment'
 
 class iCalBuffer
 
@@ -31,6 +32,9 @@ module.exports.VComponent = class VComponent
         buf.addString component.toString() for component in @subComponents
         buf.addString "END:#{@name}"
 
+    formatIcalDate: (date) ->
+        moment(date).format('YYYYMMDDTHHmm00')
+
 
 module.exports.VCalendar = class VCalendar extends VComponent
 
@@ -41,3 +45,13 @@ module.exports.VCalendar = class VCalendar extends VComponent
 
     constructor: (organization, title) ->
         @fields['PRODID'] = "-//#{organization}//NONSGML #{title}//EN"
+
+
+module.exports.VAlarm = class VAlarm extends VComponent
+    name: 'VALARM'
+    fields:
+        'ACTION': 'AUDIO'
+        'REPEAT': '1'
+
+    constructor: (date) ->
+        @fields['TRIGGER'] = @formatIcalDate date
