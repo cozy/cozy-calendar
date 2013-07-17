@@ -8256,6 +8256,9 @@ input[type="time"] {
 .affix div.form-horizontal {
   border: 1px solid #ddd;
 }
+.icon-arrow-down:before {
+  content: "";
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
