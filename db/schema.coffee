@@ -14,6 +14,15 @@ Alarm = define 'Alarm', ->
 
     property 'related', String, default: null
 
+Event = define 'Event', ->
+    property 'start', String
+    property 'end', String
+    property 'place', String
+    property 'description', String
+
+    property 'related', String, default: null 
+
+
     # Further work to make the doctype iCal compliant
     # email properties
     #property 'summary', String, default: null

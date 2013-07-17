@@ -2,21 +2,30 @@ View = require '../lib/view'
 AlarmFormView = require './alarmform_view'
 AlarmPopOver = require './alarm_popover'
 AlarmsListView = require '../views/alarms_list_view'
+EventFormView = require './eventform_view'
+EventPopOver = require './event_popover'
+#EventsListView = require '../views/events_list_view'
 helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
+Event = require '../models/event'
 alarmFormSmallTemplate = require('./templates/alarm_form_small')
+eventFormSmallTemplate = require('./templates/event_form_small')
 
 
 module.exports = class CalendarView extends View
 
     el: '#viewContainer'
 
-    initialize: ->
+    initialize: (alarm, evt) ->
         @caldata = {}
 
-        @listenTo @model, 'add', @onAdd
-        @listenTo @model, 'reset', @onReset
+        @modelAlarm = alarm
+        @modelEvent = evt 
+        @listenTo @modelAlarm, 'add', @onAddAlarm
+        @listenTo @modelAlarm, 'reset', @onResetAlarm
+        @listenTo @modelEvent, 'add', @onAddEvent
+        @listenTo @modelEvent, 'reset', @onResetEvent
 
     template: ->
         require('./templates/calendarview')
@@ -55,13 +64,14 @@ module.exports = class CalendarView extends View
             eventDrop: @onEventDrop
             eventClick: @onEventClick
         @popover = new AlarmPopOver @cal
+        @popoverEvent = new EventPopOver @cal
 
-    onAdd: (alarm, alarms) ->
+    onAddAlarm: (alarm, alarms) ->
         index = alarm.getFormattedDate "{MM}-{dd}-{yyyy}"
         time = alarm.getFormattedDate "{hh}:{mm}"
         content = "#{time} #{alarm.get("description")}"
         endAlarm = alarm.getDateObject().clone()
-        endAlarm.advance minutes: 60
+        endAlarm.advance minutes: 30
 
         event =
             id: alarm.cid
@@ -75,8 +85,30 @@ module.exports = class CalendarView extends View
 
         @cal.fullCalendar 'addEventSource', [event]
 
-    onReset: ->
-        @model.forEach (item) => @onAdd item, @model
+    onResetAlarm: ->
+        @modelAlarm.forEach (item) => @onAdd item, @modelAlarm
+
+    onAddEvent: (evt, events) ->
+        index = evt.getFormattedDate "{MM}-{dd}-{yyyy}"
+        time = evt.get("start")
+        content = "#{time} #{evt.get("description")}"
+        endEvt = evt.get("end")
+
+        event =
+            id: evt.cid
+            title: evt.get 'description'
+            start: evt.getFormattedStartDate(Date.ISO8601_DATETIME)
+            end: evt.getFormattedEndDate(Date.ISO8601_DATETIME)
+            place: evt.get 'place'
+            allDay: false
+            backgroundColor: '#EB1'
+            borderColor: '#EB1'
+            type: 'event' # non standard field
+
+        @cal.fullCalendar 'addEventSource', [event]
+
+    onResetEvent: ->
+        @modelEvent.forEach (item) => @onAdd item, @modelEvent
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @popover.clean()
@@ -89,6 +121,10 @@ module.exports = class CalendarView extends View
 
     onRender: (event, element) ->
         if event.type is 'alarm'
+            selector = '.ui-resizable-handle.ui-resizable-s'
+            $(element).find(selector).remove()
+
+        if event.type is 'event'
             selector = '.ui-resizable-handle.ui-resizable-s'
             $(element).find(selector).remove()
 
@@ -105,21 +141,42 @@ module.exports = class CalendarView extends View
     onEventDrop: (event, dayDelta, minuteDelta, allDay,
                   revertFunc, jsEvent, ui, view) =>
 
-        alarm = @model.get event.id
-        alarm.getDateObject().advance
-            days: dayDelta
-            minutes: minuteDelta
+        if event.type is 'alarm'
+            alarm = @modelAlarm.get event.id
+            alarm.getDateObject().advance
+                days: dayDelta
+                minutes: minuteDelta
 
-        data = trigg: alarm.getFormattedDate Alarm.dateFormat
-        alarm.save data,
-            wait: true
-            success: =>
-                event.isSaving = false
-                @cal.fullCalendar 'renderEvent', event
-            error: ->
-                event.isSaving = false
-                @cal.fullCalendar 'renderEvent', event
-                revertFunc()
+            data = trigg: alarm.getFormattedDate Alarm.dateFormat
+            alarm.save data,
+                wait: true
+                success: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                error: ->
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                    revertFunc()
+        else
+            evt = @modelEvent.get event.id
+            evt.start.advance
+                days: dayDelta
+                minutes: minuteDelta
+            evt.end.advance
+                days: dayDelta
+                minutes: minuteDelta
+            data = 
+                start: evt.getFormattedStartDate Event.dateFormat
+                end: evt.getFormattedEndDate Event.dateFormat
+            evt.save data,
+                wait: true
+                success: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                error: ->
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                    revertFunc()
 
     onEventClick: (event, jsEvent, view) =>
         target = $(jsEvent.currentTarget)
@@ -128,38 +185,80 @@ module.exports = class CalendarView extends View
         isDayView = view.name is 'agendaDay'
         direction = helpers.getPopoverDirection isDayView, event.start
 
-        unless @popover.isExist? and
-        @popover.action is 'edit' and
-        @popover.date?.getTime() is eventStartTime
+        if event.type is 'alarm'
+            @popoverEvent.clean()
+            unless @popover.isExist? and
+            @popover.action is 'edit' and
+            @popover.date?.getTime() is eventStartTime
 
-            @popover.createNew
-                field: $(target)
-                date: event.start
-                action: 'edit'
-                model: @model
-                event: event
+                @popover.createNew
+                    field: $(target)
+                    date: event.start
+                    action: 'edit'
+                    model: @modelAlarm
+                    event: event
 
-            formTemplate = alarmFormSmallTemplate
-                editionMode: true
-                defaultValue: event.title
+                formTemplate = alarmFormSmallTemplate
+                    editionMode: true
+                    defaultValue: event.title
 
-            @popover.show "Alarm edition", direction, formTemplate
+                @popover.show "Alarm edition", direction, formTemplate
 
-        @popover.bindEditEvents()
+            @popover.bindEditEvents()
+        else
+            @popover.clean()
+            unless @popoverEvent.isExist? and
+            @popoverEvent.action is 'edit' and
+            @popoverEvent.date?.getTime() is eventStartTime
+
+                @popoverEvent.createNew
+                    field: $(target)
+                    date: event.start
+                    action: 'edit'
+                    model: @modelEvent
+                    event: event
+
+                formTemplate = eventFormSmallTemplate
+                    editionMode: true
+                    defaultValueStart: event.start.format('{HH}:{mm}')
+                    defaultValueEnd: event.end.format('{HH}:{mm}')
+                    defaultValuePlace: event.place
+                    defaultValueDesc: event.title
+
+                @popoverEvent.show "Event edition", direction, formTemplate
+
+            @popoverEvent.bindEditEvents()
+
+    addEvent: (field, date, direction) ->
+        @popover.createNew
+            field: field
+            date: date
+            action: 'create'
+            model: @modelEvent
+
+        eventFormTemplate = eventFormSmallTemplate
+            editionMode: false
+            defaultValue: ''
+
+        @popover.show "Event creation", direction, alarmFormTemplate
+        @popover.bindEvents startDate
 
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
         target = $(jsEvent.target)
         direction = helpers.getPopoverDirection isDayView, startDate
 
-        @popover.createNew
+        @popoverEvent.createNew
             field: $(target)
             date: startDate
             action: 'create'
-            model: @model
+            model: @modelEvent
 
-        alarmFormTemplate = alarmFormSmallTemplate
+        eventFormTemplate = eventFormSmallTemplate
             editionMode: false
-            defaultValue: ''
+            defaultValueStart: ''
+            defaultValueEnd: ''
+            defaultValuePlace: ''
+            defaultValueDesc: ''
 
-        @popover.show "Alarm creation", direction, alarmFormTemplate
-        @popover.bindEvents startDate
+        @popoverEvent.show "Event creation", direction, eventFormTemplate
+        @popoverEvent.bindEvents startDate
