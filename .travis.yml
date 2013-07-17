@@ -16,4 +16,4 @@ before_install:
     - sleep 3
     - curl http://localhost:9101/
     - cd ..
-    - mkir log
+    - mkdir log
