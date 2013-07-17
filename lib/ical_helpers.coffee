@@ -20,7 +20,6 @@ class iCalBuffer
 
 
 module.exports.VComponent = class VComponent
-
     name: 'VCOMPONENT'
     subComponents: []
     fields: {}
@@ -37,7 +36,6 @@ module.exports.VComponent = class VComponent
 
 
 module.exports.VCalendar = class VCalendar extends VComponent
-
     name: 'VCALENDAR'
     fields:
         'VERSION': '2.0'
@@ -55,3 +53,12 @@ module.exports.VAlarm = class VAlarm extends VComponent
 
     constructor: (date) ->
         @fields['TRIGGER'] = @formatIcalDate date
+
+
+module.exports.VTodo = class VAlarm extends VComponent
+    name: 'VTODO'
+
+    constructor: (date, user, description) ->
+        @fields['DSTAMP'] = @formatIcalDate date
+        @fields['SUMMARY'] = description
+        @fields['UID'] = user

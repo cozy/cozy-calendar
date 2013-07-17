@@ -34,7 +34,7 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
 
         describe 'get vAlarm string', ->
             it 'should return default vAlarm string', ->
-                date = new Date(2013, 5, 9, 15, 0, 0)
+                date = new Date 2013, 5, 9, 15, 0, 0
                 valarm = new VAlarm date
                 valarm.toString().should.equal """
 BEGIN:VALARM
@@ -44,7 +44,17 @@ TRIGGER:20130609T150000
 END:VALARM""".replace(/\n/g, '\r\n')
 
         describe 'get vTodo string', ->
+            it 'should return default vTodo string', ->
+                date = new Date 2013, 5, 9, 15, 0, 0
+                vtodo = new VTodo date, "superuser", "ma description"
+                vtodo.toString().should.equal """
+BEGIN:VTODO
+DSTAMP:20130609T150000
+SUMMARY:ma description
+UID:superuser
+END:VTODO""".replace(/\n/g, '\r\n')
 
+        describe 'get vTodo string', ->
         describe 'get vCalendar with alarms', ->
 
     describe "GET /calendar/:startDate/:endDate/calendar.ics", ->
