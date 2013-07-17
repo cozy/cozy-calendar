@@ -1,6 +1,5 @@
 time = require 'time'
 moment = require 'moment'
-dateHelpers = require './lib/date_helpers'
 
 before ->
 
