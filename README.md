@@ -3,7 +3,7 @@
 The application currently manages reminders and only reminders. It is based on the iCal standard.
 
 ![Build
-Status](https://travis-ci.org/mycozycloud/cozy-agenda.png?branch=master)](https://travis-ci.org/mycozycloud/cozy-agenda)
+Status](https://travis-ci.org/mycozycloud/cozy-agenda.png?branch=master)
 
 # Run
 
