@@ -22,8 +22,10 @@ describe "Alarms management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createAlarm "DISPLAY", "Something to remind", "Tue Apr 23 2013 14:40:00 "
-                    helpers.createAlarm "EMAIL", "Something else to remind", "Tue Apr 24 2013 13:30:00"
+                    helpers.createAlarm("DISPLAY", "Something to remind",
+                                        "Tue Apr 23 2013 14:40:00 ")
+                    helpers.createAlarm("EMAIL", "Something else to remind",
+                                        "Tue Apr 24 2013 13:30:00")
                 ], ->
                     callback()
             helpers.cleanDb ->
@@ -44,11 +46,11 @@ describe "Alarms management", ->
     describe "POST alarms/", ->
 
         before (done) =>
-            helpers.cleanDb done
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
+            helpers.cleanDb done
 
         it "should return the alarm json object", (done) =>
 
@@ -62,7 +64,8 @@ describe "Alarms management", ->
                 body.should.have.property 'id'
                 @alarm.id = body.id
                 body.should.have.property 'action', @alarm.action
-                body.should.have.property 'trigg', @alarm.trigg
+                body.should.have.property 'trigg'
+                body.trigg.should.eql @alarm.trigg
                 body.should.have.property 'description', @alarm.description
                 done()
 
