@@ -43,6 +43,9 @@
     "Alarm": {
       "description": "Creates and edits your alarms."
       },
+    "Event": {
+      "description": "Creates and edits your events."
+      },
     "User": {
       "description": "Used to recover your timezone"
     }

@@ -1,7 +1,9 @@
 helpers = require '../helpers'
+ScheduleItem = require './scheduleitem' 
 
-module.exports = class Alarm extends Backbone.Model
+module.exports = class Alarm extends ScheduleItem
 
+    mainDateField: 'trigg'  
     urlRoot: 'alarms'
 
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
@@ -34,36 +36,3 @@ module.exports = class Alarm extends Backbone.Model
 
         if errors.length > 0
             return errors
-
-    getDateObject: ->
-        if not @dateObject?
-            @dateObject = new Date.create(@get('trigg'))
-        return @dateObject
-
-    getFormattedDate: (formatter) ->
-        return @getDateObject().format formatter
-
-    getPreviousDateObject: ->
-        if @previous('trigg')?
-            return new Date.create @previous('trigg')
-        else return false
-
-    getDateHash: (date) ->
-        date = @getDateObject() unless date?
-        return date.format '{yyyy}{MM}{dd}'
-
-    getPreviousDateHash: ->
-        previousDateObject = @getPreviousDateObject()
-        if previousDateObject
-            return @getDateHash(previousDateObject)
-        else return false
-
-    getTimeHash: (date) ->
-        date = @getDateObject() unless date?
-        return date.format '{yyyy}{MM}{dd}{HH}{mm}'
-
-    getPreviousTimeHash: ->
-        previousDateObject = @getPreviousDateObject()
-        if previousDateObject
-            return @getTimeHash(previousDateObject)
-        else return false

@@ -147,14 +147,4 @@ module.exports = class AlarmFormView extends View
             mappedElement.field.tooltip('destroy')
 
     onSubmit: =>
-        alarm = @model.get event.id
-        data = description: @descriptionField.val()
-        @cal.fullCalendar 'renderEvent', event
-        alarm.save data,
-            success: =>
-                event.title = data.description
-                @cal.fullCalendar 'renderEvent', event
-            error: ->
-                @cal.fullCalendar('renderEvent', event)
-
         @resetErrors()
