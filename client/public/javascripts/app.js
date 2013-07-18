@@ -79,27 +79,6 @@
   globals.require.brunch = true;
 })();
 
-window.require.register("application", function(exports, require, module) {
-  module.exports = {
-    initialize: function() {
-      var AlarmCollection, EventCollection, Router, SocketListener;
-      Router = require('router');
-      SocketListener = require('../lib/socket_listener');
-      AlarmCollection = require('collections/alarms');
-      EventCollection = require('collections/events');
-      this.router = new Router();
-      this.alarms = new AlarmCollection();
-      this.events = new EventCollection();
-      SocketListener.watch(this.alarms);
-      SocketListener.watch(this.events);
-      Backbone.history.start();
-      if (typeof Object.freeze === 'function') {
-        return Object.freeze(this);
-      }
-    }
-  };
-  
-});
 window.require.register("collections/alarms", function(exports, require, module) {
   var Alarm, AlarmCollection, ScheduleItemsCollection, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -2659,7 +2638,7 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a></li></ul><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

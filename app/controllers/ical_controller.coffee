@@ -3,13 +3,6 @@ moment = require 'moment'
 
 before ->
 
-    @convertAlarmDate = (alarm, timezone) ->
-        timezonedDate = new time.Date(alarm.trigg)
-        timezonedDate.setTimezone(timezone)
-        alarm.trigg = timezonedDate.toString().slice(0, 24)
-        alarm.trigg = moment(alarm.trigg).format('YYYYMMDDTHHMM00')
-        return alarm
-
     @userTimezone = 'Europe/Paris'
     User.all (err, users) =>
         if err
@@ -25,33 +18,12 @@ before ->
 
 action 'ics', ->
 
-    buf = ""
-    addLine = (line) ->
-        buf += (line + '\r\n')
-        #buf += (line + '<br />') # for debug purpose
-
-    addLine 'BEGIN:VCALENDAR'
-    addLine 'VERSION:2.0'
-    addLine 'PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN'
-
+    calendar = Alarm.getICalCalendar()
     Alarm.all (err, alarms) =>
         if err
             send error: true, msg: 'Server error occurred while retrieving data'
         else
-            for alarm, index in alarms
-                alarm = @convertAlarmDate alarm, @userTimezone
-                addLine 'BEGIN:VTODO'
-                addLine 'DTSTAMP:' + alarm.trigg
-                addLine 'UID:' + @userEmail
-                addLine 'SUMMARY:' + alarm.description
-                addLine 'BEGIN:VALARM'
-                addLine 'ACTION:AUDIO'
-                addLine 'TRIGGER:' + alarm.trigg
-                addLine 'REPEAT:1'
-                addLine 'END:VALARM'
-                addLine 'END:VTODO'
-
-            addLine 'END:VCALENDAR'
-            send buf
-
-
+            for alarm in alarms
+                calendar.add alarm.toIcal()
+            res.header 'Content-Type': 'text/plain'
+            send calendar.toString()
