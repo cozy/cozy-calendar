@@ -661,29 +661,18 @@ window.require.register("router", function(exports, require, module) {
 
     Router.prototype.calendar = function() {
       this.displayView(CalendarView, app.alarms, app.events);
-      return this.handleFetch();
+      this.handleFetch("modelAlarm", "alarms");
+      return this.handleFetch("modelEvent", "events");
     };
 
     Router.prototype.alarmsList = function() {
-      this.displayView(ListView, app.alarms, app.events);
-      return this.handleFetch();
+      this.displayView(ListView, app.alarms, null);
+      return this.handleFetch("model", "alarms");
     };
 
-    Router.prototype.handleFetch = function() {
-      if (!(app.alarms.length > 0)) {
-        this.mainView.modelAlarm.fetch({
-          success: function(collection, response, options) {
-            return console.log("Fetch: success");
-          },
-          error: function() {
-            return console.log("Fetch: error");
-          }
-        });
-      } else {
-        this.mainView.modelAlarm.reset(app.alarms.toJSON());
-      }
-      if (!(app.events.length > 0)) {
-        return this.mainView.modelEvent.fetch({
+    Router.prototype.handleFetch = function(model, name) {
+      if (!(app[name].length > 0)) {
+        return this.mainView[model].fetch({
           success: function(collection, response, options) {
             console.log(collection);
             return console.log("Fetch: success");
@@ -693,7 +682,7 @@ window.require.register("router", function(exports, require, module) {
           }
         });
       } else {
-        return this.mainView.modelEvent.reset(app.events.toJSON());
+        return this.mainView[model].reset(app[name].toJSON());
       }
     };
 
@@ -705,7 +694,13 @@ window.require.register("router", function(exports, require, module) {
       container = $(document.createElement('div'));
       container.prop('id', 'viewContainer');
       $('body').prepend(container);
-      this.mainView = new classView(alarmsCollection, eventsCollection);
+      if (eventsCollection === null) {
+        this.mainView = new classView({
+          model: alarmsCollection
+        });
+      } else {
+        this.mainView = new classView(alarmsCollection, eventsCollection);
+      }
       return this.mainView.render();
     };
 
@@ -921,7 +916,8 @@ window.require.register("views/alarm_popover", function(exports, require, module
         defaultValueDesc: ''
       });
       this.pop.show("Event creation", this.direction, eventFormTemplate);
-      return this.pop.bindEvents(this.date);
+      this.pop.bindEvents(this.date);
+      return this.pop.clean();
     };
 
     AlarmPopOver.prototype.onEditAlarmClicked = function() {
@@ -1471,7 +1467,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onResetAlarm = function() {
       var _this = this;
       return this.modelAlarm.forEach(function(item) {
-        return _this.onAdd(item, _this.modelAlarm);
+        return _this.onAddAlarm(item, _this.modelAlarm);
       });
     };
 
@@ -1498,7 +1494,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onResetEvent = function() {
       var _this = this;
       return this.modelEvent.forEach(function(item) {
-        return _this.onAdd(item, _this.modelEvent);
+        return _this.onAddEvent(item, _this.modelEvent);
       });
     };
 
@@ -1635,41 +1631,22 @@ window.require.register("views/calendar_view", function(exports, require, module
       }
     };
 
-    CalendarView.prototype.addEvent = function(field, date, direction) {
-      var eventFormTemplate;
-      this.popover.createNew({
-        field: field,
-        date: date,
-        action: 'create',
-        model: this.modelEvent
-      });
-      eventFormTemplate = eventFormSmallTemplate({
-        editionMode: false,
-        defaultValue: ''
-      });
-      this.popover.show("Event creation", direction, alarmFormTemplate);
-      return this.popover.bindEvents(startDate);
-    };
-
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, eventFormTemplate, target;
+      var alarmFormTemplate, direction, target;
       target = $(jsEvent.target);
       direction = helpers.getPopoverDirection(isDayView, startDate);
-      this.popoverEvent.createNew({
+      this.popover.createNew({
         field: $(target),
         date: startDate,
         action: 'create',
-        model: this.modelEvent
+        model: this.modelAlarm
       });
-      eventFormTemplate = eventFormSmallTemplate({
+      alarmFormTemplate = alarmFormSmallTemplate({
         editionMode: false,
-        defaultValueStart: '',
-        defaultValueEnd: '',
-        defaultValuePlace: '',
-        defaultValueDesc: ''
+        defaultValue: ''
       });
-      this.popoverEvent.show("Event creation", direction, eventFormTemplate);
-      return this.popoverEvent.bindEvents(startDate);
+      this.popover.show("Alarm creation", direction, alarmFormTemplate);
+      return this.popover.bindEvents(startDate);
     };
 
     return CalendarView;
@@ -2255,6 +2232,159 @@ window.require.register("views/eventform_view", function(exports, require, modul
   })(View);
   
 });
+window.require.register("views/events_list_view", function(exports, require, module) {
+  var DayProgramView, Event, EventCollection, EventsListView, View, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  DayProgramView = require('./dayprogram_view');
+
+  EventCollection = require('../collections/events');
+
+  Event = require('../models/event');
+
+  module.exports = EventsListView = (function(_super) {
+    __extends(EventsListView, _super);
+
+    function EventsListView() {
+      _ref = EventsListView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    EventsListView.prototype.el = '#events';
+
+    EventsListView.prototype.initialize = function() {
+      this.listenTo(this.model, "add", this.onAdd);
+      this.listenTo(this.model, "change", this.onChange);
+      this.listenTo(this.model, "remove", this.onRemove);
+      this.listenTo(this.model, "reset", this.onReset);
+      this.views = {};
+      this.dayPrograms = new Backbone.Collection;
+      this.dayPrograms.comparator = function(dayProg1, dayProg2) {
+        var d1, d2;
+        d1 = new Date.create(dayProg1.get('date'));
+        d2 = new Date.create(dayProg2.get('date'));
+        if (d1.getTime() < d2.getTime()) {
+          return -1;
+        } else if (d1.getTime() === d2.getTime()) {
+          return 0;
+        } else {
+          return 1;
+        }
+      };
+      return this.listenTo(this.dayPrograms, "remove", this.onRemoveDayProgram);
+    };
+
+    EventsListView.prototype.onReset = function() {
+      var _this = this;
+      return this.model.forEach(function(item) {
+        return _this.onAdd(item, _this.model);
+      });
+    };
+
+    EventsListView.prototype.onAdd = function(evt, events) {
+      var dateHash, view,
+        _this = this;
+      dateHash = evt.getDateHash();
+      view = this.getSubView(dateHash, function() {
+        return _this._getNewSubView(dateHash, evt);
+      });
+      return view.model.get('events').add(evt);
+    };
+
+    EventsListView.prototype.onChange = function(evt) {
+      var dateHash, prevDateHash, prevView, view,
+        _this = this;
+      dateHash = evt.getDateHash();
+      view = this.getSubView(dateHash, function() {
+        _this.onAdd(evt);
+        return false;
+      });
+      prevDateHash = evt.getPreviousDateHash();
+      if ((evt.changedAttributes().trigg != null) && prevDateHash !== dateHash) {
+        prevView = this.views[prevDateHash];
+        return prevView.model.get('events').remove(evt);
+      }
+    };
+
+    EventsListView.prototype.onRemoveDayProgram = function(dayProgram) {
+      var dateHash;
+      dateHash = dayProgram.get('dateHash');
+      this.views[dateHash].destroy();
+      return delete this.views[dateHash];
+    };
+
+    EventsListView.prototype.onRemove = function(evt) {
+      var dateHash, view,
+        _this = this;
+      console.log('remove event now');
+      dateHash = evt.getDateHash();
+      view = this.getSubView(dateHash, function() {
+        return null;
+      });
+      if (view != null) {
+        return view.model.get('events').remove(evt);
+      }
+    };
+
+    EventsListView.prototype.getSubView = function(dateHash, callbackIfNotExist) {
+      var tmp;
+      if (this.views[dateHash] != null) {
+        return this.views[dateHash];
+      } else {
+        tmp = callbackIfNotExist();
+        if (tmp instanceof DayProgramView) {
+          return this.views[dateHash] = tmp;
+        } else {
+          return false;
+        }
+      }
+    };
+
+    EventsListView.prototype._getNewSubView = function(dateHash, evt) {
+      var date;
+      date = evt.getDateObject().beginningOfDay();
+      this._buildSubView(dateHash, date);
+      return this._renderSubView(dateHash);
+    };
+
+    EventsListView.prototype._buildSubView = function(dateHash, date) {
+      var model;
+      model = new Backbone.Model({
+        date: date,
+        dateHash: dateHash,
+        events: new EventCollection()
+      });
+      this.dayPrograms.add(model);
+      return this.views[dateHash] = new DayProgramView({
+        id: dateHash,
+        model: model
+      });
+    };
+
+    EventsListView.prototype._renderSubView = function(dateHash) {
+      var index, render, selector, view;
+      view = this.views[dateHash];
+      index = index = this.dayPrograms.indexOf(view.model);
+      render = view.render().$el;
+      if (index === 0) {
+        this.$el.prepend(render);
+      } else if (index === this.dayPrograms.length - 1) {
+        this.$el.append(render);
+      } else {
+        selector = "." + view.className + ":nth-of-type(" + (index + 1) + ")";
+        this.$el.find(selector).before(render);
+      }
+      return view;
+    };
+
+    return EventsListView;
+
+  })(View);
+  
+});
 window.require.register("views/list_view", function(exports, require, module) {
   var Alarm, AlarmCollection, AlarmFormView, AlarmsListView, ListView, View, helpers, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -2564,24 +2694,24 @@ window.require.register("views/templates/event_form_small", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("inputStart"), 'placeholder':("Start"), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><p>ie: 8:00</p><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("inputEnd"), 'placeholder':("End"), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('<div>From  <input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("inputStart"), 'placeholder':("Start"), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/>To  <input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("inputEnd"), 'placeholder':("End"), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValuePlace) + ""), 'id':("inputPlace"), 'placeholder':("Place"), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("inputDesc"), 'placeholder':("Description"), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><button class="btn add-event">');
+  buf.push('/><button class="btn pull-right add-event">');
   if ( editionMode)
   {
-  buf.push('Edit Event');
+  buf.push('Edit');
   }
   else
   {
-  buf.push('Create Event');
+  buf.push('Create');
   }
-  buf.push('</button></div>');
+  buf.push('</button><input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("inputDesc"), 'placeholder':("Description"), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/></div>');
   }
   return buf.join("");
   };

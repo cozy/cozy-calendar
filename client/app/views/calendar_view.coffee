@@ -86,7 +86,7 @@ module.exports = class CalendarView extends View
         @cal.fullCalendar 'addEventSource', [event]
 
     onResetAlarm: ->
-        @modelAlarm.forEach (item) => @onAdd item, @modelAlarm
+        @modelAlarm.forEach (item) => @onAddAlarm item, @modelAlarm
 
     onAddEvent: (evt, events) ->
         index = evt.getFormattedDate "{MM}-{dd}-{yyyy}"
@@ -108,7 +108,7 @@ module.exports = class CalendarView extends View
         @cal.fullCalendar 'addEventSource', [event]
 
     onResetEvent: ->
-        @modelEvent.forEach (item) => @onAdd item, @modelEvent
+        @modelEvent.forEach (item) => @onAddEvent item, @modelEvent
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @popover.clean()
@@ -229,36 +229,19 @@ module.exports = class CalendarView extends View
 
             @popoverEvent.bindEditEvents()
 
-    addEvent: (field, date, direction) ->
-        @popover.createNew
-            field: field
-            date: date
-            action: 'create'
-            model: @modelEvent
-
-        eventFormTemplate = eventFormSmallTemplate
-            editionMode: false
-            defaultValue: ''
-
-        @popover.show "Event creation", direction, alarmFormTemplate
-        @popover.bindEvents startDate
-
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
         target = $(jsEvent.target)
         direction = helpers.getPopoverDirection isDayView, startDate
 
-        @popoverEvent.createNew
+        @popover.createNew
             field: $(target)
             date: startDate
             action: 'create'
-            model: @modelEvent
+            model: @modelAlarm
 
-        eventFormTemplate = eventFormSmallTemplate
+        alarmFormTemplate = alarmFormSmallTemplate
             editionMode: false
-            defaultValueStart: ''
-            defaultValueEnd: ''
-            defaultValuePlace: ''
-            defaultValueDesc: ''
+            defaultValue: ''
 
-        @popoverEvent.show "Event creation", direction, eventFormTemplate
-        @popoverEvent.bindEvents startDate
+        @popover.show "Alarm creation", direction, alarmFormTemplate
+        @popover.bindEvents startDate

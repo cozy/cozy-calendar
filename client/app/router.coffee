@@ -12,32 +12,24 @@ module.exports = class Router extends Backbone.Router
 
     calendar: ->
         @displayView CalendarView, app.alarms, app.events
-        @handleFetch()
+        @handleFetch("modelAlarm", "alarms")
+        @handleFetch("modelEvent", "events")
+
 
     alarmsList: ->
-        @displayView ListView, app.alarms, app.events
-        @handleFetch()
+        @displayView ListView, app.alarms, null
+        @handleFetch("model", "alarms")
 
-    handleFetch: ->
-
-        unless app.alarms.length > 0
-            @mainView.modelAlarm.fetch
-                success: (collection, response, options) ->
-                    console.log "Fetch: success"
-                error: ->
-                    console.log "Fetch: error"
-        else
-            @mainView.modelAlarm.reset app.alarms.toJSON()
-
-        unless app.events.length > 0
-            @mainView.modelEvent.fetch
+    handleFetch: (model, name) ->
+        unless app[name].length > 0
+            @mainView[model].fetch
                 success: (collection, response, options) ->
                     console.log collection
                     console.log "Fetch: success"
                 error: ->
                     console.log "Fetch: error"
         else
-            @mainView.modelEvent.reset app.events.toJSON() 
+            @mainView[model].reset app[name].toJSON()
 
     # display a page properly (remove previous page)
     displayView: (classView, alarmsCollection, eventsCollection) =>
@@ -46,5 +38,9 @@ module.exports = class Router extends Backbone.Router
         container = $(document.createElement('div'))
         container.prop 'id', 'viewContainer'
         $('body').prepend(container)
-        @mainView = new classView alarmsCollection, eventsCollection
+        if eventsCollection is null
+            @mainView = new classView 
+                                model: alarmsCollection
+        else
+            @mainView = new classView alarmsCollection, eventsCollection
         @mainView.render()
