@@ -149,3 +149,20 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
 
         it "Then it should contains my alarms", ->
             @body.should.equal expectedContent
+
+
+    describe "POST /import/ical", ->
+
+        it "when I send an iCal import file", (done) ->
+            client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
+                console.log body
+                should.not.exist err
+                res.statusCode.should.equal 200
+                @body = body
+                done()
+
+        it "Then it sends to me the parsing result", (done) ->
+            @body.length.should.equal 3
+            done()
+
+        it "When I confirm the import ", ->

@@ -6,4 +6,5 @@ exports.routes = (map) ->
     map.delete 'alarms/:id', 'alarms#delete'
     map.get 'alarms/:id', 'alarms#getOne'
 
-    map.get 'export/calendar.ics', 'ical#ics'
+    map.get 'export/calendar.ics', 'ical#export'
+    map.post 'import/ical', 'ical#import'

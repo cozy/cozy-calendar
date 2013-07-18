@@ -17,3 +17,22 @@ module.exports = (compound, Alarm) ->
         vtodo = new VTodo date, user, @description
         vtodo.addAlarm date
         vtodo
+
+    Alarm.fromIcal = (valarm) ->
+        alarm = new Alarm()
+        alarm.description = valarm.fields["SUMMARY"]
+        alarm.trigg = valarm.fields["DSTAMP"]
+        alarm
+
+    Alarm.extractAlarms = (component) ->
+        alarms = []
+        walker = (component) ->
+            if component.name is 'VTODO'
+                alarms.push Alarm.fromIcal component
+
+            if component.subComponents?.length isnt 0
+                for subComponent in component.subComponents
+                    walker subComponent
+
+        walker component
+        alarms
