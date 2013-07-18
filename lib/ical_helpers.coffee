@@ -121,57 +121,56 @@ module.exports.ICalParser = class ICalParser
     parse: (stream, callback) ->
         result = {}
         noerror = true
+        lineNumber = 0
+        component = null
+        parent = null
 
         stream.on 'end', ->
             callback null, result if noerror
 
         sendError = (msg) ->
             noerror = false
-            stream.close()
-            callback new Error "Malformed ical file (line #{lineNumber})"
+            stream.emit 'end'
+            callback new Error "#{msg} (line #{lineNumber})"
 
-        lineNumber = 0
-        component = null
-        parent = null
+        createComponent = (name) ->
+            parent = component
 
-        lazy(stream).lines.forEach (line) ->
+            if name is "VCALENDAR"
+                if result.fields?
+                    sendError "Cannot import more than one calendar"
+                component = new VCalendar()
+                result = component
+
+            else if name in Object.keys(ICalParser.components)
+                component = new ICalParser.components[name]()
+
+            else
+                sendError "Malformed ical file"
+
+            component?.parent = parent
+            parent?.add component
+
+        lineParser = (line) ->
             lineNumber++
+
             line = line.toString('utf-8').trim()
             tuple = line.split(':')
 
             if tuple.length < 2
-                sendError "Malformed ical file (line #{lineNumber})"
+                sendError "Malformed ical file"
             else
                 key = tuple[0]
                 tuple.shift()
                 value = tuple.join('')
 
                 if key is "BEGIN"
-                    parent = component
-
-                    if value is "VCALENDAR"
-                        if result.fields?
-                            sendError "Cannot import more than one " + \
-                                "calendar (line #{lineNumber})"
-                        component = new VCalendar()
-                        result = component
-
-                    else if value in Object.keys(ICalParser.components)
-                        component = new ICalParser.components[value]()
-
-                    else
-                        sendError "Malformed ical file (line #{lineNumber})"
-
-                    component?.parent = parent
-                    parent?.add component
-
+                    createComponent value
                 else if key is "END"
                     component = component.parent
-
                 else if not (component? or result?)
-                    noerror = false
-                    @close()
-                    callback new Error "Malformed ical file (line #{lineNumber})"
-
+                    sendError "Malformed ical file"
                 else
                     component.fields[key] = value
+
+        lazy(stream).lines.forEach lineParser
