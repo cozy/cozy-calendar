@@ -25,7 +25,6 @@ before ->
         else if users.length is 0
             console.log 'No user registered.'
         else
-            console.log users[0].timezone
             @userTimezone = users[0].timezone
 
         next()
@@ -48,7 +47,7 @@ action 'getOne', ->
     send @alarm, 200
 
 action 'create', ->
-    
+
     triggerDate = new time.Date(req.body.trigg, @userTimezone)
     triggerDate.setTimezone('UTC')
     req.body.trigg = triggerDate.toString().slice(0, 24)

@@ -2,7 +2,6 @@ time = require 'time'
 
 before ->
     Event.find req.params.id, (err, evt) =>
-        console.log evt
         if err or not evt
             send error: true, msg: "Event not found", 404
         else

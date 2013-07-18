@@ -100,6 +100,7 @@ module.exports = class CalendarView extends View
             title: evt.get 'description'
             start: evt.getFormattedStartDate(Date.ISO8601_DATETIME)
             end: evt.getFormattedEndDate(Date.ISO8601_DATETIME)
+            diff: evt.get "diff"
             place: evt.get 'place'
             allDay: false
             backgroundColor: '#EB1'
@@ -222,7 +223,7 @@ module.exports = class CalendarView extends View
 
                 startDate = event.start.format('{yy}:{MM}:{dd}').split(":")
                 endDate = event.end.format('{yy}:{MM}:{dd}').split(":")
-                diff = event.diffDays
+                diff = event.diff
                 defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff
 
                 formTemplate = eventFormSmallTemplate
@@ -246,6 +247,7 @@ module.exports = class CalendarView extends View
             date: startDate
             action: 'create'
             model: @modelAlarm
+            modelEvent: @modelEvent
 
         alarmFormTemplate = alarmFormSmallTemplate
             editionMode: false

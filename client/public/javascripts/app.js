@@ -969,6 +969,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
     AlarmPopOver.prototype.onEventButtonClicked = function() {
       var eventFormTemplate;
+      this.field.popover('destroy').popover();
       this.pop = new EventPopOver(this.cal);
       this.pop.createNew({
         field: this.field,
@@ -984,8 +985,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
         defaultValueDesc: ''
       });
       this.pop.show("Event creation", this.direction, eventFormTemplate);
-      this.pop.bindEvents(this.date);
-      return this.pop.clean();
+      return this.pop.bindEvents(this.date);
     };
 
     AlarmPopOver.prototype.onEditAlarmClicked = function() {
@@ -1534,6 +1534,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         title: evt.get('description'),
         start: evt.getFormattedStartDate(Date.ISO8601_DATETIME),
         end: evt.getFormattedEndDate(Date.ISO8601_DATETIME),
+        diff: evt.get("diff"),
         place: evt.get('place'),
         allDay: false,
         backgroundColor: '#EB1',
@@ -1672,7 +1673,7 @@ window.require.register("views/calendar_view", function(exports, require, module
           });
           startDate = event.start.format('{yy}:{MM}:{dd}').split(":");
           endDate = event.end.format('{yy}:{MM}:{dd}').split(":");
-          diff = event.diffDays;
+          diff = event.diff;
           defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff;
           formTemplate = eventFormSmallTemplate({
             editionMode: true,
@@ -1695,7 +1696,8 @@ window.require.register("views/calendar_view", function(exports, require, module
         field: $(target),
         date: startDate,
         action: 'create',
-        model: this.modelAlarm
+        model: this.modelAlarm,
+        modelEvent: this.modelEvent
       });
       alarmFormTemplate = alarmFormSmallTemplate({
         editionMode: false,
@@ -1854,7 +1856,7 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.show = function(title, direction, content) {
-      this.field.popover({
+      this.field.data('popover', null).popover({
         title: '<span>' + title + '&nbsp;<i class="event-remove ' + 'icon-trash" /></span> <button type="button" class="close">' + '&times;</button>',
         html: true,
         placement: direction,
@@ -1974,7 +1976,7 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.onEventButtonClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, place, specifiedDay, specifiedTime, start,
+      var data, description, dueEndDate, dueStartDate, end, newDate, place, specifiedDay, specifiedTime, start,
         _this = this;
       start = $('.popover #inputStart').val();
       end = $('.popover #inputEnd').val();
@@ -1989,7 +1991,10 @@ window.require.register("views/event_popover", function(exports, require, module
       specifiedDay = end.split('+');
       specifiedTime = specifiedDay[0].split(':');
       if (specifiedDay[1] != null) {
-        dueEndDate = Date.create(specifiedDay[1]);
+        newDate = this.date.advance({
+          days: specifiedDay[1]
+        });
+        dueEndDate = Date.create(newDate);
       } else {
         specifiedDay[1] = 0;
         dueEndDate = Date.create(this.date);
@@ -2001,7 +2006,7 @@ window.require.register("views/event_popover", function(exports, require, module
       data = {
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
-        diffDays: specifiedDay[1],
+        diff: parseInt(specifiedDay[1]),
         place: place,
         description: description
       };
@@ -2040,6 +2045,7 @@ window.require.register("views/event_popover", function(exports, require, module
         });
         dueEndDate = Date.create(newDate);
       } else {
+        specifiedDay[1] = 0;
         dueEndDate = Date.create(this.date);
       }
       dueEndDate.set({
@@ -2050,6 +2056,7 @@ window.require.register("views/event_popover", function(exports, require, module
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
         place: $('.popover #inputPlace').val(),
+        diff: parseInt(specifiedDay[1]),
         description: $('.popover #inputDesc').val()
       };
       this.cal.fullCalendar('renderEvent', this.event);

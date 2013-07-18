@@ -139,6 +139,7 @@ module.exports = class AlarmPopOver extends View
                 @addAlarmButton.html @action
 
     onEventButtonClicked: () =>
+        @field.popover('destroy').popover()
         @pop = new EventPopOver @cal
         @pop.createNew
             field: @field
@@ -154,7 +155,6 @@ module.exports = class AlarmPopOver extends View
             defaultValueDesc: ''
         @pop.show "Event creation", @direction , eventFormTemplate
         @pop.bindEvents @date
-        @pop.clean()
 
     onEditAlarmClicked: =>
         alarm = @model.get @event.id

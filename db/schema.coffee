@@ -16,7 +16,7 @@ Event = define 'Event', ->
     property 'end', String
     property 'place', String
     property 'description', String
-    property 'diffDays', Number
+    property 'diff', Number
 
     property 'related', String, default: null 
 

@@ -26,7 +26,7 @@ module.exports = class EventPopOver extends View
         @event = data.event
 
     show: (title, direction, content) ->
-        @field.popover(
+        @field.data('popover', null).popover(
             title: '<span>' + title + '&nbsp;<i class="event-remove ' + \
                 'icon-trash" /></span> <button type="button" class="close">' + \
                 '&times;</button>'
@@ -137,7 +137,9 @@ module.exports = class EventPopOver extends View
         specifiedDay = end.split('+')
         specifiedTime = specifiedDay[0].split(':')
         if specifiedDay[1]?
-            dueEndDate = Date.create(specifiedDay[1])
+            newDate = @date.advance
+                days: specifiedDay[1]
+            dueEndDate = Date.create(newDate)
         else
             specifiedDay[1] = 0
             dueEndDate = Date.create(@date)
@@ -145,11 +147,10 @@ module.exports = class EventPopOver extends View
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
 
-
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
-            diffDays: specifiedDay[1]
+            diff: parseInt(specifiedDay[1])
             place: place
             description: description
         @model.create data, 
@@ -174,8 +175,6 @@ module.exports = class EventPopOver extends View
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
 
-
-
         specifiedDay = end.split('+')
         specifiedTime = specifiedDay[0].split(':')
         if specifiedDay[1]?
@@ -183,15 +182,17 @@ module.exports = class EventPopOver extends View
                 days: specifiedDay[1]
             dueEndDate = Date.create(newDate)
         else
+            specifiedDay[1] = 0
             dueEndDate = Date.create(@date)
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
-
+          
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
             place: $('.popover #inputPlace').val()
+            diff: parseInt(specifiedDay[1])
             description: $('.popover #inputDesc').val()
         @cal.fullCalendar 'renderEvent', @event
         @addEventButton.html '&nbsp;'
