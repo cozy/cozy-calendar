@@ -523,6 +523,36 @@ window.require.register("models/event", function(exports, require, module) {
     Event.prototype.validate = function(attrs, options) {
       var errors;
       errors = [];
+      if (!attrs.description) {
+        errors.push({
+          field: 'description',
+          value: "A description must be set."
+        });
+      }
+      if (!attrs.place) {
+        errors.push({
+          field: 'place',
+          value: "An Place must be set."
+        });
+      }
+      if (!attrs.start || !new Date.create(attrs.start).isValid()) {
+        errors.push({
+          field: 'startdate',
+          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+        });
+      }
+      if (!attrs.end || !new Date.create(attrs.end).isValid()) {
+        errors.push({
+          field: 'enddate',
+          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+        });
+      }
+      if (attrs.start > attrs.end) {
+        errors.push({
+          field: 'date',
+          value: "The start date might be inferor than end date  " + "It must be dd/mm/yyyy and hh:mm."
+        });
+      }
       if (errors.length > 0) {
         return errors;
       }
@@ -580,7 +610,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return this.getDateObject().format(formatter);
+      return Date.create(this.get(this.mainDateField)).format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
@@ -1168,22 +1198,6 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     };
 
     AlarmFormView.prototype.onSubmit = function() {
-      var alarm, data,
-        _this = this;
-      alarm = this.model.get(event.id);
-      data = {
-        description: this.descriptionField.val()
-      };
-      this.cal.fullCalendar('renderEvent', event);
-      alarm.save(data, {
-        success: function() {
-          event.title = data.description;
-          return _this.cal.fullCalendar('renderEvent', event);
-        },
-        error: function() {
-          return this.cal.fullCalendar('renderEvent', event);
-        }
-      });
       return this.resetErrors();
     };
 
