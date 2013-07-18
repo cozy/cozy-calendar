@@ -85,6 +85,7 @@ module.exports = class CalendarView extends View
 
         @cal.fullCalendar 'addEventSource', [event]
 
+
     onResetAlarm: ->
         @modelAlarm.forEach (item) => @onAddAlarm item, @modelAlarm
 
@@ -143,6 +144,7 @@ module.exports = class CalendarView extends View
 
         if event.type is 'alarm'
             alarm = @modelAlarm.get event.id
+            console.log alarm.getDateObject()
             alarm.getDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
@@ -159,10 +161,11 @@ module.exports = class CalendarView extends View
                     revertFunc()
         else
             evt = @modelEvent.get event.id
-            evt.start.advance
+            evt.getStartDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
-            evt.end.advance
+
+            evt.getEndDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
             data = 

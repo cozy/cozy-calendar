@@ -1551,6 +1551,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         _this = this;
       if (event.type === 'alarm') {
         alarm = this.modelAlarm.get(event.id);
+        console.log(alarm.getDateObject());
         alarm.getDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta
@@ -1572,11 +1573,11 @@ window.require.register("views/calendar_view", function(exports, require, module
         });
       } else {
         evt = this.modelEvent.get(event.id);
-        evt.start.advance({
+        evt.getStartDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta
         });
-        evt.end.advance({
+        evt.getEndDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta
         });
