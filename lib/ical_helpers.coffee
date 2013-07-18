@@ -2,6 +2,13 @@ fs = require 'fs'
 moment = require 'moment'
 lazy = require 'lazy'
 
+# Small module to generate iCal file from JS Objects or to parse iCal file
+# to obtain explicit JS Objects.
+#
+# This module is inpired by the icalendar Python module.
+
+
+# Buffer manager to easily build long string.
 class iCalBuffer
 
     txt: ''
@@ -21,6 +28,8 @@ class iCalBuffer
     toString: -> @txt
 
 
+# Base ICal Component. This class is aimed to be extended not to be used
+# directly.
 module.exports.VComponent = class VComponent
     name: 'VCOMPONENT'
 
@@ -41,7 +50,9 @@ module.exports.VComponent = class VComponent
     add: (component) ->
         @subComponents.push component
 
-module.exports.VCalendar = VCalendar = class VCalendar extends VComponent
+
+# Calendar component. It's the representation of the root object of a Calendar.
+module.exports.VCalendar = class VCalendar extends VComponent
     name: 'VCALENDAR'
 
     constructor: (organization, title) ->
@@ -52,7 +63,9 @@ module.exports.VCalendar = VCalendar = class VCalendar extends VComponent
         @fields['PRODID'] = "-//#{organization}//NONSGML #{title}//EN"
 
 
-module.exports.VAlarm = VAlarm = class VAlarm extends VComponent
+# An alarm is there to warn the calendar owner of something. It could be
+# included in an event or in a todo.
+module.exports.VAlarm = class VAlarm extends VComponent
     name: 'VALARM'
 
     constructor: (date) ->
@@ -63,7 +76,8 @@ module.exports.VAlarm = VAlarm = class VAlarm extends VComponent
             TRIGGER: @formatIcalDate date
 
 
-module.exports.VTodo = VTodo = class VTodo extends VComponent
+# The VTodo is used to described a dated action.
+module.exports.VTodo = class VTodo extends VComponent
     name: 'VTODO'
 
     constructor: (date, user, description) ->
@@ -76,30 +90,30 @@ module.exports.VTodo = VTodo = class VTodo extends VComponent
     addAlarm: (date) ->
         @add new VAlarm date
 
-module.exports.VEvent = VEvent = class VEvent extends VComponent
+# Additional components not supported yet by Cozy Cloud.
+module.exports.VEvent = class VEvent extends VComponent
     name = 'VEVENT'
-module.exports.VJournal = VJournal = class VJournal extends VComponent
-    name = 'VJOURNAL'
-module.exports.VFreeBusy = VFreeBusy = class VFreeBusy extends VComponent
-    name = 'VFREEBUSY'
-module.exports.VTimezone = VTimezone = class VTimezone extends VComponent
+module.exports.VTimezone = class VTimezone extends VComponent
     name = 'VTIMEZONE'
-module.exports.VStandard = VStandard = class VStandard extends VComponent
+module.exports.VJournal = class VJournal extends VComponent
+    name = 'VJOURNAL'
+module.exports.VFreeBusy = class VFreeBusy extends VComponent
+    name = 'VFREEBUSY'
+module.exports.VStandard = class VStandard extends VComponent
     name = 'VSTANDARD'
-module.exports.VDaylight = VDaylight = class VDaylight extends VComponent
+module.exports.VDaylight = class VDaylight extends VComponent
     name = 'VDAYLIGHT'
 
-components =
-    VCALENDAR: VCalendar
-    VTODO: VTodo
-    VALARM: VAlarm
-    VEVENT: VEvent
-    VJOURNAL: VJournal
-    VFREEBUSY: VFreeBusy
-    VTIMEZONE: VTimezone
-    VSTANDARD: VStandard
-
 module.exports.ICalParser = class ICalParser
+
+    @components:
+        VTODO: VTodo
+        VALARM: VAlarm
+        VEVENT: VEvent
+        VJOURNAL: VJournal
+        VFREEBUSY: VFreeBusy
+        VTIMEZONE: VTimezone
+        VSTANDARD: VStandard
 
     parseFile: (file, callback) ->
         @parse fs.createReadStream(file), callback
@@ -142,8 +156,8 @@ module.exports.ICalParser = class ICalParser
                         component = new VCalendar()
                         result = component
 
-                    else if value in Object.keys(components)
-                        component = new components[value]()
+                    else if value in Object.keys(ICalParser.components)
+                        component = new ICalParser.components[value]()
 
                     else
                         sendError "Malformed ical file (line #{lineNumber})"
