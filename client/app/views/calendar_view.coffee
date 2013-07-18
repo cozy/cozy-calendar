@@ -144,7 +144,6 @@ module.exports = class CalendarView extends View
 
         if event.type is 'alarm'
             alarm = @modelAlarm.get event.id
-            console.log alarm.getDateObject()
             alarm.getDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
@@ -221,12 +220,18 @@ module.exports = class CalendarView extends View
                     model: @modelEvent
                     event: event
 
+                startDate = event.start.format('{yy}:{MM}:{dd}').split(":")
+                endDate = event.end.format('{yy}:{MM}:{dd}').split(":")
+                diff = event.diffDays
+                defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff
+
                 formTemplate = eventFormSmallTemplate
                     editionMode: true
                     defaultValueStart: event.start.format('{HH}:{mm}')
-                    defaultValueEnd: event.end.format('{HH}:{mm}')
+                    defaultValueEnd: defaultValueEnd
                     defaultValuePlace: event.place
                     defaultValueDesc: event.title
+
 
                 @popoverEvent.show "Event edition", direction, formTemplate
 

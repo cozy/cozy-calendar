@@ -79,6 +79,27 @@
   globals.require.brunch = true;
 })();
 
+window.require.register("application", function(exports, require, module) {
+  module.exports = {
+    initialize: function() {
+      var AlarmCollection, EventCollection, Router, SocketListener;
+      Router = require('router');
+      SocketListener = require('../lib/socket_listener');
+      AlarmCollection = require('collections/alarms');
+      EventCollection = require('collections/events');
+      this.router = new Router();
+      this.alarms = new AlarmCollection();
+      this.events = new EventCollection();
+      SocketListener.watch(this.alarms);
+      SocketListener.watch(this.events);
+      Backbone.history.start();
+      if (typeof Object.freeze === 'function') {
+        return Object.freeze(this);
+      }
+    }
+  };
+  
+});
 window.require.register("collections/alarms", function(exports, require, module) {
   var Alarm, AlarmCollection, ScheduleItemsCollection, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -222,6 +243,44 @@ window.require.register("helpers", function(exports, require, module) {
       }
     }
     return direction;
+  };
+
+  exports.getDiffDays = function(start, end) {
+    var days, diff, i, monthDiff, _i, _ref, _ref1;
+    days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    monthDiff = function() {
+      var diff, firstMonth, i, lastMonth, _i, _ref, _ref1;
+      firstMonth = days[start[1] - 1] - start[2];
+      lastMonth = end[2];
+      if (end[1] - start[1] === 1) {
+        console.log(parseInt(firstMonth) + parseInt(lastMonth));
+        return parseInt(firstMonth) + parseInt(lastMonth);
+      } else {
+        diff = parseInt(firstMonth) + parseInt(lastMonth);
+        for (i = _i = _ref = start[1], _ref1 = end[1] - 1; _i <= _ref1; i = _i += 1) {
+          diff = diff + days[i - 1];
+        }
+        console.log(diff);
+        return diff;
+      }
+    };
+    if (start === end) {
+      return 0;
+    } else if (start[0] === end[0] && start[1] === end[1]) {
+      return parseInt(end[2]) - parseInt(start[2]);
+    } else if (start[0] === end[0]) {
+      return monthDiff();
+    } else {
+      if (end[1] - start[1] === 1) {
+        return monthDiff();
+      } else {
+        diff = monthDiff();
+        for (i = _i = _ref = start[2], _ref1 = end[2] - 1; _i <= _ref1; i = _i += 1) {
+          diff = diff + 365;
+        }
+        return diff;
+      }
+    }
   };
   
 });
@@ -1530,7 +1589,6 @@ window.require.register("views/calendar_view", function(exports, require, module
         _this = this;
       if (event.type === 'alarm') {
         alarm = this.modelAlarm.get(event.id);
-        console.log(alarm.getDateObject());
         alarm.getDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta
@@ -1580,7 +1638,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var direction, eventStartTime, formTemplate, isDayView, target, _ref1, _ref2;
+      var defaultValueEnd, diff, direction, endDate, eventStartTime, formTemplate, isDayView, startDate, target, _ref1, _ref2;
       target = $(jsEvent.currentTarget);
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
@@ -1612,10 +1670,14 @@ window.require.register("views/calendar_view", function(exports, require, module
             model: this.modelEvent,
             event: event
           });
+          startDate = event.start.format('{yy}:{MM}:{dd}').split(":");
+          endDate = event.end.format('{yy}:{MM}:{dd}').split(":");
+          diff = event.diffDays;
+          defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff;
           formTemplate = eventFormSmallTemplate({
             editionMode: true,
             defaultValueStart: event.start.format('{HH}:{mm}'),
-            defaultValueEnd: event.end.format('{HH}:{mm}'),
+            defaultValueEnd: defaultValueEnd,
             defaultValuePlace: event.place,
             defaultValueDesc: event.title
           });
@@ -1912,7 +1974,7 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.onEventButtonClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, place, specifiedTime, start,
+      var data, description, dueEndDate, dueStartDate, end, place, specifiedDay, specifiedTime, start,
         _this = this;
       start = $('.popover #inputStart').val();
       end = $('.popover #inputEnd').val();
@@ -1924,8 +1986,14 @@ window.require.register("views/event_popover", function(exports, require, module
         hours: specifiedTime[0],
         minutes: specifiedTime[1]
       });
-      specifiedTime = end.split(':');
-      dueEndDate = Date.create(this.date);
+      specifiedDay = end.split('+');
+      specifiedTime = specifiedDay[0].split(':');
+      if (specifiedDay[1] != null) {
+        dueEndDate = Date.create(specifiedDay[1]);
+      } else {
+        specifiedDay[1] = 0;
+        dueEndDate = Date.create(this.date);
+      }
       dueEndDate.set({
         hours: specifiedTime[0],
         minutes: specifiedTime[1]
@@ -1933,9 +2001,9 @@ window.require.register("views/event_popover", function(exports, require, module
       data = {
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
+        diffDays: specifiedDay[1],
         place: place,
-        description: description,
-        action: 'DISPLAY'
+        description: description
       };
       return this.model.create(data, {
         wait: true,
@@ -1953,7 +2021,7 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.onEditEventClicked = function() {
-      var data, dueEndDate, dueStartDate, end, evt, specifiedTime, start,
+      var data, dueEndDate, dueStartDate, end, evt, newDate, specifiedDay, specifiedTime, start,
         _this = this;
       evt = this.model.get(this.event.id);
       start = $('.popover #inputStart').val();
@@ -1964,8 +2032,16 @@ window.require.register("views/event_popover", function(exports, require, module
         hours: specifiedTime[0],
         minutes: specifiedTime[1]
       });
-      specifiedTime = end.split(':');
-      dueEndDate = Date.create(this.date);
+      specifiedDay = end.split('+');
+      specifiedTime = specifiedDay[0].split(':');
+      if (specifiedDay[1] != null) {
+        newDate = this.date.advance({
+          days: specifiedDay[1]
+        });
+        dueEndDate = Date.create(newDate);
+      } else {
+        dueEndDate = Date.create(this.date);
+      }
       dueEndDate.set({
         hours: specifiedTime[0],
         minutes: specifiedTime[1]

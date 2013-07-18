@@ -14,10 +14,10 @@ before ->
 before ->
 
     @convertEventDate = (evt, timezone) ->
-        timezonedDate = new time.Date(evt.start)
+        timezonedDate = new time.Date(evt.start, 'UTC')
         timezonedDate.setTimezone(timezone)
         evt.start = timezonedDate.toString().slice(0, 24)
-        timezonedDate = new time.Date(evt.end)
+        timezonedDate = new time.Date(evt.end, 'UTC')
         timezonedDate.setTimezone(timezone)
         evt.end = timezonedDate.toString().slice(0, 24)
         return evt
@@ -46,40 +46,36 @@ action 'all', ->
             send events
 
 action 'getOne', ->
-    console.log @event
     @event = @convertEventDate(@event, @userTimezone)
-    console.log @event
     send @event, 200
 
 action 'create', ->
 
-    #startDate = new time.Date(req.body.start, @userTimezone)
-    #startDate.setTimezone('UTC')
-   # req.body.start = startDate.toString().slice(0, 24)
+    startDate = new time.Date(req.body.start, @userTimezone)
+    startDate.setTimezone('UTC')
+    req.body.start = startDate.toString().slice(0, 24)
 
-    #endDate = new time.Date(req.body.end, @userTimezone)
-    #endDate.setTimezone('UTC')
-    #req.body.end = endDate.toString().slice(0, 24)
+    endDate = new time.Date(req.body.end, @userTimezone)
+    endDate.setTimezone('UTC')
+    req.body.end = endDate.toString().slice(0, 24)
 
     Event.create req.body, (err, evt) =>
-        console.log evt
         if err
             send error: true, msg: "Server error while creating event.", 500
         else
             evt = @convertEventDate(evt, @userTimezone)
-            console.log evt
             send evt, 201
 
 action 'update', ->
 
-    #startDate = new time.Date(req.body.start, @userTimezone)
-    #startDate.setTimezone('UTC')
-    #req.body.start = startDate.toString().slice(0, 24)
+    startDate = new time.Date(req.body.start, @userTimezone)
+    startDate.setTimezone('UTC')
+    req.body.start = startDate.toString().slice(0, 24)
 
-    #endDate = new time.Date(req.body.end, @userTimezone)
-    #endDate.setTimezone('UTC')
-    #req.body.end = endDate.toString().slice(0, 24)
-    console.log @event
+    endDate = new time.Date(req.body.end, @userTimezone)
+    endDate.setTimezone('UTC')
+    req.body.end = endDate.toString().slice(0, 24)
+
     @event.updateAttributes body, (err, evt) =>
         if err?
             send error: true, msg: "Server error while saving event", 500

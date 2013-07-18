@@ -13,7 +13,7 @@ before ->
 before ->
 
     @convertAlarmDate = (alarm, timezone) ->
-        timezonedDate = new time.Date(alarm.trigg)
+        timezonedDate = new time.Date(alarm.trigg, 'UTC')
         timezonedDate.setTimezone(timezone)
         alarm.trigg = timezonedDate.toString().slice(0, 24)
         return alarm
@@ -48,13 +48,10 @@ action 'getOne', ->
     send @alarm, 200
 
 action 'create', ->
-    console.log req.body.trigg
-    console.log @userTimezone
-    #triggerDate = new time.Date(req.body.trigg, @userTimezone)
-    #console.log triggerDate
-    #triggerDate.setTimezone('UTC')
-    #req.body.trigg = triggerDate.toString().slice(0, 24)
-    #console.log req.body.trigg
+    
+    triggerDate = new time.Date(req.body.trigg, @userTimezone)
+    triggerDate.setTimezone('UTC')
+    req.body.trigg = triggerDate.toString().slice(0, 24)
 
     Alarm.create req.body, (err, alarm) =>
         if err
@@ -65,9 +62,9 @@ action 'create', ->
 
 action 'update', ->
 
-    #triggerDate = new time.Date(req.body.trigg, @userTimezone)
-    #triggerDate.setTimezone('UTC')
-    #req.body.trigg = triggerDate.toString().slice(0, 24)
+    triggerDate = new time.Date(req.body.trigg, @userTimezone)
+    triggerDate.setTimezone('UTC')
+    req.body.trigg = triggerDate.toString().slice(0, 24)
 
     @alarm.updateAttributes body, (err, alarm) =>
         if err?

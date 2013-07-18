@@ -134,10 +134,13 @@ module.exports = class EventPopOver extends View
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
 
-
-        specifiedTime = end.split(':')
-
-        dueEndDate = Date.create(@date)
+        specifiedDay = end.split('+')
+        specifiedTime = specifiedDay[0].split(':')
+        if specifiedDay[1]?
+            dueEndDate = Date.create(specifiedDay[1])
+        else
+            specifiedDay[1] = 0
+            dueEndDate = Date.create(@date)
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
@@ -146,10 +149,9 @@ module.exports = class EventPopOver extends View
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
+            diffDays: specifiedDay[1]
             place: place
             description: description
-            action: 'DISPLAY'
-
         @model.create data, 
             wait: true
             success: =>
@@ -173,9 +175,15 @@ module.exports = class EventPopOver extends View
             minutes: specifiedTime[1]
 
 
-        specifiedTime = end.split(':')
 
-        dueEndDate = Date.create(@date)
+        specifiedDay = end.split('+')
+        specifiedTime = specifiedDay[0].split(':')
+        if specifiedDay[1]?
+            newDate = @date.advance
+                days: specifiedDay[1]
+            dueEndDate = Date.create(newDate)
+        else
+            dueEndDate = Date.create(@date)
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
