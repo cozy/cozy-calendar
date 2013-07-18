@@ -1,6 +1,9 @@
 View = require '../lib/view'
 Alarm = require '../models/alarm'
 
+EventPopOver = require './event_popover'
+eventFormSmallTemplate = require('./templates/event_form_small')
+
 module.exports = class AlarmPopOver extends View
 
     constructor: (@cal) ->
@@ -13,6 +16,7 @@ module.exports = class AlarmPopOver extends View
         if @popoverWidget?
             @popoverWidget.find('button.close').unbind 'click'
             @popoverWidget.find('button.add-alarm').unbind 'click'
+            @popoverWidget.find('button.add-event').unbind 'click'
             @popoverWidget.find('input').unbind 'keyup'
             @popoverWidget?.hide()
 
@@ -22,6 +26,7 @@ module.exports = class AlarmPopOver extends View
         @date = data.date
         @action = data.action
         @model = data.model
+        @modelEvent = data.modelEvent
         @event = data.event
 
     show: (title, direction, content) ->
@@ -46,9 +51,11 @@ module.exports = class AlarmPopOver extends View
 
         @addAlarmButton = @popoverWidget.find 'button.add-alarm'
         @addAlarmButton.html @action
+        @addEventButton = @popoverWidget.find 'button.add-event'
 
         @popoverWidget.find('button.close').click => @clean()
         @addAlarmButton.click => @onAlarmButtonClicked()
+        @addEventButton.click => @onEventButtonClicked()
 
         @alarmDescription = @popoverWidget.find('input')
         @alarmDescription.keyup (event) =>
@@ -62,6 +69,7 @@ module.exports = class AlarmPopOver extends View
     bindEditEvents: =>
         @popoverWidget = $('.container .popover')
         @addAlarmButton = @popoverWidget.find 'button.add-alarm'
+        @addEventButton = @popoverWidget.find 'button.add-event'
         @closeButton = @popoverWidget.find 'button.close'
         @removeButton = @popoverWidget.find '.alarm-remove'
         @alarmDescription = @popoverWidget.find 'input'
@@ -92,7 +100,6 @@ module.exports = class AlarmPopOver extends View
             error: ->
                 @removeButton.spin()
                 @removeButton.css 'width', '14px'
-                @clean()
                 @clean()
 
     onAlarmButtonClicked: =>
@@ -130,6 +137,24 @@ module.exports = class AlarmPopOver extends View
                 @clean()
                 @addAlarmButton.spin()
                 @addAlarmButton.html @action
+
+    onEventButtonClicked: () =>
+        @field.popover('destroy').popover()
+        @pop = new EventPopOver @cal
+        @pop.createNew
+            field: @field
+            date: @date
+            action: 'create'
+            model: @modelEvent
+
+        eventFormTemplate = eventFormSmallTemplate
+            editionMode: false
+            defaultValueStart: ''
+            defaultValueEnd: ''
+            defaultValuePlace: ''
+            defaultValueDesc: ''
+        @pop.show "Event creation", @direction , eventFormTemplate
+        @pop.bindEvents @date
 
     onEditAlarmClicked: =>
         alarm = @model.get @event.id
