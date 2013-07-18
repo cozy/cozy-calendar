@@ -76,6 +76,28 @@ module.exports.VTodo = VTodo = class VTodo extends VComponent
     addAlarm: (date) ->
         @add new VAlarm date
 
+module.exports.VEvent = VEvent = class VEvent extends VComponent
+    name = 'VEVENT'
+module.exports.VJournal = VJournal = class VJournal extends VComponent
+    name = 'VJOURNAL'
+module.exports.VFreeBusy = VFreeBusy = class VFreeBusy extends VComponent
+    name = 'VFREEBUSY'
+module.exports.VTimezone = VTimezone = class VTimezone extends VComponent
+    name = 'VTIMEZONE'
+module.exports.VStandard = VStandard = class VStandard extends VComponent
+    name = 'VSTANDARD'
+module.exports.VDaylight = VDaylight = class VDaylight extends VComponent
+    name = 'VDAYLIGHT'
+
+components =
+    VCALENDAR: VCalendar
+    VTODO: VTodo
+    VALARM: VAlarm
+    VEVENT: VEvent
+    VJOURNAL: VJournal
+    VFREEBUSY: VFreeBusy
+    VTIMEZONE: VTimezone
+    VSTANDARD: VStandard
 
 module.exports.ICalParser = class ICalParser
 
@@ -120,11 +142,8 @@ module.exports.ICalParser = class ICalParser
                         component = new VCalendar()
                         result = component
 
-                    else if value is "VTODO"
-                        component = new VTodo()
-
-                    else if value is "VALARM"
-                        component = new VAlarm()
+                    else if value in Object.keys(components)
+                        component = new components[value]()
 
                     else
                         sendError "Malformed ical file (line #{lineNumber})"
