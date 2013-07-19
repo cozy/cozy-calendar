@@ -50,11 +50,6 @@ module.exports = class Event extends ScheduleItem
                 field: 'description'
                 value: "A description must be set."
 
-        if not attrs.place
-            errors.push
-                field: 'place'
-                value: "An Place must be set."
-
         if not attrs.start or not new Date.create(attrs.start).isValid()
             errors.push
                 field: 'startdate'

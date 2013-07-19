@@ -40,6 +40,7 @@ module.exports = class AlarmPopOver extends View
         ).popover('show')
         @popoverWidget = $('.container .popover')
         @popoverWidget.find('input').focus()
+        @direction = direction
 
         if @action is 'create'
             $('.alarm-remove').hide()

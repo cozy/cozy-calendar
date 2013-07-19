@@ -123,12 +123,14 @@ module.exports = class EventPopOver extends View
                 @clean()
 
     onEventButtonClicked: =>
+        # Recover values
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
         place = $('.popover #inputPlace').val()
         description = $('.popover #inputDesc').val()
         specifiedTime = start.split(':')
 
+        # Configure start and end dates
         dueStartDate = Date.create(@date)
         dueStartDate.set
             hours: specifiedTime[0]
@@ -146,7 +148,8 @@ module.exports = class EventPopOver extends View
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
-
+            
+        # Store new event
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
@@ -165,6 +168,7 @@ module.exports = class EventPopOver extends View
                 @addEventButton.html @action
 
     onEditEventClicked: =>
+        # Recover values
         evt = @model.get @event.id
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
@@ -172,6 +176,7 @@ module.exports = class EventPopOver extends View
         description = $('.popover #inputDesc').val()
         specifiedTime = start.split(':')
 
+        # Configure start and end dates
         dueStartDate = Date.create(@date)
         dueStartDate.set
             hours: specifiedTime[0]
@@ -190,6 +195,7 @@ module.exports = class EventPopOver extends View
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
           
+        # Store new event
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
@@ -201,6 +207,7 @@ module.exports = class EventPopOver extends View
         evt.save data,
             wait: true
             success: =>
+                # Update event in calendar
                 @event.title = data.description
                 startDate = new Date(data.start)
                 @event.start = startDate.format Date.ISO8601_DATETIME

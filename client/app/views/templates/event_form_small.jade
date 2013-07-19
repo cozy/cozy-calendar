@@ -3,11 +3,12 @@ div
     input.input-small(type="text", value="#{defaultValueStart}", id="inputStart", placeholder="Start") 
     |To  
     input.input-small(type="text", value="#{defaultValueEnd}", id="inputEnd", placeholder="End")   
-    input.input(type="text", value="#{defaultValuePlace}", id="inputPlace", placeholder="Place")
+    input.input-small(type="text", value="#{defaultValuePlace}", id="inputPlace", placeholder="Place")
+    |    
+    input.input(type="text", value="#{defaultValueDesc}", id="inputDesc", placeholder="Description")
 
-    button.btn.pull-right.add-event
+    button.btn.add-event
         if editionMode
             | Edit
         else
             | Create
-    input.input-xlarge(type="text", value="#{defaultValueDesc}", id="inputDesc", placeholder="Description")
