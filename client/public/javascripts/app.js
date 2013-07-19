@@ -874,7 +874,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
   
 });
 window.require.register("router", function(exports, require, module) {
-  var AlarmCollection, CalendarView, ListView, Router, app, _ref,
+  var AlarmCollection, CalendarView, ImportView, ListView, Router, app, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -884,6 +884,8 @@ window.require.register("router", function(exports, require, module) {
   ListView = require('views/list_view');
 
   CalendarView = require('views/calendar_view');
+
+  ImportView = require('views/import_view');
 
   AlarmCollection = require('collections/alarms');
 
@@ -898,7 +900,8 @@ window.require.register("router", function(exports, require, module) {
     Router.prototype.routes = {
       '': 'calendar',
       'calendar': 'calendar',
-      'list': 'alarmsList'
+      'list': 'alarmsList',
+      'import': 'import'
     };
 
     Router.prototype.calendar = function() {
@@ -910,6 +913,10 @@ window.require.register("router", function(exports, require, module) {
     Router.prototype.alarmsList = function() {
       this.displayView(ListView, app.alarms, null);
       return this.handleFetch(this.mainView.model, "alarms");
+    };
+
+    Router.prototype["import"] = function() {
+      return this.displayView(ImportView, app.alarms);
     };
 
     Router.prototype.handleFetch = function(model, name) {
@@ -2739,7 +2746,7 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"><i class="icon-arrow-up icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };
@@ -2811,7 +2818,7 @@ window.require.register("views/templates/listview", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"><i class="icon-arrow-up icon-white"></i></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

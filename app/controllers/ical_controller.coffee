@@ -1,5 +1,7 @@
 time = require 'time'
 moment = require 'moment'
+ical = require './lib/ical_helpers'
+
 
 before ->
 
@@ -16,14 +18,35 @@ before ->
         next()
 
 
-action 'ics', ->
-
+action 'export', ->
     calendar = Alarm.getICalCalendar()
     Alarm.all (err, alarms) =>
         if err
             send error: true, msg: 'Server error occurred while retrieving data'
         else
-            for alarm in alarms
-                calendar.add alarm.toIcal()
+            calendar.add alarm.toIcal() for alarm in alarms
             res.header 'Content-Type': 'text/plain'
             send calendar.toString()
+
+
+action 'import', ->
+    file = req.files['file']
+    if file?
+        parser = new ical.ICalParser()
+        parser.parseFile file.path, (err, result) ->
+            if err
+                console.log err
+                send error: 'error occured while saving file', msg: err.msg, 500
+            else
+                @alarmsToImport = result
+                send Alarm.extractAlarms result
+    else
+        send error: 'no file sent', 500
+
+action 'confirm Import', ->
+    if @alarmsToImport?
+
+        for alarm in @alarmsToImport
+            alarm.save()
+
+    send success: 'import processed'

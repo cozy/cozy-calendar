@@ -12,8 +12,8 @@ exports.routes = (map) ->
     map.post 'events', 'events#create'
     map.put 'events/:id', 'events#update'
     map.delete 'events/:id', 'events#delete'
-    map.get 'events/:id', 'events#getOne' 
+    map.get 'events/:id', 'events#getOne'
 
-    map.get 'ical.ics', 'ical#ics'
-    map.get 'public/ical.ics', 'ical#ics'
-    map.get 'export/calendar.ics', 'ical#ics'
+    # Ical support
+    map.get 'export/calendar.ics', 'ical#export'
+    map.post 'import/ical', 'ical#import'

@@ -8263,8 +8263,20 @@ input[type="time"] {
 .affix div.form-horizontal {
   border: 1px solid #ddd;
 }
-.icon-arrow-down:before {
+.icon-arrow-down:before,
+.icon-arrow-up:before {
   content: "";
+}
+#import-form h1,
+#import-form h3 {
+  font-weight: normal;
+}
+#import-form #import-alarm-list {
+  margin-top: 20px;
+}
+#import-form .alarm p {
+  margin: 0;
+  font-weight: 10px;
 }
 @font-face {
   font-family: styled;
