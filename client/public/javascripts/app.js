@@ -2489,7 +2489,8 @@ window.require.register("views/import_view", function(exports, require, module) 
 
     ImportView.prototype.events = {
       'change #import-file-input': 'onFileChanged',
-      'click button': 'onImportClicked'
+      'click button#import-button': 'onImportClicked',
+      'click button#confirm-import-button': 'onConfirmImportClicked'
     };
 
     ImportView.prototype.initialize = function() {};
@@ -2550,6 +2551,23 @@ window.require.register("views/import_view", function(exports, require, module) 
           return alert('error');
         }
       });
+    };
+
+    ImportView.prototype.onConfirmImportClicked = function() {
+      var alarm, event, _i, _j, _len, _len1, _ref1, _ref2;
+
+      _ref1 = this.alarmList.collection.toArray();
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        alarm = _ref1[_i];
+        alarm.save();
+      }
+      _ref2 = this.eventList.collection.toArray();
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        event = _ref2[_j];
+        event.save();
+      }
+      this.alarmList.collection.reset();
+      return this.eventList.collection.reset();
     };
 
     return ImportView;
@@ -2902,7 +2920,7 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div></div><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button id="import-button" class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div><button id="confirm-import-button" class="btn">confirm import</button></div><div><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div></div>');
   }
   return buf.join("");
   };

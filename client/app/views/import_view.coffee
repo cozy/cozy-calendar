@@ -13,7 +13,8 @@ module.exports = class ImportView extends View
 
     events:
         'change #import-file-input': 'onFileChanged'
-        'click button': 'onImportClicked'
+        'click button#import-button': 'onImportClicked'
+        'click button#confirm-import-button': 'onConfirmImportClicked'
 
     initialize: ->
 
@@ -52,3 +53,14 @@ module.exports = class ImportView extends View
                         @eventList.collection.add event
             error: ->
                 alert 'error'
+
+    onConfirmImportClicked: ->
+
+        for alarm in @alarmList.collection.toArray()
+            alarm.save()
+
+        for event in @eventList.collection.toArray()
+            event.save()
+
+        @alarmList.collection.reset()
+        @eventList.collection.reset()

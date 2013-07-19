@@ -10,12 +10,15 @@
         h3 Icalendar importer
 
         div
-            button.btn import your icalendar file
+            button#import-button.btn import your icalendar file
             input#import-file-input(type="file")
+
         div
+            button#confirm-import-button.btn confirm import
 
-        h4 Alarms to import
-        #import-alarm-list
+        div
+            h4 Alarms to import
+            #import-alarm-list
 
-        h4 Events to import
-        #import-event-list
+            h4 Events to import
+            #import-event-list
