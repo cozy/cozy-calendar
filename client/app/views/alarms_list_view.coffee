@@ -24,11 +24,11 @@ module.exports = class AlarmsListView extends View
             d2 = new Date.create dayProg2.get('date')
 
             if d1.getTime() < d2.getTime()
-                return -1
+                return 1
             else if d1.getTime() is d2.getTime()
                 return 0
             else
-                return 1
+                return -1
 
         @listenTo @dayPrograms, "remove", @onRemoveDayProgram
 

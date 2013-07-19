@@ -122,6 +122,20 @@ window.require.register("collections/alarms", function(exports, require, module)
 
     AlarmCollection.prototype.url = 'alarms';
 
+    AlarmCollection.prototype.comparator = function(si1, si2) {
+      var d1, d2;
+
+      d1 = si1.getDateObject();
+      d2 = si2.getDateObject();
+      if (d1.getTime() < d2.getTime()) {
+        return -1;
+      } else if (d1.getTime() === d2.getTime()) {
+        return 0;
+      } else {
+        return 1;
+      }
+    };
+
     return AlarmCollection;
 
   })(ScheduleItemsCollection);
@@ -1477,11 +1491,11 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
         d1 = new Date.create(dayProg1.get('date'));
         d2 = new Date.create(dayProg2.get('date'));
         if (d1.getTime() < d2.getTime()) {
-          return -1;
+          return 1;
         } else if (d1.getTime() === d2.getTime()) {
           return 0;
         } else {
-          return 1;
+          return -1;
         }
       };
       return this.listenTo(this.dayPrograms, "remove", this.onRemoveDayProgram);
