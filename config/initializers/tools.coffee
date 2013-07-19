@@ -2,7 +2,7 @@ module.exports = (compound) ->
     app = compound.app
 
     compound.tools.database = ->
-        {Alarm} = compound.models
+        {Alarm, Event} = compound.models
 
         switch process.argv[3]
             when 'cleandb'
