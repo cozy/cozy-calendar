@@ -22,8 +22,12 @@ describe "Events management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", "Tue Apr 23 2013 15:40:00 ", "Place", 3, "Something to do"
-                    helpers.createEvent "Tue Apr 24 2013 13:30:00", "Tue Apr 24 2013 14:00:00", "Other place", 0, "Something else to do"
+                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", 
+                        "Tue Apr 23 2013 15:40:00 ", "Place", 3, 
+                        "Something to do"
+                    helpers.createEvent "Tue Apr 24 2013 13:30:00", 
+                        "Tue Apr 24 2013 14:00:00", "Other place", 0, 
+                        "Something else to do"
                 ], ->
                     callback()
             helpers.cleanDb ->
@@ -78,11 +82,13 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'start', 
+                    exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'end', 
+                    exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
                 event.should.have.property 'place', @event.place
@@ -143,11 +149,13 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'start', 
+                    exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'end', 
+                    exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
                 event.should.have.property 'place', @event.place

@@ -168,6 +168,8 @@ module.exports = class EventPopOver extends View
         evt = @model.get @event.id
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
+        place = $('.popover #inputPlace').val()
+        description = $('.popover #inputDesc').val()
         specifiedTime = start.split(':')
 
         dueStartDate = Date.create(@date)
@@ -191,9 +193,9 @@ module.exports = class EventPopOver extends View
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
-            place: $('.popover #inputPlace').val()
+            place: place
             diff: parseInt(specifiedDay[1])
-            description: $('.popover #inputDesc').val()
+            description: description
         @cal.fullCalendar 'renderEvent', @event
         @addEventButton.html '&nbsp;'
         evt.save data,

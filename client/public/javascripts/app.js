@@ -519,6 +519,8 @@ window.require.register("models/event", function(exports, require, module) {
   ScheduleItem = require('./scheduleitem');
 
   module.exports = Event = (function(_super) {
+    var validateDate;
+
     __extends(Event, _super);
 
     function Event() {
@@ -532,8 +534,42 @@ window.require.register("models/event", function(exports, require, module) {
 
     Event.prototype.urlRoot = 'events';
 
+    validateDate = function(attrs, options) {
+      var end, endDate, endHour, sendError, start, startDate, startHour;
+      sendError = function() {
+        console.log('pb start - end');
+        return errors.push({
+          field: 'date',
+          value: "The start date might be inferor than end date  " + "It must be dd/mm/yyyy and hh:mm."
+        });
+      };
+      start = new Date(attrs.start);
+      end = new Date(attrs.end);
+      startDate = start.format('{yy}:{MM}:{dd}').split(":");
+      endDate = end.format('{yy}:{MM}:{dd}').split(":");
+      startHour = start.format('{HH}:{mm}').split(":");
+      endHour = end.format('{HH}:{mm}').split(":");
+      if (startDate[0] === endDate[0] && startDate[1] === endDate[1] && startDate[2] === endDate[2]) {
+        if (startHour[0] > endHour[0]) {
+          return sendError();
+        } else if (startHour[0] === endHour[0] && startHour[1] > endHour[1]) {
+          return sendError();
+        }
+      } else {
+        if (startDate[0] > endDate[0]) {
+          return sendError();
+        } else if (startDate[0] === endDate[0]) {
+          if (startDate[1] > endDate[1]) {
+            return sendError();
+          } else if (startDate[1] === endDate[1] && startDate[2] > endDate[2]) {
+            return sendError();
+          }
+        }
+      }
+    };
+
     Event.prototype.validate = function(attrs, options) {
-      var end, endDate, endHour, errors, sendError, start, startDate, startHour;
+      var errors;
       errors = [];
       if (!attrs.description) {
         errors.push({
@@ -559,36 +595,7 @@ window.require.register("models/event", function(exports, require, module) {
           value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
         });
       }
-      sendError = function() {
-        console.log('pb start - end');
-        return errors.push({
-          field: 'date',
-          value: "The start date might be inferor than end date  " + "It must be dd/mm/yyyy and hh:mm."
-        });
-      };
-      start = new Date(attrs.start);
-      end = new Date(attrs.end);
-      startDate = start.format('{yy}:{MM}:{dd}').split(":");
-      endDate = end.format('{yy}:{MM}:{dd}').split(":");
-      startHour = start.format('{HH}:{mm}').split(":");
-      endHour = end.format('{HH}:{mm}').split(":");
-      if (startDate[0] === endDate[0] && startDate[1] === endDate[1] && startDate[2] === endDate[2]) {
-        if (startHour[0] > endHour[0]) {
-          sendError();
-        } else if (startHour[0] === endHour[0] && startHour[1] > endHour[1]) {
-          sendError();
-        }
-      } else {
-        if (startDate[0] > endDate[0]) {
-          sendError();
-        } else if (startDate[0] === endDate[0]) {
-          if (startDate[1] > endDate[1]) {
-            sendError();
-          } else if (startDate[1] === endDate[1] && startDate[2] > endDate[2]) {
-            sendError();
-          }
-        }
-      }
+      validateDate(attrs, options);
       if (errors.length > 0) {
         return errors;
       }
@@ -2044,11 +2051,13 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.onEditEventClicked = function() {
-      var data, dueEndDate, dueStartDate, end, evt, newDate, specifiedDay, specifiedTime, start,
+      var data, description, dueEndDate, dueStartDate, end, evt, newDate, place, specifiedDay, specifiedTime, start,
         _this = this;
       evt = this.model.get(this.event.id);
       start = $('.popover #inputStart').val();
       end = $('.popover #inputEnd').val();
+      place = $('.popover #inputPlace').val();
+      description = $('.popover #inputDesc').val();
       specifiedTime = start.split(':');
       dueStartDate = Date.create(this.date);
       dueStartDate.set({
@@ -2073,9 +2082,9 @@ window.require.register("views/event_popover", function(exports, require, module
       data = {
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
-        place: $('.popover #inputPlace').val(),
+        place: place,
         diff: parseInt(specifiedDay[1]),
-        description: $('.popover #inputDesc').val()
+        description: description
       };
       this.cal.fullCalendar('renderEvent', this.event);
       this.addEventButton.html('&nbsp;');
