@@ -98,8 +98,6 @@ module.exports = class CalendarView extends View
             title: evt.get 'description'
             start: evt.getFormattedStartDate(Date.ISO8601_DATETIME)
             end: evt.getFormattedEndDate(Date.ISO8601_DATETIME)
-            diff: evt.get "diff"
-            place: evt.get 'place'
             allDay: false
             backgroundColor: '#EB1'
             borderColor: '#EB1'

@@ -1518,8 +1518,6 @@ window.require.register("views/calendar_view", function(exports, require, module
         title: evt.get('description'),
         start: evt.getFormattedStartDate(Date.ISO8601_DATETIME),
         end: evt.getFormattedEndDate(Date.ISO8601_DATETIME),
-        diff: evt.get("diff"),
-        place: evt.get('place'),
         allDay: false,
         backgroundColor: '#EB1',
         borderColor: '#EB1',
@@ -2049,7 +2047,12 @@ window.require.register("views/event_popover", function(exports, require, module
       return evt.save(data, {
         wait: true,
         success: function() {
+          var endDate, startDate;
           _this.event.title = data.description;
+          startDate = new Date(data.start);
+          _this.event.start = startDate.format(Date.ISO8601_DATETIME);
+          endDate = new Date(data.end);
+          _this.event.end = endDate.format(Date.ISO8601_DATETIME);
           return _this.cal.fullCalendar('renderEvent', _this.event);
         },
         error: function() {

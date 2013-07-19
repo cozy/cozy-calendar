@@ -200,6 +200,10 @@ module.exports = class EventPopOver extends View
             wait: true
             success: =>
                 @event.title = data.description
+                startDate = new Date(data.start)
+                @event.start = startDate.format Date.ISO8601_DATETIME
+                endDate = new Date(data.end)
+                @event.end = endDate.format Date.ISO8601_DATETIME
                 @cal.fullCalendar 'renderEvent', @event
             error: ->
                 @cal.fullCalendar 'renderEvent', @event
