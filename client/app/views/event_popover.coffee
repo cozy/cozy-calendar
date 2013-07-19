@@ -123,12 +123,14 @@ module.exports = class EventPopOver extends View
                 @clean()
 
     onEventButtonClicked: =>
+        # Recover values
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
         place = $('.popover #inputPlace').val()
         description = $('.popover #inputDesc').val()
         specifiedTime = start.split(':')
 
+        # Configure start and end dates
         dueStartDate = Date.create(@date)
         dueStartDate.set
             hours: specifiedTime[0]
@@ -146,7 +148,8 @@ module.exports = class EventPopOver extends View
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
-
+            
+        # Store new event
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
@@ -165,11 +168,15 @@ module.exports = class EventPopOver extends View
                 @addEventButton.html @action
 
     onEditEventClicked: =>
+        # Recover values
         evt = @model.get @event.id
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
+        place = $('.popover #inputPlace').val()
+        description = $('.popover #inputDesc').val()
         specifiedTime = start.split(':')
 
+        # Configure start and end dates
         dueStartDate = Date.create(@date)
         dueStartDate.set
             hours: specifiedTime[0]
@@ -188,18 +195,26 @@ module.exports = class EventPopOver extends View
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
           
+        # Store new event
         data = 
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
-            place: $('.popover #inputPlace').val()
+            place: place
             diff: parseInt(specifiedDay[1])
-            description: $('.popover #inputDesc').val()
+            description: description
         @cal.fullCalendar 'renderEvent', @event
         @addEventButton.html '&nbsp;'
         evt.save data,
             wait: true
             success: =>
+                # Update event in calendar
                 @event.title = data.description
+                startDate = new Date(data.start)
+                @event.start = startDate.format Date.ISO8601_DATETIME
+                endDate = new Date(data.end)
+                @event.end = endDate.format Date.ISO8601_DATETIME
+                @event.diff = data.diff
+                @event.place = data.place
                 @cal.fullCalendar 'renderEvent', @event
             error: ->
                 @cal.fullCalendar 'renderEvent', @event

@@ -1,5 +1,8 @@
 time = require 'time'
 
+## Before and after method
+
+# Recover event with id equal to req.params.id
 before ->
     Event.find req.params.id, (err, evt) =>
         if err or not evt
@@ -10,9 +13,10 @@ before ->
 # Make this pre-treatment only before update and delete action.
 , except: ['create', 'all']
 
+# Initialize convertEvenDate and userTimezone 
 before ->
-
     @convertEventDate = (evt, timezone) ->
+        # Convert dates from UTC to user timezone
         timezonedDate = new time.Date(evt.start, 'UTC')
         timezonedDate.setTimezone(timezone)
         evt.start = timezonedDate.toString().slice(0, 24)
@@ -31,9 +35,9 @@ before ->
             @userTimezone = users[0].timezone
 
         next()
-
-
 , except: ['delete']
+
+## Actions
 
 action 'all', ->
     Event.all (err, events) =>
@@ -45,11 +49,12 @@ action 'all', ->
             send events
 
 action 'getOne', ->
+    # Recover dates with user timezone
     @event = @convertEventDate(@event, @userTimezone)
     send @event, 200
 
 action 'create', ->
-
+    # Store dates in UTC
     startDate = new time.Date(req.body.start, @userTimezone)
     startDate.setTimezone('UTC')
     req.body.start = startDate.toString().slice(0, 24)
@@ -62,11 +67,12 @@ action 'create', ->
         if err
             send error: true, msg: "Server error while creating event.", 500
         else
+            # Recover dates with user timezone
             evt = @convertEventDate(evt, @userTimezone)
             send evt, 201
 
 action 'update', ->
-
+    # Store dates in UTC
     startDate = new time.Date(req.body.start, @userTimezone)
     startDate.setTimezone('UTC')
     req.body.start = startDate.toString().slice(0, 24)
@@ -79,6 +85,7 @@ action 'update', ->
         if err?
             send error: true, msg: "Server error while saving event", 500
         else
+            # Recover dates with user timezone
             evt = @convertEventDate(evt, @userTimezone)
             send evt, 200
 

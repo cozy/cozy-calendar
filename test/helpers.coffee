@@ -4,13 +4,19 @@ client = new Client "http://localhost:8888/"
 module.exports = (compound) ->
     Event = compound.models.Event
     Alarm = compound.models.Alarm
+    User = compound.models.User
 
     helpers = {}
 
     # Remove all the alarms
     helpers.cleanDb = (callback) ->
         Alarm.destroyAll () ->
-            Event.destroyAll callback
+            Event.destroyAll () ->
+                data =
+                    email: 'test@cozycloud.cc'
+                    password: 'password'
+                    timezone: 'Europe/Paris'
+                User.create data, callback
 
     # Get all the alarams
     helpers.getAllEvents = (callback) ->

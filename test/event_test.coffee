@@ -22,8 +22,12 @@ describe "Events management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", "Tue Apr 23 2013 15:40:00 ", "Place", 3, "Something to do"
-                    helpers.createEvent "Tue Apr 24 2013 13:30:00", "Tue Apr 24 2013 14:00:00", "Other place", 0, "Something else to do"
+                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", 
+                        "Tue Apr 23 2013 15:40:00 ", "Place", 3, 
+                        "Something to do"
+                    helpers.createEvent "Tue Apr 24 2013 13:30:00", 
+                        "Tue Apr 24 2013 14:00:00", "Other place", 0, 
+                        "Something else to do"
                 ], ->
                     callback()
             helpers.cleanDb ->
@@ -45,14 +49,16 @@ describe "Events management", ->
 
         before (done) =>
             helpers.cleanDb done
+        after ->
+            delete @event
+
+        it "should return the event json object", (done) =>
             @event =
                 description: 'Title'
                 start: "Tue Apr 15 2013 15:30:00"
                 end:"Tue Apr 15 2013 16:30:00"
                 place: "place"
                 diff: 0
-
-        it "should return the event json object", (done) =>
 
             client.post "events/", @event, (error, response, body) =>
 
@@ -78,11 +84,13 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'start', 
+                    exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'end', 
+                    exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
                 event.should.have.property 'place', @event.place
@@ -101,18 +109,24 @@ describe "Events management", ->
 
     describe "PUT events/:id", ->
 
-        before (done) =>
+        before (done) =>                
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete @event
+
+
+        it "When I create an event", (done) =>
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
                 place: "place"
                 diff: 0
-
-            helpers.cleanDb =>
-                helpers.createEventFromObject @event, (err, event) =>
-                    @event.id = event.id
-                    done()
+            helpers.createEventFromObject @event, (err, event) =>
+                @event.id = event.id
+                done()
 
         it "should return the event with the updated value", (done) =>
 
@@ -143,11 +157,13 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'start', 
+                    exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
+                event.should.have.property 'end', 
+                    exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
                 event.should.have.property 'place', @event.place
@@ -158,20 +174,24 @@ describe "Events management", ->
     describe "DELETE events/:id", ->
 
         before (done) =>
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete @event
+
+        it "When I create an event", (done) =>
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
                 place: "place"
                 diff: 0
-
-            helpers.cleanDb =>
-                helpers.createEventFromObject @event, (err, event) =>
-                    @event.id = event.id
-                    done()
+            helpers.createEventFromObject @event, (err, event) =>
+                @event.id = event.id
+                done()
 
         it "should return the deleted event", (done) =>
-
             client.del "events/#{@event.id}", (err, resp, body) =>
                 should.not.exist err
                 should.exist resp
