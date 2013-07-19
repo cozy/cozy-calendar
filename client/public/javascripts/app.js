@@ -2067,7 +2067,8 @@ window.require.register("views/event_popover", function(exports, require, module
       this.field = data.field;
       this.date = data.date;
       this.model = data.model;
-      return this.event = data.event;
+      this.event = data.event;
+      return this.action = data.action;
     };
 
     EventPopOver.prototype.show = function(title, direction, content) {

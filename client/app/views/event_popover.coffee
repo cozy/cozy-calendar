@@ -24,6 +24,7 @@ module.exports = class EventPopOver extends View
         @date = data.date
         @model = data.model
         @event = data.event
+        @action = data.action
 
     show: (title, direction, content) ->
         @field.data('popover', null).popover(
@@ -70,7 +71,7 @@ module.exports = class EventPopOver extends View
                             @onEventButtonClicked()
                         else
                             @addEventButton.removeClass 'disabled'
-                else 
+                else
                     @addEventButton.removeClass 'disabled'
 
     bindEditEvents: =>
@@ -103,7 +104,7 @@ module.exports = class EventPopOver extends View
                             @onEventButtonClicked()
                         else
                             @addEventButton.removeClass 'disabled'
-                else 
+                else
                     @addEventButton.removeClass 'disabled'
 
     onRemoveEventClicked: =>
@@ -148,15 +149,15 @@ module.exports = class EventPopOver extends View
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
-            
+
         # Store new event
-        data = 
+        data =
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
             diff: parseInt(specifiedDay[1])
             place: place
             description: description
-        @model.create data, 
+        @model.create data,
             wait: true
             success: =>
                 @clean()
@@ -194,9 +195,9 @@ module.exports = class EventPopOver extends View
         dueEndDate.set
             hours: specifiedTime[0]
             minutes: specifiedTime[1]
-          
+
         # Store new event
-        data = 
+        data =
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
             place: place
