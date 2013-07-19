@@ -7,8 +7,9 @@ module.exports = (compound) ->
         switch process.argv[3]
             when 'cleandb'
                 Alarm.destroyAll ->
-                    console.log 'All data cleaned'
-                    process.exit 0
+                    Event.destroyAll ->
+                        console.log 'All data cleaned'
+                        process.exit 0
                 break
             else
                 console.log 'Usage: compound database [cleandb]'
