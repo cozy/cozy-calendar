@@ -71,7 +71,6 @@ module.exports.VAlarm = class VAlarm extends VComponent
     constructor: (date) ->
         super
         @fields =
-            ACTION: 'AUDIO'
             REPEAT: '1'
             TRIGGER: @formatIcalDate date
 
@@ -92,17 +91,26 @@ module.exports.VTodo = class VTodo extends VComponent
 
 # Additional components not supported yet by Cozy Cloud.
 module.exports.VEvent = class VEvent extends VComponent
-    name = 'VEVENT'
+    name: 'VEVENT'
+
+    constructor: (startDate, endDate, description, location) ->
+        super
+        @fields =
+            DESCRIPTION: description
+            DTSTART: @formatIcalDate startDate
+            DTEND: @formatIcalDate endDate
+            LOCATION: location
+
 module.exports.VTimezone = class VTimezone extends VComponent
-    name = 'VTIMEZONE'
+    name: 'VTIMEZONE'
 module.exports.VJournal = class VJournal extends VComponent
-    name = 'VJOURNAL'
+    name: 'VJOURNAL'
 module.exports.VFreeBusy = class VFreeBusy extends VComponent
-    name = 'VFREEBUSY'
+    name: 'VFREEBUSY'
 module.exports.VStandard = class VStandard extends VComponent
-    name = 'VSTANDARD'
+    name: 'VSTANDARD'
 module.exports.VDaylight = class VDaylight extends VComponent
-    name = 'VDAYLIGHT'
+    name: 'VDAYLIGHT'
 
 module.exports.ICalParser = class ICalParser
 

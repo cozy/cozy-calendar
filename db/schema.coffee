@@ -18,7 +18,7 @@ Event = define 'Event', ->
     property 'description', String
     property 'diff', Number
 
-    property 'related', String, default: null 
+    property 'related', String, default: null
 
 
     # Further work to make the doctype iCal compliant
