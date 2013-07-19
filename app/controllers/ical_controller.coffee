@@ -2,6 +2,7 @@ time = require 'time'
 moment = require 'moment'
 ical = require './lib/ical_helpers'
 
+
 before ->
 
     @userTimezone = 'Europe/Paris'
@@ -29,15 +30,23 @@ action 'export', ->
 
 
 action 'import', ->
-    file = req.files["file"]
+    file = req.files['file']
     if file?
         parser = new ical.ICalParser()
         parser.parseFile file.path, (err, result) ->
             if err
-                console.log error
-                send error: "error occured while saving file", msg: err.msg, 500
+                console.log err
+                send error: 'error occured while saving file', msg: err.msg, 500
             else
-                alarms = Alarm.extractAlarms result
-                send alarms
+                @alarmsToImport = result
+                send Alarm.extractAlarms result
     else
-        send error: "no file sent", 500
+        send error: 'no file sent', 500
+
+action 'confirm Import', ->
+    if @alarmsToImport?
+
+        for alarm in @alarmsToImport
+            alarm.save()
+
+    send success: 'import processed'

@@ -288,6 +288,54 @@ window.require.register("lib/app_helpers", function(exports, require, module) {
   })();
   
 });
+window.require.register("lib/base_view", function(exports, require, module) {
+  var BaseView, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  module.exports = BaseView = (function(_super) {
+    __extends(BaseView, _super);
+
+    function BaseView() {
+      _ref = BaseView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    BaseView.prototype.template = function() {};
+
+    BaseView.prototype.initialize = function() {};
+
+    BaseView.prototype.getRenderData = function() {
+      var _ref1;
+
+      return {
+        model: (_ref1 = this.model) != null ? _ref1.toJSON() : void 0
+      };
+    };
+
+    BaseView.prototype.render = function() {
+      this.beforeRender();
+      this.$el.html(this.template(this.getRenderData()));
+      this.afterRender();
+      return this;
+    };
+
+    BaseView.prototype.beforeRender = function() {};
+
+    BaseView.prototype.afterRender = function() {};
+
+    BaseView.prototype.destroy = function() {
+      this.undelegateEvents();
+      this.$el.removeData().unbind();
+      this.remove();
+      return Backbone.View.prototype.remove.call(this);
+    };
+
+    return BaseView;
+
+  })(Backbone.View);
+  
+});
 window.require.register("lib/cozy_collection", function(exports, require, module) {
   var _ref,
     __hasProp = {}.hasOwnProperty,
@@ -397,6 +445,119 @@ window.require.register("lib/view", function(exports, require, module) {
     return View;
 
   })(Backbone.View);
+  
+});
+window.require.register("lib/view_collection", function(exports, require, module) {
+  var BaseView, ViewCollection, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  BaseView = require('lib/base_view');
+
+  module.exports = ViewCollection = (function(_super) {
+    __extends(ViewCollection, _super);
+
+    function ViewCollection() {
+      this.removeItem = __bind(this.removeItem, this);
+      this.addItem = __bind(this.addItem, this);    _ref = ViewCollection.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    ViewCollection.prototype.itemview = null;
+
+    ViewCollection.prototype.views = {};
+
+    ViewCollection.prototype.template = function() {
+      return '';
+    };
+
+    ViewCollection.prototype.itemViewOptions = function() {};
+
+    ViewCollection.prototype.collectionEl = null;
+
+    ViewCollection.prototype.onChange = function() {
+      return this.$el.toggleClass('empty', _.size(this.views) === 0);
+    };
+
+    ViewCollection.prototype.appendView = function(view) {
+      return this.$collectionEl.append(view.el);
+    };
+
+    ViewCollection.prototype.initialize = function() {
+      var collectionEl;
+
+      ViewCollection.__super__.initialize.apply(this, arguments);
+      this.views = {};
+      this.listenTo(this.collection, "reset", this.onReset);
+      this.listenTo(this.collection, "add", this.addItem);
+      this.listenTo(this.collection, "remove", this.removeItem);
+      if (this.collectionEl == null) {
+        return collectionEl = el;
+      }
+    };
+
+    ViewCollection.prototype.render = function() {
+      var id, view, _ref1;
+
+      _ref1 = this.views;
+      for (id in _ref1) {
+        view = _ref1[id];
+        view.$el.detach();
+      }
+      return ViewCollection.__super__.render.apply(this, arguments);
+    };
+
+    ViewCollection.prototype.afterRender = function() {
+      var id, view, _ref1;
+
+      this.$collectionEl = $(this.collectionEl);
+      _ref1 = this.views;
+      for (id in _ref1) {
+        view = _ref1[id];
+        this.appendView(view.$el);
+      }
+      this.onReset(this.collection);
+      return this.onChange(this.views);
+    };
+
+    ViewCollection.prototype.remove = function() {
+      this.onReset([]);
+      return ViewCollection.__super__.remove.apply(this, arguments);
+    };
+
+    ViewCollection.prototype.onReset = function(newcollection) {
+      var id, view, _ref1;
+
+      _ref1 = this.views;
+      for (id in _ref1) {
+        view = _ref1[id];
+        view.remove();
+      }
+      return newcollection.forEach(this.addItem);
+    };
+
+    ViewCollection.prototype.addItem = function(model) {
+      var options, view;
+
+      options = _.extend({}, {
+        model: model
+      }, this.itemViewOptions(model));
+      view = new this.itemview(options);
+      this.views[model.cid] = view.render();
+      this.appendView(view);
+      return this.onChange(this.views);
+    };
+
+    ViewCollection.prototype.removeItem = function(model) {
+      this.views[model.cid].remove();
+      delete this.views[model.cid];
+      return this.onChange(this.views);
+    };
+
+    return ViewCollection;
+
+  })(BaseView);
   
 });
 window.require.register("models/alarm", function(exports, require, module) {
@@ -513,7 +674,7 @@ window.require.register("models/alarm", function(exports, require, module) {
   
 });
 window.require.register("router", function(exports, require, module) {
-  var AlarmCollection, CalendarView, ListView, Router, app, _ref,
+  var AlarmCollection, CalendarView, ImportView, ListView, Router, app, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -523,6 +684,8 @@ window.require.register("router", function(exports, require, module) {
   ListView = require('views/list_view');
 
   CalendarView = require('views/calendar_view');
+
+  ImportView = require('views/import_view');
 
   AlarmCollection = require('collections/alarms');
 
@@ -537,7 +700,8 @@ window.require.register("router", function(exports, require, module) {
     Router.prototype.routes = {
       '': 'calendar',
       'calendar': 'calendar',
-      'list': 'alarmsList'
+      'list': 'alarmsList',
+      'import': 'import'
     };
 
     Router.prototype.calendar = function() {
@@ -548,6 +712,10 @@ window.require.register("router", function(exports, require, module) {
     Router.prototype.alarmsList = function() {
       this.displayView(ListView, app.alarms);
       return this.handleFetch();
+    };
+
+    Router.prototype["import"] = function() {
+      return this.displayView(ImportView, app.alarms);
     };
 
     Router.prototype.handleFetch = function() {
@@ -1541,6 +1709,171 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
   })(View);
   
 });
+window.require.register("views/import_alarm_list", function(exports, require, module) {
+  var AlarmCollection, AlarmList, AlarmView, ViewCollection, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  ViewCollection = require('../lib/view_collection');
+
+  AlarmView = require('./import_alarm_view');
+
+  AlarmCollection = require('../collections/alarms');
+
+  module.exports = AlarmList = (function(_super) {
+    __extends(AlarmList, _super);
+
+    function AlarmList() {
+      _ref = AlarmList.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    AlarmList.prototype.itemview = AlarmView;
+
+    AlarmList.prototype.views = {};
+
+    AlarmList.prototype.template = function() {
+      return '';
+    };
+
+    AlarmList.prototype.collection = new AlarmCollection;
+
+    AlarmList.prototype.collectionEl = "#import-alarm-list";
+
+    return AlarmList;
+
+  })(ViewCollection);
+  
+});
+window.require.register("views/import_alarm_view", function(exports, require, module) {
+  var AlarmView, View, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  module.exports = AlarmView = (function(_super) {
+    __extends(AlarmView, _super);
+
+    function AlarmView() {
+      _ref = AlarmView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    AlarmView.prototype.tagName = 'div';
+
+    AlarmView.prototype.className = 'alarm';
+
+    AlarmView.prototype.render = function() {
+      return AlarmView.__super__.render.call(this, {
+        action: this.model.get('action'),
+        time: this.model.getFormattedDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
+        description: this.model.get('description')
+      });
+    };
+
+    AlarmView.prototype.template = function() {
+      return require('./templates/alarm_import');
+    };
+
+    return AlarmView;
+
+  })(View);
+  
+});
+window.require.register("views/import_view", function(exports, require, module) {
+  var Alarm, AlarmFormView, AlarmList, AlarmPopOver, AlarmsListView, ImportView, View, alarmFormSmallTemplate, helpers, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  AlarmFormView = require('./alarmform_view');
+
+  AlarmPopOver = require('./alarm_popover');
+
+  AlarmsListView = require('../views/alarms_list_view');
+
+  Alarm = require('../models/alarm');
+
+  helpers = require('../helpers');
+
+  Alarm = require('../models/alarm');
+
+  AlarmList = require('./import_alarm_list');
+
+  alarmFormSmallTemplate = require('./templates/alarm_form_small');
+
+  module.exports = ImportView = (function(_super) {
+    __extends(ImportView, _super);
+
+    function ImportView() {
+      _ref = ImportView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    ImportView.prototype.el = '#viewContainer';
+
+    ImportView.prototype.events = {
+      'change #import-file-input': 'onFileChanged',
+      'click button': 'onImportClicked'
+    };
+
+    ImportView.prototype.initialize = function() {};
+
+    ImportView.prototype.template = function() {
+      return require('./templates/import_view');
+    };
+
+    ImportView.prototype.afterRender = function() {
+      this.alarmList = new AlarmList;
+      return this.alarmList.render();
+    };
+
+    ImportView.prototype.onFileChanged = function(event) {
+      var file;
+
+      file = event.target.files[0];
+      return this.file = file;
+    };
+
+    ImportView.prototype.onImportClicked = function() {
+      var form,
+        _this = this;
+
+      form = new FormData();
+      form.append("file", this.file);
+      return $.ajax({
+        url: "import/ical",
+        type: "POST",
+        data: form,
+        processData: false,
+        contentType: false,
+        success: function(valarms) {
+          var alarm, valarm, _i, _len, _results;
+
+          console.log(valarms);
+          _results = [];
+          for (_i = 0, _len = valarms.length; _i < _len; _i++) {
+            valarm = valarms[_i];
+            alarm = new Alarm(valarm);
+            console.log(alarm);
+            console.log(_this.alarmList.$collectionEl);
+            _results.push(_this.alarmList.collection.add(alarm));
+          }
+          return _results;
+        },
+        error: function() {
+          return alert('error');
+        }
+      });
+    };
+
+    return ImportView;
+
+  })(View);
+  
+});
 window.require.register("views/list_view", function(exports, require, module) {
   var Alarm, AlarmCollection, AlarmFormView, AlarmsListView, ListView, View, helpers, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -1765,13 +2098,24 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   return buf.join("");
   };
 });
+window.require.register("views/templates/alarm_import", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = action) == null ? '' : interp) + ')</p>');
+  }
+  return buf.join("");
+  };
+});
 window.require.register("views/templates/calendarview", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"><i class="icon-arrow-up icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };
@@ -1787,13 +2131,24 @@ window.require.register("views/templates/dayprogram", function(exports, require,
   return buf.join("");
   };
 });
+window.require.register("views/templates/import_view", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div></div><div id="import-alarm-list"></div></div></div>');
+  }
+  return buf.join("");
+  };
+});
 window.require.register("views/templates/listview", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"><i class="icon-arrow-up icon-white"></i></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

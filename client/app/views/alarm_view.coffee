@@ -9,7 +9,6 @@ module.exports = class AlarmView extends View
         @listenTo @model, "change", @onChange
 
     render: ->
-
         super
             action: @model.get 'action'
             time: @model.getFormattedDate '{HH}:{mm}'

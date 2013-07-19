@@ -1,6 +1,7 @@
 app = require 'application'
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
+ImportView = require 'views/import_view'
 AlarmCollection = require 'collections/alarms'
 
 module.exports = class Router extends Backbone.Router
@@ -9,6 +10,7 @@ module.exports = class Router extends Backbone.Router
         ''                    : 'calendar'
         'calendar'            : 'calendar'
         'list'                : 'alarmsList'
+        'import'              : 'import'
 
     calendar: ->
         @displayView CalendarView, app.alarms
@@ -17,6 +19,9 @@ module.exports = class Router extends Backbone.Router
     alarmsList: ->
         @displayView ListView, app.alarms
         @handleFetch()
+
+    import: ->
+        @displayView ImportView, app.alarms
 
     handleFetch: ->
 

@@ -155,7 +155,6 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
 
         it "when I send an iCal import file", (done) ->
             client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
-                console.log body
                 should.not.exist err
                 res.statusCode.should.equal 200
                 @body = body
@@ -165,4 +164,4 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
             @body.length.should.equal 3
             done()
 
-        it "When I confirm the import ", ->
+        it "When I confirm the import", ->

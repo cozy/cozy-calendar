@@ -129,9 +129,9 @@ module.exports.ICalParser = class ICalParser
             callback null, result if noerror
 
         sendError = (msg) ->
+            callback new Error "#{msg} (line #{lineNumber})" if noerror
             noerror = false
-            stream.emit 'end'
-            callback new Error "#{msg} (line #{lineNumber})"
+            # TODO find a way to stop the stream
 
         createComponent = (name) ->
             parent = component
@@ -170,7 +170,9 @@ module.exports.ICalParser = class ICalParser
                     component = component.parent
                 else if not (component? or result?)
                     sendError "Malformed ical file"
-                else
+                else if key? and key isnt '' and component?
                     component.fields[key] = value
+                else
+                    sendError "Malformed ical file"
 
         lazy(stream).lines.forEach lineParser
