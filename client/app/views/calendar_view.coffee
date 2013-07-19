@@ -99,6 +99,8 @@ module.exports = class CalendarView extends View
             start: evt.getFormattedStartDate(Date.ISO8601_DATETIME)
             end: evt.getFormattedEndDate(Date.ISO8601_DATETIME)
             allDay: false
+            diff: evt.get "diff"
+            place: evt.get 'place' 
             backgroundColor: '#EB1'
             borderColor: '#EB1'
             type: 'event' # non standard field
@@ -238,17 +240,37 @@ module.exports = class CalendarView extends View
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
         target = $(jsEvent.target)
         direction = helpers.getPopoverDirection isDayView, startDate
+        startHour = startDate.format('{HH}:{mm}').split(':')
+        endHour = endDate.format('{HH}:{mm}').split(':')
 
-        @popover.createNew
-            field: $(target)
-            date: startDate
-            action: 'create'
-            model: @modelAlarm
-            modelEvent: @modelEvent
+        if helpers.isEvent(startHour, endHour)
+            @popoverEvent = new EventPopOver @cal
+            @popoverEvent.createNew
+                field: $(target)
+                date: startDate
+                action: 'create'
+                model: @modelEvent
 
-        alarmFormTemplate = alarmFormSmallTemplate
-            editionMode: false
-            defaultValue: ''
+            eventFormTemplate = eventFormSmallTemplate
+                editionMode: false
+                defaultValueStart: startDate.format('{HH}:{mm}')
+                defaultValueEnd: endDate.format('{HH}:{mm}')
+                defaultValuePlace: ''
+                defaultValueDesc: ''
+            @popoverEvent.show "Event creation", direction , eventFormTemplate
+            @popoverEvent.bindEvents startDate
 
-        @popover.show "Alarm creation", direction, alarmFormTemplate
-        @popover.bindEvents startDate
+        else
+            @popover.createNew
+                field: $(target)
+                date: startDate
+                action: 'create'
+                model: @modelAlarm
+                modelEvent: @modelEvent
+
+            alarmFormTemplate = alarmFormSmallTemplate
+                editionMode: false
+                defaultValue: ''
+
+            @popover.show "Alarm creation", direction, alarmFormTemplate
+            @popover.bindEvents startDate

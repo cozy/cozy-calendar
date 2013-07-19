@@ -244,6 +244,18 @@ window.require.register("helpers", function(exports, require, module) {
     }
     return direction;
   };
+
+  exports.isEvent = function(start, end) {
+    if (start[0] === end[0]) {
+      if (start[1] === "00" && end[1] === "30") {
+        return false;
+      }
+    } else if (parseInt(start[0]) + 1 === parseInt(end[0]) && start[1] === "30" && end[1] === "00") {
+      return false;
+    } else {
+      return true;
+    }
+  };
   
 });
 window.require.register("initialize", function(exports, require, module) {
@@ -1519,6 +1531,8 @@ window.require.register("views/calendar_view", function(exports, require, module
         start: evt.getFormattedStartDate(Date.ISO8601_DATETIME),
         end: evt.getFormattedEndDate(Date.ISO8601_DATETIME),
         allDay: false,
+        diff: evt.get("diff"),
+        place: evt.get('place'),
         backgroundColor: '#EB1',
         borderColor: '#EB1',
         type: 'event'
@@ -1672,22 +1686,43 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var alarmFormTemplate, direction, target;
+      var alarmFormTemplate, direction, endHour, eventFormTemplate, startHour, target;
       target = $(jsEvent.target);
       direction = helpers.getPopoverDirection(isDayView, startDate);
-      this.popover.createNew({
-        field: $(target),
-        date: startDate,
-        action: 'create',
-        model: this.modelAlarm,
-        modelEvent: this.modelEvent
-      });
-      alarmFormTemplate = alarmFormSmallTemplate({
-        editionMode: false,
-        defaultValue: ''
-      });
-      this.popover.show("Alarm creation", direction, alarmFormTemplate);
-      return this.popover.bindEvents(startDate);
+      startHour = startDate.format('{HH}:{mm}').split(':');
+      endHour = endDate.format('{HH}:{mm}').split(':');
+      if (helpers.isEvent(startHour, endHour)) {
+        this.popoverEvent = new EventPopOver(this.cal);
+        this.popoverEvent.createNew({
+          field: $(target),
+          date: startDate,
+          action: 'create',
+          model: this.modelEvent
+        });
+        eventFormTemplate = eventFormSmallTemplate({
+          editionMode: false,
+          defaultValueStart: startDate.format('{HH}:{mm}'),
+          defaultValueEnd: endDate.format('{HH}:{mm}'),
+          defaultValuePlace: '',
+          defaultValueDesc: ''
+        });
+        this.popoverEvent.show("Event creation", direction, eventFormTemplate);
+        return this.popoverEvent.bindEvents(startDate);
+      } else {
+        this.popover.createNew({
+          field: $(target),
+          date: startDate,
+          action: 'create',
+          model: this.modelAlarm,
+          modelEvent: this.modelEvent
+        });
+        alarmFormTemplate = alarmFormSmallTemplate({
+          editionMode: false,
+          defaultValue: ''
+        });
+        this.popover.show("Alarm creation", direction, alarmFormTemplate);
+        return this.popover.bindEvents(startDate);
+      }
     };
 
     return CalendarView;
@@ -2053,6 +2088,8 @@ window.require.register("views/event_popover", function(exports, require, module
           _this.event.start = startDate.format(Date.ISO8601_DATETIME);
           endDate = new Date(data.end);
           _this.event.end = endDate.format(Date.ISO8601_DATETIME);
+          _this.event.diff = data.diff;
+          _this.event.place = data.place;
           return _this.cal.fullCalendar('renderEvent', _this.event);
         },
         error: function() {
