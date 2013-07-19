@@ -2387,20 +2387,85 @@ window.require.register("views/import_alarm_view", function(exports, require, mo
   })(View);
   
 });
-window.require.register("views/import_view", function(exports, require, module) {
-  var Alarm, AlarmFormView, AlarmList, AlarmPopOver, AlarmsListView, ImportView, View, alarmFormSmallTemplate, helpers, _ref,
+window.require.register("views/import_event_list", function(exports, require, module) {
+  var EventCollection, EventList, EventView, ViewCollection, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  ViewCollection = require('../lib/view_collection');
+
+  EventView = require('./import_event_view');
+
+  EventCollection = require('../collections/events');
+
+  module.exports = EventList = (function(_super) {
+    __extends(EventList, _super);
+
+    function EventList() {
+      _ref = EventList.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    EventList.prototype.itemview = EventView;
+
+    EventList.prototype.views = {};
+
+    EventList.prototype.template = function() {
+      return '';
+    };
+
+    EventList.prototype.collection = new EventCollection;
+
+    EventList.prototype.collectionEl = "#import-event-list";
+
+    return EventList;
+
+  })(ViewCollection);
+  
+});
+window.require.register("views/import_event_view", function(exports, require, module) {
+  var EventView, View, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('../lib/view');
 
-  AlarmFormView = require('./alarmform_view');
+  module.exports = EventView = (function(_super) {
+    __extends(EventView, _super);
 
-  AlarmPopOver = require('./alarm_popover');
+    function EventView() {
+      _ref = EventView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
 
-  AlarmsListView = require('../views/alarms_list_view');
+    EventView.prototype.tagName = 'div';
 
-  Alarm = require('../models/alarm');
+    EventView.prototype.className = 'event';
+
+    EventView.prototype.render = function() {
+      return EventView.__super__.render.call(this, {
+        start: this.model.getFormattedStartDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
+        end: this.model.getFormattedEndDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
+        description: this.model.get('description'),
+        place: this.model.get('place')
+      });
+    };
+
+    EventView.prototype.template = function() {
+      return require('./templates/event_import');
+    };
+
+    return EventView;
+
+  })(View);
+  
+});
+window.require.register("views/import_view", function(exports, require, module) {
+  var Alarm, AlarmList, Event, EventList, ImportView, View, helpers, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
 
   helpers = require('../helpers');
 
@@ -2408,7 +2473,9 @@ window.require.register("views/import_view", function(exports, require, module) 
 
   AlarmList = require('./import_alarm_list');
 
-  alarmFormSmallTemplate = require('./templates/alarm_form_small');
+  Event = require('../models/event');
+
+  EventList = require('./import_event_list');
 
   module.exports = ImportView = (function(_super) {
     __extends(ImportView, _super);
@@ -2433,7 +2500,9 @@ window.require.register("views/import_view", function(exports, require, module) 
 
     ImportView.prototype.afterRender = function() {
       this.alarmList = new AlarmList;
-      return this.alarmList.render();
+      this.alarmList.render();
+      this.eventList = new EventList;
+      return this.eventList.render();
     };
 
     ImportView.prototype.onFileChanged = function(event) {
@@ -2455,19 +2524,27 @@ window.require.register("views/import_view", function(exports, require, module) 
         data: form,
         processData: false,
         contentType: false,
-        success: function(valarms) {
-          var alarm, valarm, _i, _len, _results;
+        success: function(result) {
+          var alarm, event, valarm, vevent, _i, _j, _len, _len1, _ref1, _ref2, _results;
 
-          console.log(valarms);
-          _results = [];
-          for (_i = 0, _len = valarms.length; _i < _len; _i++) {
-            valarm = valarms[_i];
-            alarm = new Alarm(valarm);
-            console.log(alarm);
-            console.log(_this.alarmList.$collectionEl);
-            _results.push(_this.alarmList.collection.add(alarm));
+          if ((result != null ? result.alarms : void 0) != null) {
+            _ref1 = result.alarms;
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              valarm = _ref1[_i];
+              alarm = new Alarm(valarm);
+              _this.alarmList.collection.add(alarm);
+            }
           }
-          return _results;
+          if ((result != null ? result.events : void 0) != null) {
+            _ref2 = result.events;
+            _results = [];
+            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+              vevent = _ref2[_j];
+              event = new Event(vevent);
+              _results.push(_this.eventList.collection.add(event));
+            }
+            return _results;
+          }
         },
         error: function() {
           return alert('error');
@@ -2808,13 +2885,24 @@ window.require.register("views/templates/event_form_small", function(exports, re
   return buf.join("");
   };
 });
+window.require.register("views/templates/event_import", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = place) == null ? '' : interp) + ')</p>');
+  }
+  return buf.join("");
+  };
+});
 window.require.register("views/templates/import_view", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div></div><div id="import-alarm-list"></div></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div></div><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div>');
   }
   return buf.join("");
   };

@@ -8278,6 +8278,10 @@ input[type="time"] {
   margin: 0;
   font-weight: 10px;
 }
+#import-form .event p {
+  margin: 0;
+  font-weight: 10px;
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");

@@ -49,7 +49,9 @@ action 'import', ->
                 send error: 'error occured while saving file', msg: err.msg, 500
             else
                 @alarmsToImport = result
-                send Alarm.extractAlarms result
+                send
+                    events: Event.extractEvents result
+                    alarms: Alarm.extractAlarms result
     else
         send error: 'no file sent', 500
 

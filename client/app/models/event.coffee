@@ -2,7 +2,7 @@ ScheduleItem = require './scheduleitem'
 
 module.exports = class Event extends ScheduleItem
 
-    startDateField: 'start'    
+    startDateField: 'start'
     endDateField: 'end'
     urlRoot: 'events'
 
@@ -13,7 +13,7 @@ module.exports = class Event extends ScheduleItem
             errors.push
                 field: 'date'
                 value: "The start date might be inferor than end date  " + \
-                        "It must be dd/mm/yyyy and hh:mm."  
+                        "It must be dd/mm/yyyy and hh:mm."
 
         # Initialize date
         start = new Date(attrs.start)
@@ -24,7 +24,7 @@ module.exports = class Event extends ScheduleItem
         startHour = start.format('{HH}:{mm}').split(":")
         endHour = end.format('{HH}:{mm}').split(":")
 
-        if startDate[0] is endDate[0] and startDate[1] is endDate[1] and 
+        if startDate[0] is endDate[0] and startDate[1] is endDate[1] and
                 startDate[2] is endDate[2]
                 # Same day
             if startHour[0] > endHour[0]
@@ -40,7 +40,7 @@ module.exports = class Event extends ScheduleItem
                     sendError()
                 else if startDate[1] is endDate[1] and startDate[2] > endDate[2]
                     sendError()
-   
+
     validate: (attrs, options) ->
 
         errors = []
@@ -62,10 +62,10 @@ module.exports = class Event extends ScheduleItem
                 value: "The date or time format might be invalid. " + \
                         "It must be dd/mm/yyyy and hh:mm."
 
-        validateDate(attrs, options, errors)             
+        validateDate(attrs, options, errors)
 
         if errors.length > 0
-            return errors 
+            return errors
 
     getStartDateObject: ->
         if not @startDateObject?
