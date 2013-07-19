@@ -12,10 +12,10 @@ module.exports = class EventPopOver extends View
         if @popoverWidget?
             @popoverWidget.find('button.close').unbind 'click'
             @popoverWidget.find('button.add-event').unbind 'click'
-            @popoverWidget.find('inputStart').unbind 'keyup'
-            @popoverWidget.find('inputEnd').unbind 'keyup'
-            @popoverWidget.find('inputPlace').unbind 'keyup'
-            @popoverWidget.find('inputDesc').unbind 'keyup'
+            @popoverWidget.find('#inputStart').unbind 'keyup'
+            @popoverWidget.find('#inputEnd').unbind 'keyup'
+            @popoverWidget.find('#inputPlace').unbind 'keyup'
+            @popoverWidget.find('#inputDesc').unbind 'keyup'
             @popoverWidget?.hide()
 
     createNew: (data) ->
@@ -36,12 +36,11 @@ module.exports = class EventPopOver extends View
             content: content
         ).popover('show')
         @popoverWidget = $('.container .popover')
-        @popoverWidget.find('inputStart').focus()
+        @popoverWidget.find('#inputStart').focus()
+        @popoverWidget.find('button.add-event').addClass 'disable'
 
-        if @action is 'create'
-            $('.event-remove').hide()
-        else
-            $('.event-remove').show()
+        if @action is 'create' then $('.event-remove').hide()
+        else $('.event-remove').show()
 
     bindEvents: =>
         @popoverWidget = $('.container .popover')
@@ -51,61 +50,55 @@ module.exports = class EventPopOver extends View
         @popoverWidget.find('button.close').click => @clean()
         @addEventButton.click => @onEventButtonClicked()
 
-        @eventStart = @popoverWidget.find('inputStart')
-        @eventEnd = @popoverWidget.find('inputEnd')
-        @eventPlace = @popoverWidget.find('inputPlace')
-        @eventDescription = @popoverWidget.find('inputDesc')
+        @eventStart = @popoverWidget.find('#inputStart')
+        @eventEnd = @popoverWidget.find('#inputEnd')
+        @eventPlace = @popoverWidget.find('#inputPlace')
+        @eventDescription = @popoverWidget.find('#inputDesc')
 
-        @eventStart.keyup (event) =>
-            if @eventStart.val() is ''
+        @addEventButton.addClass 'disabled'
+
+        keyReaction = (event) =>
+            if @eventStart.val() is '' or
+            @eventEnd.val() is '' or
+            @eventDescription.val() is ''
                 @addEventButton.addClass 'disabled'
             else if event.keyCode is 13 or event.which is 13
                 @onEventButtonClicked()
             else
-                if @eventEnd.val() is ''
-                    @addEventButton.addClass 'disabled'
-                    @eventEnd.keyup (event) =>
-                        if @eventEnd.val() is ''
-                            @addEventButton.addClass 'disabled'
-                        else if event.keyCode is 13 or event.which is 13
-                            @onEventButtonClicked()
-                        else
-                            @addEventButton.removeClass 'disabled'
-                else
-                    @addEventButton.removeClass 'disabled'
+                @addEventButton.removeClass 'disabled'
+
+        @eventStart.keyup keyReaction
+        @eventEnd.keyup keyReaction
+        @eventDescription.keyup keyReaction
 
     bindEditEvents: =>
         @popoverWidget = $('.container .popover')
         @addEventButton = @popoverWidget.find 'button.add-event'
         @closeButton = @popoverWidget.find 'button.close'
         @removeButton = @popoverWidget.find '.event-remove'
-        @eventStart = @popoverWidget.find 'inputStart'
-        @eventEnd = @popoverWidget.find 'inputEnd'
-        @eventPlace = @popoverWidget.find 'inputPlace'
-        @eventDescription = @popoverWidget.find 'inputDesc'
+        @eventStart = @popoverWidget.find '#inputStart'
+        @eventEnd = @popoverWidget.find '#inputEnd'
+        @eventPlace = @popoverWidget.find '#inputPlace'
+        @eventDescription = @popoverWidget.find '#inputDesc'
 
         @addEventButton.html @action
         @closeButton.click => @clean()
         @addEventButton.click => @onEditEventClicked()
         @removeButton.click => @onRemoveEventClicked()
 
-        @eventStart.keyup (event) =>
-            if @eventStart.val() is ''
+        keyReaction = (event) =>
+            if @eventStart.val() is '' or
+            @eventEnd.val() is '' or
+            @eventDescription.val() is ''
                 @addEventButton.addClass 'disabled'
             else if event.keyCode is 13 or event.which is 13
                 @onEventButtonClicked()
             else
-                if @eventEnd.val() is ''
-                    @addEventButton.addClass 'disabled'
-                    @eventEnd.keyup (event) =>
-                        if @eventEnd.val() is ''
-                            @addEventButton.addClass 'disabled'
-                        else if event.keyCode is 13 or event.which is 13
-                            @onEventButtonClicked()
-                        else
-                            @addEventButton.removeClass 'disabled'
-                else
-                    @addEventButton.removeClass 'disabled'
+                @addEventButton.removeClass 'disabled'
+
+        @eventStart.keyup keyReaction
+        @eventEnd.keyup keyReaction
+        @eventDescription.keyup keyReaction
 
     onRemoveEventClicked: =>
         evt = @model.get @event.id
@@ -124,6 +117,9 @@ module.exports = class EventPopOver extends View
                 @clean()
 
     onEventButtonClicked: =>
+        if @addEventButton.hasClass 'disabled'
+            return
+
         # Recover values
         start = $('.popover #inputStart').val()
         end = $('.popover #inputEnd').val()
@@ -157,6 +153,8 @@ module.exports = class EventPopOver extends View
             diff: parseInt(specifiedDay[1])
             place: place
             description: description
+        @addEventButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @addEventButton.spin 'tiny'
         @model.create data,
             wait: true
             success: =>
@@ -204,7 +202,8 @@ module.exports = class EventPopOver extends View
             diff: parseInt(specifiedDay[1])
             description: description
         @cal.fullCalendar 'renderEvent', @event
-        @addEventButton.html '&nbsp;'
+        @addEventButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @addEventButton.spin 'tiny'
         evt.save data,
             wait: true
             success: =>
@@ -217,5 +216,7 @@ module.exports = class EventPopOver extends View
                 @event.diff = data.diff
                 @event.place = data.place
                 @cal.fullCalendar 'renderEvent', @event
+                @addEventButton.spin()
             error: ->
                 @cal.fullCalendar 'renderEvent', @event
+                @addEventButton.spin()

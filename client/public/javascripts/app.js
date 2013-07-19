@@ -2068,10 +2068,10 @@ window.require.register("views/event_popover", function(exports, require, module
       if (this.popoverWidget != null) {
         this.popoverWidget.find('button.close').unbind('click');
         this.popoverWidget.find('button.add-event').unbind('click');
-        this.popoverWidget.find('inputStart').unbind('keyup');
-        this.popoverWidget.find('inputEnd').unbind('keyup');
-        this.popoverWidget.find('inputPlace').unbind('keyup');
-        this.popoverWidget.find('inputDesc').unbind('keyup');
+        this.popoverWidget.find('#inputStart').unbind('keyup');
+        this.popoverWidget.find('#inputEnd').unbind('keyup');
+        this.popoverWidget.find('#inputPlace').unbind('keyup');
+        this.popoverWidget.find('#inputDesc').unbind('keyup');
         return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
       }
     };
@@ -2093,7 +2093,8 @@ window.require.register("views/event_popover", function(exports, require, module
         content: content
       }).popover('show');
       this.popoverWidget = $('.container .popover');
-      this.popoverWidget.find('inputStart').focus();
+      this.popoverWidget.find('#inputStart').focus();
+      this.popoverWidget.find('button.add-event').addClass('disable');
       if (this.action === 'create') {
         return $('.event-remove').hide();
       } else {
@@ -2102,7 +2103,8 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     EventPopOver.prototype.bindEvents = function() {
-      var _this = this;
+      var keyReaction,
+        _this = this;
 
       this.popoverWidget = $('.container .popover');
       this.addEventButton = this.popoverWidget.find('button.add-event');
@@ -2112,45 +2114,37 @@ window.require.register("views/event_popover", function(exports, require, module
       this.addEventButton.click(function() {
         return _this.onEventButtonClicked();
       });
-      this.eventStart = this.popoverWidget.find('inputStart');
-      this.eventEnd = this.popoverWidget.find('inputEnd');
-      this.eventPlace = this.popoverWidget.find('inputPlace');
-      this.eventDescription = this.popoverWidget.find('inputDesc');
-      return this.eventStart.keyup(function(event) {
-        if (_this.eventStart.val() === '') {
+      this.eventStart = this.popoverWidget.find('#inputStart');
+      this.eventEnd = this.popoverWidget.find('#inputEnd');
+      this.eventPlace = this.popoverWidget.find('#inputPlace');
+      this.eventDescription = this.popoverWidget.find('#inputDesc');
+      this.addEventButton.addClass('disabled');
+      keyReaction = function(event) {
+        if (_this.eventStart.val() === '' || _this.eventEnd.val() === '' || _this.eventDescription.val() === '') {
           return _this.addEventButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
           return _this.onEventButtonClicked();
         } else {
-          if (_this.eventEnd.val() === '') {
-            _this.addEventButton.addClass('disabled');
-            return _this.eventEnd.keyup(function(event) {
-              if (_this.eventEnd.val() === '') {
-                return _this.addEventButton.addClass('disabled');
-              } else if (event.keyCode === 13 || event.which === 13) {
-                return _this.onEventButtonClicked();
-              } else {
-                return _this.addEventButton.removeClass('disabled');
-              }
-            });
-          } else {
-            return _this.addEventButton.removeClass('disabled');
-          }
+          return _this.addEventButton.removeClass('disabled');
         }
-      });
+      };
+      this.eventStart.keyup(keyReaction);
+      this.eventEnd.keyup(keyReaction);
+      return this.eventDescription.keyup(keyReaction);
     };
 
     EventPopOver.prototype.bindEditEvents = function() {
-      var _this = this;
+      var keyReaction,
+        _this = this;
 
       this.popoverWidget = $('.container .popover');
       this.addEventButton = this.popoverWidget.find('button.add-event');
       this.closeButton = this.popoverWidget.find('button.close');
       this.removeButton = this.popoverWidget.find('.event-remove');
-      this.eventStart = this.popoverWidget.find('inputStart');
-      this.eventEnd = this.popoverWidget.find('inputEnd');
-      this.eventPlace = this.popoverWidget.find('inputPlace');
-      this.eventDescription = this.popoverWidget.find('inputDesc');
+      this.eventStart = this.popoverWidget.find('#inputStart');
+      this.eventEnd = this.popoverWidget.find('#inputEnd');
+      this.eventPlace = this.popoverWidget.find('#inputPlace');
+      this.eventDescription = this.popoverWidget.find('#inputDesc');
       this.addEventButton.html(this.action);
       this.closeButton.click(function() {
         return _this.clean();
@@ -2161,28 +2155,18 @@ window.require.register("views/event_popover", function(exports, require, module
       this.removeButton.click(function() {
         return _this.onRemoveEventClicked();
       });
-      return this.eventStart.keyup(function(event) {
-        if (_this.eventStart.val() === '') {
+      keyReaction = function(event) {
+        if (_this.eventStart.val() === '' || _this.eventEnd.val() === '' || _this.eventDescription.val() === '') {
           return _this.addEventButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
           return _this.onEventButtonClicked();
         } else {
-          if (_this.eventEnd.val() === '') {
-            _this.addEventButton.addClass('disabled');
-            return _this.eventEnd.keyup(function(event) {
-              if (_this.eventEnd.val() === '') {
-                return _this.addEventButton.addClass('disabled');
-              } else if (event.keyCode === 13 || event.which === 13) {
-                return _this.onEventButtonClicked();
-              } else {
-                return _this.addEventButton.removeClass('disabled');
-              }
-            });
-          } else {
-            return _this.addEventButton.removeClass('disabled');
-          }
+          return _this.addEventButton.removeClass('disabled');
         }
-      });
+      };
+      this.eventStart.keyup(keyReaction);
+      this.eventEnd.keyup(keyReaction);
+      return this.eventDescription.keyup(keyReaction);
     };
 
     EventPopOver.prototype.onRemoveEventClicked = function() {
@@ -2212,6 +2196,9 @@ window.require.register("views/event_popover", function(exports, require, module
       var data, description, dueEndDate, dueStartDate, end, newDate, place, specifiedDay, specifiedTime, start,
         _this = this;
 
+      if (this.addEventButton.hasClass('disabled')) {
+        return;
+      }
       start = $('.popover #inputStart').val();
       end = $('.popover #inputEnd').val();
       place = $('.popover #inputPlace').val();
@@ -2244,6 +2231,8 @@ window.require.register("views/event_popover", function(exports, require, module
         place: place,
         description: description
       };
+      this.addEventButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      this.addEventButton.spin('tiny');
       return this.model.create(data, {
         wait: true,
         success: function() {
@@ -2297,7 +2286,8 @@ window.require.register("views/event_popover", function(exports, require, module
         description: description
       };
       this.cal.fullCalendar('renderEvent', this.event);
-      this.addEventButton.html('&nbsp;');
+      this.addEventButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      this.addEventButton.spin('tiny');
       return evt.save(data, {
         wait: true,
         success: function() {
@@ -2310,10 +2300,12 @@ window.require.register("views/event_popover", function(exports, require, module
           _this.event.end = endDate.format(Date.ISO8601_DATETIME);
           _this.event.diff = data.diff;
           _this.event.place = data.place;
-          return _this.cal.fullCalendar('renderEvent', _this.event);
+          _this.cal.fullCalendar('renderEvent', _this.event);
+          return _this.addEventButton.spin();
         },
         error: function() {
-          return this.cal.fullCalendar('renderEvent', this.event);
+          this.cal.fullCalendar('renderEvent', this.event);
+          return this.addEventButton.spin();
         }
       });
     };
