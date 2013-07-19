@@ -1,11 +1,13 @@
 div
-    |From  
-    input.input-small(type="text", value="#{defaultValueStart}", id="inputStart", placeholder="Start") 
-    |To  
-    input.input-small(type="text", value="#{defaultValueEnd}", id="inputEnd", placeholder="End")   
-    input.input-small(type="text", value="#{defaultValuePlace}", id="inputPlace", placeholder="Place")
-    |    
-    input.input(type="text", value="#{defaultValueDesc}", id="inputDesc", placeholder="Description")
+    input.input-small(type="text", value="#{defaultValueStart}", 
+                      id="inputStart", placeholder="From hours:minutes") 
+    input.input-small(type="text", value="#{defaultValueEnd}", 
+                          id="inputEnd", placeholder="To hours:minutes+days")   
+div
+    input.input-small(type="text", value="#{defaultValuePlace}", 
+                      id="inputPlace", placeholder="Place")
+    input.input(type="text", value="#{defaultValueDesc}", 
+        id="inputDesc", placeholder="Description")
 
     button.btn.add-event
         if editionMode

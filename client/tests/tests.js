@@ -83,10 +83,12 @@ var createSinonServer;
 
 createSinonServer = function() {
   var createAutoResponse, server;
+
   this.server = server = sinon.fakeServer.create();
   createAutoResponse = function(method, url, code, JSONResponder) {
     return server.respondWith(method, url, function(req) {
       var body, headers, res;
+
       body = JSON.parse(req.requestBody);
       res = JSONResponder(req, body);
       headers = {
@@ -97,6 +99,7 @@ createSinonServer = function() {
   };
   this.server.checkLastRequestIs = function(method, url) {
     var req;
+
     req = server.requests[server.requests.length - 1];
     expect(req.url).to.equal(url);
     return expect(req.method).to.equal(method);
@@ -106,6 +109,7 @@ createSinonServer = function() {
 ;
 describe('helpers', function() {
   var fixtures, helpers;
+
   helpers = require('helpers');
   fixtures = {
     invalidDates: ['15/04/20#09:40', '15/2013#09:40', 'azdza#09:40', '#09:40', '1//#09:40'],
@@ -117,12 +121,14 @@ describe('helpers', function() {
   describe('.formatDateISO8601', function() {
     it('should return a valid iso8601 full date if the input is correct', function() {
       var expected, given;
+
       given = '15/04/2013#09:40';
       expected = '2013-04-15T09:40:00';
       return expect(helpers.formatDateISO8601(given)).to.equal(expected);
     });
     it('should return an undefined date part if the date is incorrect', function() {
       var expected;
+
       expected = 'undefinedT09:40:00';
       return fixtures.invalidDates.forEach(function(item) {
         return expect(helpers.formatDateISO8601(item)).to.equal(expected);
@@ -130,6 +136,7 @@ describe('helpers', function() {
     });
     return it('should return an undefined time part if the time is incorrect', function() {
       var expected;
+
       expected = '2013-04-15Tundefined';
       return fixtures.invalidTimes.forEach(function(item) {
         return expect(helpers.formatDateISO8601(item)).to.equal(expected);
@@ -163,6 +170,7 @@ describe('helpers', function() {
   return describe('.icalToISO8601', function() {
     return it('should return a valid full date', function() {
       var expected, given;
+
       given = '20130415T094000Z';
       expected = '2013-04-15T09:40Z';
       return expect(helpers.icalToISO8601(given)).to.equal(expected);

@@ -8184,6 +8184,13 @@ input[type="time"] {
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
   filter: alpha(opacity=70);
 }
+.popover-content input {
+  margin-left: 5px;
+}
+.popover-content #inputStart,
+.popover-content #inputEnd {
+  width: 148px;
+}
 .popover-content,
 #add-alarm {
   margin-top: 20px;
@@ -8476,6 +8483,13 @@ thead > tr.fc-first,
   border-radius: 0;
 }
 .alarm-remove {
+  cursor: pointer;
+}
+.event-remove {
+  cursor: pointer;
+}
+.fc-widget-content,
+.fc-cell-overlay {
   cursor: pointer;
 }
 .fc-widget-content,
