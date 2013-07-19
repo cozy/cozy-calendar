@@ -33,12 +33,39 @@ module.exports = class Event extends ScheduleItem
                 value: "The date or time format might be invalid. " + \
                         "It must be dd/mm/yyyy and hh:mm."
 
-        ###if attrs.start > attrs.end
-            console.log "pb start - end"
+
+        # Start date should be lower than end date
+        sendError = () ->
+            console.log 'pb start - end'
             errors.push
                 field: 'date'
                 value: "The start date might be inferor than end date  " + \
-                        "It must be dd/mm/yyyy and hh:mm."###
+                        "It must be dd/mm/yyyy and hh:mm."
+
+        # Initialize date
+        start = new Date(attrs.start)
+        end = new Date(attrs.end)
+
+        startDate = start.format('{yy}:{MM}:{dd}').split(":")
+        endDate = end.format('{yy}:{MM}:{dd}').split(":")
+        startHour = start.format('{HH}:{mm}').split(":")
+        endHour = end.format('{HH}:{mm}').split(":")
+
+        if startDate[0] is endDate[0] and startDate[1] is endDate[1] and startDate[2] is endDate[2]
+                # Same day
+            if startHour[0] > endHour[0]
+                sendError()
+            else if startHour[0] is endHour[0] and startHour[1] > endHour[1]
+                sendError()
+        else
+            # Event on multiples days
+            if startDate[0] > endDate[0]
+                sendError()
+            else if startDate[0]is endDate[0]
+                if startDate[1] > endDate[1]
+                    sendError()
+                else if startDate[1] is endDate[1] and startDate[2] > endDate[2]
+                    sendError()
 
         if errors.length > 0
             return errors 
