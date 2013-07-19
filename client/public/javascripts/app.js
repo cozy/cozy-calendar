@@ -1537,6 +1537,7 @@ window.require.register("views/calendar_view", function(exports, require, module
 
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
       this.popover.clean();
+      this.popoverEvent.clean();
       if (view.name === "month") {
         return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
       } else if (view.name === "agendaWeek") {

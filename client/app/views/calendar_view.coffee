@@ -112,6 +112,7 @@ module.exports = class CalendarView extends View
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @popover.clean()
+        @popoverEvent.clean()
         if view.name is "month"
             @handleSelectionInView startDate, endDate, allDay, jsEvent
         else if view.name is "agendaWeek"
