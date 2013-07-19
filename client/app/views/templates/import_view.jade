@@ -7,16 +7,17 @@
                 i.icon-arrow-down.icon-white
 
     #import-form.well
-        h3 Icalendar importer
+        h3 ICalendar importer
 
-        div
+        div.import-form
             button#import-button.btn import your icalendar file
             input#import-file-input(type="file")
 
-        div
+        div.confirmation
             button#confirm-import-button.btn confirm import
+            button#cancel-import-button.btn cancel
 
-        div
+        div.results
             h4 Alarms to import
             #import-alarm-list
 

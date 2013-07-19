@@ -2490,7 +2490,8 @@ window.require.register("views/import_view", function(exports, require, module) 
     ImportView.prototype.events = {
       'change #import-file-input': 'onFileChanged',
       'click button#import-button': 'onImportClicked',
-      'click button#confirm-import-button': 'onConfirmImportClicked'
+      'click button#confirm-import-button': 'onConfirmImportClicked',
+      'click button#cancel-import-button': 'onCancelImportClicked'
     };
 
     ImportView.prototype.initialize = function() {};
@@ -2500,10 +2501,14 @@ window.require.register("views/import_view", function(exports, require, module) 
     };
 
     ImportView.prototype.afterRender = function() {
+      this.$(".confirmation").hide();
+      this.$(".results").hide();
       this.alarmList = new AlarmList;
       this.alarmList.render();
       this.eventList = new EventList;
-      return this.eventList.render();
+      this.eventList.render();
+      this.importButton = this.$('button#import-button');
+      return this.confirmButton = this.$('button#confirm-button');
     };
 
     ImportView.prototype.onFileChanged = function(event) {
@@ -2519,6 +2524,8 @@ window.require.register("views/import_view", function(exports, require, module) 
 
       form = new FormData();
       form.append("file", this.file);
+      this.importButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      this.importButton.spin('tiny');
       return $.ajax({
         url: "import/ical",
         type: "POST",
@@ -2526,7 +2533,7 @@ window.require.register("views/import_view", function(exports, require, module) 
         processData: false,
         contentType: false,
         success: function(result) {
-          var alarm, event, valarm, vevent, _i, _j, _len, _len1, _ref1, _ref2, _results;
+          var alarm, event, valarm, vevent, _i, _j, _len, _len1, _ref1, _ref2;
 
           if ((result != null ? result.alarms : void 0) != null) {
             _ref1 = result.alarms;
@@ -2538,36 +2545,70 @@ window.require.register("views/import_view", function(exports, require, module) 
           }
           if ((result != null ? result.events : void 0) != null) {
             _ref2 = result.events;
-            _results = [];
             for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
               vevent = _ref2[_j];
               event = new Event(vevent);
-              _results.push(_this.eventList.collection.add(event));
+              _this.eventList.collection.add(event);
             }
-            return _results;
           }
+          return _this.$(".import-form").fadeOut(function() {
+            _this.importButton.spin();
+            _this.importButton.html('import your calendar');
+            _this.$(".results").slideDown();
+            return _this.$(".confirmation").fadeIn();
+          });
         },
         error: function() {
-          return alert('error');
+          alert('An error occured while importing your calendar.');
+          _this.importButton.spin();
+          return _this.importButton.html('import your calendar');
         }
       });
     };
 
     ImportView.prototype.onConfirmImportClicked = function() {
-      var alarm, event, _i, _j, _len, _len1, _ref1, _ref2;
+      var alarms, events, finish, saveAlarms, saveEvents,
+        _this = this;
 
-      _ref1 = this.alarmList.collection.toArray();
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        alarm = _ref1[_i];
-        alarm.save();
-      }
-      _ref2 = this.eventList.collection.toArray();
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        event = _ref2[_j];
-        event.save();
-      }
-      this.alarmList.collection.reset();
-      return this.eventList.collection.reset();
+      alarms = this.alarmList.collection.toArray();
+      events = this.eventList.collection.toArray();
+      finish = function() {
+        _this.$(".confirmation").fadeOut();
+        _this.$(".results").slideUp(function() {
+          _this.$(".import-form").fadeIn();
+          return _this.confirmButton.html('confirm import');
+        });
+        _this.alarmList.collection.reset();
+        return _this.eventList.collection.reset();
+      };
+      saveAlarms = function(alarms) {
+        if (alarms.length > 0) {
+          alarms.pop().save();
+          return saveAlarms(alarms);
+        } else {
+          return finish();
+        }
+      };
+      saveEvents = function(events) {
+        if (events.length > 0) {
+          events.pop().save();
+          return saveEvents(events);
+        } else {
+          return saveAlarms(alarms);
+        }
+      };
+      this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      this.confirmButton.spin('tiny');
+      return saveEvents(events);
+    };
+
+    ImportView.prototype.onCancelImportClicked = function() {
+      var _this = this;
+
+      this.$(".confirmation").fadeOut();
+      return this.$(".results").slideUp(function() {
+        return _this.$(".import-form").fadeIn();
+      });
     };
 
     return ImportView;
@@ -2920,7 +2961,7 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>Icalendar importer</h3><div><button id="import-button" class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div><button id="confirm-import-button" class="btn">confirm import</button></div><div><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>ICalendar importer</h3><div class="import-form"><button id="import-button" class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div class="confirmation"><button id="confirm-import-button" class="btn">confirm import</button><button id="cancel-import-button" class="btn">cancel</button></div><div class="results"><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div></div>');
   }
   return buf.join("");
   };

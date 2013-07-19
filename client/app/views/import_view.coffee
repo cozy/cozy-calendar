@@ -15,6 +15,7 @@ module.exports = class ImportView extends View
         'change #import-file-input': 'onFileChanged'
         'click button#import-button': 'onImportClicked'
         'click button#confirm-import-button': 'onConfirmImportClicked'
+        'click button#cancel-import-button': 'onCancelImportClicked'
 
     initialize: ->
 
@@ -22,10 +23,14 @@ module.exports = class ImportView extends View
         require('./templates/import_view')
 
     afterRender: ->
+        @$(".confirmation").hide()
+        @$(".results").hide()
         @alarmList = new AlarmList
         @alarmList.render()
         @eventList = new EventList
         @eventList.render()
+        @importButton = @$ 'button#import-button'
+        @confirmButton = @$ 'button#confirm-button'
 
     onFileChanged: (event) ->
         file = event.target.files[0]
@@ -34,6 +39,8 @@ module.exports = class ImportView extends View
     onImportClicked: ->
         form = new FormData()
         form.append "file", @file
+        @importButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @importButton.spin 'tiny'
         $.ajax
             url: "import/ical"
             type: "POST"
@@ -51,16 +58,50 @@ module.exports = class ImportView extends View
                     for vevent in result.events
                         event = new Event vevent
                         @eventList.collection.add event
-            error: ->
-                alert 'error'
+
+
+                @$(".import-form").fadeOut =>
+                    @importButton.spin()
+                    @importButton.html 'import your calendar'
+                    @$(".results").slideDown()
+                    @$(".confirmation").fadeIn()
+
+            error: =>
+                alert 'An error occured while importing your calendar.'
+                @importButton.spin()
+                @importButton.html 'import your calendar'
 
     onConfirmImportClicked: ->
+        alarms = @alarmList.collection.toArray()
+        events = @eventList.collection.toArray()
 
-        for alarm in @alarmList.collection.toArray()
-            alarm.save()
+        finish = =>
+            @$(".confirmation").fadeOut()
+            @$(".results").slideUp =>
+                @$(".import-form").fadeIn()
+                @confirmButton.html 'confirm import'
+            @alarmList.collection.reset()
+            @eventList.collection.reset()
 
-        for event in @eventList.collection.toArray()
-            event.save()
+        saveAlarms = (alarms) ->
+            if alarms.length > 0
+                alarms.pop().save()
+                saveAlarms alarms
+            else
+                finish()
 
-        @alarmList.collection.reset()
-        @eventList.collection.reset()
+        saveEvents = (events) ->
+            if events.length > 0
+                events.pop().save()
+                saveEvents events
+            else
+                saveAlarms alarms
+
+        @confirmButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @confirmButton.spin 'tiny'
+        saveEvents events
+
+    onCancelImportClicked: ->
+        @$(".confirmation").fadeOut()
+        @$(".results").slideUp =>
+            @$(".import-form").fadeIn()
