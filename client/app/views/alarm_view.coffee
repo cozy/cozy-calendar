@@ -1,15 +1,8 @@
-View = require '../lib/view'
+ScheduleElement = require './schedule_element'
 
-module.exports = class AlarmView extends View
-
-    tagName: 'div'
-    className: 'alarm'
-
-    initialize: ->
-        @listenTo @model, "change", @onChange
+module.exports = class AlarmView extends ScheduleElement
 
     render: ->
-
         super
             action: @model.get 'action'
             time: @model.getFormattedDate '{HH}:{mm}'
@@ -18,6 +11,3 @@ module.exports = class AlarmView extends View
 
     template: ->
         require './templates/alarm'
-
-    onChange: (alarm) ->
-        @render()

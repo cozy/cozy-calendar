@@ -1,0 +1,16 @@
+div
+    input.input-small(type="text", value="#{defaultValueStart}", 
+                      id="inputStart", placeholder="From hours:minutes") 
+    input.input-small(type="text", value="#{defaultValueEnd}", 
+                          id="inputEnd", placeholder="To hours:minutes+days")   
+div
+    input.input-small(type="text", value="#{defaultValuePlace}", 
+                      id="inputPlace", placeholder="Place")
+    input.input(type="text", value="#{defaultValueDesc}", 
+        id="inputDesc", placeholder="Description")
+
+    button.btn.add-event
+        if editionMode
+            | Edit
+        else
+            | Create

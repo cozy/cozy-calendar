@@ -1,11 +1,6 @@
-ScheduleItemsCollection = require './scheduleitems'
-Alarm = require '../models/alarm'
+CozyCollection = require '../lib/cozy_collection'
 
-module.exports = class AlarmCollection extends ScheduleItemsCollection
-
-    model: Alarm
-    url: 'alarms'
-
+module.exports = class ScheduleItemsCollection extends CozyCollection
 
     comparator: (si1, si2) ->
 

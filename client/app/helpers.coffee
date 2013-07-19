@@ -54,3 +54,15 @@ exports.getPopoverDirection = (isDayView, startDate) ->
         else
             direction = 'bottom'
     direction
+
+exports.isEvent = (start, end) ->
+    if start[0] is end[0] 
+        if start[1] is "00" and end[1] is "30"
+            return false
+    else if parseInt(start[0])+1 is parseInt(end[0]) and start[1] is "30" and 
+            end[1] is "00"
+        return false
+    else
+        return true
+
+

@@ -13,7 +13,7 @@ before ->
 before ->
 
     @convertAlarmDate = (alarm, timezone) ->
-        timezonedDate = new time.Date(alarm.trigg)
+        timezonedDate = new time.Date(alarm.trigg, 'UTC')
         timezonedDate.setTimezone(timezone)
         alarm.trigg = timezonedDate.toString().slice(0, 24)
         return alarm
