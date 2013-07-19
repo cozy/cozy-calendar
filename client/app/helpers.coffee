@@ -55,36 +55,4 @@ exports.getPopoverDirection = (isDayView, startDate) ->
             direction = 'bottom'
     direction
 
-exports.getDiffDays = (start, end) ->
-    days = [31,28,31,30,31,30,31,31,30,31,30,31]
-
-    monthDiff = () ->
-        firstMonth = days[start[1]-1] - start[2]
-        lastMonth = end[2]
-        if end[1] - start[1] is 1   
-            console.log parseInt(firstMonth)+parseInt(lastMonth)
-            return parseInt(firstMonth)+parseInt(lastMonth)
-        else
-            diff = parseInt(firstMonth)+parseInt(lastMonth) 
-            for i in [start[1]..end[1]-1] by 1
-                diff = diff + days[i-1]
-            console.log diff
-            return diff
-
-    if start is end
-        return 0
-    else if start[0] is end[0] and start[1] is end[1]
-        return parseInt(end[2])-parseInt(start[2])
-    else if start[0] is end[0]
-        return monthDiff()
-    else
-        if end[1] - start[1] is 1
-            return monthDiff()
-        else
-            diff = monthDiff()
-            for i in [start[2]..end[2]-1] by 1
-                diff = diff + 365
-            return diff
-
-
 

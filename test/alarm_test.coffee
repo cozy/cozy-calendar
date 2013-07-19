@@ -45,7 +45,7 @@ describe "Alarms management", ->
 
     describe "POST alarms/", ->
 
-        before (done) ->
+        before (done) =>
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"

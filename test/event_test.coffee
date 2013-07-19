@@ -22,8 +22,8 @@ describe "Events management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createEvent "Something to do", "Tue Apr 23 2013 14:40:00 ", "Tue Apr 23 2013 15:40:00 "
-                    helpers.createEvent "Something else to do", "Tue Apr 24 2013 13:30:00", "Tue Apr 24 2013 14:00:00"
+                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", "Tue Apr 23 2013 15:40:00 ", "Place", 3, "Something to do"
+                    helpers.createEvent "Tue Apr 24 2013 13:30:00", "Tue Apr 24 2013 14:00:00", "Other place", 0, "Something else to do"
                 ], ->
                     callback()
             helpers.cleanDb ->
@@ -49,6 +49,8 @@ describe "Events management", ->
                 description: 'Title'
                 start: "Tue Apr 15 2013 15:30:00"
                 end:"Tue Apr 15 2013 16:30:00"
+                place: "place"
+                diff: 0
 
         it "should return the event json object", (done) =>
 
@@ -64,6 +66,8 @@ describe "Events management", ->
                 body.should.have.property 'start'
                 body.should.have.property 'end'
                 body.should.have.property 'description', @event.description
+                body.should.have.property 'place', @event.place
+                body.should.have.property 'diff', @event.diff
                 done()
 
         it "should have persisted the event into database", (done) =>
@@ -81,7 +85,8 @@ describe "Events management", ->
                 event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
-
+                event.should.have.property 'place', @event.place
+                event.should.have.property 'diff', @event.diff
                 done()
 
         it "should have only one item in the database", (done) =>
@@ -101,6 +106,8 @@ describe "Events management", ->
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
+                place: "place"
+                diff: 0
 
             helpers.cleanDb =>
                 helpers.createEventFromObject @event, (err, event) =>
@@ -112,6 +119,8 @@ describe "Events management", ->
             @event.start = "Tue Apr 25 2013 16:30:00"
             @event.end = "Tue Apr 25 2013 19:30:00"
             @event.description = 'Something updated to do'
+            @event.place = "other place"
+            @event.diff = 1
 
             client.put "events/#{@event.id}", @event, (err, resp, body) =>
 
@@ -122,6 +131,8 @@ describe "Events management", ->
                 body.should.have.property 'start'
                 body.should.have.property 'end'
                 body.should.have.property 'description', @event.description
+                body.should.have.property 'place', @event.place
+                body.should.have.property 'diff', @event.diff
                 done()
 
         it "should have persisted the event into database", (done) =>
@@ -139,6 +150,8 @@ describe "Events management", ->
                 event.should.have.property 'end', exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
+                event.should.have.property 'place', @event.place
+                event.should.have.property 'diff', @event.diff
 
                 done()
 
@@ -149,6 +162,8 @@ describe "Events management", ->
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
+                place: "place"
+                diff: 0
 
             helpers.cleanDb =>
                 helpers.createEventFromObject @event, (err, event) =>

@@ -33,11 +33,12 @@ module.exports = class Event extends ScheduleItem
                 value: "The date or time format might be invalid. " + \
                         "It must be dd/mm/yyyy and hh:mm."
 
-        if attrs.start > attrs.end
+        ###if attrs.start > attrs.end
+            console.log "pb start - end"
             errors.push
                 field: 'date'
                 value: "The start date might be inferor than end date  " + \
-                        "It must be dd/mm/yyyy and hh:mm."
+                        "It must be dd/mm/yyyy and hh:mm."###
 
         if errors.length > 0
             return errors 
