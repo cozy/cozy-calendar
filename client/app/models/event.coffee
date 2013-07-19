@@ -7,7 +7,7 @@ module.exports = class Event extends ScheduleItem
     urlRoot: 'events'
 
 
-    validateDate = (attrs, options) ->
+    validateDate = (attrs, options, errors) ->
         sendError = () ->
             console.log 'pb start - end'
             errors.push
@@ -62,7 +62,7 @@ module.exports = class Event extends ScheduleItem
                 value: "The date or time format might be invalid. " + \
                         "It must be dd/mm/yyyy and hh:mm."
 
-        validateDate(attrs, options)             
+        validateDate(attrs, options, errors)             
 
         if errors.length > 0
             return errors 

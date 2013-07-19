@@ -534,7 +534,7 @@ window.require.register("models/event", function(exports, require, module) {
 
     Event.prototype.urlRoot = 'events';
 
-    validateDate = function(attrs, options) {
+    validateDate = function(attrs, options, errors) {
       var end, endDate, endHour, sendError, start, startDate, startHour;
       sendError = function() {
         console.log('pb start - end');
@@ -589,7 +589,7 @@ window.require.register("models/event", function(exports, require, module) {
           value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
         });
       }
-      validateDate(attrs, options);
+      validateDate(attrs, options, errors);
       if (errors.length > 0) {
         return errors;
       }
