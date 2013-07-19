@@ -49,14 +49,16 @@ describe "Events management", ->
 
         before (done) =>
             helpers.cleanDb done
+        after ->
+            delete @event
+
+        it "should return the event json object", (done) =>
             @event =
                 description: 'Title'
                 start: "Tue Apr 15 2013 15:30:00"
                 end:"Tue Apr 15 2013 16:30:00"
                 place: "place"
                 diff: 0
-
-        it "should return the event json object", (done) =>
 
             client.post "events/", @event, (error, response, body) =>
 
@@ -107,18 +109,24 @@ describe "Events management", ->
 
     describe "PUT events/:id", ->
 
-        before (done) =>
+        before (done) =>                
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete @event
+
+
+        it "When I create an event", (done) =>
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
                 place: "place"
                 diff: 0
-
-            helpers.cleanDb =>
-                helpers.createEventFromObject @event, (err, event) =>
-                    @event.id = event.id
-                    done()
+            helpers.createEventFromObject @event, (err, event) =>
+                @event.id = event.id
+                done()
 
         it "should return the event with the updated value", (done) =>
 
@@ -166,20 +174,24 @@ describe "Events management", ->
     describe "DELETE events/:id", ->
 
         before (done) =>
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete @event
+
+        it "When I create an event", (done) =>
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
                 end: "Tue Apr 25 2013 18:30:00"
                 place: "place"
                 diff: 0
-
-            helpers.cleanDb =>
-                helpers.createEventFromObject @event, (err, event) =>
-                    @event.id = event.id
-                    done()
+            helpers.createEventFromObject @event, (err, event) =>
+                @event.id = event.id
+                done()
 
         it "should return the deleted event", (done) =>
-
             client.del "events/#{@event.id}", (err, resp, body) =>
                 should.not.exist err
                 should.exist resp
