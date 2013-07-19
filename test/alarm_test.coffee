@@ -46,13 +46,15 @@ describe "Alarms management", ->
     describe "POST alarms/", ->
 
         before (done) =>
+            helpers.cleanDb done
+        after ->
+            delete alarm
+
+        it "should return the alarm json object", (done) =>
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
-            helpers.cleanDb done
-
-        it "should return the alarm json object", (done) =>
 
             client.post "alarms/", @alarm, (error, response, body) =>
 
@@ -95,15 +97,21 @@ describe "Alarms management", ->
     describe "PUT alarms/:id", ->
 
         before (done) =>
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete alarm
+
+        it "When I create an alarm", (done) =>            
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
+            helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                @alarm.id = alarm.id
+                done()
 
-            helpers.cleanDb =>
-                helpers.createAlarmFromObject @alarm, (err, alarm) =>
-                    @alarm.id = alarm.id
-                    done()
 
         it "should return the alarm with the updated value", (done) =>
 
@@ -138,15 +146,20 @@ describe "Alarms management", ->
     describe "DELETE alarms/:id", ->
 
         before (done) =>
+            helpers.cleanDb =>
+                done()
+
+        after ->
+            delete alarm
+
+        it "When I create an alarm", (done) =>            
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
-
-            helpers.cleanDb =>
-                helpers.createAlarmFromObject @alarm, (err, alarm) =>
-                    @alarm.id = alarm.id
-                    done()
+            helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                @alarm.id = alarm.id
+                done()
 
         it "should return the deleted alarm", (done) =>
 
