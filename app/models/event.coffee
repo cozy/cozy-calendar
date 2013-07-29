@@ -20,10 +20,12 @@ module.exports = (compound, Event) ->
         event.place = vevent.fields["LOCATION"]
         startDate = vevent.fields["DTSTART"]
         startDate = moment startDate, "YYYYMMDDTHHmm00"
+        startDate = new time.Date new Date(startDate), 'UTC'
         endDate = vevent.fields["DTEND"]
         endDate = moment endDate, "YYYYMMDDTHHmm00"
-        event.start = startDate
-        event.end = endDate
+        endDate = new time.Date new Date(endDate), 'UTC'
+        event.start = startDate.toString().slice(0, 24)
+        event.end = endDate.toString().slice(0, 24)
         event
 
     Event.extractEvents = (component) ->

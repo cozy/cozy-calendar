@@ -206,8 +206,53 @@ END:VTODO""".replace(/\n/g, '\r\n')
 
         describe 'Events', ->
             it 'toIcal', ->
+                event = new Event
+                    place: "my place"
+                    description: "my description"
+                    start: "Tue Apr 24 2013 13:30:00"
+                    end: "Fri Apr 25 2013 13:30:00"
+                event.toIcal().toString().should.equal """
+BEGIN:VEVENT
+DESCRIPTION:my description
+DTSTART:20130424T133000
+DTEND:20130425T133000
+LOCATION:my place
+END:VEVENT""".replace(/\n/g, '\r\n')
+
             it 'fromIcal', ->
+                start = new Date 2013, 5, 9, 15, 0, 0
+                end = new Date 2013, 5, 10, 15, 0, 0
+                location = 'my place'
+                description = 'description'
+                vEvent = new VEvent start, end, description, location
+                event = Event.fromIcal vEvent
+                event.description.should.equal description
+                event.place.should.equal location
+                event.start.should.equal "Sun Jun 09 2013 15:00:00"
+                event.end.should.equal "Mon Jun 10 2013 15:00:00"
+
             it 'extractEvents', ->
+                cal = Alarm.getICalCalendar()
+                start = new Date 2013, 5, 9, 15, 0, 0
+                end = new Date 2013, 5, 10, 15, 0, 0
+                location = 'my place'
+                description = 'description'
+                cal.add new VEvent start, end, description, location
+                start2 = new Date 2013, 5, 10, 15, 0, 0
+                end2 = new Date 2013, 5, 11, 15, 0, 0
+                location2 = 'my place2'
+                description2 = 'description2'
+                cal.add new VEvent start2, end2, description2, location2
+                events = Event.extractEvents cal
+                events[0].description.should.equal description
+                events[0].place.should.equal location
+                events[0].start.should.equal "Sun Jun 09 2013 15:00:00"
+                events[0].end.should.equal "Mon Jun 10 2013 15:00:00"
+                events[1].description.should.equal description2
+                events[1].place.should.equal location2
+                events[1].start.should.equal "Mon Jun 10 2013 15:00:00"
+                events[1].end.should.equal "Tue Jun 11 2013 15:00:00"
+
 
     describe 'Resources', ->
         describe "GET /export/calendar.ics", ->
