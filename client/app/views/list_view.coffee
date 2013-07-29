@@ -41,6 +41,9 @@ module.exports = class ListView extends View
             action: @alarmFormView.actionField.val()
             trigg: dueDate
 
+        if @alarmFormView.timezoneField.val() isnt 'Use specific timezone'
+            data.timezone = @alarmFormView.timezoneField.val()
+
         if @alarmFormView.editionMode
             alarm = @alarmFormView.data
             alarm.save data,

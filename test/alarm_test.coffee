@@ -41,6 +41,7 @@ describe "Alarms management", ->
                 response.should.have.property 'statusCode'
                 response.statusCode.should.equal 200
                 body.length.should.equal 2
+                body[0].timezone.should.equal 'Europe/Paris'
                 done()
 
     describe "POST alarms/", ->
@@ -50,49 +51,101 @@ describe "Alarms management", ->
         after ->
             delete alarm
 
-        it "should return the alarm json object", (done) =>
-            @alarm =
-                action: 'DISPLAY'
-                trigg: "Tue Apr 23 2013 14:25:00"
-                description: 'Something to remind'
+        describe "Create alarm with the timezone of user", ->
 
-            client.post "alarms/", @alarm, (error, response, body) =>
+            it "When I create alarm", (done) =>
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'Europe/Paris'
 
-                should.not.exist error
-                should.exist response
-                response.should.have.status 201
-                should.exist body
+                client.post "alarms/", @alarm, (error, response, body) =>
 
-                body.should.have.property 'id'
-                @alarm.id = body.id
-                body.should.have.property 'action', @alarm.action
-                body.should.have.property 'trigg'
-                body.trigg.should.eql @alarm.trigg
-                body.should.have.property 'description', @alarm.description
-                done()
+                    should.not.exist error
+                    should.exist response
+                    response.should.have.status 201
+                    should.exist body
 
-        it "should have persisted the alarm into database", (done) =>
+                    body.should.have.property 'id'
+                    @alarm.id = body.id
+                    body.should.have.property 'action', @alarm.action
+                    body.should.have.property 'trigg'
+                    body.should.have.property 'timezone', 'Europe/Paris'
+                    body.trigg.should.equal @alarm.trigg
+                    body.should.have.property 'description', @alarm.description
+                    done()
 
-            helpers.getAlarmByID @alarm.id, (err, alarm) =>
-                should.not.exist err
-                should.exist alarm
-                alarm.should.have.property 'action', @alarm.action
-                exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
-                exepectedDate.setTimezone('UTC')
-                alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
-                alarm.should.have.property 'description', @alarm.description
+            it "Then should have persisted the alarm into database", (done) =>
 
-                done()
+                helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                    should.not.exist err
+                    should.exist alarm
+                    alarm.should.have.property 'action', @alarm.action
+                    exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
+                    exepectedDate.setTimezone('UTC')
+                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    alarm.should.have.property 'description', @alarm.description
 
-        it "should have only one item in the database", (done) =>
+                    done()
 
-            helpers.getAllAlarms (err, alarms) =>
+            it "And should have only one item in the database", (done) =>
 
-                should.not.exist err
-                should.exist alarms
-                alarms.length.should.equal 1
+                helpers.getAllAlarms (err, alarms) =>
 
-                done()
+                    should.not.exist err
+                    should.exist alarms
+                    alarms.length.should.equal 1
+
+                    done()
+
+        describe "Create alarm with a timezone different than user timezone", ->
+
+            it "When I post an alarm with America/Chicago as timezone", (done) =>
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'America/Chicago'
+
+                client.post "alarms/", @alarm, (error, response, body) =>
+
+                    should.not.exist error
+                    should.exist response
+                    response.should.have.status 201
+                    should.exist body
+
+                    body.should.have.property 'id'
+                    @alarm.id = body.id
+                    body.should.have.property 'action', @alarm.action
+                    body.should.have.property 'trigg'
+                    body.should.have.property 'timezone', 'America/Chicago'
+                    body.trigg.should.equal @alarm.trigg
+                    body.should.have.property 'description', @alarm.description
+                    done()
+
+            it "Then should have persisted the alarm into database", (done) =>
+
+                helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                    should.not.exist err
+                    should.exist alarm
+                    alarm.should.have.property 'action', @alarm.action
+                    exepectedDate = new time.Date(@alarm.trigg, 'America/Chicago')
+                    exepectedDate.setTimezone('UTC')
+                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    alarm.should.have.property 'description', @alarm.description
+
+                    done()
+
+            it "And should have two items in the database", (done) =>
+
+                helpers.getAllAlarms (err, alarms) =>
+
+                    should.not.exist err
+                    should.exist alarms
+                    alarms.length.should.equal 2
+
+                    done()
 
     describe "PUT alarms/:id", ->
 
@@ -103,45 +156,94 @@ describe "Alarms management", ->
         after ->
             delete alarm
 
-        it "When I create an alarm", (done) =>            
-            @alarm =
-                action: 'DISPLAY'
-                trigg: "Tue Apr 23 2013 14:25:00"
-                description: 'Something to remind'
-            helpers.createAlarmFromObject @alarm, (err, alarm) =>
-                @alarm.id = alarm.id
-                done()
+        describe "Update alarm with same timezone", ->
+
+            it "When I create an alarm", (done) =>            
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'Europe/Paris'
+                helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                    @alarm.id = alarm.id
+                    done()
 
 
-        it "should return the alarm with the updated value", (done) =>
+            it "Then should return the alarm with the updated value", (done) =>
 
-            @alarm.action = 'EMAIL'
-            @alarm.trigg = "Tue Apr 23 2013 14:30:00"
-            @alarm.description = 'Something updated to remind'
+                @alarm.action = 'EMAIL'
+                @alarm.trigg = "Tue Apr 23 2013 14:30:00"
+                @alarm.description = 'Something updated to remind'
+                @alarm.timezone = 'Europe/Paris'
 
-            client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
+                client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
 
-                should.not.exist err
-                should.exist resp
-                resp.should.have.status 200
-                should.exist body
-                body.should.have.property 'action', @alarm.action
-                body.should.have.property 'trigg', @alarm.trigg
-                body.should.have.property 'description', @alarm.description
-                done()
+                    should.not.exist err
+                    should.exist resp
+                    resp.should.have.status 200
+                    should.exist body
+                    body.should.have.property 'action', @alarm.action
+                    body.should.have.property 'trigg', @alarm.trigg
+                    body.should.have.property 'description', @alarm.description
+                    done()
 
-        it "should have persisted the alarm into database", (done) =>
+            it "And should have persisted the alarm into database", (done) =>
 
-            helpers.getAlarmByID @alarm.id, (err, alarm) =>
-                should.not.exist err
-                should.exist alarm
-                alarm.should.have.property 'action', @alarm.action
-                exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
-                exepectedDate.setTimezone('UTC')
-                alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
-                alarm.should.have.property 'description', @alarm.description
+                helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                    should.not.exist err
+                    should.exist alarm
+                    alarm.should.have.property 'action', @alarm.action
+                    exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
+                    exepectedDate.setTimezone('UTC')
+                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    alarm.should.have.property 'description', @alarm.description
 
-                done()
+                    done()
+
+        describe "Update an alarm with an other timezone", ->
+
+            it "When I create an alarm", (done) =>            
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'America/Chicago'
+                helpers.createAlarmFromObject @alarm, (err, alarm) =>
+                    @alarm.id = alarm.id
+                    done()
+
+
+            it "Then should return the alarm with the updated value", (done) =>
+
+                @alarm.action = 'EMAIL'
+                @alarm.trigg = "Tue Apr 23 2013 14:30:00"
+                @alarm.description = 'Something updated to remind'
+                @alarm.timezone = 'Africa/Abidjan'
+
+                client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
+
+                    should.not.exist err
+                    should.exist resp
+                    resp.should.have.status 200
+                    should.exist body
+                    body.should.have.property 'action', @alarm.action
+                    body.should.have.property 'trigg', @alarm.trigg
+                    body.should.have.property 'description', @alarm.description
+                    body.should.have.property 'timezone', @alarm.timezone
+                    done()
+
+            it "And should have persisted the alarm into database", (done) =>
+
+                helpers.getAlarmByID @alarm.id, (err, alarm) =>
+                    should.not.exist err
+                    should.exist alarm
+                    alarm.should.have.property 'action', @alarm.action
+                    exepectedDate = new time.Date(@alarm.trigg, 'Africa/Abidjan')
+                    exepectedDate.setTimezone('UTC')
+                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    alarm.should.have.property 'description', @alarm.description
+
+                    done()
 
     describe "DELETE alarms/:id", ->
 
@@ -157,6 +259,7 @@ describe "Alarms management", ->
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
                 description: 'Something to remind'
+                timezone: 'Europe/Paris'
             helpers.createAlarmFromObject @alarm, (err, alarm) =>
                 @alarm.id = alarm.id
                 done()

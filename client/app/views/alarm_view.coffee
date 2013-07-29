@@ -7,6 +7,7 @@ module.exports = class AlarmView extends ScheduleElement
             action: @model.get 'action'
             time: @model.getFormattedDate '{HH}:{mm}'
             description: @model.get 'description'
+            timezone: @model.get 'timezone'
             alarmID: @model.id
 
     template: ->

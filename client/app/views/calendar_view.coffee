@@ -4,6 +4,7 @@ AlarmPopOver = require './alarm_popover'
 AlarmsListView = require '../views/alarms_list_view'
 EventPopOver = require './event_popover'
 helpers = require '../helpers'
+timezones = require('helpers/timezone').timezones
 
 Alarm = require '../models/alarm'
 Event = require '../models/event'
@@ -75,6 +76,7 @@ module.exports = class CalendarView extends View
         event =
             id: alarm.cid
             title: alarm.get 'description'
+            timezone: alarm.get 'timezone'
             start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
             end: endAlarm.format(Date.ISO8601_DATETIME)
             allDay: false
@@ -200,9 +202,15 @@ module.exports = class CalendarView extends View
                 event: event
             # Initialize template and show popover
             if event.type is 'alarm'
+                timezoneData = []
+                for timezone in timezones
+                    timezoneData.push value: timezone, text: timezone
                 formTemplate = formSmallTemplate.alarm
                     editionMode: true
                     defaultValue: event.title
+                    timezones: timezoneData
+                    defaultTimezone: event.timezone
+
                 @popover.alarm.show "Alarm edition", direction, formTemplate
 
             else
@@ -237,8 +245,13 @@ module.exports = class CalendarView extends View
             title = "Event creation"
         else
             type = 'alarm'
+            timezoneData = []
+            for timezone in timezones
+                    timezoneData.push value: timezone, text: timezone
             formTemplate = formSmallTemplate.alarm
                 editionMode: false
+                timezones: timezoneData
+                defaultTimezone: 'Use specific timezone'
                 defaultValue: ''
             title = "Alarm creation"
 
