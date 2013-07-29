@@ -678,6 +678,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "import your icalendar file": "import your icalendar file",
     "confirm import": "confirm import",
     "cancel": "cancel",
+    "Create": "Create",
     "Alarms to import": "Alarms to import",
     "Events to import": "Events to import",
     "Create Event": "Create Event",
