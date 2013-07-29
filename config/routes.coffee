@@ -1,6 +1,6 @@
 exports.routes = (map) ->
 
-    map.get '/', 'alarms#index'
+    map.get '/', 'application#index'
 
     # Alarm management
     map.get 'alarms', 'alarms#all'

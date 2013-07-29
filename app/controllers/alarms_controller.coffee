@@ -9,7 +9,7 @@ before ->
             @alarm = alarm
             next()
 # Make this pre-treatment only before update and delete action.
-, except: ['create', 'all', 'index']
+, except: ['create', 'all']
 
 before ->
 
@@ -32,26 +32,6 @@ before ->
 
 
 , except: ['delete']
-
-
-action 'index', ->
-
-    Alarm.all (err, alarms) =>
-        if err
-            send error: true, msg: 'Server error occurred while retrieving data'
-        else
-            for alarm, index in alarms
-                alarms[index] = @convertAlarmDate(alarm, @userTimezone)
-
-        i18n.getLocale null, (err, locale) ->
-            console.log err if err
-
-            imports = """
-                window.locale = "#{locale}";
-                window.initalarms = #{JSON.stringify(alarms)};
-            """
-
-            res.render 'index.jade', imports: imports
 
 
 action 'all', ->
