@@ -71,6 +71,7 @@ module.exports.VAlarm = class VAlarm extends VComponent
     constructor: (date) ->
         super
         @fields =
+            ACTION: 'AUDIO'
             REPEAT: '1'
             TRIGGER: @formatIcalDate date
 

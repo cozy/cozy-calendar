@@ -1,10 +1,10 @@
 div
-    input.input-xlarge(type="text", value="#{defaultValue}", id="inputDesc", placeholder="What do you want to be reminded ?")
+    input.input-xlarge(type="text", value="#{defaultValue}", id="inputDesc", placeholder=t("What do you want to be reminded ?"))
     button.btn.pull-right.add-alarm.disabled
         if editionMode
-            | Edit
+            = t('Edit')
         else
-            | Add
+            = t('Add')
     unless editionMode
-        p ie: 9:00 important meeting
-        button.btn.add-event Create Event
+        p= t('ie: 9:00 important meeting')
+        button.btn.add-event= t('Create Event')

@@ -154,7 +154,7 @@ module.exports = class AlarmPopOver extends View
             defaultValueEnd: ''
             defaultValuePlace: ''
             defaultValueDesc: ''
-        @pop.show "Event creation", @direction , eventFormTemplate
+        @pop.show t("Event creation"), @direction , eventFormTemplate
         @pop.bindEvents @date
 
     onEditAlarmClicked: =>
