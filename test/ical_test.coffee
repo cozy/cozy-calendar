@@ -9,6 +9,12 @@ client = new Client "http://localhost:8888/"
 instantiateApp = require('../server')
 app = instantiateApp()
 
+Alarm = null
+Event = null
+app.compound.on 'models', (models, compound) ->
+    Event = compound.models.Event
+    Alarm = compound.models.Alarm
+
 expectedContent = """
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -147,6 +153,61 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
 
 
     describe 'Models', ->
+        describe 'Alarms', ->
+            it 'getICalCalendar', ->
+                cal = Alarm.getICalCalendar()
+                cal.toString().should.equal """
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
+END:VCALENDAR""".replace(/\n/g, '\r\n')
+
+            it 'toIcal', ->
+                alarm = new Alarm
+                    action: "EMAIL"
+                    description: "Something else to remind"
+                    trigg: "Tue Apr 24 2013 13:30:00"
+                alarm.toIcal().toString().should.equal """
+BEGIN:VTODO
+DSTAMP:20130424T133000
+SUMMARY:Something else to remind
+UID:undefined
+BEGIN:VALARM
+ACTION:AUDIO
+REPEAT:1
+TRIGGER:20130424T133000
+END:VALARM
+END:VTODO""".replace(/\n/g, '\r\n')
+
+            it 'fromIcal', ->
+                date = new Date 2013, 5, 9, 15, 0, 0
+                user = 'user'
+                description = 'description'
+                vtodo = new VTodo date, user, description
+                alarm = Alarm.fromIcal vtodo
+                alarm.description.should.equal description
+                alarm.trigg.should.equal "Sun Jun 09 2013 15:00:00"
+
+            it 'extractAlarms', ->
+                cal = Alarm.getICalCalendar()
+                date = new Date 2013, 5, 9, 15, 0, 0
+                user = 'user'
+                description = 'description'
+                cal.add new VTodo date, user, description
+                date2 = new Date 2013, 5, 9, 18, 0, 0
+                user2 = 'user2'
+                description2 = 'description2'
+                cal.add new VTodo date2, user2, description2
+                alarms = Alarm.extractAlarms cal
+                alarms[0].description.should.equal description
+                alarms[0].trigg.should.equal "Sun Jun 09 2013 15:00:00"
+                alarms[1].description.should.equal description2
+                alarms[1].trigg.should.equal "Sun Jun 09 2013 18:00:00"
+
+        describe 'Events', ->
+            it 'toIcal', ->
+            it 'fromIcal', ->
+            it 'extractEvents', ->
 
     describe 'Resources', ->
         describe "GET /export/calendar.ics", ->
