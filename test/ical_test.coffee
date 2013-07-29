@@ -273,7 +273,7 @@ END:VEVENT""".replace(/\n/g, '\r\n')
                 helpers.cleanDb ->
                     initDb done
 
-            it "when I request for iCal export file", (done) ->
+            it "When I request for iCal export file", (done) ->
                 client.get "export/calendar.ics", (error, response, body) =>
                     @body = body
                     done()
@@ -285,7 +285,7 @@ END:VEVENT""".replace(/\n/g, '\r\n')
 
         describe "POST /import/ical", ->
 
-            it "when I send an iCal import file", (done) ->
+            it "When I send an iCal file to import", (done) ->
                 client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
                     should.not.exist err
                     res.statusCode.should.equal 200
@@ -295,4 +295,28 @@ END:VEVENT""".replace(/\n/g, '\r\n')
             it "Then it sends to me the parsing result", (done) ->
                 @body.alarms.length.should.equal 3
                 @body.events.length.should.equal 1
+                done()
+
+            it "When I send an iCal file from Apple to import", (done) ->
+                client.sendFile "import/ical", "./test/apple.ics", (err, res, body) =>
+                    should.not.exist err
+                    res.statusCode.should.equal 200
+                    @body = JSON.parse body
+                    done()
+
+            it "Then it sends to me the parsing result", (done) ->
+                @body.alarms.length.should.equal 0
+                @body.events.length.should.equal 2
+                done()
+
+            it "When I send an iCal file from Google to import", (done) ->
+                client.sendFile "import/ical", "./test/google.ics", (err, res, body) =>
+                    should.not.exist err
+                    res.statusCode.should.equal 200
+                    @body = JSON.parse body
+                    done()
+
+            it "Then it sends to me the parsing result", (done) ->
+                @body.alarms.length.should.equal 0
+                @body.events.length.should.equal 2
                 done()

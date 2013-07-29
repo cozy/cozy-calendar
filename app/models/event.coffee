@@ -16,7 +16,9 @@ module.exports = (compound, Event) ->
 
     Event.fromIcal = (vevent) ->
         event = new Event()
-        event.description = vevent.fields["DESCRIPTION"]
+        description = vevent.fields["DESCRIPTION"]
+        description = vevent.fields["SUMMARY"] unless description?
+        event.description = description
         event.place = vevent.fields["LOCATION"]
         startDate = vevent.fields["DTSTART"]
         startDate = moment startDate, "YYYYMMDDTHHmm00"

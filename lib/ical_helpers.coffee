@@ -10,6 +10,7 @@ lazy = require 'lazy'
 
 # Buffer manager to easily build long string.
 class iCalBuffer
+    # Make this buffer streamablE
 
     txt: ''
 
@@ -122,7 +123,8 @@ module.exports.ICalParser = class ICalParser
         VJOURNAL: VJournal
         VFREEBUSY: VFreeBusy
         VTIMEZONE: VTimezone
-        VSTANDARD: VStandard
+        STANDARD: VStandard
+        DAYLIGHT: VDaylight
 
     parseFile: (file, callback) ->
         @parse fs.createReadStream(file), callback
@@ -180,6 +182,7 @@ module.exports.ICalParser = class ICalParser
                 else if not (component? or result?)
                     sendError "Malformed ical file"
                 else if key? and key isnt '' and component?
+                    key = key.split(';')[0]
                     component.fields[key] = value
                 else
                     sendError "Malformed ical file"
