@@ -283,20 +283,16 @@ END:VEVENT""".replace(/\n/g, '\r\n')
                 @body.should.equal expectedContent
 
 
-        #describe "POST /import/ical", ->
+        describe "POST /import/ical", ->
 
-            #it "when I send an iCal import file", (done) ->
-                #client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
-                    #should.not.exist err
-                    #res.statusCode.should.equal 200
-                    #@body = body
-                    #done()
+            it "when I send an iCal import file", (done) ->
+                client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
+                    should.not.exist err
+                    res.statusCode.should.equal 200
+                    @body = JSON.parse body
+                    done()
 
-            #it "Then it sends to me the parsing result", (done) ->
-                #console.log @body
-                #console.log @body.alarms
-                #console.log @body.alarms.length
-                #@body.alarms.length.should.equal 3
-                #done()
-
-            #it "When I confirm the import", ->
+            it "Then it sends to me the parsing result", (done) ->
+                @body.alarms.length.should.equal 3
+                @body.events.length.should.equal 1
+                done()
