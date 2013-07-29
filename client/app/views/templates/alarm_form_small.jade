@@ -7,4 +7,10 @@ div
             = t('Add')
     unless editionMode
         p= t('ie: 9:00 important meeting')
+
+    select(id="inputTimezone").input
+        option(value="#{defaultTimezone}", selected) #{defaultTimezone}
+        each timezone in timezones
+            option(value="#{timezone.value}") #{timezone.value}
+    unless editionMode
         button.btn.add-event= t('Create Event')

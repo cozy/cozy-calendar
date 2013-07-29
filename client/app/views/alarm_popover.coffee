@@ -1,5 +1,6 @@
 View = require '../lib/view'
 Alarm = require '../models/alarm'
+timezones = require('helpers/timezone').timezones
 
 EventPopOver = require './event_popover'
 eventFormSmallTemplate = require('./templates/event_form_small')
@@ -70,10 +71,10 @@ module.exports = class AlarmPopOver extends View
     bindEditEvents: =>
         @popoverWidget = $('.container .popover')
         @addAlarmButton = @popoverWidget.find 'button.add-alarm'
-        @addEventButton = @popoverWidget.find 'button.add-event'
         @closeButton = @popoverWidget.find 'button.close'
         @removeButton = @popoverWidget.find '.alarm-remove'
         @alarmDescription = @popoverWidget.find 'input'
+        @alarmTimezone = @popoverWidget.find 'timezone'
 
         @addAlarmButton.html @action
         @closeButton.click => @clean()
@@ -87,6 +88,9 @@ module.exports = class AlarmPopOver extends View
                 @onEditAlarmClicked()
             else
                 @addAlarmButton.removeClass 'disabled'
+
+        $('.popover #inputTimezone').change () =>
+            @addAlarmButton.removeClass 'disabled'     
 
     onRemoveAlarmClicked: =>
         alarm = @model.get @event.id
@@ -121,10 +125,15 @@ module.exports = class AlarmPopOver extends View
             value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
             value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
 
+
         data =
             description: value
             action: 'DISPLAY'
             trigg: dueDate.format Alarm.dateFormat
+
+        if $('.popover #inputTimezone').val() isnt "Use specific timezone"
+            data.timezone = $('.popover #inputTimezone').val()
+
 
         @addAlarmButton.html '&nbsp;'
         @addAlarmButton.spin 'small'
@@ -159,7 +168,11 @@ module.exports = class AlarmPopOver extends View
 
     onEditAlarmClicked: =>
         alarm = @model.get @event.id
-        data = description: @alarmDescription.val()
+        data = 
+            description: @alarmDescription.val()
+
+        if $('.popover #inputTimezone').val() isnt "Use specific timezone"
+            data.timezone = $('.popover #inputTimezone').val()
         @cal.fullCalendar 'renderEvent', @event
         @addAlarmButton.html '&nbsp;'
         @addAlarmButton.spin 'small'
@@ -167,10 +180,11 @@ module.exports = class AlarmPopOver extends View
             wait: true
             success: =>
                 @event.title = data.description
+                @event.timezone = data.timezone
                 @cal.fullCalendar 'renderEvent', @event
                 @addAlarmButton.spin()
                 @addAlarmButton.html @action
-            error: ->
+            error: =>
                 @cal.fullCalendar 'renderEvent', @event
                 @addAlarmButton.spin()
                 @addAlarmButton.html @action

@@ -288,6 +288,10 @@ window.require.register("helpers", function(exports, require, module) {
   };
   
 });
+window.require.register("helpers/timezone", function(exports, require, module) {
+  exports.timezones = ["Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau", "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo", "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar", "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun", "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa", "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda", "Africa/Lubumbashi", "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane", "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena", "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo", "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek", "America/Adak", "America/Anchorage", "America/Anguilla", "America/Antigua", "America/Araguaina", "America/Argentina/Buenos_Aires", "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy", "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos", "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis", "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Aruba", "America/Asuncion", "America/Atikokan", "America/Bahia", "America/Barbados", "America/Belem", "America/Belize", "America/Blanc-Sablon", "America/Boa_Vista", "America/Bogota", "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun", "America/Caracas", "America/Cayenne", "America/Cayman", "America/Chicago", "America/Chihuahua", "America/Costa_Rica", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn", "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit", "America/Dominica", "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fortaleza", "America/Glace_Bay", "America/Godthab", "America/Goose_Bay", "America/Grand_Turk", "America/Grenada", "America/Guadeloupe", "America/Guatemala", "America/Guayaquil", "America/Guyana", "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis", "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg", "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes", "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica", "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello", "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Maceio", "America/Managua", "America/Manaus", "America/Martinique", "America/Matamoros", "America/Mazatlan", "America/Menominee", "America/Merida", "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey", "America/Montevideo", "America/Montreal", "America/Montserrat", "America/Nassau", "America/New_York", "America/Nipigon", "America/Nome", "America/Noronha", "America/North_Dakota/Center", "America/North_Dakota/New_Salem", "America/Ojinaga", "America/Panama", "America/Pangnirtung", "America/Paramaribo", "America/Phoenix", "America/Port-au-Prince", "America/Port_of_Spain", "America/Porto_Velho", "America/Puerto_Rico", "America/Rainy_River", "America/Rankin_Inlet", "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco", "America/Santa_Isabel", "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo", "America/Scoresbysund", "America/St_Johns", "America/St_Kitts", "America/St_Lucia", "America/St_Thomas", "America/St_Vincent", "America/Swift_Current", "America/Tegucigalpa", "America/Thule", "America/Thunder_Bay", "America/Tijuana", "America/Toronto", "America/Tortola", "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat", "America/Yellowknife", "Antarctica/Casey", "Antarctica/Davis", "Antarctica/DumontDUrville", "Antarctica/Mawson", "Antarctica/McMurdo", "Antarctica/Palmer", "Antarctica/Rothera", "Antarctica/Syowa", "Antarctica/Vostok", "Asia/Aden", "Asia/Almaty", "Asia/Amman", "Asia/Anadyr", "Asia/Aqtau", "Asia/Aqtobe", "Asia/Ashgabat", "Asia/Baghdad", "Asia/Bahrain", "Asia/Baku", "Asia/Bangkok", "Asia/Beirut", "Asia/Bishkek", "Asia/Brunei", "Asia/Choibalsan", "Asia/Chongqing", "Asia/Colombo", "Asia/Damascus", "Asia/Dhaka", "Asia/Dili", "Asia/Dubai", "Asia/Dushanbe", "Asia/Gaza", "Asia/Harbin", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Hovd", "Asia/Irkutsk", "Asia/Jakarta", "Asia/Jayapura", "Asia/Jerusalem", "Asia/Kabul", "Asia/Kamchatka", "Asia/Karachi", "Asia/Kashgar", "Asia/Kathmandu", "Asia/Kolkata", "Asia/Krasnoyarsk", "Asia/Kuala_Lumpur", "Asia/Kuching", "Asia/Kuwait", "Asia/Macau", "Asia/Magadan", "Asia/Makassar", "Asia/Manila", "Asia/Muscat", "Asia/Nicosia", "Asia/Novokuznetsk", "Asia/Novosibirsk", "Asia/Omsk", "Asia/Oral", "Asia/Phnom_Penh", "Asia/Pontianak", "Asia/Pyongyang", "Asia/Qatar", "Asia/Qyzylorda", "Asia/Rangoon", "Asia/Riyadh", "Asia/Sakhalin", "Asia/Samarkand", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Taipei", "Asia/Tashkent", "Asia/Tbilisi", "Asia/Tehran", "Asia/Thimphu", "Asia/Tokyo", "Asia/Ulaanbaatar", "Asia/Urumqi", "Asia/Vientiane", "Asia/Vladivostok", "Asia/Yakutsk", "Asia/Yekaterinburg", "Asia/Yerevan", "Atlantic/Azores", "Atlantic/Bermuda", "Atlantic/Canary", "Atlantic/Cape_Verde", "Atlantic/Faroe", "Atlantic/Madeira", "Atlantic/Reykjavik", "Atlantic/South_Georgia", "Atlantic/St_Helena", "Atlantic/Stanley", "Australia/Adelaide", "Australia/Brisbane", "Australia/Broken_Hill", "Australia/Currie", "Australia/Darwin", "Australia/Eucla", "Australia/Hobart", "Australia/Lindeman", "Australia/Lord_Howe", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney", "Canada/Atlantic", "Canada/Central", "Canada/Eastern", "Canada/Mountain", "Canada/Newfoundland", "Canada/Pacific", "Europe/Amsterdam", "Europe/Andorra", "Europe/Athens", "Europe/Belgrade", "Europe/Berlin", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Chisinau", "Europe/Copenhagen", "Europe/Dublin", "Europe/Gibraltar", "Europe/Helsinki", "Europe/Istanbul", "Europe/Kaliningrad", "Europe/Kiev", "Europe/Lisbon", "Europe/London", "Europe/Luxembourg", "Europe/Madrid", "Europe/Malta", "Europe/Minsk", "Europe/Monaco", "Europe/Moscow", "Europe/Oslo", "Europe/Paris", "Europe/Prague", "Europe/Riga", "Europe/Rome", "Europe/Samara", "Europe/Simferopol", "Europe/Sofia", "Europe/Stockholm", "Europe/Tallinn", "Europe/Tirane", "Europe/Uzhgorod", "Europe/Vaduz", "Europe/Vienna", "Europe/Vilnius", "Europe/Volgograd", "Europe/Warsaw", "Europe/Zaporozhye", "Europe/Zurich", "GMT", "Indian/Antananarivo", "Indian/Chagos", "Indian/Christmas", "Indian/Cocos", "Indian/Comoro", "Indian/Kerguelen", "Indian/Mahe", "Indian/Maldives", "Indian/Mauritius", "Indian/Mayotte", "Indian/Reunion", "Pacific/Apia", "Pacific/Auckland", "Pacific/Chatham", "Pacific/Easter", "Pacific/Efate", "Pacific/Enderbury", "Pacific/Fakaofo", "Pacific/Fiji", "Pacific/Funafuti", "Pacific/Galapagos", "Pacific/Gambier", "Pacific/Guadalcanal", "Pacific/Guam", "Pacific/Honolulu", "Pacific/Johnston", "Pacific/Kiritimati", "Pacific/Kosrae", "Pacific/Kwajalein", "Pacific/Majuro", "Pacific/Marquesas", "Pacific/Midway", "Pacific/Nauru", "Pacific/Niue", "Pacific/Norfolk", "Pacific/Noumea", "Pacific/Pago_Pago", "Pacific/Palau", "Pacific/Pitcairn", "Pacific/Ponape", "Pacific/Port_Moresby", "Pacific/Rarotonga", "Pacific/Saipan", "Pacific/Tahiti", "Pacific/Tarawa", "Pacific/Tongatapu", "Pacific/Truk", "Pacific/Wake", "Pacific/Wallis", "US/Alaska", "US/Arizona", "US/Central", "US/Eastern", "US/Hawaii", "US/Mountain", "US/Pacific", "UTC"];
+  
+});
 window.require.register("initialize", function(exports, require, module) {
   var app;
 
@@ -649,6 +653,10 @@ window.require.register("locales/en", function(exports, require, module) {
     "Day": "Day",
     "Edit": "Edit",
     "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "List": "List",
+    "Calendar": "Calendar",
     "ie: 9:00 important meeting": "ie: 9:00 important meeting",
     "Month": "Month",
     "Popup": "Popup",
@@ -656,8 +664,8 @@ window.require.register("locales/en", function(exports, require, module) {
     "Switch to Calendar": "Switch to Calendar",
     "time": "time",
     "Today": "Today",
-    "What should I remind you ?": "What should I remind you ?",
-    "What do you want to be reminded ?": "What do you want to be reminded ?",
+    "What should I remind you ?": "What should I remind you?",
+    "What do you want to be reminded ?": "What do you want to be reminded?",
     "ICalendar importer": "ICalendar importer",
     "import your icalendar file": "import your icalendar file",
     "confirm import": "confirm import",
@@ -717,6 +725,10 @@ window.require.register("locales/fr", function(exports, require, module) {
     "Day": "Jour",
     "Edit": "Modifier",
     "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "List": "Liste",
+    "Calendar": "Calendrier",
     "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacque",
     "Month": "Mois",
     "Popup": "Popup",
@@ -1113,7 +1125,7 @@ window.require.register("router", function(exports, require, module) {
   
 });
 window.require.register("views/alarm_popover", function(exports, require, module) {
-  var Alarm, AlarmPopOver, EventPopOver, View, eventFormSmallTemplate,
+  var Alarm, AlarmPopOver, EventPopOver, View, eventFormSmallTemplate, timezones,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1121,6 +1133,8 @@ window.require.register("views/alarm_popover", function(exports, require, module
   View = require('../lib/view');
 
   Alarm = require('../models/alarm');
+
+  timezones = require('helpers/timezone').timezones;
 
   EventPopOver = require('./event_popover');
 
@@ -1214,10 +1228,10 @@ window.require.register("views/alarm_popover", function(exports, require, module
       var _this = this;
       this.popoverWidget = $('.container .popover');
       this.addAlarmButton = this.popoverWidget.find('button.add-alarm');
-      this.addEventButton = this.popoverWidget.find('button.add-event');
       this.closeButton = this.popoverWidget.find('button.close');
       this.removeButton = this.popoverWidget.find('.alarm-remove');
       this.alarmDescription = this.popoverWidget.find('input');
+      this.alarmTimezone = this.popoverWidget.find('timezone');
       this.addAlarmButton.html(this.action);
       this.closeButton.click(function() {
         return _this.clean();
@@ -1228,7 +1242,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
       this.removeButton.click(function() {
         return _this.onRemoveAlarmClicked();
       });
-      return this.alarmDescription.keyup(function(event) {
+      this.alarmDescription.keyup(function(event) {
         if (_this.alarmDescription.val() === '') {
           return _this.addAlarmButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
@@ -1236,6 +1250,9 @@ window.require.register("views/alarm_popover", function(exports, require, module
         } else {
           return _this.addAlarmButton.removeClass('disabled');
         }
+      });
+      return $('.popover #inputTimezone').change(function() {
+        return _this.addAlarmButton.removeClass('disabled');
       });
     };
 
@@ -1286,6 +1303,9 @@ window.require.register("views/alarm_popover", function(exports, require, module
         action: 'DISPLAY',
         trigg: dueDate.format(Alarm.dateFormat)
       };
+      if ($('.popover #inputTimezone').val() !== "Use specific timezone") {
+        data.timezone = $('.popover #inputTimezone').val();
+      }
       this.addAlarmButton.html('&nbsp;');
       this.addAlarmButton.spin('small');
       return this.model.create(data, {
@@ -1331,6 +1351,9 @@ window.require.register("views/alarm_popover", function(exports, require, module
       data = {
         description: this.alarmDescription.val()
       };
+      if ($('.popover #inputTimezone').val() !== "Use specific timezone") {
+        data.timezone = $('.popover #inputTimezone').val();
+      }
       this.cal.fullCalendar('renderEvent', this.event);
       this.addAlarmButton.html('&nbsp;');
       this.addAlarmButton.spin('small');
@@ -1338,14 +1361,15 @@ window.require.register("views/alarm_popover", function(exports, require, module
         wait: true,
         success: function() {
           _this.event.title = data.description;
+          _this.event.timezone = data.timezone;
           _this.cal.fullCalendar('renderEvent', _this.event);
           _this.addAlarmButton.spin();
           return _this.addAlarmButton.html(_this.action);
         },
         error: function() {
-          this.cal.fullCalendar('renderEvent', this.event);
-          this.addAlarmButton.spin();
-          return this.addAlarmButton.html(this.action);
+          _this.cal.fullCalendar('renderEvent', _this.event);
+          _this.addAlarmButton.spin();
+          return _this.addAlarmButton.html(_this.action);
         }
       });
     };
@@ -1375,6 +1399,7 @@ window.require.register("views/alarm_view", function(exports, require, module) {
         action: this.model.get('action'),
         time: this.model.getFormattedDate('{HH}:{mm}'),
         description: this.model.get('description'),
+        timezone: this.model.get('timezone'),
         alarmID: this.model.id
       });
     };
@@ -1389,12 +1414,14 @@ window.require.register("views/alarm_view", function(exports, require, module) {
   
 });
 window.require.register("views/alarmform_view", function(exports, require, module) {
-  var AlarmFormView, View, _ref,
+  var AlarmFormView, View, timezones, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('../lib/view');
+
+  timezones = require('helpers/timezone').timezones;
 
   module.exports = AlarmFormView = (function(_super) {
     __extends(AlarmFormView, _super);
@@ -1415,12 +1442,21 @@ window.require.register("views/alarmform_view", function(exports, require, modul
     };
 
     AlarmFormView.prototype.initialize = function() {
+      var timezone, timezoneData, _i, _len;
       this.actions = {
         'DISPLAY': 'Popup',
         'EMAIL': 'Email'
       };
       this.data = null;
-      return this.editionMode = false;
+      this.editionMode = false;
+      timezoneData = [];
+      for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+        timezone = timezones[_i];
+        timezoneData.push({
+          value: timezone
+        });
+      }
+      return this.timezones = timezoneData;
     };
 
     AlarmFormView.prototype.render = function() {
@@ -1429,6 +1465,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       content = AlarmFormView.__super__.render.call(this, {
         actions: this.actions,
         defaultAction: this.getDefaultAction('DISPLAY'),
+        defaultTimezone: "Use specific timezone",
+        timezones: this.timezones,
         defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
         defaultTime: todayDate.format('{HH}:{mm}')
       });
@@ -1447,6 +1485,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
+      this.timezoneField = this.$('#inputTimezone');
       this.addAlarmButton = this.$('button.add-alarm');
       this.disableSubmitButton();
       this.validationMapper = {
@@ -1527,6 +1566,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
       this.descriptionField.val(alarm.get('description'));
       this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
       this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
+      this.timezoneField.val(alarm.get('timezone'));
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
@@ -1734,7 +1774,7 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
   
 });
 window.require.register("views/calendar_view", function(exports, require, module) {
-  var Alarm, AlarmFormView, AlarmPopOver, AlarmsListView, CalendarView, Event, EventPopOver, View, formSmallTemplate, helpers, _ref,
+  var Alarm, AlarmFormView, AlarmPopOver, AlarmsListView, CalendarView, Event, EventPopOver, View, formSmallTemplate, helpers, timezones, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1750,6 +1790,8 @@ window.require.register("views/calendar_view", function(exports, require, module
   EventPopOver = require('./event_popover');
 
   helpers = require('../helpers');
+
+  timezones = require('helpers/timezone').timezones;
 
   Alarm = require('../models/alarm');
 
@@ -1847,6 +1889,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       event = {
         id: alarm.cid,
         title: alarm.get('description'),
+        timezone: alarm.get('timezone'),
         start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
         end: endAlarm.format(Date.ISO8601_DATETIME),
         allDay: false,
@@ -1973,7 +2016,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var defaultValueEnd, diff, direction, eventStartTime, formTemplate, isDayView, target, _ref1;
+      var defaultValueEnd, diff, direction, eventStartTime, formTemplate, isDayView, target, timezone, timezoneData, _i, _len, _ref1;
       target = $(jsEvent.currentTarget);
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
@@ -1989,9 +2032,19 @@ window.require.register("views/calendar_view", function(exports, require, module
           event: event
         });
         if (event.type === 'alarm') {
+          timezoneData = [];
+          for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+            timezone = timezones[_i];
+            timezoneData.push({
+              value: timezone,
+              text: timezone
+            });
+          }
           formTemplate = formSmallTemplate.alarm({
             editionMode: true,
-            defaultValue: event.title
+            defaultValue: event.title,
+            timezones: timezoneData,
+            defaultTimezone: event.timezone
           });
           this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
         } else {
@@ -2011,7 +2064,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, endHour, formTemplate, startHour, target, title, type;
+      var direction, endHour, formTemplate, startHour, target, timezone, timezoneData, title, type, _i, _len;
       target = $(jsEvent.target);
       direction = helpers.getPopoverDirection(isDayView, startDate);
       startHour = startDate.format('{HH}:{mm}').split(':');
@@ -2028,8 +2081,18 @@ window.require.register("views/calendar_view", function(exports, require, module
         title = t("Event creation");
       } else {
         type = 'alarm';
+        timezoneData = [];
+        for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+          timezone = timezones[_i];
+          timezoneData.push({
+            value: timezone,
+            text: timezone
+          });
+        }
         formTemplate = formSmallTemplate.alarm({
           editionMode: false,
+          timezones: timezoneData,
+          defaultTimezone: 'Use specific timezone',
           defaultValue: ''
         });
         title = t("Alarm creation");
@@ -2775,6 +2838,9 @@ window.require.register("views/list_view", function(exports, require, module) {
         action: this.alarmFormView.actionField.val(),
         trigg: dueDate
       };
+      if (this.alarmFormView.timezoneField.val() !== 'Use specific timezone') {
+        data.timezone = this.alarmFormView.timezoneField.val();
+      }
       if (this.alarmFormView.editionMode) {
         alarm = this.alarmFormView.data;
         alarm.save(data, {
@@ -2872,7 +2938,7 @@ window.require.register("views/templates/alarm", function(exports, require, modu
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = action) == null ? '' : interp) + ')<i');
+  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + ' (' + escape((interp = timezone) == null ? '' : interp) + ')\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = action) == null ? '' : interp) + ')<i');
   buf.push(attrs({ 'data-alarmid':("" + (alarmID) + ""), "class": ('icon-pencil') }, {"data-alarmid":true}));
   buf.push('></i><i');
   buf.push(attrs({ 'data-alarmid':("" + (alarmID) + ""), "class": ('icon-trash') }, {"data-alarmid":true}));
@@ -2949,7 +3015,35 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   buf.push(attrs({ 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;' + escape((interp = t('time')) == null ? '' : interp) + ':&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
   buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-alarm">');
+  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><select id="inputTimezone" class="input"><option');
+  buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
+  buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
+  // iterate timezones
+  ;(function(){
+    if ('number' == typeof timezones.length) {
+
+      for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
+        var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    } else {
+      var $$l = 0;
+      for (var $index in timezones) {
+        $$l++;      var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    }
+  }).call(this);
+
+  buf.push('</select></div><button class="btn pull-right add-alarm">');
   var __val__ = t('add the alarm')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button><div class="clearfix"></div></div>');
@@ -2982,7 +3076,40 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   buf.push('<p>');
   var __val__ = t('ie: 9:00 important meeting')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</p><button class="btn add-event">');
+  buf.push('</p>');
+  }
+  buf.push('<select id="inputTimezone" class="input"><option');
+  buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
+  buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
+  // iterate timezones
+  ;(function(){
+    if ('number' == typeof timezones.length) {
+
+      for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
+        var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    } else {
+      var $$l = 0;
+      for (var $index in timezones) {
+        $$l++;      var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    }
+  }).call(this);
+
+  buf.push('</select>');
+  if (!( editionMode))
+  {
+  buf.push('<button class="btn add-event">');
   var __val__ = t('Create Event')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button>');
@@ -3074,17 +3201,6 @@ window.require.register("views/templates/event_form_small", function(exports, re
   buf.push(escape(null == __val__ ? "" : __val__));
   }
   buf.push('</button></div>');
-  }
-  return buf.join("");
-  };
-});
-window.require.register("views/templates/event_import", function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
-  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = place) == null ? '' : interp) + ')</p>');
   }
   return buf.join("");
   };
