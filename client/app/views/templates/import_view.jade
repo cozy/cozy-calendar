@@ -1,25 +1,25 @@
 .container
     ul#menu
         li
-            a.btn(href="#list") Switch to List
-            a.btn(href="#calendar") Switch to Calendar
-            a.btn(href="export/calendar.ics", target="_blank") 
+            a.btn(href="#list")=t ('Switch to List')
+            a.btn(href="#calendar")= t('Switch to Calendar')
+            a.btn(href="export/calendar.ics", target="_blank")
                 i.icon-arrow-down.icon-white
 
     #import-form.well
-        h3 ICalendar importer
+        h3= t('ICalendar importer')
 
         div.import-form
-            button#import-button.btn import your icalendar file
+            button#import-button.btn= t('import your icalendar file')
             input#import-file-input(type="file")
 
         div.confirmation
-            button#confirm-import-button.btn confirm import
-            button#cancel-import-button.btn cancel
+            button#confirm-import-button.btn= t('confirm import')
+            button#cancel-import-button.btn=t ('cancel')
 
         div.results
-            h4 Alarms to import
+            h4= t('Alarms to import')
             #import-alarm-list
 
-            h4 Events to import
+            h4= t('Events to import')
             #import-event-list

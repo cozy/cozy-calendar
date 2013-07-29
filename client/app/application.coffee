@@ -22,16 +22,17 @@ module.exports =
         @router = new Router()
 
         @alarms = new AlarmCollection()
-        @events = new EventCollection() 
+        @events = new EventCollection()
 
         SocketListener.watch @alarms
         SocketListener.watch @events
 
         if window.initalarms?
             @alarms.reset window.initalarms
+            @events.reset window.initevents
             delete window.initalarms
-            Backbone.history.start()
-        else
-            @alarms.fetch().done -> Backbone.history.start()
+            delete window.initevents
+
+        Backbone.history.start()
 
         Object.freeze this if typeof Object.freeze is 'function'
