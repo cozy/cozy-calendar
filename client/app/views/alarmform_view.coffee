@@ -1,4 +1,5 @@
 View = require '../lib/view'
+timezones = require('helpers/timezone').timezones
 
 module.exports = class AlarmFormView extends View
 
@@ -16,7 +17,11 @@ module.exports = class AlarmFormView extends View
             'EMAIL': 'Email'
 
         @data = null
-        @editionMode = false
+        @editionMode = false 
+        timezoneData = []
+        for timezone in timezones
+            timezoneData.push value: timezone
+        @timezones = timezoneData
 
     render: ->
 
@@ -24,6 +29,8 @@ module.exports = class AlarmFormView extends View
         content = super
             actions: @actions
             defaultAction: @getDefaultAction('DISPLAY')
+            defaultTimezone:"Use specific timezone"
+            timezones: @timezones
             defaultDate: todayDate.format '{dd}/{MM}/{yyyy}'
             defaultTime: todayDate.format '{HH}:{mm}'
         @$el.append content
@@ -38,6 +45,7 @@ module.exports = class AlarmFormView extends View
         @actionField = @$('#action')
         @dateField = @$('#inputDate input')
         @timeField = @$('#inputTime')
+        @timezoneField = @$('#inputTimezone')
 
         @addAlarmButton = @$('button.add-alarm')
         @disableSubmitButton()
@@ -86,7 +94,7 @@ module.exports = class AlarmFormView extends View
                 return action
 
         return defaultAction
-
+        
     onKeydown: (event) ->
         console.log event.keyCode
 
@@ -108,6 +116,7 @@ module.exports = class AlarmFormView extends View
         @descriptionField.val alarm.get 'description'
         @dateField.val alarm.getFormattedDate '{dd}/{MM}/{yyyy}'
         @timeField.val alarm.getFormattedDate '{HH}:{mm}'
+        @timezoneField.val alarm.get 'timezone'
 
         @data = alarm
 
