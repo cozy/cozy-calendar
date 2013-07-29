@@ -1,10 +1,18 @@
 .container
     ul#menu
         li
-            a.btn(href="#list")=t ('Switch to List')
-            a.btn(href="#calendar")= t('Switch to Calendar')
+            a.btn(href="#list")
+                i.icon-th-list.icon-white
+                = t('List')
+            a.btn(href="#calendar")
+                i.icon-calendar.icon-white
+                = t('Calendar')
             a.btn(href="export/calendar.ics", target="_blank")
-                i.icon-arrow-down.icon-white
+                i.icon-share.icon-white
+                = t('Export')
+            a.active.btn(href="#import")
+                i.icon-circle-arrow-up.icon-white
+                = t('Import')
 
     #import-form.well
         h3= t('ICalendar importer')
