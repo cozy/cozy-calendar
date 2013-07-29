@@ -66,8 +66,11 @@ module.exports = class ImportView extends View
                     @$(".results").slideDown()
                     @$(".confirmation").fadeIn()
 
-            error: =>
-                alert 'An error occured while importing your calendar.'
+            error: (xhr) =>
+                msg = JSON.parse(xhr.responseText).msg
+                unless msg?
+                    msg = 'An error occured while importing your calendar.'
+                alert msg
                 @importButton.spin()
                 @importButton.html 'import your calendar'
 

@@ -2721,8 +2721,13 @@ window.require.register("views/import_view", function(exports, require, module) 
             return _this.$(".confirmation").fadeIn();
           });
         },
-        error: function() {
-          alert('An error occured while importing your calendar.');
+        error: function(xhr) {
+          var msg;
+          msg = JSON.parse(xhr.responseText).msg;
+          if (msg == null) {
+            msg = 'An error occured while importing your calendar.';
+          }
+          alert(msg);
           _this.importButton.spin();
           return _this.importButton.html('import your calendar');
         }

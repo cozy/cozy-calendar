@@ -46,7 +46,8 @@ action 'import', ->
         parser.parseFile file.path, (err, result) ->
             if err
                 console.log err
-                send error: 'error occured while saving file', msg: err.msg, 500
+                console.log err.message
+                send {error: 'error occured while saving file', msg: err.message}, 500
             else
                 send
                     events: Event.extractEvents result
