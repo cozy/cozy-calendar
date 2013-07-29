@@ -8263,9 +8263,18 @@ input[type="time"] {
 .affix div.form-horizontal {
   border: 1px solid #ddd;
 }
+.icon-th:before,
+.icon-th-list:before,
+.icon-share:before,
+.icon-calendar:before,
+.icon-upload:before,
 .icon-arrow-down:before,
-.icon-arrow-up:before {
+.icon-arrow-up:before,
+.icon-circle-arrow-up:before {
   content: "";
+}
+.active.btn {
+  background: #008af6;
 }
 #import-form h1,
 #import-form h3 {
@@ -8280,7 +8289,7 @@ input[type="time"] {
 }
 #import-form .event p {
   margin: 0;
-  font-weight: 10px;
+  sharefont-weight: 10px;
 }
 @font-face {
   font-family: styled;

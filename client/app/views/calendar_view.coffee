@@ -49,10 +49,52 @@ module.exports = class CalendarView extends View
                 'agenda': 'HH:mm{ - HH:mm}'
             axisFormat: 'HH:mm'
             buttonText:
-                today: 'Today'
-                month: 'Month'
-                week: 'Week'
-                day: 'Day'
+                today: t 'Today'
+                month: t 'Month'
+                week:  t 'Week'
+                day:   t 'Day'
+            dayNames : [
+                t 'Sunday'
+                t 'Monday'
+                t 'Tuesday'
+                t 'Wednesday'
+                t 'Thursday'
+                t 'Friday'
+                t 'Saturday']
+            dayNamesShort: [
+                t 'Sun'
+                t 'Mon'
+                t 'Tue'
+                t 'Wed'
+                t 'Thu'
+                t 'Fri'
+                t 'Sat']
+            monthNames: [
+                t 'January'
+                t 'February'
+                t 'March'
+                t 'April'
+                t 'May'
+                t 'June'
+                t 'July'
+                t 'August'
+                t 'September'
+                t 'October'
+                t 'November'
+                t 'December']
+            monthNamesShort: [
+                t 'Jan'
+                t 'Feb'
+                t 'Mar'
+                t 'Apr'
+                t 'May'
+                t 'Jun'
+                t 'Jul'
+                t 'Aug'
+                t 'Sep'
+                t 'Oct'
+                t 'Nov'
+                t 'Dec']
             selectable: true
             selectHelper: false
             unselectAuto: false
@@ -103,7 +145,7 @@ module.exports = class CalendarView extends View
             end: evt.getFormattedEndDate(Date.ISO8601_DATETIME)
             allDay: false
             diff: evt.get "diff"
-            place: evt.get 'place' 
+            place: evt.get 'place'
             backgroundColor: '#EB1'
             borderColor: '#EB1'
             type: 'event' # non standard field
@@ -175,7 +217,7 @@ module.exports = class CalendarView extends View
             evt.getEndDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
-            data = 
+            data =
                 start: evt.getFormattedStartDate Event.dateFormat
                 end: evt.getFormattedEndDate Event.dateFormat
             storeEvent(evt, data)
@@ -211,7 +253,7 @@ module.exports = class CalendarView extends View
                     timezones: timezoneData
                     defaultTimezone: event.timezone
 
-                @popover.alarm.show "Alarm edition", direction, formTemplate
+                @popover.alarm.show t("Alarm edition"), direction, formTemplate
 
             else
                 diff = event.diff
@@ -222,7 +264,7 @@ module.exports = class CalendarView extends View
                     defaultValueEnd: defaultValueEnd
                     defaultValuePlace: event.place
                     defaultValueDesc: event.title
-                @popover.event.show "Event edition", direction, formTemplate
+                @popover.event.show t("Event edition"), direction, formTemplate
 
         @popover[event.type].bindEditEvents()
 
@@ -242,7 +284,7 @@ module.exports = class CalendarView extends View
                 defaultValueEnd: endDate.format('{HH}:{mm}')
                 defaultValuePlace: ''
                 defaultValueDesc: ''
-            title = "Event creation"
+            title = t "Event creation"
         else
             type = 'alarm'
             timezoneData = []
@@ -253,7 +295,7 @@ module.exports = class CalendarView extends View
                 timezones: timezoneData
                 defaultTimezone: 'Use specific timezone'
                 defaultValue: ''
-            title = "Alarm creation"
+            title = t "Alarm creation"
 
         # Create popover to create alarm or event
         @popover[type].createNew

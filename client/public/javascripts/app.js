@@ -82,7 +82,18 @@
 window.require.register("application", function(exports, require, module) {
   module.exports = {
     initialize: function() {
-      var AlarmCollection, EventCollection, Router, SocketListener;
+      var AlarmCollection, EventCollection, Router, SocketListener, e, locales;
+      this.locale = window.locale;
+      delete window.locale;
+      this.polyglot = new Polyglot();
+      try {
+        locales = require('locales/' + this.locale);
+      } catch (_error) {
+        e = _error;
+        locales = require('locales/en');
+      }
+      this.polyglot.extend(locales);
+      window.t = this.polyglot.t.bind(this.polyglot);
       Router = require('router');
       SocketListener = require('../lib/socket_listener');
       AlarmCollection = require('collections/alarms');
@@ -92,6 +103,12 @@ window.require.register("application", function(exports, require, module) {
       this.events = new EventCollection();
       SocketListener.watch(this.alarms);
       SocketListener.watch(this.events);
+      if (window.initalarms != null) {
+        this.alarms.reset(window.initalarms);
+        this.events.reset(window.initevents);
+        delete window.initalarms;
+        delete window.initevents;
+      }
       Backbone.history.start();
       if (typeof Object.freeze === 'function') {
         return Object.freeze(this);
@@ -621,6 +638,157 @@ window.require.register("lib/view_collection", function(exports, require, module
     return ViewCollection;
 
   })(BaseView);
+  
+});
+window.require.register("locales/en", function(exports, require, module) {
+  module.exports = {
+    "Add": "Add",
+    "add the alarm": "add the alarm",
+    "Alarm creation": "Alarm creation",
+    "Event creation": "Event creation",
+    "Alarm edition": "Alarm edition",
+    "Event edition": "Event edition",
+    "Place": "Place",
+    "date": "date",
+    "Day": "Day",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "List": "List",
+    "Calendar": "Calendar",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "What should I remind you ?": "What should I remind you?",
+    "What do you want to be reminded ?": "What do you want to be reminded?",
+    "ICalendar importer": "ICalendar importer",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Alarms to import": "Alarms to import",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From hours:minutes": "From hours:minutes",
+    "To hours:minutes+days": "To hours:minutes+days",
+    "Description": "Description",
+    "Week": "Week",
+    "Sunday": "Sunday",
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Saturday": "Saturday",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "May": "May",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec"
+  };
+  
+});
+window.require.register("locales/fr", function(exports, require, module) {
+  module.exports = {
+    "Add": "Ajouter",
+    "add the alarm": "Ajouter l'alarme",
+    "Alarm creation": "Création d'une alarme",
+    "Event creation": "Création d'un évènement",
+    "Alarm edition": "Edition d'une alarme",
+    "Event edition": "Edition d'un évènement",
+    "Place": "Lieu",
+    "date": "Date",
+    "Day": "Jour",
+    "Edit": "Modifier",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "List": "Liste",
+    "Calendar": "Calendrier",
+    "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacque",
+    "Month": "Mois",
+    "Popup": "Popup",
+    "Switch to List": "Basculer en mode List",
+    "Switch to Calendar": "Basculer en mode Calendrier",
+    "time": "Heure",
+    "Today": "Aujourd'hui",
+    "What should I remind you ?": "Que dois-je vous rappeler ?",
+    "What do you want to be reminded ?": "Que voulez-vous vous rappeler ?",
+    "ICalendar importer": "Importateur ICalendar",
+    "import your icalendar file": "Importer votre fichier icalendar",
+    "confirm import": "Confirmer l'import",
+    "cancel": "Annuler",
+    "Create": "Créer",
+    "Alarms to import": "Alarmes à importer",
+    "Events to import": "Evenements à importer",
+    "Create Event": "Créer un évènement",
+    "From hours:minutes": "De heures:minutes",
+    "To hours:minutes+days": "A heures:minutes+jours",
+    "Description": "Description",
+    "Week": "Semaine",
+    "Sunday": "Dimanche",
+    "Monday": "Lundi",
+    "Tuesday": "Mardi",
+    "Wednesday": "Mercredi",
+    "Thursday": "Jeudi",
+    "Friday": "Vendredi",
+    "Saturday": "Samedi",
+    "Sun": "Dim",
+    "Mon": "Lun",
+    "Tue": "Mar",
+    "Wed": "Mer",
+    "Thu": "Jeu",
+    "Fri": "Ven",
+    "Sat": "Sam",
+    "January": "Janvier",
+    "February": "Février",
+    "March": "Mars",
+    "April": "Avril",
+    "May": "Mai",
+    "June": "Juin",
+    "July": "Juillet",
+    "August": "Aout",
+    "September": "Septembre",
+    "October": "Octobre",
+    "November": "Novembre",
+    "December": "Decembre",
+    "Jan": "Jan",
+    "Feb": "Fev",
+    "Mar": "Mar",
+    "Apr": "Avr",
+    "May": "Mai",
+    "Jun": "Juin",
+    "Jul": "Juil",
+    "Aug": "Aout",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec"
+  };
   
 });
 window.require.register("models/alarm", function(exports, require, module) {
@@ -1172,7 +1340,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
         defaultValuePlace: '',
         defaultValueDesc: ''
       });
-      this.pop.show("Event creation", this.direction, eventFormTemplate);
+      this.pop.show(t("Event creation"), this.direction, eventFormTemplate);
       return this.pop.bindEvents(this.date);
     };
 
@@ -1685,11 +1853,15 @@ window.require.register("views/calendar_view", function(exports, require, module
         },
         axisFormat: 'HH:mm',
         buttonText: {
-          today: 'Today',
-          month: 'Month',
-          week: 'Week',
-          day: 'Day'
+          today: t('Today'),
+          month: t('Month'),
+          week: t('Week'),
+          day: t('Day')
         },
+        dayNames: [t('Sunday'), t('Monday'), t('Tuesday'), t('Wednesday'), t('Thursday'), t('Friday'), t('Saturday')],
+        dayNamesShort: [t('Sun'), t('Mon'), t('Tue'), t('Wed'), t('Thu'), t('Fri'), t('Sat')],
+        monthNames: [t('January'), t('February'), t('March'), t('April'), t('May'), t('June'), t('July'), t('August'), t('September'), t('October'), t('November'), t('December')],
+        monthNamesShort: [t('Jan'), t('Feb'), t('Mar'), t('Apr'), t('May'), t('Jun'), t('Jul'), t('Aug'), t('Sep'), t('Oct'), t('Nov'), t('Dec')],
         selectable: true,
         selectHelper: false,
         unselectAuto: false,
@@ -1874,7 +2046,7 @@ window.require.register("views/calendar_view", function(exports, require, module
             timezones: timezoneData,
             defaultTimezone: event.timezone
           });
-          this.popover.alarm.show("Alarm edition", direction, formTemplate);
+          this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
         } else {
           diff = event.diff;
           defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff;
@@ -1885,7 +2057,7 @@ window.require.register("views/calendar_view", function(exports, require, module
             defaultValuePlace: event.place,
             defaultValueDesc: event.title
           });
-          this.popover.event.show("Event edition", direction, formTemplate);
+          this.popover.event.show(t("Event edition"), direction, formTemplate);
         }
       }
       return this.popover[event.type].bindEditEvents();
@@ -1906,7 +2078,7 @@ window.require.register("views/calendar_view", function(exports, require, module
           defaultValuePlace: '',
           defaultValueDesc: ''
         });
-        title = "Event creation";
+        title = t("Event creation");
       } else {
         type = 'alarm';
         timezoneData = [];
@@ -1923,7 +2095,7 @@ window.require.register("views/calendar_view", function(exports, require, module
           defaultTimezone: 'Use specific timezone',
           defaultValue: ''
         });
-        title = "Alarm creation";
+        title = t("Alarm creation");
       }
       this.popover[type].createNew({
         field: $(target),
@@ -2305,390 +2477,6 @@ window.require.register("views/event_popover", function(exports, require, module
     };
 
     return EventPopOver;
-
-  })(View);
-  
-});
-window.require.register("views/event_view", function(exports, require, module) {
-  var EventView, ScheduleElement, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  ScheduleElement = require('./schedule_element');
-
-  module.exports = EventView = (function(_super) {
-    __extends(EventView, _super);
-
-    function EventView() {
-      _ref = EventView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    EventView.prototype.render = function() {
-      return EventView.__super__.render.call(this, {
-        time: this.model.getFormattedDate('{HH}:{mm}'),
-        description: this.model.get('description')
-      });
-    };
-
-    EventView.prototype.template = function() {
-      return require('./templates/event');
-    };
-
-    return EventView;
-
-  })(ScheduleElement);
-  
-});
-window.require.register("views/eventform_view", function(exports, require, module) {
-  var EventFormView, View, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('../lib/view');
-
-  module.exports = EventFormView = (function(_super) {
-    __extends(EventFormView, _super);
-
-    function EventFormView() {
-      this.onSubmit = __bind(this.onSubmit, this);
-      _ref = EventFormView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    EventFormView.prototype.el = '#add-event';
-
-    EventFormView.prototype.events = {
-      'focus #inputStart': 'onFocus',
-      'blur #inputStart': 'onBlur',
-      'keyup #inputStart': 'onKeydown',
-      'blur #inputEnd': 'onBlur',
-      'keyup #inputEnd': 'onKeydown',
-      'blur #inputPlace': 'onBlur',
-      'keyup #inputPlace': 'onKeydown',
-      'blur #inputDesc': 'onBlur',
-      'keyup #inputDesc': 'onKeydown',
-      'click .add-event': 'onSubmit'
-    };
-
-    EventFormView.prototype.initialize = function() {
-      this.data = null;
-      return this.editionMode = false;
-    };
-
-    EventFormView.prototype.render = function() {
-      var content, todayDate;
-      todayDate = Date.create('now');
-      content = EventFormView.__super__.render.call(this, {
-        defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
-        defaultTime: todayDate.format('{HH}:{mm}')
-      });
-      this.$el.append(content);
-      return this.$el.parent().css('min-height', this.$el.height() + 40);
-    };
-
-    EventFormView.prototype.afterRender = function() {
-      var datePicker;
-      this.startField = this.$('#inputStart');
-      this.endField = this.$('#inputEnd');
-      this.placeField = this.$('#inputPlace');
-      this.descriptionField = this.$('#inputDesc');
-      this.dateField = this.$('#inputDate');
-      this.addEventButton = this.$('button.add-event');
-      this.disableSubmitButton();
-      this.validationMapper = {
-        description: {
-          field: this.descriptionField,
-          placement: 'top'
-        }
-      };
-      datePicker = this.dateField.datepicker({
-        weekStart: 1,
-        format: 'dd/mm/yyyy'
-      });
-      datePicker.on('changeDate', function() {
-        return $(this).datepicker('hide');
-      });
-      this.startField.timepicker({
-        minuteStep: 1,
-        showMeridian: false
-      });
-      return this.descriptionField.focus();
-    };
-
-    EventFormView.prototype.template = function() {
-      return require('./templates/event_form');
-    };
-
-    EventFormView.prototype.getDefaultAction = function(defaultAction) {
-      var action, actionsAlreadySelected, selectedOptions;
-      if (typeof defaultDefaultAction === "undefined" || defaultDefaultAction === null) {
-        defaultAction = 'DISPLAY';
-      }
-      selectedOptions = this.$('.controls.form-inline option').filter(':selected');
-      actionsAlreadySelected = [];
-      selectedOptions.each(function(index, item) {
-        var itemValue;
-        itemValue = $(item).val();
-        if (actionsAlreadySelected.indexOf(itemValue) === -1) {
-          return actionsAlreadySelected.push(itemValue);
-        }
-      });
-      for (action in this.actions) {
-        if (actionsAlreadySelected.indexOf(action) === -1) {
-          return action;
-        }
-      }
-      return defaultAction;
-    };
-
-    EventFormView.prototype.onKeydown = function(event) {
-      console.log(event.keyCode);
-      if (this.descriptionField.val() === '') {
-        return this.disableSubmitButton();
-      } else if (event.keyCode === 13 || event.which === 13) {
-        return this.onSubmit();
-      } else {
-        return this.enableSubmitButton();
-      }
-    };
-
-    EventFormView.prototype.enableSubmitButton = function() {
-      return this.addEventButton.removeClass('disabled');
-    };
-
-    EventFormView.prototype.disableSubmitButton = function() {
-      return this.addEventButton.addClass('disabled');
-    };
-
-    EventFormView.prototype.loadEventData = function(evt) {
-      this.resetForm();
-      this.descriptionField.val(evt.get('description'));
-      this.dateField.val(evt.getFormattedDate('{dd}/{MM}/{yyyy}'));
-      this.startField.val(evt.getFormattedDate('{HH}:{mm}'));
-      this.endField.val(evt.getFormattedDate('{HH}:{mm}'));
-      this.data = evt;
-      this.editionMode = true;
-      this.addEventButton.html('Edit the event');
-      return this.enableSubmitButton();
-    };
-
-    EventFormView.prototype.resetForm = function() {
-      var todayDate;
-      this.data = null;
-      this.editionMode = false;
-      this.addEventButton.html('add the event');
-      this.disableSubmitButton();
-      this.descriptionField.val('');
-      todayDate = new Date.create('now');
-      this.dateField.val(todayDate.format('{dd}/{MM}/{yyyy}'));
-      this.startField.val(todayDate.format('{HH}:{mm}'));
-      this.endField.val(todayDate.format('{HH}:{mm}'));
-      return this.resetErrors();
-    };
-
-    EventFormView.prototype.displayErrors = function(validationErrors) {
-      var _this = this;
-      return validationErrors.forEach(function(err) {
-        var data;
-        data = _this.validationMapper[err.field];
-        return data.field.tooltip({
-          title: err.value,
-          placement: data.placement,
-          container: _this.$el,
-          trigger: 'manual'
-        }).tooltip('show');
-      });
-    };
-
-    EventFormView.prototype.resetErrors = function() {
-      var index, mappedElement, _ref1, _results;
-      _ref1 = this.validationMapper;
-      _results = [];
-      for (index in _ref1) {
-        mappedElement = _ref1[index];
-        _results.push(mappedElement.field.tooltip('destroy'));
-      }
-      return _results;
-    };
-
-    EventFormView.prototype.onSubmit = function() {
-      var data,
-        _this = this;
-      data = {
-        start: this.startField.val(),
-        end: this.endField.val(),
-        place: this.placeField.val(),
-        description: this.descriptionField.val()
-      };
-      this.cal.fullCalendar('renderEvent', event);
-      Event.save(data, {
-        success: function() {
-          event.title = data.description;
-          return _this.cal.fullCalendar('renderEvent', event);
-        },
-        error: function() {
-          return this.cal.fullCalendar('renderEvent', event);
-        }
-      });
-      return this.resetErrors();
-    };
-
-    return EventFormView;
-
-  })(View);
-  
-});
-window.require.register("views/events_list_view", function(exports, require, module) {
-  var DayProgramView, Event, EventCollection, EventsListView, View, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('../lib/view');
-
-  DayProgramView = require('./dayprogram_view');
-
-  EventCollection = require('../collections/events');
-
-  Event = require('../models/event');
-
-  module.exports = EventsListView = (function(_super) {
-    __extends(EventsListView, _super);
-
-    function EventsListView() {
-      _ref = EventsListView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    EventsListView.prototype.el = '#events';
-
-    EventsListView.prototype.initialize = function() {
-      this.listenTo(this.model, "add", this.onAdd);
-      this.listenTo(this.model, "change", this.onChange);
-      this.listenTo(this.model, "remove", this.onRemove);
-      this.listenTo(this.model, "reset", this.onReset);
-      this.views = {};
-      this.dayPrograms = new Backbone.Collection;
-      this.dayPrograms.comparator = function(dayProg1, dayProg2) {
-        var d1, d2;
-        d1 = new Date.create(dayProg1.get('date'));
-        d2 = new Date.create(dayProg2.get('date'));
-        if (d1.getTime() < d2.getTime()) {
-          return -1;
-        } else if (d1.getTime() === d2.getTime()) {
-          return 0;
-        } else {
-          return 1;
-        }
-      };
-      return this.listenTo(this.dayPrograms, "remove", this.onRemoveDayProgram);
-    };
-
-    EventsListView.prototype.onReset = function() {
-      var _this = this;
-      return this.model.forEach(function(item) {
-        return _this.onAdd(item, _this.model);
-      });
-    };
-
-    EventsListView.prototype.onAdd = function(evt, events) {
-      var dateHash, view,
-        _this = this;
-      dateHash = evt.getDateHash();
-      view = this.getSubView(dateHash, function() {
-        return _this._getNewSubView(dateHash, evt);
-      });
-      return view.model.get('events').add(evt);
-    };
-
-    EventsListView.prototype.onChange = function(evt) {
-      var dateHash, prevDateHash, prevView, view,
-        _this = this;
-      dateHash = evt.getDateHash();
-      view = this.getSubView(dateHash, function() {
-        _this.onAdd(evt);
-        return false;
-      });
-      prevDateHash = evt.getPreviousDateHash();
-      if ((evt.changedAttributes().trigg != null) && prevDateHash !== dateHash) {
-        prevView = this.views[prevDateHash];
-        return prevView.model.get('events').remove(evt);
-      }
-    };
-
-    EventsListView.prototype.onRemoveDayProgram = function(dayProgram) {
-      var dateHash;
-      dateHash = dayProgram.get('dateHash');
-      this.views[dateHash].destroy();
-      return delete this.views[dateHash];
-    };
-
-    EventsListView.prototype.onRemove = function(evt) {
-      var dateHash, view,
-        _this = this;
-      console.log('remove event now');
-      dateHash = evt.getDateHash();
-      view = this.getSubView(dateHash, function() {
-        return null;
-      });
-      if (view != null) {
-        return view.model.get('events').remove(evt);
-      }
-    };
-
-    EventsListView.prototype.getSubView = function(dateHash, callbackIfNotExist) {
-      var tmp;
-      if (this.views[dateHash] != null) {
-        return this.views[dateHash];
-      } else {
-        tmp = callbackIfNotExist();
-        if (tmp instanceof DayProgramView) {
-          return this.views[dateHash] = tmp;
-        } else {
-          return false;
-        }
-      }
-    };
-
-    EventsListView.prototype._getNewSubView = function(dateHash, evt) {
-      var date;
-      date = evt.getDateObject().beginningOfDay();
-      this._buildSubView(dateHash, date);
-      return this._renderSubView(dateHash);
-    };
-
-    EventsListView.prototype._buildSubView = function(dateHash, date) {
-      var model;
-      model = new Backbone.Model({
-        date: date,
-        dateHash: dateHash,
-        events: new EventCollection()
-      });
-      this.dayPrograms.add(model);
-      return this.views[dateHash] = new DayProgramView({
-        id: dateHash,
-        model: model
-      });
-    };
-
-    EventsListView.prototype._renderSubView = function(dateHash) {
-      var index, render, selector, view;
-      view = this.views[dateHash];
-      index = index = this.dayPrograms.indexOf(view.model);
-      render = view.render().$el;
-      if (index === 0) {
-        this.$el.prepend(render);
-      } else if (index === this.dayPrograms.length - 1) {
-        this.$el.append(render);
-      } else {
-        selector = "." + view.className + ":nth-of-type(" + (index + 1) + ")";
-        this.$el.find(selector).before(render);
-      }
-      return view;
-    };
-
-    return EventsListView;
 
   })(View);
   
@@ -3165,7 +2953,9 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="form-horizontal well"><div class="control-group"><input id="alarm-description-input" type="text" placeholder="What should I remind you ?" class="input-block-level"/></div><div class="form-inline"><select id="action" class="input-small">');
+  buf.push('<div class="form-horizontal well"><div class="control-group"><input');
+  buf.push(attrs({ 'type':("text"), 'id':("inputDesc"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"id":true,"placeholder":true}));
+  buf.push('/></div><div class="form-inline"><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
     if ('number' == typeof actions.length) {
@@ -3177,13 +2967,19 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   {
   buf.push('<option');
   buf.push(attrs({ 'value':("" + (action) + ""), 'selected':(true) }, {"value":true,"selected":true}));
-  buf.push('>' + escape((interp = displayAction) == null ? '' : interp) + '</option>');
+  buf.push('>');
+  var __val__ = t(displayAction)
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</option>');
   }
   else
   {
   buf.push('<option');
   buf.push(attrs({ 'value':("" + (action) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = displayAction) == null ? '' : interp) + '</option>');
+  buf.push('>');
+  var __val__ = t(displayAction)
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</option>');
   }
       }
 
@@ -3196,23 +2992,29 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   {
   buf.push('<option');
   buf.push(attrs({ 'value':("" + (action) + ""), 'selected':(true) }, {"value":true,"selected":true}));
-  buf.push('>' + escape((interp = displayAction) == null ? '' : interp) + '</option>');
+  buf.push('>');
+  var __val__ = t(displayAction)
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</option>');
   }
   else
   {
   buf.push('<option');
   buf.push(attrs({ 'value':("" + (action) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = displayAction) == null ? '' : interp) + '</option>');
+  buf.push('>');
+  var __val__ = t(displayAction)
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</option>');
   }
       }
 
     }
   }).call(this);
 
-  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;date:&nbsp;</label><div id="inputDate" class="input-append date"><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;time:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
+  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;' + escape((interp = t('date')) == null ? '' : interp) + ':&nbsp;</label><div id="inputDate" class="input-append date"><input');
+  buf.push(attrs({ 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
+  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;' + escape((interp = t('time')) == null ? '' : interp) + ':&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
+  buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><select id="inputTimezone" class="input"><option');
   buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
   buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
@@ -3241,7 +3043,10 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select></div><button class="btn pull-right add-alarm">add the alarm</button><div class="clearfix"></div></div>');
+  buf.push('</select></div><button class="btn pull-right add-alarm">');
+  var __val__ = t('add the alarm')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button><div class="clearfix"></div></div>');
   }
   return buf.join("");
   };
@@ -3253,20 +3058,25 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   with (locals || {}) {
   var interp;
   buf.push('<div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':("What do you want to be reminded ?"), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><button class="btn pull-right add-alarm disabled">');
   if ( editionMode)
   {
-  buf.push('Edit');
+  var __val__ = t('Edit')
+  buf.push(escape(null == __val__ ? "" : __val__));
   }
   else
   {
-  buf.push('Add');
+  var __val__ = t('Add')
+  buf.push(escape(null == __val__ ? "" : __val__));
   }
   buf.push('</button>');
   if (!( editionMode))
   {
-  buf.push('<p>ie: 9:00 important meeting</p>');
+  buf.push('<p>');
+  var __val__ = t('ie: 9:00 important meeting')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p>');
   }
   buf.push('<select id="inputTimezone" class="input"><option');
   buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
@@ -3299,7 +3109,10 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   buf.push('</select>');
   if (!( editionMode))
   {
-  buf.push('<button class="btn add-event">Create Event</button>');
+  buf.push('<button class="btn add-event">');
+  var __val__ = t('Create Event')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button>');
   }
   buf.push('</div>');
   }
@@ -3323,7 +3136,19 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"> <i class="icon-arrow-up icon-white"></i></a></li></ul><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i>');
+  var __val__ = t('List')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#calendar" class="active btn"><i class="icon-calendar icon-white"></i>');
+  var __val__ = t('Calendar')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  var __val__ = t('Export')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  var __val__ = t('Import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };
@@ -3350,23 +3175,6 @@ window.require.register("views/templates/event", function(exports, require, modu
   return buf.join("");
   };
 });
-window.require.register("views/templates/event_form", function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
-  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<div class="form-horizontal well"><input id="event-place-input" type="text" placeholder="Place"/><input id="event-description-input" type="text" placeholder="Description"/></div><div class="form-inline"><div id="date-control"><label for="inputDate">&nbsp;date:&nbsp;</label><div id="inputDate" class="input-append date"><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultDate) + ""), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;Start:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'id':("inputStart"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div><label for="inputTime">&nbsp;&nbsp;End:&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'id':("inputEnd"), 'type':("text"), 'value':("" + (defaultTime) + ""), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div></div><button class="btn pull-right add-event">add the event<div class="clearfix"></div></button>');
-  }
-  return buf.join("");
-  };
-});
 window.require.register("views/templates/event_form_small", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
@@ -3374,34 +3182,25 @@ window.require.register("views/templates/event_form_small", function(exports, re
   with (locals || {}) {
   var interp;
   buf.push('<div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("inputStart"), 'placeholder':("From hours:minutes"), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("inputStart"), 'placeholder':(t("From hours:minutes")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("inputEnd"), 'placeholder':("To hours:minutes+days"), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("inputEnd"), 'placeholder':(t("To hours:minutes+days")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/></div><div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValuePlace) + ""), 'id':("inputPlace"), 'placeholder':("Place"), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValuePlace) + ""), 'id':("inputPlace"), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("inputDesc"), 'placeholder':("Description"), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("inputDesc"), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><button class="btn add-event">');
   if ( editionMode)
   {
-  buf.push('Edit');
+  var __val__ = t('Edit')
+  buf.push(escape(null == __val__ ? "" : __val__));
   }
   else
   {
-  buf.push('Create');
+  var __val__ = t('Create')
+  buf.push(escape(null == __val__ ? "" : __val__));
   }
   buf.push('</button></div>');
-  }
-  return buf.join("");
-  };
-});
-window.require.register("views/templates/event_import", function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
-  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = place) == null ? '' : interp) + ')</p>');
   }
   return buf.join("");
   };
@@ -3412,7 +3211,37 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn">Switch to List</a><a href="#calendar" class="btn">Switch to Calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a></li></ul><div id="import-form" class="well"><h3>ICalendar importer</h3><div class="import-form"><button id="import-button" class="btn">import your icalendar file</button><input id="import-file-input" type="file"/></div><div class="confirmation"><button id="confirm-import-button" class="btn">confirm import</button><button id="cancel-import-button" class="btn">cancel</button></div><div class="results"><h4>Alarms to import</h4><div id="import-alarm-list"></div><h4>Events to import</h4><div id="import-event-list"></div></div></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i>');
+  var __val__ = t('List')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i>');
+  var __val__ = t('Calendar')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  var __val__ = t('Export')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#import" class="active btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  var __val__ = t('Import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a></li></ul><div id="import-form" class="well"><h3>');
+  var __val__ = t('ICalendar importer')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h3><div class="import-form"><button id="import-button" class="btn">');
+  var __val__ = t('import your icalendar file')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button><input id="import-file-input" type="file"/></div><div class="confirmation"><button id="confirm-import-button" class="btn">');
+  var __val__ = t('confirm import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button><button id="cancel-import-button" class="btn">');
+  var __val__ = t ('cancel')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button></div><div class="results"><h4>');
+  var __val__ = t('Alarms to import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h4><div id="import-alarm-list"></div><h4>');
+  var __val__ = t('Events to import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h4><div id="import-event-list"></div></div></div></div>');
   }
   return buf.join("");
   };
@@ -3423,7 +3252,19 @@ window.require.register("views/templates/listview", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#calendar" class="btn">Switch to calendar</a><a href="export/calendar.ics" target="_blank" class="btn"> <i class="icon-arrow-down icon-white"></i></a><a href="#import" class="btn"> <i class="icon-arrow-up icon-white"></i></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="active btn"><i class="icon-th-list icon-white"></i>');
+  var __val__ = t('List')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i>');
+  var __val__ = t('Calendar')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  var __val__ = t('Export')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a><a href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  var __val__ = t('Import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

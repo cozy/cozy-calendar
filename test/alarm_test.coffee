@@ -46,14 +46,14 @@ describe "Alarms management", ->
 
     describe "POST alarms/", ->
 
-        before (done) =>
+        before (done) ->
             helpers.cleanDb done
         after ->
             delete alarm
 
         describe "Create alarm with the timezone of user", ->
 
-            it "When I create alarm", (done) =>
+            it "When I create an alarm", (done) ->
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -76,7 +76,7 @@ describe "Alarms management", ->
                     body.should.have.property 'description', @alarm.description
                     done()
 
-            it "Then should have persisted the alarm into database", (done) =>
+            it "Then should have persisted the alarm into database", (done) ->
 
                 helpers.getAlarmByID @alarm.id, (err, alarm) =>
                     should.not.exist err
@@ -89,7 +89,7 @@ describe "Alarms management", ->
 
                     done()
 
-            it "And should have only one item in the database", (done) =>
+            it "And should have only one item in the database", (done) ->
 
                 helpers.getAllAlarms (err, alarms) =>
 
@@ -108,13 +108,12 @@ describe "Alarms management", ->
                     description: 'Something to remind'
                     timezone: 'America/Chicago'
 
-                client.post "alarms/", @alarm, (error, response, body) =>
-
+                client.post "alarms/", @alarm, (error, response, body) =>   
+                    
                     should.not.exist error
                     should.exist response
                     response.should.have.status 201
                     should.exist body
-
                     body.should.have.property 'id'
                     @alarm.id = body.id
                     body.should.have.property 'action', @alarm.action
@@ -137,7 +136,7 @@ describe "Alarms management", ->
 
                     done()
 
-            it "And should have two items in the database", (done) =>
+            it "And should have two items in the database", (done) ->
 
                 helpers.getAllAlarms (err, alarms) =>
 
@@ -247,14 +246,13 @@ describe "Alarms management", ->
 
     describe "DELETE alarms/:id", ->
 
-        before (done) =>
-            helpers.cleanDb =>
-                done()
+        before (done) ->
+            helpers.cleanDb done
 
         after ->
             delete alarm
 
-        it "When I create an alarm", (done) =>            
+        it "When I create an alarm", (done) ->
             @alarm =
                 action: 'DISPLAY'
                 trigg: "Tue Apr 23 2013 14:25:00"
@@ -264,7 +262,7 @@ describe "Alarms management", ->
                 @alarm.id = alarm.id
                 done()
 
-        it "should return the deleted alarm", (done) =>
+        it "should return the deleted alarm", (done) ->
 
             client.del "alarms/#{@alarm.id}", (err, resp, body) =>
                 should.not.exist err
@@ -273,7 +271,7 @@ describe "Alarms management", ->
 
                 done()
 
-        it "should have removed the alarm from the database", (done) =>
+        it "should have removed the alarm from the database", (done) ->
 
             helpers.doesAlarmExist @alarm.id, (err, isExist) ->
                 should.not.exist err
