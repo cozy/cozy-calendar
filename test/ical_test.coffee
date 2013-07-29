@@ -162,6 +162,8 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
 
         it "Then it sends to me the parsing result", (done) ->
             console.log @body
+            console.log @body.alarms
+            console.log @body.alarms.length
             @body.alarms.length.should.equal 3
             done()
 
