@@ -22,11 +22,11 @@ describe "Events management", ->
         before (done) ->
             initDb = (callback) ->
                 async.series [
-                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ", 
-                        "Tue Apr 23 2013 15:40:00 ", "Place", 3, 
+                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ",
+                        "Tue Apr 23 2013 15:40:00 ", "Place", 3,
                         "Something to do"
-                    helpers.createEvent "Tue Apr 24 2013 13:30:00", 
-                        "Tue Apr 24 2013 14:00:00", "Other place", 0, 
+                    helpers.createEvent "Tue Apr 24 2013 13:30:00",
+                        "Tue Apr 24 2013 14:00:00", "Other place", 0,
                         "Something else to do"
                 ], ->
                     callback()
@@ -52,7 +52,7 @@ describe "Events management", ->
         after ->
             delete @event
 
-        it "should return the event json object", (done) =>
+        it "should return the event json object", (done) ->
             @event =
                 description: 'Title'
                 start: "Tue Apr 15 2013 15:30:00"
@@ -76,7 +76,7 @@ describe "Events management", ->
                 body.should.have.property 'diff', @event.diff
                 done()
 
-        it "should have persisted the event into database", (done) =>
+        it "should have persisted the event into database", (done) ->
 
             helpers.getEventByID @event.id, (err, event) =>
                 should.not.exist err
@@ -84,12 +84,12 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', 
+                event.should.have.property 'start',
                     exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', 
+                event.should.have.property 'end',
                     exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
@@ -97,7 +97,7 @@ describe "Events management", ->
                 event.should.have.property 'diff', @event.diff
                 done()
 
-        it "should have only one item in the database", (done) =>
+        it "should have only one item in the database", (done) ->
 
             helpers.getAllEvents (err, events) =>
 
@@ -109,7 +109,7 @@ describe "Events management", ->
 
     describe "PUT events/:id", ->
 
-        before (done) =>                
+        before (done) =>
             helpers.cleanDb =>
                 done()
 
@@ -117,7 +117,7 @@ describe "Events management", ->
             delete @event
 
 
-        it "When I create an event", (done) =>
+        it "When I create an event", (done) ->
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
@@ -128,7 +128,7 @@ describe "Events management", ->
                 @event.id = event.id
                 done()
 
-        it "should return the event with the updated value", (done) =>
+        it "should return the event with the updated value", (done) ->
 
             @event.start = "Tue Apr 25 2013 16:30:00"
             @event.end = "Tue Apr 25 2013 19:30:00"
@@ -149,7 +149,7 @@ describe "Events management", ->
                 body.should.have.property 'diff', @event.diff
                 done()
 
-        it "should have persisted the event into database", (done) =>
+        it "should have persisted the event into database", (done) ->
 
             helpers.getEventByID @event.id, (err, event) =>
                 should.not.exist err
@@ -157,12 +157,12 @@ describe "Events management", ->
 
                 exepectedDate = new time.Date(@event.start, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'start', 
+                event.should.have.property 'start',
                     exepectedDate.toString().slice(0, 24)
 
                 exepectedDate = new time.Date(@event.end, 'Europe/Paris')
                 exepectedDate.setTimezone('UTC')
-                event.should.have.property 'end', 
+                event.should.have.property 'end',
                     exepectedDate.toString().slice(0, 24)
 
                 event.should.have.property 'description', @event.description
@@ -180,7 +180,7 @@ describe "Events management", ->
         after ->
             delete @event
 
-        it "When I create an event", (done) =>
+        it "When I create an event", (done) ->
             @event =
                 description: 'Something to do'
                 start: "Tue Apr 25 2013 15:30:00"
@@ -191,7 +191,7 @@ describe "Events management", ->
                 @event.id = event.id
                 done()
 
-        it "should return the deleted event", (done) =>
+        it "should return the deleted event", (done) ->
             client.del "events/#{@event.id}", (err, resp, body) =>
                 should.not.exist err
                 should.exist resp
@@ -199,7 +199,7 @@ describe "Events management", ->
 
                 done()
 
-        it "should have removed the event from the database", (done) =>
+        it "should have removed the event from the database", (done) ->
 
             helpers.doesEventExist @event.id, (err, isExist) ->
                 should.not.exist err
