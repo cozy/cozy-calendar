@@ -63,7 +63,7 @@ action 'getOne', ->
     send @alarm, 200
 
 action 'create', ->
-    triggerDate = new time.Date(req.body.trigg, @alarmTimezone)
+    triggerDate = new time.Date(req.body.trigg, @timezone)
     triggerDate.setTimezone('UTC')
     req.body.trigg = triggerDate.toString().slice(0, 24)
 
