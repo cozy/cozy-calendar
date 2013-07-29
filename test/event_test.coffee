@@ -47,7 +47,7 @@ describe "Events management", ->
 
     describe "POST events/", ->
 
-        before (done) =>
+        before (done) ->
             helpers.cleanDb done
         after ->
             delete @event
@@ -109,7 +109,7 @@ describe "Events management", ->
 
     describe "PUT events/:id", ->
 
-        before (done) =>
+        before (done) ->
             helpers.cleanDb =>
                 done()
 
@@ -173,7 +173,7 @@ describe "Events management", ->
 
     describe "DELETE events/:id", ->
 
-        before (done) =>
+        before (done) ->
             helpers.cleanDb =>
                 done()
 
