@@ -1,5 +1,4 @@
 time = require 'time'
-i18n = require 'cozy-i18n-helper'
 
 before ->
     Alarm.find req.params.id, (err, alarm) =>
@@ -32,7 +31,6 @@ before ->
 
 
 , except: ['delete']
-
 
 action 'all', ->
 
