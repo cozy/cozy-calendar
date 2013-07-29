@@ -101,7 +101,7 @@ describe "Alarms management", ->
 
         describe "Create alarm with a timezone different than user timezone", ->
 
-            it "When I post an alarm with America/Chicago as timezone", (done) =>
+            it "When I post an alarm with America/Chicago as timezone", (done) ->
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -123,7 +123,7 @@ describe "Alarms management", ->
                     body.should.have.property 'description', @alarm.description
                     done()
 
-            it "Then should have persisted the alarm into database", (done) =>
+            it "Then should have persisted the alarm into database", (done) ->
 
                 helpers.getAlarmByID @alarm.id, (err, alarm) =>
                     should.not.exist err
