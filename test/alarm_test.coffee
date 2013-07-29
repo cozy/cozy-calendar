@@ -148,7 +148,7 @@ describe "Alarms management", ->
 
     describe "PUT alarms/:id", ->
 
-        before (done) =>
+        before (done) ->
             helpers.cleanDb =>
                 done()
 
@@ -157,7 +157,7 @@ describe "Alarms management", ->
 
         describe "Update alarm with same timezone", ->
 
-            it "When I create an alarm", (done) =>            
+            it "When I create an alarm", (done) ->            
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -168,7 +168,7 @@ describe "Alarms management", ->
                     done()
 
 
-            it "Then should return the alarm with the updated value", (done) =>
+            it "Then should return the alarm with the updated value", (done) ->
 
                 @alarm.action = 'EMAIL'
                 @alarm.trigg = "Tue Apr 23 2013 14:30:00"
@@ -186,7 +186,7 @@ describe "Alarms management", ->
                     body.should.have.property 'description', @alarm.description
                     done()
 
-            it "And should have persisted the alarm into database", (done) =>
+            it "And should have persisted the alarm into database", (done) ->
 
                 helpers.getAlarmByID @alarm.id, (err, alarm) =>
                     should.not.exist err
@@ -201,7 +201,7 @@ describe "Alarms management", ->
 
         describe "Update an alarm with an other timezone", ->
 
-            it "When I create an alarm", (done) =>            
+            it "When I create an alarm", (done) ->            
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -212,7 +212,7 @@ describe "Alarms management", ->
                     done()
 
 
-            it "Then should return the alarm with the updated value", (done) =>
+            it "Then should return the alarm with the updated value", (done) ->
 
                 @alarm.action = 'EMAIL'
                 @alarm.trigg = "Tue Apr 23 2013 14:30:00"
@@ -231,7 +231,7 @@ describe "Alarms management", ->
                     body.should.have.property 'timezone', @alarm.timezone
                     done()
 
-            it "And should have persisted the alarm into database", (done) =>
+            it "And should have persisted the alarm into database", (done) ->
 
                 helpers.getAlarmByID @alarm.id, (err, alarm) =>
                     should.not.exist err
