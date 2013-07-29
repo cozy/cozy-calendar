@@ -21,5 +21,10 @@
           span.add-on
             i.icon-time
 
+      select(id="inputTimezone").input
+        option(value="#{defaultTimezone}", selected) #{defaultTimezone}
+        each timezone in timezones
+          option(value="#{timezone.value}") #{timezone.value}
+
   button.btn.pull-right.add-alarm add the alarm
   .clearfix
