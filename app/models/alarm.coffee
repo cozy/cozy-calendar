@@ -9,7 +9,7 @@ module.exports = (compound, Alarm) ->
         Alarm.request "all", params, callback
 
     Alarm.getICalCalendar = ->
-        new VCalendar 'Cozy Cloud', 'Cozy Agenda'
+        calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
 
     Alarm::toIcal = (user, timezone) ->
         date = new time.Date @trigg

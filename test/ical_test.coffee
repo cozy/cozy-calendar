@@ -4,7 +4,7 @@ time = require 'time'
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 
-{ICalParser, VCalendar, VAlarm, VTodo} = require '../lib/ical_helpers'
+{ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require '../lib/ical_helpers'
 
 instantiateApp = require('../server')
 app = instantiateApp()
@@ -43,13 +43,19 @@ REPEAT:1
 TRIGGER:20130425T113000
 END:VALARM
 END:VTODO
+BEGIN:VEVENT
+DESCRIPTION:my description
+DTSTART:20130609T150000
+DTEND:20130610T150000
+LOCATION:my place
+END:VEVENT
 END:VCALENDAR
 """.replace(/\n/g, '\r\n')
 
 
 
 helpers = null
-describe "Alarms management", ->
+describe "Calendar export/import", ->
 
     before ->
         app.listen 8888
@@ -92,6 +98,21 @@ SUMMARY:ma description
 UID:superuser
 END:VTODO""".replace(/\n/g, '\r\n')
 
+        describe 'get vEvent string', ->
+            it 'should return default vEvent string', ->
+                startDate = new Date 2013, 5, 9, 15, 0, 0
+                endDate = new Date 2013, 5, 10, 15, 0, 0
+                vevent = new VEvent startDate, endDate, "desc", "loc"
+                vevent.toString().should.equal """
+BEGIN:VEVENT
+DESCRIPTION:desc
+DTSTART:20130609T150000
+DTEND:20130610T150000
+LOCATION:loc
+END:VEVENT""".replace(/\n/g, '\r\n')
+
+
+
         describe 'get vCalendar with alarms', ->
             it 'should return ical string', ->
                 date = new Date 2013, 5, 9, 15, 0, 0
@@ -125,46 +146,51 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
                     done()
 
 
-    describe "GET /export/calendar.ics", ->
+    describe 'Models', ->
 
-        before (done) ->
-            initDb = (callback) ->
-                async.series [
-                    helpers.createAlarm("DISPLAY", "Something to remind",
-                                        "Tue Apr 23 2013 14:40:00 ")
-                    helpers.createAlarm("EMAIL", "Something else to remind",
-                                        "Tue Apr 24 2013 13:30:00")
-                    helpers.createAlarm("EMAIL", "Another thing to remind",
-                                        "Tue Apr 25 2013 11:30:00")
-                ], ->
-                    callback()
-            helpers.cleanDb ->
-                initDb done
+    describe 'Resources', ->
+        describe "GET /export/calendar.ics", ->
+            before (done) ->
+                initDb = (callback) ->
+                    async.series [
+                        helpers.createAlarm("DISPLAY", "Something to remind",
+                                            "Tue Apr 23 2013 14:40:00")
+                        helpers.createAlarm("EMAIL", "Something else to remind",
+                                            "Tue Apr 24 2013 13:30:00")
+                        helpers.createAlarm("EMAIL", "Another thing to remind",
+                                            "Tue Apr 25 2013 11:30:00")
+                        helpers.createEvent("Sun Jun 09 2013 15:00:00",
+                                            "Sun Jun 10 2013 15:00:00",
+                                            "my place", "", "my description")
+                    ], ->
+                        callback()
+                helpers.cleanDb ->
+                    initDb done
 
-        it "when I request for iCal export file", (done) ->
-            client.get "export/calendar.ics", (error, response, body) =>
-                @body = body
-                done()
-            , false
+            it "when I request for iCal export file", (done) ->
+                client.get "export/calendar.ics", (error, response, body) =>
+                    @body = body
+                    done()
+                , false
 
-        it "Then it should contains my alarms", ->
-            @body.should.equal expectedContent
+            it "Then it should contains my alarms", ->
+                @body.should.equal expectedContent
 
 
-    describe "POST /import/ical", ->
+        #describe "POST /import/ical", ->
 
-        it "when I send an iCal import file", (done) ->
-            client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
-                should.not.exist err
-                res.statusCode.should.equal 200
-                @body = body
-                done()
+            #it "when I send an iCal import file", (done) ->
+                #client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
+                    #should.not.exist err
+                    #res.statusCode.should.equal 200
+                    #@body = body
+                    #done()
 
-        it "Then it sends to me the parsing result", (done) ->
-            console.log @body
-            console.log @body.alarms
-            console.log @body.alarms.length
-            @body.alarms.length.should.equal 3
-            done()
+            #it "Then it sends to me the parsing result", (done) ->
+                #console.log @body
+                #console.log @body.alarms
+                #console.log @body.alarms.length
+                #@body.alarms.length.should.equal 3
+                #done()
 
-        it "When I confirm the import", ->
+            #it "When I confirm the import", ->
