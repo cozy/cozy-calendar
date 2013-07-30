@@ -88,6 +88,17 @@ module.exports = class AlarmPopOver extends PopOver
         super data
         @clean()
 
+    onEditClicked: =>
+        data =
+            description: @alarmDescription.val()
+        if $('.popover #input-timezone').val() isnt "Use specific timezone"
+            data.timezone = $('.popover #input-timezone').val()
+        super data, (success) =>
+            if success
+                @event.title = data.description
+                @event.timezone = data.timezone
+                @cal.fullCalendar 'renderEvent', @event
+                
     onEventButtonClicked: () =>
         @field.popover('destroy').popover()
         @pop = new EventPopOver @cal
@@ -105,14 +116,3 @@ module.exports = class AlarmPopOver extends PopOver
             defaultValueDesc: ''
         @pop.show t("Event creation"), @direction , eventFormTemplate
         @pop.bindEvents @date
-
-    onEditClicked: =>
-        data =
-            description: @alarmDescription.val()
-        if $('.popover #input-timezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #input-timezone').val()
-        super data, (success) =>
-            if success
-                @event.title = data.description
-                @event.timezone = data.timezone
-                @cal.fullCalendar 'renderEvent', @event

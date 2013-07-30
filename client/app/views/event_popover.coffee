@@ -54,19 +54,10 @@ module.exports = class EventPopOver extends PopOver
         super()
         @clean
 
-    onButtonClicked: =>
-        if @addButton.hasClass 'disabled'
-            return
-
-        # Recover values
-        start = $('.popover #input-start').val()
-        end = $('.popover #input-end').val()
-        place = $('.popover #input-place').val()
-        description = $('.popover #input-desc').val()
-
+    initData: =>
         # Configure start and end dates
-        dueStartDate = @formatDate start
-        specifiedDay = end.split('+')
+        dueStartDate = @formatDate $('.popover #input-start').val()
+        specifiedDay = $('.popover #input-end').val().split('+')
         if specifiedDay[1]?
             newDate = @date.advance
                 days: specifiedDay[1]
@@ -81,40 +72,17 @@ module.exports = class EventPopOver extends PopOver
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
             diff: parseInt(specifiedDay[1])
-            place: place
-            description: description
-        
+            place: $('.popover #input-place').val()
+            description: $('.popover #input-desc').val()
+        return data
+
+    onButtonClicked: =>
+        data = @initData()        
         super data
         @clean()
 
     onEditClicked: =>
-        # Recover values
-        evt = @model.get @event.id
-        start = $('.popover #input-start').val()
-        end = $('.popover #input-end').val()
-        place = $('.popover #input-place').val()
-        description = $('.popover #input-desc').val()
-
-        # Configure start and end dates
-        dueStartDate = @formatDate start
-        specifiedDay = end.split('+')
-        if specifiedDay[1]?
-            newDate = @date.advance
-                days: specifiedDay[1]
-            dueEndDate = Date.create(newDate)
-        else
-            specifiedDay[1] = 0
-            dueEndDate = Date.create(@date)
-        dueEndDate = @formatDate specifiedDay[0]
-
-        # Store new event
-        data =
-            start: dueStartDate.format Event.dateFormat
-            end: dueEndDate.format Event.dateFormat
-            place: place
-            diff: parseInt(specifiedDay[1])
-            description: description
-
+        data = @initData()  
         super data, (success) =>
             if success
                 # Update event in calendar

@@ -1147,8 +1147,8 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
     function AlarmPopOver(cal) {
       this.cal = cal;
-      this.onEditClicked = __bind(this.onEditClicked, this);
       this.onEventButtonClicked = __bind(this.onEventButtonClicked, this);
+      this.onEditClicked = __bind(this.onEditClicked, this);
       this.onButtonClicked = __bind(this.onButtonClicked, this);
       this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
@@ -1249,6 +1249,24 @@ window.require.register("views/alarm_popover", function(exports, require, module
       return this.clean();
     };
 
+    AlarmPopOver.prototype.onEditClicked = function() {
+      var data,
+        _this = this;
+      data = {
+        description: this.alarmDescription.val()
+      };
+      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
+        data.timezone = $('.popover #input-timezone').val();
+      }
+      return AlarmPopOver.__super__.onEditClicked.call(this, data, function(success) {
+        if (success) {
+          _this.event.title = data.description;
+          _this.event.timezone = data.timezone;
+          return _this.cal.fullCalendar('renderEvent', _this.event);
+        }
+      });
+    };
+
     AlarmPopOver.prototype.onEventButtonClicked = function() {
       var eventFormTemplate;
       this.field.popover('destroy').popover();
@@ -1268,24 +1286,6 @@ window.require.register("views/alarm_popover", function(exports, require, module
       });
       this.pop.show(t("Event creation"), this.direction, eventFormTemplate);
       return this.pop.bindEvents(this.date);
-    };
-
-    AlarmPopOver.prototype.onEditClicked = function() {
-      var data,
-        _this = this;
-      data = {
-        description: this.alarmDescription.val()
-      };
-      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
-        data.timezone = $('.popover #input-timezone').val();
-      }
-      return AlarmPopOver.__super__.onEditClicked.call(this, data, function(success) {
-        if (success) {
-          _this.event.title = data.description;
-          _this.event.timezone = data.timezone;
-          return _this.cal.fullCalendar('renderEvent', _this.event);
-        }
-      });
     };
 
     return AlarmPopOver;
@@ -2139,6 +2139,7 @@ window.require.register("views/event_popover", function(exports, require, module
       this.cal = cal;
       this.onEditClicked = __bind(this.onEditClicked, this);
       this.onButtonClicked = __bind(this.onButtonClicked, this);
+      this.initData = __bind(this.initData, this);
       this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
       EventPopOver.__super__.constructor.call(this, this.cal);
@@ -2199,17 +2200,10 @@ window.require.register("views/event_popover", function(exports, require, module
       return this.clean;
     };
 
-    EventPopOver.prototype.onButtonClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, newDate, place, specifiedDay, start;
-      if (this.addButton.hasClass('disabled')) {
-        return;
-      }
-      start = $('.popover #input-start').val();
-      end = $('.popover #input-end').val();
-      place = $('.popover #input-place').val();
-      description = $('.popover #input-desc').val();
-      dueStartDate = this.formatDate(start);
-      specifiedDay = end.split('+');
+    EventPopOver.prototype.initData = function() {
+      var data, dueEndDate, dueStartDate, newDate, specifiedDay;
+      dueStartDate = this.formatDate($('.popover #input-start').val());
+      specifiedDay = $('.popover #input-end').val().split('+');
       if (specifiedDay[1] != null) {
         newDate = this.date.advance({
           days: specifiedDay[1]
@@ -2224,40 +2218,23 @@ window.require.register("views/event_popover", function(exports, require, module
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
         diff: parseInt(specifiedDay[1]),
-        place: place,
-        description: description
+        place: $('.popover #input-place').val(),
+        description: $('.popover #input-desc').val()
       };
+      return data;
+    };
+
+    EventPopOver.prototype.onButtonClicked = function() {
+      var data;
+      data = this.initData();
       EventPopOver.__super__.onButtonClicked.call(this, data);
       return this.clean();
     };
 
     EventPopOver.prototype.onEditClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, evt, newDate, place, specifiedDay, start,
+      var data,
         _this = this;
-      evt = this.model.get(this.event.id);
-      start = $('.popover #input-start').val();
-      end = $('.popover #input-end').val();
-      place = $('.popover #input-place').val();
-      description = $('.popover #input-desc').val();
-      dueStartDate = this.formatDate(start);
-      specifiedDay = end.split('+');
-      if (specifiedDay[1] != null) {
-        newDate = this.date.advance({
-          days: specifiedDay[1]
-        });
-        dueEndDate = Date.create(newDate);
-      } else {
-        specifiedDay[1] = 0;
-        dueEndDate = Date.create(this.date);
-      }
-      dueEndDate = this.formatDate(specifiedDay[0]);
-      data = {
-        start: dueStartDate.format(Event.dateFormat),
-        end: dueEndDate.format(Event.dateFormat),
-        place: place,
-        diff: parseInt(specifiedDay[1]),
-        description: description
-      };
+      data = this.initData();
       return EventPopOver.__super__.onEditClicked.call(this, data, function(success) {
         var endDate, startDate;
         if (success) {
