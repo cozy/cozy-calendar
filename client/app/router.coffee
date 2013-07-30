@@ -9,7 +9,7 @@ module.exports = class Router extends Backbone.Router
     routes:
         ''                    : 'calendar'
         'calendar'            : 'calendar'
-        'list'                : 'alarmsList'
+        'alarms'              : 'alarmsList'
         'import'              : 'import'
 
     calendar: ->

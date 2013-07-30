@@ -678,6 +678,13 @@ window.require.register("locales/en", function(exports, require, module) {
     "To hours:minutes+days": "To hours:minutes+days",
     "Description": "Description",
     "Week": "Week",
+    "sunday": "sunday",
+    "monday": "monday",
+    "tuesday": "tuesday",
+    "wednesday": "wednesday",
+    "thursday": "thursday",
+    "friday": "friday",
+    "saturday": "saturday",
     "Sunday": "Sunday",
     "Monday": "Monday",
     "Tuesday": "Tuesday",
@@ -708,7 +715,18 @@ window.require.register("locales/en", function(exports, require, module) {
     "Sep": "Sep",
     "Oct": "Oct",
     "Nov": "Nov",
-    "Dec": "Dec"
+    "Dec": "Dec",
+    "Sun": "Sun",
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Alarms": "Alarms",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail"
   };
   
 });
@@ -750,7 +768,14 @@ window.require.register("locales/fr", function(exports, require, module) {
     "To hours:minutes+days": "A heures:minutes+jours",
     "Description": "Description",
     "Week": "Semaine",
-    "Sunday": "Dimanche",
+    "sunday": "Dimanche",
+    "monday": "lundi",
+    "tuesday": "mardi",
+    "wednesday": "mercredi",
+    "thursday": "jeudi",
+    "friday": "vendredi",
+    "Saturday": "samedi",
+    "Sunday": "dimanche",
     "Monday": "Lundi",
     "Tuesday": "Mardi",
     "Wednesday": "Mercredi",
@@ -787,7 +812,18 @@ window.require.register("locales/fr", function(exports, require, module) {
     "Sep": "Sep",
     "Oct": "Oct",
     "Nov": "Nov",
-    "Dec": "Dec"
+    "Dec": "Dec",
+    "Sun": "Dim",
+    "Mon": "Lun",
+    "Tue": "Mar",
+    "Wed": "Mer",
+    "Thu": "Jeu",
+    "Fri": "Ven",
+    "Sat": "Sam",
+    "Alarms": "Alarmes",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail"
   };
   
 });
@@ -1066,7 +1102,7 @@ window.require.register("router", function(exports, require, module) {
     Router.prototype.routes = {
       '': 'calendar',
       'calendar': 'calendar',
-      'list': 'alarmsList',
+      'alarms': 'alarmsList',
       'import': 'import'
     };
 
@@ -2902,7 +2938,7 @@ window.require.register("views/templates/alarm", function(exports, require, modu
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + ' (' + escape((interp = timezone) == null ? '' : interp) + ')\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = action) == null ? '' : interp) + ')<i');
+  buf.push('<p>' + escape((interp = time) == null ? '' : interp) + ' (' + escape((interp = timezone) == null ? '' : interp) + ')\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i');
   buf.push(attrs({ 'data-alarmid':("" + (alarmID) + ""), "class": ('icon-pencil') }, {"data-alarmid":true}));
   buf.push('></i><i');
   buf.push(attrs({ 'data-alarmid':("" + (alarmID) + ""), "class": ('icon-trash') }, {"data-alarmid":true}));
@@ -3186,7 +3222,7 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i><span> ');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-th-list icon-white"></i><span> ');
   var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
@@ -3227,7 +3263,7 @@ window.require.register("views/templates/listview", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="active btn"><i class="icon-th-list icon-white"></i><span> ');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="active btn"><i class="icon-th-list icon-white"></i><span> ');
   var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
