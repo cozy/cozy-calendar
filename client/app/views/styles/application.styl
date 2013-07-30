@@ -214,3 +214,63 @@ input[type="time"]
         p
             margin: 0
             sharefont-weight: 10px
+
+@media(max-width: 800px)
+
+    body
+        padding: 0
+
+    #viewContainer
+        padding: 0
+ 
+        .container:before
+        .container:after
+            display: block
+
+        .container
+            display: block
+            width: 100%
+            margin: 0
+            padding: 0
+            box-sizing: border-box
+
+    #alarms
+        width: 100%
+        margin: 0
+        box-sizing: border-box
+
+        .fc-header-title
+            h2
+                font-size: 16px
+        
+
+    #inputDate
+    #inputTime
+    #inputTimezone
+    #action
+    #date-control
+        display: block
+        margin-bottom: 10px
+
+    #inputDate
+        span
+            display: none
+
+    #inputTime
+        span
+            display: none
+
+@media(max-width: 700px)
+    #alarms
+        .fc-day-header
+            color: transparent
+            text-align: center
+            padding-left: 5px
+
+        .fc-day-header::first-letter
+            color: white
+
+@media (max-width: 400px)
+    #alarms
+        width 100%
+

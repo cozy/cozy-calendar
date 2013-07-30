@@ -2959,7 +2959,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   with (locals || {}) {
   var interp;
   buf.push('<div class="form-horizontal well"><div class="control-group"><input');
-  buf.push(attrs({ 'type':("text"), 'id':("inputDesc"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'id':('inputDesc'), 'type':("text"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"placeholder":true}));
   buf.push('/></div><div class="form-inline"><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
@@ -3016,10 +3016,10 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><div id="date-control"><label for="inputDate">&nbsp;' + escape((interp = t('date')) == null ? '' : interp) + ':&nbsp;</label><div id="inputDate" class="input-append date"><input');
+  buf.push('</select><div id="date-control"><label>' + escape((interp = t('date')) == null ? '' : interp) + '</label><div id="inputDate" class="input-append date"><input');
   buf.push(attrs({ 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label for="inputTime">&nbsp;&nbsp;' + escape((interp = t('time')) == null ? '' : interp) + ':&nbsp;</label><div class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'id':("inputTime"), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"id":true,"type":true,"value":true}));
+  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label>' + escape((interp = t('time')) == null ? '' : interp) + '</label><div id="inputTime" class="input-append bootstrap-timepicker"><input');
+  buf.push(attrs({ 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"type":true,"value":true}));
   buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><select id="inputTimezone" class="input"><option');
   buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
   buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');

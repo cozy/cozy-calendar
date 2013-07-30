@@ -8291,6 +8291,66 @@ input[type="time"] {
   margin: 0;
   sharefont-weight: 10px;
 }
+@media (max-width: 800px) {
+  body {
+    padding: 0;
+  }
+  #viewContainer {
+    padding: 0;
+  }
+  #viewContainer .container:before,
+  #viewContainer .container:after {
+    display: block;
+  }
+  #viewContainer .container {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  #alarms {
+    width: 100%;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  #alarms .fc-header-title h2 {
+    font-size: 16px;
+  }
+  #inputDate,
+  #inputTime,
+  #inputTimezone,
+  #action,
+  #date-control {
+    display: block;
+    margin-bottom: 10px;
+  }
+  #inputDate span {
+    display: none;
+  }
+  #inputTime span {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  #alarms .fc-day-header {
+    color: transparent;
+    text-align: center;
+    padding-left: 5px;
+  }
+  #alarms .fc-day-header::first-letter {
+    color: #fff;
+  }
+}
+@media (max-width: 400px) {
+  #alarms {
+    width: 100%;
+  }
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");

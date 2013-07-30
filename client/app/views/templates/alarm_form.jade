@@ -1,23 +1,23 @@
 .form-horizontal.well
   .control-group
-      input.input-block-level(
-          type="text", id="inputDesc", placeholder=t("What should I remind you ?"))
+      input#inputDesc.input-block-level(
+          type="text", placeholder=t("What should I remind you ?"))
   .form-inline
-      select(id="action").input-small
+      select#action.input-small
         each displayAction, action in actions
             if action == defaultAction
               option(value="#{action}", selected)= t(displayAction)
             else
               option(value="#{action}")= t(displayAction)
       #date-control
-        label(for="inputDate") &nbsp;#{t('date')}:&nbsp;
-        .input-append.date(id="inputDate")
+        label #{t('date')}
+        .input-append.date#inputDate
           input.span2(type="text", value=defaultDate)
           span.add-on
             i.icon-th
-        label(for="inputTime") &nbsp;&nbsp;#{t('time')}:&nbsp;
-        .input-append.bootstrap-timepicker
-          input.input-small(id="inputTime", type="text", value=defaultTime)
+        label #{t('time')}
+        .input-append.bootstrap-timepicker#inputTime
+          input.input-small(type="text", value=defaultTime)
           span.add-on
             i.icon-time
 
