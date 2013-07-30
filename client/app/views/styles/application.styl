@@ -193,6 +193,7 @@ h2
     margin-top: 20px
 
 
+.icon-bell:before
 .icon-th:before
 .icon-th-list:before
 .icon-share:before
@@ -271,12 +272,9 @@ h2
 @media(max-width: 700px)
     #alarms
         .fc-day-header
-            color: transparent
+            font-size: 12px
             text-align: center
             padding-left: 5px
-
-        .fc-day-header::first-letter
-            color: white
 
     #alarm-list
         h2
@@ -291,3 +289,30 @@ h2
         #import-menu-button
             display: none
 
+    #alarms
+        .fc-day-header
+            font-size: 10px
+
+        .fc-button-today
+            display: none
+
+        td.fc-header-right
+            span
+                display: none
+
+        .fc-event-title
+            display: none
+
+        .fc-border-separate
+            width: 100%
+
+@media(max-width: 500px)
+    #alarms
+        .popover
+            width: 310px
+
+            input
+                width: 260px
+
+            button
+                display: block

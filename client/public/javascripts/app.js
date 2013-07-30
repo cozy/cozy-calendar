@@ -2735,6 +2735,9 @@ window.require.register("views/popover", function(exports, require, module) {
     };
 
     PopOver.prototype.show = function(title, direction, content) {
+      if ($(window).width() < 600) {
+        direction = 'bottom';
+      }
       this.field.data('popover', null).popover({
         title: require('./templates/popover_title')({
           title: title
@@ -3117,7 +3120,7 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-th-list icon-white"></i><span> ');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-bell icon-white"></i><span> ');
   var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="active btn"><i class="icon-calendar icon-white"></i><span>');
@@ -3203,7 +3206,7 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-th-list icon-white"></i><span> ');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-bell icon-white"></i><span> ');
   var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
@@ -3244,7 +3247,7 @@ window.require.register("views/templates/listview", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="active btn"><i class="icon-th-list icon-white"></i><span> ');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="active btn"><i class="icon-bell icon-white"></i><span> ');
   var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');

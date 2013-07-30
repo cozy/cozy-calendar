@@ -8274,6 +8274,7 @@ h2 {
 #alarm-list {
   margin-top: 20px;
 }
+.icon-bell:before,
 .icon-th:before,
 .icon-th-list:before,
 .icon-share:before,
@@ -8352,12 +8353,9 @@ h2 {
 }
 @media (max-width: 700px) {
   #alarms .fc-day-header {
-    color: transparent;
+    font-size: 12px;
     text-align: center;
     padding-left: 5px;
-  }
-  #alarms .fc-day-header::first-letter {
-    color: #fff;
   }
   #alarm-list h2 {
     font-size: 22px;
@@ -8369,6 +8367,32 @@ h2 {
   }
   #menu #import-menu-button {
     display: none;
+  }
+  #alarms .fc-day-header {
+    font-size: 10px;
+  }
+  #alarms .fc-button-today {
+    display: none;
+  }
+  #alarms td.fc-header-right span {
+    display: none;
+  }
+  #alarms .fc-event-title {
+    display: none;
+  }
+  #alarms .fc-border-separate {
+    width: 100%;
+  }
+}
+@media (max-width: 500px) {
+  #alarms .popover {
+    width: 310px;
+  }
+  #alarms .popover input {
+    width: 260px;
+  }
+  #alarms .popover button {
+    display: block;
   }
 }
 @font-face {

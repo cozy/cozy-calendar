@@ -22,6 +22,9 @@ module.exports = class PopOver extends View
         @event = data.event
 
     show: (title, direction, content) ->
+        if $(window).width() < 600
+            direction = 'bottom'
+
         @field.data('popover', null).popover(
             title: require('./templates/popover_title')(title: title)
             html: true
