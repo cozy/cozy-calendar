@@ -2209,43 +2209,40 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
   
 });
 window.require.register("views/event_popover", function(exports, require, module) {
-  var Event, EventPopOver, View,
+  var Event, EventPopOver, PopOver, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  View = require('../lib/view');
+  PopOver = require('./popover');
 
   Event = require('../models/event');
 
   module.exports = EventPopOver = (function(_super) {
     __extends(EventPopOver, _super);
 
-    function EventPopOver(cal) {
-      this.cal = cal;
+    function EventPopOver() {
       this.onEditEventClicked = __bind(this.onEditEventClicked, this);
       this.onEventButtonClicked = __bind(this.onEventButtonClicked, this);
       this.onRemoveEventClicked = __bind(this.onRemoveEventClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
       this.bindEvents = __bind(this.bindEvents, this);
+      _ref = EventPopOver.__super__.constructor.apply(this, arguments);
+      return _ref;
     }
 
     EventPopOver.prototype.clean = function() {
-      var _ref, _ref1;
-      if ((_ref = this.field) != null) {
-        _ref.popover('destroy');
-      }
-      this.field = null;
-      this.date = null;
-      if (this.popoverWidget != null) {
-        this.popoverWidget.find('button.close').unbind('click');
-        this.popoverWidget.find('button.add-event').unbind('click');
-        this.popoverWidget.find('#inputStart').unbind('keyup');
-        this.popoverWidget.find('#inputEnd').unbind('keyup');
-        this.popoverWidget.find('#inputPlace').unbind('keyup');
-        this.popoverWidget.find('#inputDesc').unbind('keyup');
-        return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
-      }
+      return EventPopOver.__super__.clean.call(this);
+    };
+
+    EventPopOver.prototype.unbindEvents = function() {
+      EventPopOver.__super__.unbindEvents.call(this);
+      this.popoverWidget.find('button.close').unbind('click');
+      this.popoverWidget.find('button.add-event').unbind('click');
+      this.popoverWidget.find('#inputStart').unbind('keyup');
+      this.popoverWidget.find('#inputEnd').unbind('keyup');
+      this.popoverWidget.find('#inputPlace').unbind('keyup');
+      return this.popoverWidget.find('#inputDesc').unbind('keyup');
     };
 
     EventPopOver.prototype.createNew = function(data) {
@@ -2259,7 +2256,9 @@ window.require.register("views/event_popover", function(exports, require, module
 
     EventPopOver.prototype.show = function(title, direction, content) {
       this.field.data('popover', null).popover({
-        title: '<span>' + title + '&nbsp;<i class="event-remove ' + 'icon-trash" /></span> <button type="button" class="close">' + '&times;</button>',
+        title: require('./templates/popover_title')().call(null, {
+          title: title
+        }),
         html: true,
         placement: direction,
         content: content
@@ -2478,7 +2477,7 @@ window.require.register("views/event_popover", function(exports, require, module
 
     return EventPopOver;
 
-  })(View);
+  })(PopOver);
   
 });
 window.require.register("views/import_alarm_list", function(exports, require, module) {
@@ -2905,6 +2904,42 @@ window.require.register("views/list_view", function(exports, require, module) {
   })(View);
   
 });
+window.require.register("views/popover", function(exports, require, module) {
+  var PopOver, View,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  module.exports = PopOver = (function(_super) {
+    __extends(PopOver, _super);
+
+    function PopOver(cal) {
+      this.cal = cal;
+    }
+
+    PopOver.prototype.clean = function() {
+      var _ref, _ref1;
+      if ((_ref = this.field) != null) {
+        _ref.popover('destroy');
+      }
+      this.field = null;
+      this.date = null;
+      if (this.popoverWidget != null) {
+        this.unbindEvents();
+      }
+      return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
+    };
+
+    PopOver.prototype.unbindEvents = function() {
+      return this.popoverWidget.find('button.close').unbind('click');
+    };
+
+    return PopOver;
+
+  })(View);
+  
+});
 window.require.register("views/schedule_element", function(exports, require, module) {
   var ScheduleElement, View, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3281,6 +3316,17 @@ window.require.register("views/templates/listview", function(exports, require, m
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/popover_title", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<span>' + escape((interp = title) == null ? '' : interp) + '&nbsp;<i class="event-remove icon-trash"> </i></span><button class="close">&times;</button>');
   }
   return buf.join("");
   };
