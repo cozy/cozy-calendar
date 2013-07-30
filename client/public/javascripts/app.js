@@ -988,7 +988,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return Date.create(this.get(this.mainDateField)).format(formatter);
+      return this.getDateObject().format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
@@ -1436,8 +1436,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
 
     AlarmFormView.prototype.events = {
       'focus #inputDesc': 'onFocus',
-      'blur #alarm-description-input': 'onBlur',
-      'keyup #alarm-description-input': 'onKeydown',
+      'blur #inputDesc': 'onBlur',
+      'keyup #inputDesc': 'onKeydown',
       'click .add-alarm': 'onSubmit'
     };
 
@@ -1481,7 +1481,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
 
     AlarmFormView.prototype.afterRender = function() {
       var datePicker;
-      this.descriptionField = this.$('#alarm-description-input');
+      this.descriptionField = this.$('#inputDesc');
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
