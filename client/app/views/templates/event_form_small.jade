@@ -1,15 +1,15 @@
 div
     input.input-small(type="text", value="#{defaultValueStart}",
-                      id="inputStart", placeholder=t("From hours:minutes"))
+                      id="input-start", placeholder=t("From hours:minutes"))
     input.input-small(type="text", value="#{defaultValueEnd}",
-                          id="inputEnd", placeholder=t("To hours:minutes+days"))
+                          id="input-end", placeholder=t("To hours:minutes+days"))
 div
     input.input-small(type="text", value="#{defaultValuePlace}",
-                      id="inputPlace", placeholder=t("Place"))
+                      id="input-place", placeholder=t("Place"))
     input.input(type="text", value="#{defaultValueDesc}",
-        id="inputDesc", placeholder=t("Description"))
+        id="input-desc", placeholder=t("Description"))
 
-    button.btn.add-event
+    button.btn.add
         if editionMode
             = t('Edit')
         else

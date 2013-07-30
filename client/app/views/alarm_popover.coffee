@@ -1,3 +1,4 @@
+PopOver = require './popover'
 View = require '../lib/view'
 Alarm = require '../models/alarm'
 timezones = require('helpers/timezone').timezones
@@ -5,148 +6,87 @@ timezones = require('helpers/timezone').timezones
 EventPopOver = require './event_popover'
 eventFormSmallTemplate = require('./templates/event_form_small')
 
-module.exports = class AlarmPopOver extends View
+module.exports = class AlarmPopOver extends PopOver
 
     constructor: (@cal) ->
+        super @cal
 
     clean: ->
-        @field?.popover 'destroy'
-        @field = null
-        @date = null
+        super()
         @action = null
-        if @popoverWidget?
-            @popoverWidget.find('button.close').unbind 'click'
-            @popoverWidget.find('button.add-alarm').unbind 'click'
-            @popoverWidget.find('button.add-event').unbind 'click'
-            @popoverWidget.find('input').unbind 'keyup'
-            @popoverWidget?.hide()
+
+    unbindEvents: ->
+        super()
+        @popoverWidget.find('button.add-event').unbind 'click'
+        @popoverWidget.find('input').unbind 'keyup'
 
     createNew: (data) ->
         @clean()
-        @field = data.field
-        @date = data.date
+        super data
         @action = data.action
-        @model = data.model
         @modelEvent = data.modelEvent
-        @event = data.event
 
     show: (title, direction, content) ->
-        @field.popover(
-            title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + \
-                'icon-trash" /></span> <button type="button" class="close">' + \
-                '&times;</button>'
-            html: true
-            placement: direction
-            content: content
-        ).popover('show')
-        @popoverWidget = $('.container .popover')
+        super title, direction, content
         @popoverWidget.find('input').focus()
         @direction = direction
 
         if @action is 'create'
-            $('.alarm-remove').hide()
+            $('.remove').hide()
         else
-            $('.alarm-remove').show()
+            $('.remove').show()
 
-    bindEvents: =>
-        @popoverWidget = $('.container .popover')
-
-        @addAlarmButton = @popoverWidget.find 'button.add-alarm'
-        @addAlarmButton.html @action
+    bindEvents: ->        
+        super()
         @addEventButton = @popoverWidget.find 'button.add-event'
-
-        @popoverWidget.find('button.close').click => @clean()
-        @addAlarmButton.click => @onAlarmButtonClicked()
         @addEventButton.click => @onEventButtonClicked()
+        @alarmDescription = @popoverWidget.find 'input'
+        @alarmTimezone = @popoverWidget.find 'input-timezone'
+        $('.popover #input-timezone').change () =>
+            @addButton.removeClass 'disabled'
 
-        @alarmDescription = @popoverWidget.find('input')
         @alarmDescription.keyup (event) =>
             if @alarmDescription.val() is ''
-                @addAlarmButton.addClass 'disabled'
+                @addButton.addClass 'disabled'
             else if event.keyCode is 13 or event.which is 13
-                @onAlarmButtonClicked()
+                @onButtonClicked()
             else
-                @addAlarmButton.removeClass 'disabled'
+                @addButton.removeClass 'disabled'
 
     bindEditEvents: =>
-        @popoverWidget = $('.container .popover')
-        @addAlarmButton = @popoverWidget.find 'button.add-alarm'
-        @closeButton = @popoverWidget.find 'button.close'
-        @removeButton = @popoverWidget.find '.alarm-remove'
+        super()
         @alarmDescription = @popoverWidget.find 'input'
-        @alarmTimezone = @popoverWidget.find 'timezone'
-
-        @addAlarmButton.html @action
-        @closeButton.click => @clean()
-        @addAlarmButton.click => @onEditAlarmClicked()
-        @removeButton.click => @onRemoveAlarmClicked()
-
+        @alarmTimezone = @popoverWidget.find 'input-timezone'        
+        $('.popover #input-timezone').change () =>
+            @addButton.removeClass 'disabled'
+        
         @alarmDescription.keyup (event) =>
             if @alarmDescription.val() is ''
-                @addAlarmButton.addClass 'disabled'
+                @addButton.addClass 'disabled'
             else if event.keyCode is 13 or event.which is 13
-                @onEditAlarmClicked()
+                @onEditClicked()
             else
-                @addAlarmButton.removeClass 'disabled'
+                @addButton.removeClass 'disabled'
 
-        $('.popover #inputTimezone').change () =>
-            @addAlarmButton.removeClass 'disabled'
+    onRemoveClicked: =>
+        super()
+        @clean
 
-    onRemoveAlarmClicked: =>
-        alarm = @model.get @event.id
-        @removeButton.css 'width', '42px'
-        @removeButton.spin 'tiny'
-        alarm.destroy
-            success: =>
-                @cal.fullCalendar 'removeEvents', @event.id
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
-                @clean()
-            error: ->
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
-                @clean()
-
-    onAlarmButtonClicked: =>
-        dueDate = Date.create @date
-        dueDate.advance hours: 8 if dueDate.format('{HH}:{mm}') is '00:00'
-
-        # smart detection: set the time if the user input has a time
+    onButtonClicked: =>
         value = @popoverWidget.find('input').val()
-        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
-
-        if smartDetection? and smartDetection[1]?
-            specifiedTime = smartDetection[1]
-            specifiedTime = specifiedTime.split /:/
-            dueDate.set
-                hours: specifiedTime[0]
-                minutes: specifiedTime[1]
-
-            value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
-            value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
-
+        dueDate =  @formatDate value
+        value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
+        value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
 
         data =
             description: value
             action: 'DISPLAY'
             trigg: dueDate.format Alarm.dateFormat
+        if $('.popover #input-timezone').val() isnt "Use specific timezone"
+            data.timezone = $('.popover #input-timezone').val()
 
-        if $('.popover #inputTimezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #inputTimezone').val()
-
-
-        @addAlarmButton.html '&nbsp;'
-        @addAlarmButton.spin 'small'
-        @model.create data,
-            wait: true
-            success: =>
-                @clean()
-                @addAlarmButton.spin()
-                @addAlarmButton.html @action
-            error: =>
-                @clean()
-                @addAlarmButton.spin()
-                @addAlarmButton.html @action
+        super data
+        @clean()
 
     onEventButtonClicked: () =>
         @field.popover('destroy').popover()
@@ -166,25 +106,13 @@ module.exports = class AlarmPopOver extends View
         @pop.show t("Event creation"), @direction , eventFormTemplate
         @pop.bindEvents @date
 
-    onEditAlarmClicked: =>
-        alarm = @model.get @event.id
+    onEditClicked: =>
         data =
             description: @alarmDescription.val()
-
-        if $('.popover #inputTimezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #inputTimezone').val()
-        @cal.fullCalendar 'renderEvent', @event
-        @addAlarmButton.html '&nbsp;'
-        @addAlarmButton.spin 'small'
-        alarm.save data,
-            wait: true
-            success: =>
+        if $('.popover #input-timezone').val() isnt "Use specific timezone"
+            data.timezone = $('.popover #input-timezone').val()
+        super data, (success) =>
+            if success
                 @event.title = data.description
                 @event.timezone = data.timezone
                 @cal.fullCalendar 'renderEvent', @event
-                @addAlarmButton.spin()
-                @addAlarmButton.html @action
-            error: =>
-                @cal.fullCalendar 'renderEvent', @event
-                @addAlarmButton.spin()
-                @addAlarmButton.html @action
