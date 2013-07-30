@@ -39,8 +39,8 @@ module.exports = class AlarmsListView extends View
 
     onAdd: (alarm, alarms) ->
         dateHash = alarm.getDateHash()
-        view = @getSubView dateHash, () => @_getNewSubView(dateHash, alarm)
-
+        view = @getSubView dateHash, =>
+            @_getNewSubView(dateHash, alarm)
         view.model.get('alarms').add alarm
 
     onChange: (alarm) ->

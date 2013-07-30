@@ -982,13 +982,13 @@ window.require.register("models/scheduleitem", function(exports, require, module
 
     ScheduleItem.prototype.getDateObject = function() {
       if (this.dateObject == null) {
-        this.dateObject = new Date.create(this.get(this.mainDateField));
+        this.dateObject = moment(this.get(this.mainDateField)).toDate();
       }
       return this.dateObject;
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return this.getDateObject().format(formatter);
+      return (new Date(this.get(this.mainDateField))).format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
@@ -2579,8 +2579,8 @@ window.require.register("views/list_view", function(exports, require, module) {
 
     ListView.prototype.events = {
       "click #add-alarm button.add-alarm": "onAddAlarmClicked",
-      "click #alarms .alarms p .icon-pencil": "onEditAlarmClicked",
-      "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
+      "click #alarm-list .icon-pencil": "onEditAlarmClicked",
+      "click #alarm-list .icon-trash": "onRemoveAlarmClicked"
     };
 
     ListView.prototype.template = function() {
@@ -3187,7 +3187,7 @@ window.require.register("views/templates/import_view", function(exports, require
   with (locals || {}) {
   var interp;
   buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i><span> ');
-  var __val__ = t('List')
+  var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')
@@ -3228,7 +3228,7 @@ window.require.register("views/templates/listview", function(exports, require, m
   with (locals || {}) {
   var interp;
   buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="active btn"><i class="icon-th-list icon-white"></i><span> ');
-  var __val__ = t('List')
+  var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')

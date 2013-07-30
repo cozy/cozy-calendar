@@ -63,12 +63,12 @@ action 'getOne', ->
     send @alarm, 200
 
 action 'create', ->
-    triggerDate = new time.Date(req.body.trigg, @timezone)
+    triggerDate = new time.Date(body.trigg, @timezone)
     triggerDate.setTimezone('UTC')
-    req.body.trigg = triggerDate.toString().slice(0, 24)
+    body.trigg = triggerDate.toString().slice(0, 24)
 
-    req.body.timezone = @timezone
-    Alarm.create req.body, (err, alarm) =>
+    body.timezone = @timezone
+    Alarm.create body, (err, alarm) =>
         if err
             send error: true, msg: "Server error while creating alarm.", 500
         else

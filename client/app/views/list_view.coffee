@@ -13,8 +13,8 @@ module.exports = class ListView extends View
 
     events:
         "click #add-alarm button.add-alarm": "onAddAlarmClicked"
-        "click #alarms .alarms p .icon-pencil": "onEditAlarmClicked"
-        "click #alarms .alarms p .icon-trash": "onRemoveAlarmClicked"
+        "click #alarm-list .icon-pencil": "onEditAlarmClicked"
+        "click #alarm-list .icon-trash": "onRemoveAlarmClicked"
 
     template: ->
         require('./templates/listview')
@@ -74,7 +74,7 @@ module.exports = class ListView extends View
     onRemoveAlarmClicked: (event) ->
         alarmID = $(event.target).data('alarmid')
         alarm = @model.get alarmID
-        # TODO: add confirmation
+        # TODO: add confirmation and loading indicator
         alarm.destroy
             wait: true
             success: () ->
