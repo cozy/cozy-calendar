@@ -276,26 +276,26 @@ module.exports = class CalendarView extends View
         endHour = endDate.format('{HH}:{mm}').split(':')
 
         # Initialize templates and type of popover
-        if helpers.isEvent(startHour, endHour)
-            type = 'event'
-            formTemplate = formSmallTemplate.event
-                editionMode: false
-                defaultValueStart: startDate.format('{HH}:{mm}')
-                defaultValueEnd: endDate.format('{HH}:{mm}')
-                defaultValuePlace: ''
-                defaultValueDesc: ''
-            title = t "Event creation"
-        else
-            type = 'alarm'
-            timezoneData = []
-            for timezone in timezones
-                    timezoneData.push value: timezone, text: timezone
-            formTemplate = formSmallTemplate.alarm
-                editionMode: false
-                timezones: timezoneData
-                defaultTimezone: 'Use specific timezone'
-                defaultValue: ''
-            title = t "Alarm creation"
+        #if helpers.isEvent(startHour, endHour)
+        type = 'event'
+        formTemplate = formSmallTemplate.event
+            editionMode: false
+            defaultValueStart: '' #startDate.format('{HH}:{mm}')
+            defaultValueEnd: '' #endDate.format('{HH}:{mm}')
+            defaultValuePlace: ''
+            defaultValueDesc: ''
+        title = t "Event creation"
+        #else
+            #type = 'alarm'
+            #timezoneData = []
+            #for timezone in timezones
+                    #timezoneData.push value: timezone, text: timezone
+            #formTemplate = formSmallTemplate.alarm
+                #editionMode: false
+                #timezones: timezoneData
+                #defaultTimezone: 'Use specific timezone'
+                #defaultValue: ''
+            #title = t "Alarm creation"
 
         # Create popover to create alarm or event
         @popover[type].createNew

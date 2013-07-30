@@ -2008,39 +2008,20 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, endHour, formTemplate, startHour, target, timezone, timezoneData, title, type, _i, _len;
+      var direction, endHour, formTemplate, startHour, target, title, type;
       target = $(jsEvent.target);
       direction = helpers.getPopoverDirection(isDayView, startDate);
       startHour = startDate.format('{HH}:{mm}').split(':');
       endHour = endDate.format('{HH}:{mm}').split(':');
-      if (helpers.isEvent(startHour, endHour)) {
-        type = 'event';
-        formTemplate = formSmallTemplate.event({
-          editionMode: false,
-          defaultValueStart: startDate.format('{HH}:{mm}'),
-          defaultValueEnd: endDate.format('{HH}:{mm}'),
-          defaultValuePlace: '',
-          defaultValueDesc: ''
-        });
-        title = t("Event creation");
-      } else {
-        type = 'alarm';
-        timezoneData = [];
-        for (_i = 0, _len = timezones.length; _i < _len; _i++) {
-          timezone = timezones[_i];
-          timezoneData.push({
-            value: timezone,
-            text: timezone
-          });
-        }
-        formTemplate = formSmallTemplate.alarm({
-          editionMode: false,
-          timezones: timezoneData,
-          defaultTimezone: 'Use specific timezone',
-          defaultValue: ''
-        });
-        title = t("Alarm creation");
-      }
+      type = 'event';
+      formTemplate = formSmallTemplate.event({
+        editionMode: false,
+        defaultValueStart: '',
+        defaultValueEnd: '',
+        defaultValuePlace: '',
+        defaultValueDesc: ''
+      });
+      title = t("Event creation");
       this.popover[type].createNew({
         field: $(target),
         date: startDate,
@@ -3136,19 +3117,19 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i>');
-  var __val__ = t('List')
+  buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-th-list icon-white"></i><span> ');
+  var __val__ = t('Alarms')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#calendar" class="active btn"><i class="icon-calendar icon-white"></i>');
+  buf.push('</span></a><a href="#calendar" class="active btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
   var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></li></ul><div id="alarms" class="well"></div></div>');
+  buf.push('</span></a></li></ul><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

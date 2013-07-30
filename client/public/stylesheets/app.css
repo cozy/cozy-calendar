@@ -8268,11 +8268,11 @@ input[type="time"] {
 #action {
   width: 110px;
 }
+h2 {
+  font-family: styled;
+}
 #alarm-list {
   margin-top: 20px;
-}
-#alarm-list h2 {
-  font-family: styled;
 }
 .icon-th:before,
 .icon-th-list:before,
@@ -8469,6 +8469,13 @@ button.ui-button[data-state="selected"] {
   max-width: none;
   width: 400px;
 }
+.popover #input-start,
+.popover #input-end {
+  min-width: 163px;
+}
+.popover #input-place {
+  min-width: 120px;
+}
 .popover .popover-title button {
   margin-top: -4px;
 }
@@ -8567,6 +8574,7 @@ thead,
 thead > tr.fc-first,
 .fc-day-header,
 .fc-widget-header {
+  font-family: main;
   background: #34a6bb;
   -webkit-border-radius: 0;
   border-radius: 0;
