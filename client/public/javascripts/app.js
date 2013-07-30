@@ -3268,19 +3268,19 @@ window.require.register("views/templates/listview", function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="active btn"><i class="icon-th-list icon-white"></i>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="active btn"><i class="icon-th-list icon-white"></i><span> ');
   var __val__ = t('List')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i>');
+  buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
   var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('</span></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
   }
   return buf.join("");
   };

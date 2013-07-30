@@ -261,6 +261,10 @@ input[type="time"]
             display: none
 
 @media(max-width: 700px)
+    button.add-alarm
+        float: left
+        margin-top: 10px
+
     #alarms
         .fc-day-header
             color: transparent
@@ -270,7 +274,15 @@ input[type="time"]
         .fc-day-header::first-letter
             color: white
 
-@media (max-width: 400px)
-    #alarms
-        width 100%
+        h2
+            font-size: 22px
+
+
+@media(max-width: 600px)
+    #menu
+        span
+            display: none
+
+        #import-menu-button
+            display: none
 

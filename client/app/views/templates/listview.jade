@@ -3,16 +3,20 @@
         li
             a.active.btn(href="#list")
                 i.icon-th-list.icon-white
-                = t('List')
+                span 
+                    = t('List')
             a.btn(href="#calendar")
                 i.icon-calendar.icon-white
-                = t('Calendar')
+                span
+                    = t('Calendar')
             a.btn(href="export/calendar.ics", target="_blank")
                 i.icon-share.icon-white
-                = t('Export')
-            a.btn(href="#import")
+                span
+                    = t('Export')
+            a#import-menu-button.btn(href="#import")
                 i.icon-circle-arrow-up.icon-white
-                = t('Import')
+                span
+                    = t('Import')
     .addform
         #add-alarm.container
 

@@ -8337,6 +8337,10 @@ input[type="time"] {
   }
 }
 @media (max-width: 700px) {
+  button.add-alarm {
+    float: left;
+    margin-top: 10px;
+  }
   #alarms .fc-day-header {
     color: transparent;
     text-align: center;
@@ -8345,10 +8349,16 @@ input[type="time"] {
   #alarms .fc-day-header::first-letter {
     color: #fff;
   }
+  #alarms h2 {
+    font-size: 22px;
+  }
 }
-@media (max-width: 400px) {
-  #alarms {
-    width: 100%;
+@media (max-width: 600px) {
+  #menu span {
+    display: none;
+  }
+  #menu #import-menu-button {
+    display: none;
   }
 }
 @font-face {
