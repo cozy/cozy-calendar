@@ -1072,8 +1072,8 @@ window.require.register("router", function(exports, require, module) {
 
     Router.prototype.calendar = function() {
       this.displayView(CalendarView, app.alarms, app.events);
-      this.handleFetch(this.mainView.model['alarm'], "alarms");
-      return this.handleFetch(this.mainView.model['event'], "events");
+      this.handleFetch(this.mainView.model.alarm, "alarms");
+      return this.handleFetch(this.mainView.model.event, "events");
     };
 
     Router.prototype.alarmsList = function() {
@@ -1122,6 +1122,206 @@ window.require.register("router", function(exports, require, module) {
     return Router;
 
   })(Backbone.Router);
+  
+});
+window.require.register("views/alarm_form_view", function(exports, require, module) {
+  var AlarmFormView, View, timezones, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('../lib/view');
+
+  timezones = require('helpers/timezone').timezones;
+
+  module.exports = AlarmFormView = (function(_super) {
+    __extends(AlarmFormView, _super);
+
+    function AlarmFormView() {
+      this.onSubmit = __bind(this.onSubmit, this);
+      _ref = AlarmFormView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    AlarmFormView.prototype.el = '#add-alarm';
+
+    AlarmFormView.prototype.template = function() {
+      return require('./templates/alarm_form');
+    };
+
+    AlarmFormView.prototype.events = {
+      'focus #input-desc': 'onFocus',
+      'blur #input-desc': 'onBlur',
+      'keyup #input-desc': 'onKeyUp',
+      'click .add-alarm': 'onSubmit'
+    };
+
+    AlarmFormView.prototype.initialize = function() {
+      var timezone, timezoneData, _i, _len;
+      this.actions = {
+        'DISPLAY': 'Display',
+        'EMAIL': 'Email'
+      };
+      this.data = null;
+      this.editionMode = false;
+      timezoneData = [];
+      for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+        timezone = timezones[_i];
+        timezoneData.push({
+          value: timezone
+        });
+      }
+      return this.timezones = timezoneData;
+    };
+
+    AlarmFormView.prototype.render = function() {
+      var content, todayDate;
+      todayDate = Date.create('now');
+      content = AlarmFormView.__super__.render.call(this, {
+        actions: this.actions,
+        defaultAction: this.getDefaultAction('DISPLAY'),
+        defaultTimezone: "timezone",
+        timezones: this.timezones,
+        defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
+        defaultTime: todayDate.format('{HH}:{mm}')
+      });
+      return this.$el.append(content);
+    };
+
+    AlarmFormView.prototype.afterRender = function() {
+      var datePicker;
+      this.descriptionField = this.$('#input-desc');
+      this.actionField = this.$('#action');
+      this.dateField = this.$('#input-date');
+      this.timeField = this.$('#input-time');
+      this.timezoneField = this.$('#input-timezone');
+      this.addAlarmButton = this.$('button.add-alarm');
+      this.disableSubmitButton();
+      this.validationMapper = {
+        action: {
+          field: this.actionField,
+          placement: 'left'
+        },
+        description: {
+          field: this.descriptionField,
+          placement: 'top'
+        },
+        triggdate: {
+          field: this.$('#date-control'),
+          placement: 'bottom'
+        }
+      };
+      datePicker = this.dateField.datepicker({
+        weekStart: 1,
+        format: 'dd/mm/yyyy'
+      });
+      datePicker.on('changeDate', function() {
+        return $(this).datepicker('hide');
+      });
+      this.timeField.timepicker({
+        minuteStep: 1,
+        showMeridian: false
+      });
+      return this.descriptionField.focus();
+    };
+
+    AlarmFormView.prototype.getDefaultAction = function(defaultAction) {
+      var action, actionsAlreadySelected, selectedOptions;
+      if (typeof defaultDefaultAction === "undefined" || defaultDefaultAction === null) {
+        defaultAction = 'DISPLAY';
+      }
+      selectedOptions = this.$('#action').filter(':selected');
+      actionsAlreadySelected = [];
+      selectedOptions.each(function(index, item) {
+        var itemValue;
+        itemValue = $(item).val();
+        if (actionsAlreadySelected.indexOf(itemValue) === -1) {
+          return actionsAlreadySelected.push(itemValue);
+        }
+      });
+      for (action in this.actions) {
+        if (actionsAlreadySelected.indexOf(action) === -1) {
+          return action;
+        }
+      }
+      return defaultAction;
+    };
+
+    AlarmFormView.prototype.onKeyUp = function(event) {
+      if (this.descriptionField.val() === '') {
+        return this.disableSubmitButton();
+      } else if (event.keyCode === 13 || event.which === 13) {
+        return this.onSubmit();
+      } else {
+        return this.enableSubmitButton();
+      }
+    };
+
+    AlarmFormView.prototype.enableSubmitButton = function() {
+      return this.addAlarmButton.removeClass('disabled');
+    };
+
+    AlarmFormView.prototype.disableSubmitButton = function() {
+      return this.addAlarmButton.addClass('disabled');
+    };
+
+    AlarmFormView.prototype.loadAlarmData = function(alarm) {
+      this.resetForm();
+      this.descriptionField.val(alarm.get('description'));
+      this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
+      this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
+      this.timezoneField.val(alarm.get('timezone'));
+      this.data = alarm;
+      this.editionMode = true;
+      this.addAlarmButton.html('Edit the alarm');
+      return this.enableSubmitButton();
+    };
+
+    AlarmFormView.prototype.resetForm = function() {
+      var todayDate;
+      this.data = null;
+      this.editionMode = false;
+      this.addAlarmButton.html('add the alarm');
+      this.disableSubmitButton();
+      this.descriptionField.val('');
+      todayDate = new Date.create('now');
+      this.dateField.val(todayDate.format('{dd}/{MM}/{yyyy}'));
+      this.timeField.val(todayDate.format('{HH}:{mm}'));
+      return this.resetErrors();
+    };
+
+    AlarmFormView.prototype.displayErrors = function(validationErrors) {
+      var _this = this;
+      return validationErrors.forEach(function(err) {
+        var data;
+        data = _this.validationMapper[err.field];
+        return data.field.tooltip({
+          title: err.value,
+          placement: data.placement,
+          container: _this.$el,
+          trigger: 'manual'
+        }).tooltip('show');
+      });
+    };
+
+    AlarmFormView.prototype.resetErrors = function() {
+      var index, mappedElement, _ref1, _results;
+      _ref1 = this.validationMapper;
+      _results = [];
+      for (index in _ref1) {
+        mappedElement = _ref1[index];
+        _results.push(mappedElement.field.tooltip('destroy'));
+      }
+      return _results;
+    };
+
+    AlarmFormView.prototype.onSubmit = function() {
+      return this.resetErrors();
+    };
+
+    return AlarmFormView;
+
+  })(View);
   
 });
 window.require.register("views/alarm_popover", function(exports, require, module) {
@@ -1327,213 +1527,6 @@ window.require.register("views/alarm_view", function(exports, require, module) {
   })(ScheduleElement);
   
 });
-window.require.register("views/alarmform_view", function(exports, require, module) {
-  var AlarmFormView, View, timezones, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('../lib/view');
-
-  timezones = require('helpers/timezone').timezones;
-
-  module.exports = AlarmFormView = (function(_super) {
-    __extends(AlarmFormView, _super);
-
-    function AlarmFormView() {
-      this.onSubmit = __bind(this.onSubmit, this);
-      _ref = AlarmFormView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    AlarmFormView.prototype.el = '#add-alarm';
-
-    AlarmFormView.prototype.events = {
-      'focus #inputDesc': 'onFocus',
-      'blur #inputDesc': 'onBlur',
-      'keyup #inputDesc': 'onKeydown',
-      'click .add-alarm': 'onSubmit'
-    };
-
-    AlarmFormView.prototype.initialize = function() {
-      var timezone, timezoneData, _i, _len;
-      this.actions = {
-        'DISPLAY': 'Popup',
-        'EMAIL': 'Email'
-      };
-      this.data = null;
-      this.editionMode = false;
-      timezoneData = [];
-      for (_i = 0, _len = timezones.length; _i < _len; _i++) {
-        timezone = timezones[_i];
-        timezoneData.push({
-          value: timezone
-        });
-      }
-      return this.timezones = timezoneData;
-    };
-
-    AlarmFormView.prototype.render = function() {
-      var content, todayDate;
-      todayDate = Date.create('now');
-      content = AlarmFormView.__super__.render.call(this, {
-        actions: this.actions,
-        defaultAction: this.getDefaultAction('DISPLAY'),
-        defaultTimezone: "Use specific timezone",
-        timezones: this.timezones,
-        defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
-        defaultTime: todayDate.format('{HH}:{mm}')
-      });
-      this.$el.append(content);
-      this.$el.parent().css('min-height', this.$el.height() + 40);
-      return this.$el.affix({
-        offset: {
-          top: this.$el.offset().top - 10
-        }
-      });
-    };
-
-    AlarmFormView.prototype.afterRender = function() {
-      var datePicker;
-      this.descriptionField = this.$('#inputDesc');
-      this.actionField = this.$('#action');
-      this.dateField = this.$('#inputDate input');
-      this.timeField = this.$('#inputTime');
-      this.timezoneField = this.$('#inputTimezone');
-      this.addAlarmButton = this.$('button.add-alarm');
-      this.disableSubmitButton();
-      this.validationMapper = {
-        action: {
-          field: this.actionField,
-          placement: 'left'
-        },
-        description: {
-          field: this.descriptionField,
-          placement: 'top'
-        },
-        triggdate: {
-          field: this.$('#date-control'),
-          placement: 'bottom'
-        }
-      };
-      datePicker = this.dateField.datepicker({
-        weekStart: 1,
-        format: 'dd/mm/yyyy'
-      });
-      datePicker.on('changeDate', function() {
-        return $(this).datepicker('hide');
-      });
-      this.timeField.timepicker({
-        minuteStep: 1,
-        showMeridian: false
-      });
-      return this.descriptionField.focus();
-    };
-
-    AlarmFormView.prototype.template = function() {
-      return require('./templates/alarm_form');
-    };
-
-    AlarmFormView.prototype.getDefaultAction = function(defaultAction) {
-      var action, actionsAlreadySelected, selectedOptions;
-      if (typeof defaultDefaultAction === "undefined" || defaultDefaultAction === null) {
-        defaultAction = 'DISPLAY';
-      }
-      selectedOptions = this.$('.controls.form-inline option').filter(':selected');
-      actionsAlreadySelected = [];
-      selectedOptions.each(function(index, item) {
-        var itemValue;
-        itemValue = $(item).val();
-        if (actionsAlreadySelected.indexOf(itemValue) === -1) {
-          return actionsAlreadySelected.push(itemValue);
-        }
-      });
-      for (action in this.actions) {
-        if (actionsAlreadySelected.indexOf(action) === -1) {
-          return action;
-        }
-      }
-      return defaultAction;
-    };
-
-    AlarmFormView.prototype.onKeydown = function(event) {
-      console.log(event.keyCode);
-      if (this.descriptionField.val() === '') {
-        return this.disableSubmitButton();
-      } else if (event.keyCode === 13 || event.which === 13) {
-        return this.onSubmit();
-      } else {
-        return this.enableSubmitButton();
-      }
-    };
-
-    AlarmFormView.prototype.enableSubmitButton = function() {
-      return this.addAlarmButton.removeClass('disabled');
-    };
-
-    AlarmFormView.prototype.disableSubmitButton = function() {
-      return this.addAlarmButton.addClass('disabled');
-    };
-
-    AlarmFormView.prototype.loadAlarmData = function(alarm) {
-      this.resetForm();
-      this.descriptionField.val(alarm.get('description'));
-      this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
-      this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
-      this.timezoneField.val(alarm.get('timezone'));
-      this.data = alarm;
-      this.editionMode = true;
-      this.addAlarmButton.html('Edit the alarm');
-      return this.enableSubmitButton();
-    };
-
-    AlarmFormView.prototype.resetForm = function() {
-      var todayDate;
-      this.data = null;
-      this.editionMode = false;
-      this.addAlarmButton.html('add the alarm');
-      this.disableSubmitButton();
-      this.descriptionField.val('');
-      todayDate = new Date.create('now');
-      this.dateField.val(todayDate.format('{dd}/{MM}/{yyyy}'));
-      this.timeField.val(todayDate.format('{HH}:{mm}'));
-      return this.resetErrors();
-    };
-
-    AlarmFormView.prototype.displayErrors = function(validationErrors) {
-      var _this = this;
-      return validationErrors.forEach(function(err) {
-        var data;
-        data = _this.validationMapper[err.field];
-        return data.field.tooltip({
-          title: err.value,
-          placement: data.placement,
-          container: _this.$el,
-          trigger: 'manual'
-        }).tooltip('show');
-      });
-    };
-
-    AlarmFormView.prototype.resetErrors = function() {
-      var index, mappedElement, _ref1, _results;
-      _ref1 = this.validationMapper;
-      _results = [];
-      for (index in _ref1) {
-        mappedElement = _ref1[index];
-        _results.push(mappedElement.field.tooltip('destroy'));
-      }
-      return _results;
-    };
-
-    AlarmFormView.prototype.onSubmit = function() {
-      return this.resetErrors();
-    };
-
-    return AlarmFormView;
-
-  })(View);
-  
-});
 window.require.register("views/alarms_list_view", function(exports, require, module) {
   var Alarm, AlarmCollection, AlarmsListView, DayProgramView, View, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -1555,7 +1548,7 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
       return _ref;
     }
 
-    AlarmsListView.prototype.el = '#alarms';
+    AlarmsListView.prototype.el = '#alarm-list';
 
     AlarmsListView.prototype.initialize = function() {
       this.listenTo(this.model, "add", this.onAdd);
@@ -1621,7 +1614,6 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
     AlarmsListView.prototype.onRemove = function(alarm) {
       var dateHash, view,
         _this = this;
-      console.log('remove alarm now');
       dateHash = alarm.getDateHash();
       view = this.getSubView(dateHash, function() {
         return null;
@@ -1653,17 +1645,19 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
     };
 
     AlarmsListView.prototype._buildSubView = function(dateHash, date) {
-      var model;
+      var dayProgram, model;
       model = new Backbone.Model({
         date: date,
         dateHash: dateHash,
         alarms: new AlarmCollection()
       });
       this.dayPrograms.add(model);
-      return this.views[dateHash] = new DayProgramView({
+      dayProgram = new DayProgramView({
         id: dateHash,
         model: model
       });
+      this.views[dateHash] = dayProgram;
+      return dayProgram;
     };
 
     AlarmsListView.prototype._renderSubView = function(dateHash) {
@@ -1695,7 +1689,7 @@ window.require.register("views/calendar_view", function(exports, require, module
 
   View = require('../lib/view');
 
-  AlarmFormView = require('./alarmform_view');
+  AlarmFormView = require('./alarm_form_view');
 
   AlarmPopOver = require('./alarm_popover');
 
@@ -2563,7 +2557,7 @@ window.require.register("views/list_view", function(exports, require, module) {
 
   View = require('../lib/view');
 
-  AlarmFormView = require('./alarmform_view');
+  AlarmFormView = require('./alarm_form_view');
 
   AlarmsListView = require('../views/alarms_list_view');
 
@@ -2924,7 +2918,7 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   with (locals || {}) {
   var interp;
   buf.push('<div class="form-horizontal well"><div class="control-group"><input');
-  buf.push(attrs({ 'id':('inputDesc'), 'type':("text"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"placeholder":true}));
+  buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"placeholder":true}));
   buf.push('/></div><div class="form-inline"><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
@@ -2981,11 +2975,11 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select><div id="date-control"><label>' + escape((interp = t('date')) == null ? '' : interp) + '</label><div id="inputDate" class="input-append date"><input');
-  buf.push(attrs({ 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-th"></i></span></div><label>' + escape((interp = t('time')) == null ? '' : interp) + '</label><div id="inputTime" class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon-time"></i></span></div></div><select id="inputTimezone" class="input"><option');
+  buf.push('</select><div id="date-control"><div class="input-append date"><input');
+  buf.push(attrs({ 'id':('input-date'), 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
+  buf.push('/></div><div class="input-append bootstrap-timepicker"><input');
+  buf.push(attrs({ 'id':('input-time'), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"type":true,"value":true}));
+  buf.push('/></div></div><select id="input-timezone" class="input"><option');
   buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
   buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
   // iterate timezones
@@ -3245,7 +3239,7 @@ window.require.register("views/templates/listview", function(exports, require, m
   buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarms" class="well"></div></div>');
+  buf.push('</span></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarm-list" class="well"></div></div>');
   }
   return buf.join("");
   };

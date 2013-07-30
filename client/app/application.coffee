@@ -5,6 +5,7 @@ module.exports =
         @locale = window.locale
         delete window.locale
 
+
         @polyglot = new Polyglot()
         try
             locales = require 'locales/'+ @locale
@@ -20,7 +21,6 @@ module.exports =
         EventCollection = require 'collections/events'
 
         @router = new Router()
-
         @alarms = new AlarmCollection()
         @events = new EventCollection()
 

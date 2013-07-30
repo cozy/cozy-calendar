@@ -1,5 +1,5 @@
 View = require '../lib/view'
-AlarmFormView = require './alarmform_view'
+AlarmFormView = require './alarm_form_view'
 AlarmPopOver = require './alarm_popover'
 AlarmsListView = require '../views/alarms_list_view'
 EventPopOver = require './event_popover'

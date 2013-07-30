@@ -1,30 +1,28 @@
 .form-horizontal.well
-  .control-group
-      input#inputDesc.input-block-level(
-          type="text", placeholder=t("What should I remind you ?"))
-  .form-inline
-      select#action.input-small
-        each displayAction, action in actions
-            if action == defaultAction
-              option(value="#{action}", selected)= t(displayAction)
-            else
-              option(value="#{action}")= t(displayAction)
-      #date-control
-        label #{t('date')}
-        .input-append.date#inputDate
-          input.span2(type="text", value=defaultDate)
-          span.add-on
-            i.icon-th
-        label #{t('time')}
-        .input-append.bootstrap-timepicker#inputTime
-          input.input-small(type="text", value=defaultTime)
-          span.add-on
-            i.icon-time
 
-      select(id="inputTimezone").input
-        option(value="#{defaultTimezone}", selected) #{defaultTimezone}
-        each timezone in timezones
-          option(value="#{timezone.value}") #{timezone.value}
+    .control-group
+        input#input-desc.input-block-level(
+            type="text", placeholder=t("What should I remind you ?"))
 
-  button.btn.pull-right.add-alarm= t('add the alarm')
-  .clearfix
+    .form-inline
+        select#action.input-small
+            each displayAction, action in actions
+                if action == defaultAction
+                    option(
+                        value="#{action}", selected)= t(displayAction)
+                else
+                    option(value="#{action}")= t(displayAction)
+
+        #date-control
+            .input-append.date
+                input#input-date.span2(type="text", value=defaultDate)
+            .input-append.bootstrap-timepicker
+                input#input-time.input-small(type="text", value=defaultTime)
+
+        select#input-timezone.input
+            option(value="#{defaultTimezone}", selected) #{defaultTimezone}
+            each timezone in timezones
+                option(value="#{timezone.value}") #{timezone.value}
+
+    button.btn.pull-right.add-alarm= t('add the alarm')
+    .clearfix

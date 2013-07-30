@@ -1,5 +1,5 @@
 View      = require '../lib/view'
-AlarmFormView = require './alarmform_view'
+AlarmFormView = require './alarm_form_view'
 AlarmsListView = require '../views/alarms_list_view'
 
 AlarmCollection = require '../collections/alarms'
@@ -20,9 +20,7 @@ module.exports = class ListView extends View
         require('./templates/listview')
 
     afterRender: ->
-
         (@alarmFormView = new AlarmFormView()).render()
-
         @alarmsListView = new AlarmsListView
            model: @model
 

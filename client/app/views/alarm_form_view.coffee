@@ -5,48 +5,43 @@ module.exports = class AlarmFormView extends View
 
     el: '#add-alarm'
 
+    template: ->
+        require './templates/alarm_form'
+
     events:
-        'focus #inputDesc': 'onFocus'
-        'blur #inputDesc': 'onBlur'
-        'keyup #inputDesc': 'onKeydown'
+        'focus #input-desc': 'onFocus'
+        'blur #input-desc': 'onBlur'
+        'keyup #input-desc': 'onKeyUp'
         'click .add-alarm': 'onSubmit'
 
     initialize: ->
         @actions =
-            'DISPLAY': 'Popup'
+            'DISPLAY': 'Display'
             'EMAIL': 'Email'
 
         @data = null
-        @editionMode = false 
+        @editionMode = false
         timezoneData = []
-        for timezone in timezones
-            timezoneData.push value: timezone
+        timezoneData.push value: timezone for timezone in timezones
         @timezones = timezoneData
 
     render: ->
-
         todayDate = Date.create('now')
         content = super
             actions: @actions
             defaultAction: @getDefaultAction('DISPLAY')
-            defaultTimezone:"Use specific timezone"
+            defaultTimezone:"timezone"
             timezones: @timezones
             defaultDate: todayDate.format '{dd}/{MM}/{yyyy}'
             defaultTime: todayDate.format '{HH}:{mm}'
         @$el.append content
 
-        # prevent the affix from bugging
-        @$el.parent().css 'min-height', @$el.height() + 40
-
-        @$el.affix({offset: { top: @$el.offset().top - 10}})
-
     afterRender: ->
-        @descriptionField = @$('#inputDesc')
+        @descriptionField = @$('#input-desc')
         @actionField = @$('#action')
-        @dateField = @$('#inputDate input')
-        @timeField = @$('#inputTime')
-        @timezoneField = @$('#inputTimezone')
-
+        @dateField = @$('#input-date')
+        @timeField = @$('#input-time')
+        @timezoneField = @$('#input-timezone')
         @addAlarmButton = @$('button.add-alarm')
         @disableSubmitButton()
 
@@ -62,8 +57,9 @@ module.exports = class AlarmFormView extends View
                 placement: 'bottom'
 
         datePicker = @dateField.datepicker
-                            weekStart: 1
-                            format: 'dd/mm/yyyy'
+            weekStart: 1
+            format: 'dd/mm/yyyy'
+
         datePicker.on 'changeDate', ->
             $(@).datepicker 'hide'
 
@@ -73,15 +69,10 @@ module.exports = class AlarmFormView extends View
 
         @descriptionField.focus()
 
-    template: ->
-        require './templates/alarm_form'
-
-    # defaultAction is an optional parameter
     getDefaultAction: (defaultAction) ->
-
         defaultAction = 'DISPLAY' unless defaultDefaultAction?
 
-        selectedOptions = @$('.controls.form-inline option').filter(':selected')
+        selectedOptions = @$('#action').filter(':selected')
         actionsAlreadySelected = []
 
         selectedOptions.each (index, item) ->
@@ -94,10 +85,8 @@ module.exports = class AlarmFormView extends View
                 return action
 
         return defaultAction
-        
-    onKeydown: (event) ->
-        console.log event.keyCode
 
+    onKeyUp: (event) ->
         if @descriptionField.val() is ''
             @disableSubmitButton()
         else if event.keyCode is 13 or event.which is 13

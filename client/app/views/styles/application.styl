@@ -41,16 +41,19 @@ ul#menu
     margin-bottom: 0
 
 .form-horizontal
-  margin-bottom: 0 !important
+    .control-group
+        margin-bottom: 10px
 
-  .control-label
-    font-size: 13px
-    width: 100px
-  .controls
-    margin-left: 120px
+    margin-bottom: 0 !important
 
-    .add-on i
-        margin-top: 2px !important
+    .control-label
+        font-size: 13px
+        width: 100px
+    .controls
+        margin-left: 120px
+
+        .add-on i
+            margin-top: 2px !important
 
 
 input[type="date"]
@@ -176,12 +179,15 @@ input[type="time"]
     button.add-alarm.disabled
       border: 1px solid grey
 
-#alarms
+    button.add-alarm
+        float: left
+        margin-top: 10px
+
+#alarm-list
+    margin-top: 20px
+
     h2
         font-family: styled
-
-.affix div.form-horizontal
-    border: 1px solid #DDD
 
 
 .icon-th:before
@@ -191,6 +197,7 @@ input[type="time"]
 .icon-upload:before
 .icon-arrow-down:before
 .icon-arrow-up:before
+.icon-circle-arrow-down:before
 .icon-circle-arrow-up:before
     content: ""
 
@@ -244,27 +251,18 @@ input[type="time"]
                 font-size: 16px
         
 
-    #inputDate
-    #inputTime
-    #inputTimezone
+    #input-date
+    #input-time
+    #input-timezone
     #action
     #date-control
         display: block
         margin-bottom: 10px
 
-    #inputDate
-        span
-            display: none
-
-    #inputTime
-        span
-            display: none
+    #input-timezone
+        display: none
 
 @media(max-width: 700px)
-    button.add-alarm
-        float: left
-        margin-top: 10px
-
     #alarms
         .fc-day-header
             color: transparent
@@ -274,6 +272,7 @@ input[type="time"]
         .fc-day-header::first-letter
             color: white
 
+    #alarm-list
         h2
             font-size: 22px
 

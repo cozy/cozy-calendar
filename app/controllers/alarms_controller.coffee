@@ -19,9 +19,9 @@ before ->
         return alarm
 
     # Recover alarm timezone if it exists
-    if req.body? and req.body.timezone?
+    if req.body? and req.body.timezone? req.body.timezone isnt 'timezone'
         @alarmTimezone = req.body.timezone
-    else if @alarm? 
+    else if @alarm?
         @alarmTimezone = @alarm.timezone
 
     # Recover user timezone

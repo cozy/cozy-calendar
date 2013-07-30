@@ -8097,6 +8097,9 @@ ul#menu li a {
 .form-horizontal {
   margin-bottom: 0 !important;
 }
+.form-horizontal .control-group {
+  margin-bottom: 10px;
+}
 .form-horizontal .control-label {
   font-size: 13px;
   width: 100px;
@@ -8257,11 +8260,16 @@ input[type="time"] {
 #add-alarm button.add-alarm.disabled {
   border: 1px solid #aaa;
 }
-#alarms h2 {
-  font-family: styled;
+.popover-content button.add-alarm,
+#add-alarm button.add-alarm {
+  float: left;
+  margin-top: 10px;
 }
-.affix div.form-horizontal {
-  border: 1px solid #ddd;
+#alarm-list {
+  margin-top: 20px;
+}
+#alarm-list h2 {
+  font-family: styled;
 }
 .icon-th:before,
 .icon-th-list:before,
@@ -8270,6 +8278,7 @@ input[type="time"] {
 .icon-upload:before,
 .icon-arrow-down:before,
 .icon-arrow-up:before,
+.icon-circle-arrow-down:before,
 .icon-circle-arrow-up:before {
   content: "";
 }
@@ -8321,26 +8330,19 @@ input[type="time"] {
   #alarms .fc-header-title h2 {
     font-size: 16px;
   }
-  #inputDate,
-  #inputTime,
-  #inputTimezone,
+  #input-date,
+  #input-time,
+  #input-timezone,
   #action,
   #date-control {
     display: block;
     margin-bottom: 10px;
   }
-  #inputDate span {
-    display: none;
-  }
-  #inputTime span {
+  #input-timezone {
     display: none;
   }
 }
 @media (max-width: 700px) {
-  button.add-alarm {
-    float: left;
-    margin-top: 10px;
-  }
   #alarms .fc-day-header {
     color: transparent;
     text-align: center;
@@ -8349,7 +8351,7 @@ input[type="time"] {
   #alarms .fc-day-header::first-letter {
     color: #fff;
   }
-  #alarms h2 {
+  #alarm-list h2 {
     font-size: 22px;
   }
 }

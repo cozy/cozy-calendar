@@ -36,7 +36,7 @@ module.exports = class AlarmPopOver extends PopOver
         else
             $('.remove').show()
 
-    bindEvents: ->        
+    bindEvents: ->
         super()
         @addEventButton = @popoverWidget.find 'button.add-event'
         @addEventButton.click => @onEventButtonClicked()
@@ -56,10 +56,10 @@ module.exports = class AlarmPopOver extends PopOver
     bindEditEvents: =>
         super()
         @alarmDescription = @popoverWidget.find 'input'
-        @alarmTimezone = @popoverWidget.find 'input-timezone'        
+        @alarmTimezone = @popoverWidget.find 'input-timezone'
         $('.popover #input-timezone').change () =>
             @addButton.removeClass 'disabled'
-        
+
         @alarmDescription.keyup (event) =>
             if @alarmDescription.val() is ''
                 @addButton.addClass 'disabled'
@@ -98,7 +98,7 @@ module.exports = class AlarmPopOver extends PopOver
                 @event.title = data.description
                 @event.timezone = data.timezone
                 @cal.fullCalendar 'renderEvent', @event
-                
+
     onEventButtonClicked: () =>
         @field.popover('destroy').popover()
         @pop = new EventPopOver @cal

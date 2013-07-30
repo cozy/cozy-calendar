@@ -14,12 +14,12 @@ module.exports = class Router extends Backbone.Router
 
     calendar: ->
         @displayView CalendarView, app.alarms, app.events
-        @handleFetch(@mainView.model['alarm'], "alarms")
-        @handleFetch(@mainView.model['event'], "events")
+        @handleFetch @mainView.model.alarm, "alarms"
+        @handleFetch @mainView.model.event, "events"
 
     alarmsList: ->
         @displayView ListView, app.alarms, null
-        @handleFetch(@mainView.model, "alarms")
+        @handleFetch @mainView.model, "alarms"
 
     import: ->
         @displayView ImportView, app.alarms

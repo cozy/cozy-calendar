@@ -4,9 +4,10 @@ DayProgramView = require './dayprogram_view'
 AlarmCollection = require '../collections/alarms'
 Alarm = require '../models/alarm'
 
+# Display the list of alarms in the list view
 module.exports = class AlarmsListView extends View
 
-    el: '#alarms'
+    el: '#alarm-list'
 
     initialize: ->
         @listenTo @model, "add", @onAdd
@@ -43,7 +44,6 @@ module.exports = class AlarmsListView extends View
         view.model.get('alarms').add alarm
 
     onChange: (alarm) ->
-
         dateHash = alarm.getDateHash()
 
         view = @getSubView dateHash, () =>
@@ -61,14 +61,12 @@ module.exports = class AlarmsListView extends View
         delete @views[dateHash]
 
     onRemove: (alarm) ->
-        console.log 'remove alarm now'
         dateHash = alarm.getDateHash()
         view = @getSubView dateHash, () => return null
 
         view.model.get('alarms').remove alarm if view?
 
     getSubView: (dateHash, callbackIfNotExist) ->
-
         if @views[dateHash]?
             return @views[dateHash]
         else
@@ -84,19 +82,19 @@ module.exports = class AlarmsListView extends View
         return @_renderSubView(dateHash)
 
     _buildSubView: (dateHash, date) ->
-
         model = new Backbone.Model
                         date: date
                         dateHash: dateHash
                         alarms: new AlarmCollection()
         @dayPrograms.add model
 
-        return @views[dateHash] = new DayProgramView
-                                        id: dateHash
-                                        model: model
+        dayProgram = new DayProgramView
+            id: dateHash
+            model: model
+        @views[dateHash] = dayProgram
+        dayProgram
 
     _renderSubView: (dateHash) ->
-
         view = @views[dateHash]
         index = index = @dayPrograms.indexOf view.model
         render = view.render().$el
