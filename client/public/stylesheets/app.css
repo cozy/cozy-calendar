@@ -8285,6 +8285,9 @@ input[type="time"] {
 .active.btn {
   background: #008af6;
 }
+#import-form {
+  margin-top: 20px;
+}
 #import-form h1,
 #import-form h3 {
   font-weight: normal;
@@ -8299,6 +8302,9 @@ input[type="time"] {
 #import-form .event p {
   margin: 0;
   sharefont-weight: 10px;
+}
+#input-timezone {
+  display: none;
 }
 @media (max-width: 800px) {
   body {

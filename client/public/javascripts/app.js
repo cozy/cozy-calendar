@@ -2919,7 +2919,39 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   var interp;
   buf.push('<div class="form-horizontal well"><div class="control-group"><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'placeholder':(t("What should I remind you ?")), "class": ('input-block-level') }, {"type":true,"placeholder":true}));
-  buf.push('/></div><div class="form-inline"><select id="action" class="input-small">');
+  buf.push('/></div><div class="form-inline"><div id="date-control"><div class="input-append date"><input');
+  buf.push(attrs({ 'id':('input-date'), 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
+  buf.push('/></div><div class="input-append bootstrap-timepicker"><input');
+  buf.push(attrs({ 'id':('input-time'), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"type":true,"value":true}));
+  buf.push('/></div></div><select id="input-timezone" class="input"><option');
+  buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
+  buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
+  // iterate timezones
+  ;(function(){
+    if ('number' == typeof timezones.length) {
+
+      for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
+        var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    } else {
+      var $$l = 0;
+      for (var $index in timezones) {
+        $$l++;      var timezone = timezones[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
+  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
+      }
+
+    }
+  }).call(this);
+
+  buf.push('</select><select id="action" class="input-small">');
   // iterate actions
   ;(function(){
     if ('number' == typeof actions.length) {
@@ -2970,38 +3002,6 @@ window.require.register("views/templates/alarm_form", function(exports, require,
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</option>');
   }
-      }
-
-    }
-  }).call(this);
-
-  buf.push('</select><div id="date-control"><div class="input-append date"><input');
-  buf.push(attrs({ 'id':('input-date'), 'type':("text"), 'value':(defaultDate), "class": ('span2') }, {"type":true,"value":true}));
-  buf.push('/></div><div class="input-append bootstrap-timepicker"><input');
-  buf.push(attrs({ 'id':('input-time'), 'type':("text"), 'value':(defaultTime), "class": ('input-small') }, {"type":true,"value":true}));
-  buf.push('/></div></div><select id="input-timezone" class="input"><option');
-  buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
-  buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
-  // iterate timezones
-  ;(function(){
-    if ('number' == typeof timezones.length) {
-
-      for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
-        var timezone = timezones[$index];
-
-  buf.push('<option');
-  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
-      }
-
-    } else {
-      var $$l = 0;
-      for (var $index in timezones) {
-        $$l++;      var timezone = timezones[$index];
-
-  buf.push('<option');
-  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
       }
 
     }
@@ -3186,19 +3186,19 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i>');
+  buf.push('<div class="container"><ul id="menu"><li><a href="#list" class="btn"><i class="icon-th-list icon-white"></i><span> ');
   var __val__ = t('List')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i>');
+  buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i>');
+  buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
   var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><a href="#import" class="active btn"><i class="icon-circle-arrow-up icon-white"></i>');
+  buf.push('</span></a><a id="import-menu-button" href="#import" class="active btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></li></ul><div id="import-form" class="well"><h3>');
+  buf.push('</span></a></li></ul><div id="import-form" class="well"><h3>');
   var __val__ = t('ICalendar importer')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h3><div class="import-form"><button id="import-button" class="btn">');
