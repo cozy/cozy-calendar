@@ -1,22 +1,19 @@
-View = require '../lib/view'
+PopOver = require './popover'
 Event = require '../models/event'
 
-module.exports = class EventPopOver extends View
-
-    constructor: (@cal) ->
+module.exports = class EventPopOver extends PopOver
 
     clean: ->
-        @field?.popover 'destroy'
-        @field = null
-        @date = null
-        if @popoverWidget?
-            @popoverWidget.find('button.close').unbind 'click'
-            @popoverWidget.find('button.add-event').unbind 'click'
-            @popoverWidget.find('#inputStart').unbind 'keyup'
-            @popoverWidget.find('#inputEnd').unbind 'keyup'
-            @popoverWidget.find('#inputPlace').unbind 'keyup'
-            @popoverWidget.find('#inputDesc').unbind 'keyup'
-            @popoverWidget?.hide()
+        super()
+
+    unbindEvents: ->
+        super()
+        @popoverWidget.find('button.close').unbind 'click'
+        @popoverWidget.find('button.add-event').unbind 'click'
+        @popoverWidget.find('#inputStart').unbind 'keyup'
+        @popoverWidget.find('#inputEnd').unbind 'keyup'
+        @popoverWidget.find('#inputPlace').unbind 'keyup'
+        @popoverWidget.find('#inputDesc').unbind 'keyup'
 
     createNew: (data) ->
         @clean()
@@ -28,9 +25,7 @@ module.exports = class EventPopOver extends View
 
     show: (title, direction, content) ->
         @field.data('popover', null).popover(
-            title: '<span>' + title + '&nbsp;<i class="event-remove ' + \
-                'icon-trash" /></span> <button type="button" class="close">' + \
-                '&times;</button>'
+            title: require('./templates/popover_title')().call(null, title: title)
             html: true
             placement: direction
             content: content

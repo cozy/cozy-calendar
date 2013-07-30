@@ -90,7 +90,7 @@ module.exports = class AlarmPopOver extends View
                 @addAlarmButton.removeClass 'disabled'
 
         $('.popover #inputTimezone').change () =>
-            @addAlarmButton.removeClass 'disabled'     
+            @addAlarmButton.removeClass 'disabled'
 
     onRemoveAlarmClicked: =>
         alarm = @model.get @event.id
@@ -168,7 +168,7 @@ module.exports = class AlarmPopOver extends View
 
     onEditAlarmClicked: =>
         alarm = @model.get @event.id
-        data = 
+        data =
             description: @alarmDescription.val()
 
         if $('.popover #inputTimezone').val() isnt "Use specific timezone"
