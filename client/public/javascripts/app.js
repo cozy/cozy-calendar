@@ -988,7 +988,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return Date.create(this.get(this.mainDateField)).format(formatter);
+      return this.getDateObject().format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
