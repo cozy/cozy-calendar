@@ -7,8 +7,8 @@ module.exports = class AlarmFormView extends View
 
     events:
         'focus #inputDesc': 'onFocus'
-        'blur #alarm-description-input': 'onBlur'
-        'keyup #alarm-description-input': 'onKeydown'
+        'blur #inputDesc': 'onBlur'
+        'keyup #inputDesc': 'onKeydown'
         'click .add-alarm': 'onSubmit'
 
     initialize: ->
@@ -41,7 +41,7 @@ module.exports = class AlarmFormView extends View
         @$el.affix({offset: { top: @$el.offset().top - 10}})
 
     afterRender: ->
-        @descriptionField = @$('#alarm-description-input')
+        @descriptionField = @$('#inputDesc')
         @actionField = @$('#action')
         @dateField = @$('#inputDate input')
         @timeField = @$('#inputTime')

@@ -988,7 +988,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return Date.create(this.get(this.mainDateField)).format(formatter);
+      return this.getDateObject().format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
@@ -1125,10 +1125,12 @@ window.require.register("router", function(exports, require, module) {
   
 });
 window.require.register("views/alarm_popover", function(exports, require, module) {
-  var Alarm, AlarmPopOver, EventPopOver, View, eventFormSmallTemplate, timezones,
+  var Alarm, AlarmPopOver, EventPopOver, PopOver, View, eventFormSmallTemplate, timezones,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  PopOver = require('./popover');
 
   View = require('../lib/view');
 
@@ -1145,180 +1147,122 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
     function AlarmPopOver(cal) {
       this.cal = cal;
-      this.onEditAlarmClicked = __bind(this.onEditAlarmClicked, this);
       this.onEventButtonClicked = __bind(this.onEventButtonClicked, this);
-      this.onAlarmButtonClicked = __bind(this.onAlarmButtonClicked, this);
-      this.onRemoveAlarmClicked = __bind(this.onRemoveAlarmClicked, this);
+      this.onEditClicked = __bind(this.onEditClicked, this);
+      this.onButtonClicked = __bind(this.onButtonClicked, this);
+      this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
-      this.bindEvents = __bind(this.bindEvents, this);
+      AlarmPopOver.__super__.constructor.call(this, this.cal);
     }
 
     AlarmPopOver.prototype.clean = function() {
-      var _ref, _ref1;
-      if ((_ref = this.field) != null) {
-        _ref.popover('destroy');
-      }
-      this.field = null;
-      this.date = null;
-      this.action = null;
-      if (this.popoverWidget != null) {
-        this.popoverWidget.find('button.close').unbind('click');
-        this.popoverWidget.find('button.add-alarm').unbind('click');
-        this.popoverWidget.find('button.add-event').unbind('click');
-        this.popoverWidget.find('input').unbind('keyup');
-        return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
-      }
+      AlarmPopOver.__super__.clean.call(this);
+      return this.action = null;
+    };
+
+    AlarmPopOver.prototype.unbindEvents = function() {
+      AlarmPopOver.__super__.unbindEvents.call(this);
+      this.popoverWidget.find('button.add-event').unbind('click');
+      return this.popoverWidget.find('input').unbind('keyup');
     };
 
     AlarmPopOver.prototype.createNew = function(data) {
       this.clean();
-      this.field = data.field;
-      this.date = data.date;
+      AlarmPopOver.__super__.createNew.call(this, data);
       this.action = data.action;
-      this.model = data.model;
-      this.modelEvent = data.modelEvent;
-      return this.event = data.event;
+      return this.modelEvent = data.modelEvent;
     };
 
     AlarmPopOver.prototype.show = function(title, direction, content) {
-      this.field.popover({
-        title: '<span>' + title + '&nbsp;<i class="alarm-remove ' + 'icon-trash" /></span> <button type="button" class="close">' + '&times;</button>',
-        html: true,
-        placement: direction,
-        content: content
-      }).popover('show');
-      this.popoverWidget = $('.container .popover');
+      AlarmPopOver.__super__.show.call(this, title, direction, content);
       this.popoverWidget.find('input').focus();
       this.direction = direction;
       if (this.action === 'create') {
-        return $('.alarm-remove').hide();
+        return $('.remove').hide();
       } else {
-        return $('.alarm-remove').show();
+        return $('.remove').show();
       }
     };
 
     AlarmPopOver.prototype.bindEvents = function() {
       var _this = this;
-      this.popoverWidget = $('.container .popover');
-      this.addAlarmButton = this.popoverWidget.find('button.add-alarm');
-      this.addAlarmButton.html(this.action);
+      AlarmPopOver.__super__.bindEvents.call(this);
       this.addEventButton = this.popoverWidget.find('button.add-event');
-      this.popoverWidget.find('button.close').click(function() {
-        return _this.clean();
-      });
-      this.addAlarmButton.click(function() {
-        return _this.onAlarmButtonClicked();
-      });
       this.addEventButton.click(function() {
         return _this.onEventButtonClicked();
       });
       this.alarmDescription = this.popoverWidget.find('input');
+      this.alarmTimezone = this.popoverWidget.find('input-timezone');
+      $('.popover #input-timezone').change(function() {
+        return _this.addButton.removeClass('disabled');
+      });
       return this.alarmDescription.keyup(function(event) {
         if (_this.alarmDescription.val() === '') {
-          return _this.addAlarmButton.addClass('disabled');
+          return _this.addButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
-          return _this.onAlarmButtonClicked();
+          return _this.onButtonClicked();
         } else {
-          return _this.addAlarmButton.removeClass('disabled');
+          return _this.addButton.removeClass('disabled');
         }
       });
     };
 
     AlarmPopOver.prototype.bindEditEvents = function() {
       var _this = this;
-      this.popoverWidget = $('.container .popover');
-      this.addAlarmButton = this.popoverWidget.find('button.add-alarm');
-      this.closeButton = this.popoverWidget.find('button.close');
-      this.removeButton = this.popoverWidget.find('.alarm-remove');
+      AlarmPopOver.__super__.bindEditEvents.call(this);
       this.alarmDescription = this.popoverWidget.find('input');
-      this.alarmTimezone = this.popoverWidget.find('timezone');
-      this.addAlarmButton.html(this.action);
-      this.closeButton.click(function() {
-        return _this.clean();
+      this.alarmTimezone = this.popoverWidget.find('input-timezone');
+      $('.popover #input-timezone').change(function() {
+        return _this.addButton.removeClass('disabled');
       });
-      this.addAlarmButton.click(function() {
-        return _this.onEditAlarmClicked();
-      });
-      this.removeButton.click(function() {
-        return _this.onRemoveAlarmClicked();
-      });
-      this.alarmDescription.keyup(function(event) {
+      return this.alarmDescription.keyup(function(event) {
         if (_this.alarmDescription.val() === '') {
-          return _this.addAlarmButton.addClass('disabled');
+          return _this.addButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
-          return _this.onEditAlarmClicked();
+          return _this.onEditClicked();
         } else {
-          return _this.addAlarmButton.removeClass('disabled');
-        }
-      });
-      return $('.popover #inputTimezone').change(function() {
-        return _this.addAlarmButton.removeClass('disabled');
-      });
-    };
-
-    AlarmPopOver.prototype.onRemoveAlarmClicked = function() {
-      var alarm,
-        _this = this;
-      alarm = this.model.get(this.event.id);
-      this.removeButton.css('width', '42px');
-      this.removeButton.spin('tiny');
-      return alarm.destroy({
-        success: function() {
-          _this.cal.fullCalendar('removeEvents', _this.event.id);
-          _this.removeButton.spin();
-          _this.removeButton.css('width', '14px');
-          return _this.clean();
-        },
-        error: function() {
-          this.removeButton.spin();
-          this.removeButton.css('width', '14px');
-          return this.clean();
+          return _this.addButton.removeClass('disabled');
         }
       });
     };
 
-    AlarmPopOver.prototype.onAlarmButtonClicked = function() {
-      var data, dueDate, smartDetection, specifiedTime, value,
-        _this = this;
-      dueDate = Date.create(this.date);
-      if (dueDate.format('{HH}:{mm}') === '00:00') {
-        dueDate.advance({
-          hours: 8
-        });
-      }
+    AlarmPopOver.prototype.onRemoveClicked = function() {
+      AlarmPopOver.__super__.onRemoveClicked.call(this);
+      return this.clean;
+    };
+
+    AlarmPopOver.prototype.onButtonClicked = function() {
+      var data, dueDate, value;
       value = this.popoverWidget.find('input').val();
-      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
-      if ((smartDetection != null) && (smartDetection[1] != null)) {
-        specifiedTime = smartDetection[1];
-        specifiedTime = specifiedTime.split(/:/);
-        dueDate.set({
-          hours: specifiedTime[0],
-          minutes: specifiedTime[1]
-        });
-        value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
-        value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-      }
+      dueDate = this.formatDate(value);
+      value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
+      value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
       data = {
         description: value,
         action: 'DISPLAY',
         trigg: dueDate.format(Alarm.dateFormat)
       };
-      if ($('.popover #inputTimezone').val() !== "Use specific timezone") {
-        data.timezone = $('.popover #inputTimezone').val();
+      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
+        data.timezone = $('.popover #input-timezone').val();
       }
-      this.addAlarmButton.html('&nbsp;');
-      this.addAlarmButton.spin('small');
-      return this.model.create(data, {
-        wait: true,
-        success: function() {
-          _this.clean();
-          _this.addAlarmButton.spin();
-          return _this.addAlarmButton.html(_this.action);
-        },
-        error: function() {
-          _this.clean();
-          _this.addAlarmButton.spin();
-          return _this.addAlarmButton.html(_this.action);
+      AlarmPopOver.__super__.onButtonClicked.call(this, data);
+      return this.clean();
+    };
+
+    AlarmPopOver.prototype.onEditClicked = function() {
+      var data,
+        _this = this;
+      data = {
+        description: this.alarmDescription.val()
+      };
+      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
+        data.timezone = $('.popover #input-timezone').val();
+      }
+      return AlarmPopOver.__super__.onEditClicked.call(this, data, function(success) {
+        if (success) {
+          _this.event.title = data.description;
+          _this.event.timezone = data.timezone;
+          return _this.cal.fullCalendar('renderEvent', _this.event);
         }
       });
     };
@@ -1344,39 +1288,9 @@ window.require.register("views/alarm_popover", function(exports, require, module
       return this.pop.bindEvents(this.date);
     };
 
-    AlarmPopOver.prototype.onEditAlarmClicked = function() {
-      var alarm, data,
-        _this = this;
-      alarm = this.model.get(this.event.id);
-      data = {
-        description: this.alarmDescription.val()
-      };
-      if ($('.popover #inputTimezone').val() !== "Use specific timezone") {
-        data.timezone = $('.popover #inputTimezone').val();
-      }
-      this.cal.fullCalendar('renderEvent', this.event);
-      this.addAlarmButton.html('&nbsp;');
-      this.addAlarmButton.spin('small');
-      return alarm.save(data, {
-        wait: true,
-        success: function() {
-          _this.event.title = data.description;
-          _this.event.timezone = data.timezone;
-          _this.cal.fullCalendar('renderEvent', _this.event);
-          _this.addAlarmButton.spin();
-          return _this.addAlarmButton.html(_this.action);
-        },
-        error: function() {
-          _this.cal.fullCalendar('renderEvent', _this.event);
-          _this.addAlarmButton.spin();
-          return _this.addAlarmButton.html(_this.action);
-        }
-      });
-    };
-
     return AlarmPopOver;
 
-  })(View);
+  })(PopOver);
   
 });
 window.require.register("views/alarm_view", function(exports, require, module) {
@@ -1436,8 +1350,8 @@ window.require.register("views/alarmform_view", function(exports, require, modul
 
     AlarmFormView.prototype.events = {
       'focus #inputDesc': 'onFocus',
-      'blur #alarm-description-input': 'onBlur',
-      'keyup #alarm-description-input': 'onKeydown',
+      'blur #inputDesc': 'onBlur',
+      'keyup #inputDesc': 'onKeydown',
       'click .add-alarm': 'onSubmit'
     };
 
@@ -1481,7 +1395,7 @@ window.require.register("views/alarmform_view", function(exports, require, modul
 
     AlarmFormView.prototype.afterRender = function() {
       var datePicker;
-      this.descriptionField = this.$('#alarm-description-input');
+      this.descriptionField = this.$('#inputDesc');
       this.actionField = this.$('#action');
       this.dateField = this.$('#inputDate input');
       this.timeField = this.$('#inputTime');
@@ -2209,7 +2123,7 @@ window.require.register("views/dayprogram_view", function(exports, require, modu
   
 });
 window.require.register("views/event_popover", function(exports, require, module) {
-  var Event, EventPopOver, PopOver, _ref,
+  var Event, EventPopOver, PopOver,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2221,14 +2135,14 @@ window.require.register("views/event_popover", function(exports, require, module
   module.exports = EventPopOver = (function(_super) {
     __extends(EventPopOver, _super);
 
-    function EventPopOver() {
-      this.onEditEventClicked = __bind(this.onEditEventClicked, this);
-      this.onEventButtonClicked = __bind(this.onEventButtonClicked, this);
-      this.onRemoveEventClicked = __bind(this.onRemoveEventClicked, this);
+    function EventPopOver(cal) {
+      this.cal = cal;
+      this.onEditClicked = __bind(this.onEditClicked, this);
+      this.onButtonClicked = __bind(this.onButtonClicked, this);
+      this.initData = __bind(this.initData, this);
+      this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
-      this.bindEvents = __bind(this.bindEvents, this);
-      _ref = EventPopOver.__super__.constructor.apply(this, arguments);
-      return _ref;
+      EventPopOver.__super__.constructor.call(this, this.cal);
     }
 
     EventPopOver.prototype.clean = function() {
@@ -2237,147 +2151,59 @@ window.require.register("views/event_popover", function(exports, require, module
 
     EventPopOver.prototype.unbindEvents = function() {
       EventPopOver.__super__.unbindEvents.call(this);
-      this.popoverWidget.find('button.close').unbind('click');
-      this.popoverWidget.find('button.add-event').unbind('click');
-      this.popoverWidget.find('#inputStart').unbind('keyup');
-      this.popoverWidget.find('#inputEnd').unbind('keyup');
-      this.popoverWidget.find('#inputPlace').unbind('keyup');
-      return this.popoverWidget.find('#inputDesc').unbind('keyup');
+      this.popoverWidget.find('#input-start').unbind('keyup');
+      this.popoverWidget.find('#input-end').unbind('keyup');
+      this.popoverWidget.find('#input-place').unbind('keyup');
+      return this.popoverWidget.find('#input-desc').unbind('keyup');
     };
 
     EventPopOver.prototype.createNew = function(data) {
       this.clean();
-      this.field = data.field;
-      this.date = data.date;
-      this.model = data.model;
-      this.event = data.event;
-      return this.action = data.action;
+      return EventPopOver.__super__.createNew.call(this, data);
     };
 
     EventPopOver.prototype.show = function(title, direction, content) {
-      this.field.data('popover', null).popover({
-        title: require('./templates/popover_title')().call(null, {
-          title: title
-        }),
-        html: true,
-        placement: direction,
-        content: content
-      }).popover('show');
-      this.popoverWidget = $('.container .popover');
-      this.popoverWidget.find('#inputStart').focus();
-      this.popoverWidget.find('button.add-event').addClass('disable');
+      EventPopOver.__super__.show.call(this, title, direction, content);
+      this.popoverWidget.find('#input-start').focus();
+      this.popoverWidget.find('button.add').addClass('disable');
       if (this.action === 'create') {
-        return $('.event-remove').hide();
+        return $('.remove').hide();
       } else {
-        return $('.event-remove').show();
+        return $('.remove').show();
       }
     };
 
     EventPopOver.prototype.bindEvents = function() {
-      var keyReaction,
-        _this = this;
-      this.popoverWidget = $('.container .popover');
-      this.addEventButton = this.popoverWidget.find('button.add-event');
-      this.popoverWidget.find('button.close').click(function() {
-        return _this.clean();
-      });
-      this.addEventButton.click(function() {
-        return _this.onEventButtonClicked();
-      });
-      this.eventStart = this.popoverWidget.find('#inputStart');
-      this.eventEnd = this.popoverWidget.find('#inputEnd');
-      this.eventPlace = this.popoverWidget.find('#inputPlace');
-      this.eventDescription = this.popoverWidget.find('#inputDesc');
-      this.addEventButton.addClass('disabled');
-      keyReaction = function(event) {
-        if (_this.eventStart.val() === '' || _this.eventEnd.val() === '' || _this.eventDescription.val() === '') {
-          return _this.addEventButton.addClass('disabled');
-        } else if (event.keyCode === 13 || event.which === 13) {
-          return _this.onEventButtonClicked();
-        } else {
-          return _this.addEventButton.removeClass('disabled');
-        }
-      };
-      this.eventStart.keyup(keyReaction);
-      this.eventEnd.keyup(keyReaction);
-      return this.eventDescription.keyup(keyReaction);
+      EventPopOver.__super__.bindEvents.call(this);
+      this.eventStart = this.popoverWidget.find('#input-start');
+      this.eventEnd = this.popoverWidget.find('#input-end');
+      this.eventPlace = this.popoverWidget.find('#input-place');
+      this.eventDescription = this.popoverWidget.find('#input-desc');
+      this.eventStart.keyup(this.keyReaction);
+      this.eventEnd.keyup(this.keyReaction);
+      return this.eventDescription.keyup(this.keyReaction);
     };
 
     EventPopOver.prototype.bindEditEvents = function() {
-      var keyReaction,
-        _this = this;
-      this.popoverWidget = $('.container .popover');
-      this.addEventButton = this.popoverWidget.find('button.add-event');
-      this.closeButton = this.popoverWidget.find('button.close');
-      this.removeButton = this.popoverWidget.find('.event-remove');
-      this.eventStart = this.popoverWidget.find('#inputStart');
-      this.eventEnd = this.popoverWidget.find('#inputEnd');
-      this.eventPlace = this.popoverWidget.find('#inputPlace');
-      this.eventDescription = this.popoverWidget.find('#inputDesc');
-      this.addEventButton.html(this.action);
-      this.closeButton.click(function() {
-        return _this.clean();
-      });
-      this.addEventButton.click(function() {
-        return _this.onEditEventClicked();
-      });
-      this.removeButton.click(function() {
-        return _this.onRemoveEventClicked();
-      });
-      keyReaction = function(event) {
-        if (_this.eventStart.val() === '' || _this.eventEnd.val() === '' || _this.eventDescription.val() === '') {
-          return _this.addEventButton.addClass('disabled');
-        } else if (event.keyCode === 13 || event.which === 13) {
-          return _this.onEventButtonClicked();
-        } else {
-          return _this.addEventButton.removeClass('disabled');
-        }
-      };
-      this.eventStart.keyup(keyReaction);
-      this.eventEnd.keyup(keyReaction);
-      return this.eventDescription.keyup(keyReaction);
+      EventPopOver.__super__.bindEditEvents.call(this);
+      this.eventStart = this.popoverWidget.find('#input-start');
+      this.eventEnd = this.popoverWidget.find('#input-end');
+      this.eventPlace = this.popoverWidget.find('#input-place');
+      this.eventDescription = this.popoverWidget.find('#input-desc');
+      this.eventStart.keyup(this.keyReaction);
+      this.eventEnd.keyup(this.keyReaction);
+      return this.eventDescription.keyup(this.keyReaction);
     };
 
-    EventPopOver.prototype.onRemoveEventClicked = function() {
-      var evt,
-        _this = this;
-      evt = this.model.get(this.event.id);
-      this.removeButton.css('width', '42px');
-      this.removeButton.spin('tiny');
-      return evt.destroy({
-        success: function() {
-          _this.cal.fullCalendar('removeEvents', _this.event.id);
-          _this.removeButton.spin();
-          _this.removeButton.css('width', '14px');
-          return _this.clean();
-        },
-        error: function() {
-          this.removeButton.spin();
-          this.removeButton.css('width', '14px');
-          this.clean();
-          return this.clean();
-        }
-      });
+    EventPopOver.prototype.onRemoveClicked = function() {
+      EventPopOver.__super__.onRemoveClicked.call(this);
+      return this.clean;
     };
 
-    EventPopOver.prototype.onEventButtonClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, newDate, place, specifiedDay, specifiedTime, start,
-        _this = this;
-      if (this.addEventButton.hasClass('disabled')) {
-        return;
-      }
-      start = $('.popover #inputStart').val();
-      end = $('.popover #inputEnd').val();
-      place = $('.popover #inputPlace').val();
-      description = $('.popover #inputDesc').val();
-      specifiedTime = start.split(':');
-      dueStartDate = Date.create(this.date);
-      dueStartDate.set({
-        hours: specifiedTime[0],
-        minutes: specifiedTime[1]
-      });
-      specifiedDay = end.split('+');
-      specifiedTime = specifiedDay[0].split(':');
+    EventPopOver.prototype.initData = function() {
+      var data, dueEndDate, dueStartDate, newDate, specifiedDay;
+      dueStartDate = this.formatDate($('.popover #input-start').val());
+      specifiedDay = $('.popover #input-end').val().split('+');
       if (specifiedDay[1] != null) {
         newDate = this.date.advance({
           days: specifiedDay[1]
@@ -2387,77 +2213,31 @@ window.require.register("views/event_popover", function(exports, require, module
         specifiedDay[1] = 0;
         dueEndDate = Date.create(this.date);
       }
-      dueEndDate.set({
-        hours: specifiedTime[0],
-        minutes: specifiedTime[1]
-      });
+      dueEndDate = this.formatDate(specifiedDay[0]);
       data = {
         start: dueStartDate.format(Event.dateFormat),
         end: dueEndDate.format(Event.dateFormat),
         diff: parseInt(specifiedDay[1]),
-        place: place,
-        description: description
+        place: $('.popover #input-place').val(),
+        description: $('.popover #input-desc').val()
       };
-      this.addEventButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-      this.addEventButton.spin('tiny');
-      return this.model.create(data, {
-        wait: true,
-        success: function() {
-          _this.clean();
-          _this.addEventButton.spin();
-          return _this.addEventButton.html(_this.action);
-        },
-        error: function() {
-          _this.clean();
-          _this.addEventButton.spin();
-          return _this.addEventButton.html(_this.action);
-        }
-      });
+      return data;
     };
 
-    EventPopOver.prototype.onEditEventClicked = function() {
-      var data, description, dueEndDate, dueStartDate, end, evt, newDate, place, specifiedDay, specifiedTime, start,
+    EventPopOver.prototype.onButtonClicked = function() {
+      var data;
+      data = this.initData();
+      EventPopOver.__super__.onButtonClicked.call(this, data);
+      return this.clean();
+    };
+
+    EventPopOver.prototype.onEditClicked = function() {
+      var data,
         _this = this;
-      evt = this.model.get(this.event.id);
-      start = $('.popover #inputStart').val();
-      end = $('.popover #inputEnd').val();
-      place = $('.popover #inputPlace').val();
-      description = $('.popover #inputDesc').val();
-      specifiedTime = start.split(':');
-      dueStartDate = Date.create(this.date);
-      dueStartDate.set({
-        hours: specifiedTime[0],
-        minutes: specifiedTime[1]
-      });
-      specifiedDay = end.split('+');
-      specifiedTime = specifiedDay[0].split(':');
-      if (specifiedDay[1] != null) {
-        newDate = this.date.advance({
-          days: specifiedDay[1]
-        });
-        dueEndDate = Date.create(newDate);
-      } else {
-        specifiedDay[1] = 0;
-        dueEndDate = Date.create(this.date);
-      }
-      dueEndDate.set({
-        hours: specifiedTime[0],
-        minutes: specifiedTime[1]
-      });
-      data = {
-        start: dueStartDate.format(Event.dateFormat),
-        end: dueEndDate.format(Event.dateFormat),
-        place: place,
-        diff: parseInt(specifiedDay[1]),
-        description: description
-      };
-      this.cal.fullCalendar('renderEvent', this.event);
-      this.addEventButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-      this.addEventButton.spin('tiny');
-      return evt.save(data, {
-        wait: true,
-        success: function() {
-          var endDate, startDate;
+      data = this.initData();
+      return EventPopOver.__super__.onEditClicked.call(this, data, function(success) {
+        var endDate, startDate;
+        if (success) {
           _this.event.title = data.description;
           startDate = new Date(data.start);
           _this.event.start = startDate.format(Date.ISO8601_DATETIME);
@@ -2465,12 +2245,7 @@ window.require.register("views/event_popover", function(exports, require, module
           _this.event.end = endDate.format(Date.ISO8601_DATETIME);
           _this.event.diff = data.diff;
           _this.event.place = data.place;
-          _this.cal.fullCalendar('renderEvent', _this.event);
-          return _this.addEventButton.spin();
-        },
-        error: function() {
-          this.cal.fullCalendar('renderEvent', this.event);
-          return this.addEventButton.spin();
+          return _this.cal.fullCalendar('renderEvent', _this.event);
         }
       });
     };
@@ -2906,6 +2681,7 @@ window.require.register("views/list_view", function(exports, require, module) {
 });
 window.require.register("views/popover", function(exports, require, module) {
   var PopOver, View,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2916,6 +2692,10 @@ window.require.register("views/popover", function(exports, require, module) {
 
     function PopOver(cal) {
       this.cal = cal;
+      this.onEditClicked = __bind(this.onEditClicked, this);
+      this.onButtonClicked = __bind(this.onButtonClicked, this);
+      this.onRemoveClicked = __bind(this.onRemoveClicked, this);
+      this.bindEditEvents = __bind(this.bindEditEvents, this);
     }
 
     PopOver.prototype.clean = function() {
@@ -2932,7 +2712,157 @@ window.require.register("views/popover", function(exports, require, module) {
     };
 
     PopOver.prototype.unbindEvents = function() {
+      this.popoverWidget.find('button.add').unbind('click');
       return this.popoverWidget.find('button.close').unbind('click');
+    };
+
+    PopOver.prototype.createNew = function(data) {
+      this.field = data.field;
+      this.date = data.date;
+      this.model = data.model;
+      return this.event = data.event;
+    };
+
+    PopOver.prototype.show = function(title, direction, content) {
+      this.field.data('popover', null).popover({
+        title: require('./templates/popover_title')({
+          title: title
+        }),
+        html: true,
+        placement: direction,
+        content: content
+      }).popover('show');
+      return this.popoverWidget = $('.container .popover');
+    };
+
+    PopOver.prototype.bindEvents = function() {
+      var _this = this;
+      this.keyReaction = function(event) {
+        if (_this.eventStart.val() === '' || _this.eventEnd.val() === '' || _this.eventDescription.val() === '') {
+          return _this.addButton.addClass('disabled');
+        } else if (event.keyCode === 13 || event.which === 13) {
+          return _this.onButtonClicked();
+        } else {
+          return _this.addButton.removeClass('disabled');
+        }
+      };
+      this.popoverWidget = $('.container .popover');
+      this.addButton = this.popoverWidget.find('button.add');
+      this.addButton.html(this.action);
+      this.addButton.click(function() {
+        return _this.onButtonClicked();
+      });
+      this.popoverWidget.find('button.close').click(function() {
+        return _this.clean();
+      });
+      return this.addButton.addClass('disabled');
+    };
+
+    PopOver.prototype.bindEditEvents = function() {
+      var _this = this;
+      this.keyReaction = function(event) {
+        if (_this.checkField) {
+          return _this.addButton.addClass('disabled');
+        } else if (event.keyCode === 13 || event.which === 13) {
+          return _this.onEditClicked();
+        } else {
+          return _this.addButton.removeClass('disabled');
+        }
+      };
+      this.addButton = this.popoverWidget.find('button.add');
+      this.popoverWidget = $('.container .popover');
+      this.closeButton = this.popoverWidget.find('button.close');
+      this.removeButton = this.popoverWidget.find('.remove');
+      this.removeButton.click(function() {
+        return _this.onRemoveClicked();
+      });
+      this.addButton.html(this.action);
+      this.closeButton.click(function() {
+        return _this.clean();
+      });
+      return this.addButton.click(function() {
+        return _this.onEditClicked();
+      });
+    };
+
+    PopOver.prototype.onRemoveClicked = function() {
+      var evt,
+        _this = this;
+      evt = this.model.get(this.event.id);
+      this.removeButton.css('width', '42px');
+      this.removeButton.spin('tiny');
+      return evt.destroy({
+        success: function() {
+          _this.cal.fullCalendar('removeEvents', _this.event.id);
+          _this.removeButton.spin();
+          return _this.removeButton.css('width', '14px');
+        },
+        error: function() {
+          this.removeButton.spin();
+          return this.removeButton.css('width', '14px');
+        }
+      });
+    };
+
+    PopOver.prototype.formatDate = function(value) {
+      var dueDate, smartDetection, specifiedTime;
+      dueDate = Date.create(this.date);
+      if (dueDate.format('{HH}:{mm}') === '00:00') {
+        dueDate.advance({
+          hours: 8
+        });
+      }
+      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
+      if ((smartDetection != null) && (smartDetection[1] != null)) {
+        specifiedTime = smartDetection[1];
+        specifiedTime = specifiedTime.split(/:/);
+        dueDate.set({
+          hours: specifiedTime[0],
+          minutes: specifiedTime[1]
+        });
+        return dueDate;
+      }
+    };
+
+    PopOver.prototype.onButtonClicked = function(data) {
+      var _this = this;
+      this.addButton.html('&nbsp;');
+      this.addButton.spin('small');
+      return this.model.create(data, {
+        wait: true,
+        success: function() {
+          _this.addButton.spin();
+          return _this.addButton.html(_this.action);
+        },
+        error: function() {
+          _this.clean();
+          _this.addButton.spin();
+          return _this.addButton.html(_this.action);
+        }
+      });
+    };
+
+    PopOver.prototype.onEditClicked = function(data, callback) {
+      var evt,
+        _this = this;
+      evt = this.model.get(this.event.id);
+      this.cal.fullCalendar('renderEvent', this.event);
+      this.addButton.html('&nbsp;');
+      this.addButton.spin('small');
+      return evt.save(data, {
+        wait: true,
+        success: function() {
+          _this.addButton.spin();
+          _this.addButton.html(_this.action);
+          return callback(true);
+        },
+        error: function() {
+          _this.cal.fullCalendar('renderEvent', _this.event);
+          _this.addButton.spin();
+          _this.addButton.html(_this.action);
+          return callback(false);
+        }
+      });
     };
 
     return PopOver;
@@ -3099,7 +3029,7 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   var interp;
   buf.push('<div><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><button class="btn pull-right add-alarm disabled">');
+  buf.push('/><button class="btn pull-right add disabled">');
   if ( editionMode)
   {
   var __val__ = t('Edit')
@@ -3118,7 +3048,7 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</p>');
   }
-  buf.push('<select id="inputTimezone" class="input"><option');
+  buf.push('<select id="input-timezone" class="input"><option');
   buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
   buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
   // iterate timezones
@@ -3222,14 +3152,14 @@ window.require.register("views/templates/event_form_small", function(exports, re
   with (locals || {}) {
   var interp;
   buf.push('<div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("inputStart"), 'placeholder':(t("From hours:minutes")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueStart) + ""), 'id':("input-start"), 'placeholder':(t("From hours:minutes")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("inputEnd"), 'placeholder':(t("To hours:minutes+days")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueEnd) + ""), 'id':("input-end"), 'placeholder':(t("To hours:minutes+days")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/></div><div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValuePlace) + ""), 'id':("inputPlace"), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValuePlace) + ""), 'id':("input-place"), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"id":true,"placeholder":true}));
   buf.push('/><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("inputDesc"), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><button class="btn add-event">');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValueDesc) + ""), 'id':("input-desc"), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/><button class="btn add">');
   if ( editionMode)
   {
   var __val__ = t('Edit')
@@ -3326,7 +3256,7 @@ window.require.register("views/templates/popover_title", function(exports, requi
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<span>' + escape((interp = title) == null ? '' : interp) + '&nbsp;<i class="event-remove icon-trash"> </i></span><button class="close">&times;</button>');
+  buf.push('<span>' + escape((interp = title) == null ? '' : interp) + '&nbsp;<i class="remove icon-trash"> </i></span><button class="close">&times;</button>');
   }
   return buf.join("");
   };

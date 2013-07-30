@@ -3,133 +3,61 @@ Event = require '../models/event'
 
 module.exports = class EventPopOver extends PopOver
 
+    constructor: (@cal) ->
+        super @cal
+
     clean: ->
         super()
 
     unbindEvents: ->
         super()
-        @popoverWidget.find('button.close').unbind 'click'
-        @popoverWidget.find('button.add-event').unbind 'click'
-        @popoverWidget.find('#inputStart').unbind 'keyup'
-        @popoverWidget.find('#inputEnd').unbind 'keyup'
-        @popoverWidget.find('#inputPlace').unbind 'keyup'
-        @popoverWidget.find('#inputDesc').unbind 'keyup'
+        @popoverWidget.find('#input-start').unbind 'keyup'
+        @popoverWidget.find('#input-end').unbind 'keyup'
+        @popoverWidget.find('#input-place').unbind 'keyup'
+        @popoverWidget.find('#input-desc').unbind 'keyup'
 
     createNew: (data) ->
         @clean()
-        @field = data.field
-        @date = data.date
-        @model = data.model
-        @event = data.event
-        @action = data.action
+        super data
 
     show: (title, direction, content) ->
-        @field.data('popover', null).popover(
-            title: require('./templates/popover_title')().call(null, title: title)
-            html: true
-            placement: direction
-            content: content
-        ).popover('show')
-        @popoverWidget = $('.container .popover')
-        @popoverWidget.find('#inputStart').focus()
-        @popoverWidget.find('button.add-event').addClass 'disable'
+        super title, direction, content
+        @popoverWidget.find('#input-start').focus()
+        @popoverWidget.find('button.add').addClass 'disable'
 
-        if @action is 'create' then $('.event-remove').hide()
-        else $('.event-remove').show()
+        if @action is 'create' then $('.remove').hide()
+        else $('.remove').show()
 
-    bindEvents: =>
-        @popoverWidget = $('.container .popover')
+    bindEvents: ->   
+        super()
+        @eventStart = @popoverWidget.find('#input-start')
+        @eventEnd = @popoverWidget.find('#input-end')
+        @eventPlace = @popoverWidget.find('#input-place')
+        @eventDescription = @popoverWidget.find('#input-desc')
 
-        @addEventButton = @popoverWidget.find 'button.add-event'
+        @eventStart.keyup @keyReaction
+        @eventEnd.keyup @keyReaction
+        @eventDescription.keyup @keyReaction
 
-        @popoverWidget.find('button.close').click => @clean()
-        @addEventButton.click => @onEventButtonClicked()
+    bindEditEvents: =>        
+        super()
+        @eventStart = @popoverWidget.find '#input-start'
+        @eventEnd = @popoverWidget.find '#input-end'
+        @eventPlace = @popoverWidget.find '#input-place'
+        @eventDescription = @popoverWidget.find '#input-desc'
 
-        @eventStart = @popoverWidget.find('#inputStart')
-        @eventEnd = @popoverWidget.find('#inputEnd')
-        @eventPlace = @popoverWidget.find('#inputPlace')
-        @eventDescription = @popoverWidget.find('#inputDesc')
+        @eventStart.keyup @keyReaction
+        @eventEnd.keyup @keyReaction
+        @eventDescription.keyup @keyReaction
 
-        @addEventButton.addClass 'disabled'
+    onRemoveClicked: =>
+        super()
+        @clean
 
-        keyReaction = (event) =>
-            if @eventStart.val() is '' or
-            @eventEnd.val() is '' or
-            @eventDescription.val() is ''
-                @addEventButton.addClass 'disabled'
-            else if event.keyCode is 13 or event.which is 13
-                @onEventButtonClicked()
-            else
-                @addEventButton.removeClass 'disabled'
-
-        @eventStart.keyup keyReaction
-        @eventEnd.keyup keyReaction
-        @eventDescription.keyup keyReaction
-
-    bindEditEvents: =>
-        @popoverWidget = $('.container .popover')
-        @addEventButton = @popoverWidget.find 'button.add-event'
-        @closeButton = @popoverWidget.find 'button.close'
-        @removeButton = @popoverWidget.find '.event-remove'
-        @eventStart = @popoverWidget.find '#inputStart'
-        @eventEnd = @popoverWidget.find '#inputEnd'
-        @eventPlace = @popoverWidget.find '#inputPlace'
-        @eventDescription = @popoverWidget.find '#inputDesc'
-
-        @addEventButton.html @action
-        @closeButton.click => @clean()
-        @addEventButton.click => @onEditEventClicked()
-        @removeButton.click => @onRemoveEventClicked()
-
-        keyReaction = (event) =>
-            if @eventStart.val() is '' or
-            @eventEnd.val() is '' or
-            @eventDescription.val() is ''
-                @addEventButton.addClass 'disabled'
-            else if event.keyCode is 13 or event.which is 13
-                @onEventButtonClicked()
-            else
-                @addEventButton.removeClass 'disabled'
-
-        @eventStart.keyup keyReaction
-        @eventEnd.keyup keyReaction
-        @eventDescription.keyup keyReaction
-
-    onRemoveEventClicked: =>
-        evt = @model.get @event.id
-        @removeButton.css 'width', '42px'
-        @removeButton.spin 'tiny'
-        evt.destroy
-            success: =>
-                @cal.fullCalendar 'removeEvents', @event.id
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
-                @clean()
-            error: ->
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
-                @clean()
-                @clean()
-
-    onEventButtonClicked: =>
-        if @addEventButton.hasClass 'disabled'
-            return
-
-        # Recover values
-        start = $('.popover #inputStart').val()
-        end = $('.popover #inputEnd').val()
-        place = $('.popover #inputPlace').val()
-        description = $('.popover #inputDesc').val()
-        specifiedTime = start.split(':')
-
+    initData: =>
         # Configure start and end dates
-        dueStartDate = Date.create(@date)
-        dueStartDate.set
-            hours: specifiedTime[0]
-            minutes: specifiedTime[1]
-
-        specifiedDay = end.split('+')
-        specifiedTime = specifiedDay[0].split(':')
+        dueStartDate = @formatDate $('.popover #input-start').val()
+        specifiedDay = $('.popover #input-end').val().split('+')
         if specifiedDay[1]?
             newDate = @date.advance
                 days: specifiedDay[1]
@@ -137,71 +65,26 @@ module.exports = class EventPopOver extends PopOver
         else
             specifiedDay[1] = 0
             dueEndDate = Date.create(@date)
-        dueEndDate.set
-            hours: specifiedTime[0]
-            minutes: specifiedTime[1]
+        dueEndDate = @formatDate specifiedDay[0]
 
         # Store new event
         data =
             start: dueStartDate.format Event.dateFormat
             end: dueEndDate.format Event.dateFormat
             diff: parseInt(specifiedDay[1])
-            place: place
-            description: description
-        @addEventButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        @addEventButton.spin 'tiny'
-        @model.create data,
-            wait: true
-            success: =>
-                @clean()
-                @addEventButton.spin()
-                @addEventButton.html @action
-            error: =>
-                @clean()
-                @addEventButton.spin()
-                @addEventButton.html @action
+            place: $('.popover #input-place').val()
+            description: $('.popover #input-desc').val()
+        return data
 
-    onEditEventClicked: =>
-        # Recover values
-        evt = @model.get @event.id
-        start = $('.popover #inputStart').val()
-        end = $('.popover #inputEnd').val()
-        place = $('.popover #inputPlace').val()
-        description = $('.popover #inputDesc').val()
-        specifiedTime = start.split(':')
+    onButtonClicked: =>
+        data = @initData()        
+        super data
+        @clean()
 
-        # Configure start and end dates
-        dueStartDate = Date.create(@date)
-        dueStartDate.set
-            hours: specifiedTime[0]
-            minutes: specifiedTime[1]
-
-        specifiedDay = end.split('+')
-        specifiedTime = specifiedDay[0].split(':')
-        if specifiedDay[1]?
-            newDate = @date.advance
-                days: specifiedDay[1]
-            dueEndDate = Date.create(newDate)
-        else
-            specifiedDay[1] = 0
-            dueEndDate = Date.create(@date)
-        dueEndDate.set
-            hours: specifiedTime[0]
-            minutes: specifiedTime[1]
-
-        # Store new event
-        data =
-            start: dueStartDate.format Event.dateFormat
-            end: dueEndDate.format Event.dateFormat
-            place: place
-            diff: parseInt(specifiedDay[1])
-            description: description
-        @cal.fullCalendar 'renderEvent', @event
-        @addEventButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        @addEventButton.spin 'tiny'
-        evt.save data,
-            wait: true
-            success: =>
+    onEditClicked: =>
+        data = @initData()  
+        super data, (success) =>
+            if success
                 # Update event in calendar
                 @event.title = data.description
                 startDate = new Date(data.start)
@@ -211,7 +94,3 @@ module.exports = class EventPopOver extends PopOver
                 @event.diff = data.diff
                 @event.place = data.place
                 @cal.fullCalendar 'renderEvent', @event
-                @addEventButton.spin()
-            error: ->
-                @cal.fullCalendar 'renderEvent', @event
-                @addEventButton.spin()
