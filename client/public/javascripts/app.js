@@ -1018,7 +1018,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
 
     ScheduleItem.prototype.getDateObject = function() {
       if (this.dateObject == null) {
-        this.dateObject = moment(this.get(this.mainDateField)).toDate();
+        this.dateObject = new Date.create(this.get(this.mainDateField));
       }
       return this.dateObject;
     };
@@ -1161,7 +1161,7 @@ window.require.register("router", function(exports, require, module) {
   
 });
 window.require.register("views/alarm_form_view", function(exports, require, module) {
-  var AlarmFormView, View, timezones, _ref,
+  var AlarmFormView, View, defaultTimezone, timezones, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1169,6 +1169,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
   View = require('../lib/view');
 
   timezones = require('helpers/timezone').timezones;
+
+  defaultTimezone = 'timezone';
 
   module.exports = AlarmFormView = (function(_super) {
     __extends(AlarmFormView, _super);
@@ -1216,7 +1218,7 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       content = AlarmFormView.__super__.render.call(this, {
         actions: this.actions,
         defaultAction: this.getDefaultAction('DISPLAY'),
-        defaultTimezone: "timezone",
+        defaultTimezone: defaultTimezone,
         timezones: this.timezones,
         defaultDate: todayDate.format('{dd}/{MM}/{yyyy}'),
         defaultTime: todayDate.format('{HH}:{mm}')
@@ -1306,7 +1308,7 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.descriptionField.val(alarm.get('description'));
       this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
       this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
-      this.timezoneField.val(alarm.get('timezone'));
+      this.timezoneField.val(alarm.get(defaultTimezone));
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
@@ -1323,6 +1325,7 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       todayDate = new Date.create('now');
       this.dateField.val(todayDate.format('{dd}/{MM}/{yyyy}'));
       this.timeField.val(todayDate.format('{HH}:{mm}'));
+      this.timezoneField.val(defaultTimezone);
       return this.resetErrors();
     };
 
@@ -2568,7 +2571,7 @@ window.require.register("views/import_view", function(exports, require, module) 
   
 });
 window.require.register("views/list_view", function(exports, require, module) {
-  var Alarm, AlarmCollection, AlarmFormView, AlarmsListView, ListView, View, helpers, _ref,
+  var Alarm, AlarmCollection, AlarmFormView, AlarmsListView, ListView, View, defaultTimezone, helpers, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2583,6 +2586,8 @@ window.require.register("views/list_view", function(exports, require, module) {
   Alarm = require('../models/alarm');
 
   helpers = require('../helpers');
+
+  defaultTimezone = 'timezone';
 
   module.exports = ListView = (function(_super) {
     __extends(ListView, _super);
@@ -2628,7 +2633,8 @@ window.require.register("views/list_view", function(exports, require, module) {
         action: this.alarmFormView.actionField.val(),
         trigg: dueDate
       };
-      if (this.alarmFormView.timezoneField.val() !== 'Use specific timezone') {
+      console.log(this.alarmFormView.timezoneField.val());
+      if (this.alarmFormView.timezoneField.val() !== defaultTimezone) {
         data.timezone = this.alarmFormView.timezoneField.val();
       }
       if (this.alarmFormView.editionMode) {
