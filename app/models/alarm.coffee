@@ -1,6 +1,6 @@
 time = require 'time'
 moment = require 'moment'
-{VCalendar, VTodo, VAlarm} = require '../../lib/ical_helpers'
+{VCalendar, VTodo, VAlarm, VTimezone, VStandard, VDaylight} = require '../../lib/ical_helpers'
 
 
 module.exports = (compound, Alarm) ->
@@ -11,8 +11,13 @@ module.exports = (compound, Alarm) ->
     Alarm.getICalCalendar = ->
         calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
 
-    Alarm::toIcal = (user, timezone) ->
+    Alarm::timezoneToIcal = () ->
         date = new time.Date @trigg
+        vtimezone = new VTimezone date, @timezone
+        vtimezone
+
+    Alarm::toIcal = (user, timezone) ->
+        date = new time.Date @trigg        
         date.setTimezone timezone, false
         vtodo = new VTodo date, user, @description
         vtodo.addAlarm date

@@ -31,7 +31,9 @@ action 'export', ->
                         msg: 'Server error occurred while retrieving data'
                 else
                     if alarms.length > 0
-                        calendar.add alarm.toIcal() for alarm in alarms
+                        for alarm in alarms
+                            calendar.add alarm.timezoneToIcal()
+                            calendar.add alarm.toIcal()
                     if events.length > 0
                         calendar.add event.toIcal() for event in events
 
