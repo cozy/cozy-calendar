@@ -84,7 +84,7 @@ module.exports.VTodo = class VTodo extends VComponent
     constructor: (date, user, description) ->
         super
         @fields =
-            DSTAMP: @formatIcalDate date
+            DTSTAMP: @formatIcalDate date
             SUMMARY: description
             UID: user
 
@@ -103,16 +103,65 @@ module.exports.VEvent = class VEvent extends VComponent
             DTEND: @formatIcalDate endDate
             LOCATION: location
 
+formatUTCOffset = (startDate, timezone) ->
+    startDate.setTimezone timezone
+    diff = startDate.getTimezoneOffset()/6
+    if diff is 0
+            diff = "+0000"
+    else
+        if diff < 0
+            diff = diff.toString()
+            diff = diff.concat '0'
+            if diff.length is 4
+                diff = '-0' + diff.substring(1,4)
+        else
+            diff = diff.toString()
+            diff = diff.concat '00'
+            if diff.length is 3
+                diff = '+0' + diff.substring(0,3)
+            else
+                diff = '+' + diff.substring(0,4)
+    diff
+
 module.exports.VTimezone = class VTimezone extends VComponent
     name: 'VTIMEZONE'
+
+    constructor: (startDate, timezone) ->
+        super
+        @fields = 
+            TZID: timezone
+        # startShift and endShift are equal because, actually, only alarm has timezone
+        diff = formatUTCOffset startDate, timezone
+        vstandard = new VStandard startDate, diff, diff
+        @add vstandard
+        vdaylight = new VDaylight startDate, diff, diff
+        @add vdaylight
+
+
 module.exports.VJournal = class VJournal extends VComponent
     name: 'VJOURNAL'
 module.exports.VFreeBusy = class VFreeBusy extends VComponent
     name: 'VFREEBUSY'
+
 module.exports.VStandard = class VStandard extends VComponent
-    name: 'VSTANDARD'
+    name: 'STANDARD'
+
+    constructor: (startDate, startShift, endShift) ->
+        super
+        @fields =
+            DTSTART: @formatIcalDate startDate
+            TZOFFSETFROM: startShift
+            TZOFFSETTO: endShift
+
 module.exports.VDaylight = class VDaylight extends VComponent
-    name: 'VDAYLIGHT'
+    name: 'DAYLIGHT'
+
+    constructor: (startDate, startShift, endShift) ->
+        super
+        @fields =
+            DTSTART: @formatIcalDate startDate
+            TZOFFSETFROM: startShift
+            TZOFFSETTO: endShift
 
 module.exports.ICalParser = class ICalParser
 
