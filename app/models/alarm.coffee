@@ -23,21 +23,28 @@ module.exports = (compound, Alarm) ->
         vtodo.addAlarm date
         vtodo
 
-    Alarm.fromIcal = (valarm) ->
+    Alarm.fromIcal = (valarm, timezone) ->
         alarm = new Alarm()
         alarm.description = valarm.fields["SUMMARY"]
-        date = valarm.fields["DSTAMP"]
+        date = valarm.fields["DTSTAMP"]
         date = moment(date, "YYYYMMDDTHHmm00")
         triggerDate = new time.Date new Date(date), 'UTC'
+        if timezone?
+            alarm.timezone = timezone
+            triggerDate.setTimezone timezone
         alarm.trigg = triggerDate.toString().slice(0, 24)
         alarm
 
-    Alarm.extractAlarms = (component) ->
+    Alarm.fromIcalTimezone = (vtimezone) ->
+        vtimezone.fields["TZID"]
+
+    Alarm.extractAlarms = (component, @timezone) ->
         alarms = []
         walker = (component) ->
+            if component.name is 'VTIMEZONE'
+                @timezone = Alarm.fromIcalTimezone component
             if component.name is 'VTODO'
-                alarms.push Alarm.fromIcal component
-
+                alarms.push Alarm.fromIcal component, @timezone
             if component.subComponents?.length isnt 0
                 for subComponent in component.subComponents
                     walker subComponent

@@ -104,24 +104,25 @@ module.exports.VEvent = class VEvent extends VComponent
             LOCATION: location
 
 formatUTCOffset = (startDate, timezone) ->
-    startDate.setTimezone timezone
-    diff = startDate.getTimezoneOffset()/6
-    if diff is 0
-            diff = "+0000"
-    else
-        if diff < 0
-            diff = diff.toString()
-            diff = diff.concat '0'
-            if diff.length is 4
-                diff = '-0' + diff.substring(1,4)
+    if timezone? and startDate?
+        startDate.setTimezone timezone
+        diff = startDate.getTimezoneOffset()/6
+        if diff is 0
+                diff = "+0000"
         else
-            diff = diff.toString()
-            diff = diff.concat '00'
-            if diff.length is 3
-                diff = '+0' + diff.substring(0,3)
+            if diff < 0
+                diff = diff.toString()
+                diff = diff.concat '0'
+                if diff.length is 4
+                    diff = '-0' + diff.substring(1,4)
             else
-                diff = '+' + diff.substring(0,4)
-    diff
+                diff = diff.toString()
+                diff = diff.concat '00'
+                if diff.length is 3
+                    diff = '+0' + diff.substring(0,3)
+                else
+                    diff = '+' + diff.substring(0,4)
+        diff
 
 module.exports.VTimezone = class VTimezone extends VComponent
     name: 'VTIMEZONE'
