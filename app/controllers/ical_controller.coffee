@@ -53,6 +53,6 @@ action 'import', ->
             else
                 send
                     events: Event.extractEvents result
-                    alarms: Alarm.extractAlarms result
+                    alarms: Alarm.extractAlarms result, @userTimezone
     else
         send error: 'no file sent', 500
