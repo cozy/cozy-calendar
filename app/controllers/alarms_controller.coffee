@@ -18,12 +18,6 @@ before ->
         alarm.trigg = timezonedDate.toString().slice(0, 24)
         return alarm
 
-    # Recover alarm timezone if it exists
-    if req.body? and req.body.timezone? req.body.timezone isnt 'timezone'
-        @alarmTimezone = req.body.timezone
-    else if @alarm?
-        @alarmTimezone = @alarm.timezone
-
     # Recover user timezone
     User.all (err, users) =>
         if err
@@ -32,12 +26,6 @@ before ->
             console.log 'No user registered.'
         else
             @userTimezone = users[0].timezone
-        # Initialize timezone: userTimezone if alarm has not specific timezone
-        @timezone = @userTimezone
-        if @alarmTimezone? and @alarmTimezone isnt null
-            @timezone = @alarmTimezone
-        if @alarm?
-            @alarm.timezone = @timezone
 
         next()
 
@@ -54,29 +42,33 @@ action 'all', ->
                     alarms[index] = @convertAlarmDate(alarm, alarm.timezone)
                 else
                     alarm.timezone = @userTimezone
-                    alarms[index] = @convertAlarmDate(alarm, @timezone)
+                    alarms[index] = @convertAlarmDate(alarm, @userTimezone)
             send alarms
 
 action 'getOne', ->
-    @alarm.timezone = @timezone
-    @alarm = @convertAlarmDate(@alarm, @timezone)
+    if not @alarm.timezone?
+        @alarm.timezone = @userTimezone
+    @alarm = @convertAlarmDate(@alarm, @alarm.timezone)
     send @alarm, 200
 
 action 'create', ->
-    triggerDate = new time.Date(body.trigg, @timezone)
+    if not body.timezone?
+        body.timezone = @userTimezone
+    triggerDate = new time.Date(body.trigg, body.timezone)
     triggerDate.setTimezone('UTC')
     body.trigg = triggerDate.toString().slice(0, 24)
 
-    body.timezone = @timezone
     Alarm.create body, (err, alarm) =>
         if err
             send error: true, msg: "Server error while creating alarm.", 500
         else
-            alarm = @convertAlarmDate(alarm, @timezone)
+            alarm = @convertAlarmDate(alarm, alarm.timezone)
             send alarm, 201
 
 action 'update', ->
-    triggerDate = new time.Date(req.body.trigg, @timezone)
+    if not body.timezone?
+        body.timezone = @userTimezone
+    triggerDate = new time.Date(req.body.trigg, body.timezone)
     triggerDate.setTimezone('UTC')
     req.body.trigg = triggerDate.toString().slice(0, 24)
 
@@ -85,7 +77,7 @@ action 'update', ->
         if err?
             send error: true, msg: "Server error while saving alarm", 500
         else
-            alarm = @convertAlarmDate(alarm, @timezone)
+            alarm = @convertAlarmDate(alarm, alarm.timezone)
             send alarm, 200
 
 action 'delete', ->

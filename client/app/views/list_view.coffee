@@ -6,6 +6,7 @@ AlarmCollection = require '../collections/alarms'
 Alarm = require '../models/alarm'
 
 helpers = require '../helpers'
+defaultTimezone = 'timezone'
 
 module.exports = class ListView extends View
 
@@ -39,7 +40,9 @@ module.exports = class ListView extends View
             action: @alarmFormView.actionField.val()
             trigg: dueDate
 
-        if @alarmFormView.timezoneField.val() isnt 'Use specific timezone'
+        console.log @alarmFormView.timezoneField.val()
+
+        if @alarmFormView.timezoneField.val() isnt defaultTimezone
             data.timezone = @alarmFormView.timezoneField.val()
 
         if @alarmFormView.editionMode

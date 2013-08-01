@@ -5,7 +5,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getDateObject: ->
         if not @dateObject?
-            @dateObject = moment(@get(@mainDateField)).toDate()
+            @dateObject = new Date.create(@get(@mainDateField))
         return @dateObject
 
     getFormattedDate: (formatter) ->
