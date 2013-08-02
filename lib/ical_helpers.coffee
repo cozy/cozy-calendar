@@ -117,7 +117,7 @@ formatUTCOffset = (startDate, timezone) ->
                     diff = '-0' + diff.substring(1,4)
             else
                 diff = diff.toString()
-                diff = diff.concat '00'
+                diff = diff.concat '0'
                 if diff.length is 3
                     diff = '+0' + diff.substring(0,3)
                 else
