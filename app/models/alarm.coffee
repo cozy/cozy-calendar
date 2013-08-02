@@ -38,13 +38,13 @@ module.exports = (compound, Alarm) ->
     Alarm.fromIcalTimezone = (vtimezone) ->
         vtimezone.fields["TZID"]
 
-    Alarm.extractAlarms = (component, @timezone) ->
+    Alarm.extractAlarms = (component, timezone) ->
         alarms = []
         walker = (component) ->
             if component.name is 'VTIMEZONE'
-                @timezone = Alarm.fromIcalTimezone component
+                timezone = Alarm.fromIcalTimezone component
             if component.name is 'VTODO'
-                alarms.push Alarm.fromIcal component, @timezone
+                alarms.push Alarm.fromIcal component, timezone
             if component.subComponents?.length isnt 0
                 for subComponent in component.subComponents
                     walker subComponent
