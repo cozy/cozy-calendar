@@ -19,8 +19,21 @@ expectedContent = """
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
+BEGIN:VTIMEZONE
+TZID:Europe/Paris
+BEGIN:STANDARD
+DTSTART:20130423T144000
+TZOFFSETFROM:-0200
+TZOFFSETTO:-0200
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20130423T144000
+TZOFFSETFROM:-0200
+TZOFFSETTO:-0200
+END:DAYLIGHT
+END:VTIMEZONE
 BEGIN:VTODO
-DSTAMP:20130423T144000
+DTSTAMP:20130423T144000
 SUMMARY:Something to remind
 UID:undefined
 BEGIN:VALARM
@@ -29,8 +42,21 @@ REPEAT:1
 TRIGGER:20130423T144000
 END:VALARM
 END:VTODO
+BEGIN:VTIMEZONE
+TZID:Africa/Abidjan
+BEGIN:STANDARD
+DTSTART:20130424T133000
+TZOFFSETFROM:+0000
+TZOFFSETTO:+0000
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20130424T133000
+TZOFFSETFROM:+0000
+TZOFFSETTO:+0000
+END:DAYLIGHT
+END:VTIMEZONE
 BEGIN:VTODO
-DSTAMP:20130424T133000
+DTSTAMP:20130424T133000
 SUMMARY:Something else to remind
 UID:undefined
 BEGIN:VALARM
@@ -39,8 +65,21 @@ REPEAT:1
 TRIGGER:20130424T133000
 END:VALARM
 END:VTODO
+BEGIN:VTIMEZONE
+TZID:Pacific/Apia
+BEGIN:STANDARD
+DTSTART:20130425T113000
+TZOFFSETFROM:-1300
+TZOFFSETTO:-1300
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20130425T113000
+TZOFFSETFROM:-1300
+TZOFFSETTO:-1300
+END:DAYLIGHT
+END:VTIMEZONE
 BEGIN:VTODO
-DSTAMP:20130425T113000
+DTSTAMP:20130425T113000
 SUMMARY:Another thing to remind
 UID:undefined
 BEGIN:VALARM
@@ -99,7 +138,7 @@ END:VALARM""".replace(/\n/g, '\r\n')
                 vtodo = new VTodo date, "superuser", "ma description"
                 vtodo.toString().should.equal """
 BEGIN:VTODO
-DSTAMP:20130609T150000
+DTSTAMP:20130609T150000
 SUMMARY:ma description
 UID:superuser
 END:VTODO""".replace(/\n/g, '\r\n')
@@ -131,7 +170,7 @@ BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
 BEGIN:VTODO
-DSTAMP:20130609T150000
+DTSTAMP:20130609T150000
 SUMMARY:ma description
 UID:superuser
 BEGIN:VALARM
@@ -167,9 +206,10 @@ END:VCALENDAR""".replace(/\n/g, '\r\n')
                     action: "EMAIL"
                     description: "Something else to remind"
                     trigg: "Tue Apr 24 2013 13:30:00"
+                    timezone: "Europe/Paris"
                 alarm.toIcal().toString().should.equal """
 BEGIN:VTODO
-DSTAMP:20130424T133000
+DTSTAMP:20130424T133000
 SUMMARY:Something else to remind
 UID:undefined
 BEGIN:VALARM
@@ -260,14 +300,18 @@ END:VEVENT""".replace(/\n/g, '\r\n')
                 initDb = (callback) ->
                     async.series [
                         helpers.createAlarm("DISPLAY", "Something to remind",
-                                            "Tue Apr 23 2013 14:40:00")
+                                            "Tue Apr 23 2013 14:40:00",
+                                            "Europe/Paris")
                         helpers.createAlarm("EMAIL", "Something else to remind",
-                                            "Tue Apr 24 2013 13:30:00")
+                                            "Tue Apr 24 2013 13:30:00",
+                                            "Africa/Abidjan")
                         helpers.createAlarm("EMAIL", "Another thing to remind",
-                                            "Tue Apr 25 2013 11:30:00")
+                                            "Tue Apr 25 2013 11:30:00",
+                                            "Pacific/Apia")
                         helpers.createEvent("Sun Jun 09 2013 15:00:00",
                                             "Sun Jun 10 2013 15:00:00",
-                                            "my place", "", "my description")
+                                            "my place", "", "my description",
+                                            "Indian/Cocos")
                     ], ->
                         callback()
                 helpers.cleanDb ->
