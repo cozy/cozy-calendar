@@ -48,12 +48,13 @@ module.exports = (compound) ->
         Alarm.all callback
 
     # Create an alarm from values
-    helpers.createAlarm = (action, description, trigger, callback) ->
+    helpers.createAlarm = (action, description, trigger, timezone, callback) ->
         (callback) ->
             alarm =
                 action: action
                 description: description
                 trigg: trigger
+                timezone: timezone
 
             Alarm.create alarm, callback
 
