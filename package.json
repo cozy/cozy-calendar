@@ -1,11 +1,10 @@
 {
   "name": "cozy-agenda",
   "version": "0.0.1",
-  "description": "The application currently manages reminders and only reminders. It is based on the iCal standard.",
+  "description": "Agenda application for Cozy Cloud",
   "engines": [
     "node = 0.8.x"
   ],
-  "description": "Agenda application for Cozy Cloud",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,11 +22,11 @@
     "jugglingdb": "= 0.2.0-23",
     "jugglingdb-cozy-adapter": "0.3.3",
     "async": "= 0.1.22",
-    "cozy-realtime-adapter":"= 0.11.0",
+    "cozy-realtime-adapter": "= 0.11.0",
     "cozy-i18n-helper": "~0.0.1",
     "time": "~0.9.2",
-    "lazy": "1.0.11",
-    "moment": "2.0.0"
+    "moment": "2.0.0",
+    "cozy-ical": "0.0.1"
   },
   "devDependencies": {
     "should": "= 1.2.0",
@@ -43,10 +42,10 @@
   "cozy-permissions": {
     "Alarm": {
       "description": "Creates and edits your alarms."
-      },
+    },
     "Event": {
       "description": "Creates and edits your events."
-      },
+    },
     "User": {
       "description": "Used to recover your timezone"
     }
