@@ -7,8 +7,8 @@ module.exports = class EventView extends View
 
     render: ->
         super
-            start: @model.getFormattedStartDate '{MM}/{dd}/{yyyy} {HH}:{mm}'
-            end: @model.getFormattedEndDate '{MM}/{dd}/{yyyy} {HH}:{mm}'
+            start: @model.getFormattedStartDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
+            end: @model.getFormattedEndDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
             description: @model.get 'description'
             place: @model.get 'place'
 
