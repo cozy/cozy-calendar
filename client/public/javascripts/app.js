@@ -255,14 +255,24 @@ window.require.register("helpers", function(exports, require, module) {
     return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
   };
 
-  exports.getPopoverDirection = function(isDayView, startDate) {
-    var direction, selectedHour, selectedWeekDay;
+  exports.getPopoverDirection = function(isDayView, startDate, endDate, isEditMode) {
+    var dayEnd, dayStart, direction, isStartEndOnSameDay, selectedHour, selectedWeekDay;
+    if (isEditMode == null) {
+      isEditMode = false;
+    }
+    dayStart = startDate.beginningOfDay();
+    dayEnd = endDate != null ? endDate.beginningOfDay() : void 0;
+    isStartEndOnSameDay = (endDate != null) && dayStart.is(dayEnd);
     if (!isDayView) {
-      selectedWeekDay = startDate.format('{weekday}');
-      if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
-        direction = 'left';
+      if (isEditMode && !isStartEndOnSameDay) {
+        direction = 'bottom';
       } else {
-        direction = 'right';
+        selectedWeekDay = startDate.format('{weekday}');
+        if (selectedWeekDay === 'friday' || selectedWeekDay === 'saturday' || selectedWeekDay === 'sunday') {
+          direction = 'left';
+        } else {
+          direction = 'right';
+        }
       }
     } else {
       selectedHour = startDate.format('{HH}');
@@ -1967,7 +1977,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       target = $(jsEvent.currentTarget);
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
-      direction = helpers.getPopoverDirection(isDayView, event.start);
+      direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
       this.popover.event.clean();
       this.popover.alarm.clean();
       if (!((this.popover[event.type].isExist != null) && this.popover[event.type].action === 'edit' && ((_ref1 = this.popover[event.type].date) != null ? _ref1.getTime() : void 0) === eventStartTime)) {
@@ -2327,7 +2337,7 @@ window.require.register("views/import_alarm_view", function(exports, require, mo
     AlarmView.prototype.render = function() {
       return AlarmView.__super__.render.call(this, {
         action: this.model.get('action'),
-        time: this.model.getFormattedDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
+        time: this.model.getFormattedDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
         description: this.model.get('description')
       });
     };
@@ -2398,8 +2408,8 @@ window.require.register("views/import_event_view", function(exports, require, mo
 
     EventView.prototype.render = function() {
       return EventView.__super__.render.call(this, {
-        start: this.model.getFormattedStartDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
-        end: this.model.getFormattedEndDate('{MM}/{dd}/{yyyy} {HH}:{mm}'),
+        start: this.model.getFormattedStartDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
+        end: this.model.getFormattedEndDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
         description: this.model.get('description'),
         place: this.model.get('place')
       });
