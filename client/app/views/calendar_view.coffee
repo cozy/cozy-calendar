@@ -158,6 +158,7 @@ module.exports = class CalendarView extends View
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @popover.alarm.clean()
         @popover.event.clean()
+
         if view.name is "month"
             @handleSelectionInView startDate, endDate, allDay, jsEvent
         else if view.name is "agendaWeek"
@@ -226,7 +227,9 @@ module.exports = class CalendarView extends View
         target = $(jsEvent.currentTarget)
         eventStartTime = event.start.getTime()
         isDayView = view.name is 'agendaDay'
-        direction = helpers.getPopoverDirection isDayView, event.start
+
+        direction = helpers.getPopoverDirection isDayView, event.start, \
+                                                        event.end, true
 
         # Clean other popover if it exists
         @popover.event.clean()
