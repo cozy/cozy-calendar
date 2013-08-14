@@ -8,7 +8,7 @@ module.exports = class AlarmView extends View
     render: ->
         super
             action: @model.get 'action'
-            time: @model.getFormattedDate '{MM}/{dd}/{yyyy} {HH}:{mm}'
+            time: @model.getFormattedDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
             description: @model.get 'description'
 
     template: ->
