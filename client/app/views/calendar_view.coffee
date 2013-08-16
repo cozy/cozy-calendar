@@ -227,17 +227,15 @@ module.exports = class CalendarView extends View
         target = $(jsEvent.currentTarget)
         eventStartTime = event.start.getTime()
         isDayView = view.name is 'agendaDay'
-
         direction = helpers.getPopoverDirection isDayView, event.start, \
                                                         event.end, true
 
-        # Clean other popover if it exists
-        @popover.event.clean()
-        @popover.alarm.clean()
+        unless @popover[event.type].action is 'edit' and
+        @popover[event.type].event?.id is event.id
+            # Clean other popover if it exists
+            @popover.event.clean()
+            @popover.alarm.clean()
 
-        unless @popover[event.type].isExist? and
-        @popover[event.type].action is 'edit' and
-        @popover[event.type].date?.getTime() is eventStartTime
             # Create new popover to edit alarm or event
             @popover[event.type].createNew
                 field: $(target)
@@ -245,6 +243,7 @@ module.exports = class CalendarView extends View
                 action: 'edit'
                 model: @model[event.type]
                 event: event
+
             # Initialize template and show popover
             if event.type is 'alarm'
                 timezoneData = []
@@ -269,7 +268,7 @@ module.exports = class CalendarView extends View
                     defaultValueDesc: event.title
                 @popover.event.show t("Event edition"), direction, formTemplate
 
-        @popover[event.type].bindEditEvents()
+            @popover[event.type].bindEditEvents()
 
     # Display popover to create alarm or event if user selects several cases
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->

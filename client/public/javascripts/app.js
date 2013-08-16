@@ -1978,9 +1978,9 @@ window.require.register("views/calendar_view", function(exports, require, module
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
       direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
-      this.popover.event.clean();
-      this.popover.alarm.clean();
-      if (!((this.popover[event.type].isExist != null) && this.popover[event.type].action === 'edit' && ((_ref1 = this.popover[event.type].date) != null ? _ref1.getTime() : void 0) === eventStartTime)) {
+      if (!(this.popover[event.type].action === 'edit' && ((_ref1 = this.popover[event.type].event) != null ? _ref1.id : void 0) === event.id)) {
+        this.popover.event.clean();
+        this.popover.alarm.clean();
         this.popover[event.type].createNew({
           field: $(target),
           date: event.start,
@@ -2016,8 +2016,8 @@ window.require.register("views/calendar_view", function(exports, require, module
           });
           this.popover.event.show(t("Event edition"), direction, formTemplate);
         }
+        return this.popover[event.type].bindEditEvents();
       }
-      return this.popover[event.type].bindEditEvents();
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
@@ -2732,6 +2732,8 @@ window.require.register("views/popover", function(exports, require, module) {
       }
       this.field = null;
       this.date = null;
+      this.isExist = null;
+      this.event = null;
       if (this.popoverWidget != null) {
         this.unbindEvents();
       }
@@ -2747,7 +2749,9 @@ window.require.register("views/popover", function(exports, require, module) {
       this.field = data.field;
       this.date = data.date;
       this.model = data.model;
-      return this.event = data.event;
+      this.event = data.event;
+      this.action = data.action;
+      return this.isExist = true;
     };
 
     PopOver.prototype.show = function(title, direction, content) {

@@ -8,6 +8,8 @@ module.exports = class PopOver extends View
         @field?.popover 'destroy'
         @field = null
         @date = null
+        @isExist = null
+        @event = null
         @unbindEvents() if @popoverWidget?
         @popoverWidget?.hide()
 
@@ -20,6 +22,8 @@ module.exports = class PopOver extends View
         @date = data.date
         @model = data.model
         @event = data.event
+        @action = data.action
+        @isExist = true
 
     show: (title, direction, content) ->
         if $(window).width() < 600
