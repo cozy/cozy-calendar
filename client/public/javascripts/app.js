@@ -1895,13 +1895,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
       this.popover.alarm.clean();
       this.popover.event.clean();
-      if (view.name === "month") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-      } else if (view.name === "agendaWeek") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-      } else if (view.name === "agendaDay") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
-      }
+      return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, view.name);
     };
 
     CalendarView.prototype.onRender = function(event, element) {
@@ -1973,17 +1967,19 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var defaultValueEnd, diff, direction, eventStartTime, formTemplate, isDayView, target, timezone, timezoneData, _i, _len, _ref1;
+      var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, target, timezone, timezoneData, _i, _len, _ref1;
       target = $(jsEvent.currentTarget);
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
+      end = event.end.format('{HH}:{mm}');
+      start = event.start.format('{HH}:{mm}');
       direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
       this.popover.event.clean();
       this.popover.alarm.clean();
       if (!((this.popover[event.type].isExist != null) && this.popover[event.type].action === 'edit' && ((_ref1 = this.popover[event.type].date) != null ? _ref1.getTime() : void 0) === eventStartTime)) {
         this.popover[event.type].createNew({
           field: $(target),
-          date: event.start,
+          date: start,
           action: 'edit',
           model: this.model[event.type],
           event: event
@@ -2006,10 +2002,10 @@ window.require.register("views/calendar_view", function(exports, require, module
           this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
         } else {
           diff = event.diff;
-          defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff;
+          defaultValueEnd = end + "+" + diff;
           formTemplate = formSmallTemplate.event({
             editionMode: true,
-            defaultValueStart: event.start.format('{HH}:{mm}'),
+            defaultValueStart: start,
             defaultValueEnd: defaultValueEnd,
             defaultValuePlace: event.place,
             defaultValueDesc: event.title
@@ -2020,17 +2016,22 @@ window.require.register("views/calendar_view", function(exports, require, module
       return this.popover[event.type].bindEditEvents();
     };
 
-    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, endHour, formTemplate, startHour, target, title, type;
+    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, view) {
+      var direction, endHour, formTemplate, isDayView, startHour, target, title, type;
+      startHour = startDate.format('{HH}:{mm}');
+      endHour = endDate.format('{HH}:{mm}');
       target = $(jsEvent.target);
+      isDayView = view === "agendaDay";
       direction = helpers.getPopoverDirection(isDayView, startDate);
-      startHour = startDate.format('{HH}:{mm}').split(':');
-      endHour = endDate.format('{HH}:{mm}').split(':');
-      type = 'event';
+      if (view === "month") {
+        startHour = "";
+        endHour = "";
+      }
+      type = "event";
       formTemplate = formSmallTemplate.event({
         editionMode: false,
-        defaultValueStart: '',
-        defaultValueEnd: '',
+        defaultValueStart: startHour,
+        defaultValueEnd: endHour,
         defaultValuePlace: '',
         defaultValueDesc: ''
       });
