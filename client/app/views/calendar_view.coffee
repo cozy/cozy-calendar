@@ -221,6 +221,8 @@ module.exports = class CalendarView extends View
         target = $(jsEvent.currentTarget)
         eventStartTime = event.start.getTime()
         isDayView = view.name is 'agendaDay'
+        end = event.end.format('{HH}:{mm}')
+        start = event.start.format('{HH}:{mm}')
 
         direction = helpers.getPopoverDirection isDayView, event.start, \
                                                         event.end, true
@@ -235,7 +237,7 @@ module.exports = class CalendarView extends View
             # Create new popover to edit alarm or event
             @popover[event.type].createNew
                 field: $(target)
-                date: event.start
+                date: start
                 action: 'edit'
                 model: @model[event.type]
                 event: event
@@ -254,10 +256,10 @@ module.exports = class CalendarView extends View
 
             else
                 diff = event.diff
-                defaultValueEnd = event.end.format('{HH}:{mm}') + "+" + diff
+                defaultValueEnd = end + "+" + diff
                 formTemplate = formSmallTemplate.event
                     editionMode: true
-                    defaultValueStart: event.start.format('{HH}:{mm}')
+                    defaultValueStart: start
                     defaultValueEnd: defaultValueEnd
                     defaultValuePlace: event.place
                     defaultValueDesc: event.title
@@ -272,7 +274,7 @@ module.exports = class CalendarView extends View
         target = $(jsEvent.target)
         isDayView = view is "agendaDay"
         direction = helpers.getPopoverDirection isDayView, startDate
-        
+
         if view is "month"
             startHour = ""
             endHour = ""
