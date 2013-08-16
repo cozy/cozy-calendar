@@ -158,13 +158,7 @@ module.exports = class CalendarView extends View
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @popover.alarm.clean()
         @popover.event.clean()
-
-        if view.name is "month"
-            @handleSelectionInView startDate, endDate, allDay, jsEvent
-        else if view.name is "agendaWeek"
-            @handleSelectionInView startDate, endDate, allDay, jsEvent
-        else if view.name is "agendaDay"
-            @handleSelectionInView startDate, endDate, allDay, jsEvent, true
+        @handleSelectionInView startDate, endDate, allDay, jsEvent, view.name
 
     onRender: (event, element) ->
         if event.type is 'alarm'
@@ -272,33 +266,24 @@ module.exports = class CalendarView extends View
         @popover[event.type].bindEditEvents()
 
     # Display popover to create alarm or event if user selects several cases
-    handleSelectionInView: (startDate, endDate, allDay, jsEvent, isDayView) ->
+    handleSelectionInView: (startDate, endDate, allDay, jsEvent, view) ->
+        startHour = startDate.format('{HH}:{mm}')
+        endHour = endDate.format('{HH}:{mm}')
         target = $(jsEvent.target)
+        isDayView = view is "agendaDay"
         direction = helpers.getPopoverDirection isDayView, startDate
-        startHour = startDate.format('{HH}:{mm}').split(':')
-        endHour = endDate.format('{HH}:{mm}').split(':')
-
-        # Initialize templates and type of popover
-        #if helpers.isEvent(startHour, endHour)
-        type = 'event'
+        
+        if view is "month"
+            startHour = ""
+            endHour = ""
+        type = "event"
         formTemplate = formSmallTemplate.event
             editionMode: false
-            defaultValueStart: '' #startDate.format('{HH}:{mm}')
-            defaultValueEnd: '' #endDate.format('{HH}:{mm}')
+            defaultValueStart: startHour
+            defaultValueEnd: endHour
             defaultValuePlace: ''
             defaultValueDesc: ''
-        title = t "Event creation"
-        #else
-            #type = 'alarm'
-            #timezoneData = []
-            #for timezone in timezones
-                    #timezoneData.push value: timezone, text: timezone
-            #formTemplate = formSmallTemplate.alarm
-                #editionMode: false
-                #timezones: timezoneData
-                #defaultTimezone: 'Use specific timezone'
-                #defaultValue: ''
-            #title = t "Alarm creation"
+        title = t "Event creation" 
 
         # Create popover to create alarm or event
         @popover[type].createNew

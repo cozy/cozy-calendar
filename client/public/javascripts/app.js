@@ -1895,13 +1895,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
       this.popover.alarm.clean();
       this.popover.event.clean();
-      if (view.name === "month") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-      } else if (view.name === "agendaWeek") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent);
-      } else if (view.name === "agendaDay") {
-        return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, true);
-      }
+      return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, view.name);
     };
 
     CalendarView.prototype.onRender = function(event, element) {
@@ -2020,17 +2014,22 @@ window.require.register("views/calendar_view", function(exports, require, module
       return this.popover[event.type].bindEditEvents();
     };
 
-    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, isDayView) {
-      var direction, endHour, formTemplate, startHour, target, title, type;
+    CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, view) {
+      var direction, endHour, formTemplate, isDayView, startHour, target, title, type;
+      startHour = startDate.format('{HH}:{mm}');
+      endHour = endDate.format('{HH}:{mm}');
       target = $(jsEvent.target);
+      isDayView = view === "agendaDay";
       direction = helpers.getPopoverDirection(isDayView, startDate);
-      startHour = startDate.format('{HH}:{mm}').split(':');
-      endHour = endDate.format('{HH}:{mm}').split(':');
-      type = 'event';
+      if (view === "month") {
+        startHour = "";
+        endHour = "";
+      }
+      type = "event";
       formTemplate = formSmallTemplate.event({
         editionMode: false,
-        defaultValueStart: '',
-        defaultValueEnd: '',
+        defaultValueStart: startHour,
+        defaultValueEnd: endHour,
         defaultValuePlace: '',
         defaultValueDesc: ''
       });
