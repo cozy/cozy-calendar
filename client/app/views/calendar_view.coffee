@@ -217,12 +217,13 @@ module.exports = class CalendarView extends View
         if $('.popover').is(':visible') and @popover[event.type].event?.id is event.id
             console.log 'bisit'
             return
-
         target = $(jsEvent.currentTarget)
         eventStartTime = event.start.getTime()
         isDayView = view.name is 'agendaDay'
         end = event.end.format '{HH}:{mm}'
+        startDate = event.start
         start = event.start.format '{HH}:{mm}'
+
         direction = helpers.getPopoverDirection isDayView, event.start, \
                                                         event.end, true
 
@@ -232,7 +233,7 @@ module.exports = class CalendarView extends View
         # Create new popover to edit alarm or event
         @popover[event.type].createNew
             field: $(target)
-            date: start
+            date: startDate
             action: 'edit'
             model: @model[event.type]
             event: event
@@ -244,6 +245,7 @@ module.exports = class CalendarView extends View
             formTemplate = formSmallTemplate.alarm
                 editionMode: true
                 defaultValue: event.title
+                defaultTime: start
                 timezones: timezoneData
                 defaultTimezone: event.timezone
 

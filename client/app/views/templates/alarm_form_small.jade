@@ -1,16 +1,6 @@
 div
-    input.input-xlarge(type="text", value="#{defaultValue}", id="inputDesc", placeholder=t("What do you want to be reminded ?"))
-    button.btn.pull-right.add.disabled
-        if editionMode
-            = t('Edit')
-        else
-            = t('Add')
-    unless editionMode
-        p= t('ie: 9:00 important meeting')
-
-    select(id="input-timezone").input
-        option(value="#{defaultTimezone}", selected) #{defaultTimezone}
-        each timezone in timezones
-            option(value="#{timezone.value}") #{timezone.value}
-    unless editionMode
-        button.btn.add-event= t('Create Event')
+    input.input-small(type="text", value="#{defaultTime}", id="input-time")
+    input.input(type="text", value="#{defaultValue}", id="input-desc", placeholder=t("What do you want to be reminded ?"))
+div
+    button.btn.add 
+        =t('Edit')

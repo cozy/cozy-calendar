@@ -94,7 +94,7 @@ module.exports = class PopOver extends View
         dueDate.advance hours: 8 if dueDate.format('{HH}:{mm}') is '00:00'
 
         # smart detection: set the time if the user input has a time
-        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2}A4)/)
+        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
         if smartDetection? and smartDetection[1]?
             specifiedTime = smartDetection[1]
             specifiedTime = specifiedTime.split /:/

@@ -1,9 +1,6 @@
 PopOver = require './popover'
 View = require '../lib/view'
 Alarm = require '../models/alarm'
-timezones = require('helpers/timezone').timezones
-
-eventFormSmallTemplate = require('./templates/event_form_small')
 
 module.exports = class AlarmPopOver extends PopOver
 
@@ -18,18 +15,16 @@ module.exports = class AlarmPopOver extends PopOver
 
     show: (title, direction, content) ->
         super title, direction, content
-        @popoverWidget.find('input').focus()
+        $('.popover #input-time').focus()   
 
     bindEditEvents: =>
         super()
-        @alarmDescription = @popoverWidget.find 'input'
-        @alarmTimezone = @popoverWidget.find 'input-timezone'
-        $('.popover #input-timezone').change () =>
-            @addButton.removeClass 'disabled'
+        @alarmDescription = $('.popover #input-desc')
+        @alarmTime = $('.popover #input-time')
 
         @alarmDescription.keyup (event) =>
-            if @alarmDescription.val() is ''
-                @addButton.addClass 'disabled'
+            if @alarmDescription.val() is '' and @alarmTime.val() is ''
+                @addButton.addClass 'disabled'               
             else if event.keyCode is 13 or event.which is 13
                 @onEditClicked()
             else
@@ -40,10 +35,11 @@ module.exports = class AlarmPopOver extends PopOver
         @clean
 
     onEditClicked: =>
+        start =  @formatDate $('.popover #input-time').val()
         data =
-            description: @alarmDescription.val()
-        if $('.popover #input-timezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #input-timezone').val()
+            description: $('.popover #input-desc').val()
+            trigg: start.format Alarm.dateFormat
+        
         super data, (err, alarm) =>
             unless err
                 @event.title = data.description
@@ -52,4 +48,5 @@ module.exports = class AlarmPopOver extends PopOver
                     minutes: 30
                 @event._start = @event.start
                 @event._end = @event.end
+                @event.title = data.description
                 @cal.fullCalendar 'renderEvent', @event

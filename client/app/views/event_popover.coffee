@@ -83,8 +83,8 @@ module.exports = class EventPopOver extends PopOver
 
     onEditClicked: =>
         data = @initData()
-        super data, (success) =>
-            if success
+        super data, (err, evt) =>
+            unless err
                 # Update event in calendar
                 @event.title = data.description
                 startDate = new Date(data.start)

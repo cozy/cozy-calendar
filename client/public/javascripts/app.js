@@ -1374,7 +1374,7 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
   
 });
 window.require.register("views/alarm_popover", function(exports, require, module) {
-  var Alarm, AlarmPopOver, PopOver, View, eventFormSmallTemplate, timezones,
+  var Alarm, AlarmPopOver, PopOver, View,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1384,10 +1384,6 @@ window.require.register("views/alarm_popover", function(exports, require, module
   View = require('../lib/view');
 
   Alarm = require('../models/alarm');
-
-  timezones = require('helpers/timezone').timezones;
-
-  eventFormSmallTemplate = require('./templates/event_form_small');
 
   module.exports = AlarmPopOver = (function(_super) {
     __extends(AlarmPopOver, _super);
@@ -1409,19 +1405,16 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
     AlarmPopOver.prototype.show = function(title, direction, content) {
       AlarmPopOver.__super__.show.call(this, title, direction, content);
-      return this.popoverWidget.find('input').focus();
+      return $('.popover #input-time').focus();
     };
 
     AlarmPopOver.prototype.bindEditEvents = function() {
       var _this = this;
       AlarmPopOver.__super__.bindEditEvents.call(this);
-      this.alarmDescription = this.popoverWidget.find('input');
-      this.alarmTimezone = this.popoverWidget.find('input-timezone');
-      $('.popover #input-timezone').change(function() {
-        return _this.addButton.removeClass('disabled');
-      });
+      this.alarmDescription = $('.popover #input-desc');
+      this.alarmTime = $('.popover #input-time');
       return this.alarmDescription.keyup(function(event) {
-        if (_this.alarmDescription.val() === '') {
+        if (_this.alarmDescription.val() === '' && _this.alarmTime.val() === '') {
           return _this.addButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
           return _this.onEditClicked();
@@ -1437,14 +1430,13 @@ window.require.register("views/alarm_popover", function(exports, require, module
     };
 
     AlarmPopOver.prototype.onEditClicked = function() {
-      var data,
+      var data, start,
         _this = this;
+      start = this.formatDate($('.popover #input-time').val());
       data = {
-        description: this.alarmDescription.val()
+        description: $('.popover #input-desc').val(),
+        trigg: start.format(Alarm.dateFormat)
       };
-      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
-        data.timezone = $('.popover #input-timezone').val();
-      }
       return AlarmPopOver.__super__.onEditClicked.call(this, data, function(err, alarm) {
         if (!err) {
           _this.event.title = data.description;
@@ -1454,6 +1446,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
           });
           _this.event._start = _this.event.start;
           _this.event._end = _this.event.end;
+          _this.event.title = data.description;
           return _this.cal.fullCalendar('renderEvent', _this.event);
         }
       });
@@ -1887,7 +1880,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, target, timezone, timezoneData, _i, _len, _ref1;
+      var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, startDate, target, timezone, timezoneData, _i, _len, _ref1;
       if ($('.popover').is(':visible') && ((_ref1 = this.popover[event.type].event) != null ? _ref1.id : void 0) === event.id) {
         console.log('bisit');
         return;
@@ -1896,13 +1889,14 @@ window.require.register("views/calendar_view", function(exports, require, module
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
       end = event.end.format('{HH}:{mm}');
+      startDate = event.start;
       start = event.start.format('{HH}:{mm}');
       direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
       this.popover.alarm.clean();
       this.popover.event.clean();
       this.popover[event.type].createNew({
         field: $(target),
-        date: start,
+        date: startDate,
         action: 'edit',
         model: this.model[event.type],
         event: event
@@ -1919,6 +1913,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         formTemplate = formSmallTemplate.alarm({
           editionMode: true,
           defaultValue: event.title,
+          defaultTime: start,
           timezones: timezoneData,
           defaultTimezone: event.timezone
         });
@@ -2182,9 +2177,9 @@ window.require.register("views/event_popover", function(exports, require, module
       var data,
         _this = this;
       data = this.initData();
-      return EventPopOver.__super__.onEditClicked.call(this, data, function(success) {
+      return EventPopOver.__super__.onEditClicked.call(this, data, function(err, evt) {
         var endDate, startDate;
-        if (success) {
+        if (!err) {
           _this.event.title = data.description;
           startDate = new Date(data.start);
           _this.event.start = startDate.format(Date.ISO8601_DATETIME);
@@ -2775,7 +2770,7 @@ window.require.register("views/popover", function(exports, require, module) {
           hours: 8
         });
       }
-      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2}A4)/);
+      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
       if ((smartDetection != null) && (smartDetection[1] != null)) {
         specifiedTime = smartDetection[1];
         specifiedTime = specifiedTime.split(/:/);
@@ -2989,63 +2984,13 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   with (locals || {}) {
   var interp;
   buf.push('<div><input');
-  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("inputDesc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input-xlarge') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/><button class="btn pull-right add disabled">');
-  if ( editionMode)
-  {
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultTime) + ""), 'id':("input-time"), "class": ('input-small') }, {"type":true,"value":true,"id":true}));
+  buf.push('/><input');
+  buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("input-desc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
+  buf.push('/></div><div><button class="btn add"> ');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
-  }
-  else
-  {
-  var __val__ = t('Add')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  }
-  buf.push('</button>');
-  if (!( editionMode))
-  {
-  buf.push('<p>');
-  var __val__ = t('ie: 9:00 important meeting')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</p>');
-  }
-  buf.push('<select id="input-timezone" class="input"><option');
-  buf.push(attrs({ 'value':("" + (defaultTimezone) + ""), 'selected':(true) }, {"value":true,"selected":true}));
-  buf.push('>' + escape((interp = defaultTimezone) == null ? '' : interp) + '</option>');
-  // iterate timezones
-  ;(function(){
-    if ('number' == typeof timezones.length) {
-
-      for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
-        var timezone = timezones[$index];
-
-  buf.push('<option');
-  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
-      }
-
-    } else {
-      var $$l = 0;
-      for (var $index in timezones) {
-        $$l++;      var timezone = timezones[$index];
-
-  buf.push('<option');
-  buf.push(attrs({ 'value':("" + (timezone.value) + "") }, {"value":true}));
-  buf.push('>' + escape((interp = timezone.value) == null ? '' : interp) + '</option>');
-      }
-
-    }
-  }).call(this);
-
-  buf.push('</select>');
-  if (!( editionMode))
-  {
-  buf.push('<button class="btn add-event">');
-  var __val__ = t('Create Event')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</button>');
-  }
-  buf.push('</div>');
+  buf.push('</button></div>');
   }
   return buf.join("");
   };
