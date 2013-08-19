@@ -1374,7 +1374,7 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
   
 });
 window.require.register("views/alarm_popover", function(exports, require, module) {
-  var Alarm, AlarmPopOver, EventPopOver, PopOver, View, eventFormSmallTemplate, timezones,
+  var Alarm, AlarmPopOver, PopOver, View, eventFormSmallTemplate, timezones,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1387,8 +1387,6 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
   timezones = require('helpers/timezone').timezones;
 
-  EventPopOver = require('./event_popover');
-
   eventFormSmallTemplate = require('./templates/event_form_small');
 
   module.exports = AlarmPopOver = (function(_super) {
@@ -1396,64 +1394,22 @@ window.require.register("views/alarm_popover", function(exports, require, module
 
     function AlarmPopOver(cal) {
       this.cal = cal;
-      this.onEventButtonClicked = __bind(this.onEventButtonClicked, this);
       this.onEditClicked = __bind(this.onEditClicked, this);
-      this.onButtonClicked = __bind(this.onButtonClicked, this);
       this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.bindEditEvents = __bind(this.bindEditEvents, this);
       AlarmPopOver.__super__.constructor.call(this, this.cal);
     }
 
-    AlarmPopOver.prototype.clean = function() {
-      AlarmPopOver.__super__.clean.call(this);
-      return this.action = null;
-    };
-
     AlarmPopOver.prototype.unbindEvents = function() {
       AlarmPopOver.__super__.unbindEvents.call(this);
-      this.popoverWidget.find('button.add-event').unbind('click');
+      this.popoverWidget.find('button').unbind('click');
+      this.popoverWidget.find('.remove').unbind('click');
       return this.popoverWidget.find('input').unbind('keyup');
-    };
-
-    AlarmPopOver.prototype.createNew = function(data) {
-      this.clean();
-      AlarmPopOver.__super__.createNew.call(this, data);
-      this.action = data.action;
-      return this.modelEvent = data.modelEvent;
     };
 
     AlarmPopOver.prototype.show = function(title, direction, content) {
       AlarmPopOver.__super__.show.call(this, title, direction, content);
-      this.popoverWidget.find('input').focus();
-      this.direction = direction;
-      if (this.action === 'create') {
-        return $('.remove').hide();
-      } else {
-        return $('.remove').show();
-      }
-    };
-
-    AlarmPopOver.prototype.bindEvents = function() {
-      var _this = this;
-      AlarmPopOver.__super__.bindEvents.call(this);
-      this.addEventButton = this.popoverWidget.find('button.add-event');
-      this.addEventButton.click(function() {
-        return _this.onEventButtonClicked();
-      });
-      this.alarmDescription = this.popoverWidget.find('input');
-      this.alarmTimezone = this.popoverWidget.find('input-timezone');
-      $('.popover #input-timezone').change(function() {
-        return _this.addButton.removeClass('disabled');
-      });
-      return this.alarmDescription.keyup(function(event) {
-        if (_this.alarmDescription.val() === '') {
-          return _this.addButton.addClass('disabled');
-        } else if (event.keyCode === 13 || event.which === 13) {
-          return _this.onButtonClicked();
-        } else {
-          return _this.addButton.removeClass('disabled');
-        }
-      });
+      return this.popoverWidget.find('input').focus();
     };
 
     AlarmPopOver.prototype.bindEditEvents = function() {
@@ -1480,24 +1436,6 @@ window.require.register("views/alarm_popover", function(exports, require, module
       return this.clean;
     };
 
-    AlarmPopOver.prototype.onButtonClicked = function() {
-      var data, dueDate, value;
-      value = this.popoverWidget.find('input').val();
-      dueDate = this.formatDate(value);
-      value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '');
-      value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-      data = {
-        description: value,
-        action: 'DISPLAY',
-        trigg: dueDate.format(Alarm.dateFormat)
-      };
-      if ($('.popover #input-timezone').val() !== "Use specific timezone") {
-        data.timezone = $('.popover #input-timezone').val();
-      }
-      AlarmPopOver.__super__.onButtonClicked.call(this, data);
-      return this.clean();
-    };
-
     AlarmPopOver.prototype.onEditClicked = function() {
       var data,
         _this = this;
@@ -1507,34 +1445,18 @@ window.require.register("views/alarm_popover", function(exports, require, module
       if ($('.popover #input-timezone').val() !== "Use specific timezone") {
         data.timezone = $('.popover #input-timezone').val();
       }
-      return AlarmPopOver.__super__.onEditClicked.call(this, data, function(success) {
-        if (success) {
+      return AlarmPopOver.__super__.onEditClicked.call(this, data, function(err, alarm) {
+        if (!err) {
           _this.event.title = data.description;
-          _this.event.timezone = data.timezone;
+          _this.event.start = Date.create(alarm.get('trigg'));
+          _this.event.end = Date.create(alarm.get('trigg')).advance({
+            minutes: 30
+          });
+          _this.event._start = _this.event.start;
+          _this.event._end = _this.event.end;
           return _this.cal.fullCalendar('renderEvent', _this.event);
         }
       });
-    };
-
-    AlarmPopOver.prototype.onEventButtonClicked = function() {
-      var eventFormTemplate;
-      this.field.popover('destroy').popover();
-      this.pop = new EventPopOver(this.cal);
-      this.pop.createNew({
-        field: this.field,
-        date: this.date,
-        action: 'create',
-        model: this.modelEvent
-      });
-      eventFormTemplate = eventFormSmallTemplate({
-        editionMode: false,
-        defaultValueStart: '',
-        defaultValueEnd: '',
-        defaultValuePlace: '',
-        defaultValueDesc: ''
-      });
-      this.pop.show(t("Event creation"), this.direction, eventFormTemplate);
-      return this.pop.bindEvents(this.date);
     };
 
     return AlarmPopOver;
@@ -1823,7 +1745,6 @@ window.require.register("views/calendar_view", function(exports, require, module
         selectHelper: false,
         unselectAuto: false,
         eventRender: this.onRender,
-        viewDisplay: this.deletePopOver,
         select: this.onSelect,
         eventDragStop: this.onEventDragStop,
         eventDrop: this.onEventDrop,
@@ -1893,8 +1814,6 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
-      this.popover.alarm.clean();
-      this.popover.event.clean();
       return this.handleSelectionInView(startDate, endDate, allDay, jsEvent, view.name);
     };
 
@@ -1955,8 +1874,9 @@ window.require.register("views/calendar_view", function(exports, require, module
           minutes: minuteDelta
         });
         evt.getEndDateObject().advance({
-          days: dayDelta,
-          minutes: minuteDelta
+          days: dayDelta({
+            minutes: minuteDelta
+          })
         });
         data = {
           start: evt.getFormattedStartDate(Event.dateFormat),
@@ -1968,50 +1888,52 @@ window.require.register("views/calendar_view", function(exports, require, module
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
       var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, target, timezone, timezoneData, _i, _len, _ref1;
+      if ($('.popover').is(':visible') && ((_ref1 = this.popover[event.type].event) != null ? _ref1.id : void 0) === event.id) {
+        console.log('bisit');
+        return;
+      }
       target = $(jsEvent.currentTarget);
       eventStartTime = event.start.getTime();
       isDayView = view.name === 'agendaDay';
       end = event.end.format('{HH}:{mm}');
       start = event.start.format('{HH}:{mm}');
       direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
-      this.popover.event.clean();
       this.popover.alarm.clean();
-      if (!((this.popover[event.type].isExist != null) && this.popover[event.type].action === 'edit' && ((_ref1 = this.popover[event.type].date) != null ? _ref1.getTime() : void 0) === eventStartTime)) {
-        this.popover[event.type].createNew({
-          field: $(target),
-          date: start,
-          action: 'edit',
-          model: this.model[event.type],
-          event: event
-        });
-        if (event.type === 'alarm') {
-          timezoneData = [];
-          for (_i = 0, _len = timezones.length; _i < _len; _i++) {
-            timezone = timezones[_i];
-            timezoneData.push({
-              value: timezone,
-              text: timezone
-            });
-          }
-          formTemplate = formSmallTemplate.alarm({
-            editionMode: true,
-            defaultValue: event.title,
-            timezones: timezoneData,
-            defaultTimezone: event.timezone
+      this.popover.event.clean();
+      this.popover[event.type].createNew({
+        field: $(target),
+        date: start,
+        action: 'edit',
+        model: this.model[event.type],
+        event: event
+      });
+      if (event.type === 'alarm') {
+        timezoneData = [];
+        for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+          timezone = timezones[_i];
+          timezoneData.push({
+            value: timezone,
+            text: timezone
           });
-          this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
-        } else {
-          diff = event.diff;
-          defaultValueEnd = end + "+" + diff;
-          formTemplate = formSmallTemplate.event({
-            editionMode: true,
-            defaultValueStart: start,
-            defaultValueEnd: defaultValueEnd,
-            defaultValuePlace: event.place,
-            defaultValueDesc: event.title
-          });
-          this.popover.event.show(t("Event edition"), direction, formTemplate);
         }
+        formTemplate = formSmallTemplate.alarm({
+          editionMode: true,
+          defaultValue: event.title,
+          timezones: timezoneData,
+          defaultTimezone: event.timezone
+        });
+        this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
+      } else {
+        diff = event.diff;
+        defaultValueEnd = end + "+" + diff;
+        formTemplate = formSmallTemplate.event({
+          editionMode: true,
+          defaultValueStart: start,
+          defaultValueEnd: defaultValueEnd,
+          defaultValuePlace: event.place,
+          defaultValueDesc: event.title
+        });
+        this.popover.event.show(t("Event edition"), direction, formTemplate);
       }
       return this.popover[event.type].bindEditEvents();
     };
@@ -2229,7 +2151,7 @@ window.require.register("views/event_popover", function(exports, require, module
       var data, dueEndDate, dueStartDate, newDate, specifiedDay;
       dueStartDate = this.formatDate($('.popover #input-start').val());
       specifiedDay = $('.popover #input-end').val().split('+');
-      if (specifiedDay[1] != null) {
+      if ((specifiedDay[1] != null) && (this.date != null)) {
         newDate = this.date.advance({
           days: specifiedDay[1]
         });
@@ -2727,16 +2649,17 @@ window.require.register("views/popover", function(exports, require, module) {
     }
 
     PopOver.prototype.clean = function() {
-      var _ref, _ref1;
+      var _ref;
+      this.date = null;
+      this.event = null;
+      if (this.popoverWidget != null) {
+        this.unbindEvents();
+      }
       if ((_ref = this.field) != null) {
         _ref.popover('destroy');
       }
       this.field = null;
-      this.date = null;
-      if (this.popoverWidget != null) {
-        this.unbindEvents();
-      }
-      return (_ref1 = this.popoverWidget) != null ? _ref1.hide() : void 0;
+      return this.popoverWidget = null;
     };
 
     PopOver.prototype.unbindEvents = function() {
@@ -2746,23 +2669,30 @@ window.require.register("views/popover", function(exports, require, module) {
 
     PopOver.prototype.createNew = function(data) {
       this.field = data.field;
-      this.date = data.date;
+      if (data.date != null) {
+        this.date = Date.create(data.date);
+      } else {
+        this.date = null;
+      }
       this.model = data.model;
-      return this.event = data.event;
+      this.event = data.event;
+      return this.action = data.action;
     };
 
     PopOver.prototype.show = function(title, direction, content) {
       if ($(window).width() < 600) {
         direction = 'bottom';
       }
-      this.field.data('popover', null).popover({
+      this.field.data('popover', null);
+      this.pop = this.field.popover({
         title: require('./templates/popover_title')({
           title: title
         }),
         html: true,
         placement: direction,
         content: content
-      }).popover('show');
+      });
+      this.pop.popover('show');
       return this.popoverWidget = $('.container .popover');
     };
 
@@ -2786,6 +2716,7 @@ window.require.register("views/popover", function(exports, require, module) {
       this.popoverWidget.find('button.close').click(function() {
         return _this.clean();
       });
+      this.popoverWidget.find('remove').hide();
       return this.addButton.addClass('disabled');
     };
 
@@ -2807,6 +2738,7 @@ window.require.register("views/popover", function(exports, require, module) {
       this.removeButton.click(function() {
         return _this.onRemoveClicked();
       });
+      this.popoverWidget.find('show').hide();
       this.addButton.html(this.action);
       this.closeButton.click(function() {
         return _this.clean();
@@ -2843,7 +2775,7 @@ window.require.register("views/popover", function(exports, require, module) {
           hours: 8
         });
       }
-      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
+      smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2}A4)/);
       if ((smartDetection != null) && (smartDetection[1] != null)) {
         specifiedTime = smartDetection[1];
         specifiedTime = specifiedTime.split(/:/);
@@ -2877,7 +2809,6 @@ window.require.register("views/popover", function(exports, require, module) {
       var evt,
         _this = this;
       evt = this.model.get(this.event.id);
-      this.cal.fullCalendar('renderEvent', this.event);
       this.addButton.html('&nbsp;');
       this.addButton.spin('small');
       return evt.save(data, {
@@ -2885,13 +2816,12 @@ window.require.register("views/popover", function(exports, require, module) {
         success: function() {
           _this.addButton.spin();
           _this.addButton.html(_this.action);
-          return callback(true);
+          return callback(null, evt);
         },
         error: function() {
-          _this.cal.fullCalendar('renderEvent', _this.event);
           _this.addButton.spin();
           _this.addButton.html(_this.action);
-          return callback(false);
+          return callback(new Error());
         }
       });
     };

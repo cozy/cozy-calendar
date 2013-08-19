@@ -99,7 +99,6 @@ module.exports = class CalendarView extends View
             selectHelper: false
             unselectAuto: false
             eventRender: @onRender
-            viewDisplay: @deletePopOver
             select: @onSelect
             eventDragStop: @onEventDragStop
             eventDrop: @onEventDrop
@@ -156,8 +155,6 @@ module.exports = class CalendarView extends View
         @model.event.forEach (item) => @onAddEvent item, @model.event
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
-        @popover.alarm.clean()
-        @popover.event.clean()
         @handleSelectionInView startDate, endDate, allDay, jsEvent, view.name
 
     onRender: (event, element) ->
@@ -202,7 +199,7 @@ module.exports = class CalendarView extends View
                 minutes: minuteDelta
 
             data = trigg: alarm.getFormattedDate Alarm.dateFormat
-            storeEvent(alarm, data)
+            storeEvent alarm, data
         else
             evt = @model.event.get event.id
             evt.getStartDateObject().advance
@@ -210,60 +207,58 @@ module.exports = class CalendarView extends View
                 minutes: minuteDelta
 
             evt.getEndDateObject().advance
-                days: dayDelta
-                minutes: minuteDelta
+                days: dayDelta minutes: minuteDelta
             data =
                 start: evt.getFormattedStartDate Event.dateFormat
                 end: evt.getFormattedEndDate Event.dateFormat
-            storeEvent(evt, data)
+            storeEvent evt, data
 
     onEventClick: (event, jsEvent, view) =>
+        if $('.popover').is(':visible') and @popover[event.type].event?.id is event.id
+            console.log 'bisit'
+            return
+
         target = $(jsEvent.currentTarget)
         eventStartTime = event.start.getTime()
         isDayView = view.name is 'agendaDay'
-        end = event.end.format('{HH}:{mm}')
-        start = event.start.format('{HH}:{mm}')
-
+        end = event.end.format '{HH}:{mm}'
+        start = event.start.format '{HH}:{mm}'
         direction = helpers.getPopoverDirection isDayView, event.start, \
                                                         event.end, true
 
-        # Clean other popover if it exists
-        @popover.event.clean()
         @popover.alarm.clean()
+        @popover.event.clean()
 
-        unless @popover[event.type].isExist? and
-        @popover[event.type].action is 'edit' and
-        @popover[event.type].date?.getTime() is eventStartTime
-            # Create new popover to edit alarm or event
-            @popover[event.type].createNew
-                field: $(target)
-                date: start
-                action: 'edit'
-                model: @model[event.type]
-                event: event
-            # Initialize template and show popover
-            if event.type is 'alarm'
-                timezoneData = []
-                for timezone in timezones
-                    timezoneData.push value: timezone, text: timezone
-                formTemplate = formSmallTemplate.alarm
-                    editionMode: true
-                    defaultValue: event.title
-                    timezones: timezoneData
-                    defaultTimezone: event.timezone
+        # Create new popover to edit alarm or event
+        @popover[event.type].createNew
+            field: $(target)
+            date: start
+            action: 'edit'
+            model: @model[event.type]
+            event: event
 
-                @popover.alarm.show t("Alarm edition"), direction, formTemplate
+        if event.type is 'alarm'
+            timezoneData = []
+            for timezone in timezones
+                timezoneData.push value: timezone, text: timezone
+            formTemplate = formSmallTemplate.alarm
+                editionMode: true
+                defaultValue: event.title
+                timezones: timezoneData
+                defaultTimezone: event.timezone
 
-            else
-                diff = event.diff
-                defaultValueEnd = end + "+" + diff
-                formTemplate = formSmallTemplate.event
-                    editionMode: true
-                    defaultValueStart: start
-                    defaultValueEnd: defaultValueEnd
-                    defaultValuePlace: event.place
-                    defaultValueDesc: event.title
-                @popover.event.show t("Event edition"), direction, formTemplate
+            @popover.alarm.show t("Alarm edition"), direction, formTemplate
+
+        else
+            diff = event.diff
+            defaultValueEnd = end + "+" + diff
+            formTemplate = formSmallTemplate.event
+                editionMode: true
+                defaultValueStart: start
+                defaultValueEnd: defaultValueEnd
+                defaultValuePlace: event.place
+                defaultValueDesc: event.title
+            @popover.event.show t("Event edition"), direction, formTemplate
 
         @popover[event.type].bindEditEvents()
 
@@ -285,7 +280,7 @@ module.exports = class CalendarView extends View
             defaultValueEnd: endHour
             defaultValuePlace: ''
             defaultValueDesc: ''
-        title = t "Event creation" 
+        title = t "Event creation"
 
         # Create popover to create alarm or event
         @popover[type].createNew

@@ -28,7 +28,7 @@ module.exports = class EventPopOver extends PopOver
         if @action is 'create' then $('.remove').hide()
         else $('.remove').show()
 
-    bindEvents: ->   
+    bindEvents: ->
         super()
         @eventStart = @popoverWidget.find('#input-start')
         @eventEnd = @popoverWidget.find('#input-end')
@@ -39,7 +39,7 @@ module.exports = class EventPopOver extends PopOver
         @eventEnd.keyup @keyReaction
         @eventDescription.keyup @keyReaction
 
-    bindEditEvents: =>        
+    bindEditEvents: =>
         super()
         @eventStart = @popoverWidget.find '#input-start'
         @eventEnd = @popoverWidget.find '#input-end'
@@ -58,7 +58,7 @@ module.exports = class EventPopOver extends PopOver
         # Configure start and end dates
         dueStartDate = @formatDate $('.popover #input-start').val()
         specifiedDay = $('.popover #input-end').val().split('+')
-        if specifiedDay[1]?
+        if specifiedDay[1]? and @date?
             newDate = @date.advance
                 days: specifiedDay[1]
             dueEndDate = Date.create(newDate)
@@ -77,12 +77,12 @@ module.exports = class EventPopOver extends PopOver
         return data
 
     onButtonClicked: =>
-        data = @initData()        
+        data = @initData()
         super data
         @clean()
 
     onEditClicked: =>
-        data = @initData()  
+        data = @initData()
         super data, (success) =>
             if success
                 # Update event in calendar
