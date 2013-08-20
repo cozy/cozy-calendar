@@ -1037,6 +1037,10 @@ window.require.register("models/scheduleitem", function(exports, require, module
       return this.getDateObject().format(formatter);
     };
 
+    ScheduleItem.prototype.getDate = function(formatter) {
+      return Date.create(this.get(this.mainDateField)).format(formatter);
+    };
+
     ScheduleItem.prototype.getPreviousDateObject = function() {
       if (this.previous(this.mainDateField) != null) {
         return new Date.create(this.previous(this.mainDateField));
@@ -1475,7 +1479,7 @@ window.require.register("views/alarm_view", function(exports, require, module) {
     AlarmView.prototype.render = function() {
       return AlarmView.__super__.render.call(this, {
         action: this.model.get('action'),
-        time: this.model.getFormattedDate('{HH}:{mm}'),
+        time: this.model.getDate('{HH}:{mm}'),
         description: this.model.get('description'),
         timezone: this.model.get('timezone'),
         alarmID: this.model.id
