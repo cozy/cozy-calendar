@@ -11,7 +11,8 @@ module.exports = class AlarmPopOver extends PopOver
         super()
         @popoverWidget.find('button').unbind 'click'
         @popoverWidget.find('.remove').unbind 'click'
-        @popoverWidget.find('input').unbind 'keyup'
+        @popoverWidget.find('input-time').unbind 'keyup'
+        @popoverWidget.find('input-desc').unbind 'keyup'
 
     show: (title, direction, content) ->
         super title, direction, content
@@ -23,10 +24,18 @@ module.exports = class AlarmPopOver extends PopOver
         @alarmTime = $('.popover #input-time')
 
         @alarmDescription.keyup (event) =>
-            if @alarmDescription.val() is '' and @alarmTime.val() is ''
+            if @alarmDescription.val() is ''
                 @addButton.addClass 'disabled'               
             else if event.keyCode is 13 or event.which is 13
-                @onEditClicked()
+                @onEditClicked()  
+            else
+                @addButton.removeClass 'disabled'
+
+        @alarmTime.keyup (event) =>
+            if @alarmTime.val() is ''
+                @addButton.addClass 'disabled'               
+            else if event.keyCode is 13 or event.which is 13
+                @onEditClicked()  
             else
                 @addButton.removeClass 'disabled'
 

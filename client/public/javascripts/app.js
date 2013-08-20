@@ -1404,7 +1404,8 @@ window.require.register("views/alarm_popover", function(exports, require, module
       AlarmPopOver.__super__.unbindEvents.call(this);
       this.popoverWidget.find('button').unbind('click');
       this.popoverWidget.find('.remove').unbind('click');
-      return this.popoverWidget.find('input').unbind('keyup');
+      this.popoverWidget.find('input-time').unbind('keyup');
+      return this.popoverWidget.find('input-desc').unbind('keyup');
     };
 
     AlarmPopOver.prototype.show = function(title, direction, content) {
@@ -1417,8 +1418,17 @@ window.require.register("views/alarm_popover", function(exports, require, module
       AlarmPopOver.__super__.bindEditEvents.call(this);
       this.alarmDescription = $('.popover #input-desc');
       this.alarmTime = $('.popover #input-time');
-      return this.alarmDescription.keyup(function(event) {
-        if (_this.alarmDescription.val() === '' && _this.alarmTime.val() === '') {
+      this.alarmDescription.keyup(function(event) {
+        if (_this.alarmDescription.val() === '') {
+          return _this.addButton.addClass('disabled');
+        } else if (event.keyCode === 13 || event.which === 13) {
+          return _this.onEditClicked();
+        } else {
+          return _this.addButton.removeClass('disabled');
+        }
+      });
+      return this.alarmTime.keyup(function(event) {
+        if (_this.alarmTime.val() === '') {
           return _this.addButton.addClass('disabled');
         } else if (event.keyCode === 13 || event.which === 13) {
           return _this.onEditClicked();
