@@ -260,9 +260,9 @@ window.require.register("helpers", function(exports, require, module) {
     if (isEditMode == null) {
       isEditMode = false;
     }
-    dayStart = startDate.beginningOfDay();
-    dayEnd = endDate != null ? endDate.beginningOfDay() : void 0;
-    isStartEndOnSameDay = (endDate != null) && dayStart.is(dayEnd);
+    dayStart = startDate.format('{yyyy}:{MM}:{dd}');
+    dayEnd = endDate != null ? endDate.format('{yyyy}:{MM}:{dd}') : void 0;
+    isStartEndOnSameDay = (endDate != null) && dayStart === dayEnd;
     if (!isDayView) {
       if (isEditMode && !isStartEndOnSameDay) {
         direction = 'bottom';
