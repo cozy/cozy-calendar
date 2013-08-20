@@ -9,7 +9,10 @@ module.exports = class ScheduleItem extends Backbone.Model
         return @dateObject
 
     getFormattedDate: (formatter) ->
-        (new Date @get(@mainDateField)).format formatter
+        return @getDateObject().format formatter
+
+    getDate: (formatter) ->
+        return Date.create(@get(@mainDateField)).format formatter
 
     getPreviousDateObject: ->
         if @previous(@mainDateField)?

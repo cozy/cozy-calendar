@@ -42,9 +42,9 @@ exports.icalToISO8601 = (icalDate) ->
 
 exports.getPopoverDirection = (isDayView, startDate, endDate, isEditMode) ->
     isEditMode ?= false
-    dayStart = startDate.beginningOfDay()
-    dayEnd = endDate?.beginningOfDay()
-    isStartEndOnSameDay = endDate? and dayStart.is dayEnd
+    dayStart = startDate.format '{yyyy}:{MM}:{dd}'
+    dayEnd = endDate?.format '{yyyy}:{MM}:{dd}'
+    isStartEndOnSameDay = endDate? and dayStart is dayEnd
 
     unless isDayView
         if isEditMode and not isStartEndOnSameDay

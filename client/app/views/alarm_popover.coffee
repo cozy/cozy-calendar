@@ -1,70 +1,41 @@
 PopOver = require './popover'
 View = require '../lib/view'
 Alarm = require '../models/alarm'
-timezones = require('helpers/timezone').timezones
-
-EventPopOver = require './event_popover'
-eventFormSmallTemplate = require('./templates/event_form_small')
 
 module.exports = class AlarmPopOver extends PopOver
 
     constructor: (@cal) ->
         super @cal
 
-    clean: ->
-        super()
-        @action = null
-
     unbindEvents: ->
         super()
-        @popoverWidget.find('button.add-event').unbind 'click'
-        @popoverWidget.find('input').unbind 'keyup'
-
-    createNew: (data) ->
-        @clean()
-        super data
-        @action = data.action
-        @modelEvent = data.modelEvent
+        @popoverWidget.find('button').unbind 'click'
+        @popoverWidget.find('.remove').unbind 'click'
+        @popoverWidget.find('input-time').unbind 'keyup'
+        @popoverWidget.find('input-desc').unbind 'keyup'
 
     show: (title, direction, content) ->
         super title, direction, content
-        @popoverWidget.find('input').focus()
-        @direction = direction
-
-        if @action is 'create'
-            $('.remove').hide()
-        else
-            $('.remove').show()
-
-    bindEvents: ->
-        super()
-        @addEventButton = @popoverWidget.find 'button.add-event'
-        @addEventButton.click => @onEventButtonClicked()
-        @alarmDescription = @popoverWidget.find 'input'
-        @alarmTimezone = @popoverWidget.find 'input-timezone'
-        $('.popover #input-timezone').change () =>
-            @addButton.removeClass 'disabled'
-
-        @alarmDescription.keyup (event) =>
-            if @alarmDescription.val() is ''
-                @addButton.addClass 'disabled'
-            else if event.keyCode is 13 or event.which is 13
-                @onButtonClicked()
-            else
-                @addButton.removeClass 'disabled'
+        $('.popover #input-time').focus()   
 
     bindEditEvents: =>
         super()
-        @alarmDescription = @popoverWidget.find 'input'
-        @alarmTimezone = @popoverWidget.find 'input-timezone'
-        $('.popover #input-timezone').change () =>
-            @addButton.removeClass 'disabled'
+        @alarmDescription = $('.popover #input-desc')
+        @alarmTime = $('.popover #input-time')
 
         @alarmDescription.keyup (event) =>
             if @alarmDescription.val() is ''
-                @addButton.addClass 'disabled'
+                @addButton.addClass 'disabled'               
             else if event.keyCode is 13 or event.which is 13
-                @onEditClicked()
+                @onEditClicked()  
+            else
+                @addButton.removeClass 'disabled'
+
+        @alarmTime.keyup (event) =>
+            if @alarmTime.val() is ''
+                @addButton.addClass 'disabled'               
+            else if event.keyCode is 13 or event.which is 13
+                @onEditClicked()  
             else
                 @addButton.removeClass 'disabled'
 
@@ -72,47 +43,19 @@ module.exports = class AlarmPopOver extends PopOver
         super()
         @clean
 
-    onButtonClicked: =>
-        value = @popoverWidget.find('input').val()
-        dueDate =  @formatDate value
-        value = value.replace(/(( )?((at|à) )?[0-9]?[0-9]:[0-9]{2})/, '')
-        value = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') # trim
-
-        data =
-            description: value
-            action: 'DISPLAY'
-            trigg: dueDate.format Alarm.dateFormat
-        if $('.popover #input-timezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #input-timezone').val()
-
-        super data
-        @clean()
-
     onEditClicked: =>
+        start =  @formatDate $('.popover #input-time').val()
         data =
-            description: @alarmDescription.val()
-        if $('.popover #input-timezone').val() isnt "Use specific timezone"
-            data.timezone = $('.popover #input-timezone').val()
-        super data, (success) =>
-            if success
+            description: $('.popover #input-desc').val()
+            trigg: start.format Alarm.dateFormat
+        
+        super data, (err, alarm) =>
+            unless err
                 @event.title = data.description
-                @event.timezone = data.timezone
+                @event.start = Date.create(alarm.get 'trigg')
+                @event.end = Date.create(alarm.get 'trigg').advance
+                    minutes: 30
+                @event._start = @event.start
+                @event._end = @event.end
+                @event.title = data.description
                 @cal.fullCalendar 'renderEvent', @event
-
-    onEventButtonClicked: () =>
-        @field.popover('destroy').popover()
-        @pop = new EventPopOver @cal
-        @pop.createNew
-            field: @field
-            date: @date
-            action: 'create'
-            model: @modelEvent
-
-        eventFormTemplate = eventFormSmallTemplate
-            editionMode: false
-            defaultValueStart: ''
-            defaultValueEnd: ''
-            defaultValuePlace: ''
-            defaultValueDesc: ''
-        @pop.show t("Event creation"), @direction , eventFormTemplate
-        @pop.bindEvents @date

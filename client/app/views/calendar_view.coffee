@@ -99,11 +99,12 @@ module.exports = class CalendarView extends View
             selectHelper: false
             unselectAuto: false
             eventRender: @onRender
-            viewDisplay: @deletePopOver
             select: @onSelect
             eventDragStop: @onEventDragStop
             eventDrop: @onEventDrop
             eventClick: @onEventClick
+            eventResizeStop: @onEventResizeStop
+            eventResize: @onEventResize
         @popover = {}
         @popover.alarm = new AlarmPopOver @cal
         @popover.event = new EventPopOver @cal
@@ -156,8 +157,6 @@ module.exports = class CalendarView extends View
         @model.event.forEach (item) => @onAddEvent item, @model.event
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
-        @popover.alarm.clean()
-        @popover.event.clean()
         @handleSelectionInView startDate, endDate, allDay, jsEvent, view.name
 
     onRender: (event, element) ->
@@ -202,7 +201,7 @@ module.exports = class CalendarView extends View
                 minutes: minuteDelta
 
             data = trigg: alarm.getFormattedDate Alarm.dateFormat
-            storeEvent(alarm, data)
+            storeEvent alarm, data
         else
             evt = @model.event.get event.id
             evt.getStartDateObject().advance
@@ -210,38 +209,74 @@ module.exports = class CalendarView extends View
                 minutes: minuteDelta
 
             evt.getEndDateObject().advance
-                days: dayDelta
+                days: dayDelta 
                 minutes: minuteDelta
             data =
                 start: evt.getFormattedStartDate Event.dateFormat
                 end: evt.getFormattedEndDate Event.dateFormat
-            storeEvent(evt, data)
+            storeEvent evt, data
+
+    onEventResizeStop: (event, jsEvent, ui, view) -> event.isSaving = true
+
+    onEventResize: (event, dayDelta, minuteDelta, revertFunc, 
+                    jsEvent, ui, view) =>
+        storeEvent = (model, data) =>
+            model.save data,
+                wait: true
+                success: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                error: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                    revertFunc()
+                    
+        if event.type is "alarm"
+            event.isSaving = false   
+            @cal.fullCalendar 'renderEvent', event
+            revertFunc()
+            return
+
+        evt = @model.event.get event.id
+
+        evt.getEndDateObject().advance
+            days: dayDelta 
+            minutes: minuteDelta
+
+        diff = event.diff + dayDelta
+        data =
+            end: evt.getFormattedEndDate Event.dateFormat
+            diff: diff
+        event.diff = data.diff
+        event.end = data.end
+        storeEvent evt, data
+
 
     onEventClick: (event, jsEvent, view) =>
-        target = $(jsEvent.currentTarget)
-        eventStartTime = event.start.getTime()
-        isDayView = view.name is 'agendaDay'
-        end = event.end.format('{HH}:{mm}')
-        start = event.start.format('{HH}:{mm}')
 
-        direction = helpers.getPopoverDirection isDayView, event.start, \
-                                                        event.end, true
+        createPopover = () =>
 
-        # Clean other popover if it exists
-        @popover.event.clean()
-        @popover.alarm.clean()
+            @popover.alarm.clean()
+            @popover.event.clean()
 
-        unless @popover[event.type].isExist? and
-        @popover[event.type].action is 'edit' and
-        @popover[event.type].date?.getTime() is eventStartTime
+            target = $(jsEvent.currentTarget)
+            eventStartTime = event.start.getTime()
+            isDayView = view.name is 'agendaDay'
+            end = event.end.format '{HH}:{mm}'
+            startDate = event.start
+            start = event.start.format '{HH}:{mm}'
+
+            direction = helpers.getPopoverDirection isDayView, event.start, \
+                                                            event.end, true
+
             # Create new popover to edit alarm or event
             @popover[event.type].createNew
                 field: $(target)
-                date: start
+                date: startDate
                 action: 'edit'
                 model: @model[event.type]
                 event: event
-            # Initialize template and show popover
+
             if event.type is 'alarm'
                 timezoneData = []
                 for timezone in timezones
@@ -249,6 +284,7 @@ module.exports = class CalendarView extends View
                 formTemplate = formSmallTemplate.alarm
                     editionMode: true
                     defaultValue: event.title
+                    defaultTime: start
                     timezones: timezoneData
                     defaultTimezone: event.timezone
 
@@ -265,34 +301,61 @@ module.exports = class CalendarView extends View
                     defaultValueDesc: event.title
                 @popover.event.show t("Event edition"), direction, formTemplate
 
-        @popover[event.type].bindEditEvents()
+            @popover[event.type].bindEditEvents()
+
+
+        if $('.popover').is(':visible') and @popover[event.type].event?.id is event.id
+            setTimeout () => 
+                createPopover()
+            , 20
+        else
+            createPopover()
 
     # Display popover to create alarm or event if user selects several cases
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, view) ->
-        startHour = startDate.format('{HH}:{mm}')
-        endHour = endDate.format('{HH}:{mm}')
-        target = $(jsEvent.target)
-        isDayView = view is "agendaDay"
-        direction = helpers.getPopoverDirection isDayView, startDate
 
-        if view is "month"
-            startHour = ""
-            endHour = ""
-        type = "event"
-        formTemplate = formSmallTemplate.event
-            editionMode: false
-            defaultValueStart: startHour
-            defaultValueEnd: endHour
-            defaultValuePlace: ''
-            defaultValueDesc: ''
-        title = t "Event creation" 
+        createPopover = () =>
+            @popover.alarm.clean()
+            @popover.event.clean()
 
-        # Create popover to create alarm or event
-        @popover[type].createNew
-            field: $(target)
-            date: startDate
-            action: 'create'
-            model: @model[type]
-            modelEvent: @model.event
-        @popover[type].show title, direction , formTemplate
-        @popover[type].bindEvents startDate
+            startHour = startDate.format('{HH}:{mm}')
+            endHour = endDate.format('{HH}:{mm}')
+            target = $(jsEvent.target)
+            isDayView = view is "agendaDay"
+            direction = helpers.getPopoverDirection isDayView, startDate
+
+            if view is "month"
+                startHour = ""
+                endHour = ""
+            type = "event"
+            formTemplate = formSmallTemplate.event
+                editionMode: false
+                defaultValueStart: startHour
+                defaultValueEnd: endHour
+                defaultValuePlace: ''
+                defaultValueDesc: ''
+            title = t "Event creation"
+
+            # Create popover to create alarm or event
+            @popover[type].createNew
+                field: $(target)
+                date: startDate
+                action: 'create'
+                model: @model[type]
+                modelEvent: @model.event
+            @popover[type].show title, direction , formTemplate
+            @popover[type].bindEvents startDate
+
+        isVisible = $('.popover').is(':visible')
+        isSameDate = @popover.event.date?.format('{dd}:{MM}:{yyyy}') is 
+            startDate.format('{dd}:{MM}:{yyyy}')
+        isCreate = @popover.event.action is "create"
+
+        if isVisible and isSameDate and isCreate
+            setTimeout () => 
+                createPopover()
+            , 20
+        else
+            createPopover()
+
+        
