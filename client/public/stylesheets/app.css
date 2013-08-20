@@ -8307,9 +8307,6 @@ h2 {
   margin: 0;
   sharefont-weight: 10px;
 }
-#input-timezone {
-  display: none;
-}
 @media (max-width: 800px) {
   body {
     padding: 0;
@@ -8346,9 +8343,6 @@ h2 {
   #date-control {
     display: block;
     margin-bottom: 10px;
-  }
-  #input-timezone {
-    display: none;
   }
 }
 @media (max-width: 700px) {

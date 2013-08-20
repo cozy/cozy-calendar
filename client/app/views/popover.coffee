@@ -5,11 +5,12 @@ module.exports = class PopOver extends View
     constructor: (@cal) ->
 
     clean: ->
+        @date = null
+        @event = null
+        @unbindEvents() if @popoverWidget?
         @field?.popover 'destroy'
         @field = null
-        @date = null
-        @unbindEvents() if @popoverWidget?
-        @popoverWidget?.hide()
+        @popoverWidget = null
 
     unbindEvents: ->
         @popoverWidget.find('button.add').unbind 'click'
@@ -17,20 +18,24 @@ module.exports = class PopOver extends View
 
     createNew: (data) ->
         @field = data.field
-        @date = data.date
+        if data.date? then @date = Date.create(data.date)
+        else @date = null
         @model = data.model
         @event = data.event
+        @action = data.action
 
     show: (title, direction, content) ->
         if $(window).width() < 600
             direction = 'bottom'
 
-        @field.data('popover', null).popover(
+        @field.data('popover', null)
+        @pop = @field.popover(
             title: require('./templates/popover_title')(title: title)
             html: true
             placement: direction
             content: content
-        ).popover('show')
+        )
+        @pop.popover('show')
         @popoverWidget = $('.container .popover')
 
     bindEvents: ->
@@ -48,6 +53,7 @@ module.exports = class PopOver extends View
         @addButton.html @action
         @addButton.click => @onButtonClicked()
         @popoverWidget.find('button.close').click => @clean()
+        @popoverWidget.find('remove').hide()
         @addButton.addClass 'disabled'
 
     bindEditEvents: =>
@@ -64,6 +70,7 @@ module.exports = class PopOver extends View
         @closeButton = @popoverWidget.find 'button.close'
         @removeButton = @popoverWidget.find '.remove'
         @removeButton.click => @onRemoveClicked()
+        @popoverWidget.find('show').hide()
         @addButton.html @action
         @closeButton.click => @clean()
         @addButton.click => @onEditClicked()
@@ -112,7 +119,6 @@ module.exports = class PopOver extends View
 
     onEditClicked: (data, callback) =>
         evt = @model.get @event.id
-        @cal.fullCalendar 'renderEvent', @event
         @addButton.html '&nbsp;'
         @addButton.spin 'small'
         evt.save data,
@@ -120,9 +126,8 @@ module.exports = class PopOver extends View
             success: =>
                 @addButton.spin()
                 @addButton.html @action
-                callback true
+                callback null, evt
             error: =>
-                @cal.fullCalendar 'renderEvent', @event
                 @addButton.spin()
                 @addButton.html @action
-                callback false
+                callback new Error()
