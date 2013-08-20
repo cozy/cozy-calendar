@@ -1034,7 +1034,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
     };
 
     ScheduleItem.prototype.getFormattedDate = function(formatter) {
-      return (new Date(this.get(this.mainDateField))).format(formatter);
+      return this.getDateObject().format(formatter);
     };
 
     ScheduleItem.prototype.getPreviousDateObject = function() {
@@ -1867,9 +1867,8 @@ window.require.register("views/calendar_view", function(exports, require, module
           minutes: minuteDelta
         });
         evt.getEndDateObject().advance({
-          days: dayDelta({
-            minutes: minuteDelta
-          })
+          days: dayDelta,
+          minutes: minuteDelta
         });
         data = {
           start: evt.getFormattedStartDate(Event.dateFormat),

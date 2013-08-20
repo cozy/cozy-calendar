@@ -207,7 +207,8 @@ module.exports = class CalendarView extends View
                 minutes: minuteDelta
 
             evt.getEndDateObject().advance
-                days: dayDelta minutes: minuteDelta
+                days: dayDelta 
+                minutes: minuteDelta
             data =
                 start: evt.getFormattedStartDate Event.dateFormat
                 end: evt.getFormattedEndDate Event.dateFormat
