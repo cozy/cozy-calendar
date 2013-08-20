@@ -1694,6 +1694,7 @@ window.require.register("views/calendar_view", function(exports, require, module
 
     function CalendarView() {
       this.onEventClick = __bind(this.onEventClick, this);
+      this.onEventResize = __bind(this.onEventResize, this);
       this.onEventDrop = __bind(this.onEventDrop, this);
       this.onSelect = __bind(this.onSelect, this);
       _ref = CalendarView.__super__.constructor.apply(this, arguments);
@@ -1755,7 +1756,9 @@ window.require.register("views/calendar_view", function(exports, require, module
         select: this.onSelect,
         eventDragStop: this.onEventDragStop,
         eventDrop: this.onEventDrop,
-        eventClick: this.onEventClick
+        eventClick: this.onEventClick,
+        eventResizeStop: this.onEventResizeStop,
+        eventResize: this.onEventResize
       });
       this.popover = {};
       this.popover.alarm = new AlarmPopOver(this.cal);
@@ -1890,6 +1893,48 @@ window.require.register("views/calendar_view", function(exports, require, module
         };
         return storeEvent(evt, data);
       }
+    };
+
+    CalendarView.prototype.onEventResizeStop = function(event, jsEvent, ui, view) {
+      return event.isSaving = true;
+    };
+
+    CalendarView.prototype.onEventResize = function(event, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
+      var data, diff, evt, storeEvent,
+        _this = this;
+      storeEvent = function(model, data) {
+        return model.save(data, {
+          wait: true,
+          success: function() {
+            event.isSaving = false;
+            return _this.cal.fullCalendar('renderEvent', event);
+          },
+          error: function() {
+            event.isSaving = false;
+            _this.cal.fullCalendar('renderEvent', event);
+            return revertFunc();
+          }
+        });
+      };
+      if (event.type === "alarm") {
+        event.isSaving = false;
+        this.cal.fullCalendar('renderEvent', event);
+        revertFunc();
+        return;
+      }
+      evt = this.model.event.get(event.id);
+      evt.getEndDateObject().advance({
+        days: dayDelta,
+        minutes: minuteDelta
+      });
+      diff = event.diff + dayDelta;
+      data = {
+        end: evt.getFormattedEndDate(Event.dateFormat),
+        diff: diff
+      };
+      event.diff = data.diff;
+      event.end = data.end;
+      return storeEvent(evt, data);
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {

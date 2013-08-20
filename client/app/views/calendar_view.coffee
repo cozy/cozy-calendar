@@ -103,6 +103,8 @@ module.exports = class CalendarView extends View
             eventDragStop: @onEventDragStop
             eventDrop: @onEventDrop
             eventClick: @onEventClick
+            eventResizeStop: @onEventResizeStop
+            eventResize: @onEventResize
         @popover = {}
         @popover.alarm = new AlarmPopOver @cal
         @popover.event = new EventPopOver @cal
@@ -213,6 +215,42 @@ module.exports = class CalendarView extends View
                 start: evt.getFormattedStartDate Event.dateFormat
                 end: evt.getFormattedEndDate Event.dateFormat
             storeEvent evt, data
+
+    onEventResizeStop: (event, jsEvent, ui, view) -> event.isSaving = true
+
+    onEventResize: (event, dayDelta, minuteDelta, revertFunc, 
+                    jsEvent, ui, view) =>
+        storeEvent = (model, data) =>
+            model.save data,
+                wait: true
+                success: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                error: =>
+                    event.isSaving = false
+                    @cal.fullCalendar 'renderEvent', event
+                    revertFunc()
+                    
+        if event.type is "alarm"
+            event.isSaving = false   
+            @cal.fullCalendar 'renderEvent', event
+            revertFunc()
+            return
+
+        evt = @model.event.get event.id
+
+        evt.getEndDateObject().advance
+            days: dayDelta 
+            minutes: minuteDelta
+
+        diff = event.diff + dayDelta
+        data =
+            end: evt.getFormattedEndDate Event.dateFormat
+            diff: diff
+        event.diff = data.diff
+        event.end = data.end
+        storeEvent evt, data
+
 
     onEventClick: (event, jsEvent, view) =>
 
