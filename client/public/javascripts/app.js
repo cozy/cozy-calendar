@@ -1879,88 +1879,111 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventClick = function(event, jsEvent, view) {
-      var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, startDate, target, timezone, timezoneData, _i, _len, _ref1;
-      if ($('.popover').is(':visible') && ((_ref1 = this.popover[event.type].event) != null ? _ref1.id : void 0) === event.id) {
-        console.log('bisit');
-        return;
-      }
-      target = $(jsEvent.currentTarget);
-      eventStartTime = event.start.getTime();
-      isDayView = view.name === 'agendaDay';
-      end = event.end.format('{HH}:{mm}');
-      startDate = event.start;
-      start = event.start.format('{HH}:{mm}');
-      direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
-      this.popover.alarm.clean();
-      this.popover.event.clean();
-      this.popover[event.type].createNew({
-        field: $(target),
-        date: startDate,
-        action: 'edit',
-        model: this.model[event.type],
-        event: event
-      });
-      if (event.type === 'alarm') {
-        timezoneData = [];
-        for (_i = 0, _len = timezones.length; _i < _len; _i++) {
-          timezone = timezones[_i];
-          timezoneData.push({
-            value: timezone,
-            text: timezone
+      var createPopover, _ref1,
+        _this = this;
+      createPopover = function() {
+        var defaultValueEnd, diff, direction, end, eventStartTime, formTemplate, isDayView, start, startDate, target, timezone, timezoneData, _i, _len;
+        _this.popover.alarm.clean();
+        _this.popover.event.clean();
+        target = $(jsEvent.currentTarget);
+        eventStartTime = event.start.getTime();
+        isDayView = view.name === 'agendaDay';
+        end = event.end.format('{HH}:{mm}');
+        startDate = event.start;
+        start = event.start.format('{HH}:{mm}');
+        direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
+        _this.popover[event.type].createNew({
+          field: $(target),
+          date: startDate,
+          action: 'edit',
+          model: _this.model[event.type],
+          event: event
+        });
+        if (event.type === 'alarm') {
+          timezoneData = [];
+          for (_i = 0, _len = timezones.length; _i < _len; _i++) {
+            timezone = timezones[_i];
+            timezoneData.push({
+              value: timezone,
+              text: timezone
+            });
+          }
+          formTemplate = formSmallTemplate.alarm({
+            editionMode: true,
+            defaultValue: event.title,
+            defaultTime: start,
+            timezones: timezoneData,
+            defaultTimezone: event.timezone
           });
+          _this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
+        } else {
+          diff = event.diff;
+          defaultValueEnd = end + "+" + diff;
+          formTemplate = formSmallTemplate.event({
+            editionMode: true,
+            defaultValueStart: start,
+            defaultValueEnd: defaultValueEnd,
+            defaultValuePlace: event.place,
+            defaultValueDesc: event.title
+          });
+          _this.popover.event.show(t("Event edition"), direction, formTemplate);
         }
-        formTemplate = formSmallTemplate.alarm({
-          editionMode: true,
-          defaultValue: event.title,
-          defaultTime: start,
-          timezones: timezoneData,
-          defaultTimezone: event.timezone
-        });
-        this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
+        return _this.popover[event.type].bindEditEvents();
+      };
+      if ($('.popover').is(':visible') && ((_ref1 = this.popover[event.type].event) != null ? _ref1.id : void 0) === event.id) {
+        return setTimeout(function() {
+          return createPopover();
+        }, 20);
       } else {
-        diff = event.diff;
-        defaultValueEnd = end + "+" + diff;
-        formTemplate = formSmallTemplate.event({
-          editionMode: true,
-          defaultValueStart: start,
-          defaultValueEnd: defaultValueEnd,
-          defaultValuePlace: event.place,
-          defaultValueDesc: event.title
-        });
-        this.popover.event.show(t("Event edition"), direction, formTemplate);
+        return createPopover();
       }
-      return this.popover[event.type].bindEditEvents();
     };
 
     CalendarView.prototype.handleSelectionInView = function(startDate, endDate, allDay, jsEvent, view) {
-      var direction, endHour, formTemplate, isDayView, startHour, target, title, type;
-      startHour = startDate.format('{HH}:{mm}');
-      endHour = endDate.format('{HH}:{mm}');
-      target = $(jsEvent.target);
-      isDayView = view === "agendaDay";
-      direction = helpers.getPopoverDirection(isDayView, startDate);
-      if (view === "month") {
-        startHour = "";
-        endHour = "";
+      var createPopover, isCreate, isSameDate, isVisible, _ref1,
+        _this = this;
+      createPopover = function() {
+        var direction, endHour, formTemplate, isDayView, startHour, target, title, type;
+        _this.popover.alarm.clean();
+        _this.popover.event.clean();
+        startHour = startDate.format('{HH}:{mm}');
+        endHour = endDate.format('{HH}:{mm}');
+        target = $(jsEvent.target);
+        isDayView = view === "agendaDay";
+        direction = helpers.getPopoverDirection(isDayView, startDate);
+        if (view === "month") {
+          startHour = "";
+          endHour = "";
+        }
+        type = "event";
+        formTemplate = formSmallTemplate.event({
+          editionMode: false,
+          defaultValueStart: startHour,
+          defaultValueEnd: endHour,
+          defaultValuePlace: '',
+          defaultValueDesc: ''
+        });
+        title = t("Event creation");
+        _this.popover[type].createNew({
+          field: $(target),
+          date: startDate,
+          action: 'create',
+          model: _this.model[type],
+          modelEvent: _this.model.event
+        });
+        _this.popover[type].show(title, direction, formTemplate);
+        return _this.popover[type].bindEvents(startDate);
+      };
+      isVisible = $('.popover').is(':visible');
+      isSameDate = ((_ref1 = this.popover.event.date) != null ? _ref1.format('{dd}:{MM}:{yyyy}') : void 0) === startDate.format('{dd}:{MM}:{yyyy}');
+      isCreate = this.popover.event.action === "create";
+      if (isVisible && isSameDate && isCreate) {
+        return setTimeout(function() {
+          return createPopover();
+        }, 20);
+      } else {
+        return createPopover();
       }
-      type = "event";
-      formTemplate = formSmallTemplate.event({
-        editionMode: false,
-        defaultValueStart: startHour,
-        defaultValueEnd: endHour,
-        defaultValuePlace: '',
-        defaultValueDesc: ''
-      });
-      title = t("Event creation");
-      this.popover[type].createNew({
-        field: $(target),
-        date: startDate,
-        action: 'create',
-        model: this.model[type],
-        modelEvent: this.model.event
-      });
-      this.popover[type].show(title, direction, formTemplate);
-      return this.popover[type].bindEvents(startDate);
     };
 
     return CalendarView;

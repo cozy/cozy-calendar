@@ -215,82 +215,109 @@ module.exports = class CalendarView extends View
             storeEvent evt, data
 
     onEventClick: (event, jsEvent, view) =>
+
+        createPopover = () =>
+
+            @popover.alarm.clean()
+            @popover.event.clean()
+
+            target = $(jsEvent.currentTarget)
+            eventStartTime = event.start.getTime()
+            isDayView = view.name is 'agendaDay'
+            end = event.end.format '{HH}:{mm}'
+            startDate = event.start
+            start = event.start.format '{HH}:{mm}'
+
+            direction = helpers.getPopoverDirection isDayView, event.start, \
+                                                            event.end, true
+
+            # Create new popover to edit alarm or event
+            @popover[event.type].createNew
+                field: $(target)
+                date: startDate
+                action: 'edit'
+                model: @model[event.type]
+                event: event
+
+            if event.type is 'alarm'
+                timezoneData = []
+                for timezone in timezones
+                    timezoneData.push value: timezone, text: timezone
+                formTemplate = formSmallTemplate.alarm
+                    editionMode: true
+                    defaultValue: event.title
+                    defaultTime: start
+                    timezones: timezoneData
+                    defaultTimezone: event.timezone
+
+                @popover.alarm.show t("Alarm edition"), direction, formTemplate
+
+            else
+                diff = event.diff
+                defaultValueEnd = end + "+" + diff
+                formTemplate = formSmallTemplate.event
+                    editionMode: true
+                    defaultValueStart: start
+                    defaultValueEnd: defaultValueEnd
+                    defaultValuePlace: event.place
+                    defaultValueDesc: event.title
+                @popover.event.show t("Event edition"), direction, formTemplate
+
+            @popover[event.type].bindEditEvents()
+
+
         if $('.popover').is(':visible') and @popover[event.type].event?.id is event.id
-            console.log 'bisit'
-            return
-        target = $(jsEvent.currentTarget)
-        eventStartTime = event.start.getTime()
-        isDayView = view.name is 'agendaDay'
-        end = event.end.format '{HH}:{mm}'
-        startDate = event.start
-        start = event.start.format '{HH}:{mm}'
-
-        direction = helpers.getPopoverDirection isDayView, event.start, \
-                                                        event.end, true
-
-        @popover.alarm.clean()
-        @popover.event.clean()
-
-        # Create new popover to edit alarm or event
-        @popover[event.type].createNew
-            field: $(target)
-            date: startDate
-            action: 'edit'
-            model: @model[event.type]
-            event: event
-
-        if event.type is 'alarm'
-            timezoneData = []
-            for timezone in timezones
-                timezoneData.push value: timezone, text: timezone
-            formTemplate = formSmallTemplate.alarm
-                editionMode: true
-                defaultValue: event.title
-                defaultTime: start
-                timezones: timezoneData
-                defaultTimezone: event.timezone
-
-            @popover.alarm.show t("Alarm edition"), direction, formTemplate
-
+            setTimeout () => 
+                createPopover()
+            , 20
         else
-            diff = event.diff
-            defaultValueEnd = end + "+" + diff
-            formTemplate = formSmallTemplate.event
-                editionMode: true
-                defaultValueStart: start
-                defaultValueEnd: defaultValueEnd
-                defaultValuePlace: event.place
-                defaultValueDesc: event.title
-            @popover.event.show t("Event edition"), direction, formTemplate
-
-        @popover[event.type].bindEditEvents()
+            createPopover()
 
     # Display popover to create alarm or event if user selects several cases
     handleSelectionInView: (startDate, endDate, allDay, jsEvent, view) ->
-        startHour = startDate.format('{HH}:{mm}')
-        endHour = endDate.format('{HH}:{mm}')
-        target = $(jsEvent.target)
-        isDayView = view is "agendaDay"
-        direction = helpers.getPopoverDirection isDayView, startDate
 
-        if view is "month"
-            startHour = ""
-            endHour = ""
-        type = "event"
-        formTemplate = formSmallTemplate.event
-            editionMode: false
-            defaultValueStart: startHour
-            defaultValueEnd: endHour
-            defaultValuePlace: ''
-            defaultValueDesc: ''
-        title = t "Event creation"
+        createPopover = () =>
+            @popover.alarm.clean()
+            @popover.event.clean()
 
-        # Create popover to create alarm or event
-        @popover[type].createNew
-            field: $(target)
-            date: startDate
-            action: 'create'
-            model: @model[type]
-            modelEvent: @model.event
-        @popover[type].show title, direction , formTemplate
-        @popover[type].bindEvents startDate
+            startHour = startDate.format('{HH}:{mm}')
+            endHour = endDate.format('{HH}:{mm}')
+            target = $(jsEvent.target)
+            isDayView = view is "agendaDay"
+            direction = helpers.getPopoverDirection isDayView, startDate
+
+            if view is "month"
+                startHour = ""
+                endHour = ""
+            type = "event"
+            formTemplate = formSmallTemplate.event
+                editionMode: false
+                defaultValueStart: startHour
+                defaultValueEnd: endHour
+                defaultValuePlace: ''
+                defaultValueDesc: ''
+            title = t "Event creation"
+
+            # Create popover to create alarm or event
+            @popover[type].createNew
+                field: $(target)
+                date: startDate
+                action: 'create'
+                model: @model[type]
+                modelEvent: @model.event
+            @popover[type].show title, direction , formTemplate
+            @popover[type].bindEvents startDate
+
+        isVisible = $('.popover').is(':visible')
+        isSameDate = @popover.event.date?.format('{dd}:{MM}:{yyyy}') is 
+            startDate.format('{dd}:{MM}:{yyyy}')
+        isCreate = @popover.event.action is "create"
+
+        if isVisible and isSameDate and isCreate
+            setTimeout () => 
+                createPopover()
+            , 20
+        else
+            createPopover()
+
+        
