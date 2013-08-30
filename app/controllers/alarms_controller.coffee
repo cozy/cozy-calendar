@@ -62,6 +62,9 @@ action 'create', ->
         if err
             send error: true, msg: "Server error while creating alarm.", 500
         else
+            console.log alarm
+            alarm = @convertAlarmDate(alarm, @userTimezone)
+            console.log alarm
             send alarm, 201
 
 action 'update', ->
