@@ -1575,6 +1575,7 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
     AlarmsListView.prototype.onChange = function(alarm) {
       var dateHash, prevDateHash, prevView, view,
         _this = this;
+      console.log(alarm);
       dateHash = alarm.getDateHash();
       view = this.getSubView(dateHash, function() {
         _this.onAdd(alarm);
@@ -1582,6 +1583,8 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
       });
       prevDateHash = alarm.getPreviousDateHash();
       if ((alarm.changedAttributes().trigg != null) && prevDateHash !== dateHash) {
+        console.log(prevDateHash);
+        console.log(this.views);
         prevView = this.views[prevDateHash];
         return prevView.model.get('alarms').remove(alarm);
       }
@@ -1857,7 +1860,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventDrop = function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
-      var alarm, data, evt, storeEvent,
+      var alarm, data, evt, startRaw, storeEvent,
         _this = this;
       storeEvent = function(model, data) {
         return model.save(data, {
@@ -1875,6 +1878,11 @@ window.require.register("views/calendar_view", function(exports, require, module
       };
       if (event.type === 'alarm') {
         alarm = this.model.alarm.get(event.id);
+        if (alarm.get('rawTime') != null) {
+          startRaw = alarm.get('rawTime');
+          alarm.getDateObject().setHours(startRaw.substring(0, 2));
+          alarm.getDateObject().setMinutes(startRaw.substring(3, 5));
+        }
         alarm.getDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta

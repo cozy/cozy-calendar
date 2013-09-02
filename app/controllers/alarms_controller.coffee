@@ -38,11 +38,10 @@ action 'all', ->
             send error: true, msg: 'Server error occurred while retrieving data'
         else
             for alarm, index in alarms
-                if alarm.timezone? and alarm.timezone isnt null
-                    alarms[index] = @convertAlarmDate(alarm, alarm.timezone)
-                else
+                if !alarm.timezone? or alarm.timezone is null
                     alarm.timezone = @userTimezone
-                    alarms[index] = @convertAlarmDate(alarm, @userTimezone)
+                alarms[index] = @convertAlarmDate(alarm, @userTimezone)
+            console.log alarms
             send alarms
 
 action 'getOne', ->

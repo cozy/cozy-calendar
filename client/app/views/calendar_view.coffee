@@ -197,6 +197,13 @@ module.exports = class CalendarView extends View
         # Update new dates of event
         if event.type is 'alarm'
             alarm = @model.alarm.get event.id
+
+            if alarm.get('rawTime')?
+                # Hour should correspond to alarm timezone 
+                startRaw = alarm.get('rawTime')
+                alarm.getDateObject().setHours(startRaw.substring(0, 2))
+                alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
+
             alarm.getDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
