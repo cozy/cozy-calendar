@@ -122,6 +122,7 @@ module.exports = class CalendarView extends View
             timezone: alarm.get 'timezone'
             start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
             end: endAlarm.format(Date.ISO8601_DATETIME)
+            timezoneHour: alarm.get 'timezoneHour'
             allDay: false
             backgroundColor: '#5C5'
             borderColor: '#5C5'
@@ -196,6 +197,13 @@ module.exports = class CalendarView extends View
         # Update new dates of event
         if event.type is 'alarm'
             alarm = @model.alarm.get event.id
+
+            if alarm.get('timezoneHour')?
+                # Hour should correspond to alarm timezone 
+                startRaw = alarm.get('timezoneHour')
+                alarm.getDateObject().setHours(startRaw.substring(0, 2))
+                alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
+
             alarm.getDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
@@ -264,7 +272,10 @@ module.exports = class CalendarView extends View
             isDayView = view.name is 'agendaDay'
             end = event.end.format '{HH}:{mm}'
             startDate = event.start
-            start = event.start.format '{HH}:{mm}'
+            if event.timezoneHour?
+                start = event.timezoneHour
+            else
+                start = event.start.format '{HH}:{mm}'
 
             direction = helpers.getPopoverDirection isDayView, event.start, \
                                                             event.end, true
@@ -285,8 +296,9 @@ module.exports = class CalendarView extends View
                     editionMode: true
                     defaultValue: event.title
                     defaultTime: start
-                    timezones: timezoneData
-                    defaultTimezone: event.timezone
+                    #timezones: timezoneData
+                    #defaultTimezone: event.timezone
+                    timezone: event.timezone
 
                 @popover.alarm.show t("Alarm edition"), direction, formTemplate
 
