@@ -122,6 +122,7 @@ module.exports = class CalendarView extends View
             timezone: alarm.get 'timezone'
             start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
             end: endAlarm.format(Date.ISO8601_DATETIME)
+            rawTime: alarm.get 'rawTime'
             allDay: false
             backgroundColor: '#5C5'
             borderColor: '#5C5'
@@ -264,7 +265,10 @@ module.exports = class CalendarView extends View
             isDayView = view.name is 'agendaDay'
             end = event.end.format '{HH}:{mm}'
             startDate = event.start
-            start = event.start.format '{HH}:{mm}'
+            if event.rawTime?
+                start = event.rawTime
+            else
+                start = event.start.format '{HH}:{mm}'
 
             direction = helpers.getPopoverDirection isDayView, event.start, \
                                                             event.end, true
@@ -285,8 +289,9 @@ module.exports = class CalendarView extends View
                     editionMode: true
                     defaultValue: event.title
                     defaultTime: start
-                    timezones: timezoneData
-                    defaultTimezone: event.timezone
+                    #timezones: timezoneData
+                    #defaultTimezone: event.timezone
+                    timezone: event.timezone
 
                 @popover.alarm.show t("Alarm edition"), direction, formTemplate
 

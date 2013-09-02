@@ -1458,6 +1458,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
           _this.event.end = Date.create(alarm.get('trigg')).advance({
             minutes: 30
           });
+          _this.event.rawTime = alarm.get('rawTime');
           _this.event._start = _this.event.start;
           _this.event._end = _this.event.end;
           _this.event.title = data.description;
@@ -1780,6 +1781,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         timezone: alarm.get('timezone'),
         start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
         end: endAlarm.format(Date.ISO8601_DATETIME),
+        rawTime: alarm.get('rawTime'),
         allDay: false,
         backgroundColor: '#5C5',
         borderColor: '#5C5',
@@ -1949,7 +1951,11 @@ window.require.register("views/calendar_view", function(exports, require, module
         isDayView = view.name === 'agendaDay';
         end = event.end.format('{HH}:{mm}');
         startDate = event.start;
-        start = event.start.format('{HH}:{mm}');
+        if (event.rawTime != null) {
+          start = event.rawTime;
+        } else {
+          start = event.start.format('{HH}:{mm}');
+        }
         direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
         _this.popover[event.type].createNew({
           field: $(target),
@@ -1971,8 +1977,7 @@ window.require.register("views/calendar_view", function(exports, require, module
             editionMode: true,
             defaultValue: event.title,
             defaultTime: start,
-            timezones: timezoneData,
-            defaultTimezone: event.timezone
+            timezone: event.timezone
           });
           _this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
         } else {
@@ -3068,7 +3073,7 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultTime) + ""), 'id':("input-time"), "class": ('input-small') }, {"type":true,"value":true,"id":true}));
   buf.push('/><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("input-desc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/></div><div><button class="btn add"> ');
+  buf.push('/><p>' + escape((interp = timezone) == null ? '' : interp) + '</p></div><div><button class="btn add"> ');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button></div>');

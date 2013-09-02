@@ -46,31 +46,31 @@ action 'all', ->
             send alarms
 
 action 'getOne', ->
-    if not @alarm.timezone?
-        @alarm.timezone = @userTimezone
-    @alarm = @convertAlarmDate(@alarm, @alarm.timezone)
+    @alarm = @convertAlarmDate(@alarm, @userTimezone)
     send @alarm, 200
 
 action 'create', ->
     if not body.timezone?
         body.timezone = @userTimezone
     triggerDate = new time.Date(body.trigg, body.timezone)
+    body.rawTime = triggerDate.toString().slice(16, 21)
     triggerDate.setTimezone('UTC')
     body.trigg = triggerDate.toString().slice(0, 24)
+
 
     Alarm.create body, (err, alarm) =>
         if err
             send error: true, msg: "Server error while creating alarm.", 500
         else
-            console.log alarm
             alarm = @convertAlarmDate(alarm, @userTimezone)
-            console.log alarm
             send alarm, 201
 
 action 'update', ->
     if not body.timezone?
         body.timezone = @userTimezone
+
     triggerDate = new time.Date(req.body.trigg, body.timezone)
+    body.rawTime = triggerDate.toString().slice(16, 21)
     triggerDate.setTimezone('UTC')
     req.body.trigg = triggerDate.toString().slice(0, 24)
 
@@ -79,7 +79,7 @@ action 'update', ->
         if err?
             send error: true, msg: "Server error while saving alarm", 500
         else
-            alarm = @convertAlarmDate(alarm, alarm.timezone)
+            alarm = @convertAlarmDate(alarm, @userTimezone)
             send alarm, 200
 
 action 'delete', ->
