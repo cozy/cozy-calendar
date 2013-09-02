@@ -55,7 +55,7 @@ module.exports = class AlarmPopOver extends PopOver
                 @event.start = Date.create(alarm.get 'trigg')
                 @event.end = Date.create(alarm.get 'trigg').advance
                     minutes: 30
-                @event.rawTime = alarm.get 'rawTime'
+                @event.timezoneHour = alarm.get 'timezoneHour'
                 @event._start = @event.start
                 @event._end = @event.end
                 @event.title = data.description

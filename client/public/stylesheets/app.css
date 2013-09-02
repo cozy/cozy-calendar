@@ -8344,9 +8344,6 @@ h2 {
     display: block;
     margin-bottom: 10px;
   }
-  #input-timezone {
-    display: none;
-  }
 }
 @media (max-width: 700px) {
   #alarms .fc-day-header {

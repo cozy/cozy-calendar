@@ -44,7 +44,6 @@ module.exports = class AlarmsListView extends View
         view.model.get('alarms').add alarm
 
     onChange: (alarm) ->
-        console.log alarm
         dateHash = alarm.getDateHash()
 
         view = @getSubView dateHash, () =>
@@ -53,8 +52,6 @@ module.exports = class AlarmsListView extends View
 
         prevDateHash = alarm.getPreviousDateHash()
         if alarm.changedAttributes().trigg? and prevDateHash isnt dateHash
-            console.log prevDateHash
-            console.log @views
             prevView = @views[prevDateHash]
             prevView.model.get('alarms').remove(alarm)
 

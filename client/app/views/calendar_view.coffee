@@ -122,7 +122,7 @@ module.exports = class CalendarView extends View
             timezone: alarm.get 'timezone'
             start: alarm.getFormattedDate(Date.ISO8601_DATETIME)
             end: endAlarm.format(Date.ISO8601_DATETIME)
-            rawTime: alarm.get 'rawTime'
+            timezoneHour: alarm.get 'timezoneHour'
             allDay: false
             backgroundColor: '#5C5'
             borderColor: '#5C5'
@@ -198,9 +198,9 @@ module.exports = class CalendarView extends View
         if event.type is 'alarm'
             alarm = @model.alarm.get event.id
 
-            if alarm.get('rawTime')?
+            if alarm.get('timezoneHour')?
                 # Hour should correspond to alarm timezone 
-                startRaw = alarm.get('rawTime')
+                startRaw = alarm.get('timezoneHour')
                 alarm.getDateObject().setHours(startRaw.substring(0, 2))
                 alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
 
@@ -272,8 +272,8 @@ module.exports = class CalendarView extends View
             isDayView = view.name is 'agendaDay'
             end = event.end.format '{HH}:{mm}'
             startDate = event.start
-            if event.rawTime?
-                start = event.rawTime
+            if event.timezoneHour?
+                start = event.timezoneHour
             else
                 start = event.start.format '{HH}:{mm}'
 

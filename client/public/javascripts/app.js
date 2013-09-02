@@ -1322,8 +1322,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.descriptionField.val(alarm.get('description'));
       this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
       this.timezoneField.val(alarm.get(defaultTimezone));
-      if (alarm.get('rawTime') != null) {
-        this.timeField.val(alarm.get('rawTime'));
+      if (alarm.get('timezoneHour') != null) {
+        this.timeField.val(alarm.get('timezoneHour'));
       } else {
         this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
       }
@@ -1462,7 +1462,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
           _this.event.end = Date.create(alarm.get('trigg')).advance({
             minutes: 30
           });
-          _this.event.rawTime = alarm.get('rawTime');
+          _this.event.timezoneHour = alarm.get('timezoneHour');
           _this.event._start = _this.event.start;
           _this.event._end = _this.event.end;
           _this.event.title = data.description;
@@ -1575,7 +1575,6 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
     AlarmsListView.prototype.onChange = function(alarm) {
       var dateHash, prevDateHash, prevView, view,
         _this = this;
-      console.log(alarm);
       dateHash = alarm.getDateHash();
       view = this.getSubView(dateHash, function() {
         _this.onAdd(alarm);
@@ -1583,8 +1582,6 @@ window.require.register("views/alarms_list_view", function(exports, require, mod
       });
       prevDateHash = alarm.getPreviousDateHash();
       if ((alarm.changedAttributes().trigg != null) && prevDateHash !== dateHash) {
-        console.log(prevDateHash);
-        console.log(this.views);
         prevView = this.views[prevDateHash];
         return prevView.model.get('alarms').remove(alarm);
       }
@@ -1788,7 +1785,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         timezone: alarm.get('timezone'),
         start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
         end: endAlarm.format(Date.ISO8601_DATETIME),
-        rawTime: alarm.get('rawTime'),
+        timezoneHour: alarm.get('timezoneHour'),
         allDay: false,
         backgroundColor: '#5C5',
         borderColor: '#5C5',
@@ -1878,8 +1875,8 @@ window.require.register("views/calendar_view", function(exports, require, module
       };
       if (event.type === 'alarm') {
         alarm = this.model.alarm.get(event.id);
-        if (alarm.get('rawTime') != null) {
-          startRaw = alarm.get('rawTime');
+        if (alarm.get('timezoneHour') != null) {
+          startRaw = alarm.get('timezoneHour');
           alarm.getDateObject().setHours(startRaw.substring(0, 2));
           alarm.getDateObject().setMinutes(startRaw.substring(3, 5));
         }
@@ -1963,8 +1960,8 @@ window.require.register("views/calendar_view", function(exports, require, module
         isDayView = view.name === 'agendaDay';
         end = event.end.format('{HH}:{mm}');
         startDate = event.start;
-        if (event.rawTime != null) {
-          start = event.rawTime;
+        if (event.timezoneHour != null) {
+          start = event.timezoneHour;
         } else {
           start = event.start.format('{HH}:{mm}');
         }

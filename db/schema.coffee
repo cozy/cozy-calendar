@@ -9,7 +9,7 @@ Alarm = define 'Alarm', ->
     property 'trigg', String
     property 'description', String
     property 'timezone', String
-    property 'rawTime', String
+    property 'timezoneHour', String
     property 'related', String, default: null
 
 Event = define 'Event', ->
