@@ -1321,8 +1321,12 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.resetForm();
       this.descriptionField.val(alarm.get('description'));
       this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
-      this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
       this.timezoneField.val(alarm.get(defaultTimezone));
+      if (alarm.get('rawTime') != null) {
+        this.timeField.val(alarm.get('rawTime'));
+      } else {
+        this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
+      }
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
@@ -2647,7 +2651,6 @@ window.require.register("views/list_view", function(exports, require, module) {
         action: this.alarmFormView.actionField.val(),
         trigg: dueDate
       };
-      console.log(this.alarmFormView.timezoneField.val());
       if (this.alarmFormView.timezoneField.val() !== defaultTimezone) {
         data.timezone = this.alarmFormView.timezoneField.val();
       }
@@ -2668,7 +2671,7 @@ window.require.register("views/list_view", function(exports, require, module) {
         alarm = this.model.create(data, {
           ignoreMySocketNotification: true,
           wait: true,
-          success: function(model, response) {
+          success: function() {
             _this.alarmFormView.resetForm();
             return console.log('Create alarm: success');
           },
