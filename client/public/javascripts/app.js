@@ -1321,8 +1321,12 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.resetForm();
       this.descriptionField.val(alarm.get('description'));
       this.dateField.val(alarm.getFormattedDate('{dd}/{MM}/{yyyy}'));
-      this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
       this.timezoneField.val(alarm.get(defaultTimezone));
+      if (alarm.get('timezoneHour') != null) {
+        this.timeField.val(alarm.get('timezoneHour'));
+      } else {
+        this.timeField.val(alarm.getFormattedDate('{HH}:{mm}'));
+      }
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
@@ -1458,6 +1462,7 @@ window.require.register("views/alarm_popover", function(exports, require, module
           _this.event.end = Date.create(alarm.get('trigg')).advance({
             minutes: 30
           });
+          _this.event.timezoneHour = alarm.get('timezoneHour');
           _this.event._start = _this.event.start;
           _this.event._end = _this.event.end;
           _this.event.title = data.description;
@@ -1780,6 +1785,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         timezone: alarm.get('timezone'),
         start: alarm.getFormattedDate(Date.ISO8601_DATETIME),
         end: endAlarm.format(Date.ISO8601_DATETIME),
+        timezoneHour: alarm.get('timezoneHour'),
         allDay: false,
         backgroundColor: '#5C5',
         borderColor: '#5C5',
@@ -1851,7 +1857,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onEventDrop = function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
-      var alarm, data, evt, storeEvent,
+      var alarm, data, evt, startRaw, storeEvent,
         _this = this;
       storeEvent = function(model, data) {
         return model.save(data, {
@@ -1869,6 +1875,11 @@ window.require.register("views/calendar_view", function(exports, require, module
       };
       if (event.type === 'alarm') {
         alarm = this.model.alarm.get(event.id);
+        if (alarm.get('timezoneHour') != null) {
+          startRaw = alarm.get('timezoneHour');
+          alarm.getDateObject().setHours(startRaw.substring(0, 2));
+          alarm.getDateObject().setMinutes(startRaw.substring(3, 5));
+        }
         alarm.getDateObject().advance({
           days: dayDelta,
           minutes: minuteDelta
@@ -1949,7 +1960,11 @@ window.require.register("views/calendar_view", function(exports, require, module
         isDayView = view.name === 'agendaDay';
         end = event.end.format('{HH}:{mm}');
         startDate = event.start;
-        start = event.start.format('{HH}:{mm}');
+        if (event.timezoneHour != null) {
+          start = event.timezoneHour;
+        } else {
+          start = event.start.format('{HH}:{mm}');
+        }
         direction = helpers.getPopoverDirection(isDayView, event.start, event.end, true);
         _this.popover[event.type].createNew({
           field: $(target),
@@ -1971,8 +1986,7 @@ window.require.register("views/calendar_view", function(exports, require, module
             editionMode: true,
             defaultValue: event.title,
             defaultTime: start,
-            timezones: timezoneData,
-            defaultTimezone: event.timezone
+            timezone: event.timezone
           });
           _this.popover.alarm.show(t("Alarm edition"), direction, formTemplate);
         } else {
@@ -2642,7 +2656,6 @@ window.require.register("views/list_view", function(exports, require, module) {
         action: this.alarmFormView.actionField.val(),
         trigg: dueDate
       };
-      console.log(this.alarmFormView.timezoneField.val());
       if (this.alarmFormView.timezoneField.val() !== defaultTimezone) {
         data.timezone = this.alarmFormView.timezoneField.val();
       }
@@ -2663,7 +2676,7 @@ window.require.register("views/list_view", function(exports, require, module) {
         alarm = this.model.create(data, {
           ignoreMySocketNotification: true,
           wait: true,
-          success: function(model, response) {
+          success: function() {
             _this.alarmFormView.resetForm();
             return console.log('Create alarm: success');
           },
@@ -3068,7 +3081,7 @@ window.require.register("views/templates/alarm_form_small", function(exports, re
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultTime) + ""), 'id':("input-time"), "class": ('input-small') }, {"type":true,"value":true,"id":true}));
   buf.push('/><input');
   buf.push(attrs({ 'type':("text"), 'value':("" + (defaultValue) + ""), 'id':("input-desc"), 'placeholder':(t("What do you want to be reminded ?")), "class": ('input') }, {"type":true,"value":true,"id":true,"placeholder":true}));
-  buf.push('/></div><div><button class="btn add"> ');
+  buf.push('/><p>' + escape((interp = timezone) == null ? '' : interp) + '</p></div><div><button class="btn add"> ');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button></div>');

@@ -40,8 +40,6 @@ module.exports = class ListView extends View
             action: @alarmFormView.actionField.val()
             trigg: dueDate
 
-        console.log @alarmFormView.timezoneField.val()
-
         if @alarmFormView.timezoneField.val() isnt defaultTimezone
             data.timezone = @alarmFormView.timezoneField.val()
 
@@ -59,7 +57,7 @@ module.exports = class ListView extends View
             alarm = @model.create data,
                     ignoreMySocketNotification: true #useless ?
                     wait: true
-                    success: (model, response) =>
+                    success: =>
                         @alarmFormView.resetForm()
                         console.log 'Create alarm: success'
                     error: (error, xhr, options) ->

@@ -105,8 +105,11 @@ module.exports = class AlarmFormView extends View
         @resetForm()
         @descriptionField.val alarm.get 'description'
         @dateField.val alarm.getFormattedDate '{dd}/{MM}/{yyyy}'
-        @timeField.val alarm.getFormattedDate '{HH}:{mm}'
         @timezoneField.val alarm.get defaultTimezone
+        if alarm.get('timezoneHour')?
+            @timeField.val alarm.get 'timezoneHour'
+        else            
+            @timeField.val alarm.getFormattedDate '{HH}:{mm}'        
 
         @data = alarm
 
