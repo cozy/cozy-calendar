@@ -119,7 +119,9 @@ describe "Alarms management", ->
                     body.should.have.property 'action', @alarm.action
                     body.should.have.property 'trigg'
                     body.should.have.property 'timezone', 'America/Chicago'
-                    body.trigg.should.equal @alarm.trigg
+                    trigg = new time.Date(@alarm.trigg, 'America/Chicago')
+                    trigg.setTimezone 'Europe/Paris'
+                    body.trigg.should.equal trigg.toString().slice(0, 24)
                     body.should.have.property 'description', @alarm.description
                     done()
 
@@ -226,7 +228,9 @@ describe "Alarms management", ->
                     resp.should.have.status 200
                     should.exist body
                     body.should.have.property 'action', @alarm.action
-                    body.should.have.property 'trigg', @alarm.trigg
+                    trigg = new time.Date(@alarm.trigg, 'Africa/Abidjan')
+                    trigg.setTimezone 'Europe/Paris'
+                    body.should.have.property 'trigg', trigg.toString().slice(0, 24)
                     body.should.have.property 'description', @alarm.description
                     body.should.have.property 'timezone', @alarm.timezone
                     done()
