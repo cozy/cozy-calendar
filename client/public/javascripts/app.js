@@ -1205,7 +1205,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       'focus #input-desc': 'onFocus',
       'blur #input-desc': 'onBlur',
       'keyup #input-desc': 'onKeyUp',
-      'click .add-alarm': 'onSubmit'
+      'click .add-alarm': 'onSubmit',
+      'click .cancel': 'resetForm'
     };
 
     AlarmFormView.prototype.initialize = function() {
@@ -1248,6 +1249,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.timeField = this.$('#input-time');
       this.timezoneField = this.$('#input-timezone');
       this.addAlarmButton = this.$('button.add-alarm');
+      this.cancelButton = this.$('button.cancel');
+      this.cancelButton.hide();
       this.disableSubmitButton();
       this.validationMapper = {
         action: {
@@ -1330,11 +1333,13 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
+      this.cancelButton.show();
       return this.enableSubmitButton();
     };
 
     AlarmFormView.prototype.resetForm = function() {
       var todayDate;
+      this.cancelButton.hide();
       this.data = null;
       this.editionMode = false;
       this.addAlarmButton.html('add the alarm');
@@ -3067,8 +3072,11 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select></div><button class="btn pull-right add-alarm">');
+  buf.push('</select></div><button class="btn add-alarm">');
   var __val__ = t('add the alarm')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button><button class="btn cancel">');
+  var __val__ = t('cancel')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button><div class="clearfix"></div></div>');
   }
