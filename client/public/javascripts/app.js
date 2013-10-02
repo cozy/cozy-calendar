@@ -2698,6 +2698,7 @@ window.require.register("views/list_view", function(exports, require, module) {
 
     ListView.prototype.onEditAlarmClicked = function(event) {
       var alarm, alarmID;
+      window.top.window.scrollTo(0, 0);
       alarmID = $(event.target).data('alarmid');
       alarm = this.model.get(alarmID);
       return this.alarmFormView.loadAlarmData(alarm);

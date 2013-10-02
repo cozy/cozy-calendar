@@ -68,6 +68,7 @@ module.exports = class ListView extends View
             @alarmFormView.displayErrors(alarm.validationError)
 
     onEditAlarmClicked: (event) ->
+        window.top.window.scrollTo(0,0)
         alarmID = $(event.target).data('alarmid')
         alarm = @model.get alarmID
         @alarmFormView.loadAlarmData(alarm)
