@@ -2700,17 +2700,19 @@ window.require.register("views/list_view", function(exports, require, module) {
 
     ListView.prototype.onRemoveAlarmClicked = function(event) {
       var alarm, alarmID;
-      alarmID = $(event.target).data('alarmid');
-      alarm = this.model.get(alarmID);
-      return alarm.destroy({
-        wait: true,
-        success: function() {
-          return console.log("Delete alarm: success");
-        },
-        error: function() {
-          return console.log("Delete alarm: error");
-        }
-      });
+      if (confirm('Are you sure ?')) {
+        alarmID = $(event.target).data('alarmid');
+        alarm = this.model.get(alarmID);
+        return alarm.destroy({
+          wait: true,
+          success: function() {
+            return console.log("Delete alarm: success");
+          },
+          error: function() {
+            return console.log("Delete alarm: error");
+          }
+        });
+      }
     };
 
     return ListView;
@@ -2843,17 +2845,19 @@ window.require.register("views/popover", function(exports, require, module) {
       evt = this.model.get(this.event.id);
       this.removeButton.css('width', '42px');
       this.removeButton.spin('tiny');
-      return evt.destroy({
-        success: function() {
-          _this.cal.fullCalendar('removeEvents', _this.event.id);
-          _this.removeButton.spin();
-          return _this.removeButton.css('width', '14px');
-        },
-        error: function() {
-          this.removeButton.spin();
-          return this.removeButton.css('width', '14px');
-        }
-      });
+      if (confirm('Are you sure ?')) {
+        return evt.destroy({
+          success: function() {
+            _this.cal.fullCalendar('removeEvents', _this.event.id);
+            _this.removeButton.spin();
+            return _this.removeButton.css('width', '14px');
+          },
+          error: function() {
+            this.removeButton.spin();
+            return this.removeButton.css('width', '14px');
+          }
+        });
+      }
     };
 
     PopOver.prototype.formatDate = function(value) {

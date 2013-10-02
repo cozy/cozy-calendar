@@ -72,13 +72,14 @@ module.exports = class ListView extends View
         alarm = @model.get alarmID
         @alarmFormView.loadAlarmData(alarm)
 
-    onRemoveAlarmClicked: (event) ->
-        alarmID = $(event.target).data('alarmid')
-        alarm = @model.get alarmID
-        # TODO: add confirmation and loading indicator
-        alarm.destroy
-            wait: true
-            success: () ->
-                console.log "Delete alarm: success"
-            error: () ->
-                console.log "Delete alarm: error"
+    onRemoveAlarmClicked: (event) ->        
+        if confirm 'Are you sure ?'
+            alarmID = $(event.target).data('alarmid')
+            alarm = @model.get alarmID
+            # TODO: add confirmation and loading indicator
+            alarm.destroy
+                wait: true
+                success: () ->
+                    console.log "Delete alarm: success"
+                error: () ->
+                    console.log "Delete alarm: error"
