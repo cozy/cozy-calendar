@@ -16,4 +16,6 @@ before_install:
     - sleep 3
     - curl http://localhost:9101/
     - cd ..
+    - export NAME=agenda
+    - export TOKEN=token
     - mkdir log
