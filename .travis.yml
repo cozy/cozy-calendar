@@ -7,7 +7,7 @@ env:
     global:
         - NODE_ENV=test
 before_install:
-    - git clone git://github.com/aenario/cozy-data-system.git
+    - git clone git://github.com/mycozycloud/cozy-data-system.git
     - cd cozy-data-system
     - npm install forever coffee-script -g
     - npm install # data-system
