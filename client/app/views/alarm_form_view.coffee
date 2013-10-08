@@ -14,6 +14,7 @@ module.exports = class AlarmFormView extends View
         'blur #input-desc': 'onBlur'
         'keyup #input-desc': 'onKeyUp'
         'click .add-alarm': 'onSubmit'
+        'click .cancel': 'resetForm'
 
     initialize: ->
         @actions =
@@ -44,6 +45,8 @@ module.exports = class AlarmFormView extends View
         @timeField = @$('#input-time')
         @timezoneField = @$('#input-timezone')
         @addAlarmButton = @$('button.add-alarm')
+        @cancelButton = @$('button.cancel')
+        @cancelButton.hide()
         @disableSubmitButton()
 
         @validationMapper =
@@ -115,10 +118,12 @@ module.exports = class AlarmFormView extends View
 
         @editionMode = true
         @addAlarmButton.html 'Edit the alarm'
+        @cancelButton.show()
 
         @enableSubmitButton()
 
     resetForm: () ->
+        @cancelButton.hide()
         @data = null
         @editionMode = false
         @addAlarmButton.html 'add the alarm'
