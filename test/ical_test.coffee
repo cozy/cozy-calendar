@@ -3,17 +3,12 @@ async = require('async')
 time = require 'time'
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
+clientDS = new Client 'http://localhost:9101'
 
 {ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require '../lib/ical_helpers'
 
-instantiateApp = require('../server')
-app = instantiateApp()
-
 Alarm = null
 Event = null
-app.compound.on 'models', (models, compound) ->
-    Event = compound.models.Event
-    Alarm = compound.models.Alarm
 
 expectedContent = """
 BEGIN:VCALENDAR
@@ -97,14 +92,30 @@ END:VEVENT
 END:VCALENDAR
 """.replace(/\n/g, '\r\n')
 
-
+addPermissions = (callback) ->
+    data =
+        slug: 'agenda'
+        password: 'token'
+        permissions:
+            "all": 'test'
+        docType: 'Application'
+    clientDS.setBasicAuth 'home', 'token'
+    clientDS.post 'data/', data, callback
 
 helpers = null
+app = null
 describe "Calendar export/import", ->
 
-    before ->
-        app.listen 8888
-        helpers = require("./helpers")(app.compound)
+    before (done) =>
+        addPermissions () =>
+            instantiateApp = require('../server')
+            app = instantiateApp()
+            app.compound.on 'models', (models, compound) =>
+                Event = compound.models.Event
+                Alarm = compound.models.Alarm
+                app.listen 8888
+                helpers = require('./helpers')(app.compound)
+                done()
 
     after ->
         app.compound.server.close()
