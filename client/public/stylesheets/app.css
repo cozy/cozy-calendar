@@ -8265,6 +8265,11 @@ input[type="time"] {
   float: left;
   margin-top: 10px;
 }
+.popover-content button.cancel,
+#add-alarm button.cancel {
+  margin-left: 5px;
+  margin-top: 10px;
+}
 #action {
   width: 110px;
 }

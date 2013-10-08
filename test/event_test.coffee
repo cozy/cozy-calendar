@@ -2,36 +2,27 @@ should = require('should')
 async = require('async')
 time = require 'time'
 Client = require('request-json').JsonClient
-instantiateApp = require('../server')
-app = instantiateApp()
 
 client = new Client "http://localhost:8888/"
+helpers = require './helpers'
 
-helpers = null
 describe "Events management", ->
 
-    before ->
-        app.listen 8888
-        helpers = require("./helpers")(app.compound)
-
-    after ->
-        app.compound.server.close()
+    before helpers.before
+    after helpers.after
 
     describe "GET events/", ->
 
+        before helpers.cleanDb
         before (done) ->
-            initDb = (callback) ->
-                async.series [
-                    helpers.createEvent "Tue Apr 23 2013 14:40:00 ",
-                        "Tue Apr 23 2013 15:40:00 ", "Place", 3,
-                        "Something to do"
-                    helpers.createEvent "Tue Apr 24 2013 13:30:00",
-                        "Tue Apr 24 2013 14:00:00", "Other place", 0,
-                        "Something else to do"
-                ], ->
-                    callback()
-            helpers.cleanDb ->
-                initDb done
+            async.series [
+                helpers.createEvent "Tue Apr 23 2013 14:40:00 ",
+                    "Tue Apr 23 2013 15:40:00 ", "Place", 3,
+                    "Something to do"
+                helpers.createEvent "Tue Apr 24 2013 13:30:00",
+                    "Tue Apr 24 2013 14:00:00", "Other place", 0,
+                    "Something else to do"
+            ], done
 
         it "should return all the events in database", (done) ->
             client.get "events/", (error, response, body) ->
@@ -47,10 +38,8 @@ describe "Events management", ->
 
     describe "POST events/", ->
 
-        before (done) ->
-            helpers.cleanDb done
-        after ->
-            delete @event
+        before helpers.cleanDb
+        after -> delete @event
 
         it "should return the event json object", (done) ->
             @event =
@@ -109,12 +98,8 @@ describe "Events management", ->
 
     describe "PUT events/:id", ->
 
-        before (done) ->
-            helpers.cleanDb =>
-                done()
-
-        after ->
-            delete @event
+        before helpers.cleanDb
+        after -> delete @event
 
 
         it "When I create an event", (done) ->
@@ -173,12 +158,8 @@ describe "Events management", ->
 
     describe "DELETE events/:id", ->
 
-        before (done) ->
-            helpers.cleanDb =>
-                done()
-
-        after ->
-            delete @event
+        before helpers.cleanDb
+        after -> delete @event
 
         it "When I create an event", (done) ->
             @event =

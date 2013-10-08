@@ -1205,7 +1205,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       'focus #input-desc': 'onFocus',
       'blur #input-desc': 'onBlur',
       'keyup #input-desc': 'onKeyUp',
-      'click .add-alarm': 'onSubmit'
+      'click .add-alarm': 'onSubmit',
+      'click .cancel': 'resetForm'
     };
 
     AlarmFormView.prototype.initialize = function() {
@@ -1248,6 +1249,8 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.timeField = this.$('#input-time');
       this.timezoneField = this.$('#input-timezone');
       this.addAlarmButton = this.$('button.add-alarm');
+      this.cancelButton = this.$('button.cancel');
+      this.cancelButton.hide();
       this.disableSubmitButton();
       this.validationMapper = {
         action: {
@@ -1330,11 +1333,13 @@ window.require.register("views/alarm_form_view", function(exports, require, modu
       this.data = alarm;
       this.editionMode = true;
       this.addAlarmButton.html('Edit the alarm');
+      this.cancelButton.show();
       return this.enableSubmitButton();
     };
 
     AlarmFormView.prototype.resetForm = function() {
       var todayDate;
+      this.cancelButton.hide();
       this.data = null;
       this.editionMode = false;
       this.addAlarmButton.html('add the alarm');
@@ -2693,6 +2698,7 @@ window.require.register("views/list_view", function(exports, require, module) {
 
     ListView.prototype.onEditAlarmClicked = function(event) {
       var alarm, alarmID;
+      window.top.window.scrollTo(0, 0);
       alarmID = $(event.target).data('alarmid');
       alarm = this.model.get(alarmID);
       return this.alarmFormView.loadAlarmData(alarm);
@@ -2700,17 +2706,19 @@ window.require.register("views/list_view", function(exports, require, module) {
 
     ListView.prototype.onRemoveAlarmClicked = function(event) {
       var alarm, alarmID;
-      alarmID = $(event.target).data('alarmid');
-      alarm = this.model.get(alarmID);
-      return alarm.destroy({
-        wait: true,
-        success: function() {
-          return console.log("Delete alarm: success");
-        },
-        error: function() {
-          return console.log("Delete alarm: error");
-        }
-      });
+      if (confirm('Are you sure ?')) {
+        alarmID = $(event.target).data('alarmid');
+        alarm = this.model.get(alarmID);
+        return alarm.destroy({
+          wait: true,
+          success: function() {
+            return console.log("Delete alarm: success");
+          },
+          error: function() {
+            return console.log("Delete alarm: error");
+          }
+        });
+      }
     };
 
     return ListView;
@@ -2843,17 +2851,19 @@ window.require.register("views/popover", function(exports, require, module) {
       evt = this.model.get(this.event.id);
       this.removeButton.css('width', '42px');
       this.removeButton.spin('tiny');
-      return evt.destroy({
-        success: function() {
-          _this.cal.fullCalendar('removeEvents', _this.event.id);
-          _this.removeButton.spin();
-          return _this.removeButton.css('width', '14px');
-        },
-        error: function() {
-          this.removeButton.spin();
-          return this.removeButton.css('width', '14px');
-        }
-      });
+      if (confirm('Are you sure ?')) {
+        return evt.destroy({
+          success: function() {
+            _this.cal.fullCalendar('removeEvents', _this.event.id);
+            _this.removeButton.spin();
+            return _this.removeButton.css('width', '14px');
+          },
+          error: function() {
+            this.removeButton.spin();
+            return this.removeButton.css('width', '14px');
+          }
+        });
+      }
     };
 
     PopOver.prototype.formatDate = function(value) {
@@ -3063,8 +3073,11 @@ window.require.register("views/templates/alarm_form", function(exports, require,
     }
   }).call(this);
 
-  buf.push('</select></div><button class="btn pull-right add-alarm">');
+  buf.push('</select></div><button class="btn add-alarm">');
   var __val__ = t('add the alarm')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button><button class="btn cancel">');
+  var __val__ = t('cancel')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button><div class="clearfix"></div></div>');
   }

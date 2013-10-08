@@ -2,34 +2,25 @@ should = require('should')
 async = require('async')
 time = require 'time'
 Client = require('request-json').JsonClient
-instantiateApp = require('../server')
-app = instantiateApp()
 
 client = new Client "http://localhost:8888/"
+helpers = require './helpers'
 
-helpers = null
 describe "Alarms management", ->
 
-    before ->
-        app.listen 8888
-        helpers = require("./helpers")(app.compound)
-
-    after ->
-        app.compound.server.close()
+    before helpers.before
+    after helpers.after
 
     describe "GET alarms/", ->
 
+        before helpers.cleanDb
         before (done) ->
-            initDb = (callback) ->
-                async.series [
-                    helpers.createAlarm("DISPLAY", "Something to remind",
-                                        "Tue Apr 23 2013 14:40:00 ")
-                    helpers.createAlarm("EMAIL", "Something else to remind",
-                                        "Tue Apr 24 2013 13:30:00")
-                ], ->
-                    callback()
-            helpers.cleanDb ->
-                initDb done
+            async.series [
+                helpers.createAlarm("DISPLAY", "Something to remind",
+                                    "Tue Apr 23 2013 14:40:00 ")
+                helpers.createAlarm("EMAIL", "Something else to remind",
+                                    "Tue Apr 24 2013 13:30:00")
+            ], done
 
         it "should return all the alarms in database", (done) ->
             client.get "alarms/", (error, response, body) ->
@@ -46,10 +37,9 @@ describe "Alarms management", ->
 
     describe "POST alarms/", ->
 
-        before (done) ->
-            helpers.cleanDb done
+        before helpers.cleanDb
         after ->
-            delete alarm
+            delete @alarm
 
         describe "Create alarm with the timezone of user", ->
 
@@ -108,8 +98,8 @@ describe "Alarms management", ->
                     description: 'Something to remind'
                     timezone: 'America/Chicago'
 
-                client.post "alarms/", @alarm, (error, response, body) =>   
-                    
+                client.post "alarms/", @alarm, (error, response, body) =>
+
                     should.not.exist error
                     should.exist response
                     response.should.have.status 201
@@ -150,16 +140,14 @@ describe "Alarms management", ->
 
     describe "PUT alarms/:id", ->
 
-        before (done) ->
-            helpers.cleanDb =>
-                done()
+        before helpers.cleanDb
 
         after ->
-            delete alarm
+            delete @alarm
 
         describe "Update alarm with same timezone", ->
 
-            it "When I create an alarm", (done) ->            
+            it "When I create an alarm", (done) ->
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -203,7 +191,7 @@ describe "Alarms management", ->
 
         describe "Update an alarm with an other timezone", ->
 
-            it "When I create an alarm", (done) ->            
+            it "When I create an alarm", (done) ->
                 @alarm =
                     action: 'DISPLAY'
                     trigg: "Tue Apr 23 2013 14:25:00"
@@ -250,11 +238,8 @@ describe "Alarms management", ->
 
     describe "DELETE alarms/:id", ->
 
-        before (done) ->
-            helpers.cleanDb done
-
-        after ->
-            delete alarm
+        before helpers.cleanDb
+        after -> delete @alarm
 
         it "When I create an alarm", (done) ->
             @alarm =
