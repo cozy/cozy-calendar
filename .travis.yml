@@ -21,7 +21,4 @@ before_install:
     - coffee commands.coffee test-install agenda
     - cd ..
     - export NAME=agenda
-    - export TOKEN=token
-    - mkdir log
-    - export NAME=agenda
     - export TOKEN=apptoken
