@@ -79,14 +79,15 @@ module.exports = class PopOver extends View
         evt = @model.get @event.id
         @removeButton.css 'width', '42px'
         @removeButton.spin 'tiny'
-        evt.destroy
-            success: =>
-                @cal.fullCalendar 'removeEvents', @event.id
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
-            error: ->
-                @removeButton.spin()
-                @removeButton.css 'width', '14px'
+        if confirm 'Are you sure ?'
+            evt.destroy
+                success: =>
+                    @cal.fullCalendar 'removeEvents', @event.id
+                    @removeButton.spin()
+                    @removeButton.css 'width', '14px'
+                error: ->
+                    @removeButton.spin()
+                    @removeButton.css 'width', '14px'
 
     formatDate: (value) ->
         # Intitialize new alarm
