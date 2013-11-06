@@ -8,25 +8,28 @@ User  = require '../server/models/user'
 module.exports = helpers = {}
 
 helpers.before = (done) ->
+    @timeout 5000
     start = require('../server')
     start 8888, (err, app, server) =>
-        console.log "WE GET HERE"
         @server = server
-        done()
+        data =
+            email: 'test@cozycloud.cc'
+            password: 'password'
+            timezone: 'Europe/Paris'
+        User.create data, (err) ->
+            return done err if err
+            # wait a little for User.timezone to be updated through Realtime
+            setTimeout done, 1000
 
 helpers.after = (done) ->
     @server.close()
-    done()
+    helpers.cleanDb ->
+        User.destroyAll done
 
 # Remove all the alarms
 helpers.cleanDb = (callback) ->
     Alarm.destroyAll () ->
-        Event.destroyAll () ->
-            data =
-                email: 'test@cozycloud.cc'
-                password: 'password'
-                timezone: 'Europe/Paris'
-            User.create data, callback
+        Event.destroyAll callback
 
 # Get all the alarams
 helpers.getAllEvents = (callback) ->

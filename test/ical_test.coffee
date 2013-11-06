@@ -181,8 +181,8 @@ describe "Calendar export/import", ->
 
 
     describe 'Models', ->
-        Alarm = Event = null
-        before -> {Alarm, Event} = @models
+        Alarm = require '../server/models/alarm'
+        Event = require '../server/models/event'
 
         describe 'Alarms', ->
 
