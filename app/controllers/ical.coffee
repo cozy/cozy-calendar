@@ -1,32 +1,15 @@
 time = require 'time'
 moment = require 'moment'
-ical = require './lib/ical_helpers'
+ical = require 'cozy-ical'
 
-
-before ->
-
-    @userTimezone = 'Europe/Paris'
-    User.all (err, users) =>
-        if err
-            console.log err
-        else if users.length is 0
-            console.log 'No user registered.'
-        else
-            @userTimezone = users[0].timezone
-            @userEmail = users[0].email
-
-        next()
-
-
-action 'export', ->
+module.exports.export = (req, res) ->
     calendar = Alarm.getICalCalendar()
     Alarm.all (err, alarms) =>
         if err
-            send error: true, msg: 'Server error occurred while retrieving data'
+            res.send error: true, msg: 'Server error occurred while retrieving data'
         else
             Event.all (err, events) =>
-                if err
-                    send
+                if err then res.send
                         error: true
                         msg: 'Server error occurred while retrieving data'
                 else
@@ -38,10 +21,10 @@ action 'export', ->
                         calendar.add event.toIcal() for event in events
 
                     res.header 'Content-Type': 'text/plain'
-                    send calendar.toString()
+                    res.send calendar.toString()
 
 
-action 'import', ->
+module.exports.import = (req, res) ->
     file = req.files['file']
     if file?
         parser = new ical.ICalParser()
@@ -49,10 +32,10 @@ action 'import', ->
             if err
                 console.log err
                 console.log err.message
-                send {error: 'error occured while saving file', msg: err.message}, 500
+                res.send error: 'error occured while saving file', 500
             else
-                send
+                red.send
                     events: Event.extractEvents result
-                    alarms: Alarm.extractAlarms result, @userTimezone
+                    alarms: Alarm.extractAlarms result, User.timezone
     else
-        send error: 'no file sent', 500
+        res.send error: 'no file sent', 500
