@@ -1,6 +1,9 @@
 time = require 'time'
 moment = require 'moment'
 ical = require 'cozy-ical'
+Event = require '../models/event'
+Alarm = require '../models/alarm'
+User = require  '../models/user'
 
 module.exports.export = (req, res) ->
     calendar = Alarm.getICalCalendar()
@@ -34,7 +37,7 @@ module.exports.import = (req, res) ->
                 console.log err.message
                 res.send error: 'error occured while saving file', 500
             else
-                red.send
+                res.send
                     events: Event.extractEvents result
                     alarms: Alarm.extractAlarms result, User.timezone
     else
