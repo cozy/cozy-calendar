@@ -1,24 +1,30 @@
-module.exports = (compound, User) ->
+americano = require 'americano-cozy'
 
-    EMAILREGEX = ///^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|
-    (\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|
-    (([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$///
-
-    # Helpers
-
-    emailValidator = (err) ->
-        err() if not EMAILREGEX.test(@email)
-
-    # Validators
-
-    User.validate 'email', emailValidator,
-        message: 'Given email is not a proper email.'
+module.exports = User = americano.getModel 'User',
+    email    : type : String
+    timezone : type : String, default: "Europe/Paris"
 
 
-    # Request methods
+User.all = (callback) ->
+    User.request "all", callback
 
-    User.all = (callback) ->
-        User.request "all", callback
+User.destroyAll = (callback) ->
+    User.requestDestroy "all", callback
 
-    User.destroyAll = (callback) ->
-        User.requestDestroy "all", callback
+User.getTimezone = (callback) ->
+    User.all (err, users) =>
+        if err
+            callback err
+        else if users.length is 0
+            callback new Error('no user')
+        else
+            callback null, users[0].timezone
+
+User.updateTimezone = (ev, callback) ->
+    User.getTimezone (err, timezone) ->
+        if err
+            console.log err
+            User.timezone = "Europe/Paris"
+        else
+            User.timezone = timezone or "Europe/Paris"
+        callback?()

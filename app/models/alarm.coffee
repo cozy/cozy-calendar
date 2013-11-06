@@ -1,6 +1,13 @@
-module.exports = (compound, Alarm) ->
+americano = require 'americano-cozy'
 
-    Alarm.all = (params, callback) ->
-        Alarm.request "all", params, callback
+module.exports = Alarm = americano.getModel 'Alarm',
+    action       : type : String, default: 'DISPLAY'
+    trigg        : type : String
+    description  : type : String
+    timezone     : type : String
+    timezoneHour : type : String
+    related      : type : String, default: null
 
-    require('cozy-ical').decorateAlarm Alarm
+
+Alarm.all = (params, callback) ->
+    Alarm.request "all", params, callback
