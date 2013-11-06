@@ -2,7 +2,6 @@ time = require('time')
 async = require('async')
 i18n = require('cozy-i18n-helper')
 
-
 convertAlarmDate = (alarm, timezone) ->
     timezonedDate = new time.Date(alarm.trigg, 'UTC')
     timezonedDate.setTimezone(timezone)
@@ -19,40 +18,37 @@ convertEventDate = (evt, timezone) ->
     evt.end = timezonedDate.toString().slice(0, 24)
     return evt
 
-module.exports.index: (req, res) ->
+module.exports.index = (req, res) ->
+    async.parallel [
+        (cb) => Alarm.all (err, alarms) =>
+            return cb err if err
+            for alarm, index in alarms
+                alarms[index] = convertAlarmDate alarm, User.timezone
 
-    User.getTimezone (err, timezone) =>
+            cb null, alarms
 
-        async.parallel [
-            (cb) => Alarm.all (err, alarms) =>
-                return cb err if err
-                for alarm, index in alarms
-                    alarms[index] = @convertAlarmDate alarm, timezone
+        (cb) => Event.all (err, events) =>
+            return cb err if err
+            for evt, index in events
+                events[index] = convertEventDate evt, User.timezone
 
-                cb null, alarms
+            cb null, events
 
-            (cb) => Event.all (err, events) =>
-                return cb err if err
-                for evt, index in events
-                    events[index] = @convertEventDate evt, timezone
+        (cb) => i18n.getLocale null, (err, locale) ->
+            console.log err if err
+            cb null, locale
 
-                cb null, events
+    ], (err, results) =>
 
-            (cb) => i18n.getLocale null, (err, locale) ->
-                console.log err if err
-                cb null, locale
+        if err then send
+            error: 'Server error occurred while retrieving data'
+            stack : err.stack
+        else
 
-        ], (err, results) =>
+            [alarms, events, locale] = results
 
-            if err then send
-                error: 'Server error occurred while retrieving data'
-                stack : err.stack
-            else
-
-                [alarms, events, locale] = results
-
-                res.render 'index.jade', imports: """
-                    window.locale = "#{locale}";
-                    window.initalarms = #{JSON.stringify(alarms)};
-                    window.initevents = #{JSON.stringify(events)};
-                """
+            res.render 'index.jade', imports: """
+                window.locale = "#{locale}";
+                window.initalarms = #{JSON.stringify(alarms)};
+                window.initevents = #{JSON.stringify(events)};
+            """

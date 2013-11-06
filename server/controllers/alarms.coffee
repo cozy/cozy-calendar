@@ -27,7 +27,7 @@ module.exports.all = (req, res) ->
             alarms[index] = convertAlarmDate alarm, User.timezone
         res.send alarms
 
-module.exports.read = (res, res) ->
+module.exports.read = (req, res) ->
     res.send convertAlarmDate req.alarm, req.timezone
 
 module.exports.create = (req, res) ->

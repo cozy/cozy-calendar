@@ -14,13 +14,10 @@ describe "Alarms management", ->
     describe "GET alarms/", ->
 
         before helpers.cleanDb
-        before (done) ->
-            async.series [
-                helpers.createAlarm("DISPLAY", "Something to remind",
+        before helpers.createAlarm("DISPLAY", "Something to remind",
                                     "Tue Apr 23 2013 14:40:00 ")
-                helpers.createAlarm("EMAIL", "Something else to remind",
+        before helpers.createAlarm("EMAIL", "Something else to remind",
                                     "Tue Apr 24 2013 13:30:00")
-            ], done
 
         it "should return all the alarms in database", (done) ->
             client.get "alarms/", (error, response, body) ->

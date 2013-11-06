@@ -1,23 +1,21 @@
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 
-Event = null
-Alarm = null
-User = null
+Event = require '../server/models/event'
+Alarm = require '../server/models/alarm'
+User  = require '../server/models/user'
 
 module.exports = helpers = {}
 
 helpers.before = (done) ->
-    instantiateApp = require('../server')
-    @app = instantiateApp()
-    @app.compound.on 'models', (models, compound) =>
-        {Event, Alarm, User} = compound.models
-        @models = compound.models
-        @app.listen 8888
+    start = require('../server')
+    start 8888, (err, app, server) =>
+        console.log "WE GET HERE"
+        @server = server
         done()
 
 helpers.after = (done) ->
-    @app.compound.server.close()
+    @server.close()
     done()
 
 # Remove all the alarms

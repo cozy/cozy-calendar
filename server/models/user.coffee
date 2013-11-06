@@ -12,7 +12,9 @@ User.destroyAll = (callback) ->
     User.requestDestroy "all", callback
 
 User.getTimezone = (callback) ->
-    User.all (err, users) =>
+    console.log "B1"
+    User.all (err, users) ->
+        console.log "B2"
         if err
             callback err
         else if users.length is 0
@@ -20,8 +22,10 @@ User.getTimezone = (callback) ->
         else
             callback null, users[0].timezone
 
-User.updateTimezone = (ev, callback) ->
+User.updateTimezone = (callback) ->
+    console.log "A"
     User.getTimezone (err, timezone) ->
+        console.log "B"
         if err
             console.log err
             User.timezone = "Europe/Paris"
