@@ -7,7 +7,7 @@ client = new Client "http://localhost:8888/"
 clientDS = new Client 'http://localhost:9101'
 helpers = require './helpers'
 
-{ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require '../lib/ical_helpers'
+{ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require 'cozy-ical'
 
 expectedContent = """
     BEGIN:VCALENDAR
