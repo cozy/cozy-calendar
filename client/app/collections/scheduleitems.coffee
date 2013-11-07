@@ -1,6 +1,4 @@
-CozyCollection = require '../lib/cozy_collection'
-
-module.exports = class ScheduleItemsCollection extends CozyCollection
+module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
     comparator: (si1, si2) ->
 
