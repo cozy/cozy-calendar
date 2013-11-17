@@ -40,29 +40,6 @@ exports.icalToISO8601 = (icalDate) ->
     return "#{year}-#{month}-#{day}T#{hours}:#{minutes}Z"
 
 
-exports.getPopoverDirection = (isDayView, startDate, endDate, isEditMode) ->
-    isEditMode ?= false
-    dayStart = startDate.format '{yyyy}:{MM}:{dd}'
-    dayEnd = endDate?.format '{yyyy}:{MM}:{dd}'
-    isStartEndOnSameDay = endDate? and dayStart is dayEnd
-
-    unless isDayView
-        if isEditMode and not isStartEndOnSameDay
-            direction = 'bottom'
-        else
-            selectedWeekDay = startDate.format '{weekday}'
-            if selectedWeekDay in ['friday', 'saturday', 'sunday']
-                direction = 'left'
-            else
-                direction = 'right'
-    else
-        selectedHour = startDate.format '{HH}'
-        if selectedHour >= 4
-            direction = 'top'
-        else
-            direction = 'bottom'
-    return direction
-
 exports.isEvent = (start, end) ->
     if start[0] is end[0]
         if start[1] is "00" and end[1] is "30"
