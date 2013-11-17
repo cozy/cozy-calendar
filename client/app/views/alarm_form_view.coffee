@@ -111,8 +111,8 @@ module.exports = class AlarmFormView extends View
         @timezoneField.val alarm.get defaultTimezone
         if alarm.get('timezoneHour')?
             @timeField.val alarm.get 'timezoneHour'
-        else            
-            @timeField.val alarm.getFormattedDate '{HH}:{mm}'        
+        else
+            @timeField.val alarm.getFormattedDate '{HH}:{mm}'
 
         @data = alarm
 
@@ -130,7 +130,7 @@ module.exports = class AlarmFormView extends View
         @disableSubmitButton()
 
         @descriptionField.val ''
-        todayDate = new Date.create('now')
+        todayDate = Date.create('now')
         @dateField.val todayDate.format '{dd}/{MM}/{yyyy}'
         @timeField.val todayDate.format '{HH}:{mm}'
         @timezoneField.val defaultTimezone

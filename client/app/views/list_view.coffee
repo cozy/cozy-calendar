@@ -10,7 +10,7 @@ defaultTimezone = 'timezone'
 
 module.exports = class ListView extends View
 
-    el: '#viewContainer'
+    id: 'viewContainer'
 
     events:
         "click #add-alarm button.add-alarm": "onAddAlarmClicked"
@@ -23,7 +23,7 @@ module.exports = class ListView extends View
     afterRender: ->
         (@alarmFormView = new AlarmFormView()).render()
         @alarmsListView = new AlarmsListView
-           model: @model
+           collection: @collection
 
     onAddAlarmClicked: (event, callback) ->
         date = @alarmFormView.dateField.val()
@@ -54,7 +54,7 @@ module.exports = class ListView extends View
                     error: ->
                         console.log "Error during alarm save."
         else
-            alarm = @model.create data,
+            alarm = @collection.create data,
                     ignoreMySocketNotification: true #useless ?
                     wait: true
                     success: =>
@@ -70,13 +70,13 @@ module.exports = class ListView extends View
     onEditAlarmClicked: (event) ->
         window.top.window.scrollTo(0,0)
         alarmID = $(event.target).data('alarmid')
-        alarm = @model.get alarmID
+        alarm = @collection.get alarmID
         @alarmFormView.loadAlarmData(alarm)
 
-    onRemoveAlarmClicked: (event) ->        
+    onRemoveAlarmClicked: (event) ->
         if confirm 'Are you sure ?'
             alarmID = $(event.target).data('alarmid')
-            alarm = @model.get alarmID
+            alarm = @collection.get alarmID
             # TODO: add confirmation and loading indicator
             alarm.destroy
                 wait: true
