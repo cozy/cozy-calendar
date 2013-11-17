@@ -2,6 +2,8 @@ module.exports =
 
     initialize: ->
 
+        window.app = @
+
         @locale = window.locale
         delete window.locale
 
@@ -14,6 +16,7 @@ module.exports =
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
+        Date.setLocale @locale
 
         Router = require 'router'
         SocketListener = require '../lib/socket_listener'
@@ -29,8 +32,10 @@ module.exports =
 
         if window.initalarms?
             @alarms.reset window.initalarms
-            @events.reset window.initevents
             delete window.initalarms
+
+        if window.initevents?
+            @events.reset window.initevents
             delete window.initevents
 
         Backbone.history.start()
