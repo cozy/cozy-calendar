@@ -5,7 +5,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getDateObject: ->
         if not @dateObject?
-            @dateObject = new Date.create(@get(@mainDateField))
+            @dateObject = Date.create(@get(@mainDateField))
         return @dateObject
 
     getFormattedDate: (formatter) ->
@@ -16,7 +16,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getPreviousDateObject: ->
         if @previous(@mainDateField)?
-            return new Date.create @previous(@mainDateField)
+            return Date.create @previous(@mainDateField)
         else return false
 
     getDateHash: (date) ->
@@ -38,3 +38,10 @@ module.exports = class ScheduleItem extends Backbone.Model
         if previousDateObject
             return @getTimeHash(previousDateObject)
         else return false
+
+    getRRuleObject: ->
+        try
+            options = RRule.parseString @get 'rrule'
+            options.dtstart = @getStartDateObject()
+        catch e then return false
+        new RRule options

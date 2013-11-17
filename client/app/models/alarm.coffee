@@ -1,9 +1,9 @@
 helpers = require '../helpers'
-ScheduleItem = require './scheduleitem' 
+ScheduleItem = require './scheduleitem'
 
 module.exports = class Alarm extends ScheduleItem
 
-    mainDateField: 'trigg'  
+    mainDateField: 'trigg'
     urlRoot: 'alarms'
 
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
@@ -22,13 +22,12 @@ module.exports = class Alarm extends ScheduleItem
                 field: 'action'
                 value: "An action must be set."
 
-        allowedActions = ['DISPLAY', 'EMAIL']
-        if allowedActions.indexOf(attrs.action) is -1
+        if not attrs.action in ['DISPLAY', 'EMAIL']
             errors.push
                 field: 'action'
                 value: "A valid action must be set."
 
-        if not attrs.trigg or not new Date.create(attrs.trigg).isValid()
+        if not attrs.trigg or not Date.create(attrs.trigg).isValid()
             errors.push
                 field: 'triggdate'
                 value: "The date or time format might be invalid. " + \
@@ -36,3 +35,23 @@ module.exports = class Alarm extends ScheduleItem
 
         if errors.length > 0
             return errors
+
+    getColor: -> '#5C5'
+
+    getRRuleObject: -> false
+
+    toFullCalendarEvent: ->
+        time = @getDateObject()
+        end = time.clone().advance minutes: 30
+
+        event =
+            id: @cid
+            title: "#{time.format "{HH}:{mm}"} #{@get("description")}"
+            timezone: @get 'timezone'
+            allDay: false
+            start: time.format(Date.ISO8601_DATETIME)
+            end: end.format(Date.ISO8601_DATETIME)
+            type: 'alarm' # non standard field
+            timezoneHour: @get 'timezoneHour'
+            backgroundColor: @getColor()
+            borderColor: @getColor()
