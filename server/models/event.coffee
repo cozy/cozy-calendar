@@ -8,6 +8,7 @@ module.exports = Event = americano.getModel 'Event',
     place       : type : String
     description : type : String
     diff        : type : Number
+    rrule       : type : String
     related: type: String, default: null
 
 require('cozy-ical').decorateEvent Event
