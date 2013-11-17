@@ -49,6 +49,9 @@
     },
     "User": {
       "description": "Used to recover your timezone"
+    },
+    "CozyInstance": {
+      "description": "Used to recover your language setting"
     }
   }
 }
