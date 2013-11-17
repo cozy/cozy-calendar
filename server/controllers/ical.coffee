@@ -23,7 +23,7 @@ module.exports.export = (req, res) ->
                     if events.length > 0
                         calendar.add event.toIcal() for event in events
 
-                    res.header 'Content-Type': 'text/plain'
+                    res.header 'Content-Type': 'text/calendar'
                     res.send calendar.toString()
 
 
