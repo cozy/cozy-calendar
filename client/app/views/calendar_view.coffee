@@ -84,7 +84,6 @@ module.exports = class CalendarView extends BaseView
         width = @cal.width() + 40
         @cal.height targetHeight + 20
         unless initial is 'initial'
-            console.log "HEY"
             @cal.fullCalendar 'option', 'height', targetHeight
             # @cal.fullCalendar 'render'
         return targetHeight
@@ -101,7 +100,6 @@ module.exports = class CalendarView extends BaseView
         data = model.toFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
         _.extend fcEvent, data
-        console.log fcEvent
         @cal.fullCalendar 'updateEvent', fcEvent
 
     showPopover: (options) ->

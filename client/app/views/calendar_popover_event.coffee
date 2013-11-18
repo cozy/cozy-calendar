@@ -21,28 +21,27 @@ module.exports = class EventPopOver extends PopOver
             end: @getEndDateWithDiff()
 
     getEndDateWithDiff: ->
+        endDate = @model.getEndDateObject()
+        startDate = @model.getStartDateObject()
+        unless @model.isOneDay()
+            diff = endDate - @model.getStartDateObject()
+            diff = Math.round(diff / 1000 / 3600 / 24)
+
         time = @model.getFormattedEndDate('{HH}:{mm}')
-        if diff = @model.get('diff') then "#{time}+#{diff}"
-        else time
+        if diff then "#{time}+#{diff}" else time
 
     getModelAttributes: ->
-        dueStartDate = @formatDate $('.popover #input-start').val()
-        specifiedDay = $('.popover #input-end').val().split('+')
-        if specifiedDay[1]? and @date?
-            newDate = @date.advance
-                days: specifiedDay[1]
-            dueEndDate = Date.create(newDate)
-        else
-            specifiedDay[1] = 0
-            dueEndDate = Date.create(@date)
-        dueEndDate = @formatDate specifiedDay[0]
+        startDate = @formatDate @date, $('.popover #input-start').val()
+        endDate = @formatDate @date, $('.popover #input-end').val()
+        # specifiedDay =  #.split('+')
 
         # Store new event
         data =
-            start: dueStartDate.format Event.dateFormat
-            end: dueEndDate.format Event.dateFormat
-            diff: parseInt(specifiedDay[1])
+            start: startDate.format Event.dateFormat, 'en-en'
+            end: endDate.format Event.dateFormat, 'en-en'
+            # diff: parseInt(specifiedDay[1])
             place: $('.popover #input-place').val()
             description: $('.popover #input-desc').val()
+
         return data
 

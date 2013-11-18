@@ -53,21 +53,18 @@ module.exports = class PopOver extends BaseView
         else
             @addButton.removeClass 'disabled'
 
-    formatDate: (value) ->
+    formatDate: (relativeTo, value) ->
         # Intitialize new alarm
-        dueDate = Date.create @date
-        dueDate.advance hours: 8 if dueDate.format('{HH}:{mm}') is '00:00'
+        date = Date.create relativeTo
 
         # smart detection: set the time if the user input has a time
-        smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/)
-        if smartDetection? and smartDetection[1]?
-            specifiedTime = smartDetection[1]
-            specifiedTime = specifiedTime.split /:/
-            dueDate.set
-                hours: specifiedTime[0]
-                minutes: specifiedTime[1]
+        splitted = value.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
+        if splitted and splitted[0]
+            [all, hours, minutes, diff] = splitted
+            date.set {hours: +hours, minutes: +minutes}
+            date.advance(days: +diff) if diff
 
-            return dueDate
+        return date
 
     onRemoveClicked: =>
         @removeButton.css 'width', '42px'
@@ -86,6 +83,7 @@ module.exports = class PopOver extends BaseView
         @addButton.html '&nbsp;'
         @addButton.spin 'small'
         @model.save @getModelAttributes(),
+            wait: true
             success: =>
                 collection = app[@type+'s']
                 collection.add @model

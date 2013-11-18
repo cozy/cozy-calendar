@@ -25,5 +25,4 @@ module.exports = class EventCollection extends ScheduleItemsCollection
 
                 eventsInRange.push event.toFullCalendarEvent() if inRange
 
-        console.log eventsInRange
         callback eventsInRange

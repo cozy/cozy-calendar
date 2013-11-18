@@ -40,10 +40,12 @@ module.exports = class Event extends ScheduleItem
 
     # Date object management
     initialize: ->
-        @startDateObject = Date.create @get @startDateField
-        @endDateObject = Date.create @get @endDateField
-        @on 'change:start', => @startDateObject.reset @get @startDateField
-        @on 'change:end', => @endDateObject.reset @get @endDateField
+        @startDateObject = Date.utc.create @get @startDateField
+        @endDateObject = Date.utc.create @get @endDateField
+        @on 'change:start', =>
+            @startDateObject = Date.utc.create @get @startDateField
+        @on 'change:end', =>
+            @endDateObject = Date.utc.create @get @endDateField
 
     getStartDateObject: -> @startDateObject
 
@@ -52,6 +54,8 @@ module.exports = class Event extends ScheduleItem
     getEndDateObject: -> @endDateObject
 
     getFormattedEndDate: (formatter) -> @getEndDateObject().format formatter
+
+    isOneDay: -> @startDateObject.short() is @endDateObject.short()
 
     # FullCalendar presenter
     toFullCalendarEvent: (trueStart) ->

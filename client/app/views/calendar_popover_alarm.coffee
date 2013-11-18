@@ -20,7 +20,7 @@ module.exports = class AlarmPopOver extends PopOver
             time: @model.getDateObject().format('{HH}:{mm}')
 
     getModelAttributes: ->
-        time = @formatDate $('.popover #input-time').val()
+        time = @formatDate @date, $('.popover #input-time').val()
 
         return data =
             trigg: time.format Alarm.dateFormat

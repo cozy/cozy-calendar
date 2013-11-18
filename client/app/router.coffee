@@ -16,7 +16,6 @@ module.exports = class Router extends Backbone.Router
         'import'              : 'import'
 
     calendar: (fcView = 'month') ->
-        console.log arguments
         @displayView new CalendarView
             view: fcView
             model: {alarms:app.alarms, events:app.events}
