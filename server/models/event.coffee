@@ -19,6 +19,8 @@ Event.all = (params, callback) ->
 # before sending to the client
 # set the start/end in TZ time
 Event::timezoned = (timezone) ->
+    timezone ?= User.timezone
+
     timezonedDate = new time.Date(@start, 'UTC')
     timezonedDate.setTimezone(timezone)
     @start = timezonedDate.toString().slice(0, 24)

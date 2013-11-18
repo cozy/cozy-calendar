@@ -19,7 +19,7 @@ Alarm.all = (params, callback) ->
 # before sending to the client
 # set the trigg in TZ time
 Alarm::timezoned = (timezone) ->
-    timezone = timezone or User.timezone
+    timezone ?= User.timezone
     timezonedDate = new time.Date @trigg, 'UTC'
     timezonedDate.setTimezone timezone
     @timezone ?= timezone

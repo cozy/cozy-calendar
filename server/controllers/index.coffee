@@ -10,14 +10,14 @@ module.exports.index = (req, res) ->
         (cb) => Alarm.all (err, alarms) =>
             return cb err if err
             for alarm, index in alarms
-                alarms[index] = alarm.timezoned User.timezone
+                alarms[index] = alarm.timezoned()
 
             cb null, alarms
 
         (cb) => Event.all (err, events) =>
             return cb err if err
             for evt, index in events
-                events[index] = evt.timezoned User.timezone
+                events[index] = evt.timezoned()
 
             cb null, events
 
