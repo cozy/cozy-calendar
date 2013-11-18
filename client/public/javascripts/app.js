@@ -232,7 +232,6 @@ module.exports = EventCollection = (function(_super) {
         }
       }
     });
-    console.log(eventsInRange);
     return callback(eventsInRange);
   };
 
@@ -985,13 +984,13 @@ module.exports = Event = (function(_super) {
   Event.prototype.initialize = function() {
     var _this = this;
 
-    this.startDateObject = Date.create(this.get(this.startDateField));
-    this.endDateObject = Date.create(this.get(this.endDateField));
+    this.startDateObject = Date.utc.create(this.get(this.startDateField));
+    this.endDateObject = Date.utc.create(this.get(this.endDateField));
     this.on('change:start', function() {
-      return _this.startDateObject.reset(_this.get(_this.startDateField));
+      return _this.startDateObject = Date.utc.create(_this.get(_this.startDateField));
     });
     return this.on('change:end', function() {
-      return _this.endDateObject.reset(_this.get(_this.endDateField));
+      return _this.endDateObject = Date.utc.create(_this.get(_this.endDateField));
     });
   };
 
@@ -1009,6 +1008,10 @@ module.exports = Event = (function(_super) {
 
   Event.prototype.getFormattedEndDate = function(formatter) {
     return this.getEndDateObject().format(formatter);
+  };
+
+  Event.prototype.isOneDay = function() {
+    return this.startDateObject.short() === this.endDateObject.short();
   };
 
   Event.prototype.toFullCalendarEvent = function(trueStart) {
@@ -1177,7 +1180,6 @@ module.exports = Router = (function(_super) {
     if (fcView == null) {
       fcView = 'month';
     }
-    console.log(arguments);
     this.displayView(new CalendarView({
       view: fcView,
       model: {
@@ -1767,25 +1769,24 @@ module.exports = PopOver = (function(_super) {
     }
   };
 
-  PopOver.prototype.formatDate = function(value) {
-    var dueDate, smartDetection, specifiedTime;
+  PopOver.prototype.formatDate = function(relativeTo, value) {
+    var all, date, diff, hours, minutes, splitted;
 
-    dueDate = Date.create(this.date);
-    if (dueDate.format('{HH}:{mm}') === '00:00') {
-      dueDate.advance({
-        hours: 8
+    date = Date.create(relativeTo);
+    splitted = value.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
+    if (splitted && splitted[0]) {
+      all = splitted[0], hours = splitted[1], minutes = splitted[2], diff = splitted[3];
+      date.set({
+        hours: +hours,
+        minutes: +minutes
       });
+      if (diff) {
+        date.advance({
+          days: +diff
+        });
+      }
     }
-    smartDetection = value.match(/([0-9]?[0-9]:[0-9]{2})/);
-    if ((smartDetection != null) && (smartDetection[1] != null)) {
-      specifiedTime = smartDetection[1];
-      specifiedTime = specifiedTime.split(/:/);
-      dueDate.set({
-        hours: specifiedTime[0],
-        minutes: specifiedTime[1]
-      });
-      return dueDate;
-    }
+    return date;
   };
 
   PopOver.prototype.onRemoveClicked = function() {
@@ -1814,6 +1815,7 @@ module.exports = PopOver = (function(_super) {
     this.addButton.html('&nbsp;');
     this.addButton.spin('small');
     return this.model.save(this.getModelAttributes(), {
+      wait: true,
       success: function() {
         var collection;
 
@@ -1876,7 +1878,7 @@ module.exports = AlarmPopOver = (function(_super) {
   AlarmPopOver.prototype.getModelAttributes = function() {
     var data, time;
 
-    time = this.formatDate($('.popover #input-time').val());
+    time = this.formatDate(this.date, $('.popover #input-time').val());
     return data = {
       trigg: time.format(Alarm.dateFormat),
       description: $('.popover #input-desc').val()
@@ -1928,10 +1930,16 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.getEndDateWithDiff = function() {
-    var diff, time;
+    var diff, endDate, startDate, time;
 
+    endDate = this.model.getEndDateObject();
+    startDate = this.model.getStartDateObject();
+    if (!this.model.isOneDay()) {
+      diff = endDate - this.model.getStartDateObject();
+      diff = Math.round(diff / 1000 / 3600 / 24);
+    }
     time = this.model.getFormattedEndDate('{HH}:{mm}');
-    if (diff = this.model.get('diff')) {
+    if (diff) {
       return "" + time + "+" + diff;
     } else {
       return time;
@@ -1939,24 +1947,13 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.getModelAttributes = function() {
-    var data, dueEndDate, dueStartDate, newDate, specifiedDay;
+    var data, endDate, startDate;
 
-    dueStartDate = this.formatDate($('.popover #input-start').val());
-    specifiedDay = $('.popover #input-end').val().split('+');
-    if ((specifiedDay[1] != null) && (this.date != null)) {
-      newDate = this.date.advance({
-        days: specifiedDay[1]
-      });
-      dueEndDate = Date.create(newDate);
-    } else {
-      specifiedDay[1] = 0;
-      dueEndDate = Date.create(this.date);
-    }
-    dueEndDate = this.formatDate(specifiedDay[0]);
+    startDate = this.formatDate(this.date, $('.popover #input-start').val());
+    endDate = this.formatDate(this.date, $('.popover #input-end').val());
     data = {
-      start: dueStartDate.format(Event.dateFormat),
-      end: dueEndDate.format(Event.dateFormat),
-      diff: parseInt(specifiedDay[1]),
+      start: startDate.format(Event.dateFormat, 'en-en'),
+      end: endDate.format(Event.dateFormat, 'en-en'),
       place: $('.popover #input-place').val(),
       description: $('.popover #input-desc').val()
     };
@@ -2080,7 +2077,6 @@ module.exports = CalendarView = (function(_super) {
     width = this.cal.width() + 40;
     this.cal.height(targetHeight + 20);
     if (initial !== 'initial') {
-      console.log("HEY");
       this.cal.fullCalendar('option', 'height', targetHeight);
     }
     return targetHeight;
@@ -2103,7 +2099,6 @@ module.exports = CalendarView = (function(_super) {
     data = model.toFullCalendarEvent();
     fcEvent = this.cal.fullCalendar('clientEvents', data.id)[0];
     _.extend(fcEvent, data);
-    console.log(fcEvent);
     return this.cal.fullCalendar('updateEvent', fcEvent);
   };
 
