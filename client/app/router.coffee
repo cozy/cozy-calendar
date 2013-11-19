@@ -19,6 +19,7 @@ module.exports = class Router extends Backbone.Router
         @displayView new CalendarView
             view: fcView
             model: {alarms:app.alarms, events:app.events}
+        app.menu.activate 'calendar'
         @handleFetch app.alarms, "alarms"
         @handleFetch app.events, "events"
 
@@ -28,6 +29,7 @@ module.exports = class Router extends Backbone.Router
     alarmsList: ->
         @displayView new ListView
             collection: app.alarms
+        app.menu.activate 'alarms'
         @handleFetch @mainView.collection, "alarms"
 
     event: (id) ->
@@ -38,7 +40,8 @@ module.exports = class Router extends Backbone.Router
         view.render()
 
     import: ->
-        @displayView ImportView, app.alarms
+        @displayView new ImportView()
+        app.menu.activate 'import'
 
     handleFetch: (collection, name) ->
         unless app[name].length > 0

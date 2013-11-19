@@ -1,0 +1,17 @@
+li
+    a.btn(href="#alarms")
+        i.icon-bell.icon-white
+        span
+            = t('Alarms')
+    a.btn(href="#calendar")
+        i.icon-calendar.icon-white
+        span
+            = t('Calendar')
+    a.btn(href="export/calendar.ics", target="_blank")
+        i.icon-share.icon-white
+        span
+            = t('Export')
+    a#import-menu-button.btn(href="#import")
+        i.icon-circle-arrow-up.icon-white
+        span
+            = t('Import')

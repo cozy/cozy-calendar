@@ -19,11 +19,14 @@ module.exports =
         Date.setLocale @locale
 
         Router = require 'router'
+        Menu = require 'views/menu'
         SocketListener = require '../lib/socket_listener'
         AlarmCollection = require 'collections/alarms'
         EventCollection = require 'collections/events'
 
         @router = new Router()
+        @menu = new Menu().render()
+        @menu.$el.appendTo 'body'
         @alarms = new AlarmCollection()
         @events = new EventCollection()
 

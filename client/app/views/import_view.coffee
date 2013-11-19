@@ -1,4 +1,4 @@
-View = require '../lib/view'
+BaseView = require '../lib/base_view'
 helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
@@ -7,7 +7,7 @@ Event = require '../models/event'
 EventList = require './import_event_list'
 
 
-module.exports = class ImportView extends View
+module.exports = class ImportView extends BaseView
 
     id: 'viewContainer'
 
@@ -17,17 +17,14 @@ module.exports = class ImportView extends View
         'click button#confirm-import-button': 'onConfirmImportClicked'
         'click button#cancel-import-button': 'onCancelImportClicked'
 
-    initialize: ->
-
-    template: ->
-        require('./templates/import_view')
+    template: require('./templates/import_view')
 
     afterRender: ->
         @$(".confirmation").hide()
         @$(".results").hide()
-        @alarmList = new AlarmList
+        @alarmList = new AlarmList()
         @alarmList.render()
-        @eventList = new EventList
+        @eventList = new EventList()
         @eventList.render()
         @importButton = @$ 'button#import-button'
         @confirmButton = @$ 'button#confirm-button'
