@@ -8324,7 +8324,7 @@ h2 {
   margin: 0;
   sharefont-weight: 10px;
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   body {
     padding: 0;
   }
@@ -8346,7 +8346,8 @@ h2 {
   }
   #alarms {
     width: 100%;
-    margin: 0;
+    margin: 0px;
+    padding: 5px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;

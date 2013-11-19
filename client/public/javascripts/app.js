@@ -892,6 +892,19 @@ module.exports = Alarm = (function(_super) {
     return '#5C5';
   };
 
+  Alarm.prototype.initialize = function() {
+    var _this = this;
+
+    this.dateObject = Date.create(this.get(this.mainDateField));
+    return this.on('change:' + this.mainDateField, function() {
+      return _this.dateObject = Date.create(_this.get(_this.mainDateField));
+    });
+  };
+
+  Alarm.prototype.getDateObject = function() {
+    return this.dateObject;
+  };
+
   Alarm.prototype.getRRuleObject = function() {
     return false;
   };
@@ -984,13 +997,13 @@ module.exports = Event = (function(_super) {
   Event.prototype.initialize = function() {
     var _this = this;
 
-    this.startDateObject = Date.utc.create(this.get(this.startDateField));
-    this.endDateObject = Date.utc.create(this.get(this.endDateField));
+    this.startDateObject = Date.create(this.get(this.startDateField));
+    this.endDateObject = Date.create(this.get(this.endDateField));
     this.on('change:start', function() {
-      return _this.startDateObject = Date.utc.create(_this.get(_this.startDateField));
+      return _this.startDateObject = Date.create(_this.get(_this.startDateField));
     });
     return this.on('change:end', function() {
-      return _this.endDateObject = Date.utc.create(_this.get(_this.endDateField));
+      return _this.endDateObject = Date.create(_this.get(_this.endDateField));
     });
   };
 
@@ -1741,13 +1754,22 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getDirection = function() {
-    var need;
+    var fitBottom, fitLeft, fitRight, pos;
 
-    need = this.target.position().left + this.target.width() + 411;
-    if (need > this.container.width()) {
-      return 'left';
-    } else {
+    pos = this.target.position();
+    fitRight = pos.left + this.target.width() + 411 < this.container.width();
+    fitLeft = pos.left - 411 > 0;
+    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
+    if (!fitLeft && !fitRight) {
+      if (fitBottom) {
+        return 'bottom';
+      } else {
+        return 'top';
+      }
+    } else if (fitRight) {
       return 'right';
+    } else {
+      return 'left';
     }
   };
 
@@ -1921,7 +1943,7 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.getRenderData = function() {
     return _.extend({
-      type: event
+      type: 'event'
     }, this.model.attributes, {
       editionMode: !this.model.isNew(),
       start: this.model.getFormattedStartDate('{HH}:{mm}'),
@@ -2067,6 +2089,7 @@ module.exports = CalendarView = (function(_super) {
     });
     this.cal.fullCalendar('addEventSource', this.eventCollection.asFCEventSource);
     this.cal.fullCalendar('addEventSource', this.alarmCollection.asFCEventSource);
+    this.handleWindowResize();
     return $(window).resize(_.debounce(this.handleWindowResize, 10));
   };
 
@@ -2079,7 +2102,7 @@ module.exports = CalendarView = (function(_super) {
     if (initial !== 'initial') {
       this.cal.fullCalendar('option', 'height', targetHeight);
     }
-    return targetHeight;
+    return this.cal.height(this.$('.fc-header').height() + this.$('.fc-content').height());
   };
 
   CalendarView.prototype.refresh = function(collection) {
@@ -2150,39 +2173,45 @@ module.exports = CalendarView = (function(_super) {
     return event.isSaving = true;
   };
 
-  CalendarView.prototype.onEventDrop = function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
-    var alarm, data, evt, startRaw;
+  CalendarView.prototype.onEventDrop = function(fcEvent, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
+    var alarm, end, evt, start,
+      _this = this;
 
-    if (event.type === 'alarm') {
-      alarm = this.alarmCollection.get(event.id);
-      if (alarm.get('timezoneHour') != null) {
-        startRaw = alarm.get('timezoneHour');
-        alarm.getDateObject().setHours(startRaw.substring(0, 2));
-        alarm.getDateObject().setMinutes(startRaw.substring(3, 5));
-      }
+    if (fcEvent.type === 'alarm') {
+      alarm = this.alarmCollection.get(fcEvent.id);
       alarm.getDateObject().advance({
         days: dayDelta,
         minutes: minuteDelta
       });
-      data = {
+      return alarm.save({
         trigg: alarm.getFormattedDate(Alarm.dateFormat)
-      };
-      return storeEvent(alarm, data);
+      }, {
+        wait: true,
+        success: function() {
+          fcEvent.isSaving = false;
+          return _this.cal.fullCalendar('renderEvent', fcEvent);
+        }
+      });
     } else {
-      evt = this.eventCollection.get(event.id);
-      evt.getStartDateObject().advance({
+      evt = this.eventCollection.get(fcEvent.id);
+      start = evt.getStartDateObject().clone().advance({
         days: dayDelta,
         minutes: minuteDelta
       });
-      evt.getEndDateObject().advance({
+      end = evt.getEndDateObject().clone().advance({
         days: dayDelta,
         minutes: minuteDelta
       });
-      data = {
-        start: evt.getFormattedStartDate(Event.dateFormat),
-        end: evt.getFormattedEndDate(Event.dateFormat)
-      };
-      return storeEvent(evt, data);
+      return evt.save({
+        start: start.format(Event.dateFormat),
+        end: end.format(Event.dateFormat)
+      }, {
+        wait: true,
+        success: function() {
+          fcEvent.isSaving = false;
+          return _this.cal.fullCalendar('renderEvent', fcEvent);
+        }
+      });
     }
   };
 
@@ -2191,7 +2220,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventResize = function(fcEvent, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
-    var data, model,
+    var data, end, model,
       _this = this;
 
     if (fcEvent.type === "alarm") {
@@ -2201,18 +2230,18 @@ module.exports = CalendarView = (function(_super) {
       return;
     }
     model = this.eventCollection.get(fcEvent.id);
-    model.getEndDateObject().advance({
+    end = model.getEndDateObject().clone();
+    end.advance({
       days: dayDelta,
       minutes: minuteDelta
     });
     data = {
-      end: model.getFormattedEndDate(Event.dateFormat),
-      diff: fcEvent.diff + dayDelta
+      end: end.format(Event.dateFormat, 'en-en')
     };
-    fcEvent.diff = fcEvent.diff;
     fcEvent.end = fcEvent.end;
     return model.save(data, {
       wait: true,
+      success: function() {},
       error: function() {
         return revertFunc();
       },
