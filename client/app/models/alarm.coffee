@@ -38,6 +38,13 @@ module.exports = class Alarm extends ScheduleItem
 
     getColor: -> '#5C5'
 
+    initialize: ->
+        @dateObject = Date.create @get @mainDateField
+        @on 'change:' + @mainDateField, =>
+            @dateObject = Date.create @get @mainDateField
+
+    getDateObject: -> @dateObject
+
     getRRuleObject: -> false
 
     toFullCalendarEvent: ->

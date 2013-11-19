@@ -40,12 +40,12 @@ module.exports = class Event extends ScheduleItem
 
     # Date object management
     initialize: ->
-        @startDateObject = Date.utc.create @get @startDateField
-        @endDateObject = Date.utc.create @get @endDateField
+        @startDateObject = Date.create @get @startDateField
+        @endDateObject = Date.create @get @endDateField
         @on 'change:start', =>
-            @startDateObject = Date.utc.create @get @startDateField
+            @startDateObject = Date.create @get @startDateField
         @on 'change:end', =>
-            @endDateObject = Date.utc.create @get @endDateField
+            @endDateObject = Date.create @get @endDateField
 
     getStartDateObject: -> @startDateObject
 
