@@ -5,6 +5,7 @@ module.exports = class AlarmView extends BaseView
 
     tagName: 'ul'
     id: 'menu'
+    className: 'container'
     template: require './templates/menu'
 
     activate: (href) ->

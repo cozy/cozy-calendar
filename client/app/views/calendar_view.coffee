@@ -163,6 +163,9 @@ module.exports = class CalendarView extends BaseView
                 success: =>
                     fcEvent.isSaving = false
                     @cal.fullCalendar 'renderEvent', fcEvent
+                error: =>
+                    fcEvent.isSaving = false
+                    revertFunc()
         else
             evt = @eventCollection.get fcEvent.id
             start = evt.getStartDateObject().clone().advance
@@ -181,6 +184,9 @@ module.exports = class CalendarView extends BaseView
                 success: =>
                     fcEvent.isSaving = false
                     @cal.fullCalendar 'renderEvent', fcEvent
+                error: =>
+                    fcEvent.isSaving = false
+                    revertFunc()
 
     onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
         fcEvent.isSaving = true
@@ -203,18 +209,16 @@ module.exports = class CalendarView extends BaseView
 
         data =
             end: end.format Event.dateFormat, 'en-en'
-            # diff: fcEvent.diff + dayDelta
 
-        # fcEvent.diff = fcEvent.diff
-        fcEvent.end = fcEvent.end
         model.save data,
             wait: true
             success: =>
+                fcEvent.isSaving = false
+                @cal.fullCalendar 'renderEvent', fcEvent
+
             error: =>
+                fcEvent.isSaving = false
                 revertFunc()
-            complete: =>
-                event.isSaving = false
-                @cal.fullCalendar 'renderEvent', event
 
 
     onEventClick: (fcEvent, jsEvent, view) =>
