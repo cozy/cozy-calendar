@@ -74,8 +74,11 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
 
+
         @cal.fullCalendar 'addEventSource', @eventCollection.asFCEventSource
         @cal.fullCalendar 'addEventSource', @alarmCollection.asFCEventSource
+
+        @handleWindowResize() #
         $(window).resize _.debounce @handleWindowResize, 10
 
 
@@ -85,8 +88,9 @@ module.exports = class CalendarView extends BaseView
         @cal.height targetHeight + 20
         unless initial is 'initial'
             @cal.fullCalendar 'option', 'height', targetHeight
-            # @cal.fullCalendar 'render'
-        return targetHeight
+
+        @cal.height @$('.fc-header').height() + @$('.fc-content').height()
+
 
     refresh: (collection) ->
         @cal.fullCalendar 'refetchEvents'
@@ -135,38 +139,48 @@ module.exports = class CalendarView extends BaseView
     onEventDragStop: (event, jsEvent, ui, view) ->
         event.isSaving = true
 
-    onEventDrop: (event, dayDelta, minuteDelta, allDay,
+    onEventDrop: (fcEvent, dayDelta, minuteDelta, allDay,
                   revertFunc, jsEvent, ui, view) =>
 
         # Update new dates of event
-        if event.type is 'alarm'
-            alarm = @alarmCollection.get event.id
+        if fcEvent.type is 'alarm'
+            alarm = @alarmCollection.get fcEvent.id
 
-            if alarm.get('timezoneHour')?
-                # Hour should correspond to alarm timezone
-                startRaw = alarm.get('timezoneHour')
-                alarm.getDateObject().setHours(startRaw.substring(0, 2))
-                alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
+            # if alarm.get('timezoneHour')?
+            #     # Hour should correspond to alarm timezone
+            #     startRaw = alarm.get('timezoneHour')
+            #     alarm.getDateObject().setHours(startRaw.substring(0, 2))
+            #     alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
 
             alarm.getDateObject().advance
                 days: dayDelta
                 minutes: minuteDelta
 
-            data = trigg: alarm.getFormattedDate Alarm.dateFormat
-            storeEvent alarm, data
+            alarm.save
+                trigg: alarm.getFormattedDate Alarm.dateFormat
+            ,
+                wait: true
+                success: =>
+                    fcEvent.isSaving = false
+                    @cal.fullCalendar 'renderEvent', fcEvent
         else
-            evt = @eventCollection.get event.id
-            evt.getStartDateObject().advance
+            evt = @eventCollection.get fcEvent.id
+            start = evt.getStartDateObject().clone().advance
                 days: dayDelta
                 minutes: minuteDelta
 
-            evt.getEndDateObject().advance
+            end = evt.getEndDateObject().clone().advance
                 days: dayDelta
                 minutes: minuteDelta
-            data =
-                start: evt.getFormattedStartDate Event.dateFormat
-                end: evt.getFormattedEndDate Event.dateFormat
-            storeEvent evt, data
+
+            evt.save
+                start: start.format Event.dateFormat
+                end: end.format Event.dateFormat
+            ,
+                wait: true
+                success: =>
+                    fcEvent.isSaving = false
+                    @cal.fullCalendar 'renderEvent', fcEvent
 
     onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
         fcEvent.isSaving = true
@@ -182,19 +196,20 @@ module.exports = class CalendarView extends BaseView
             return
 
         model = @eventCollection.get fcEvent.id
-
-        model.getEndDateObject().advance
+        end = model.getEndDateObject().clone()
+        end.advance
             days: dayDelta
             minutes: minuteDelta
 
         data =
-            end: model.getFormattedEndDate Event.dateFormat
-            diff: fcEvent.diff + dayDelta
+            end: end.format Event.dateFormat, 'en-en'
+            # diff: fcEvent.diff + dayDelta
 
-        fcEvent.diff = fcEvent.diff
+        # fcEvent.diff = fcEvent.diff
         fcEvent.end = fcEvent.end
         model.save data,
             wait: true
+            success: =>
             error: =>
                 revertFunc()
             complete: =>

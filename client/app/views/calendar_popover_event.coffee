@@ -15,7 +15,7 @@ module.exports = class EventPopOver extends PopOver
             @$('#input-desc').val() isnt ''
 
     getRenderData: ->
-        _.extend {type: event}, @model.attributes,
+        _.extend {type: 'event'}, @model.attributes,
             editionMode: not @model.isNew()
             start: @model.getFormattedStartDate('{HH}:{mm}')
             end: @getEndDateWithDiff()

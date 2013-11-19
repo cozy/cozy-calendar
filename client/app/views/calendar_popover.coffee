@@ -39,9 +39,14 @@ module.exports = class PopOver extends BaseView
         t(title)
 
     getDirection: ->
-        need = @target.position().left + @target.width() + 411 #popover
-        if need > @container.width() then 'left'
-        else 'right'
+        pos = @target.position()
+        fitRight = pos.left + @target.width() + 411 < @container.width()
+        fitLeft = pos.left - 411 > 0
+        fitBottom = pos.top + @target.height() + 200 < @container.height()
+        if not fitLeft and not fitRight
+            if fitBottom then 'bottom' else 'top'
+        else if fitRight then 'right'
+        else 'left'
 
     getButtonText: -> if @model.isNew() then t('create') else t('edit')
 
