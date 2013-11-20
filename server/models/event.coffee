@@ -9,6 +9,7 @@ module.exports = Event = americano.getModel 'Event',
     description : type : String
     diff        : type : Number
     rrule       : type : String
+    attendees   : type : [Object]
     related: type: String, default: null
 
 require('cozy-ical').decorateEvent Event
@@ -30,6 +31,19 @@ Event::timezoned = (timezone) ->
     @end = timezonedDate.toString().slice(0, 24)
 
     return @
+
+# @TODO : this doesn't handle merge correctly
+Event::getGuest = (key) ->
+    guests = @attendees?.toJSON() or []
+    currentguest = guests.filter((guest) -> guest.key is key)[0]
+    if currentguest
+        currentguest.setStatus = (status, callback) =>
+            currentguest.status = status
+            @updateAttributes attendees: guests, callback
+
+    return currentguest
+
+
 
 # before saving
 # take an attributes object

@@ -30,6 +30,10 @@ module.exports =
         put   : events.update
         del   : events.delete
 
+    'public/event:eventid':
+        get   : events.public
+
+
     # ICal
     'export/calendar.ics':
         get   : ical.export

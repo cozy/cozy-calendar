@@ -44,3 +44,26 @@ module.exports.delete = (req, res) ->
             res.send error: "Server error while deleting the event", 500
         else
             res.send success: true, 200
+
+module.exports.public = (req, res) ->
+
+    key = req.query.key
+
+    visitor = req.event.getGuest key
+
+    if not visitor
+        return res.send error: 'invalid key', 401
+
+    render = () ->
+        res.render 'event_public.jade',
+            event: req.event.timezoned()
+            key: key
+            visitor: visitor
+
+    if req.query.status in ['ACCEPTED', 'DECLINED']
+
+        visitor.setStatus req.query.status, (err) =>
+            return res.send error: "server error occured", 500 if err
+            render()
+
+    else render()
