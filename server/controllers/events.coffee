@@ -3,6 +3,9 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 
+MailHandler = require '../lib/mail_handler'
+mails = new MailHandler()
+
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) =>
         if err or not event
@@ -37,14 +40,17 @@ module.exports.update = (req, res) ->
         if err?
             res.send error: "Server error while saving event", 500
         else
-            res.send event.timezoned(), 200
+            mails.sendInvitations event, (err) ->
+                console.log err if err
+                res.send event.timezoned(), 200
 
 module.exports.delete = (req, res) ->
     req.event.destroy (err) ->
         if err?
             res.send error: "Server error while deleting the event", 500
         else
-            res.send success: true, 200
+            mails.sendDeleteNotification req.event, ->
+                res.send success: true, 200
 
 module.exports.public = (req, res) ->
     key = req.query.key
