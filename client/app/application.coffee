@@ -23,12 +23,14 @@ module.exports =
         SocketListener = require '../lib/socket_listener'
         AlarmCollection = require 'collections/alarms'
         EventCollection = require 'collections/events'
+        ContactCollection = require 'collections/contacts'
 
         @router = new Router()
         @menu = new Menu().render()
         @menu.$el.appendTo 'body'
         @alarms = new AlarmCollection()
         @events = new EventCollection()
+        @contacts = new ContactCollection()
 
         SocketListener.watch @alarms
         SocketListener.watch @events
@@ -40,6 +42,10 @@ module.exports =
         if window.initevents?
             @events.reset window.initevents
             delete window.initevents
+
+        if window.initcontacts
+            @contacts.reset window.initcontacts
+            delete window.initcontacts
 
         Backbone.history.start()
 

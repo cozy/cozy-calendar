@@ -1,7 +1,8 @@
-BaseView       = require 'lib/base_view'
+ViewCollection = require 'lib/view_collection'
+random         = require 'lib/random'
 app            = require 'application'
 
-module.exports = class EventModal extends BaseView
+module.exports = class EventModal extends ViewCollection
 
     template: require './templates/event_modal'
 
@@ -11,6 +12,14 @@ module.exports = class EventModal extends BaseView
     inputDateTimeFormat: '{year}-{MM}-{dd}T{hh}:{mm}:{ss}'
     inputDateFormat: '{year}-{MM}-{dd}'
 
+    collectionEl: '#guests-list'
+    itemview: require './event_modal_guest'
+
+    initialize: ->
+        guests = @model.get('attendees') or []
+        @collection = new Backbone.Collection guests
+        super
+
     events: ->
         'click  #confirm-btn': 'save'
         'click  #cancel-btn': 'close'
@@ -18,8 +27,10 @@ module.exports = class EventModal extends BaseView
         'change #rrule': 'updateHelp'
         'input  #rrule-until': 'toggleCountUntil'
         'change #rrule-count': 'toggleCountUntil'
+        'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
 
     afterRender: ->
+        super
         @$('#rrule').hide()
         if @model.get('rrule')
             @setRRule
@@ -29,7 +40,26 @@ module.exports = class EventModal extends BaseView
             @$('#rrule').hide()
             @$('#rrule-short').hide()
 
+        @addGuestField = @configureGuestTypeahead()
+
         @$el.modal 'show'
+
+    onGuestAdded: (info) =>
+        [email, id] = info.split ';'
+        return "" unless email
+        guests = @model.get('attendees') or []
+        guests.push
+            key: random.randomString()
+            status: 'INVITATION-NOT-SENT'
+            email: email
+            contactid: id or null
+        @model.set 'attendees', guests
+        @addGuestField.val ''
+        @refreshGuestList()
+        return ""
+
+    refreshGuestList: =>
+        @collection.reset @model.get('attendees')
 
     getRenderData: ->
         data = _.extend {}, @model.toJSON(),
@@ -173,6 +203,33 @@ module.exports = class EventModal extends BaseView
             dayNames: locale.weekdays.slice(0, 7)
             monthNames: locale.full_month.split('|').slice(1,13)
         @$('#rrule-help').html @getRRule().toText(window.t, language)
+
+
+    configureGuestTypeahead: =>
+        @$('#addguest-field').typeahead
+            source: app.contacts.asTypeaheadSource()
+            matcher: (contact) ->
+                old = $.fn.typeahead.Constructor::matcher
+                return old.call this, contact.display
+            sorter: (contacts) ->
+                beginswith = []
+                caseSensitive = []
+                caseInsensitive = []
+
+                while (contact = contacts.shift())
+                    item = contact.display
+                    if !item.toLowerCase().indexOf this.query.toLowerCase()
+                        beginswith.push contact
+                    else if ~item.indexOf this.query then caseSensitive.push contact
+                    else caseInsensitive.push contact
+
+                return beginswith.concat caseSensitive, caseInsensitive
+
+            highlighter: (contact) ->
+                old = $.fn.typeahead.Constructor::highlighter
+                return old.call this, contact.display
+
+            updater: @onGuestAdded
 
     close: =>
         @$el.modal 'hide'

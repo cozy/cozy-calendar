@@ -21,6 +21,7 @@ html
 
       else if visitor.status == 'ACCEPTED'
         h3 Your status is #{visitor.status}
+        p: a(href="event#{event.id}.ics?key="+key) Download in your agenda
         p: a.btn(href="?status=DECLINED&key="+key) Change to DECLINED
 
       else

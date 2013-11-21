@@ -75,6 +75,13 @@
             label(for="rrule-count")=t('occurences')
 
     h4= t('guests')
+    form.form-inline#guests
+        .control-group
+            .controls
+                input(type="text", placeholder=t('enter email'))#addguest-field
+                a.btn#addguest= t('invite')
+    #guests-list
+
 
 
 
