@@ -12,3 +12,6 @@ module.exports =
 
     user:
         all       : (doc) -> emit doc.title, doc
+
+    contact:
+        all       : americano.defaultRequests.all

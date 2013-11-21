@@ -52,6 +52,9 @@
     },
     "CozyInstance": {
       "description": "Used to recover your language setting"
+    },
+    "Contact": {
+      "description": "Invite your contacts to an event"
     }
   }
 }

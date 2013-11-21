@@ -1,6 +1,7 @@
 time = require 'time'
 User = require '../models/user'
 Event = require '../models/event'
+{VCalendar} = require 'cozy-ical'
 
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) =>
@@ -46,24 +47,29 @@ module.exports.delete = (req, res) ->
             res.send success: true, 200
 
 module.exports.public = (req, res) ->
-
     key = req.query.key
-
-    visitor = req.event.getGuest key
-
-    if not visitor
+    if not visitor = req.event.getGuest key
         return res.send error: 'invalid key', 401
-
-    render = () ->
-        res.render 'event_public.jade',
-            event: req.event.timezoned()
-            key: key
-            visitor: visitor
 
     if req.query.status in ['ACCEPTED', 'DECLINED']
 
         visitor.setStatus req.query.status, (err) =>
             return res.send error: "server error occured", 500 if err
-            render()
+            res.header 'Location': "./event#{req.event.id}?key=#{key}"
+            res.send 303
 
-    else render()
+    else
+        res.render 'event_public.jade',
+            event: req.event.timezoned()
+            key: key
+            visitor: visitor
+
+module.exports.publicIcal = (req, res) ->
+    key = req.query.key
+    if not visitor = req.event.getGuest key
+        return res.send error: 'invalid key', 401
+
+    calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda');
+    calendar.add req.event.toIcal()
+    res.header 'Content-Type': 'text/calendar'
+    res.send calendar.toString()

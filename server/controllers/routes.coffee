@@ -1,5 +1,6 @@
 alarms = require './alarms'
 events = require './events'
+contacts = require './contacts'
 index  = require './index'
 ical   = require './ical'
 
@@ -30,12 +31,17 @@ module.exports =
         put   : events.update
         del   : events.delete
 
+    'public/event:eventid.ics':
+        get   : events.publicIcal
     'public/event:eventid':
         get   : events.public
-
 
     # ICal
     'export/calendar.ics':
         get   : ical.export
     'import/ical':
         post  : ical.import
+
+    # Contacts
+    'contacts':
+        get: contacts.list
