@@ -55,6 +55,9 @@
     },
     "Contact": {
       "description": "Invite your contacts to an event"
+    },
+    "send mail from user": {
+      "description": "Send invitations by mail"
     }
   }
 }
