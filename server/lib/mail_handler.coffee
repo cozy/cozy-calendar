@@ -2,7 +2,7 @@ Event = require '../models/event'
 async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
-try CozyAdapter = require('americano/node_modules/jugglingdb-cozy-adapter')
+try CozyAdapter = require('americano-cozy/node_modules/jugglingdb-cozy-adapter')
 catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
 
 
