@@ -93,7 +93,7 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var AlarmCollection, EventCollection, Router, SocketListener, e, locales;
+    var AlarmCollection, ContactCollection, EventCollection, Menu, Router, SocketListener, e, locales;
 
     window.app = this;
     this.locale = window.locale;
@@ -109,12 +109,17 @@ module.exports = {
     window.t = this.polyglot.t.bind(this.polyglot);
     Date.setLocale(this.locale);
     Router = require('router');
+    Menu = require('views/menu');
     SocketListener = require('../lib/socket_listener');
     AlarmCollection = require('collections/alarms');
     EventCollection = require('collections/events');
+    ContactCollection = require('collections/contacts');
     this.router = new Router();
+    this.menu = new Menu().render();
+    this.menu.$el.appendTo('body');
     this.alarms = new AlarmCollection();
     this.events = new EventCollection();
+    this.contacts = new ContactCollection();
     SocketListener.watch(this.alarms);
     SocketListener.watch(this.events);
     if (window.initalarms != null) {
@@ -124,6 +129,10 @@ module.exports = {
     if (window.initevents != null) {
       this.events.reset(window.initevents);
       delete window.initevents;
+    }
+    if (window.initcontacts) {
+      this.contacts.reset(window.initcontacts);
+      delete window.initcontacts;
     }
     Backbone.history.start();
     if (typeof Object.freeze === 'function') {
@@ -182,6 +191,53 @@ module.exports = AlarmCollection = (function(_super) {
   return AlarmCollection;
 
 })(ScheduleItemsCollection);
+
+});
+
+;require.register("collections/contacts", function(exports, require, module) {
+var Contact, ContactCollection, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Contact = require('../models/contact');
+
+module.exports = ContactCollection = (function(_super) {
+  __extends(ContactCollection, _super);
+
+  function ContactCollection() {
+    _ref = ContactCollection.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  ContactCollection.prototype.model = Contact;
+
+  ContactCollection.prototype.url = 'contacts';
+
+  ContactCollection.prototype.asTypeaheadSource = function(query) {
+    var contacts, items, regexp;
+
+    regexp = new RegExp(query);
+    contacts = this.filter(function(contact) {
+      return contact.match(regexp);
+    });
+    items = [];
+    contacts.forEach(function(contact) {
+      return contact.get('emails').forEach(function(email) {
+        return items.push({
+          id: contact.id,
+          display: "" + (contact.get('name')) + " &lt;" + email.value + "&gt;",
+          toString: function() {
+            return "" + email.value + ";" + contact.id;
+          }
+        });
+      });
+    });
+    return items;
+  };
+
+  return ContactCollection;
+
+})(Backbone.Collection);
 
 });
 
@@ -472,6 +528,22 @@ module.exports = BaseView = (function(_super) {
 
 });
 
+;require.register("lib/random", function(exports, require, module) {
+module.exports.randomString = function(length) {
+  var string;
+
+  if (length == null) {
+    length = 32;
+  }
+  string = "";
+  while (string.length < length) {
+    string += Math.random().toString(36).substr(2);
+  }
+  return string.substr(0, length);
+};
+
+});
+
 ;require.register("lib/socket_listener", function(exports, require, module) {
 var SocketListener, _ref,
   __hasProp = {}.hasOwnProperty,
@@ -675,6 +747,7 @@ module.exports = {
   "edit event": "Event edition",
   "edit": "Edit",
   "create": "Create",
+  "invite": "Inviter",
   "Place": "Place",
   "date": "date",
   "Day": "Day",
@@ -714,10 +787,10 @@ module.exports = {
   "no recurrence": "No reccurrence",
   "repeat on": "Repeat on",
   "repeat on date": "Repeat on dates",
+  "repeat on weekday": "Repeat on weekday",
   "repeat until": "Repeat until",
   "or after": "or after",
   "occurences": "occurences",
-  "guests": "Guests",
   "every": "Every",
   "days": "days",
   "day": "day",
@@ -743,7 +816,8 @@ module.exports = {
   "start": "Start",
   "end": "End",
   "change": "Change",
-  "save changes": "Save changes"
+  "save changes": "Save changes",
+  "guests": "Guests"
 };
 
 });
@@ -758,6 +832,7 @@ module.exports = {
   "edit event": "Modification d'un évènement",
   "edit": "Enregistrer",
   "create": "Enregistrer",
+  "invite": "Inviter",
   "Place": "Lieu",
   "date": "Date",
   "Day": "Jour",
@@ -798,10 +873,10 @@ module.exports = {
   "no recurrence": "Pas de répétition",
   "repeat on": "Répéter les",
   "repeat on date": "Répéter les jours du mois",
+  "repeat on weekday": "Répéter le jour de la semaine",
   "repeat until": "Répéter jusqu'au",
   "or after": "ou après",
   "occurences": "occasions",
-  "guests": "Invités",
   "every": "tous les",
   "days": "jours",
   "days": "jours",
@@ -827,7 +902,9 @@ module.exports = {
   "start": "Début",
   "end": "Fin",
   "change": "Modifier",
-  "save changes": "Enregistrer"
+  "save changes": "Enregistrer",
+  "guests": "Invités",
+  "enter email": "Entrer l'addresse email"
 };
 
 });
@@ -933,6 +1010,33 @@ module.exports = Alarm = (function(_super) {
   return Alarm;
 
 })(ScheduleItem);
+
+});
+
+;require.register("models/contact", function(exports, require, module) {
+var Contact, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = Contact = (function(_super) {
+  __extends(Contact, _super);
+
+  function Contact() {
+    _ref = Contact.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Contact.prototype.urlRoot = 'contacts';
+
+  Contact.prototype.match = function(filter) {
+    return filter.test(this.get('name')) || this.get('emails').some(function(dp) {
+      return filter.test(dp.get('value'));
+    });
+  };
+
+  return Contact;
+
+})(Backbone.Model);
 
 });
 
@@ -1200,6 +1304,7 @@ module.exports = Router = (function(_super) {
         events: app.events
       }
     }));
+    app.menu.activate('calendar');
     this.handleFetch(app.alarms, "alarms");
     return this.handleFetch(app.events, "events");
   };
@@ -1212,6 +1317,7 @@ module.exports = Router = (function(_super) {
     this.displayView(new ListView({
       collection: app.alarms
     }));
+    app.menu.activate('alarms');
     return this.handleFetch(this.mainView.collection, "alarms");
   };
 
@@ -1232,7 +1338,8 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype["import"] = function() {
-    return this.displayView(ImportView, app.alarms);
+    this.displayView(new ImportView());
+    return app.menu.activate('import');
   };
 
   Router.prototype.handleFetch = function(collection, name) {
@@ -2190,6 +2297,10 @@ module.exports = CalendarView = (function(_super) {
         success: function() {
           fcEvent.isSaving = false;
           return _this.cal.fullCalendar('renderEvent', fcEvent);
+        },
+        error: function() {
+          fcEvent.isSaving = false;
+          return revertFunc();
         }
       });
     } else {
@@ -2210,6 +2321,10 @@ module.exports = CalendarView = (function(_super) {
         success: function() {
           fcEvent.isSaving = false;
           return _this.cal.fullCalendar('renderEvent', fcEvent);
+        },
+        error: function() {
+          fcEvent.isSaving = false;
+          return revertFunc();
         }
       });
     }
@@ -2238,16 +2353,15 @@ module.exports = CalendarView = (function(_super) {
     data = {
       end: end.format(Event.dateFormat, 'en-en')
     };
-    fcEvent.end = fcEvent.end;
     return model.save(data, {
       wait: true,
-      success: function() {},
-      error: function() {
-        return revertFunc();
+      success: function() {
+        fcEvent.isSaving = false;
+        return _this.cal.fullCalendar('renderEvent', fcEvent);
       },
-      complete: function() {
-        event.isSaving = false;
-        return _this.cal.fullCalendar('renderEvent', event);
+      error: function() {
+        fcEvent.isSaving = false;
+        return revertFunc();
       }
     });
   };
@@ -2375,13 +2489,15 @@ module.exports = DayProgramView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var BaseView, EventModal, app, _ref,
+var EventModal, ViewCollection, app, random, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-BaseView = require('lib/base_view');
+ViewCollection = require('lib/view_collection');
+
+random = require('lib/random');
 
 app = require('application');
 
@@ -2390,11 +2506,14 @@ module.exports = EventModal = (function(_super) {
 
   function EventModal() {
     this.close = __bind(this.close, this);
+    this.configureGuestTypeahead = __bind(this.configureGuestTypeahead, this);
     this.updateHelp = __bind(this.updateHelp, this);
     this.toggleCountUntil = __bind(this.toggleCountUntil, this);
     this.getRRule = __bind(this.getRRule, this);
     this.showRRule = __bind(this.showRRule, this);
-    this.save = __bind(this.save, this);    _ref = EventModal.__super__.constructor.apply(this, arguments);
+    this.save = __bind(this.save, this);
+    this.refreshGuestList = __bind(this.refreshGuestList, this);
+    this.onGuestAdded = __bind(this.onGuestAdded, this);    _ref = EventModal.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
@@ -2408,18 +2527,36 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
+  EventModal.prototype.collectionEl = '#guests-list';
+
+  EventModal.prototype.itemview = require('./event_modal_guest');
+
+  EventModal.prototype.initialize = function() {
+    var guests;
+
+    guests = this.model.get('attendees') || [];
+    this.collection = new Backbone.Collection(guests);
+    return EventModal.__super__.initialize.apply(this, arguments);
+  };
+
   EventModal.prototype.events = function() {
+    var _this = this;
+
     return {
       'click  #confirm-btn': 'save',
       'click  #cancel-btn': 'close',
       'click  .rrule-show': 'showRRule',
       'change #rrule': 'updateHelp',
       'input  #rrule-until': 'toggleCountUntil',
-      'change #rrule-count': 'toggleCountUntil'
+      'change #rrule-count': 'toggleCountUntil',
+      'click #addguest': function() {
+        return _this.onGuestAdded(_this.$('#addguest-field').val());
+      }
     };
   };
 
   EventModal.prototype.afterRender = function() {
+    EventModal.__super__.afterRender.apply(this, arguments);
     this.$('#rrule').hide();
     if (this.model.get('rrule')) {
       this.setRRule;
@@ -2429,7 +2566,32 @@ module.exports = EventModal = (function(_super) {
       this.$('#rrule').hide();
       this.$('#rrule-short').hide();
     }
+    this.addGuestField = this.configureGuestTypeahead();
     return this.$el.modal('show');
+  };
+
+  EventModal.prototype.onGuestAdded = function(info) {
+    var email, guests, id, _ref1;
+
+    _ref1 = info.split(';'), email = _ref1[0], id = _ref1[1];
+    if (!email) {
+      return "";
+    }
+    guests = this.model.get('attendees') || [];
+    guests.push({
+      key: random.randomString(),
+      status: 'INVITATION-NOT-SENT',
+      email: email,
+      contactid: id || null
+    });
+    this.model.set('attendees', guests);
+    this.addGuestField.val('');
+    this.refreshGuestList();
+    return "";
+  };
+
+  EventModal.prototype.refreshGuestList = function() {
+    return this.collection.reset(this.model.get('attendees'));
   };
 
   EventModal.prototype.getRenderData = function() {
@@ -2624,6 +2786,43 @@ module.exports = EventModal = (function(_super) {
     return this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
   };
 
+  EventModal.prototype.configureGuestTypeahead = function() {
+    return this.$('#addguest-field').typeahead({
+      source: app.contacts.asTypeaheadSource(),
+      matcher: function(contact) {
+        var old;
+
+        old = $.fn.typeahead.Constructor.prototype.matcher;
+        return old.call(this, contact.display);
+      },
+      sorter: function(contacts) {
+        var beginswith, caseInsensitive, caseSensitive, contact, item;
+
+        beginswith = [];
+        caseSensitive = [];
+        caseInsensitive = [];
+        while ((contact = contacts.shift())) {
+          item = contact.display;
+          if (!item.toLowerCase().indexOf(this.query.toLowerCase())) {
+            beginswith.push(contact);
+          } else if (~item.indexOf(this.query)) {
+            caseSensitive.push(contact);
+          } else {
+            caseInsensitive.push(contact);
+          }
+        }
+        return beginswith.concat(caseSensitive, caseInsensitive);
+      },
+      highlighter: function(contact) {
+        var old;
+
+        old = $.fn.typeahead.Constructor.prototype.highlighter;
+        return old.call(this, contact.display);
+      },
+      updater: this.onGuestAdded
+    });
+  };
+
   EventModal.prototype.close = function() {
     var _this = this;
 
@@ -2635,6 +2834,29 @@ module.exports = EventModal = (function(_super) {
   };
 
   return EventModal;
+
+})(ViewCollection);
+
+});
+
+;require.register("views/event_modal_guest", function(exports, require, module) {
+var BaseView, GuestView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+module.exports = GuestView = (function(_super) {
+  __extends(GuestView, _super);
+
+  function GuestView() {
+    _ref = GuestView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  GuestView.prototype.template = require('./templates/event_modal_guest');
+
+  return GuestView;
 
 })(BaseView);
 
@@ -2790,11 +3012,11 @@ module.exports = EventView = (function(_super) {
 });
 
 ;require.register("views/import_view", function(exports, require, module) {
-var Alarm, AlarmList, Event, EventList, ImportView, View, helpers, _ref,
+var Alarm, AlarmList, BaseView, Event, EventList, ImportView, helpers, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-View = require('../lib/view');
+BaseView = require('../lib/base_view');
 
 helpers = require('../helpers');
 
@@ -2823,18 +3045,14 @@ module.exports = ImportView = (function(_super) {
     'click button#cancel-import-button': 'onCancelImportClicked'
   };
 
-  ImportView.prototype.initialize = function() {};
-
-  ImportView.prototype.template = function() {
-    return require('./templates/import_view');
-  };
+  ImportView.prototype.template = require('./templates/import_view');
 
   ImportView.prototype.afterRender = function() {
     this.$(".confirmation").hide();
     this.$(".results").hide();
-    this.alarmList = new AlarmList;
+    this.alarmList = new AlarmList();
     this.alarmList.render();
-    this.eventList = new EventList;
+    this.eventList = new EventList();
     this.eventList.render();
     this.importButton = this.$('button#import-button');
     return this.confirmButton = this.$('button#confirm-button');
@@ -2948,7 +3166,7 @@ module.exports = ImportView = (function(_super) {
 
   return ImportView;
 
-})(View);
+})(BaseView);
 
 });
 
@@ -3081,6 +3299,40 @@ module.exports = ListView = (function(_super) {
   return ListView;
 
 })(View);
+
+});
+
+;require.register("views/menu", function(exports, require, module) {
+var AlarmView, BaseView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+module.exports = AlarmView = (function(_super) {
+  __extends(AlarmView, _super);
+
+  function AlarmView() {
+    _ref = AlarmView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  AlarmView.prototype.tagName = 'ul';
+
+  AlarmView.prototype.id = 'menu';
+
+  AlarmView.prototype.className = 'container';
+
+  AlarmView.prototype.template = require('./templates/menu');
+
+  AlarmView.prototype.activate = function(href) {
+    this.$('.active').removeClass('active');
+    return this.$('a[href="#' + href + '"]').addClass('active');
+  };
+
+  return AlarmView;
+
+})(BaseView);
 
 });
 
@@ -3226,19 +3478,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-bell icon-white"></i><span> ');
-var __val__ = t('Alarms')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="#calendar" class="active btn"><i class="icon-calendar icon-white"></i><span>');
-var __val__ = t('Calendar')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
-var __val__ = t('Export')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
-var __val__ = t('Import')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a></li></ul><div id="alarms" class="well"></div></div>');
+buf.push('<div class="container"><div id="alarms" class="well"></div></div>');
 }
 return buf.join("");
 };
@@ -3415,7 +3655,12 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label></div></form><h4>');
 var __val__ = t('guests')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4></div><div class="modal-footer"><a id="cancel-btn" class="btn">');
+buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
+buf.push(attrs({ 'type':("text"), 'placeholder':(t('enter email')), 'id':('addguest-field') }, {"type":true,"placeholder":true}));
+buf.push('/><a id="addguest" class="btn">');
+var __val__ = t('invite')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</a></div></div></form><div id="guests-list"></div></div><div class="modal-footer"><a id="cancel-btn" class="btn">');
 var __val__ = t("cancel")
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a><a id="confirm-btn" class="btn disabled btn-primary">');
@@ -3427,25 +3672,25 @@ return buf.join("");
 };
 });
 
+;require.register("views/templates/event_modal_guest", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<p>' + escape((interp = model.status) == null ? '' : interp) + ' ' + escape((interp = model.email) == null ? '' : interp) + '</p>');
+}
+return buf.join("");
+};
+});
+
 ;require.register("views/templates/import_view", function(exports, require, module) {
 module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="btn"><i class="icon-bell icon-white"></i><span> ');
-var __val__ = t('Alarms')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
-var __val__ = t('Calendar')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
-var __val__ = t('Export')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a id="import-menu-button" href="#import" class="active btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
-var __val__ = t('Import')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a></li></ul><div id="import-form" class="well"><h3>');
+buf.push('<div class="container"><div id="import-form" class="well"><h3>');
 var __val__ = t('ICalendar importer')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</h3><div class="import-form"><button id="import-button" class="btn">');
@@ -3475,7 +3720,19 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="container"><ul id="menu"><li><a href="#alarms" class="active btn"><i class="icon-bell icon-white"></i><span> ');
+buf.push('<div class="container"><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarm-list" class="well"></div></div>');
+}
+return buf.join("");
+};
+});
+
+;require.register("views/templates/menu", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<li><a href="#alarms" class="btn"><i class="icon-bell icon-white"></i><span>');
 var __val__ = t('Alarms')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
@@ -3487,7 +3744,7 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
 var __val__ = t('Import')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a></li></ul><div class="addform"><div id="add-alarm" class="container"></div></div><div id="alarm-list" class="well"></div></div>');
+buf.push('</span></a></li>');
 }
 return buf.join("");
 };
