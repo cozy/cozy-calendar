@@ -1,6 +1,6 @@
 time = require('time')
 async = require('async')
-i18n = require('cozy-i18n-helper')
+CozyInstance = require '../models/cozy_instance'
 Alarm = require '../models/alarm'
 Event = require '../models/event'
 Contact = require '../models/contact'
@@ -28,7 +28,7 @@ module.exports.index = (req, res) ->
 
             cb null, events
 
-        (cb) => i18n.getLocale null, (err, locale) ->
+        (cb) => CozyInstance.getLocale (err, locale) ->
             console.log err if err
             cb null, locale
 
