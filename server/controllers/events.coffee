@@ -3,7 +3,7 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 
-MailHandler = require '../lib/mail_handler'
+MailHandler = require '../mails/mail_handler'
 mails = new MailHandler()
 
 module.exports.fetch = (req, res, next, id) ->
