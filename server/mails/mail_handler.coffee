@@ -1,4 +1,5 @@
 Event = require '../models/event'
+CozyInstance = require '../models/cozy_instance'
 async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
@@ -31,29 +32,42 @@ module.exports = class MailHandler
 
     sendInvitations: (event, callback) ->
 
-        async.forEach event.toJSON().attendees, (guest, cb) =>
-            if guest.status is 'INVITATION-NOT-SENT'
-                subject = "Invitation : " + event.description
-                template = @templates.invitation
+        guests = event.toJSON().attendees
+        needSaving = false
+        CozyInstance.getURL (err, domain) =>
+            if err
+                console.log err.stack
+                return callback()
 
-            # else if guest.status is 'ACCEPTED'
-            #     subject = "This event has changed : " + event.description
-            #     template = @templates.update
+            async.forEach guests, (guest, cb) =>
+                if guest.status is 'INVITATION-NOT-SENT'
+                    subject = "Invitation : " + event.description
+                    template = @templates.invitation
 
-            else return cb null
+                # else if guest.status is 'ACCEPTED'
+                #     subject = "This event has changed : " + event.description
+                #     template = @templates.update
 
-            mailOptions =
-                to: guest.email
-                subject: subject
-                html: template
-                    event: event.toJSON()
-                    key: guest.key
+                else return cb()
 
-            CozyAdapter.sendMailFromUser mailOptions, (err) ->
-                if not err
-                    event.updateAttributes cb
+                mailOptions =
+                    to: guest.email
+                    subject: subject
+                    html: template
+                        event: event.toJSON()
+                        key: guest.key
+                        url: "#{domain}/public/calendar/event#{event.id}"
 
-        , callback
+                CozyAdapter.sendMailFromUser mailOptions, (err) ->
+                    if not err
+                        needSaving = true
+                        guest.status = 'NEEDS-ACTION' # ical = waiting an answer
+                    cb()
+
+            , (err) ->
+                if not needSaving then callback()
+                else event.updateAttributes attendees: guests, callback
+
 
     sendDeleteNotification: (event, callback) ->
 
@@ -68,7 +82,7 @@ module.exports = class MailHandler
                     key: guest.key
 
             CozyAdapter.sendMailFromUser mailOptions, (err) ->
-                if not err
-                    event.updateAttributes cb
+                console.log err if err
+                cb() # ignore err
 
         , callback

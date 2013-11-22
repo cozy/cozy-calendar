@@ -51,7 +51,7 @@
       "description": "Used to recover your timezone"
     },
     "CozyInstance": {
-      "description": "Used to recover your language setting"
+      "description": "Used to recover your language setting and your cozy's domain"
     },
     "Contact": {
       "description": "Invite your contacts to an event"

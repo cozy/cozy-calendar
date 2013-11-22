@@ -14,7 +14,7 @@ html
       h2 #{event.place}
 
 
-      if visitor.status == 'RSVP'
+      if visitor.status == 'NEEDS-ACTION'
 
         p: a.btn(href="?status=ACCEPTED&key="+key) accept
         p: a.btn(href="?status=DECLINED&key="+key) deny

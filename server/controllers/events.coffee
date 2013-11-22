@@ -40,9 +40,9 @@ module.exports.update = (req, res) ->
         if err?
             res.send error: "Server error while saving event", 500
         else
-            mails.sendInvitations event, (err) ->
+            mails.sendInvitations event, (err, event2) ->
                 console.log err if err
-                res.send event.timezoned(), 200
+                res.send (event2 or event).timezoned(), 200
 
 module.exports.delete = (req, res) ->
     req.event.destroy (err) ->

@@ -15,3 +15,6 @@ module.exports =
 
     contact:
         all       : americano.defaultRequests.all
+
+    cozy_instance:
+        all       : americano.defaultRequests.all
