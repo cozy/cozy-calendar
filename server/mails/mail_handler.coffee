@@ -42,12 +42,12 @@ module.exports = class MailHandler
 
             else return cb null
 
-                mailOptions =
-                    to: guest.email
-                    subject: subject
-                    html: template
-                        event: event.toJSON()
-                        key: guest.key
+            mailOptions =
+                to: guest.email
+                subject: subject
+                html: template
+                    event: event.toJSON()
+                    key: guest.key
 
             CozyAdapter.sendMailFromUser mailOptions, (err) ->
                 if not err
