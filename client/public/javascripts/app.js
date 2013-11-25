@@ -2150,7 +2150,14 @@ window.require.register("views/calendar_view", function(exports, require, module
       return this.popover = new klass(options);
     };
 
-    CalendarView.prototype.onChangeView = function(view) {};
+    CalendarView.prototype.onChangeView = function(view) {
+      switch (view.name) {
+        case 'month':
+          return app.router.navigate('calendar');
+        case 'agendaWeek':
+          return app.router.navigate('calendarweek');
+      }
+    };
 
     CalendarView.prototype.onSelect = function(startDate, endDate, allDay, jsEvent, view) {
       return this.showPopover({
@@ -2451,7 +2458,6 @@ window.require.register("views/event_modal", function(exports, require, module) 
       EventModal.__super__.afterRender.apply(this, arguments);
       this.$('#rrule').hide();
       if (this.model.get('rrule')) {
-        this.setRRule;
         this.updateHelp();
         this.$('#rrule-toggle').hide();
       } else {

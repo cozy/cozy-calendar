@@ -34,7 +34,6 @@ module.exports = class EventModal extends ViewCollection
         super
         @$('#rrule').hide()
         if @model.get('rrule')
-            @setRRule
             @updateHelp()
             @$('#rrule-toggle').hide()
         else
