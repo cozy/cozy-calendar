@@ -43,10 +43,10 @@ module.exports =
     "EMAIL"                             : "E-mail"
 
 # RRULE related
-    "recurrence rule"                   : "Reccurence rules"
-    "make reccurent"                    : "Make reccurent"
+    "recurrence rule"                   : "Recurrence rules"
+    "make reccurent"                    : "Make recurrent"
     "repeat every"                      : "Repeat every"
-    "no recurrence"                     : "No reccurrence"
+    "no recurrence"                     : "No recurrence"
     "repeat on"                         : "Repeat on"
     "repeat on date"                    : "Repeat on dates"
     "repeat on weekday"                 : "Repeat on weekday"
