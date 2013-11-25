@@ -23,6 +23,7 @@ module.exports = class EventModal extends ViewCollection
     events: ->
         'click  #confirm-btn': 'save'
         'click  #cancel-btn': 'close'
+        'click  .close': 'close'
         'click  .rrule-show': 'showRRule'
         'change #rrule': 'updateHelp'
         'input  #rrule-until': 'toggleCountUntil'
@@ -131,7 +132,7 @@ module.exports = class EventModal extends ViewCollection
     showRRule: =>
         @$('#rrule').show()
         @$('#rrule-short').show()
-        @$('#rrule-short a').hide()
+        @$('#rrule-short #rrule-action').hide()
         @$('#rrule-toggle').hide()
         @updateHelp()
 
