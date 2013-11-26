@@ -7951,6 +7951,7 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
   color: #00f;
 }
 #event-modal .modal-footer #cancel-btn {
+  cursor: pointer;
   font-size: 13px;
   margin-right: 10px;
 }

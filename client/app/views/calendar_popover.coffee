@@ -45,6 +45,7 @@ module.exports = class PopOver extends BaseView
         @addButton = @$('button.add').text @getButtonText()
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
+        @removeButton.hide() if @model.isNew()
         @$('.focused').focus()
 
     validForm: ->
@@ -57,7 +58,8 @@ module.exports = class PopOver extends BaseView
             @$('#input-time').val()  isnt ''
 
     getTitle: ->
-        title = (if @model.isNew() then 'create' else 'edit') + ' ' + @type
+        title = if @model.isNew() then 'creation'
+        else 'edit ' + @type
         t(title)
 
     getDirection: ->

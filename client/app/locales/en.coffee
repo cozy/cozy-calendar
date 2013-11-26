@@ -7,6 +7,7 @@ module.exports =
     "edit event"                        : "Event edition"
     "edit"                              : "Edit"
     "create"                            : "Create"
+    "creation"                          : "Creation"
     "invite"                            : "Invite"
     "Place"                             : "Place"
     "date"                              : "date"

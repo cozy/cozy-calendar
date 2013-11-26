@@ -747,6 +747,7 @@ module.exports = {
   "edit event": "Event edition",
   "edit": "Edit",
   "create": "Create",
+  "creation": "Creation",
   "invite": "Invite",
   "Place": "Place",
   "date": "date",
@@ -832,6 +833,7 @@ module.exports = {
   "edit event": "Modification d'un évènement",
   "edit": "Enregistrer",
   "create": "Enregistrer",
+  "creation": "Creation",
   "invite": "Inviter",
   "Place": "Lieu",
   "date": "Date",
@@ -1876,6 +1878,9 @@ module.exports = PopOver = (function(_super) {
     this.addButton = this.$('button.add').text(this.getButtonText());
     this.addButton.toggleClass('disabled', this.validForm());
     this.removeButton = this.$('.remove');
+    if (this.model.isNew()) {
+      this.removeButton.hide();
+    }
     return this.$('.focused').focus();
   };
 
@@ -1890,7 +1895,7 @@ module.exports = PopOver = (function(_super) {
   PopOver.prototype.getTitle = function() {
     var title;
 
-    title = (this.model.isNew() ? 'create' : 'edit') + ' ' + this.type;
+    title = this.model.isNew() ? 'creation' : 'edit ' + this.type;
     return t(title);
   };
 
