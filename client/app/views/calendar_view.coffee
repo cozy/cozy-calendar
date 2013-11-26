@@ -1,7 +1,6 @@
 app = require 'application'
 BaseView = require '../lib/base_view'
-AlarmPopOver = require './calendar_popover_alarm'
-EventPopOver = require './calendar_popover_event'
+Popover = require './calendar_popover'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
 
@@ -107,25 +106,29 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'updateEvent', fcEvent
 
     showPopover: (options) ->
-        klass = if options.model instanceof Event then EventPopOver
-        else AlarmPopOver
         options.container = @cal
+        options.parentView = this
         @popover.close() if @popover
-        @popover = new(klass) options
+        @popover = new Popover options
+        @popover.render()
 
     onChangeView: (view) =>
         switch view.name
             when 'month' then app.router.navigate 'calendar'
             when 'agendaWeek' then app.router.navigate 'calendarweek'
+        @handleWindowResize()
+
+    getUrlHash: =>
+        switch @cal.fullCalendar('getView').name
+            when 'month' then 'calendar'
+            when 'agendaWeek' then 'calendarweek'
 
     onSelect: (startDate, endDate, allDay, jsEvent, view) =>
         @showPopover
+            type: 'event'
+            start: startDate
+            end: endDate
             target: $(jsEvent.target)
-            model: new Event
-                start: startDate
-                end: endDate
-                place: ''
-                description: ''
 
     onEventRender: (event, element) ->
         if event.isSaving? and event.isSaving

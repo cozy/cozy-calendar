@@ -1,3 +1,8 @@
+if !editionMode
+    ul.nav.nav-tabs
+        li(class= type=='event'?'active':''): a.event= t('event')
+        li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
+
 if type == 'alarm'
     div
         input.focused.input-small(type="text", id="input-time", value=time)
@@ -24,4 +29,4 @@ else if type = 'event'
         button.btn.add= editionMode ? t('Edit') : t('Create')
 
         if editionMode
-            a(href="#events/#{id}") advanced
+            a.advanced-link(href='#'+advancedUrl)= t('advanced')

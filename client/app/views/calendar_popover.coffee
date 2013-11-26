@@ -1,8 +1,9 @@
 BaseView = require '../lib/base_view'
+Alarm = require 'models/alarm'
+Event = require 'models/event'
 
 module.exports = class PopOver extends BaseView
 
-    type: undefined
     template: require('./templates/popover_content')
 
     events:
@@ -10,10 +11,29 @@ module.exports = class PopOver extends BaseView
         'click button.add'  : 'onAddClicked'
         'click .remove': 'onRemoveClicked'
         'click .close' : 'close'
+        'click .event': 'onTabClicked'
+        'click .alarm': 'onTabClicked'
 
     initialize: (options) ->
+        if options.type
+            @type = options.type
+            @model = @makeNewModel options
+
+        else if @model
+            @type = if @model instanceof Event then 'event' else 'alarm'
+
+        window.test = this
+
         @target = options.target
         @container = options.container
+        @parentView = options.parentView
+
+    close: ->
+        @target.popover 'destroy'
+        @target.data('popover', null)
+        @remove()
+
+    render: ->
         @target.data('popover', null)
         @target.popover(
             title: require('./templates/popover_title')(title: @getTitle())
@@ -21,18 +41,20 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
-        @$el = $('.container .popover')
+        @setElement $('.container .popover')
         @addButton = @$('button.add').text @getButtonText()
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
         @$('.focused').focus()
 
-    close: ->
-        @target.popover 'destroy'
-        @target.data('popover', null)
-        @remove()
-
-    render: -> # this view cant be rendered
+    validForm: ->
+        if @model instanceof Event
+            @$('#input-start').val() isnt '' and
+            @$('#input-end').val()   isnt '' and
+            @$('#input-desc').val()  isnt ''
+        else
+            @$('#input-desc').val()  isnt '' and
+            @$('#input-time').val()  isnt ''
 
     getTitle: ->
         title = (if @model.isNew() then 'create' else 'edit') + ' ' + @type
@@ -49,6 +71,57 @@ module.exports = class PopOver extends BaseView
         else 'left'
 
     getButtonText: -> if @model.isNew() then t('create') else t('edit')
+
+    getRenderData: ->
+        data = _.extend type: @type,
+            @model.attributes,
+            editionMode: not @model.isNew()
+            advancedUrl: @parentView.getUrlHash() + '/' + @model.id
+
+        if @model instanceof Event
+            data.start = @model.getFormattedStartDate('{HH}:{mm}')
+            data.end = @getEndDateWithDiff()
+        else
+            data.time = @model.getDateObject().format '{HH}:{mm}'
+
+        return data
+
+    getEndDateWithDiff: ->
+        return null unless @model instanceof Event
+        endDate = @model.getEndDateObject()
+        startDate = @model.getStartDateObject()
+        unless @model.isOneDay()
+            diff = endDate - @model.getStartDateObject()
+            diff = Math.round(diff / 1000 / 3600 / 24)
+
+        time = @model.getFormattedEndDate('{HH}:{mm}')
+        if diff then "#{time}+#{diff}" else time
+
+    makeNewModel: (options) ->
+        switch @type
+            when 'event' then new Event
+                start: options.start
+                end: options.end
+                description: ''
+                place: ''
+
+            when 'alarm' then new Alarm
+                trigg: options.start
+                timezone: ''
+                description: ''
+                action: 'DISPLAY'
+                place: ''
+
+            else throw new Error 'wrong type'
+
+    onTabClicked: (event) ->
+        type = event.target.className
+        return false if type is @type
+        @parentView.showPopover
+            type: type
+            target: @options.target
+            start:  @options.start
+            end:    @options.end
 
     onKeyUp: (event) -> #
         if not @validForm()
@@ -71,6 +144,28 @@ module.exports = class PopOver extends BaseView
 
         return date
 
+    getModelAttributes: =>
+        if @model instanceof Event
+            date = @model.getStartDateObject()
+            startDate = @formatDate date, $('.popover #input-start').val()
+            endDate = @formatDate date, $('.popover #input-end').val()
+            data =
+                start: startDate.format Event.dateFormat, 'en-en'
+                end: endDate.format Event.dateFormat, 'en-en'
+                place: $('.popover #input-place').val()
+                description: $('.popover #input-desc').val()
+
+        else
+            console.log "HERE"
+            date = @model.getDateObject()
+            time = @formatDate date, $('.popover #input-time').val()
+
+            data =
+                trigg: time.format Alarm.dateFormat
+                description: $('.popover #input-desc').val()
+
+        return data
+
     onRemoveClicked: =>
         @removeButton.css 'width', '42px'
         @removeButton.spin 'tiny'
@@ -87,7 +182,8 @@ module.exports = class PopOver extends BaseView
     onAddClicked: () =>
         @addButton.html '&nbsp;'
         @addButton.spin 'small'
-        @model.save @getModelAttributes(),
+        console.log "there"
+        noError = @model.save @getModelAttributes(),
             wait: true
             success: =>
                 collection = app[@type+'s']
@@ -98,3 +194,6 @@ module.exports = class PopOver extends BaseView
                 @addButton.spin()
                 @addButton.html @getButtonText()
                 @close()
+
+        unless noError
+            console.log @model.validationError
