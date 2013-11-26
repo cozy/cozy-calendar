@@ -8,12 +8,13 @@ AlarmCollection = require 'collections/alarms'
 module.exports = class Router extends Backbone.Router
 
     routes:
-        ''                    : -> @navigate 'calendar', true
-        'calendar'            : 'calendar'
-        'calendarweek'        : 'calendarweek'
-        'events/:eventid'     : 'event'
-        'alarms'              : 'alarmsList'
-        'import'              : 'import'
+        ''                     : -> @navigate 'calendar', true
+        'calendar'             : 'calendar'
+        'calendarweek'         : 'calendarweek'
+        'calendar/:eventid'    : 'calendar_event'
+        'calendarweek/:eventid': 'calendarweek_event'
+        'alarms'               : 'alarmsList'
+        'import'               : 'import'
 
     calendar: (fcView = 'month') ->
         @displayView new CalendarView
@@ -32,8 +33,15 @@ module.exports = class Router extends Backbone.Router
         app.menu.activate 'alarms'
         @handleFetch @mainView.collection, "alarms"
 
-    event: (id) ->
+    calendar_event: (id) ->
         @calendar() unless @mainView instanceof CalendarView
+        @event id
+
+    calendarweek_event: (id) ->
+        @calendarweek() unless @mainView instanceof CalendarView
+        @event id
+
+    event: (id) ->
         model = app.events.get(id) or new Event(id: id).fetch()
         view = new EventModal(model: model)
         $('body').append view.$el
