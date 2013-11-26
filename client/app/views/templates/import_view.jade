@@ -3,8 +3,9 @@
         h3= t('ICalendar importer')
 
         div.import-form
-            button#import-button.btn= t('import your icalendar file')
-            input#import-file-input(type="file")
+            div#import-button.btn
+                span= t('select an icalendar file')
+                input#import-file-input(type="file")
 
         div.confirmation
             button#confirm-import-button.btn= t('confirm import')

@@ -3063,7 +3063,6 @@ module.exports = ImportView = (function(_super) {
 
   ImportView.prototype.events = {
     'change #import-file-input': 'onFileChanged',
-    'click button#import-button': 'onImportClicked',
     'click button#confirm-import-button': 'onConfirmImportClicked',
     'click button#cancel-import-button': 'onCancelImportClicked'
   };
@@ -3077,24 +3076,22 @@ module.exports = ImportView = (function(_super) {
     this.alarmList.render();
     this.eventList = new EventList();
     this.eventList.render();
-    this.importButton = this.$('button#import-button');
+    this.uploader = this.$('#import-file-input');
+    this.importButton = this.$('#import-button');
     return this.confirmButton = this.$('button#confirm-button');
   };
 
   ImportView.prototype.onFileChanged = function(event) {
-    var file;
-
-    file = event.target.files[0];
-    return this.file = file;
-  };
-
-  ImportView.prototype.onImportClicked = function() {
-    var form,
+    var file, form,
       _this = this;
 
+    file = this.uploader[0].files[0];
+    if (!file) {
+      return;
+    }
     form = new FormData();
-    form.append("file", this.file);
-    this.importButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+    form.append("file", file);
+    this.importButton.find('span').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.importButton.spin('tiny');
     return $.ajax({
       url: "import/ical",
@@ -3103,7 +3100,7 @@ module.exports = ImportView = (function(_super) {
       processData: false,
       contentType: false,
       success: function(result) {
-        var alarm, event, valarm, vevent, _i, _j, _len, _len1, _ref1, _ref2;
+        var alarm, valarm, vevent, _i, _j, _len, _len1, _ref1, _ref2;
 
         if ((result != null ? result.alarms : void 0) != null) {
           _ref1 = result.alarms;
@@ -3122,8 +3119,9 @@ module.exports = ImportView = (function(_super) {
           }
         }
         return _this.$(".import-form").fadeOut(function() {
+          _this.resetUploader();
           _this.importButton.spin();
-          _this.importButton.html('import your calendar');
+          _this.importButton.find('span').html(t('select an icalendar file'));
           _this.$(".results").slideDown();
           return _this.$(".confirmation").fadeIn();
         });
@@ -3136,8 +3134,9 @@ module.exports = ImportView = (function(_super) {
           msg = 'An error occured while importing your calendar.';
         }
         alert(msg);
+        _this.resetUploader();
         _this.importButton.spin();
-        return _this.importButton.html('import your calendar');
+        return _this.importButton.find('span').html(t('select an icalendar file'));
       }
     });
   };
@@ -3152,7 +3151,7 @@ module.exports = ImportView = (function(_super) {
       _this.$(".confirmation").fadeOut();
       _this.$(".results").slideUp(function() {
         _this.$(".import-form").fadeIn();
-        return _this.confirmButton.html('confirm import');
+        return _this.confirmButton.html(t('confirm import'));
       });
       _this.alarmList.collection.reset();
       return _this.eventList.collection.reset();
@@ -3185,6 +3184,11 @@ module.exports = ImportView = (function(_super) {
     return this.$(".results").slideUp(function() {
       return _this.$(".import-form").fadeIn();
     });
+  };
+
+  ImportView.prototype.resetUploader = function() {
+    this.uploader.wrap('<form>').parent('form').trigger('reset');
+    return this.uploader.unwrap();
   };
 
   return ImportView;
@@ -3729,10 +3733,10 @@ var interp;
 buf.push('<div class="container"><div id="import-form" class="well"><h3>');
 var __val__ = t('ICalendar importer')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h3><div class="import-form"><button id="import-button" class="btn">');
-var __val__ = t('import your icalendar file')
+buf.push('</h3><div class="import-form"><div id="import-button" class="btn"><span>');
+var __val__ = t('select an icalendar file')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</button><input id="import-file-input" type="file"/></div><div class="confirmation"><button id="confirm-import-button" class="btn">');
+buf.push('</span><input id="import-file-input" type="file"/></div></div><div class="confirmation"><button id="confirm-import-button" class="btn">');
 var __val__ = t('confirm import')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</button><button id="cancel-import-button" class="btn">');

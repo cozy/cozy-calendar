@@ -8397,6 +8397,24 @@ h2 {
 #import-form h3 {
   font-weight: normal;
 }
+#import-form #import-button {
+  position: relative;
+  overflow: hidden;
+}
+#import-form #import-button input {
+  opacity: 0.01;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=1);
+  filter: alpha(opacity=1);
+  cursor: pointer;
+  position: absolute;
+  left: 0px;
+  border: 0px;
+  font-size: 100px;
+  bottom: 0px;
+  margin: 0px;
+  width: 100%;
+  height: 100%;
+}
 #import-form #import-alarm-list {
   margin-top: 20px;
 }
