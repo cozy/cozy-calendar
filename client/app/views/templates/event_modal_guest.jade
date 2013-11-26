@@ -1,1 +1,9 @@
-p #{model.status} #{model.email}
+p
+    if model.status == 'ACCEPTED'
+        i.icon-ok-circle.green
+    else if model.status == 'DECLINED'
+        i.icon-ban-circle.red
+    else if model.status == 'NEED-ACTION'
+        i.icon-time.blue
+
+    | &nbsp;#{model.email}

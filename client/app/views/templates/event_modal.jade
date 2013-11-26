@@ -1,4 +1,6 @@
-.modal-header= t('edit event')
+.modal-header
+    span= t('edit event')
+    button.close &times;
 .modal-body
     form.form-inline#basic
         .row-fluid
@@ -24,38 +26,39 @@
     h4= t('recurrence rule')
     p#rrule-toggle: a.rrule-show= t('make reccurent')
     p#rrule-short
+        i.icon-arrow-right
         span#rrule-help
-        a.rrule-show= t('change')
+        span#rrule-action
+            | &nbsp;-&nbsp;
+            a.rrule-show= t('Edit')
     form.form-inline#rrule
 
         .control-group
             label.control-label(for="rrule-interval")= t('repeat every')
-            .controls
-                input(type="number", value=rrule.interval).input-mini#rrule-interval
-                select#rrule-freq
-                    option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
-                    option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= units[4]
-                    option(value=RRule.WEEKLY, selected=freqSelected(RRule.WEEKLY))= units[5]
-                    option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= units[6]
-                    option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= units[7]
+            input.col-xs2.input-mini#rrule-interval(type="number", value=rrule.interval)
+            select#rrule-freq
+                option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
+                option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= units[4]
+                option(value=RRule.WEEKLY, selected=freqSelected(RRule.WEEKLY))= units[5]
+                option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= units[6]
+                option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= units[7]
 
         .control-group#rrule-weekdays
             label.control-label= t('repeat on')
-            .controls
-                label.checkbox.inline= weekDays[0]
-                    input(type="checkbox", value=0, checked=wkdaySelected(0))
-                label.checkbox.inline= weekDays[1]
-                    input(type="checkbox", value=1, checked=wkdaySelected(1))
-                label.checkbox.inline= weekDays[2]
-                    input(type="checkbox", value=2, checked=wkdaySelected(2))
-                label.checkbox.inline= weekDays[3]
-                    input(type="checkbox", value=3, checked=wkdaySelected(3))
-                label.checkbox.inline= weekDays[4]
-                    input(type="checkbox", value=4, checked=wkdaySelected(4))
-                label.checkbox.inline= weekDays[5]
-                    input(type="checkbox", value=5, checked=wkdaySelected(5))
-                label.checkbox.inline= weekDays[6]
-                    input(type="checkbox", value=6, checked=wkdaySelected(6))
+            label.checkbox.inline= weekDays[0]
+                input(type="checkbox", value=0, checked=wkdaySelected(0))
+            label.checkbox.inline= weekDays[1]
+                input(type="checkbox", value=1, checked=wkdaySelected(1))
+            label.checkbox.inline= weekDays[2]
+                input(type="checkbox", value=2, checked=wkdaySelected(2))
+            label.checkbox.inline= weekDays[3]
+                input(type="checkbox", value=3, checked=wkdaySelected(3))
+            label.checkbox.inline= weekDays[4]
+                input(type="checkbox", value=4, checked=wkdaySelected(4))
+            label.checkbox.inline= weekDays[5]
+                input(type="checkbox", value=5, checked=wkdaySelected(5))
+            label.checkbox.inline= weekDays[6]
+                input(type="checkbox", value=6, checked=wkdaySelected(6))
 
         .control-group#rrule-monthdays
             label= t('repeat on')
@@ -78,13 +81,15 @@
     form.form-inline#guests
         .control-group
             .controls
-                input(type="text", placeholder=t('enter email'))#addguest-field
+                input#addguest-field(type="text", placeholder=t('enter email'))
                 a.btn#addguest= t('invite')
+                #guest-info
+                    i.icon-question-sign
+                    span The invitations will be sent after you click "Save Changes"
     #guests-list
 
 
-
-
 .modal-footer
-    a#cancel-btn.btn= t("cancel")
-    a#confirm-btn.btn.disabled.btn-primary= t("save changes")
+    a#cancel-btn= t("cancel")
+    | &nbsp;
+    a#confirm-btn.btn= t("save changes")
