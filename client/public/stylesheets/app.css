@@ -373,7 +373,6 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
-
 /*!
  * Bootstrap v2.3.1
  *
@@ -6682,7 +6681,6 @@ button.close {
     overflow: visible !important;
   }
 }
-
 /*!
  * Datepicker for Bootstrap
  *
@@ -6864,8 +6862,7 @@ button.close {
   cursor: pointer;
   width: 16px;
   height: 16px;
-}
-/*!
+}/*!
  * Timepicker Component for Twitter Bootstrap
  *
  * Copyright 2013 Joris de Wit
@@ -6986,7 +6983,6 @@ button.close {
     width: 100%;
   }
 }
-
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7566,7 +7562,6 @@ table.fc-border-separate {
 	}
 
 
-
 /*  Font Awesome
     the iconic font designed for use with Twitter Bootstrap
     -------------------------------------------------------
@@ -7870,7 +7865,89 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 .icon-paste:before                { content: "\f0ea"; }
 
 .icon-user-md:before              { content: "\f200"; }
-
+#event-modal {
+  padding: 2px;
+}
+#event-modal .btn {
+  border-radius: 5px;
+}
+#event-modal .modal-header {
+  background: #aaa;
+  color: #fff;
+  border-radius: 5px 5px 0 0;
+}
+#event-modal .modal-header button.close {
+  margin-top: -2px;
+}
+#event-modal .modal-body h4 {
+  margin-top: 25px;
+  font-size: 20px;
+  font-family: styled;
+}
+#event-modal .modal-body #rrule-short {
+  font-size: 14px;
+}
+#event-modal .modal-body #rrule #rrule-interval,
+#event-modal .modal-body #rrule #rrule-freq,
+#event-modal .modal-body #rrule #rrule-until,
+#event-modal .modal-body #rrule #rrule-count {
+  margin: 0 5px;
+}
+#event-modal .modal-body #rrule #rrule-interval,
+#event-modal .modal-body #rrule #rrule-count {
+  width: 35px;
+}
+#event-modal .modal-body #rrule #rrule-freq {
+  width: 175px;
+}
+#event-modal .modal-body #rrule #rrule-weekdays label.checkbox {
+  margin-left: 5px;
+}
+#event-modal .modal-body #guests #addguest,
+#event-modal .modal-body #guests #addguest-field {
+  vertical-align: top;
+}
+#event-modal .modal-body #guests #addguest {
+  margin-left: 5px;
+}
+#event-modal .modal-body #guests #guest-info {
+  display: inline-block;
+  height: 30px;
+  max-width: 200px;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+#event-modal .modal-body #guests #guest-info i {
+  display: inline-block;
+  width: 30px;
+  width: 30px;
+  vertical-align: text-top;
+  font-size: 30px;
+}
+#event-modal .modal-body #guests #guest-info span {
+  display: inline-block;
+  max-width: 165px;
+  vertical-align: middle;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 11px;
+}
+#event-modal .modal-body #guests-list i {
+  vertical-align: middle;
+}
+#event-modal .modal-body #guests-list i.green {
+  color: #008000;
+}
+#event-modal .modal-body #guests-list i.red {
+  color: #f00;
+}
+#event-modal .modal-body #guests-list i.blue {
+  color: #00f;
+}
+#event-modal .modal-footer #cancel-btn {
+  font-size: 13px;
+  margin-right: 10px;
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8407,7 +8484,6 @@ h2 {
     display: block;
   }
 }
-
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8533,6 +8609,9 @@ button.ui-button[data-state="selected"] {
   font-size: 12px;
   margin-left: 5px;
 }
+.popover .popover-content a {
+  font-size: 12px;
+}
 /* Styles for the fullcalendar plugin */
 .fc-button-prev,
 .fc-button-next,
@@ -8652,7 +8731,6 @@ thead > tr.fc-first,
 .fc-view {
   overflow: visible;
 }
-
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -8678,6 +8756,3 @@ thead > tr.fc-first,
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
-
-
-/*@ sourceMappingURL=app.css.map*/
