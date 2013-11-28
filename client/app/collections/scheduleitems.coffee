@@ -1,5 +1,6 @@
 module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
+    model: require '../models/scheduleitem'
     comparator: (si1, si2) ->
 
         d1 = si1.getDateObject()

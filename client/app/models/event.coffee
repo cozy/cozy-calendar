@@ -2,6 +2,7 @@ ScheduleItem = require './scheduleitem'
 
 module.exports = class Event extends ScheduleItem
 
+    mainDateField: 'start'
     startDateField: 'start'
     endDateField: 'end'
     urlRoot: 'events'
@@ -48,6 +49,7 @@ module.exports = class Event extends ScheduleItem
             @endDateObject = Date.create @get @endDateField
 
     getStartDateObject: -> @startDateObject
+    getDateObject:      -> @startDateObject
 
     getFormattedStartDate: (formatter) -> @getStartDateObject().format formatter
 
