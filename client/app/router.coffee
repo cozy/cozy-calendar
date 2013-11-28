@@ -3,7 +3,7 @@ ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
 ImportView = require 'views/import_view'
-AlarmCollection = require 'collections/alarms'
+DayBucketCollection = require 'collections/daybuckets'
 
 module.exports = class Router extends Backbone.Router
 
@@ -11,9 +11,10 @@ module.exports = class Router extends Backbone.Router
         ''                     : -> @navigate 'calendar', true
         'calendar'             : 'calendar'
         'calendarweek'         : 'calendarweek'
+        'list'                 : 'list'
         'calendar/:eventid'    : 'calendar_event'
         'calendarweek/:eventid': 'calendarweek_event'
-        'alarms'               : 'alarmsList'
+        'list/:eventid'        : 'list_event'
         'import'               : 'import'
 
     calendar: (fcView = 'month') ->
@@ -27,23 +28,26 @@ module.exports = class Router extends Backbone.Router
     calendarweek: ->
         @calendar 'agendaWeek'
 
-    alarmsList: ->
+    list: ->
         @displayView new ListView
-            collection: app.alarms
-        app.menu.activate 'alarms'
-        @handleFetch @mainView.collection, "alarms"
+            collection: new DayBucketCollection()
+        app.menu.activate 'list'
 
     calendar_event: (id) ->
         @calendar() unless @mainView instanceof CalendarView
-        @event id
+        @event id, 'calendar'
 
     calendarweek_event: (id) ->
         @calendarweek() unless @mainView instanceof CalendarView
-        @event id
+        @event id, 'calendarweek'
 
-    event: (id) ->
+    list_event: (id) ->
+        @list() unless @mainView instanceof ListView
+        @event id, 'list'
+
+    event: (id, backurl) ->
         model = app.events.get(id) or new Event(id: id).fetch()
-        view = new EventModal(model: model)
+        view = new EventModal(model: model, backurl: backurl)
         $('body').append view.$el
         view.render()
 

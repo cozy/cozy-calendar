@@ -59,6 +59,9 @@ module.exports = class CalendarView extends BaseView
             timeFormat:
                 '' : '' # do not display times on event
                 'agendaWeek': ''
+            columnFormat:
+                'week': 'ddd d'
+
             axisFormat: "H:mm"
             allDaySlot: false
             selectable: true
@@ -232,5 +235,5 @@ module.exports = class CalendarView extends BaseView
 
         @showPopover
             model: model,
-            target: $(jsEvent.currentTarget),
+            target: $(jsEvent.currentTarget)
 

@@ -235,5 +235,5 @@ module.exports = class EventModal extends ViewCollection
         @$el.modal 'hide'
         @$el.on 'hidden', =>
             @remove()
-            app.router.navigate ''
+            app.router.navigate @options.backurl or '', true
 
