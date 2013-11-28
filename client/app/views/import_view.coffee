@@ -21,9 +21,9 @@ module.exports = class ImportView extends BaseView
     afterRender: ->
         @$(".confirmation").hide()
         @$(".results").hide()
-        @alarmList = new AlarmList()
+        @alarmList = new AlarmList el: @$ "#import-alarm-list"
         @alarmList.render()
-        @eventList = new EventList()
+        @eventList = new EventList el: @$ "#import-event-list"
         @eventList.render()
         @uploader = @$ '#import-file-input'
         @importButton = @$ '#import-button'

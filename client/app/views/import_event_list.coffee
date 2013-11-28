@@ -5,8 +5,4 @@ EventCollection = require '../collections/events'
 module.exports = class EventList extends ViewCollection
 
     itemview: EventView
-    views: {}
-
-    template: -> ''
-    collection: new EventCollection
-    collectionEl: "#import-event-list"
+    collection: new EventCollection()

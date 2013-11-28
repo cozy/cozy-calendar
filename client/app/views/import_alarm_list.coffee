@@ -5,8 +5,4 @@ AlarmCollection = require '../collections/alarms'
 module.exports = class AlarmList extends ViewCollection
 
     itemview: AlarmView
-    views: {}
-
-    template: -> ''
-    collection: new AlarmCollection
-    collectionEl: "#import-alarm-list"
+    collection: new AlarmCollection()
