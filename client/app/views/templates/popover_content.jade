@@ -15,9 +15,10 @@ if type == 'alarm'
 else if type = 'event'
 
     div
-        input#input-start.focused.input-small(type="text", value=start,
+        input#input-start.focused.input-mini(type="text", value=start,
             placeholder=t("From hours:minutes"))
-        input#input-end.input-small(type="text", value=end,
+        span.timeseparator -
+        input#input-end.input-mini(type="text", value=end,
             placeholder=t("To hours:minutes+days"))
     div
         input#input-place.input-small(type="text", value=place,
