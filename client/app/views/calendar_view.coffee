@@ -140,6 +140,8 @@ module.exports = class CalendarView extends BaseView
             spinTarget.html "&nbsp;"
             spinTarget.spin "tiny"
 
+        $(element).attr 'title', event.title
+
         return element
 
     onEventDragStop: (event, jsEvent, ui, view) ->
