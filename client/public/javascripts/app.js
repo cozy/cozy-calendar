@@ -2009,6 +2009,7 @@ module.exports = CalendarView = (function(_super) {
       spinTarget.html("&nbsp;");
       spinTarget.spin("tiny");
     }
+    $(element).attr('title', event.title);
     return element;
   };
 
@@ -2105,7 +2106,6 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.onEventClick = function(fcEvent, jsEvent, view) {
     var model;
 
-    console.log(fcEvent);
     model = (function() {
       if (fcEvent.type === 'alarm') {
         return this.alarmCollection.get(fcEvent.id);
@@ -3422,9 +3422,9 @@ buf.push('</button></div>');
 else if ( type = 'event')
 {
 buf.push('<div><input');
-buf.push(attrs({ 'id':('input-start'), 'type':("text"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-small') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/><input');
-buf.push(attrs({ 'id':('input-end'), 'type':("text"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
+buf.push(attrs({ 'id':('input-start'), 'type':("text"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
+buf.push('/><span class="timeseparator">-</span><input');
+buf.push(attrs({ 'id':('input-end'), 'type':("text"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/></div><div><input');
 buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><input');

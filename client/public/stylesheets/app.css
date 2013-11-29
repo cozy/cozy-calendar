@@ -8611,9 +8611,16 @@ button.ui-button[data-state="selected"] {
   max-width: none;
   width: 400px;
 }
-.popover #input-start,
+.popover #input-start {
+  width: 4em;
+}
 .popover #input-end {
-  min-width: 163px;
+  width: 5em;
+}
+.popover .timeseparator {
+  display: inline-block;
+  margin-bottom: 10px;
+  vertical-align: middle;
 }
 .popover #input-place {
   min-width: 120px;
