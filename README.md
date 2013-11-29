@@ -1,4 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-agenda.png?label=ready)](https://waffle.io/mycozycloud/cozy-agenda)  
+[![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-agenda.png?label=ready)](https://waffle.io/mycozycloud/cozy-agenda)  
 # Description
 
 The application currently manages reminders and only reminders. It is based on the iCal standard.
