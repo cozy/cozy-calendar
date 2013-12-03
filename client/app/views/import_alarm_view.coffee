@@ -1,15 +1,13 @@
-View = require '../lib/view'
+BaseView = require '../lib/base_view'
 
-module.exports = class AlarmView extends View
+module.exports = class AlarmView extends BaseView
 
     tagName: 'div'
     className: 'alarm'
+    template: require './templates/import_alarm'
 
-    render: ->
-        super
-            action: @model.get 'action'
+    getRenderData: ->
+        _.extend @model.toJSON(),
             time: @model.getFormattedDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
             description: @model.get 'description'
 
-    template: ->
-        require './templates/alarm_import'

@@ -373,6 +373,7 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 /*!
  * Bootstrap v2.3.1
  *
@@ -6681,6 +6682,7 @@ button.close {
     overflow: visible !important;
   }
 }
+
 /*!
  * Datepicker for Bootstrap
  *
@@ -6862,7 +6864,8 @@ button.close {
   cursor: pointer;
   width: 16px;
   height: 16px;
-}/*!
+}
+/*!
  * Timepicker Component for Twitter Bootstrap
  *
  * Copyright 2013 Joris de Wit
@@ -6983,6 +6986,7 @@ button.close {
     width: 100%;
   }
 }
+
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7562,6 +7566,7 @@ table.fc-border-separate {
 	}
 
 
+
 /*  Font Awesome
     the iconic font designed for use with Twitter Bootstrap
     -------------------------------------------------------
@@ -7865,6 +7870,95 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 .icon-paste:before                { content: "\f0ea"; }
 
 .icon-user-md:before              { content: "\f200"; }
+
+#event-modal {
+  padding: 2px;
+}
+#event-modal .btn {
+  border-radius: 5px;
+}
+#event-modal .modal-header {
+  background: #aaa;
+  color: #fff;
+  border-radius: 5px 5px 0 0;
+}
+#event-modal .modal-header button.close {
+  margin-top: -2px;
+}
+#event-modal .modal-body h4 {
+  margin-top: 25px;
+  font-size: 20px;
+  font-family: styled;
+}
+#event-modal .modal-body .rrule-show {
+  cursor: pointer;
+}
+#event-modal .modal-body #rrule-short {
+  font-size: 14px;
+}
+#event-modal .modal-body #rrule #rrule-interval,
+#event-modal .modal-body #rrule #rrule-freq,
+#event-modal .modal-body #rrule #rrule-until,
+#event-modal .modal-body #rrule #rrule-count {
+  margin: 0 5px;
+}
+#event-modal .modal-body #rrule #rrule-interval,
+#event-modal .modal-body #rrule #rrule-count {
+  width: 35px;
+}
+#event-modal .modal-body #rrule #rrule-freq {
+  width: 175px;
+}
+#event-modal .modal-body #rrule #rrule-weekdays label.checkbox {
+  margin-left: 5px;
+}
+#event-modal .modal-body #guests #addguest,
+#event-modal .modal-body #guests #addguest-field {
+  vertical-align: top;
+}
+#event-modal .modal-body #guests #addguest {
+  margin-left: 5px;
+}
+#event-modal .modal-body #guests #guest-info {
+  display: inline-block;
+  height: 30px;
+  max-width: 200px;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+#event-modal .modal-body #guests #guest-info i {
+  display: inline-block;
+  width: 30px;
+  width: 30px;
+  vertical-align: text-top;
+  font-size: 30px;
+}
+#event-modal .modal-body #guests #guest-info span {
+  display: inline-block;
+  max-width: 165px;
+  vertical-align: middle;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 11px;
+}
+#event-modal .modal-body #guests-list i {
+  vertical-align: middle;
+}
+#event-modal .modal-body #guests-list i.green {
+  color: #008000;
+}
+#event-modal .modal-body #guests-list i.red {
+  color: #f00;
+}
+#event-modal .modal-body #guests-list i.blue {
+  color: #00f;
+}
+#event-modal .modal-footer #cancel-btn {
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 10px;
+}
+
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8073,6 +8167,12 @@ ul#menu li {
 ul#menu li a {
   color: #fff;
 }
+#alarms {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 20px;
+}
 .addform .tooltip.top .tooltip-arrow {
   border-top-color: #d33;
 }
@@ -8121,6 +8221,15 @@ input[type="time"] {
   padding-bottom: 15px;
   margin-bottom: 15px;
 }
+.dayprogram h2 i {
+  margin-top: 10px;
+  margin-left: 10px;
+  display: none;
+  cursor: pointer;
+}
+.dayprogram:hover h2 i {
+  display: inline-block;
+}
 .dayprogram .alarms {
   margin-top: 15px;
 }
@@ -8140,6 +8249,10 @@ input[type="time"] {
 .dayprogram:nth-last-child(1) {
   border-bottom: 0;
   padding-bottom: 0;
+}
+.showbefore {
+  float: left;
+  cursor: pointer;
 }
 .affix {
   position: fixed;
@@ -8189,18 +8302,18 @@ input[type="time"] {
 }
 .popover-content input {
   margin-left: 5px;
+  border: 1px solid transparent;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .popover-content #inputStart,
 .popover-content #inputEnd {
   width: 148px;
 }
-.popover-content,
-#add-alarm {
-  margin-top: 20px;
+.popover-content a.advanced-link {
+  margin-left: 10px;
 }
-.popover-content input,
 #add-alarm input,
-.popover-content select,
 #add-alarm select {
   border: 1px solid #ccc;
   -webkit-box-shadow: 0;
@@ -8210,13 +8323,10 @@ input[type="time"] {
   shadow: none;
   font-family: styled, helvetica;
 }
-.popover-content input.disabled,
 #add-alarm input.disabled {
   border: 1px solid transparent;
 }
-.popover-content input:hover,
 #add-alarm input:hover,
-.popover-content select:hover,
 #add-alarm select:hover {
   border: 1px solid #fe8800;
   -webkit-border-radius: 0px;
@@ -8224,48 +8334,37 @@ input[type="time"] {
   shadow: inset 1px 1px 2px rgba(100,100,100,0.1);
   color: #333;
 }
-.popover-content input:focus,
 #add-alarm input:focus,
-.popover-content input:active,
 #add-alarm input:active,
-.popover-content select:active,
 #add-alarm select:active,
-.popover-content select:focus,
 #add-alarm select:focus {
   border: 1px solid #34a6ff;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.popover-content .add-on,
 #add-alarm .add-on {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
-.popover-content .datepicker td.day:hover,
 #add-alarm .datepicker td.day:hover {
   background: #ffc47f;
 }
-.popover-content .bootstrap-timepicker-widget table td a:hover,
 #add-alarm .bootstrap-timepicker-widget table td a:hover {
   background: #ffc47f;
   border: 1px solid transparent;
 }
-.popover-content #alarm-description-input,
 #add-alarm #alarm-description-input {
   font-size: 24px;
   line-height: 40px;
   height: 40px;
 }
-.popover-content button.add-alarm.disabled,
 #add-alarm button.add-alarm.disabled {
   border: 1px solid #aaa;
 }
-.popover-content button.add-alarm,
 #add-alarm button.add-alarm {
   float: left;
   margin-top: 10px;
 }
-.popover-content button.cancel,
 #add-alarm button.cancel {
   margin-left: 5px;
   margin-top: 10px;
@@ -8301,6 +8400,24 @@ h2 {
 #import-form h3 {
   font-weight: normal;
 }
+#import-form #import-button {
+  position: relative;
+  overflow: hidden;
+}
+#import-form #import-button input {
+  opacity: 0.01;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=1);
+  filter: alpha(opacity=1);
+  cursor: pointer;
+  position: absolute;
+  left: 0px;
+  border: 0px;
+  font-size: 100px;
+  bottom: 0px;
+  margin: 0px;
+  width: 100%;
+  height: 100%;
+}
 #import-form #import-alarm-list {
   margin-top: 20px;
 }
@@ -8312,7 +8429,7 @@ h2 {
   margin: 0;
   sharefont-weight: 10px;
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   body {
     padding: 0;
   }
@@ -8334,7 +8451,8 @@ h2 {
   }
   #alarms {
     width: 100%;
-    margin: 0;
+    margin: 0px;
+    padding: 5px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -8394,6 +8512,7 @@ h2 {
     display: block;
   }
 }
+
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8492,9 +8611,16 @@ button.ui-button[data-state="selected"] {
   max-width: none;
   width: 400px;
 }
-.popover #input-start,
+.popover #input-start {
+  width: 4em;
+}
 .popover #input-end {
-  min-width: 163px;
+  width: 5em;
+}
+.popover .timeseparator {
+  display: inline-block;
+  margin-bottom: 10px;
+  vertical-align: middle;
 }
 .popover #input-place {
   min-width: 120px;
@@ -8518,6 +8644,9 @@ button.ui-button[data-state="selected"] {
 .popover .popover-content p {
   font-size: 12px;
   margin-left: 5px;
+}
+.popover .popover-content a {
+  font-size: 12px;
 }
 /* Styles for the fullcalendar plugin */
 .fc-button-prev,
@@ -8638,6 +8767,7 @@ thead > tr.fc-first,
 .fc-view {
   overflow: visible;
 }
+
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -8663,3 +8793,6 @@ thead > tr.fc-first,
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+
+
+/*@ sourceMappingURL=app.css.map*/

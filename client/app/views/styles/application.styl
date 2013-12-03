@@ -21,6 +21,9 @@ ul#menu
     a
       color: #fff
 
+#alarms
+  box-sizing: border-box
+  padding 20px
 
 .addform
   .tooltip.top .tooltip-arrow
@@ -66,6 +69,15 @@ input[type="time"]
   padding-bottom: 15px
   margin-bottom: 15px
 
+  h2
+    i
+      margin-top 10px
+      margin-left 10px
+      display none
+      cursor pointer
+  &:hover h2 i
+      display inline-block
+
   .alarms
     margin-top: 15px
 
@@ -83,6 +95,10 @@ input[type="time"]
 .dayprogram:nth-last-child(1)
   border-bottom: 0
   padding-bottom: 0
+
+.showbefore
+    float left
+    cursor pointer
 
 .affix
   position: fixed
@@ -126,16 +142,20 @@ input[type="time"]
 .popover-content
     input
         margin-left: 5px
+        border 1px solid transparent
+        box-shadow none
 
     #inputStart
     #inputEnd
         width: 148px
 
+    a.advanced-link
+        margin-left 10px
 
-.popover-content
+
+// .popover-content
 #add-alarm
 
-    margin-top: 20px
     input
     select
         border: 1px solid lightgrey
@@ -219,6 +239,21 @@ h2
     h3
         font-weight: normal
 
+    #import-button
+        position relative
+        overflow hidden
+        input
+            opacity 0.01
+            cursor pointer
+            position absolute
+            left 0px
+            border 0px
+            font-size 100px
+            bottom 0px
+            margin 0px
+            width 100%
+            height 100%
+
     #import-alarm-list
         margin-top: 20px
 
@@ -232,14 +267,14 @@ h2
             margin: 0
             sharefont-weight: 10px
 
-@media(max-width: 800px)
+@media(max-width: 1000px)
 
     body
         padding: 0
 
     #viewContainer
         padding: 0
- 
+
         .container:before
         .container:after
             display: block
@@ -253,13 +288,14 @@ h2
 
     #alarms
         width: 100%
-        margin: 0
+        margin: 0px
+        padding: 5px
         box-sizing: border-box
 
         .fc-header-title
             h2
                 font-size: 16px
-        
+
     #input-time
     #input-timezone
     #action

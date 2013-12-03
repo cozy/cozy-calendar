@@ -7,7 +7,7 @@ client = new Client "http://localhost:8888/"
 clientDS = new Client 'http://localhost:9101'
 helpers = require './helpers'
 
-{ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require '../lib/ical_helpers'
+{ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require 'cozy-ical'
 
 expectedContent = """
     BEGIN:VCALENDAR
@@ -15,6 +15,7 @@ expectedContent = """
     PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
     BEGIN:VTIMEZONE
     TZID:Europe/Paris
+    TZURL:http://tzurl.org/zoneinfo/Europe/Paris.ics
     BEGIN:STANDARD
     DTSTART:20130423T144000
     TZOFFSETFROM:-0200
@@ -27,17 +28,18 @@ expectedContent = """
     END:DAYLIGHT
     END:VTIMEZONE
     BEGIN:VTODO
-    DTSTAMP:20130423T144000
+    DTSTAMP:20130423T144000Z
     SUMMARY:Something to remind
-    UID:undefined
+    UID:[id-1]
     BEGIN:VALARM
-    ACTION:AUDIO
+    ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130423T144000
+    TRIGGER:20130423T144000Z
     END:VALARM
     END:VTODO
     BEGIN:VTIMEZONE
     TZID:Africa/Abidjan
+    TZURL:http://tzurl.org/zoneinfo/Africa/Abidjan.ics
     BEGIN:STANDARD
     DTSTART:20130424T133000
     TZOFFSETFROM:+0000
@@ -50,17 +52,18 @@ expectedContent = """
     END:DAYLIGHT
     END:VTIMEZONE
     BEGIN:VTODO
-    DTSTAMP:20130424T133000
+    DTSTAMP:20130424T133000Z
     SUMMARY:Something else to remind
-    UID:undefined
+    UID:[id-2]
     BEGIN:VALARM
-    ACTION:AUDIO
+    ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130424T133000
+    TRIGGER:20130424T133000Z
     END:VALARM
     END:VTODO
     BEGIN:VTIMEZONE
     TZID:Pacific/Apia
+    TZURL:http://tzurl.org/zoneinfo/Pacific/Apia.ics
     BEGIN:STANDARD
     DTSTART:20130425T113000
     TZOFFSETFROM:-1300
@@ -73,24 +76,24 @@ expectedContent = """
     END:DAYLIGHT
     END:VTIMEZONE
     BEGIN:VTODO
-    DTSTAMP:20130425T113000
+    DTSTAMP:20130425T113000Z
     SUMMARY:Another thing to remind
-    UID:undefined
+    UID:[id-3]
     BEGIN:VALARM
-    ACTION:AUDIO
+    ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130425T113000
+    TRIGGER:20130425T113000Z
     END:VALARM
     END:VTODO
     BEGIN:VEVENT
     DESCRIPTION:my description
-    DTSTART:20130609T150000
-    DTEND:20130610T150000
+    DTSTART:20130609T150000Z
+    DTEND:20130610T150000Z
     LOCATION:my place
+    UID:[id-4]
     END:VEVENT
     END:VCALENDAR
     """.replace(/\n/g, '\r\n')
-
 
 describe "Calendar export/import", ->
 
@@ -114,9 +117,9 @@ describe "Calendar export/import", ->
                 valarm = new VAlarm date
                 valarm.toString().should.equal """
                     BEGIN:VALARM
-                    ACTION:AUDIO
+                    ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130609T150000
+                    TRIGGER:20130609T150000Z
                     END:VALARM""".replace(/\n/g, '\r\n')
 
         describe 'get vTodo string', ->
@@ -125,7 +128,7 @@ describe "Calendar export/import", ->
                 vtodo = new VTodo date, "superuser", "ma description"
                 vtodo.toString().should.equal """
                     BEGIN:VTODO
-                    DTSTAMP:20130609T150000
+                    DTSTAMP:20130609T150000Z
                     SUMMARY:ma description
                     UID:superuser
                     END:VTODO""".replace(/\n/g, '\r\n')
@@ -134,15 +137,15 @@ describe "Calendar export/import", ->
             it 'should return default vEvent string', ->
                 startDate = new Date 2013, 5, 9, 15, 0, 0
                 endDate = new Date 2013, 5, 10, 15, 0, 0
-                vevent = new VEvent startDate, endDate, "desc", "loc"
+                vevent = new VEvent startDate, endDate, "desc", "loc", "eid"
                 vevent.toString().should.equal """
                     BEGIN:VEVENT
                     DESCRIPTION:desc
-                    DTSTART:20130609T150000
-                    DTEND:20130610T150000
+                    DTSTART:20130609T150000Z
+                    DTEND:20130610T150000Z
                     LOCATION:loc
+                    UID:eid
                     END:VEVENT""".replace(/\n/g, '\r\n')
-
 
 
         describe 'get vCalendar with alarms', ->
@@ -157,17 +160,16 @@ describe "Calendar export/import", ->
                     VERSION:2.0
                     PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
                     BEGIN:VTODO
-                    DTSTAMP:20130609T150000
+                    DTSTAMP:20130609T150000Z
                     SUMMARY:ma description
                     UID:superuser
                     BEGIN:VALARM
-                    ACTION:AUDIO
+                    ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130609T150000
+                    TRIGGER:20130609T150000Z
                     END:VALARM
                     END:VTODO
                     END:VCALENDAR""".replace(/\n/g, '\r\n')
-
 
         describe 'parse ical file', ->
             it 'should return a well formed vCalendar object', (done) ->
@@ -179,8 +181,8 @@ describe "Calendar export/import", ->
 
 
     describe 'Models', ->
-        Alarm = Event = null
-        before -> {Alarm, Event} = @models
+        Alarm = require '../server/models/alarm'
+        Event = require '../server/models/event'
 
         describe 'Alarms', ->
 
@@ -195,19 +197,20 @@ describe "Calendar export/import", ->
 
             it 'toIcal', ->
                 alarm = new Alarm
+                    id: "testid"
                     action: "EMAIL"
                     description: "Something else to remind"
                     trigg: "Tue Apr 24 2013 13:30:00"
                     timezone: "Europe/Paris"
                 alarm.toIcal().toString().should.equal """
                     BEGIN:VTODO
-                    DTSTAMP:20130424T133000
+                    DTSTAMP:20130424T133000Z
                     SUMMARY:Something else to remind
-                    UID:undefined
+                    UID:testid
                     BEGIN:VALARM
-                    ACTION:AUDIO
+                    ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130424T133000
+                    TRIGGER:20130424T133000Z
                     END:VALARM
                     END:VTODO""".replace(/\n/g, '\r\n')
 
@@ -239,6 +242,7 @@ describe "Calendar export/import", ->
         describe 'Events', ->
             it 'toIcal', ->
                 event = new Event
+                    id: "testid"
                     place: "my place"
                     description: "my description"
                     start: "Tue Apr 24 2013 13:30:00"
@@ -246,9 +250,10 @@ describe "Calendar export/import", ->
                 event.toIcal().toString().should.equal """
                     BEGIN:VEVENT
                     DESCRIPTION:my description
-                    DTSTART:20130424T133000
-                    DTEND:20130425T133000
+                    DTSTART:20130424T133000Z
+                    DTEND:20130425T133000Z
                     LOCATION:my place
+                    UID:testid
                     END:VEVENT""".replace(/\n/g, '\r\n')
 
             it 'fromIcal', ->
@@ -288,6 +293,8 @@ describe "Calendar export/import", ->
 
     describe 'Resources', ->
         describe "GET /export/calendar.ics", ->
+
+            ids = null
             before helpers.cleanDb
             before (done) ->
                 async.series [
@@ -304,7 +311,11 @@ describe "Calendar export/import", ->
                                         "Sun Jun 10 2013 15:00:00",
                                         "my place", "", "my description",
                                         "Indian/Cocos")
-                ], done
+                ], (err, results) ->
+
+                    ids = results.map (doc) -> doc.id
+
+                    done()
 
             it "When I request for iCal export file", (done) ->
                 client.get "export/calendar.ics", (error, response, body) =>
@@ -313,7 +324,12 @@ describe "Calendar export/import", ->
                 , false
 
             it "Then it should contains my alarms", ->
+
                 @body.should.equal expectedContent
+                    .replace('[id-1]', ids[0])
+                    .replace('[id-2]', ids[1])
+                    .replace('[id-3]', ids[2])
+                    .replace('[id-4]', ids[3])
 
 
         describe "POST /import/ical", ->

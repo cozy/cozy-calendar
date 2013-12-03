@@ -1,86 +1,35 @@
-View      = require '../lib/view'
-AlarmFormView = require './alarm_form_view'
-AlarmsListView = require '../views/alarms_list_view'
-
-AlarmCollection = require '../collections/alarms'
-Alarm = require '../models/alarm'
-
+ViewCollection      = require '../lib/view_collection'
 helpers = require '../helpers'
 defaultTimezone = 'timezone'
 
-module.exports = class ListView extends View
 
-    el: '#viewContainer'
+module.exports = class ListView extends ViewCollection
 
+    id: 'viewContainer'
+    template: require './templates/list_view'
+    itemview: require './list_view_bucket'
+    collectionEl: '#alarm-list'
     events:
-        "click #add-alarm button.add-alarm": "onAddAlarmClicked"
-        "click #alarm-list .icon-pencil": "onEditAlarmClicked"
-        "click #alarm-list .icon-trash": "onRemoveAlarmClicked"
+        'click .showbefore': 'showbefore'
 
-    template: ->
-        require('./templates/listview')
-
-    afterRender: ->
-        (@alarmFormView = new AlarmFormView()).render()
-        @alarmsListView = new AlarmsListView
-           model: @model
-
-    onAddAlarmClicked: (event, callback) ->
-        date = @alarmFormView.dateField.val()
-        time = @alarmFormView.timeField.val()
-        dueDate = helpers.formatDateISO8601 "#{date}##{time}"
-        dueDate = Date.create(dueDate)
-        if dueDate.isValid() # validation feedback is done later
-            dueDate = dueDate.format Alarm.dateFormat
+    appendView: (view) ->
+        index = @collection.indexOf view.model
+        el = view.$el
+        if view.model.get('date').isBefore Date.now()
+            el.addClass('before').hide()
         else
-            dueDate = 'undefined'
+            el.addClass('after')
 
-        data =
-            description: @alarmFormView.descriptionField.val()
-            action: @alarmFormView.actionField.val()
-            trigg: dueDate
-
-        if @alarmFormView.timezoneField.val() isnt defaultTimezone
-            data.timezone = @alarmFormView.timezoneField.val()
-
-        if @alarmFormView.editionMode
-            alarm = @alarmFormView.data
-            alarm.save data,
-                    wait: true
-                    ignoreMySocketNotification: true #useless ?
-                    success: =>
-                        @alarmFormView.resetForm()
-                        console.log "Save: success (attributes updated)"
-                    error: ->
-                        console.log "Error during alarm save."
+        if index is 0 then @$collectionEl.prepend el
         else
-            alarm = @model.create data,
-                    ignoreMySocketNotification: true #useless ?
-                    wait: true
-                    success: =>
-                        @alarmFormView.resetForm()
-                        console.log 'Create alarm: success'
-                    error: (error, xhr, options) ->
-                        error = JSON.parse xhr.responseText
-                        console.log "Create alarm: error: #{error?.msg}"
+            prevCid = @collection.at(index-1).cid
+            @views[prevCid].$el.after el
 
-        if alarm.validationError?.length > 0
-            @alarmFormView.displayErrors(alarm.validationError)
 
-    onEditAlarmClicked: (event) ->
-        window.top.window.scrollTo(0,0)
-        alarmID = $(event.target).data('alarmid')
-        alarm = @model.get alarmID
-        @alarmFormView.loadAlarmData(alarm)
+    showbefore: =>
+        first = @$('.after').first()
+        body = $('html, body')
+        @$('.before').slideDown
+            progress: -> body.scrollTop first.offset().top
 
-    onRemoveAlarmClicked: (event) ->        
-        if confirm 'Are you sure ?'
-            alarmID = $(event.target).data('alarmid')
-            alarm = @model.get alarmID
-            # TODO: add confirmation and loading indicator
-            alarm.destroy
-                wait: true
-                success: () ->
-                    console.log "Delete alarm: success"
-                error: () ->
-                    console.log "Delete alarm: error"
+        @$('.showbefore').fadeOut()

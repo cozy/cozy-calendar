@@ -1,16 +1,12 @@
-View = require '../lib/view'
+BaseView = require '../lib/base_view'
 
-module.exports = class EventView extends View
+module.exports = class EventView extends BaseView
 
     tagName: 'div'
     className: 'event'
+    template: require './templates/import_event'
 
-    render: ->
-        super
+    getRenderData: ->
+        _.extend @model.toJSON(),
             start: @model.getFormattedStartDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
             end: @model.getFormattedEndDate '{yyyy}/{MM}/{dd} {HH}:{mm}'
-            description: @model.get 'description'
-            place: @model.get 'place'
-
-    template: ->
-        require './templates/event_import'

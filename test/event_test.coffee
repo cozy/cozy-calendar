@@ -14,15 +14,12 @@ describe "Events management", ->
     describe "GET events/", ->
 
         before helpers.cleanDb
-        before (done) ->
-            async.series [
-                helpers.createEvent "Tue Apr 23 2013 14:40:00 ",
+        before helpers.createEvent "Tue Apr 23 2013 14:40:00 ",
                     "Tue Apr 23 2013 15:40:00 ", "Place", 3,
                     "Something to do"
-                helpers.createEvent "Tue Apr 24 2013 13:30:00",
+        before helpers.createEvent "Tue Apr 24 2013 13:30:00",
                     "Tue Apr 24 2013 14:00:00", "Other place", 0,
                     "Something else to do"
-            ], done
 
         it "should return all the events in database", (done) ->
             client.get "events/", (error, response, body) ->

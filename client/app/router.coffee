@@ -1,50 +1,74 @@
 app = require 'application'
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
+EventModal = require 'views/event_modal'
 ImportView = require 'views/import_view'
-AlarmCollection = require 'collections/alarms'
+DayBucketCollection = require 'collections/daybuckets'
 
 module.exports = class Router extends Backbone.Router
 
     routes:
-        ''                    : 'calendar'
-        'calendar'            : 'calendar'
-        'alarms'              : 'alarmsList'
-        'import'              : 'import'
+        ''                     : -> @navigate 'calendar', true
+        'calendar'             : 'calendar'
+        'calendarweek'         : 'calendarweek'
+        'list'                 : 'list'
+        'calendar/:eventid'    : 'calendar_event'
+        'calendarweek/:eventid': 'calendarweek_event'
+        'list/:eventid'        : 'list_event'
+        'import'               : 'import'
 
-    calendar: ->
-        @displayView CalendarView, app.alarms, app.events
-        @handleFetch @mainView.model.alarm, "alarms"
-        @handleFetch @mainView.model.event, "events"
+    calendar: (fcView = 'month') ->
+        @displayView new CalendarView
+            view: fcView
+            model: {alarms:app.alarms, events:app.events}
+        app.menu.activate 'calendar'
+        @handleFetch app.alarms, "alarms"
+        @handleFetch app.events, "events"
 
-    alarmsList: ->
-        @displayView ListView, app.alarms, null
-        @handleFetch @mainView.model, "alarms"
+    calendarweek: ->
+        @calendar 'agendaWeek'
+
+    list: ->
+        @displayView new ListView
+            collection: new DayBucketCollection()
+        app.menu.activate 'list'
+
+    calendar_event: (id) ->
+        @calendar() unless @mainView instanceof CalendarView
+        @event id, 'calendar'
+
+    calendarweek_event: (id) ->
+        @calendarweek() unless @mainView instanceof CalendarView
+        @event id, 'calendarweek'
+
+    list_event: (id) ->
+        @list() unless @mainView instanceof ListView
+        @event id, 'list'
+
+    event: (id, backurl) ->
+        model = app.events.get(id) or new Event(id: id).fetch()
+        view = new EventModal(model: model, backurl: backurl)
+        $('body').append view.$el
+        view.render()
 
     import: ->
-        @displayView ImportView, app.alarms
+        @displayView new ImportView()
+        app.menu.activate 'import'
 
-    handleFetch: (model, name) ->
+    handleFetch: (collection, name) ->
         unless app[name].length > 0
-            model.fetch
+            collection.fetch
                 success: (collection, response, options) ->
                     console.log collection
                     console.log "Fetch: success"
                 error: ->
                     console.log "Fetch: error"
         else
-            model.reset app[name].toJSON()
+            collection.reset app[name].toJSON()
 
     # display a page properly (remove previous page)
-    displayView: (classView, alarmsCollection, eventsCollection) =>
+    displayView: (view) =>
         @mainView.remove() if @mainView
-
-        container = $(document.createElement('div'))
-        container.prop 'id', 'viewContainer'
-        $('body').prepend(container)
-        if eventsCollection is null
-            @mainView = new classView
-                model: alarmsCollection
-        else
-            @mainView = new classView alarmsCollection, eventsCollection
+        @mainView = view
+        $('body').append @mainView.$el
         @mainView.render()

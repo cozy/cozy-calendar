@@ -33,6 +33,7 @@ exports.config =
                     'vendor/scripts/backbone-1.0.0.js'
                     'vendor/scripts/spin.js'
                     'vendor/scripts/fullcalendar.js'
+                    'vendor/scripts/rrule.js'
                 ]
 
         stylesheets:

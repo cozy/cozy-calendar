@@ -1,16 +1,26 @@
 #!/usr/bin/env coffee
 
-app = module.exports = (params) ->
-    params = params || {}
-    # specify current dir as default root of server
-    params.root = params.root || __dirname
-    return require('compound').createServer(params)
+start = (port, callback) ->
+    require('americano').start
+            name: 'Agenda'
+            port: port
+            host: process.env.HOST or "127.0.0.1"
+    , (app, server) ->
+        app.set 'views', './client/'
+
+        User = require './server/models/user'
+        Realtimer = require('cozy-realtime-adapter')
+        realtime = Realtimer server : server, ['alarm.*', 'event.*']
+        realtime.on 'user.*', -> User.updateTimezone()
+        User.updateTimezone (err) ->
+            callback err, app, server
 
 if not module.parent
-    port = process.env.PORT || 9250
-    host = process.env.HOST || "127.0.0.1"
-    server = app()
-    server.listen port, host, ->
-        console.log(
-            "Compound server listening on %s:%d within %s environment",
-            host, port, server.set('env'))
+    port = process.env.PORT or 9114
+    start port, (err) ->
+        if err
+            console.log "Initialization failed, not starting"
+            console.log err.stack
+            process.exit 1
+else
+    module.exports = start

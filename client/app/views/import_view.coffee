@@ -1,4 +1,4 @@
-View = require '../lib/view'
+BaseView = require '../lib/base_view'
 helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
@@ -7,39 +7,35 @@ Event = require '../models/event'
 EventList = require './import_event_list'
 
 
-module.exports = class ImportView extends View
+module.exports = class ImportView extends BaseView
 
-    el: '#viewContainer'
+    id: 'viewContainer'
 
     events:
         'change #import-file-input': 'onFileChanged'
-        'click button#import-button': 'onImportClicked'
         'click button#confirm-import-button': 'onConfirmImportClicked'
         'click button#cancel-import-button': 'onCancelImportClicked'
 
-    initialize: ->
-
-    template: ->
-        require('./templates/import_view')
+    template: require('./templates/import_view')
 
     afterRender: ->
         @$(".confirmation").hide()
         @$(".results").hide()
-        @alarmList = new AlarmList
+        @alarmList = new AlarmList el: @$ "#import-alarm-list"
         @alarmList.render()
-        @eventList = new EventList
+        @eventList = new EventList el: @$ "#import-event-list"
         @eventList.render()
-        @importButton = @$ 'button#import-button'
+        @uploader = @$ '#import-file-input'
+        @importButton = @$ '#import-button'
         @confirmButton = @$ 'button#confirm-button'
 
-    onFileChanged: (event) ->
-        file = event.target.files[0]
-        @file = file
 
-    onImportClicked: ->
+    onFileChanged: (event) ->
+        file = @uploader[0].files[0]
+        return unless file
         form = new FormData()
-        form.append "file", @file
-        @importButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        form.append "file", file
+        @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @importButton.spin 'tiny'
         $.ajax
             url: "import/ical"
@@ -61,8 +57,9 @@ module.exports = class ImportView extends View
 
 
                 @$(".import-form").fadeOut =>
+                    @resetUploader()
                     @importButton.spin()
-                    @importButton.html 'import your calendar'
+                    @importButton.find('span').html t 'select an icalendar file'
                     @$(".results").slideDown()
                     @$(".confirmation").fadeIn()
 
@@ -71,8 +68,9 @@ module.exports = class ImportView extends View
                 unless msg?
                     msg = 'An error occured while importing your calendar.'
                 alert msg
+                @resetUploader()
                 @importButton.spin()
-                @importButton.html 'import your calendar'
+                @importButton.find('span').html t 'select an icalendar file'
 
     onConfirmImportClicked: ->
         alarms = @alarmList.collection.toArray()
@@ -82,7 +80,7 @@ module.exports = class ImportView extends View
             @$(".confirmation").fadeOut()
             @$(".results").slideUp =>
                 @$(".import-form").fadeIn()
-                @confirmButton.html 'confirm import'
+                @confirmButton.html t 'confirm import'
             @alarmList.collection.reset()
             @eventList.collection.reset()
 
@@ -108,3 +106,7 @@ module.exports = class ImportView extends View
         @$(".confirmation").fadeOut()
         @$(".results").slideUp =>
             @$(".import-form").fadeIn()
+
+    resetUploader: ->
+        @uploader.wrap('<form>').parent('form').trigger('reset')
+        @uploader.unwrap()

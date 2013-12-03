@@ -6,15 +6,18 @@ module.exports = class AlarmCollection extends ScheduleItemsCollection
     model: Alarm
     url: 'alarms'
 
+    asFCEventSource: (start, end, callback) =>
+        eventsInRange = []
+        @each (alarm) ->
+            alarmTime = alarm.getDateObject()
 
-    comparator: (si1, si2) ->
+            if rrule = alarm.getRRuleObject()
+                dates = rrule.between start, end
 
-        d1 = si1.getDateObject()
-        d2 = si2.getDateObject()
+                for date in dates
+                    eventsInRange.push alarm.toFullCalendarEvent date
 
-        if d1.getTime() < d2.getTime()
-            return -1
-        else if d1.getTime() is d2.getTime()
-            return 0
-        else
-            return 1
+            else if alarmTime.isBetween(start, end)
+                eventsInRange.push alarm.toFullCalendarEvent()
+
+        callback eventsInRange

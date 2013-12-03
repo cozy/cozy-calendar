@@ -1,7 +1,6 @@
-CozyCollection = require '../lib/cozy_collection'
+module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
-module.exports = class ScheduleItemsCollection extends CozyCollection
-
+    model: require '../models/scheduleitem'
     comparator: (si1, si2) ->
 
         d1 = si1.getDateObject()

@@ -1,0 +1,33 @@
+if !editionMode
+    ul.nav.nav-tabs
+        li(class= type=='event'?'active':''): a.event= t('event')
+        li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
+
+if type == 'alarm'
+    div
+        input.focused.input-small(type="text", id="input-time", value=time)
+        input.input(type="text", id="input-desc", value=description
+            placeholder=t("alarm description placeholder"))
+        p #{timezone}
+    div
+        button.btn.add= t('Edit')
+
+else if type = 'event'
+
+    div
+        input#input-start.focused.input-mini(type="text", value=start,
+            placeholder=t("From hours:minutes"))
+        span.timeseparator -
+        input#input-end.input-mini(type="text", value=end,
+            placeholder=t("To hours:minutes+days"))
+    div
+        input#input-place.input-small(type="text", value=place,
+            placeholder=t("Place"))
+        input#input-desc.input(type="text", value=description,
+            placeholder=t("Description"))
+
+    div
+        button.btn.add= editionMode ? t('Edit') : t('Create')
+
+        if editionMode
+            a.advanced-link(href='#'+advancedUrl)= t('advanced')
