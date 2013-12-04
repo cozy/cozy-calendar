@@ -46,7 +46,7 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
-        @setElement $('.container .popover')
+        @setElement $('#viewContainer .popover')
         @addButton = @$('button.add').text @getButtonText()
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
