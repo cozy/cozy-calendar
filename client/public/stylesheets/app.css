@@ -8221,6 +8221,8 @@ ul#menu li:first-child {
   box-sizing: border-box;
   margin: 0px 10px 10px 10px;
   border: 1px solid #ddd;
+  max-width: 1200px;
+  margin: auto;
 }
 input[type="date"] {
   width: 150px;
