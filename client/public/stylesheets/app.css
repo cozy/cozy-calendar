@@ -8003,6 +8003,7 @@ select {
   border: 1px solid #34a6ff;
   -webkit-border-radius: 0;
   border-radius: 0;
+  font-family: styled;
 }
 input:hover,
 select:hover {
@@ -8065,6 +8066,28 @@ select:active {
   padding: 20px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+}
+.modal-body {
+  font-family: main;
+}
+.modal-body input,
+.modal-body select {
+  border: 1px solid #34a6ff;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: styled;
+}
+.modal-body input:hover,
+.modal-body select:hover {
+  border: 1px solid #fe8800;
+}
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body input:active,
+.modal-body select:active {
+  border: 1px solid #34a6ff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 [data-state~="default"],
 [data-state~="enabled"] {
@@ -8166,26 +8189,25 @@ ul#menu li a {
 ul#menu li:first-child {
   margin-left: 20px;
 }
-#alarms {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  padding: 20px;
+.info {
+  font-size: 12px;
+  color: #777;
 }
-.addform .tooltip.top .tooltip-arrow {
-  border-top-color: #d33;
+#event-modal {
+  padding: 0;
 }
-.addform .tooltip.bottom .tooltip-arrow {
-  border-bottom-color: #d33;
+#event-modal .modal-header {
+  background: #34a6bb;
 }
-.addform .tooltip.left .tooltip-arrow {
-  border-left-color: #d33;
+#event-modal a.btn.rrule-show {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  padding: 5px;
 }
-.addform .tooltip.right .tooltip-arrow {
-  border-right-color: #d33;
-}
-.addform .tooltip .tooltip-inner {
-  background: #d33;
+#addguest.btn {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  padding: 5px;
 }
 .addform #date-control {
   display: inline-block;
@@ -8442,7 +8464,13 @@ h2 {
   font-family: styled;
 }
 #alarm-list {
-  margin-top: 20px;
+  margin-top: 10px;
+}
+#alarm-list h2 {
+  font-weight: normal;
+}
+#alarm-list div {
+  font-family: main;
 }
 .icon-bell:before,
 .icon-th:before,

@@ -125,20 +125,19 @@ module.exports = class EventModal extends ViewCollection
             success: =>
                 @close()
             error: =>
-                alert('server error');
+                alert('server error')
                 @close()
 
     showRRule: =>
-        @$('#rrule').show()
-        @$('#rrule-short').show()
-        @$('#rrule-short #rrule-action').hide()
-        @$('#rrule-toggle').hide()
         @updateHelp()
+        @$('#rrule-short #rrule-action').hide()
+        @$('#rrule-toggle').fadeOut =>
+            @$('#rrule-short').slideDown =>
+                @$('#rrule').slideDown()
 
     # Recurence
     getRRule: =>
         start = @model.getStartDateObject()
-        console.log start
         RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE,
             RRule.TH, RRule.FR, RRule.SA]
 

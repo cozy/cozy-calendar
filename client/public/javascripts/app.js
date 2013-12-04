@@ -2273,17 +2273,19 @@ window.require.register("views/event_modal", function(exports, require, module) 
     };
 
     EventModal.prototype.showRRule = function() {
-      this.$('#rrule').show();
-      this.$('#rrule-short').show();
+      var _this = this;
+      this.updateHelp();
       this.$('#rrule-short #rrule-action').hide();
-      this.$('#rrule-toggle').hide();
-      return this.updateHelp();
+      return this.$('#rrule-toggle').fadeOut(function() {
+        return _this.$('#rrule-short').slideDown(function() {
+          return _this.$('#rrule').slideDown();
+        });
+      });
     };
 
     EventModal.prototype.getRRule = function() {
       var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
       start = this.model.getStartDateObject();
-      console.log(start);
       RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
       options = {
         dtstart: start,
@@ -3021,16 +3023,16 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/></div></div></div></form><h4>');
   var __val__ = t('recurrence rule')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</h4><p id="rrule-toggle"><a class="rrule-show">');
+  buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
   var __val__ = t('make reccurent')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a></p><p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></span></p><form id="rrule" class="form-inline"><div class="control-group"><label for="rrule-interval" class="control-label">');
+  buf.push('</a></span></p><form id="rrule" class="form-inline"><label for="rrule-interval" class="control-label">');
   var __val__ = t('repeat every')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><input');
+  buf.push('</label><div class="control-group"><input');
   buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true}));
   buf.push('/><select id="rrule-freq"><option');
   buf.push(attrs({ 'value':("NOREPEAT"), 'selected':(freqSelected('NOREPEAT')) }, {"value":true,"selected":true}));
@@ -3057,10 +3059,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('>');
   var __val__ = units[7]
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</option></select></div><div id="rrule-weekdays" class="control-group"><label class="control-label">');
+  buf.push('</option></select></div><label class="control-label">');
   var __val__ = t('repeat on')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><label class="checkbox inline">');
+  buf.push('</label><div id="rrule-weekdays" class="control-group"><label class="checkbox inline">');
   var __val__ = weekDays[0]
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
@@ -3095,10 +3097,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
   buf.push(attrs({ 'type':("checkbox"), 'value':(6), 'checked':(wkdaySelected(6)) }, {"type":true,"value":true,"checked":true}));
-  buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><label>');
-  var __val__ = t('repeat on')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><div class="controls"><label class="checkbox inline"><input');
+  buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><div class="controls"><label class="checkbox inline"><input');
   buf.push(attrs({ 'type':("radio"), 'checked':(yearModeIs('date')), 'name':("rrule-month-option"), 'value':("date") }, {"type":true,"checked":true,"name":true,"value":true}));
   buf.push('/>');
   var __val__ = t('repeat on date')
@@ -3108,10 +3107,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/>');
   var __val__ = t('repeat on weekday')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label></div></div><div class="control-group"><label for="rrule-until">');
+  buf.push('</label></div></div><label for="rrule-until">');
   var __val__ = t('repeat until')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><input');
+  buf.push('</label><div class="control-group"><input');
   buf.push(attrs({ 'id':('rrule-until'), 'type':("date"), 'value':(rrule.until) }, {"type":true,"value":true}));
   buf.push('/><label for="rrule-count">');
   var __val__ = t('or after')
@@ -3129,7 +3128,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/><a id="addguest" class="btn">');
   var __val__ = t('invite')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><div id="guest-info"><i class="icon-question-sign"></i><span>The invitations will be sent after you click "Save Changes"</span></div></div></div></form><div id="guests-list"></div></div><div class="modal-footer"><a id="cancel-btn">');
+  buf.push('</a></div></div><p class="info">The invitations will be sent after you click "Save Changes"</p></form><div id="guests-list"></div></div><div class="modal-footer"><a id="cancel-btn">');
   var __val__ = t("cancel")
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');

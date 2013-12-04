@@ -24,7 +24,7 @@
 
 
     h4= t('recurrence rule')
-    p#rrule-toggle: a.rrule-show= t('make reccurent')
+    p#rrule-toggle: a.btn.rrule-show= t('make reccurent')
     p#rrule-short
         i.icon-arrow-right
         span#rrule-help
@@ -33,8 +33,8 @@
             a.rrule-show= t('Edit')
     form.form-inline#rrule
 
+        label.control-label(for="rrule-interval")= t('repeat every')
         .control-group
-            label.control-label(for="rrule-interval")= t('repeat every')
             input.col-xs2.input-mini#rrule-interval(type="number", value=rrule.interval)
             select#rrule-freq
                 option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
@@ -43,8 +43,8 @@
                 option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= units[6]
                 option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= units[7]
 
+        label.control-label= t('repeat on')
         .control-group#rrule-weekdays
-            label.control-label= t('repeat on')
             label.checkbox.inline= weekDays[0]
                 input(type="checkbox", value=0, checked=wkdaySelected(0))
             label.checkbox.inline= weekDays[1]
@@ -61,7 +61,6 @@
                 input(type="checkbox", value=6, checked=wkdaySelected(6))
 
         .control-group#rrule-monthdays
-            label= t('repeat on')
             .controls
                 label.checkbox.inline
                     input(type="radio", checked=yearModeIs('date'), name="rrule-month-option", value="date")
@@ -70,8 +69,8 @@
                     input(type="radio", checked=yearModeIs('weekdate'), name="rrule-month-option", value="weekdate")
                     = t('repeat on weekday')
 
+        label(for="rrule-until")= t('repeat until')
         .control-group
-            label(for="rrule-until")= t('repeat until')
             input#rrule-until(type="date", value=rrule.until)
             label(for="rrule-count")= t('or after')
             input#rrule-count.input-mini(type="number", value=rrule.count)
@@ -83,9 +82,7 @@
             .controls
                 input#addguest-field(type="text", placeholder=t('enter email'))
                 a.btn#addguest= t('invite')
-                #guest-info
-                    i.icon-question-sign
-                    span The invitations will be sent after you click "Save Changes"
+        p.info The invitations will be sent after you click "Save Changes"
     #guests-list
 
 

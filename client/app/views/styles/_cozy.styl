@@ -20,6 +20,7 @@ input
 select
     border: 1px solid blue
     border-radius: 0
+    font-family: styled
 
 input:hover
 select:hover
@@ -79,3 +80,20 @@ select:active
     padding: 20px
     border-top-left-radius: 5px
     border-top-right-radius: 5px
+
+.modal-body
+    font-family: main
+
+    input
+    select
+        border: 1px solid blue
+        border-radius: 0
+        font-family: styled
+
+        &:hover
+            border: 1px solid orange
+
+        &:focus
+        &:active
+            border: 1px solid blue
+            box-shadow: none
