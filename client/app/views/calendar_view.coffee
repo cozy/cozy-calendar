@@ -56,6 +56,7 @@ module.exports = class CalendarView extends BaseView
                 week:  locale.units[5]
                 day:   locale.units[4]
 
+            ignoreTimezone: true
             timeFormat:
                 '' : '' # do not display times on event
                 'agendaWeek': ''
@@ -111,7 +112,18 @@ module.exports = class CalendarView extends BaseView
     showPopover: (options) ->
         options.container = @cal
         options.parentView = this
-        @popover.close() if @popover
+
+        if @popover
+            @popover.close()
+
+            # click on same case
+            if @popover.options.start.is(options.start) and
+            @popover.options.end.is(options.end) and
+            @popover.options.type is options.type
+                @cal.fullCalendar 'unselect'
+                @popover = null
+                return
+
         @popover = new Popover options
         @popover.render()
 
@@ -132,6 +144,10 @@ module.exports = class CalendarView extends BaseView
             start: startDate
             end: endDate
             target: $(jsEvent.target)
+
+    onPopoverClose: ->
+        @cal.fullCalendar 'unselect'
+        @popover = null
 
     onEventRender: (event, element) ->
         if event.isSaving? and event.isSaving
@@ -160,12 +176,13 @@ module.exports = class CalendarView extends BaseView
             #     alarm.getDateObject().setHours(startRaw.substring(0, 2))
             #     alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
 
-            alarm.getDateObject().advance
+            trigg = alarm.getDateObject().clone().advance
                 days: dayDelta
                 minutes: minuteDelta
 
             alarm.save
-                trigg: alarm.getFormattedDate Alarm.dateFormat
+                trigg: trigg.format Alarm.dateFormat, 'en-en'
+                timezoneHour: false
             ,
                 wait: true
                 success: =>
@@ -185,8 +202,8 @@ module.exports = class CalendarView extends BaseView
                 minutes: minuteDelta
 
             evt.save
-                start: start.format Event.dateFormat
-                end: end.format Event.dateFormat
+                start: start.format Event.dateFormat, 'en-en'
+                end: end.format Event.dateFormat, 'en-en'
             ,
                 wait: true
                 success: =>

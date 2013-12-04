@@ -59,10 +59,10 @@ module.exports = class Router extends Backbone.Router
         unless app[name].length > 0
             collection.fetch
                 success: (collection, response, options) ->
-                    console.log collection
-                    console.log "Fetch: success"
+                    # console.log collection
+                    # console.log "Fetch: success"
                 error: ->
-                    console.log "Fetch: error"
+                    # console.log "Fetch: error"
         else
             collection.reset app[name].toJSON()
 

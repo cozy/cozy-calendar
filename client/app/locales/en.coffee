@@ -38,6 +38,7 @@ module.exports =
     "From hours:minutes"                : "From hours:minutes"
     "To hours:minutes+days"             : "To hours:minutes+days"
     "Description"                       : "Description"
+    "days after"                        : "days after"
     "Alarms"                            : "Alarms"
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
