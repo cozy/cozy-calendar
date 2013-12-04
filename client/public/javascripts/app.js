@@ -3360,10 +3360,7 @@ window.require.register("views/templates/popover_content", function(exports, req
   buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/></div><div class="popover-footer"><button class="btn add">');
-  var __val__ = editionMode ? t('Edit') : t('Create')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</button>');
+  buf.push('/></div><div class="popover-footer">');
   if ( editionMode)
   {
   buf.push('<a');
@@ -3373,7 +3370,10 @@ window.require.register("views/templates/popover_content", function(exports, req
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a>');
   }
-  buf.push('</div>');
+  buf.push('<span>&nbsp;</span><button class="btn add">');
+  var __val__ = editionMode ? t('Edit') : t('Create')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</button></div>');
   }
   }
   return buf.join("");

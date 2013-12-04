@@ -35,7 +35,7 @@ else if type = 'event'
             placeholder=t("Description"))
 
     .popover-footer
-        button.btn.add= editionMode ? t('Edit') : t('Create')
-
         if editionMode
             a.advanced-link(href='#'+advancedUrl)= t('advanced')
+        span &nbsp;
+        button.btn.add= editionMode ? t('Edit') : t('Create')

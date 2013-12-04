@@ -8213,16 +8213,15 @@ ul#menu li:first-child {
   margin-top: 2px !important;
 }
 .main-container {
+  margin: auto;
+  max-width: 1200px;
+  border: 1px solid #ddd;
   background: #fff;
   -webkit-box-shadow: 1px 1px 2px #ccc;
   box-shadow: 1px 1px 2px #ccc;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  margin: 0px 10px 10px 10px;
-  border: 1px solid #ddd;
-  max-width: 1200px;
-  margin: auto;
 }
 input[type="date"] {
   width: 150px;
