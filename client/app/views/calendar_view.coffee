@@ -117,9 +117,10 @@ module.exports = class CalendarView extends BaseView
             @popover.close()
 
             # click on same case
-            if @popover.options.start.is(options.start) and
-            @popover.options.end.is(options.end) and
-            @popover.options.type is options.type
+            if @popover.options.model? and @popover.options.model is options.model or(
+                @popover.options.start?.is(options.start) and
+                @popover.options.end?.is(options.end) and
+                @popover.options.type is options.type)
                 @cal.fullCalendar 'unselect'
                 @popover = null
                 return
