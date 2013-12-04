@@ -85,13 +85,10 @@ module.exports = class CalendarView extends BaseView
         $(window).resize _.debounce @handleWindowResize, 10
 
 
-    handleWindowResize: (initial) => # BLACK MAGICK AT WORK
-        targetHeight = $(window).height() - 2 * $('#menu').outerHeight(true) - 60
-        width = @cal.width() + 40
-        @cal.height targetHeight + 20
-        unless initial is 'initial'
-            @cal.fullCalendar 'option', 'height', targetHeight
-
+    handleWindowResize: (initial) =>
+        diff = 2 * parseInt @cal.css('padding-top')
+        targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff
+        @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
         @cal.height @$('.fc-header').height() + @$('.fc-content').height()
 
 
