@@ -8325,9 +8325,7 @@ input[type="time"] {
 .popover-content a.advanced-link {
   margin-left: 10px;
 }
-.popover-content div {
-  padding: 10px;
-}
+.popover-content div,
 .popover-content ul {
   padding: 10px 10px 0px 10px;
 }
