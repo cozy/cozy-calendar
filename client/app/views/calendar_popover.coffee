@@ -8,9 +8,11 @@ module.exports = class PopOver extends BaseView
 
     events:
         'keyup input': 'onKeyUp'
+        'change select': 'onKeyUp'
+        'change input': 'onKeyUp'
         'click button.add'  : 'onAddClicked'
         'click .remove': 'onRemoveClicked'
-        'click .close' : 'close'
+        'click .close' : 'selfclose'
         'click .event': 'onTabClicked'
         'click .alarm': 'onTabClicked'
 
@@ -22,20 +24,23 @@ module.exports = class PopOver extends BaseView
         else if @model
             @type = if @model instanceof Event then 'event' else 'alarm'
 
-        window.test = this
-
         @target = options.target
         @container = options.container
         @parentView = options.parentView
 
-    close: ->
+    selfclose: () ->
+        @parentView.onPopoverClose?()
+        @close()
+
+    close: () ->
         @target.popover 'destroy'
-        @target.data('popover', null)
+        @target.data('popover', undefined)
         @remove()
 
     render: ->
-        @target.data('popover', null)
         @target.popover(
+            selector: true
+            trigger: 'manual'
             title: require('./templates/popover_title')(title: @getTitle())
             html: true
             placement: @getDirection()
@@ -46,6 +51,10 @@ module.exports = class PopOver extends BaseView
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
         @removeButton.hide() if @model.isNew()
+        @$('input[type="time"]').attr('type', 'text').timepicker
+            template: false
+            minuteStep: 5
+            showMeridian: false
         @$('.focused').focus()
 
     validForm: ->
@@ -81,38 +90,35 @@ module.exports = class PopOver extends BaseView
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
         if @model instanceof Event
-            data.start = @model.getFormattedStartDate('{HH}:{mm}')
-            data.end = @getEndDateWithDiff()
+            endDate = @model.getEndDateObject()
+            startDate = @model.getStartDateObject()
+            unless @model.isOneDay()
+                diff = endDate - startDate
+                diff = Math.round(diff / 1000 / 3600 / 24)
+            data.start = startDate.format '{HH}:{mm}'
+            data.end = endDate.format '{HH}:{mm}'
+            data.diff = diff or 0
+
         else
-            data.time = @model.getDateObject().format '{HH}:{mm}'
+            data.time = @model.get('timezoneHour')
+            # data.time = @model.getDateObject().format '{HH}:{mm}'
+            data.timezones = require('helpers/timezone').timezones
 
         return data
-
-    getEndDateWithDiff: ->
-        return null unless @model instanceof Event
-        endDate = @model.getEndDateObject()
-        startDate = @model.getStartDateObject()
-        unless @model.isOneDay()
-            diff = endDate - @model.getStartDateObject()
-            diff = Math.round(diff / 1000 / 3600 / 24)
-
-        time = @model.getFormattedEndDate('{HH}:{mm}')
-        if diff then "#{time}+#{diff}" else time
 
     makeNewModel: (options) ->
         switch @type
             when 'event' then new Event
-                start: options.start
-                end: options.end
+                start: options.start.format Event.dateFormat, 'en-en'
+                end: options.end.format Event.dateFormat, 'en-en'
                 description: ''
                 place: ''
 
             when 'alarm' then new Alarm
-                trigg: options.start
-                timezone: ''
+                trigg: options.start.format Alarm.dateFormat, 'en-en'
+                timezone: 'Europe/Paris'
                 description: ''
                 action: 'DISPLAY'
-                place: ''
 
             else throw new Error 'wrong type'
 
@@ -149,22 +155,20 @@ module.exports = class PopOver extends BaseView
     getModelAttributes: =>
         if @model instanceof Event
             date = @model.getStartDateObject()
-            startDate = @formatDate date, $('.popover #input-start').val()
-            endDate = @formatDate date, $('.popover #input-end').val()
+            startDate = @formatDate date, @$('#input-start').val()
+            end = @$('#input-end').val() + '+' + @$('#input-diff').val()
+            endDate = @formatDate date, end
             data =
                 start: startDate.format Event.dateFormat, 'en-en'
                 end: endDate.format Event.dateFormat, 'en-en'
-                place: $('.popover #input-place').val()
-                description: $('.popover #input-desc').val()
+                place: @$('#input-place').val()
+                description: @$('#input-desc').val()
 
         else
-            console.log "HERE"
-            date = @model.getDateObject()
-            time = @formatDate date, $('.popover #input-time').val()
-
             data =
-                trigg: time.format Alarm.dateFormat
-                description: $('.popover #input-desc').val()
+                timezone: @$('#input-timezone').val()
+                timezoneHour: @$('#input-time').val()
+                description: @$('#input-desc').val()
 
         return data
 
@@ -179,12 +183,11 @@ module.exports = class PopOver extends BaseView
                 complete: =>
                     @removeButton.spin()
                     @removeButton.css 'width', '14px'
-                    @close()
+                    @selfclose()
 
     onAddClicked: () =>
         @addButton.html '&nbsp;'
         @addButton.spin 'small'
-        console.log "there"
         noError = @model.save @getModelAttributes(),
             wait: true
             success: =>
@@ -195,7 +198,7 @@ module.exports = class PopOver extends BaseView
             complete: =>
                 @addButton.spin()
                 @addButton.html @getButtonText()
-                @close()
+                @selfclose()
 
         unless noError
             console.log @model.validationError

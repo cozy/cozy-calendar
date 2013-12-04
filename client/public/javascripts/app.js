@@ -903,6 +903,7 @@ module.exports = {
   "From hours:minutes": "From hours:minutes",
   "To hours:minutes+days": "To hours:minutes+days",
   "Description": "Description",
+  "days after": "days after",
   "Alarms": "Alarms",
   "Display": "Notification",
   "DISPLAY": "Notification",
@@ -989,11 +990,16 @@ module.exports = {
   "From hours:minutes": "De heures:minutes",
   "To hours:minutes+days": "A heures:minutes+jours",
   "Description": "Description",
+  "days after": "jours",
   "Week": "Semaine",
   "Alarms": "Alarmes",
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
+  "display previous events": "Montrer les évènements précédent",
+  "event": "Evenement",
+  "alarm": "Alarme",
+  "are you sure": "Are you sure",
   "recurrence rule": "Règle de recurrence",
   "make reccurent": "Rendre réccurent",
   "repeat every": "Répéter tous les",
@@ -1494,13 +1500,8 @@ module.exports = Router = (function(_super) {
   Router.prototype.handleFetch = function(collection, name) {
     if (!(app[name].length > 0)) {
       return collection.fetch({
-        success: function(collection, response, options) {
-          console.log(collection);
-          return console.log("Fetch: success");
-        },
-        error: function() {
-          return console.log("Fetch: error");
-        }
+        success: function(collection, response, options) {},
+        error: function() {}
       });
     } else {
       return collection.reset(app[name].toJSON());
@@ -1548,9 +1549,11 @@ module.exports = PopOver = (function(_super) {
 
   PopOver.prototype.events = {
     'keyup input': 'onKeyUp',
+    'change select': 'onKeyUp',
+    'change input': 'onKeyUp',
     'click button.add': 'onAddClicked',
     'click .remove': 'onRemoveClicked',
-    'click .close': 'close',
+    'click .close': 'selfclose',
     'click .event': 'onTabClicked',
     'click .alarm': 'onTabClicked'
   };
@@ -1562,21 +1565,30 @@ module.exports = PopOver = (function(_super) {
     } else if (this.model) {
       this.type = this.model instanceof Event ? 'event' : 'alarm';
     }
-    window.test = this;
     this.target = options.target;
     this.container = options.container;
     return this.parentView = options.parentView;
   };
 
+  PopOver.prototype.selfclose = function() {
+    var _base;
+
+    if (typeof (_base = this.parentView).onPopoverClose === "function") {
+      _base.onPopoverClose();
+    }
+    return this.close();
+  };
+
   PopOver.prototype.close = function() {
     this.target.popover('destroy');
-    this.target.data('popover', null);
+    this.target.data('popover', void 0);
     return this.remove();
   };
 
   PopOver.prototype.render = function() {
-    this.target.data('popover', null);
     this.target.popover({
+      selector: true,
+      trigger: 'manual',
       title: require('./templates/popover_title')({
         title: this.getTitle()
       }),
@@ -1591,6 +1603,11 @@ module.exports = PopOver = (function(_super) {
     if (this.model.isNew()) {
       this.removeButton.hide();
     }
+    this.$('input[type="time"]').attr('type', 'text').timepicker({
+      template: false,
+      minuteStep: 5,
+      showMeridian: false
+    });
     return this.$('.focused').focus();
   };
 
@@ -1638,7 +1655,7 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getRenderData = function() {
-    var data;
+    var data, diff, endDate, startDate;
 
     data = _.extend({
       type: this.type
@@ -1647,50 +1664,37 @@ module.exports = PopOver = (function(_super) {
       advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id
     });
     if (this.model instanceof Event) {
-      data.start = this.model.getFormattedStartDate('{HH}:{mm}');
-      data.end = this.getEndDateWithDiff();
+      endDate = this.model.getEndDateObject();
+      startDate = this.model.getStartDateObject();
+      if (!this.model.isOneDay()) {
+        diff = endDate - startDate;
+        diff = Math.round(diff / 1000 / 3600 / 24);
+      }
+      data.start = startDate.format('{HH}:{mm}');
+      data.end = endDate.format('{HH}:{mm}');
+      data.diff = diff || 0;
     } else {
-      data.time = this.model.getDateObject().format('{HH}:{mm}');
+      data.time = this.model.get('timezoneHour');
+      data.timezones = require('helpers/timezone').timezones;
     }
     return data;
-  };
-
-  PopOver.prototype.getEndDateWithDiff = function() {
-    var diff, endDate, startDate, time;
-
-    if (!(this.model instanceof Event)) {
-      return null;
-    }
-    endDate = this.model.getEndDateObject();
-    startDate = this.model.getStartDateObject();
-    if (!this.model.isOneDay()) {
-      diff = endDate - this.model.getStartDateObject();
-      diff = Math.round(diff / 1000 / 3600 / 24);
-    }
-    time = this.model.getFormattedEndDate('{HH}:{mm}');
-    if (diff) {
-      return "" + time + "+" + diff;
-    } else {
-      return time;
-    }
   };
 
   PopOver.prototype.makeNewModel = function(options) {
     switch (this.type) {
       case 'event':
         return new Event({
-          start: options.start,
-          end: options.end,
+          start: options.start.format(Event.dateFormat, 'en-en'),
+          end: options.end.format(Event.dateFormat, 'en-en'),
           description: '',
           place: ''
         });
       case 'alarm':
         return new Alarm({
-          trigg: options.start,
-          timezone: '',
+          trigg: options.start.format(Alarm.dateFormat, 'en-en'),
+          timezone: 'Europe/Paris',
           description: '',
-          action: 'DISPLAY',
-          place: ''
+          action: 'DISPLAY'
         });
       default:
         throw new Error('wrong type');
@@ -1743,25 +1747,24 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getModelAttributes = function() {
-    var data, date, endDate, startDate, time;
+    var data, date, end, endDate, startDate;
 
     if (this.model instanceof Event) {
       date = this.model.getStartDateObject();
-      startDate = this.formatDate(date, $('.popover #input-start').val());
-      endDate = this.formatDate(date, $('.popover #input-end').val());
+      startDate = this.formatDate(date, this.$('#input-start').val());
+      end = this.$('#input-end').val() + '+' + this.$('#input-diff').val();
+      endDate = this.formatDate(date, end);
       data = {
         start: startDate.format(Event.dateFormat, 'en-en'),
         end: endDate.format(Event.dateFormat, 'en-en'),
-        place: $('.popover #input-place').val(),
-        description: $('.popover #input-desc').val()
+        place: this.$('#input-place').val(),
+        description: this.$('#input-desc').val()
       };
     } else {
-      console.log("HERE");
-      date = this.model.getDateObject();
-      time = this.formatDate(date, $('.popover #input-time').val());
       data = {
-        trigg: time.format(Alarm.dateFormat),
-        description: $('.popover #input-desc').val()
+        timezone: this.$('#input-timezone').val(),
+        timezoneHour: this.$('#input-time').val(),
+        description: this.$('#input-desc').val()
       };
     }
     return data;
@@ -1781,7 +1784,7 @@ module.exports = PopOver = (function(_super) {
         complete: function() {
           _this.removeButton.spin();
           _this.removeButton.css('width', '14px');
-          return _this.close();
+          return _this.selfclose();
         }
       });
     }
@@ -1793,7 +1796,6 @@ module.exports = PopOver = (function(_super) {
 
     this.addButton.html('&nbsp;');
     this.addButton.spin('small');
-    console.log("there");
     noError = this.model.save(this.getModelAttributes(), {
       wait: true,
       success: function() {
@@ -1808,7 +1810,7 @@ module.exports = PopOver = (function(_super) {
       complete: function() {
         _this.addButton.spin();
         _this.addButton.html(_this.getButtonText());
-        return _this.close();
+        return _this.selfclose();
       }
     });
     if (!noError) {
@@ -1902,6 +1904,7 @@ module.exports = CalendarView = (function(_super) {
         week: locale.units[5],
         day: locale.units[4]
       },
+      ignoreTimezone: true,
       timeFormat: {
         '': '',
         'agendaWeek': ''
@@ -1966,6 +1969,11 @@ module.exports = CalendarView = (function(_super) {
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
+      if (this.popover.options.start.is(options.start) && this.popover.options.end.is(options.end)) {
+        this.cal.fullCalendar('unselect');
+        this.popover = null;
+        return;
+      }
     }
     this.popover = new Popover(options);
     return this.popover.render();
@@ -2000,6 +2008,11 @@ module.exports = CalendarView = (function(_super) {
     });
   };
 
+  CalendarView.prototype.onPopoverClose = function() {
+    this.cal.fullCalendar('unselect');
+    return this.popover = null;
+  };
+
   CalendarView.prototype.onEventRender = function(event, element) {
     var spinTarget;
 
@@ -2018,17 +2031,18 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventDrop = function(fcEvent, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
-    var alarm, end, evt, start,
+    var alarm, end, evt, start, trigg,
       _this = this;
 
     if (fcEvent.type === 'alarm') {
       alarm = this.alarmCollection.get(fcEvent.id);
-      alarm.getDateObject().advance({
+      trigg = alarm.getDateObject().clone().advance({
         days: dayDelta,
         minutes: minuteDelta
       });
       return alarm.save({
-        trigg: alarm.getFormattedDate(Alarm.dateFormat)
+        trigg: trigg.format(Alarm.dateFormat, 'en-en'),
+        timezoneHour: false
       }, {
         wait: true,
         success: function() {
@@ -2051,8 +2065,8 @@ module.exports = CalendarView = (function(_super) {
         minutes: minuteDelta
       });
       return evt.save({
-        start: start.format(Event.dateFormat),
-        end: end.format(Event.dateFormat)
+        start: start.format(Event.dateFormat, 'en-en'),
+        end: end.format(Event.dateFormat, 'en-en')
       }, {
         wait: true,
         success: function() {
@@ -3353,7 +3367,9 @@ with (locals || {}) {
 var interp;
 if ( type == 'alarm')
 {
-buf.push('<p>' + escape((interp = time) == null ? '' : interp) + ' (' + escape((interp = timezone) == null ? '' : interp) + ')\n' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
+buf.push('<p><span');
+buf.push(attrs({ 'title':("" + (timezoneHour) + " - " + (timezone) + "") }, {"title":true}));
+buf.push('>' + escape((interp = time) == null ? '' : interp) + '</span> ' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
 }
 else if ( type == 'event')
 {
@@ -3411,10 +3427,42 @@ buf.push('</a></li></ul>');
 if ( type == 'alarm')
 {
 buf.push('<div><input');
-buf.push(attrs({ 'type':("text"), 'id':("input-time"), 'value':(time), "class": ('focused') + ' ' + ('input-small') }, {"type":true,"id":true,"value":true}));
-buf.push('/><input');
-buf.push(attrs({ 'type':("text"), 'id':("input-desc"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input') }, {"type":true,"id":true,"value":true,"placeholder":true}));
-buf.push('/><p>' + escape((interp = timezone) == null ? '' : interp) + '</p></div><div><button class="btn add">');
+buf.push(attrs({ 'id':('input-time'), 'type':("time"), 'value':(time), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true}));
+buf.push('/><select id="input-timezone" class="input">');
+// iterate timezones
+;(function(){
+  if ('number' == typeof timezones.length) {
+
+    for (var $index = 0, $$l = timezones.length; $index < $$l; $index++) {
+      var tz = timezones[$index];
+
+buf.push('<option');
+buf.push(attrs({ 'value':(tz), 'selected':((timezone == tz)) }, {"value":true,"selected":true}));
+buf.push('>');
+var __val__ = tz
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</option>');
+    }
+
+  } else {
+    var $$l = 0;
+    for (var $index in timezones) {
+      $$l++;      var tz = timezones[$index];
+
+buf.push('<option');
+buf.push(attrs({ 'value':(tz), 'selected':((timezone == tz)) }, {"value":true,"selected":true}));
+buf.push('>');
+var __val__ = tz
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</option>');
+    }
+
+  }
+}).call(this);
+
+buf.push('</select><input');
+buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
+buf.push('/></div><div><button class="btn add">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</button></div>');
@@ -3422,10 +3470,15 @@ buf.push('</button></div>');
 else if ( type = 'event')
 {
 buf.push('<div><input');
-buf.push(attrs({ 'id':('input-start'), 'type':("text"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
+buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><span class="timeseparator">-</span><input');
-buf.push(attrs({ 'id':('input-end'), 'type':("text"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div><input');
+buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
+buf.push('/><span class="timeseparator">,</span><input');
+buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
+buf.push('/><span class="timeseparator">');
+var __val__ = t('days after')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</span></div><div><input');
 buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
