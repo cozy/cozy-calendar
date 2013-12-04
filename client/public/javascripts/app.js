@@ -1891,11 +1891,12 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.showPopover = function(options) {
+      var _ref1, _ref2;
       options.container = this.cal;
       options.parentView = this;
       if (this.popover) {
         this.popover.close();
-        if (this.popover.options.start.is(options.start) && this.popover.options.end.is(options.end) && this.popover.options.type === options.type) {
+        if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref1 = this.popover.options.start) != null ? _ref1.is(options.start) : void 0) && ((_ref2 = this.popover.options.end) != null ? _ref2.is(options.end) : void 0) && this.popover.options.type === options.type)) {
           this.cal.fullCalendar('unselect');
           this.popover = null;
           return;
