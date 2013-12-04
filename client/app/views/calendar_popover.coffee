@@ -46,7 +46,7 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
-        @setElement $('.container .popover')
+        @setElement $('#viewContainer .popover')
         @addButton = @$('button.add').text @getButtonText()
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
@@ -97,6 +97,8 @@ module.exports = class PopOver extends BaseView
                 diff = Math.round(diff / 1000 / 3600 / 24)
             data.start = startDate.format '{HH}:{mm}'
             data.end = endDate.format '{HH}:{mm}'
+            data.start = '10:00' if data.start is '00:00'
+            data.end = '18:00' if data.end is '00:00'
             data.diff = diff or 0
 
         else

@@ -11,7 +11,7 @@ if type == 'alarm'
                 option(value=tz, selected=(timezone == tz))= tz
         input#input-desc.input-xlarge(type="text", value=description
             placeholder=t("alarm description placeholder"))
-    div
+    .popover-footer
         button.btn.add= t('Edit')
 
 else if type = 'event'

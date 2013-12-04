@@ -8235,6 +8235,7 @@ ul#menu li:first-child {
   margin: auto;
   max-width: 1200px;
   border: 1px solid #ddd;
+  border-width: 0px 1px;
   background: #fff;
   -webkit-box-shadow: 1px 1px 2px #ccc;
   box-shadow: 1px 1px 2px #ccc;

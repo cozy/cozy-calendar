@@ -1534,7 +1534,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         placement: this.getDirection(),
         content: this.template(this.getRenderData())
       }).popover('show');
-      this.setElement($('.container .popover'));
+      this.setElement($('#viewContainer .popover'));
       this.addButton = this.$('button.add').text(this.getButtonText());
       this.addButton.toggleClass('disabled', this.validForm());
       this.removeButton = this.$('.remove');
@@ -1607,6 +1607,12 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         }
         data.start = startDate.format('{HH}:{mm}');
         data.end = endDate.format('{HH}:{mm}');
+        if (data.start === '00:00') {
+          data.start = '10:00';
+        }
+        if (data.end === '00:00') {
+          data.end = '18:00';
+        }
         data.diff = diff || 0;
       } else {
         data.time = this.model.get('timezoneHour');
@@ -1861,10 +1867,9 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.handleWindowResize = function(initial) {
-      var targetHeight, width;
-      targetHeight = $(window).height() - 2 * $('#menu').outerHeight(true) - 60;
-      width = this.cal.width() + 40;
-      this.cal.height(targetHeight + 20);
+      var diff, targetHeight;
+      diff = 2 * parseInt(this.cal.css('padding-top'));
+      targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff;
       if (initial !== 'initial') {
         this.cal.fullCalendar('option', 'height', targetHeight);
       }
@@ -3340,7 +3345,7 @@ window.require.register("views/templates/popover_content", function(exports, req
 
   buf.push('</select><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/></div><div><button class="btn add">');
+  buf.push('/></div><div class="popover-footer"><button class="btn add">');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button></div>');
