@@ -8306,10 +8306,6 @@ input[type="time"] {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.popover-content #inputStart,
-.popover-content #inputEnd {
-  width: 148px;
-}
 .popover-content a.advanced-link {
   margin-left: 10px;
 }
@@ -8611,12 +8607,6 @@ button.ui-button[data-state="selected"] {
   max-width: none;
   width: 400px;
 }
-.popover #input-start {
-  width: 4em;
-}
-.popover #input-end {
-  width: 5em;
-}
 .popover .timeseparator {
   display: inline-block;
   margin-bottom: 10px;
@@ -8630,6 +8620,14 @@ button.ui-button[data-state="selected"] {
 }
 .popover .popover-title i.remove {
   cursor: pointer;
+}
+.popover .popover-content #input-start,
+.popover .popover-content #input-end,
+.popover .popover-content #input-time {
+  width: 3em;
+}
+.popover .popover-content #input-diff {
+  width: 35px;
 }
 .popover .popover-content button {
   margin-left: 5px;
