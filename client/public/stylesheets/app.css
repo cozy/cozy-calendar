@@ -7984,9 +7984,6 @@ a:hover,
 a:visited:hover {
   text-decoration: underline;
 }
-p {
-  padding: 20px 20px 10px 20px;
-}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8264,8 +8261,7 @@ input[type="time"] {
   padding-bottom: 0;
 }
 .showbefore {
-  float: left;
-  cursor: pointer;
+  margin: 0px 20px 20px 20px;
 }
 .affix {
   position: fixed;
@@ -8619,9 +8615,6 @@ a:visited {
 a:hover,
 a:visited:hover {
   text-decoration: underline;
-}
-p {
-  padding: 20px 20px 10px 20px;
 }
 /* Styles for the calendar view */
 .popover {

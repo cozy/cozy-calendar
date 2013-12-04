@@ -3221,10 +3221,10 @@ window.require.register("views/templates/list_view", function(exports, require, 
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><p><a class="btn showbefore">');
+  buf.push('<div class="container"><div id="alarm-list" class="well"></div><a class="btn showbefore">');
   var __val__ = t('display previous events')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></p><div id="alarm-list" class="well"></div></div>');
+  buf.push('</a></div>');
   }
   return buf.join("");
   };
