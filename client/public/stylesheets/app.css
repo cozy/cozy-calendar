@@ -8375,6 +8375,10 @@ input[type="time"] {
   background: #ffc47f;
   color: #333;
 }
+.popover-content .nav-tabs li.active a:hover {
+  background: #fff;
+  color: #333;
+}
 .popover-footer {
   background: #f5f5f5;
 }

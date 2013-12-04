@@ -30,14 +30,21 @@ Alarm::timezoned = (timezone) ->
 # take an attributes object
 # set the trigg to UTC
 # store the TZed trigg in timezoneHour
-Alarm.toUTC = (attrs) ->
-    if attrs.timezoneHour # popover
-        trigg = new time.Date(attrs.trigg, User.timezone)
-        trigg.setTimezone(attrs.timezone)
-        unless trigg.toString().slice(16, 21) is attrs.timezoneHour
-            [hours, minutes] = attrs.timezoneHour.split(':')
-            trigg.setHours(hours)
-            trigg.setMinutes(minutes)
+# @TODO : handling TZ clientside would be better
+Alarm.toUTC = (attrs, timezone) ->
+    timezone ?= User.timezone
+
+    if attrs.timezoneHour # popover save
+        if attrs.id
+            trigg = new time.Date attrs.trigg, User.timezone
+            trigg.setTimezone attrs.timezone
+        else
+            trigg = new time.Date attrs.trigg, attrs.timezone
+
+        [hours, minutes] = attrs.timezoneHour.split(':')
+        trigg.setHours(hours)
+        trigg.setMinutes(minutes)
+
     else # D&D in the interface
         trigg = new time.Date(attrs.trigg, User.timezone)
         trigg.setTimezone(attrs.timezone)

@@ -91,9 +91,10 @@ describe "Alarms management", ->
             it "When I post an alarm with America/Chicago as timezone", (done) ->
                 @alarm =
                     action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
-                    description: 'Something to remind'
+                    trigg: "Tue Apr 23 2013 00:00:00"
+                    timezoneHour: "14:25"
                     timezone: 'America/Chicago'
+                    description: 'Something to remind'
 
                 client.post "alarms/", @alarm, (error, response, body) =>
 
@@ -106,7 +107,7 @@ describe "Alarms management", ->
                     body.should.have.property 'action', @alarm.action
                     body.should.have.property 'trigg'
                     body.should.have.property 'timezone', 'America/Chicago'
-                    trigg = new time.Date(@alarm.trigg, 'America/Chicago')
+                    trigg = new time.Date("Tue Apr 23 2013 14:25:00", 'America/Chicago')
                     trigg.setTimezone 'Europe/Paris'
                     body.trigg.should.equal trigg.toString().slice(0, 24)
                     body.should.have.property 'description', @alarm.description
@@ -118,7 +119,7 @@ describe "Alarms management", ->
                     should.not.exist err
                     should.exist alarm
                     alarm.should.have.property 'action', @alarm.action
-                    exepectedDate = new time.Date(@alarm.trigg, 'America/Chicago')
+                    exepectedDate = new time.Date("Tue Apr 23 2013 14:25:00", 'America/Chicago')
                     exepectedDate.setTimezone('UTC')
                     alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
                     alarm.should.have.property 'description', @alarm.description
@@ -203,6 +204,7 @@ describe "Alarms management", ->
 
                 @alarm.action = 'EMAIL'
                 @alarm.trigg = "Tue Apr 23 2013 14:30:00"
+                @alarm.timezoneHour = "14:30"
                 @alarm.description = 'Something updated to remind'
                 @alarm.timezone = 'Africa/Abidjan'
 

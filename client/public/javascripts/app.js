@@ -943,7 +943,7 @@ window.require.register("locales/fr", function(exports, require, module) {
     "From hours:minutes": "De heures:minutes",
     "To hours:minutes+days": "A heures:minutes+jours",
     "Description": "Description",
-    "days after": "jours",
+    "days after": "jours plus tard",
     "Week": "Semaine",
     "Alarms": "Alarmes",
     "Display": "Notification",
@@ -1895,7 +1895,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       options.parentView = this;
       if (this.popover) {
         this.popover.close();
-        if (this.popover.options.start.is(options.start) && this.popover.options.end.is(options.end)) {
+        if (this.popover.options.start.is(options.start) && this.popover.options.end.is(options.end) && this.popover.options.type === options.type) {
           this.cal.fullCalendar('unselect');
           this.popover = null;
           return;
