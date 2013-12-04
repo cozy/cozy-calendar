@@ -2,6 +2,7 @@
 @import 'nib'
 
 @import '_base'
+@import '_cozy'
 @import '_ui'
 
 // Import your styles here
@@ -12,14 +13,18 @@
 
 ul#menu
   list-style-type: none
-  text-align: right
+  text-align: left
 
   li
     display: inline-block
-    margin: 0 5px
+    margin: 10px 3px 0 3px
 
     a
       color: #fff
+      border-radius: 4px
+
+  li:first-child
+      margin-left: 20px
 
 #alarms
   box-sizing: border-box
@@ -59,6 +64,13 @@ ul#menu
             margin-top: 2px !important
 
 
+.main-container
+    background: white
+    box-shadow: 1px 1px 2px #CCC
+    box-sizing: border-box
+    margin: 0px 10px 10px 10px
+    border: 1px solid #DDD
+
 input[type="date"]
   width: 150px
 input[type="time"]
@@ -83,6 +95,7 @@ input[type="time"]
 
     p
       line-height: 20px
+
       i
         margin: 3px 5px
         display: none
@@ -111,11 +124,12 @@ input[type="time"]
 .well
     border-radius: 0
     background: white
-    box-shadow: 1px 1px 2px #DDDDDD
+    box-shadow: none
+    border: 0
 
 
 .btn
-    border: 1px solid blue
+    border: 0
     background: blue
     color: white
     box-shadow: none
@@ -123,6 +137,7 @@ input[type="time"]
     border-radius: 0
     font-family: main
     font-weight: bold
+    border-radius: 4px
 
 .btn:hover
     background: orange
@@ -130,9 +145,12 @@ input[type="time"]
     border-color: orange
     text-shadow: none
 
+.popover
+    padding: 0
+
 .popover-title
     color: white
-    background: grey
+    background-color: bluegreen
     border: 0
 
     .close
@@ -140,14 +158,65 @@ input[type="time"]
         opacity: 0.7
 
 .popover-content
-    input
-        margin-left: 5px
-        border 1px solid transparent
-        box-shadow none
+    font-family: styled
 
     a.advanced-link
         margin-left 10px
 
+    padding: 0
+
+    div
+        padding: 10px
+
+    ul
+        padding: 10px 10px 0px 10px
+
+    div.popover-footer
+        text-align: right
+        padding: 5px
+        border-bottom-left-radius: 5px
+        border-bottom-right-radius: 5px
+
+    input
+    select
+        font-family: styled
+        margin-left: 5px
+        border: 1px solid blue
+        border-radius: 0
+        box-shadow: 0
+        border: 1px solid transparent
+
+    #input-start
+    #input-end
+    #input-diff
+        border: 1px solid transparent
+
+    #input-start:focus
+    #input-end:focus
+    #input-diff:focus
+        border: 1px solid blue
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+
+    input:active
+    select:active
+    input:focus
+    select:focus
+        box-shadow: none
+
+    .nav-tabs
+        li
+            a
+                font-size: 16px
+                cursor: pointer
+            a:hover
+                background: lightorange
+                color: #333
+
+.popover-footer
+    background: #F5F5F5
 
 // .popover-content
 #add-alarm
@@ -227,6 +296,8 @@ h2
 
 .active.btn
     background: blue - 20%
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+    cursor: default
 
 #import-form
     margin-top: 20px
@@ -263,24 +334,20 @@ h2
             margin: 0
             sharefont-weight: 10px
 
-@media(max-width: 1000px)
+body
+    padding: 0
 
+.container
+    display: block
+    width: 100%
+    margin: 0
+    padding: 0
+    box-sizing: border-box
+
+@media(max-width: 1000px)
     body
         padding: 0
 
-    #viewContainer
-        padding: 0
-
-        .container:before
-        .container:after
-            display: block
-
-        .container
-            display: block
-            width: 100%
-            margin: 0
-            padding: 0
-            box-sizing: border-box
 
     #alarms
         width: 100%
@@ -291,6 +358,14 @@ h2
         .fc-header-title
             h2
                 font-size: 16px
+
+    #viewContainer
+        padding: 0
+
+        .container:before
+        .container:after
+            display: block
+
 
     #input-time
     #input-timezone

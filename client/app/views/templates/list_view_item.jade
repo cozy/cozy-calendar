@@ -2,10 +2,8 @@ if type == 'alarm'
     p
         span(title="#{timezoneHour} - #{timezone}") #{time}
         |  #{description} (#{t(action)})
-        i.icon-pencil
         i.icon-trash
 else if type == 'event'
     p #{start} - #{end}
         | #{description}
-        i.icon-pencil
         i.icon-trash

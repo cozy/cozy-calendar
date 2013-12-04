@@ -28,7 +28,6 @@ exports.isTimePartValid = (date) ->
 
 
 exports.icalToISO8601 = (icalDate) ->
-
     date = icalDate.split('T')
 
     year = date[0].slice 0, 4
@@ -49,5 +48,3 @@ exports.isEvent = (start, end) ->
         return false
     else
         return true
-
-

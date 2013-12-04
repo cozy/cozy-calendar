@@ -27,7 +27,8 @@ module.exports =
 
         @router = new Router()
         @menu = new Menu().render()
-        @menu.$el.appendTo 'body'
+        $("body").append '<div class="main-container"></div>'
+        @menu.$el.appendTo '.main-container'
         @alarms = new AlarmCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()

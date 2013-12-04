@@ -1,0 +1,81 @@
+orange = #fe8800
+blue = #34A6FF
+bluegreen = #34A6BB
+
+@font-face
+    font-family: styled
+    src: url('/fonts/maven-pro-light-300.otf');
+
+@font-face
+    font-family: main
+    src: url('/fonts/signika-regular.ttf');
+
+a
+    color: blue
+
+a:hover
+    color: orange
+
+input
+select
+    border: 1px solid blue
+    border-radius: 0
+
+input:hover
+select:hover
+    border: 1px solid orange
+
+input:active
+select:active
+    box-shadow: none
+
+
+.button
+    border: 0
+    background: blue
+    color: white
+    box-shadow: none
+    text-shadow: none
+    border-radius: 0
+    font-family: main
+    font-weight: bold
+    padding: 10px
+    cursor: pointer
+
+.button:hover
+    background: orange
+    border: 0
+    color: white
+    text-decoration: none
+
+.button:active
+    background: orange - 3%
+    border: 0
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+    color: white
+
+.button.disabled
+.button.disabled:hover
+.button.disabled:active
+.button.disabled:focus
+    background-color: grey
+    padding: 10px
+    cursor: default
+    text-decoration: none
+
+
+.button.toggled
+    background-color: blue - 20%
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+
+.minor-button
+    padding: 10px
+
+.modal-header
+    background-color: bluegreen
+    color: white
+    font-family: styled
+    font-size: 26px
+    padding: 20px
+    border-top-left-radius: 5px
+    border-top-right-radius: 5px

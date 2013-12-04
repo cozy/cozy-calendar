@@ -104,7 +104,8 @@ window.require.register("application", function(exports, require, module) {
       ContactCollection = require('collections/contacts');
       this.router = new Router();
       this.menu = new Menu().render();
-      this.menu.$el.appendTo('body');
+      $("body").append('<div class="main-container"></div>');
+      this.menu.$el.appendTo('.main-container');
       this.alarms = new AlarmCollection();
       this.events = new EventCollection();
       this.contacts = new ContactCollection();
@@ -1451,7 +1452,7 @@ window.require.register("router", function(exports, require, module) {
         this.mainView.remove();
       }
       this.mainView = view;
-      $('body').append(this.mainView.$el);
+      $('.main-container').append(this.mainView.$el);
       return this.mainView.render();
     };
 
@@ -2982,7 +2983,7 @@ window.require.register("views/templates/calendarview", function(exports, requir
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><div id="alarms" class="well"></div></div>');
+  buf.push('<div id="alarms" class="well"></div>');
   }
   return buf.join("");
   };
@@ -3219,10 +3220,10 @@ window.require.register("views/templates/list_view", function(exports, require, 
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><a class="showbefore">');
+  buf.push('<div class="container"><p><a class="btn showbefore">');
   var __val__ = t('display previous events')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a><div id="alarm-list" class="well"></div></div>');
+  buf.push('</a></p><div id="alarm-list" class="well"></div></div>');
   }
   return buf.join("");
   };
@@ -3248,11 +3249,11 @@ window.require.register("views/templates/list_view_item", function(exports, requ
   {
   buf.push('<p><span');
   buf.push(attrs({ 'title':("" + (timezoneHour) + " - " + (timezone) + "") }, {"title":true}));
-  buf.push('>' + escape((interp = time) == null ? '' : interp) + '</span> ' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
+  buf.push('>' + escape((interp = time) == null ? '' : interp) + '</span> ' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-trash"></i></p>');
   }
   else if ( type == 'event')
   {
-  buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
+  buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-trash"></i></p>');
   }
   }
   return buf.join("");
@@ -3264,17 +3265,17 @@ window.require.register("views/templates/menu", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<li><a href="#list" class="btn"><i class="icon-list icon-white"></i><span>');
-  var __val__ = t('List')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
+  buf.push('<li><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
   var __val__ = t('Calendar')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
-  var __val__ = t('Export')
+  buf.push('</span></a></li><li><a href="#list" class="btn"><i class="icon-list icon-white"></i><span>');
+  var __val__ = t('List')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
+  buf.push('</span></a></li><li><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
   var __val__ = t('Import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</span></a></li><li><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
+  var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></a></li>');
   }
@@ -3346,20 +3347,20 @@ window.require.register("views/templates/popover_content", function(exports, req
   }
   else if ( type = 'event')
   {
-  buf.push('<div><input');
+  buf.push('<div><span class="timeseparator">&nbsp;From</span><input');
   buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/><span class="timeseparator">-</span><input');
+  buf.push('/><span class="timeseparator">&nbsp;to</span><input');
   buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/><span class="timeseparator">,</span><input');
+  buf.push('/><span class="timeseparator">&nbsp;+</span><input');
   buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><span class="timeseparator">');
-  var __val__ = t('days after')
+  var __val__ = t('&nbsp;days')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></div><div><input');
   buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/></div><div><button class="btn add">');
+  buf.push('/></div><div class="popover-footer"><button class="btn add">');
   var __val__ = editionMode ? t('Edit') : t('Create')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</button>');
