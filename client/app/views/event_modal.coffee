@@ -1,4 +1,5 @@
 ViewCollection = require 'lib/view_collection'
+Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
 
@@ -109,19 +110,20 @@ module.exports = class EventModal extends ViewCollection
 
     save: =>
         return if @$('confirm-btn').hasClass 'disabled'
-        @model.set
+        data =
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
-            start: Date.create(@$('#basic-start').val()).format Event.dateFormat
-            end: Date.create(@$('#basic-end').val()).format Event.dateFormat
+            start: Date.create(@$('#basic-start').val()).format Event.dateFormat, 'en'
+            end: Date.create(@$('#basic-end').val()).format Event.dateFormat, 'en'
 
         if @$('#rrule-help').is ':visible'
-            @model.set rrule: @getRRule().toString()
+            data.rrule = @getRRule().toString()
         else
-            @model.set 'rrule', ''
+            data.rrule = ''
 
 
-        @model.save {},
+        @model.save data,
+            wait: true
             success: =>
                 @close()
             error: =>
