@@ -4,7 +4,7 @@ if !editionMode
         li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
 
 if type == 'alarm'
-    div
+    .line
         input#input-time.focused.input-mini(type="time", value=time)
         select#input-timezone.input
             each tz in timezones

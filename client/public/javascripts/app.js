@@ -3361,7 +3361,7 @@ window.require.register("views/templates/popover_content", function(exports, req
   }
   if ( type == 'alarm')
   {
-  buf.push('<div><input');
+  buf.push('<div class="line"><input');
   buf.push(attrs({ 'id':('input-time'), 'type':("time"), 'value':(time), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true}));
   buf.push('/><select id="input-timezone" class="input">');
   // iterate timezones

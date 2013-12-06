@@ -8217,6 +8217,22 @@ a:hover,
 a:visited:hover {
   text-decoration: underline;
 }
+body.modal-open,
+.modal-open .navbar-fixed-top,
+.modal-open .navbar-fixed-bottom {
+  margin-right: 0;
+}
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+a:focus,
+.btn:focus {
+  outline: 0px !important;
+  -webkit-appearance: none;
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8886,6 +8902,22 @@ a:visited {
 a:hover,
 a:visited:hover {
   text-decoration: underline;
+}
+body.modal-open,
+.modal-open .navbar-fixed-top,
+.modal-open .navbar-fixed-bottom {
+  margin-right: 0;
+}
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+a:focus,
+.btn:focus {
+  outline: 0px !important;
+  -webkit-appearance: none;
 }
 /* Styles for the calendar view */
 .popover {
