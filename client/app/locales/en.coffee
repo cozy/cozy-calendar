@@ -87,6 +87,9 @@ module.exports =
     "change"                            : "Change"
     "save changes"                      : "Save changes"
     "guests"                            : "Guests"
+    "invite-info"                       : """
+        The invitations will be sent after you click "Save Changes"
+    """
 
 # ERRORS
     "no description"                    : "A title must be set."

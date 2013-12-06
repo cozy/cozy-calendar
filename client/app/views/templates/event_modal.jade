@@ -6,7 +6,7 @@
         .row-fluid
             .control-group.span12
                 label.control-label(for="basic-summary")= t('summary')
-                .controls: input.span12#basic-summary(type="text", value=description)
+                .controls: input.span12#basic-summary(type="text", value=summary)
 
         .row-fluid
             .control-group.span12
@@ -27,6 +27,10 @@
                     input#basic-end(type="datetime-local", value=end)
                     span.add-on
                         i.icon.icon-calendar
+        .row-fluid
+            .control-group.span12
+                label.control-label(for="basic-description")= t('description')
+                .controls: textarea#basic-description.span12= description
 
 
 
@@ -83,14 +87,16 @@
             input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
             label(for="rrule-count")=t('occurences')
 
-    h4= t('guests')
-    form.form-inline#guests
-        .control-group
-            .controls
-                input#addguest-field(type="text", placeholder=t('enter email'))
-                a.btn#addguest= t('invite')
-        p.info The invitations will be sent after you click "Save Changes"
-    #guests-list
+
+    #guests-block
+        h4= t('guests')
+        form.form-inline#guests
+            .control-group
+                .controls
+                    input#addguest-field(type="text", placeholder=t('enter email'))
+                    a.btn#addguest= t('invite')
+            p.info= t('invite-info')
+        #guests-list
 
 
 .modal-footer

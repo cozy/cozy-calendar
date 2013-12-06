@@ -93,6 +93,10 @@ module.exports =
     "save changes"                      : "Enregistrer"
     "guests"                            : "Invités"
     "enter email"                       : "Entrer l'addresse email"
+    "invite-info"                       : """
+        Les invitations seront envoyés dès que vous cliquerez sur
+        "Enregistrer"
+    """
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
