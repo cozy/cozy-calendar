@@ -16,11 +16,18 @@
         .row-fluid
             .control-group.span6
                 label.control-label(for="basic-start")= t('start')
-                .controls: input#basic-start(type="datetime-local", value=start)
+                .controls.input-append.date
+                    input#basic-start(type="datetime-local", value=start)
+                    span.add-on
+                        i.icon.icon-calendar
 
             .control-group.span6
                 label.control-label(for="basic-end")= t('end')
-                .controls: input#basic-end(type="datetime-local", value=end)
+                .controls.input-append.date
+                    input#basic-end(type="datetime-local", value=end)
+                    span.add-on
+                        i.icon.icon-calendar
+
 
 
     h4= t('recurrence rule')
@@ -35,7 +42,7 @@
 
         label.control-label(for="rrule-interval")= t('repeat every')
         .control-group
-            input.col-xs2.input-mini#rrule-interval(type="number", value=rrule.interval)
+            input.col-xs2.input-mini#rrule-interval(type="number", min=1, value=rrule.interval)
             select#rrule-freq
                 option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
                 option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= units[4]
@@ -45,8 +52,6 @@
 
         label.control-label= t('repeat on')
         .control-group#rrule-weekdays
-            label.checkbox.inline= weekDays[0]
-                input(type="checkbox", value=0, checked=wkdaySelected(0))
             label.checkbox.inline= weekDays[1]
                 input(type="checkbox", value=1, checked=wkdaySelected(1))
             label.checkbox.inline= weekDays[2]
@@ -59,6 +64,8 @@
                 input(type="checkbox", value=5, checked=wkdaySelected(5))
             label.checkbox.inline= weekDays[6]
                 input(type="checkbox", value=6, checked=wkdaySelected(6))
+            label.checkbox.inline= weekDays[0]
+                input(type="checkbox", value=0, checked=wkdaySelected(0))
 
         .control-group#rrule-monthdays
             .controls
@@ -73,7 +80,7 @@
         .control-group
             input#rrule-until(type="date", value=rrule.until)
             label(for="rrule-count")= t('or after')
-            input#rrule-count.input-mini(type="number", value=rrule.count)
+            input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
             label(for="rrule-count")=t('occurences')
 
     h4= t('guests')
