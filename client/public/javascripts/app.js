@@ -3163,7 +3163,18 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('</label><div class="controls"><textarea id="basic-description" class="span12">');
   var __val__ = description
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</textarea></div></div></div></form><h4>');
+  buf.push('</textarea></div></div></div></form><div id="guests-block"><h4>');
+  var __val__ = t('guests')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
+  buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
+  buf.push('/><a id="addguest" class="btn">');
+  var __val__ = t('invite')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</a></div></div><p class="info">');
+  var __val__ = t('invite-info')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p></form><div id="guests-list"></div><h4>');
   var __val__ = t('recurrence rule')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
@@ -3172,10 +3183,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('</a></p><p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></span></p><form id="rrule" class="form-inline"><div for="rrule-interval" class="control-label">');
+  buf.push('</a></span></p><form id="rrule" class="form-inline"><label for="rrule-interval" class="control-label">');
   var __val__ = t('repeat every')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</div><div class="control-group"><input');
+  buf.push('</label><div class="control-group"><input');
   buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'min':(1), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"min":true,"value":true}));
   buf.push('/><select id="rrule-freq"><option');
   buf.push(attrs({ 'value':("NOREPEAT"), 'selected':(freqSelected('NOREPEAT')) }, {"value":true,"selected":true}));
@@ -3202,10 +3213,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('>');
   var __val__ = units[7]
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</option></select></div><div id="rrule-weekdays"><div class="control-label">');
+  buf.push('</option></select></div><div id="rrule-weekdays"><label class="control-label">');
   var __val__ = t('repeat on')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</div><div class="control-group"><label class="checkbox inline">');
+  buf.push('</label><div class="control-group"><label class="checkbox inline">');
   var __val__ = weekDays[1]
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
@@ -3263,18 +3274,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/><label for="rrule-count">');
   var __val__ = t('occurences')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label></div></form><div id="guests-block"><h4>');
-  var __val__ = t('guests')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
-  buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
-  buf.push('/><a id="addguest" class="btn">');
-  var __val__ = t('invite')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></div></div><p class="info">');
-  var __val__ = t('invite-info')
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</p></form><div id="guests-list"></div></div></div><div class="modal-footer"><a id="cancel-btn">');
+  buf.push('</label></div></form></div></div><div class="modal-footer"><a id="cancel-btn">');
   var __val__ = t("cancel")
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');
