@@ -491,7 +491,21 @@ window.require.register("initialize", function(exports, require, module) {
   app = require('application');
 
   $(function() {
+    var locale;
     require('lib/app_helpers');
+    locale = Date.getLocale(window.locale);
+    $.fn.datetimepicker.dates['en'] = {
+      days: locale.weekdays.slice(0, 7),
+      daysShort: locale.weekdays.slice(7, 15),
+      daysMin: locale.weekdays.slice(7, 15),
+      months: locale.full_month.split('|').slice(1, 13),
+      monthsShort: locale.full_month.split('|').slice(13, 26),
+      today: locale.day.split('|')[1],
+      suffix: [],
+      meridiem: locale.ampm,
+      weekStart: 1,
+      format: "dd/mm/yyyy"
+    };
     app.initialize();
     return $.fn.spin = function(opts, color) {
       var presets;
@@ -862,6 +876,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "Display": "Notification",
     "DISPLAY": "Notification",
     "EMAIL": "E-mail",
+    "advanced": "More details",
     "recurrence rule": "Recurrence rules",
     "make reccurent": "Make recurrent",
     "repeat every": "Repeat every",
@@ -887,6 +902,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "on the": "on the",
     "th": "th",
     "nd": "nd",
+    "rd": "rd",
     "st": "st",
     "last": "last",
     "and": "and",
@@ -952,7 +968,8 @@ window.require.register("locales/fr", function(exports, require, module) {
     "display previous events": "Montrer les évènements précédent",
     "event": "Evenement",
     "alarm": "Alarme",
-    "are you sure": "Are you sure",
+    "are you sure": "Etes-vous sur ?",
+    "advanced": "Détails",
     "recurrence rule": "Règle de recurrence",
     "make reccurent": "Rendre réccurent",
     "repeat every": "Répéter tous les",
@@ -978,6 +995,7 @@ window.require.register("locales/fr", function(exports, require, module) {
     "on the": "le",
     "th": "ème",
     "nd": "ème",
+    "rd": "ème",
     "st": "er",
     "last": "dernier",
     "and": "et",
@@ -1490,7 +1508,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
       'keyup input': 'onKeyUp',
       'change select': 'onKeyUp',
       'change input': 'onKeyUp',
-      'click button.add': 'onAddClicked',
+      'click .add': 'onAddClicked',
       'click .remove': 'onRemoveClicked',
       'click .close': 'selfclose',
       'click .event': 'onTabClicked',
@@ -1535,7 +1553,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         content: this.template(this.getRenderData())
       }).popover('show');
       this.setElement($('#viewContainer .popover'));
-      this.addButton = this.$('button.add').text(this.getButtonText());
+      this.addButton = this.$('.btn.add').text(this.getButtonText());
       this.addButton.toggleClass('disabled', this.validForm());
       this.removeButton = this.$('.remove');
       if (this.model.isNew()) {
@@ -1730,7 +1748,10 @@ window.require.register("views/calendar_popover", function(exports, require, mod
     PopOver.prototype.onAddClicked = function() {
       var noError,
         _this = this;
-      this.addButton.html('&nbsp;');
+      if (this.$('.btn.add').hasClass('disabled')) {
+        return;
+      }
+      this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
       this.addButton.spin('small');
       noError = this.model.save(this.getModelAttributes(), {
         wait: true,
@@ -1743,7 +1764,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
           return alert('server error occured');
         },
         complete: function() {
-          _this.addButton.spin();
+          _this.addButton.spin(false);
           _this.addButton.html(_this.getButtonText());
           return _this.selfclose();
         }
@@ -1816,6 +1837,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       var locale;
       locale = Date.getLocale(app.locale);
       this.cal = this.$('#alarms');
+      this.view = this.options.view;
       this.cal.fullCalendar({
         header: {
           left: 'prev,next today',
@@ -1826,7 +1848,7 @@ window.require.register("views/calendar_view", function(exports, require, module
         firstDay: 1,
         weekMode: 'liquid',
         height: this.handleWindowResize('initial'),
-        defaultView: this.options.view,
+        defaultView: this.view,
         viewDisplay: this.onChangeView,
         monthNames: locale.full_month.split('|').slice(1, 13),
         monthNamesShort: locale.full_month.split('|').slice(13, 26),
@@ -1864,6 +1886,14 @@ window.require.register("views/calendar_view", function(exports, require, module
       this.cal.fullCalendar('addEventSource', this.alarmCollection.asFCEventSource);
       this.handleWindowResize();
       return $(window).resize(_.debounce(this.handleWindowResize, 10));
+    };
+
+    CalendarView.prototype.remove = function() {
+      var _ref1;
+      if ((_ref1 = this.popover) != null) {
+        _ref1.close();
+      }
+      return CalendarView.__super__.remove.apply(this, arguments);
     };
 
     CalendarView.prototype.handleWindowResize = function(initial) {
@@ -1912,7 +1942,10 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.onChangeView = function(view) {
-      switch (view.name) {
+      if (this.view === view.name) {
+        return;
+      }
+      switch (this.view = view.name) {
         case 'month':
           app.router.navigate('calendar');
           break;
@@ -2106,7 +2139,7 @@ window.require.register("views/event_modal", function(exports, require, module) 
 
     EventModal.prototype.className = 'modal fade';
 
-    EventModal.prototype.inputDateTimeFormat = '{year}-{MM}-{dd}T{hh}:{mm}:{ss}';
+    EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {hh}:{mm}';
 
     EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
@@ -2129,6 +2162,7 @@ window.require.register("views/event_modal", function(exports, require, module) 
         'click  .close': 'close',
         'click  .rrule-show': 'showRRule',
         'change #rrule': 'updateHelp',
+        'changeDate #rrule-until': 'toggleCountUntil',
         'input  #rrule-until': 'toggleCountUntil',
         'change #rrule-count': 'toggleCountUntil',
         'click #addguest': function() {
@@ -2148,6 +2182,20 @@ window.require.register("views/event_modal", function(exports, require, module) 
         this.$('#rrule-short').hide();
       }
       this.addGuestField = this.configureGuestTypeahead();
+      this.startField = this.$('#basic-start').attr('type', 'text');
+      this.startField.parent().datetimepicker({
+        format: 'dd/mm/yyyy hh:ii',
+        pickerPosition: 'bottom-left'
+      });
+      this.endField = this.$('#basic-end').attr('type', 'text');
+      this.endField.parent().datetimepicker({
+        format: 'dd/mm/yyyy hh:ii',
+        pickerPosition: 'bottom-left'
+      });
+      this.$('#rrule-until').attr('type', 'text').datetimepicker({
+        format: 'dd/mm/yyyy',
+        minView: 2
+      }).on('changeDate', this.updateHelp);
       return this.$el.modal('show');
     };
 
@@ -2259,8 +2307,8 @@ window.require.register("views/event_modal", function(exports, require, module) 
       data = {
         description: this.$('#basic-summary').val(),
         place: this.$('#basic-place').val(),
-        start: Date.create(this.$('#basic-start').val()).format(Event.dateFormat, 'en'),
-        end: Date.create(this.$('#basic-end').val()).format(Event.dateFormat, 'en')
+        start: Date.create(this.startField.val()).format(Event.dateFormat, 'en'),
+        end: Date.create(this.endField.val()).format(Event.dateFormat, 'en')
       };
       if (this.$('#rrule-help').is(':visible')) {
         data.rrule = this.getRRule().toString();
@@ -2332,10 +2380,11 @@ window.require.register("views/event_modal", function(exports, require, module) 
 
     EventModal.prototype.toggleCountUntil = function(event) {
       if (event.target.id === "rrule-count") {
-        return this.$('#rrule-until').val('');
+        this.$('#rrule-until').val('');
       } else if (event.target.id === "rrule-until") {
-        return this.$('#rrule-count').val('');
+        this.$('#rrule-count').val('');
       }
+      return this.updateHelp();
     };
 
     EventModal.prototype.updateHelp = function() {
@@ -2357,7 +2406,8 @@ window.require.register("views/event_modal", function(exports, require, module) 
         dayNames: locale.weekdays.slice(0, 7),
         monthNames: locale.full_month.split('|').slice(1, 13)
       };
-      return this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
+      this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
+      return true;
     };
 
     EventModal.prototype.configureGuestTypeahead = function() {
@@ -2955,34 +3005,34 @@ window.require.register("views/list_view_item", function(exports, require, modul
   
 });
 window.require.register("views/menu", function(exports, require, module) {
-  var AlarmView, BaseView, _ref,
+  var BaseView, MenuView, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   BaseView = require('../lib/base_view');
 
-  module.exports = AlarmView = (function(_super) {
-    __extends(AlarmView, _super);
+  module.exports = MenuView = (function(_super) {
+    __extends(MenuView, _super);
 
-    function AlarmView() {
-      _ref = AlarmView.__super__.constructor.apply(this, arguments);
+    function MenuView() {
+      _ref = MenuView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    AlarmView.prototype.tagName = 'ul';
+    MenuView.prototype.tagName = 'ul';
 
-    AlarmView.prototype.id = 'menu';
+    MenuView.prototype.id = 'menu';
 
-    AlarmView.prototype.className = 'container';
+    MenuView.prototype.className = 'container';
 
-    AlarmView.prototype.template = require('./templates/menu');
+    MenuView.prototype.template = require('./templates/menu');
 
-    AlarmView.prototype.activate = function(href) {
+    MenuView.prototype.activate = function(href) {
       this.$('.active').removeClass('active');
       return this.$('a[href="#' + href + '"]').addClass('active');
     };
 
-    return AlarmView;
+    return MenuView;
 
   })(BaseView);
   
@@ -3020,14 +3070,14 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span6"><label for="basic-start" class="control-label">');
   var __val__ = t('start')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><div class="controls"><input');
+  buf.push('</label><div class="controls input-append date"><input');
   buf.push(attrs({ 'id':('basic-start'), 'type':("datetime-local"), 'value':(start) }, {"type":true,"value":true}));
-  buf.push('/></div></div><div class="control-group span6"><label for="basic-end" class="control-label">');
+  buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div><div class="control-group span6"><label for="basic-end" class="control-label">');
   var __val__ = t('end')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><div class="controls"><input');
+  buf.push('</label><div class="controls input-append date"><input');
   buf.push(attrs({ 'id':('basic-end'), 'type':("datetime-local"), 'value':(end) }, {"type":true,"value":true}));
-  buf.push('/></div></div></div></form><h4>');
+  buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div></div></form><h4>');
   var __val__ = t('recurrence rule')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
@@ -3040,7 +3090,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   var __val__ = t('repeat every')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><div class="control-group"><input');
-  buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true}));
+  buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'min':(1), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"min":true,"value":true}));
   buf.push('/><select id="rrule-freq"><option');
   buf.push(attrs({ 'value':("NOREPEAT"), 'selected':(freqSelected('NOREPEAT')) }, {"value":true,"selected":true}));
   buf.push('>');
@@ -3070,11 +3120,6 @@ window.require.register("views/templates/event_modal", function(exports, require
   var __val__ = t('repeat on')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><div id="rrule-weekdays" class="control-group"><label class="checkbox inline">');
-  var __val__ = weekDays[0]
-  buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('<input');
-  buf.push(attrs({ 'type':("checkbox"), 'value':(0), 'checked':(wkdaySelected(0)) }, {"type":true,"value":true,"checked":true}));
-  buf.push('/></label><label class="checkbox inline">');
   var __val__ = weekDays[1]
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
@@ -3104,6 +3149,11 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
   buf.push(attrs({ 'type':("checkbox"), 'value':(6), 'checked':(wkdaySelected(6)) }, {"type":true,"value":true,"checked":true}));
+  buf.push('/></label><label class="checkbox inline">');
+  var __val__ = weekDays[0]
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('<input');
+  buf.push(attrs({ 'type':("checkbox"), 'value':(0), 'checked':(wkdaySelected(0)) }, {"type":true,"value":true,"checked":true}));
   buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><div class="controls"><label class="checkbox inline"><input');
   buf.push(attrs({ 'type':("radio"), 'checked':(yearModeIs('date')), 'name':("rrule-month-option"), 'value':("date") }, {"type":true,"checked":true,"name":true,"value":true}));
   buf.push('/>');
@@ -3123,7 +3173,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   var __val__ = t('or after')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><input');
-  buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'value':(rrule.count), "class": ('input-mini') }, {"type":true,"value":true}));
+  buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'min':(0), 'value':(rrule.count), "class": ('input-mini') }, {"type":true,"min":true,"value":true}));
   buf.push('/><label for="rrule-count">');
   var __val__ = t('occurences')
   buf.push(escape(null == __val__ ? "" : __val__));
@@ -3347,14 +3397,14 @@ window.require.register("views/templates/popover_content", function(exports, req
 
   buf.push('</select><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/></div><div class="popover-footer"><button class="btn add">');
+  buf.push('/></div><div class="popover-footer"><a class="btn add">');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</button></div>');
+  buf.push('</a></div>');
   }
   else if ( type = 'event')
   {
-  buf.push('<div><span class="timeseparator">&nbsp;From</span><input');
+  buf.push('<div class="line"><span class="timeseparator">&nbsp;From</span><input');
   buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><span class="timeseparator">&nbsp;to</span><input');
   buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
@@ -3363,11 +3413,11 @@ window.require.register("views/templates/popover_content", function(exports, req
   buf.push('/><span class="timeseparator">');
   var __val__ = t('&nbsp;days')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></div><div><input');
+  buf.push('</span></div><div class="line"><input');
   buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/></div><div class="popover-footer">');
+  buf.push('/></div><div class="popover-footer line">');
   if ( editionMode)
   {
   buf.push('<a');
@@ -3377,10 +3427,10 @@ window.require.register("views/templates/popover_content", function(exports, req
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a>');
   }
-  buf.push('<span>&nbsp;</span><button class="btn add">');
+  buf.push('<span>&nbsp;</span><a class="btn add">');
   var __val__ = editionMode ? t('Edit') : t('Create')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</button></div>');
+  buf.push('</a></div>');
   }
   }
   return buf.join("");

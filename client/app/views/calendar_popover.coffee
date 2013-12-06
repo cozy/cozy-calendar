@@ -10,7 +10,7 @@ module.exports = class PopOver extends BaseView
         'keyup input': 'onKeyUp'
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
-        'click button.add'  : 'onAddClicked'
+        'click .add'  : 'onAddClicked'
         'click .remove': 'onRemoveClicked'
         'click .close' : 'selfclose'
         'click .event': 'onTabClicked'
@@ -47,7 +47,7 @@ module.exports = class PopOver extends BaseView
             content: @template @getRenderData()
         ).popover('show')
         @setElement $('#viewContainer .popover')
-        @addButton = @$('button.add').text @getButtonText()
+        @addButton = @$('.btn.add').text @getButtonText()
         @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
         @removeButton.hide() if @model.isNew()
@@ -188,17 +188,18 @@ module.exports = class PopOver extends BaseView
                     @selfclose()
 
     onAddClicked: () =>
-        @addButton.html '&nbsp;'
+        return if @$('.btn.add').hasClass 'disabled'
+        @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @addButton.spin 'small'
         noError = @model.save @getModelAttributes(),
             wait: true
             success: =>
-                collection = app[@type+'s']
+                collection = app[@type + 's']
                 collection.add @model
             error: =>
                 alert 'server error occured'
             complete: =>
-                @addButton.spin()
+                @addButton.spin false
                 @addButton.html @getButtonText()
                 @selfclose()
 

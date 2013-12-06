@@ -13,11 +13,11 @@ if type == 'alarm'
             placeholder=t("alarm description placeholder"))
 
     .popover-footer
-        button.btn.add= t('Edit')
+        a.btn.add= t('Edit')
 
 else if type = 'event'
 
-    div
+    .line
         span.timeseparator &nbsp;From
         input#input-start.focused.input-mini(type="time", value=start,
             placeholder=t("From hours:minutes"))
@@ -29,14 +29,14 @@ else if type = 'event'
             placeholder=0)
         span.timeseparator= t('&nbsp;days')
 
-    div
+    .line
         input#input-place.input-small(type="text", value=place,
             placeholder=t("Place"))
         input#input-desc.input(type="text", value=description,
             placeholder=t("Description"))
 
-    .popover-footer
+    .popover-footer.line
         if editionMode
             a.advanced-link(href='#'+advancedUrl)= t('advanced')
         span &nbsp;
-        button.btn.add= editionMode ? t('Edit') : t('Create')
+        a.btn.add= editionMode ? t('Edit') : t('Create')
