@@ -8621,7 +8621,6 @@ input[type="time"] {
 .popover-content select {
   font-family: styled;
   margin-left: 5px;
-  border: 1px solid #34a6ff;
   -webkit-border-radius: 0;
   border-radius: 0;
   -webkit-box-shadow: 0;

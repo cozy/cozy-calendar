@@ -3086,10 +3086,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('</a></p><p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
   var __val__ = t('Edit')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></span></p><form id="rrule" class="form-inline"><label for="rrule-interval" class="control-label">');
+  buf.push('</a></span></p><form id="rrule" class="form-inline"><div for="rrule-interval" class="control-label">');
   var __val__ = t('repeat every')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><div class="control-group"><input');
+  buf.push('</div><div class="control-group"><input');
   buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'min':(1), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"min":true,"value":true}));
   buf.push('/><select id="rrule-freq"><option');
   buf.push(attrs({ 'value':("NOREPEAT"), 'selected':(freqSelected('NOREPEAT')) }, {"value":true,"selected":true}));
@@ -3116,10 +3116,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('>');
   var __val__ = units[7]
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</option></select></div><label class="control-label">');
+  buf.push('</option></select></div><div id="rrule-weekdays"><div class="control-label">');
   var __val__ = t('repeat on')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label><div id="rrule-weekdays" class="control-group"><label class="checkbox inline">');
+  buf.push('</div><div class="control-group"><label class="checkbox inline">');
   var __val__ = weekDays[1]
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
@@ -3154,7 +3154,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('<input');
   buf.push(attrs({ 'type':("checkbox"), 'value':(0), 'checked':(wkdaySelected(0)) }, {"type":true,"value":true,"checked":true}));
-  buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><div class="controls"><label class="checkbox inline"><input');
+  buf.push('/></label></div></div><div id="rrule-monthdays" class="control-group"><div class="controls"><label class="checkbox inline"><input');
   buf.push(attrs({ 'type':("radio"), 'checked':(yearModeIs('date')), 'name':("rrule-month-option"), 'value':("date") }, {"type":true,"checked":true,"name":true,"value":true}));
   buf.push('/>');
   var __val__ = t('repeat on date')
