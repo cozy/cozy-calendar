@@ -3275,7 +3275,18 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><textarea id="basic-description" class="span12">');
 var __val__ = description
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</textarea></div></div></div></form><h4>');
+buf.push('</textarea></div></div></div></form><div id="guests-block"><h4>');
+var __val__ = t('guests')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
+buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
+buf.push('/><a id="addguest" class="btn">');
+var __val__ = t('invite')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</a></div></div><p class="info">');
+var __val__ = t('invite-info')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</p></form><div id="guests-list"></div><h4>');
 var __val__ = t('recurrence rule')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
@@ -3375,18 +3386,7 @@ buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'min':(0), 'value':(rr
 buf.push('/><label for="rrule-count">');
 var __val__ = t('occurences')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label></div></form><div id="guests-block"><h4>');
-var __val__ = t('guests')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
-buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
-buf.push('/><a id="addguest" class="btn">');
-var __val__ = t('invite')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a></div></div><p class="info">');
-var __val__ = t('invite-info')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</p></form><div id="guests-list"></div></div></div><div class="modal-footer"><a id="cancel-btn">');
+buf.push('</label></div></form></div></div><div class="modal-footer"><a id="cancel-btn">');
 var __val__ = t("cancel")
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');

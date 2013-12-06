@@ -8208,6 +8208,9 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
     top: 20px;
     right: 20px;
   }
+  #event-modal .modal-body #guests-block #guests-list {
+    border-bottom: 1px solid #000;
+  }
 }
 
 @font-face {
