@@ -10,6 +10,7 @@ module.exports =
     "creation"                          : "Creation"
     "invite"                            : "Invite"
     "Place"                             : "Place"
+    "description"                       : "Description"
     "date"                              : "date"
     "Day"                               : "Day"
     "Edit"                              : "Edit"
@@ -86,3 +87,11 @@ module.exports =
     "change"                            : "Change"
     "save changes"                      : "Save changes"
     "guests"                            : "Guests"
+
+# ERRORS
+    "no description"                    : "A title must be set."
+    "start after end"                   : "The start date is after the end date."
+    "invalid start date"                : "The start date is invalid."
+    "invalid end date"                  : "The end date is invalid."
+    "invalid trigg date"                : "The date is invalid."
+    "invalid action"                    : "The action is invalid."
