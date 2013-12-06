@@ -4,19 +4,23 @@ staticMiddleware = americano.static __dirname + '/../client/public', maxAge: 864
 
 module.exports =
 
-    common: [
-        staticMiddleware
-        (req, res, next) ->
-            req.url = req.url.replace '/public', ''
-            staticMiddleware req, res, (err) ->
-                req.url = '/public' + req.url if req.url isnt req.originalUrl
-                next err
+    common:
+        use: [
+            staticMiddleware
+            (req, res, next) ->
+                req.url = req.url.replace '/public', ''
+                staticMiddleware req, res, (err) ->
+                    if req.url isnt req.originalUrl
+                        req.url = '/public' + req.url
+                    next err
 
-        americano.bodyParser keepExtensions: true
-        americano.errorHandler
-            dumpExceptions: true
-            showStack: true
-    ]
+            americano.bodyParser keepExtensions: true
+            americano.errorHandler
+                dumpExceptions: true
+                showStack: true
+        ]
+        set:
+            views: './client'
 
     development: [
         americano.logger 'dev'

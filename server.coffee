@@ -6,8 +6,6 @@ start = (port, callback) ->
             port: port
             host: process.env.HOST or "127.0.0.1"
     , (app, server) ->
-        app.set 'views', './client/'
-
         User = require './server/models/user'
         Realtimer = require('cozy-realtime-adapter')
         realtime = Realtimer server : server, ['alarm.*', 'event.*']
