@@ -3,6 +3,20 @@ app = require 'application'
 $ ->
     require 'lib/app_helpers'
 
+    locale = Date.getLocale(window.locale)
+    $.fn.datetimepicker.dates['en'] = { # as default
+        days: locale.weekdays.slice(0, 7)
+        daysShort: locale.weekdays.slice(7, 15)
+        daysMin: locale.weekdays.slice(7, 15)
+        months: locale.full_month.split('|').slice(1,13)
+        monthsShort: locale.full_month.split('|').slice(13,26)
+        today: locale.day.split('|')[1],
+        suffix: [],
+        meridiem: locale.ampm
+        weekStart: 1
+        format: "dd/mm/yyyy"
+    };
+
     app.initialize()
 
     # Initialize Spin JS the lib that displays loading indicators

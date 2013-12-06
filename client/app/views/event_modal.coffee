@@ -1,4 +1,5 @@
 ViewCollection = require 'lib/view_collection'
+Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
 
@@ -9,7 +10,7 @@ module.exports = class EventModal extends ViewCollection
     id: 'event-modal'
     className: 'modal fade'
 
-    inputDateTimeFormat: '{year}-{MM}-{dd}T{hh}:{mm}:{ss}'
+    inputDateTimeFormat: '{dd}/{MM}/{year} {hh}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
 
     collectionEl: '#guests-list'
@@ -26,9 +27,12 @@ module.exports = class EventModal extends ViewCollection
         'click  .close': 'close'
         'click  .rrule-show': 'showRRule'
         'change #rrule': 'updateHelp'
+        'changeDate #rrule-until': 'toggleCountUntil'
         'input  #rrule-until': 'toggleCountUntil'
         'change #rrule-count': 'toggleCountUntil'
         'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
+        'keydown #basic-description'    : 'resizeDescription'
+        'keypress #basic-description'   : 'resizeDescription'
 
     afterRender: ->
         super
@@ -41,8 +45,25 @@ module.exports = class EventModal extends ViewCollection
             @$('#rrule-short').hide()
 
         @addGuestField = @configureGuestTypeahead()
+        @startField = @$('#basic-start').attr('type', 'text')
+        @startField.parent().datetimepicker
+                format: 'dd/mm/yyyy hh:ii'
+                pickerPosition: 'bottom-left'
+        @endField = @$('#basic-end').attr('type', 'text')
+        @endField.parent().datetimepicker
+                format: 'dd/mm/yyyy hh:ii'
+                pickerPosition: 'bottom-left'
+        @$('#rrule-until').attr('type','text').datetimepicker(
+            format: 'dd/mm/yyyy'
+            minView: 2 # datepicker only
+        ).on 'changeDate', @updateHelp
+
+        @descriptionField = @$('#basic-description')
 
         @$el.modal 'show'
+        @$el.on 'hidden', =>
+            @remove()
+            window.history.back()
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'
@@ -61,8 +82,17 @@ module.exports = class EventModal extends ViewCollection
     refreshGuestList: =>
         @collection.reset @model.get('attendees')
 
+    resizeDescription: =>
+        notes = @descriptionField.val()
+        rows = loc = 0
+        # count occurences of \n in notes
+        rows++ while loc = notes.indexOf("\n", loc) + 1
+        @descriptionField.prop 'rows', rows + 2
+
     getRenderData: ->
         data = _.extend {}, @model.toJSON(),
+            summary: @model.get('description')
+            description: @model.get('details')
             weekDays: Date.getLocale().weekdays.slice(0, 7)
             units: Date.getLocale().units
             start: @model.getStartDateObject().format @inputDateTimeFormat
@@ -108,37 +138,63 @@ module.exports = class EventModal extends ViewCollection
 
 
     save: =>
-        return if @$('confirm-btn').hasClass 'disabled'
-        @model.set
+        data =
+            details: @descriptionField.val()
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
-            start: Date.create(@$('#basic-start').val()).format Event.dateFormat
-            end: Date.create(@$('#basic-end').val()).format Event.dateFormat
+            start: Date.create(@startField.val())
+                .format Event.dateFormat, 'en'
+            end: Date.create(@endField.val())
+                .format Event.dateFormat, 'en'
 
         if @$('#rrule-help').is ':visible'
-            @model.set rrule: @getRRule().toString()
+            data.rrule = @getRRule().toString()
         else
-            @model.set 'rrule', ''
+            data.rrule = ''
 
 
-        @model.save {},
+        validModel = @model.save data,
+            wait: true
             success: =>
                 @close()
             error: =>
-                alert('server error');
+                alert('server error')
                 @close()
 
+        console.log "bip"
+        if not validModel
+            @$('.alert').remove()
+            @$('.control-group').removeClass('error')
+            @handleError error for error in @model.validationError
+
+    handleError: (error) =>
+        switch error.field
+            when 'description'
+                guiltyFields = '#basic-summary'
+
+            when 'startdate'
+                guiltyFields = '#basic-start'
+
+            when 'enddate'
+                guiltyFields = '#basic-end'
+
+            when 'date'
+                guiltyFields = '#basic-start, #basic-end'
+
+        @$(guiltyFields).parents('.control-group').addClass('error')
+        alertMsg = $('<div class="alert"></div>').text(t(error.value))
+        @$('.modal-body').before alertMsg
+
     showRRule: =>
-        @$('#rrule').show()
-        @$('#rrule-short').show()
-        @$('#rrule-short #rrule-action').hide()
-        @$('#rrule-toggle').hide()
         @updateHelp()
+        @$('#rrule-short #rrule-action').hide()
+        @$('#rrule-toggle').fadeOut =>
+            @$('#rrule-short').slideDown =>
+                @$('#rrule').slideDown()
 
     # Recurence
     getRRule: =>
         start = @model.getStartDateObject()
-        console.log start
         RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE,
             RRule.TH, RRule.FR, RRule.SA]
 
@@ -186,6 +242,8 @@ module.exports = class EventModal extends ViewCollection
         else if event.target.id is "rrule-until"
             @$('#rrule-count').val('')
 
+        @updateHelp()
+
     updateHelp: =>
         freq = @$('#rrule-freq').val()
         if freq is 'NOREPEAT'
@@ -203,6 +261,7 @@ module.exports = class EventModal extends ViewCollection
             dayNames: locale.weekdays.slice(0, 7)
             monthNames: locale.full_month.split('|').slice(1,13)
         @$('#rrule-help').html @getRRule().toText(window.t, language)
+        return true
 
 
     configureGuestTypeahead: =>
@@ -233,7 +292,3 @@ module.exports = class EventModal extends ViewCollection
 
     close: =>
         @$el.modal 'hide'
-        @$el.on 'hidden', =>
-            @remove()
-            app.router.navigate @options.backurl or '', true
-

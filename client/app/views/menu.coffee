@@ -1,7 +1,7 @@
 BaseView = require '../lib/base_view'
 
 
-module.exports = class AlarmView extends BaseView
+module.exports = class MenuView extends BaseView
 
     tagName: 'ul'
     id: 'menu'

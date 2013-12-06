@@ -46,9 +46,8 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
-        @setElement $('.container .popover')
+        @setElement $('#viewContainer .popover')
         @addButton = @$('button.add').text @getButtonText()
-        @addButton.toggleClass 'disabled', @validForm()
         @removeButton = @$('.remove')
         @removeButton.hide() if @model.isNew()
         @$('input[type="time"]').attr('type', 'text').timepicker
@@ -56,15 +55,6 @@ module.exports = class PopOver extends BaseView
             minuteStep: 5
             showMeridian: false
         @$('.focused').focus()
-
-    validForm: ->
-        if @model instanceof Event
-            @$('#input-start').val() isnt '' and
-            @$('#input-end').val()   isnt '' and
-            @$('#input-desc').val()  isnt ''
-        else
-            @$('#input-desc').val()  isnt '' and
-            @$('#input-time').val()  isnt ''
 
     getTitle: ->
         title = if @model.isNew() then 'creation'
@@ -132,9 +122,7 @@ module.exports = class PopOver extends BaseView
             end:    @options.end
 
     onKeyUp: (event) -> #
-        if not @validForm()
-            @addButton.addClass 'disabled'
-        else if event.keyCode is 13 or event.which is 13
+        if event.keyCode is 13 or event.which is 13
             @addButton.click()
         else
             @addButton.removeClass 'disabled'
@@ -187,8 +175,8 @@ module.exports = class PopOver extends BaseView
 
     onAddClicked: () =>
         @addButton.html '&nbsp;'
-        @addButton.spin 'small'
-        noError = @model.save @getModelAttributes(),
+        @addButton.spin 'tiny'
+        validModel = @model.save @getModelAttributes(),
             wait: true
             success: =>
                 collection = app[@type+'s']
@@ -200,5 +188,30 @@ module.exports = class PopOver extends BaseView
                 @addButton.html @getButtonText()
                 @selfclose()
 
-        unless noError
-            console.log @model.validationError
+        if not validModel
+            @addButton.html @getButtonText()
+            @addButton.spin()
+            @$('.alert').remove()
+            @$('input').css('border-color', '')
+            @handleError(err) for err in @model.validationError
+
+    handleError: (error) =>
+        switch error.field
+            when 'description'
+                guiltyFields = '#input-desc'
+
+            when 'startdate'
+                guiltyFields = '#input-start'
+
+            when 'enddate'
+                guiltyFields = '#input-end'
+
+            when 'triggdate'
+                guiltyFields = '#input-time'
+
+            when 'date'
+                guiltyFields = '#input-start, #input-end'
+
+        @$(guiltyFields).css('border-color', 'red')
+        alertMsg = $('<div class="alert"></div>').text(t(error.value))
+        @$('.popover-content').before alertMsg

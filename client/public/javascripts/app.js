@@ -116,7 +116,8 @@ module.exports = {
     ContactCollection = require('collections/contacts');
     this.router = new Router();
     this.menu = new Menu().render();
-    this.menu.$el.appendTo('body');
+    $("body").append('<div class="main-container"></div>');
+    this.menu.$el.appendTo('.main-container');
     this.alarms = new AlarmCollection();
     this.events = new EventCollection();
     this.contacts = new ContactCollection();
@@ -521,7 +522,22 @@ var app;
 app = require('application');
 
 $(function() {
+  var locale;
+
   require('lib/app_helpers');
+  locale = Date.getLocale(window.locale);
+  $.fn.datetimepicker.dates['en'] = {
+    days: locale.weekdays.slice(0, 7),
+    daysShort: locale.weekdays.slice(7, 15),
+    daysMin: locale.weekdays.slice(7, 15),
+    months: locale.full_month.split('|').slice(1, 13),
+    monthsShort: locale.full_month.split('|').slice(13, 26),
+    today: locale.day.split('|')[1],
+    suffix: [],
+    meridiem: locale.ampm,
+    weekStart: 1,
+    format: "dd/mm/yyyy"
+  };
   app.initialize();
   return $.fn.spin = function(opts, color) {
     var presets;
@@ -875,6 +891,7 @@ module.exports = {
   "creation": "Creation",
   "invite": "Invite",
   "Place": "Place",
+  "description": "Description",
   "date": "date",
   "Day": "Day",
   "Edit": "Edit",
@@ -908,6 +925,7 @@ module.exports = {
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
+  "advanced": "More details",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
   "repeat every": "Repeat every",
@@ -933,6 +951,7 @@ module.exports = {
   "on the": "on the",
   "th": "th",
   "nd": "nd",
+  "rd": "rd",
   "st": "st",
   "last": "last",
   "and": "and",
@@ -944,7 +963,14 @@ module.exports = {
   "end": "End",
   "change": "Change",
   "save changes": "Save changes",
-  "guests": "Guests"
+  "guests": "Guests",
+  "invite-info": "The invitations will be sent after you click \"Save Changes\"",
+  "no description": "A title must be set.",
+  "start after end": "The start date is after the end date.",
+  "invalid start date": "The start date is invalid.",
+  "invalid end date": "The end date is invalid.",
+  "invalid trigg date": "The date is invalid.",
+  "invalid action": "The action is invalid."
 };
 
 });
@@ -962,6 +988,7 @@ module.exports = {
   "creation": "Creation",
   "invite": "Inviter",
   "Place": "Lieu",
+  "description": "Description",
   "date": "Date",
   "Day": "Jour",
   "Edit": "Modifier",
@@ -999,7 +1026,8 @@ module.exports = {
   "display previous events": "Montrer les évènements précédent",
   "event": "Evenement",
   "alarm": "Alarme",
-  "are you sure": "Are you sure",
+  "are you sure": "Etes-vous sur ?",
+  "advanced": "Détails",
   "recurrence rule": "Règle de recurrence",
   "make reccurent": "Rendre réccurent",
   "repeat every": "Répéter tous les",
@@ -1025,6 +1053,7 @@ module.exports = {
   "on the": "le",
   "th": "ème",
   "nd": "ème",
+  "rd": "ème",
   "st": "er",
   "last": "dernier",
   "and": "et",
@@ -1037,7 +1066,14 @@ module.exports = {
   "change": "Modifier",
   "save changes": "Enregistrer",
   "guests": "Invités",
-  "enter email": "Entrer l'addresse email"
+  "enter email": "Entrer l'addresse email",
+  "invite-info": "Les invitations seront envoyés dès que vous cliquerez sur\n\"Enregistrer\"",
+  "no description": "Le titre est obligatoire",
+  "start after end": "La fin est après le début.",
+  "invalid start date": "Le début est invalide.",
+  "invalid end date": "La fin est invalide.",
+  "invalid trigg date": "Le moment est invalide.",
+  "invalid action": "L'action est invalide."
 };
 
 });
@@ -1072,25 +1108,19 @@ module.exports = Alarm = (function(_super) {
     if (!attrs.description || attrs.description === "") {
       errors.push({
         field: 'description',
-        value: "A description must be set."
-      });
-    }
-    if (!attrs.action || attrs.action === "") {
-      errors.push({
-        field: 'action',
-        value: "An action must be set."
+        value: "no description"
       });
     }
     if ((_ref1 = !attrs.action) === 'DISPLAY' || _ref1 === 'EMAIL') {
       errors.push({
         field: 'action',
-        value: "A valid action must be set."
+        value: "invalid action"
       });
     }
     if (!attrs.trigg || !Date.create(attrs.trigg).isValid()) {
       errors.push({
         field: 'triggdate',
-        value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+        value: "invalid trigg date"
       });
     }
     if (errors.length > 0) {
@@ -1203,25 +1233,25 @@ module.exports = Event = (function(_super) {
     if (!attrs.description) {
       errors.push({
         field: 'description',
-        value: "A description must be set."
+        value: "no description"
       });
     }
     if (!attrs.start || !(start = Date.create(attrs.start)).isValid()) {
       errors.push({
         field: 'startdate',
-        value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+        value: "invalid start date"
       });
     }
     if (!attrs.end || !(end = Date.create(attrs.end)).isValid()) {
       errors.push({
         field: 'enddate',
-        value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+        value: "invalid end date"
       });
     }
     if (start.isAfter(end)) {
       errors.push({
         field: 'date',
-        value: "The start date might be inferor than end date  " + "It must be dd/mm/yyyy and hh:mm."
+        value: "start after end"
       });
     }
     if (errors.length > 0) {
@@ -1513,7 +1543,7 @@ module.exports = Router = (function(_super) {
       this.mainView.remove();
     }
     this.mainView = view;
-    $('body').append(this.mainView.$el);
+    $('.main-container').append(this.mainView.$el);
     return this.mainView.render();
   };
 
@@ -1539,6 +1569,7 @@ module.exports = PopOver = (function(_super) {
   __extends(PopOver, _super);
 
   function PopOver() {
+    this.handleError = __bind(this.handleError, this);
     this.onAddClicked = __bind(this.onAddClicked, this);
     this.onRemoveClicked = __bind(this.onRemoveClicked, this);
     this.getModelAttributes = __bind(this.getModelAttributes, this);    _ref = PopOver.__super__.constructor.apply(this, arguments);
@@ -1596,9 +1627,8 @@ module.exports = PopOver = (function(_super) {
       placement: this.getDirection(),
       content: this.template(this.getRenderData())
     }).popover('show');
-    this.setElement($('.container .popover'));
+    this.setElement($('#viewContainer .popover'));
     this.addButton = this.$('button.add').text(this.getButtonText());
-    this.addButton.toggleClass('disabled', this.validForm());
     this.removeButton = this.$('.remove');
     if (this.model.isNew()) {
       this.removeButton.hide();
@@ -1609,14 +1639,6 @@ module.exports = PopOver = (function(_super) {
       showMeridian: false
     });
     return this.$('.focused').focus();
-  };
-
-  PopOver.prototype.validForm = function() {
-    if (this.model instanceof Event) {
-      return this.$('#input-start').val() !== '' && this.$('#input-end').val() !== '' && this.$('#input-desc').val() !== '';
-    } else {
-      return this.$('#input-desc').val() !== '' && this.$('#input-time').val() !== '';
-    }
   };
 
   PopOver.prototype.getTitle = function() {
@@ -1717,9 +1739,7 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.onKeyUp = function(event) {
-    if (!this.validForm()) {
-      return this.addButton.addClass('disabled');
-    } else if (event.keyCode === 13 || event.which === 13) {
+    if (event.keyCode === 13 || event.which === 13) {
       return this.addButton.click();
     } else {
       return this.addButton.removeClass('disabled');
@@ -1791,12 +1811,12 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.onAddClicked = function() {
-    var noError,
+    var err, validModel, _i, _len, _ref1, _results,
       _this = this;
 
     this.addButton.html('&nbsp;');
-    this.addButton.spin('small');
-    noError = this.model.save(this.getModelAttributes(), {
+    this.addButton.spin('tiny');
+    validModel = this.model.save(this.getModelAttributes(), {
       wait: true,
       success: function() {
         var collection;
@@ -1813,9 +1833,43 @@ module.exports = PopOver = (function(_super) {
         return _this.selfclose();
       }
     });
-    if (!noError) {
-      return console.log(this.model.validationError);
+    if (!validModel) {
+      this.addButton.html(this.getButtonText());
+      this.addButton.spin();
+      this.$('.alert').remove();
+      this.$('input').css('border-color', '');
+      _ref1 = this.model.validationError;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        err = _ref1[_i];
+        _results.push(this.handleError(err));
+      }
+      return _results;
     }
+  };
+
+  PopOver.prototype.handleError = function(error) {
+    var alertMsg, guiltyFields;
+
+    switch (error.field) {
+      case 'description':
+        guiltyFields = '#input-desc';
+        break;
+      case 'startdate':
+        guiltyFields = '#input-start';
+        break;
+      case 'enddate':
+        guiltyFields = '#input-end';
+        break;
+      case 'triggdate':
+        guiltyFields = '#input-time';
+        break;
+      case 'date':
+        guiltyFields = '#input-start, #input-end';
+    }
+    this.$(guiltyFields).css('border-color', 'red');
+    alertMsg = $('<div class="alert"></div>').text(t(error.value));
+    return this.$('.popover-content').before(alertMsg);
   };
 
   return PopOver;
@@ -1882,6 +1936,7 @@ module.exports = CalendarView = (function(_super) {
 
     locale = Date.getLocale(app.locale);
     this.cal = this.$('#alarms');
+    this.view = this.options.view;
     this.cal.fullCalendar({
       header: {
         left: 'prev,next today',
@@ -1892,7 +1947,7 @@ module.exports = CalendarView = (function(_super) {
       firstDay: 1,
       weekMode: 'liquid',
       height: this.handleWindowResize('initial'),
-      defaultView: this.options.view,
+      defaultView: this.view,
       viewDisplay: this.onChangeView,
       monthNames: locale.full_month.split('|').slice(1, 13),
       monthNamesShort: locale.full_month.split('|').slice(13, 26),
@@ -1932,12 +1987,20 @@ module.exports = CalendarView = (function(_super) {
     return $(window).resize(_.debounce(this.handleWindowResize, 10));
   };
 
-  CalendarView.prototype.handleWindowResize = function(initial) {
-    var targetHeight, width;
+  CalendarView.prototype.remove = function() {
+    var _ref1;
 
-    targetHeight = $(window).height() - 2 * $('#menu').outerHeight(true) - 60;
-    width = this.cal.width() + 40;
-    this.cal.height(targetHeight + 20);
+    if ((_ref1 = this.popover) != null) {
+      _ref1.close();
+    }
+    return CalendarView.__super__.remove.apply(this, arguments);
+  };
+
+  CalendarView.prototype.handleWindowResize = function(initial) {
+    var diff, targetHeight;
+
+    diff = 2 * parseInt(this.cal.css('padding-top'));
+    targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff;
     if (initial !== 'initial') {
       this.cal.fullCalendar('option', 'height', targetHeight);
     }
@@ -1982,7 +2045,10 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onChangeView = function(view) {
-    switch (view.name) {
+    if (this.view === view.name) {
+      return;
+    }
+    switch (this.view = view.name) {
       case 'month':
         app.router.navigate('calendar');
         break;
@@ -2144,13 +2210,15 @@ module.exports = CalendarView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var EventModal, ViewCollection, app, random, _ref,
+var Event, EventModal, ViewCollection, app, random, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 ViewCollection = require('lib/view_collection');
+
+Event = require('models/event');
 
 random = require('lib/random');
 
@@ -2166,7 +2234,9 @@ module.exports = EventModal = (function(_super) {
     this.toggleCountUntil = __bind(this.toggleCountUntil, this);
     this.getRRule = __bind(this.getRRule, this);
     this.showRRule = __bind(this.showRRule, this);
+    this.handleError = __bind(this.handleError, this);
     this.save = __bind(this.save, this);
+    this.resizeDescription = __bind(this.resizeDescription, this);
     this.refreshGuestList = __bind(this.refreshGuestList, this);
     this.onGuestAdded = __bind(this.onGuestAdded, this);    _ref = EventModal.__super__.constructor.apply(this, arguments);
     return _ref;
@@ -2178,7 +2248,7 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.className = 'modal fade';
 
-  EventModal.prototype.inputDateTimeFormat = '{year}-{MM}-{dd}T{hh}:{mm}:{ss}';
+  EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {hh}:{mm}';
 
   EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
@@ -2203,15 +2273,20 @@ module.exports = EventModal = (function(_super) {
       'click  .close': 'close',
       'click  .rrule-show': 'showRRule',
       'change #rrule': 'updateHelp',
+      'changeDate #rrule-until': 'toggleCountUntil',
       'input  #rrule-until': 'toggleCountUntil',
       'change #rrule-count': 'toggleCountUntil',
       'click #addguest': function() {
         return _this.onGuestAdded(_this.$('#addguest-field').val());
-      }
+      },
+      'keydown #basic-description': 'resizeDescription',
+      'keypress #basic-description': 'resizeDescription'
     };
   };
 
   EventModal.prototype.afterRender = function() {
+    var _this = this;
+
     EventModal.__super__.afterRender.apply(this, arguments);
     this.$('#rrule').hide();
     if (this.model.get('rrule')) {
@@ -2222,7 +2297,26 @@ module.exports = EventModal = (function(_super) {
       this.$('#rrule-short').hide();
     }
     this.addGuestField = this.configureGuestTypeahead();
-    return this.$el.modal('show');
+    this.startField = this.$('#basic-start').attr('type', 'text');
+    this.startField.parent().datetimepicker({
+      format: 'dd/mm/yyyy hh:ii',
+      pickerPosition: 'bottom-left'
+    });
+    this.endField = this.$('#basic-end').attr('type', 'text');
+    this.endField.parent().datetimepicker({
+      format: 'dd/mm/yyyy hh:ii',
+      pickerPosition: 'bottom-left'
+    });
+    this.$('#rrule-until').attr('type', 'text').datetimepicker({
+      format: 'dd/mm/yyyy',
+      minView: 2
+    }).on('changeDate', this.updateHelp);
+    this.descriptionField = this.$('#basic-description');
+    this.$el.modal('show');
+    return this.$el.on('hidden', function() {
+      _this.remove();
+      return window.history.back();
+    });
   };
 
   EventModal.prototype.onGuestAdded = function(info) {
@@ -2249,10 +2343,23 @@ module.exports = EventModal = (function(_super) {
     return this.collection.reset(this.model.get('attendees'));
   };
 
+  EventModal.prototype.resizeDescription = function() {
+    var loc, notes, rows;
+
+    notes = this.descriptionField.val();
+    rows = loc = 0;
+    while (loc = notes.indexOf("\n", loc) + 1) {
+      rows++;
+    }
+    return this.descriptionField.prop('rows', rows + 2);
+  };
+
   EventModal.prototype.getRenderData = function() {
     var data;
 
     data = _.extend({}, this.model.toJSON(), {
+      summary: this.model.get('description'),
+      description: this.model.get('details'),
       weekDays: Date.getLocale().weekdays.slice(0, 7),
       units: Date.getLocale().units,
       start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
@@ -2331,25 +2438,23 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var _this = this;
+    var data, error, validModel, _i, _len, _ref1, _results,
+      _this = this;
 
-    if (this.$('confirm-btn').hasClass('disabled')) {
-      return;
-    }
-    this.model.set({
+    data = {
+      details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
       place: this.$('#basic-place').val(),
-      start: Date.create(this.$('#basic-start').val()).format(Event.dateFormat),
-      end: Date.create(this.$('#basic-end').val()).format(Event.dateFormat)
-    });
+      start: Date.create(this.startField.val()).format(Event.dateFormat, 'en'),
+      end: Date.create(this.endField.val()).format(Event.dateFormat, 'en')
+    };
     if (this.$('#rrule-help').is(':visible')) {
-      this.model.set({
-        rrule: this.getRRule().toString()
-      });
+      data.rrule = this.getRRule().toString();
     } else {
-      this.model.set('rrule', '');
+      data.rrule = '';
     }
-    return this.model.save({}, {
+    validModel = this.model.save(data, {
+      wait: true,
       success: function() {
         return _this.close();
       },
@@ -2358,21 +2463,57 @@ module.exports = EventModal = (function(_super) {
         return _this.close();
       }
     });
+    console.log("bip");
+    if (!validModel) {
+      this.$('.alert').remove();
+      this.$('.control-group').removeClass('error');
+      _ref1 = this.model.validationError;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        error = _ref1[_i];
+        _results.push(this.handleError(error));
+      }
+      return _results;
+    }
+  };
+
+  EventModal.prototype.handleError = function(error) {
+    var alertMsg, guiltyFields;
+
+    switch (error.field) {
+      case 'description':
+        guiltyFields = '#basic-summary';
+        break;
+      case 'startdate':
+        guiltyFields = '#basic-start';
+        break;
+      case 'enddate':
+        guiltyFields = '#basic-end';
+        break;
+      case 'date':
+        guiltyFields = '#basic-start, #basic-end';
+    }
+    this.$(guiltyFields).parents('.control-group').addClass('error');
+    alertMsg = $('<div class="alert"></div>').text(t(error.value));
+    return this.$('.modal-body').before(alertMsg);
   };
 
   EventModal.prototype.showRRule = function() {
-    this.$('#rrule').show();
-    this.$('#rrule-short').show();
+    var _this = this;
+
+    this.updateHelp();
     this.$('#rrule-short #rrule-action').hide();
-    this.$('#rrule-toggle').hide();
-    return this.updateHelp();
+    return this.$('#rrule-toggle').fadeOut(function() {
+      return _this.$('#rrule-short').slideDown(function() {
+        return _this.$('#rrule').slideDown();
+      });
+    });
   };
 
   EventModal.prototype.getRRule = function() {
     var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
 
     start = this.model.getStartDateObject();
-    console.log(start);
     RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
     options = {
       dtstart: start,
@@ -2412,10 +2553,11 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.toggleCountUntil = function(event) {
     if (event.target.id === "rrule-count") {
-      return this.$('#rrule-until').val('');
+      this.$('#rrule-until').val('');
     } else if (event.target.id === "rrule-until") {
-      return this.$('#rrule-count').val('');
+      this.$('#rrule-count').val('');
     }
+    return this.updateHelp();
   };
 
   EventModal.prototype.updateHelp = function() {
@@ -2438,7 +2580,8 @@ module.exports = EventModal = (function(_super) {
       dayNames: locale.weekdays.slice(0, 7),
       monthNames: locale.full_month.split('|').slice(1, 13)
     };
-    return this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
+    this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
+    return true;
   };
 
   EventModal.prototype.configureGuestTypeahead = function() {
@@ -2479,13 +2622,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.close = function() {
-    var _this = this;
-
-    this.$el.modal('hide');
-    return this.$el.on('hidden', function() {
-      _this.remove();
-      return app.router.navigate(_this.options.backurl || '', true);
-    });
+    return this.$el.modal('hide');
   };
 
   return EventModal;
@@ -3058,34 +3195,34 @@ module.exports = AlarmView = (function(_super) {
 });
 
 ;require.register("views/menu", function(exports, require, module) {
-var AlarmView, BaseView, _ref,
+var BaseView, MenuView, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-module.exports = AlarmView = (function(_super) {
-  __extends(AlarmView, _super);
+module.exports = MenuView = (function(_super) {
+  __extends(MenuView, _super);
 
-  function AlarmView() {
-    _ref = AlarmView.__super__.constructor.apply(this, arguments);
+  function MenuView() {
+    _ref = MenuView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
-  AlarmView.prototype.tagName = 'ul';
+  MenuView.prototype.tagName = 'ul';
 
-  AlarmView.prototype.id = 'menu';
+  MenuView.prototype.id = 'menu';
 
-  AlarmView.prototype.className = 'container';
+  MenuView.prototype.className = 'container';
 
-  AlarmView.prototype.template = require('./templates/menu');
+  MenuView.prototype.template = require('./templates/menu');
 
-  AlarmView.prototype.activate = function(href) {
+  MenuView.prototype.activate = function(href) {
     this.$('.active').removeClass('active');
     return this.$('a[href="#' + href + '"]').addClass('active');
   };
 
-  return AlarmView;
+  return MenuView;
 
 })(BaseView);
 
@@ -3097,7 +3234,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="container"><div id="alarms" class="well"></div></div>');
+buf.push('<div id="alarms" class="well"></div>');
 }
 return buf.join("");
 };
@@ -3116,7 +3253,7 @@ buf.push('</span><button class="close">&times;</button></div><div class="modal-b
 var __val__ = t('summary')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
-buf.push(attrs({ 'id':('basic-summary'), 'type':("text"), 'value':(description), "class": ('span12') }, {"type":true,"value":true}));
+buf.push(attrs({ 'id':('basic-summary'), 'type':("text"), 'value':(summary), "class": ('span12') }, {"type":true,"value":true}));
 buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span12"><label for="basic-place" class="control-label">');
 var __val__ = t('place')
 buf.push(escape(null == __val__ ? "" : __val__));
@@ -3125,27 +3262,44 @@ buf.push(attrs({ 'id':('basic-place'), 'type':("text"), 'value':(place), "class"
 buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span6"><label for="basic-start" class="control-label">');
 var __val__ = t('start')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><div class="controls"><input');
+buf.push('</label><div class="controls input-append date"><input');
 buf.push(attrs({ 'id':('basic-start'), 'type':("datetime-local"), 'value':(start) }, {"type":true,"value":true}));
-buf.push('/></div></div><div class="control-group span6"><label for="basic-end" class="control-label">');
+buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div><div class="control-group span6"><label for="basic-end" class="control-label">');
 var __val__ = t('end')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><div class="controls"><input');
+buf.push('</label><div class="controls input-append date"><input');
 buf.push(attrs({ 'id':('basic-end'), 'type':("datetime-local"), 'value':(end) }, {"type":true,"value":true}));
-buf.push('/></div></div></div></form><h4>');
+buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div></div><div class="row-fluid"><div class="control-group span12"><label for="basic-description" class="control-label">');
+var __val__ = t('description')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</label><div class="controls"><textarea id="basic-description" class="span12">');
+var __val__ = description
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</textarea></div></div></div></form><div id="guests-block"><h4>');
+var __val__ = t('guests')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
+buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
+buf.push('/><a id="addguest" class="btn">');
+var __val__ = t('invite')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</a></div></div><p class="info">');
+var __val__ = t('invite-info')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</p></form><div id="guests-list"></div><h4>');
 var __val__ = t('recurrence rule')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><p id="rrule-toggle"><a class="rrule-show">');
+buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
 var __val__ = t('make reccurent')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a></p><p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a></span></p><form id="rrule" class="form-inline"><div class="control-group"><label for="rrule-interval" class="control-label">');
+buf.push('</a></span></p><form id="rrule" class="form-inline"><label for="rrule-interval" class="control-label">');
 var __val__ = t('repeat every')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><input');
-buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true}));
+buf.push('</label><div class="control-group"><input');
+buf.push(attrs({ 'id':('rrule-interval'), 'type':("number"), 'min':(1), 'value':(rrule.interval), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"min":true,"value":true}));
 buf.push('/><select id="rrule-freq"><option');
 buf.push(attrs({ 'value':("NOREPEAT"), 'selected':(freqSelected('NOREPEAT')) }, {"value":true,"selected":true}));
 buf.push('>');
@@ -3171,15 +3325,10 @@ buf.push(attrs({ 'value':(RRule.YEARLY), 'selected':(freqSelected(RRule.YEARLY))
 buf.push('>');
 var __val__ = units[7]
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</option></select></div><div id="rrule-weekdays" class="control-group"><label class="control-label">');
+buf.push('</option></select></div><label class="control-label">');
 var __val__ = t('repeat on')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><label class="checkbox inline">');
-var __val__ = weekDays[0]
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('<input');
-buf.push(attrs({ 'type':("checkbox"), 'value':(0), 'checked':(wkdaySelected(0)) }, {"type":true,"value":true,"checked":true}));
-buf.push('/></label><label class="checkbox inline">');
+buf.push('</label><div id="rrule-weekdays" class="control-group"><label class="checkbox inline">');
 var __val__ = weekDays[1]
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('<input');
@@ -3209,10 +3358,12 @@ var __val__ = weekDays[6]
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('<input');
 buf.push(attrs({ 'type':("checkbox"), 'value':(6), 'checked':(wkdaySelected(6)) }, {"type":true,"value":true,"checked":true}));
-buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><label>');
-var __val__ = t('repeat on')
+buf.push('/></label><label class="checkbox inline">');
+var __val__ = weekDays[0]
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><div class="controls"><label class="checkbox inline"><input');
+buf.push('<input');
+buf.push(attrs({ 'type':("checkbox"), 'value':(0), 'checked':(wkdaySelected(0)) }, {"type":true,"value":true,"checked":true}));
+buf.push('/></label></div><div id="rrule-monthdays" class="control-group"><div class="controls"><label class="checkbox inline"><input');
 buf.push(attrs({ 'type':("radio"), 'checked':(yearModeIs('date')), 'name':("rrule-month-option"), 'value':("date") }, {"type":true,"checked":true,"name":true,"value":true}));
 buf.push('/>');
 var __val__ = t('repeat on date')
@@ -3222,28 +3373,20 @@ buf.push(attrs({ 'type':("radio"), 'checked':(yearModeIs('weekdate')), 'name':("
 buf.push('/>');
 var __val__ = t('repeat on weekday')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label></div></div><div class="control-group"><label for="rrule-until">');
+buf.push('</label></div></div><label for="rrule-until">');
 var __val__ = t('repeat until')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><input');
+buf.push('</label><div class="control-group"><input');
 buf.push(attrs({ 'id':('rrule-until'), 'type':("date"), 'value':(rrule.until) }, {"type":true,"value":true}));
 buf.push('/><label for="rrule-count">');
 var __val__ = t('or after')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><input');
-buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'value':(rrule.count), "class": ('input-mini') }, {"type":true,"value":true}));
+buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'min':(0), 'value':(rrule.count), "class": ('input-mini') }, {"type":true,"min":true,"value":true}));
 buf.push('/><label for="rrule-count">');
 var __val__ = t('occurences')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label></div></form><h4>');
-var __val__ = t('guests')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
-buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('enter email')) }, {"type":true,"placeholder":true}));
-buf.push('/><a id="addguest" class="btn">');
-var __val__ = t('invite')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a><div id="guest-info"><i class="icon-question-sign"></i><span>The invitations will be sent after you click "Save Changes"</span></div></div></div></form><div id="guests-list"></div></div><div class="modal-footer"><a id="cancel-btn">');
+buf.push('</label></div></form></div></div><div class="modal-footer"><a id="cancel-btn">');
 var __val__ = t("cancel")
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');
@@ -3340,10 +3483,10 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="container"><a class="showbefore">');
+buf.push('<div class="container"><div id="alarm-list" class="well"></div><a class="btn showbefore">');
 var __val__ = t('display previous events')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a><div id="alarm-list" class="well"></div></div>');
+buf.push('</a></div>');
 }
 return buf.join("");
 };
@@ -3355,7 +3498,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h2>' + escape((interp = date) == null ? '' : interp) + '<i class="add icon icon-plus"></i></h2><div class="alarms"></div>');
+buf.push('<h2>' + escape((interp = date) == null ? '' : interp) + '</h2><div class="alarms"></div>');
 }
 return buf.join("");
 };
@@ -3371,11 +3514,11 @@ if ( type == 'alarm')
 {
 buf.push('<p><span');
 buf.push(attrs({ 'title':("" + (timezoneHour) + " - " + (timezone) + "") }, {"title":true}));
-buf.push('>' + escape((interp = time) == null ? '' : interp) + '</span> ' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
+buf.push('>' + escape((interp = time) == null ? '' : interp) + '</span> ' + escape((interp = description) == null ? '' : interp) + ' (' + escape((interp = t(action)) == null ? '' : interp) + ')<i class="icon-trash"></i></p>');
 }
 else if ( type == 'event')
 {
-buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-pencil"></i><i class="icon-trash"></i></p>');
+buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-trash"></i></p>');
 }
 }
 return buf.join("");
@@ -3388,17 +3531,17 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<li><a href="#list" class="btn"><i class="icon-list icon-white"></i><span>');
-var __val__ = t('List')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
+buf.push('<li><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
 var __val__ = t('Calendar')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
-var __val__ = t('Export')
+buf.push('</span></a></li><li><a href="#list" class="btn"><i class="icon-list icon-white"></i><span>');
+var __val__ = t('List')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
+buf.push('</span></a></li><li><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
 var __val__ = t('Import')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</span></a></li><li><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
+var __val__ = t('Export')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></a></li>');
 }
@@ -3464,30 +3607,27 @@ buf.push('</option>');
 
 buf.push('</select><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div><button class="btn add">');
+buf.push('/></div><div class="popover-footer"><button class="btn add">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</button></div>');
 }
 else if ( type = 'event')
 {
-buf.push('<div><input');
+buf.push('<div><span class="timeseparator">&nbsp;From</span><input');
 buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/><span class="timeseparator">-</span><input');
+buf.push('/><span class="timeseparator">&nbsp;to</span><input');
 buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/><span class="timeseparator">,</span><input');
+buf.push('/><span class="timeseparator">&nbsp;+</span><input');
 buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><span class="timeseparator">');
-var __val__ = t('days after')
+var __val__ = '&nbsp;' + t('days')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></div><div><input');
 buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div><button class="btn add">');
-var __val__ = editionMode ? t('Edit') : t('Create')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</button>');
+buf.push('/></div><div class="popover-footer">');
 if ( editionMode)
 {
 buf.push('<a');
@@ -3497,7 +3637,10 @@ var __val__ = t('advanced')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a>');
 }
-buf.push('</div>');
+buf.push('<span>&nbsp;</span><button class="btn add">');
+var __val__ = editionMode ? t('Edit') : t('Create')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</button></div>');
 }
 }
 return buf.join("");

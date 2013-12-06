@@ -2,6 +2,7 @@
 @import 'nib'
 
 @import '_base'
+@import '_cozy'
 @import '_ui'
 
 // Import your styles here
@@ -12,36 +13,53 @@
 
 ul#menu
   list-style-type: none
-  text-align: right
+  text-align: left
 
   li
     display: inline-block
-    margin: 0 5px
+    margin: 10px 3px 0 3px
 
     a
       color: #fff
+      border-radius: 4px
 
-#alarms
-  box-sizing: border-box
-  padding 20px
+  li:first-child
+      margin-left: 20px
+
+.info
+    font-size: 12px
+    color: #777
+
+#event-modal
+    padding: 0
+
+    .modal-header
+        background: bluegreen
+
+    a.btn.rrule-show
+        border-radius: 0px
+        padding: 5px
+
+.datepicker
+    z-index 1150
+
+#addguest.btn
+    border-radius: 0px
+    padding: 5px
 
 .addform
-  .tooltip.top .tooltip-arrow
-      border-top-color: red
-  .tooltip.bottom .tooltip-arrow
-      border-bottom-color: red
-  .tooltip.left .tooltip-arrow
-      border-left-color: red
-  .tooltip.right .tooltip-arrow
-      border-right-color: red
-  .tooltip .tooltip-inner
-      background: red
-
   #date-control
     display: inline-block
 
   #add-alarm
     margin-bottom: 0
+
+#alarms
+  box-sizing: border-box
+  padding 20px
+  margin 0px
+  border-bottom 0px
+  border-top 0px
 
 .form-horizontal
     .control-group
@@ -58,6 +76,15 @@ ul#menu
         .add-on i
             margin-top: 2px !important
 
+
+.main-container
+    margin: auto
+    max-width: 1200px
+    border: 1px solid #DDD
+    border-width 0px 1px
+    background: white
+    box-shadow: 1px 1px 2px #CCC
+    box-sizing: border-box
 
 input[type="date"]
   width: 150px
@@ -83,6 +110,7 @@ input[type="time"]
 
     p
       line-height: 20px
+
       i
         margin: 3px 5px
         display: none
@@ -97,8 +125,7 @@ input[type="time"]
   padding-bottom: 0
 
 .showbefore
-    float left
-    cursor pointer
+    margin: 0px 20px 20px 20px
 
 .affix
   position: fixed
@@ -111,11 +138,12 @@ input[type="time"]
 .well
     border-radius: 0
     background: white
-    box-shadow: 1px 1px 2px #DDDDDD
+    box-shadow: none
+    border: 0
 
 
 .btn
-    border: 1px solid blue
+    border: 0
     background: blue
     color: white
     box-shadow: none
@@ -123,6 +151,7 @@ input[type="time"]
     border-radius: 0
     font-family: main
     font-weight: bold
+    border-radius: 4px
 
 .btn:hover
     background: orange
@@ -130,9 +159,12 @@ input[type="time"]
     border-color: orange
     text-shadow: none
 
+.popover
+    padding: 0
+
 .popover-title
     color: white
-    background: grey
+    background-color: bluegreen
     border: 0
 
     .close
@@ -140,14 +172,58 @@ input[type="time"]
         opacity: 0.7
 
 .popover-content
-    input
-        margin-left: 5px
-        border 1px solid transparent
-        box-shadow none
+    font-family: styled
 
     a.advanced-link
         margin-left 10px
 
+    padding: 0
+
+    div
+    ul
+        padding: 10px 10px 0px 10px
+
+    div.popover-footer
+        text-align: right
+        padding: 5px
+        border-bottom-left-radius: 5px
+        border-bottom-right-radius: 5px
+
+    input
+    select
+    textarea
+        font-family: styled
+        margin-left: 5px
+        border: 1px solid blue
+        border-radius: 0
+        box-shadow: 0
+        border: 1px solid transparent
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+
+    input:active
+    select:active
+    input:focus
+    select:focus
+        box-shadow: none
+
+    .nav-tabs
+        li
+            a
+                font-size: 16px
+                cursor: pointer
+            a:hover
+                background: lightorange
+                color: #333
+        li.active
+            a:hover
+                background: white
+                color: #333
+
+.popover-footer
+    background: #F5F5F5
 
 // .popover-content
 #add-alarm
@@ -210,14 +286,19 @@ h2
     font-family: styled
 
 #alarm-list
-    margin-top: 20px
+    margin-top: 10px
+
+    h2
+        font-weight: normal
+
+    div
+        font-family: main
 
 
 .icon-bell:before
 .icon-th:before
 .icon-th-list:before
 .icon-share:before
-.icon-calendar:before
 .icon-upload:before
 .icon-arrow-down:before
 .icon-arrow-up:before
@@ -227,6 +308,8 @@ h2
 
 .active.btn
     background: blue - 20%
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+    cursor: default
 
 #import-form
     margin-top: 20px
@@ -263,24 +346,20 @@ h2
             margin: 0
             sharefont-weight: 10px
 
-@media(max-width: 1000px)
+body
+    padding: 0
 
+.container
+    display: block
+    width: 100%
+    margin: 0
+    padding: 0
+    box-sizing: border-box
+
+@media(max-width: 1000px)
     body
         padding: 0
 
-    #viewContainer
-        padding: 0
-
-        .container:before
-        .container:after
-            display: block
-
-        .container
-            display: block
-            width: 100%
-            margin: 0
-            padding: 0
-            box-sizing: border-box
 
     #alarms
         width: 100%
@@ -291,6 +370,14 @@ h2
         .fc-header-title
             h2
                 font-size: 16px
+
+    #viewContainer
+        padding: 0
+
+        .container:before
+        .container:after
+            display: block
+
 
     #input-time
     #input-timezone

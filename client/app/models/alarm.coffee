@@ -15,23 +15,17 @@ module.exports = class Alarm extends ScheduleItem
         if not attrs.description or attrs.description is ""
             errors.push
                 field: 'description'
-                value: "A description must be set."
-
-        if not attrs.action or attrs.action is ""
-            errors.push
-                field: 'action'
-                value: "An action must be set."
+                value: "no description"
 
         if not attrs.action in ['DISPLAY', 'EMAIL']
             errors.push
                 field: 'action'
-                value: "A valid action must be set."
+                value: "invalid action"
 
         if not attrs.trigg or not Date.create(attrs.trigg).isValid()
             errors.push
                 field: 'triggdate'
-                value: "The date or time format might be invalid. " + \
-                        "It must be dd/mm/yyyy and hh:mm."
+                value: "invalid trigg date"
 
         if errors.length > 0
             return errors

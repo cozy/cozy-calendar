@@ -6,7 +6,9 @@ module.exports = Event = americano.getModel 'Event',
     start       : type : String
     end         : type : String
     place       : type : String
-    description : type : String
+    # @TODO : rename those to follow ical (NEED PATCH)
+    details     : type : String # = ical DESCRIPTION
+    description : type : String # = ical SUMMARY
     diff        : type : Number
     rrule       : type : String
     attendees   : type : [Object]

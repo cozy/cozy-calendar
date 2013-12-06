@@ -14,25 +14,22 @@ module.exports = class Event extends ScheduleItem
         if not attrs.description
             errors.push
                 field: 'description'
-                value: "A description must be set."
+                value: "no description"
 
         if not attrs.start or not (start = Date.create(attrs.start)).isValid()
             errors.push
                 field: 'startdate'
-                value: "The date or time format might be invalid. " + \
-                        "It must be dd/mm/yyyy and hh:mm."
+                value: "invalid start date"
 
         if not attrs.end or not (end = Date.create(attrs.end)).isValid()
             errors.push
                 field: 'enddate'
-                value: "The date or time format might be invalid. " + \
-                        "It must be dd/mm/yyyy and hh:mm."
+                value: "invalid end date"
 
         if start.isAfter end
             errors.push
                 field: 'date'
-                value: "The start date might be inferor than end date  " + \
-                        "It must be dd/mm/yyyy and hh:mm."
+                value: "start after end"
 
         return errors if errors.length > 0
 
