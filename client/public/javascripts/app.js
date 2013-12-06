@@ -2069,13 +2069,15 @@ window.require.register("views/calendar_view", function(exports, require, module
   
 });
 window.require.register("views/event_modal", function(exports, require, module) {
-  var EventModal, ViewCollection, app, random, _ref,
+  var Event, EventModal, ViewCollection, app, random, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   ViewCollection = require('lib/view_collection');
+
+  Event = require('models/event');
 
   random = require('lib/random');
 
@@ -2249,24 +2251,24 @@ window.require.register("views/event_modal", function(exports, require, module) 
     };
 
     EventModal.prototype.save = function() {
-      var _this = this;
+      var data,
+        _this = this;
       if (this.$('confirm-btn').hasClass('disabled')) {
         return;
       }
-      this.model.set({
+      data = {
         description: this.$('#basic-summary').val(),
         place: this.$('#basic-place').val(),
-        start: Date.create(this.$('#basic-start').val()).format(Event.dateFormat),
-        end: Date.create(this.$('#basic-end').val()).format(Event.dateFormat)
-      });
+        start: Date.create(this.$('#basic-start').val()).format(Event.dateFormat, 'en'),
+        end: Date.create(this.$('#basic-end').val()).format(Event.dateFormat, 'en')
+      };
       if (this.$('#rrule-help').is(':visible')) {
-        this.model.set({
-          rrule: this.getRRule().toString()
-        });
+        data.rrule = this.getRRule().toString();
       } else {
-        this.model.set('rrule', '');
+        data.rrule = '';
       }
-      return this.model.save({}, {
+      return this.model.save(data, {
+        wait: true,
         success: function() {
           return _this.close();
         },

@@ -8215,6 +8215,15 @@ ul#menu li:first-child {
 .addform #add-alarm {
   margin-bottom: 0;
 }
+#alarms {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 20px;
+  margin: 0px;
+  border-bottom: 0px;
+  border-top: 0px;
+}
 .form-horizontal {
   margin-bottom: 0 !important;
 }

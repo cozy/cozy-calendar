@@ -1,4 +1,4 @@
-americano = require 'americano-cozy'
+americano = require 'americano'
 time = require 'time'
 User = require './user'
 
