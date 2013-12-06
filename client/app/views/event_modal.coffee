@@ -31,6 +31,8 @@ module.exports = class EventModal extends ViewCollection
         'input  #rrule-until': 'toggleCountUntil'
         'change #rrule-count': 'toggleCountUntil'
         'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
+        'keydown #basic-description'    : 'resizeDescription'
+        'keypress #basic-description'   : 'resizeDescription'
 
     afterRender: ->
         super
@@ -56,7 +58,12 @@ module.exports = class EventModal extends ViewCollection
             minView: 2 # datepicker only
         ).on 'changeDate', @updateHelp
 
+        @descriptionField = @$('#basic-description')
+
         @$el.modal 'show'
+        @$el.on 'hidden', =>
+            @remove()
+            window.history.back()
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'
@@ -75,8 +82,17 @@ module.exports = class EventModal extends ViewCollection
     refreshGuestList: =>
         @collection.reset @model.get('attendees')
 
+    resizeDescription: =>
+        notes = @descriptionField.val()
+        rows = loc = 0
+        # count occurences of \n in notes
+        rows++ while loc = notes.indexOf("\n", loc) + 1
+        @descriptionField.prop 'rows', rows + 2
+
     getRenderData: ->
         data = _.extend {}, @model.toJSON(),
+            summary: @model.get('description')
+            description: @model.get('details')
             weekDays: Date.getLocale().weekdays.slice(0, 7)
             units: Date.getLocale().units
             start: @model.getStartDateObject().format @inputDateTimeFormat
@@ -122,8 +138,8 @@ module.exports = class EventModal extends ViewCollection
 
 
     save: =>
-        return if @$('confirm-btn').hasClass 'disabled'
         data =
+            details: @descriptionField.val()
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
             start: Date.create(@startField.val())
@@ -137,13 +153,37 @@ module.exports = class EventModal extends ViewCollection
             data.rrule = ''
 
 
-        @model.save data,
+        validModel = @model.save data,
             wait: true
             success: =>
                 @close()
             error: =>
                 alert('server error')
                 @close()
+
+        console.log "bip"
+        if not validModel
+            @$('.alert').remove()
+            @$('.control-group').removeClass('error')
+            @handleError error for error in @model.validationError
+
+    handleError: (error) =>
+        switch error.field
+            when 'description'
+                guiltyFields = '#basic-summary'
+
+            when 'startdate'
+                guiltyFields = '#basic-start'
+
+            when 'enddate'
+                guiltyFields = '#basic-end'
+
+            when 'date'
+                guiltyFields = '#basic-start, #basic-end'
+
+        @$(guiltyFields).parents('.control-group').addClass('error')
+        alertMsg = $('<div class="alert"></div>').text(t(error.value))
+        @$('.modal-body').before alertMsg
 
     showRRule: =>
         @updateHelp()
@@ -252,7 +292,3 @@ module.exports = class EventModal extends ViewCollection
 
     close: =>
         @$el.modal 'hide'
-        @$el.on 'hidden', =>
-            @remove()
-            app.router.navigate @options.backurl or '', true
-
