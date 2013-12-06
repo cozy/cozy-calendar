@@ -47,7 +47,8 @@ module.exports =
     "display previous events"           : "Montrer les évènements précédent"
     "event"                             : "Evenement"
     "alarm"                             : "Alarme"
-    "are you sure"                      : "Are you sure"
+    "are you sure"                      : "Etes-vous sur ?"
+    "advanced"                          : "Détails"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"
@@ -75,6 +76,7 @@ module.exports =
     "on the"                            : "le"
     "th"                                : "ème"
     "nd"                                : "ème"
+    "rd"                                : "ème"
     "st"                                : "er"
     "last"                              : "dernier"
     "and"                               : "et"

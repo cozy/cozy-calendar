@@ -33,6 +33,7 @@ module.exports = class CalendarView extends BaseView
     afterRender: ->
         locale = Date.getLocale(app.locale) # thanks sugarjs
         @cal = @$('#alarms')
+        @view = @options.view
         @cal.fullCalendar
             header:
                 left: 'prev,next today'
@@ -42,7 +43,7 @@ module.exports = class CalendarView extends BaseView
             firstDay: 1 # first day of the week is monday
             weekMode: 'liquid'
             height: @handleWindowResize('initial') # initial ratio
-            defaultView: @options.view
+            defaultView: @view
             viewDisplay: @onChangeView # beware, deprected in next FC
 
             #i18n by SugarJs
@@ -83,6 +84,10 @@ module.exports = class CalendarView extends BaseView
 
         @handleWindowResize() #
         $(window).resize _.debounce @handleWindowResize, 10
+
+    remove: ->
+        @popover?.close()
+        super
 
 
     handleWindowResize: (initial) =>
@@ -126,7 +131,8 @@ module.exports = class CalendarView extends BaseView
         @popover.render()
 
     onChangeView: (view) =>
-        switch view.name
+        return if @view is view.name
+        switch @view = view.name
             when 'month' then app.router.navigate 'calendar'
             when 'agendaWeek' then app.router.navigate 'calendarweek'
         @handleWindowResize()

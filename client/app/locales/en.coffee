@@ -43,6 +43,7 @@ module.exports =
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
     "EMAIL"                             : "E-mail"
+    "advanced"                          : "More details"
 
 # RRULE related
     "recurrence rule"                   : "Recurrence rules"
@@ -70,6 +71,7 @@ module.exports =
     "on the"                            : "on the"
     "th"                                : "th"
     "nd"                                : "nd"
+    "rd"                                : "rd"
     "st"                                : "st"
     "last"                              : "last"
     "and"                               : "and"

@@ -10,7 +10,7 @@ module.exports = class EventModal extends ViewCollection
     id: 'event-modal'
     className: 'modal fade'
 
-    inputDateTimeFormat: '{year}-{MM}-{dd}T{hh}:{mm}:{ss}'
+    inputDateTimeFormat: '{dd}/{MM}/{year} {hh}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
 
     collectionEl: '#guests-list'
@@ -27,6 +27,7 @@ module.exports = class EventModal extends ViewCollection
         'click  .close': 'close'
         'click  .rrule-show': 'showRRule'
         'change #rrule': 'updateHelp'
+        'changeDate #rrule-until': 'toggleCountUntil'
         'input  #rrule-until': 'toggleCountUntil'
         'change #rrule-count': 'toggleCountUntil'
         'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
@@ -42,6 +43,18 @@ module.exports = class EventModal extends ViewCollection
             @$('#rrule-short').hide()
 
         @addGuestField = @configureGuestTypeahead()
+        @startField = @$('#basic-start').attr('type', 'text')
+        @startField.parent().datetimepicker
+                format: 'dd/mm/yyyy hh:ii'
+                pickerPosition: 'bottom-left'
+        @endField = @$('#basic-end').attr('type', 'text')
+        @endField.parent().datetimepicker
+                format: 'dd/mm/yyyy hh:ii'
+                pickerPosition: 'bottom-left'
+        @$('#rrule-until').attr('type','text').datetimepicker(
+            format: 'dd/mm/yyyy'
+            minView: 2 # datepicker only
+        ).on 'changeDate', @updateHelp
 
         @$el.modal 'show'
 
@@ -113,8 +126,10 @@ module.exports = class EventModal extends ViewCollection
         data =
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
-            start: Date.create(@$('#basic-start').val()).format Event.dateFormat, 'en'
-            end: Date.create(@$('#basic-end').val()).format Event.dateFormat, 'en'
+            start: Date.create(@startField.val())
+                .format Event.dateFormat, 'en'
+            end: Date.create(@endField.val())
+                .format Event.dateFormat, 'en'
 
         if @$('#rrule-help').is ':visible'
             data.rrule = @getRRule().toString()
@@ -187,6 +202,8 @@ module.exports = class EventModal extends ViewCollection
         else if event.target.id is "rrule-until"
             @$('#rrule-count').val('')
 
+        @updateHelp()
+
     updateHelp: =>
         freq = @$('#rrule-freq').val()
         if freq is 'NOREPEAT'
@@ -204,6 +221,7 @@ module.exports = class EventModal extends ViewCollection
             dayNames: locale.weekdays.slice(0, 7)
             monthNames: locale.full_month.split('|').slice(1,13)
         @$('#rrule-help').html @getRRule().toText(window.t, language)
+        return true
 
 
     configureGuestTypeahead: =>
