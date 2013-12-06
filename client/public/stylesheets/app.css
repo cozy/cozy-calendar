@@ -8104,6 +8104,9 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 #event-modal .btn {
   border-radius: 5px;
 }
+#event-modal .alert {
+  margin-bottom: 0px;
+}
 #event-modal .modal-header {
   background: #aaa;
   color: #fff;
@@ -8185,6 +8188,21 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
   font-size: 13px;
   margin-right: 10px;
 }
+@media (min-width: 1100px) {
+  #event-modal {
+    width: 1000px;
+    margin-left: -500px;
+  }
+  #event-modal .modal-body > * {
+    width: 50%;
+  }
+  #event-modal .modal-body #guests-block {
+    position: absolute;
+    width: 40%;
+    top: 20px;
+    right: 20px;
+  }
+}
 @font-face {
   font-family: styled;
   src: url("/fonts/maven-pro-light-300.otf");
@@ -8248,7 +8266,8 @@ a:hover {
   color: #fe8800;
 }
 input,
-select {
+select,
+textarea {
   border: 1px solid #34a6ff;
   -webkit-border-radius: 0;
   border-radius: 0;
@@ -8618,7 +8637,8 @@ input[type="time"] {
   border-bottom-right-radius: 5px;
 }
 .popover-content input,
-.popover-content select {
+.popover-content select,
+.popover-content textarea {
   font-family: styled;
   margin-left: 5px;
   -webkit-border-radius: 0;
@@ -8626,16 +8646,6 @@ input[type="time"] {
   -webkit-box-shadow: 0;
   box-shadow: 0;
   border: 1px solid transparent;
-}
-.popover-content #input-start,
-.popover-content #input-end,
-.popover-content #input-diff {
-  border: 1px solid transparent;
-}
-.popover-content #input-start:focus,
-.popover-content #input-end:focus,
-.popover-content #input-diff:focus {
-  border: 1px solid #34a6ff;
 }
 .popover-content input:hover,
 .popover-content select:hover {

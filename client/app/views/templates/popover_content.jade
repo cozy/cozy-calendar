@@ -27,7 +27,7 @@ else if type = 'event'
         span.timeseparator &nbsp;+
         input#input-diff.col-xs2.input-mini(type="number", value=diff,
             placeholder=0)
-        span.timeseparator= t('&nbsp;days')
+        span.timeseparator= '&nbsp;' + t('days')
 
     .line
         input#input-place.input-small(type="text", value=place,

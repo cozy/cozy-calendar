@@ -843,6 +843,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "creation": "Creation",
     "invite": "Invite",
     "Place": "Place",
+    "description": "Description",
     "date": "date",
     "Day": "Day",
     "Edit": "Edit",
@@ -914,7 +915,14 @@ window.require.register("locales/en", function(exports, require, module) {
     "end": "End",
     "change": "Change",
     "save changes": "Save changes",
-    "guests": "Guests"
+    "guests": "Guests",
+    "invite-info": "The invitations will be sent after you click \"Save Changes\"",
+    "no description": "A title must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid."
   };
   
 });
@@ -931,6 +939,7 @@ window.require.register("locales/fr", function(exports, require, module) {
     "creation": "Creation",
     "invite": "Inviter",
     "Place": "Lieu",
+    "description": "Description",
     "date": "Date",
     "Day": "Jour",
     "Edit": "Modifier",
@@ -1008,7 +1017,14 @@ window.require.register("locales/fr", function(exports, require, module) {
     "change": "Modifier",
     "save changes": "Enregistrer",
     "guests": "Invités",
-    "enter email": "Entrer l'addresse email"
+    "enter email": "Entrer l'addresse email",
+    "invite-info": "Les invitations seront envoyés dès que vous cliquerez sur\n\"Enregistrer\"",
+    "no description": "Le titre est obligatoire",
+    "start after end": "La fin est après le début.",
+    "invalid start date": "Le début est invalide.",
+    "invalid end date": "La fin est invalide.",
+    "invalid trigg date": "Le moment est invalide.",
+    "invalid action": "L'action est invalide."
   };
   
 });
@@ -1041,25 +1057,19 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (!attrs.description || attrs.description === "") {
         errors.push({
           field: 'description',
-          value: "A description must be set."
-        });
-      }
-      if (!attrs.action || attrs.action === "") {
-        errors.push({
-          field: 'action',
-          value: "An action must be set."
+          value: "no description"
         });
       }
       if ((_ref1 = !attrs.action) === 'DISPLAY' || _ref1 === 'EMAIL') {
         errors.push({
           field: 'action',
-          value: "A valid action must be set."
+          value: "invalid action"
         });
       }
       if (!attrs.trigg || !Date.create(attrs.trigg).isValid()) {
         errors.push({
           field: 'triggdate',
-          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+          value: "invalid trigg date"
         });
       }
       if (errors.length > 0) {
@@ -1167,25 +1177,25 @@ window.require.register("models/event", function(exports, require, module) {
       if (!attrs.description) {
         errors.push({
           field: 'description',
-          value: "A description must be set."
+          value: "no description"
         });
       }
       if (!attrs.start || !(start = Date.create(attrs.start)).isValid()) {
         errors.push({
           field: 'startdate',
-          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+          value: "invalid start date"
         });
       }
       if (!attrs.end || !(end = Date.create(attrs.end)).isValid()) {
         errors.push({
           field: 'enddate',
-          value: "The date or time format might be invalid. " + "It must be dd/mm/yyyy and hh:mm."
+          value: "invalid end date"
         });
       }
       if (start.isAfter(end)) {
         errors.push({
           field: 'date',
-          value: "The start date might be inferor than end date  " + "It must be dd/mm/yyyy and hh:mm."
+          value: "start after end"
         });
       }
       if (errors.length > 0) {
@@ -1495,6 +1505,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
     __extends(PopOver, _super);
 
     function PopOver() {
+      this.handleError = __bind(this.handleError, this);
       this.onAddClicked = __bind(this.onAddClicked, this);
       this.onRemoveClicked = __bind(this.onRemoveClicked, this);
       this.getModelAttributes = __bind(this.getModelAttributes, this);
@@ -1554,7 +1565,6 @@ window.require.register("views/calendar_popover", function(exports, require, mod
       }).popover('show');
       this.setElement($('#viewContainer .popover'));
       this.addButton = this.$('.btn.add').text(this.getButtonText());
-      this.addButton.toggleClass('disabled', this.validForm());
       this.removeButton = this.$('.remove');
       if (this.model.isNew()) {
         this.removeButton.hide();
@@ -1565,14 +1575,6 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         showMeridian: false
       });
       return this.$('.focused').focus();
-    };
-
-    PopOver.prototype.validForm = function() {
-      if (this.model instanceof Event) {
-        return this.$('#input-start').val() !== '' && this.$('#input-end').val() !== '' && this.$('#input-desc').val() !== '';
-      } else {
-        return this.$('#input-desc').val() !== '' && this.$('#input-time').val() !== '';
-      }
     };
 
     PopOver.prototype.getTitle = function() {
@@ -1675,9 +1677,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
     };
 
     PopOver.prototype.onKeyUp = function(event) {
-      if (!this.validForm()) {
-        return this.addButton.addClass('disabled');
-      } else if (event.keyCode === 13 || event.which === 13) {
+      if (event.keyCode === 13 || event.which === 13) {
         return this.addButton.click();
       } else {
         return this.addButton.removeClass('disabled');
@@ -1746,14 +1746,14 @@ window.require.register("views/calendar_popover", function(exports, require, mod
     };
 
     PopOver.prototype.onAddClicked = function() {
-      var noError,
+      var err, validModel, _i, _len, _ref1, _results,
         _this = this;
       if (this.$('.btn.add').hasClass('disabled')) {
         return;
       }
       this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
       this.addButton.spin('small');
-      noError = this.model.save(this.getModelAttributes(), {
+      validModel = this.model.save(this.getModelAttributes(), {
         wait: true,
         success: function() {
           var collection;
@@ -1769,9 +1769,42 @@ window.require.register("views/calendar_popover", function(exports, require, mod
           return _this.selfclose();
         }
       });
-      if (!noError) {
-        return console.log(this.model.validationError);
+      if (!validModel) {
+        this.addButton.html(this.getButtonText());
+        this.addButton.spin();
+        this.$('.alert').remove();
+        this.$('input').css('border-color', '');
+        _ref1 = this.model.validationError;
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          err = _ref1[_i];
+          _results.push(this.handleError(err));
+        }
+        return _results;
       }
+    };
+
+    PopOver.prototype.handleError = function(error) {
+      var alertMsg, guiltyFields;
+      switch (error.field) {
+        case 'description':
+          guiltyFields = '#input-desc';
+          break;
+        case 'startdate':
+          guiltyFields = '#input-start';
+          break;
+        case 'enddate':
+          guiltyFields = '#input-end';
+          break;
+        case 'triggdate':
+          guiltyFields = '#input-time';
+          break;
+        case 'date':
+          guiltyFields = '#input-start, #input-end';
+      }
+      this.$(guiltyFields).css('border-color', 'red');
+      alertMsg = $('<div class="alert"></div>').text(t(error.value));
+      return this.$('.popover-content').before(alertMsg);
     };
 
     return PopOver;
@@ -2126,7 +2159,9 @@ window.require.register("views/event_modal", function(exports, require, module) 
       this.toggleCountUntil = __bind(this.toggleCountUntil, this);
       this.getRRule = __bind(this.getRRule, this);
       this.showRRule = __bind(this.showRRule, this);
+      this.handleError = __bind(this.handleError, this);
       this.save = __bind(this.save, this);
+      this.resizeDescription = __bind(this.resizeDescription, this);
       this.refreshGuestList = __bind(this.refreshGuestList, this);
       this.onGuestAdded = __bind(this.onGuestAdded, this);
       _ref = EventModal.__super__.constructor.apply(this, arguments);
@@ -2167,11 +2202,14 @@ window.require.register("views/event_modal", function(exports, require, module) 
         'change #rrule-count': 'toggleCountUntil',
         'click #addguest': function() {
           return _this.onGuestAdded(_this.$('#addguest-field').val());
-        }
+        },
+        'keydown #basic-description': 'resizeDescription',
+        'keypress #basic-description': 'resizeDescription'
       };
     };
 
     EventModal.prototype.afterRender = function() {
+      var _this = this;
       EventModal.__super__.afterRender.apply(this, arguments);
       this.$('#rrule').hide();
       if (this.model.get('rrule')) {
@@ -2196,7 +2234,12 @@ window.require.register("views/event_modal", function(exports, require, module) 
         format: 'dd/mm/yyyy',
         minView: 2
       }).on('changeDate', this.updateHelp);
-      return this.$el.modal('show');
+      this.descriptionField = this.$('#basic-description');
+      this.$el.modal('show');
+      return this.$el.on('hidden', function() {
+        _this.remove();
+        return window.history.back();
+      });
     };
 
     EventModal.prototype.onGuestAdded = function(info) {
@@ -2222,9 +2265,21 @@ window.require.register("views/event_modal", function(exports, require, module) 
       return this.collection.reset(this.model.get('attendees'));
     };
 
+    EventModal.prototype.resizeDescription = function() {
+      var loc, notes, rows;
+      notes = this.descriptionField.val();
+      rows = loc = 0;
+      while (loc = notes.indexOf("\n", loc) + 1) {
+        rows++;
+      }
+      return this.descriptionField.prop('rows', rows + 2);
+    };
+
     EventModal.prototype.getRenderData = function() {
       var data;
       data = _.extend({}, this.model.toJSON(), {
+        summary: this.model.get('description'),
+        description: this.model.get('details'),
         weekDays: Date.getLocale().weekdays.slice(0, 7),
         units: Date.getLocale().units,
         start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
@@ -2299,12 +2354,10 @@ window.require.register("views/event_modal", function(exports, require, module) 
     };
 
     EventModal.prototype.save = function() {
-      var data,
+      var data, error, validModel, _i, _len, _ref1, _results,
         _this = this;
-      if (this.$('confirm-btn').hasClass('disabled')) {
-        return;
-      }
       data = {
+        details: this.descriptionField.val(),
         description: this.$('#basic-summary').val(),
         place: this.$('#basic-place').val(),
         start: Date.create(this.startField.val()).format(Event.dateFormat, 'en'),
@@ -2315,7 +2368,7 @@ window.require.register("views/event_modal", function(exports, require, module) 
       } else {
         data.rrule = '';
       }
-      return this.model.save(data, {
+      validModel = this.model.save(data, {
         wait: true,
         success: function() {
           return _this.close();
@@ -2325,6 +2378,38 @@ window.require.register("views/event_modal", function(exports, require, module) 
           return _this.close();
         }
       });
+      console.log("bip");
+      if (!validModel) {
+        this.$('.alert').remove();
+        this.$('.control-group').removeClass('error');
+        _ref1 = this.model.validationError;
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          error = _ref1[_i];
+          _results.push(this.handleError(error));
+        }
+        return _results;
+      }
+    };
+
+    EventModal.prototype.handleError = function(error) {
+      var alertMsg, guiltyFields;
+      switch (error.field) {
+        case 'description':
+          guiltyFields = '#basic-summary';
+          break;
+        case 'startdate':
+          guiltyFields = '#basic-start';
+          break;
+        case 'enddate':
+          guiltyFields = '#basic-end';
+          break;
+        case 'date':
+          guiltyFields = '#basic-start, #basic-end';
+      }
+      this.$(guiltyFields).parents('.control-group').addClass('error');
+      alertMsg = $('<div class="alert"></div>').text(t(error.value));
+      return this.$('.modal-body').before(alertMsg);
     };
 
     EventModal.prototype.showRRule = function() {
@@ -2445,12 +2530,7 @@ window.require.register("views/event_modal", function(exports, require, module) 
     };
 
     EventModal.prototype.close = function() {
-      var _this = this;
-      this.$el.modal('hide');
-      return this.$el.on('hidden', function() {
-        _this.remove();
-        return app.router.navigate(_this.options.backurl || '', true);
-      });
+      return this.$el.modal('hide');
     };
 
     return EventModal;
@@ -3061,7 +3141,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   var __val__ = t('summary')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><div class="controls"><input');
-  buf.push(attrs({ 'id':('basic-summary'), 'type':("text"), 'value':(description), "class": ('span12') }, {"type":true,"value":true}));
+  buf.push(attrs({ 'id':('basic-summary'), 'type':("text"), 'value':(summary), "class": ('span12') }, {"type":true,"value":true}));
   buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span12"><label for="basic-place" class="control-label">');
   var __val__ = t('place')
   buf.push(escape(null == __val__ ? "" : __val__));
@@ -3077,7 +3157,13 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><div class="controls input-append date"><input');
   buf.push(attrs({ 'id':('basic-end'), 'type':("datetime-local"), 'value':(end) }, {"type":true,"value":true}));
-  buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div></div></form><h4>');
+  buf.push('/><span class="add-on"><i class="icon icon-calendar"></i></span></div></div></div><div class="row-fluid"><div class="control-group span12"><label for="basic-description" class="control-label">');
+  var __val__ = t('description')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</label><div class="controls"><textarea id="basic-description" class="span12">');
+  var __val__ = description
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</textarea></div></div></div></form><h4>');
   var __val__ = t('recurrence rule')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
@@ -3177,7 +3263,7 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/><label for="rrule-count">');
   var __val__ = t('occurences')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</label></div></form><h4>');
+  buf.push('</label></div></form><div id="guests-block"><h4>');
   var __val__ = t('guests')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h4><form id="guests" class="form-inline"><div class="control-group"><div class="controls"><input');
@@ -3185,7 +3271,10 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('/><a id="addguest" class="btn">');
   var __val__ = t('invite')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></div></div><p class="info">The invitations will be sent after you click "Save Changes"</p></form><div id="guests-list"></div></div><div class="modal-footer"><a id="cancel-btn">');
+  buf.push('</a></div></div><p class="info">');
+  var __val__ = t('invite-info')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p></form><div id="guests-list"></div></div></div><div class="modal-footer"><a id="cancel-btn">');
   var __val__ = t("cancel")
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');
@@ -3411,7 +3500,7 @@ window.require.register("views/templates/popover_content", function(exports, req
   buf.push('/><span class="timeseparator">&nbsp;+</span><input');
   buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><span class="timeseparator">');
-  var __val__ = t('&nbsp;days')
+  var __val__ = '&nbsp;' + t('days')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></div><div class="line"><input');
   buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
