@@ -20,7 +20,7 @@ module.exports = class AlarmView extends BaseView
         @$el.spin 'tiny'
         @model.destroy
             error: ->
-                alert('server error');
+                alert('server error')
                 @$el.spin()
 
     editMode: -> #@TODO

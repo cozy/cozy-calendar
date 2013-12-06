@@ -63,8 +63,14 @@
         &.fc-state-disabled
             background: blue
 
+    &:active
+        background: orange - 3%
+        box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset
+
     &.fc-state-active
+        box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset
         background: blue - 20%
+        cursor: default
 
 .fc-content
 
@@ -95,14 +101,15 @@
 .fc-cell-overlay
     background: green
 
-thead
-thead > tr.fc-first
-.fc-day-header
-.fc-widget-header
-    font-family: main
-    background: greyblue
-    border-radius: 0
-    color: white
+.fc-title, .fc-content
+    thead
+    thead > tr.fc-first
+    .fc-day-header
+    .fc-widget-header
+        font-family: main
+        background: greyblue
+        border-radius: 0
+        color: white
 
 .fc-agenda-axis
     background: white

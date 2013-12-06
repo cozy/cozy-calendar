@@ -1,7 +1,8 @@
 [![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-agenda.png?label=ready)](https://waffle.io/mycozycloud/cozy-agenda)  
+
 # Description
 
-The application currently manages reminders and only reminders. It is based on the iCal standard.
+A simple application to manage your events and your alarm.
 
 [![Build
 Status](https://travis-ci.org/mycozycloud/cozy-agenda.png?branch=master)](https://travis-ci.org/mycozycloud/cozy-agenda)
@@ -27,4 +28,7 @@ More informations and hosting services on:
 http://cozycloud.cc
 
 # Cozy on IRC
-Feel free to check out our IRC channel (#cozycloud at freenode.net) if you have any technical issues/inquiries or simply to speak about Cozy cloud in general.
+
+Feel free to check out our IRC channel (#cozycloud at freenode.net) if you 
+have any technical issues/inquiries or simply to speak about Cozy cloud in 
+general.

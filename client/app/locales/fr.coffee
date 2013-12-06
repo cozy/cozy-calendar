@@ -10,6 +10,7 @@ module.exports =
     "creation"                          : "Creation"
     "invite"                            : "Inviter"
     "Place"                             : "Lieu"
+    "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"
     "Edit"                              : "Modifier"
@@ -47,7 +48,8 @@ module.exports =
     "display previous events"           : "Montrer les évènements précédent"
     "event"                             : "Evenement"
     "alarm"                             : "Alarme"
-    "are you sure"                      : "Are you sure"
+    "are you sure"                      : "Etes-vous sur ?"
+    "advanced"                          : "Détails"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"
@@ -75,6 +77,7 @@ module.exports =
     "on the"                            : "le"
     "th"                                : "ème"
     "nd"                                : "ème"
+    "rd"                                : "ème"
     "st"                                : "er"
     "last"                              : "dernier"
     "and"                               : "et"
@@ -90,3 +93,15 @@ module.exports =
     "save changes"                      : "Enregistrer"
     "guests"                            : "Invités"
     "enter email"                       : "Entrer l'addresse email"
+    "invite-info"                       : """
+        Les invitations seront envoyés dès que vous cliquerez sur
+        "Enregistrer"
+    """
+
+# ERRORS
+    "no description"                    : "Le titre est obligatoire"
+    "start after end"                   : "La fin est après le début."
+    "invalid start date"                : "Le début est invalide."
+    "invalid end date"                  : "La fin est invalide."
+    "invalid trigg date"                : "Le moment est invalide."
+    "invalid action"                    : "L'action est invalide."

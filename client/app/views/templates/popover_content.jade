@@ -4,37 +4,39 @@ if !editionMode
         li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
 
 if type == 'alarm'
-    div
+    .line
         input#input-time.focused.input-mini(type="time", value=time)
         select#input-timezone.input
             each tz in timezones
                 option(value=tz, selected=(timezone == tz))= tz
         input#input-desc.input-xlarge(type="text", value=description
             placeholder=t("alarm description placeholder"))
-    div
-        button.btn.add= t('Edit')
+
+    .popover-footer
+        a.btn.add= t('Edit')
 
 else if type = 'event'
 
-    div
+    .line
+        span.timeseparator &nbsp;From
         input#input-start.focused.input-mini(type="time", value=start,
             placeholder=t("From hours:minutes"))
-        span.timeseparator -
+        span.timeseparator &nbsp;to
         input#input-end.input-mini(type="time", value=end,
             placeholder=t("To hours:minutes+days"))
-        span.timeseparator ,
+        span.timeseparator &nbsp;+
         input#input-diff.col-xs2.input-mini(type="number", value=diff,
             placeholder=0)
-        span.timeseparator= t('days after')
+        span.timeseparator= '&nbsp;' + t('days')
 
-    div
+    .line
         input#input-place.input-small(type="text", value=place,
             placeholder=t("Place"))
         input#input-desc.input(type="text", value=description,
             placeholder=t("Description"))
 
-    div
-        button.btn.add= editionMode ? t('Edit') : t('Create')
-
+    .popover-footer.line
         if editionMode
             a.advanced-link(href='#'+advancedUrl)= t('advanced')
+        span &nbsp;
+        a.btn.add= editionMode ? t('Edit') : t('Create')
