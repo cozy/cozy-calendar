@@ -1,6 +1,10 @@
 if type == 'alarm'
     p
-        span(title="#{timezoneHour} - #{timezone}") #{time}
+        if typeof timezoneHour != 'undefined'
+            span(title="#{timezoneHour} - #{timezone}") #{time}
+        else
+            span #{time}
+
         |  #{description} (#{t(action)})
         i.icon-trash
 else if type == 'event'
