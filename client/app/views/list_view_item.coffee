@@ -37,7 +37,6 @@ module.exports = class AlarmView extends BaseView
     getRenderData: ->
         data = @model.toJSON()
         if @model instanceof Event
-            window.test = @model
             _.extend data,
                 type: 'event'
                 start: @model.getFormattedStartDate '{HH}:{mm}'
