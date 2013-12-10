@@ -8,7 +8,7 @@ User  = require '../server/models/user'
 module.exports = helpers = {}
 
 helpers.before = (done) ->
-    @timeout 5000
+    @timeout 10000
     start = require('../server')
     start 8888, (err, app, server) =>
         @server = server
