@@ -1226,6 +1226,14 @@ module.exports = Event = (function(_super) {
 
   Event.prototype.urlRoot = 'events';
 
+  Event.prototype.defaults = function() {
+    return {
+      description: '',
+      title: '',
+      place: ''
+    };
+  };
+
   Event.prototype.validate = function(attrs, options) {
     var end, errors, start;
 
@@ -2257,7 +2265,7 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.className = 'modal fade';
 
-  EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {hh}:{mm}';
+  EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {HH}:{mm}';
 
   EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
