@@ -9,5 +9,5 @@ module.exports = Contact = americano.getModel 'Contact',
 Contact::asNameAndEmails = ->
     return simple =
         id: @id
-        name: @fn or @n.split(';')[0..1].join ' '
+        name: @fn or @n?.split(';')[0..1].join(' ') or '?'
         emails: @datapoints.filter (dp) -> dp.name is 'email'

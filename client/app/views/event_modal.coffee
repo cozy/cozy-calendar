@@ -10,7 +10,7 @@ module.exports = class EventModal extends ViewCollection
     id: 'event-modal'
     className: 'modal fade'
 
-    inputDateTimeFormat: '{dd}/{MM}/{year} {hh}:{mm}'
+    inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
 
     collectionEl: '#guests-list'
