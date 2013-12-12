@@ -142,9 +142,9 @@ module.exports = class EventModal extends ViewCollection
             details: @descriptionField.val()
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
-            start: Date.create(@startField.val())
+            start: Date.create(@startField.val(), 'fr')
                 .format Event.dateFormat, 'en'
-            end: Date.create(@endField.val())
+            end: Date.create(@endField.val(), 'fr')
                 .format Event.dateFormat, 'en'
 
         if @$('#rrule-help').is ':visible'

@@ -2462,8 +2462,8 @@ module.exports = EventModal = (function(_super) {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
       place: this.$('#basic-place').val(),
-      start: Date.create(this.startField.val()).format(Event.dateFormat, 'en'),
-      end: Date.create(this.endField.val()).format(Event.dateFormat, 'en')
+      start: Date.create(this.startField.val(), 'fr').format(Event.dateFormat, 'en'),
+      end: Date.create(this.endField.val(), 'fr').format(Event.dateFormat, 'en')
     };
     if (this.$('#rrule-help').is(':visible')) {
       data.rrule = this.getRRule().toString();
