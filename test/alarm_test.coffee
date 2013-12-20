@@ -48,7 +48,6 @@ describe "Alarms management", ->
                     timezone: 'Europe/Paris'
 
                 client.post "alarms/", @alarm, (error, response, body) =>
-
                     should.not.exist error
                     should.exist response
                     response.should.have.status 201

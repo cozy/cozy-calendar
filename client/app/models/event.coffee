@@ -7,6 +7,11 @@ module.exports = class Event extends ScheduleItem
     endDateField: 'end'
     urlRoot: 'events'
 
+    defaults: ->
+        description: ''
+        title: ''
+        place: ''
+
     validate: (attrs, options) ->
 
         errors = []

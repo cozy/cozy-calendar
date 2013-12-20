@@ -55,6 +55,9 @@ runTests = (fileList) ->
     if options.debug
         command += "--debug --forward-io --profile "
     command += " --reporter spec --require should --compilers coffee:coffee-script --colors"
+
+    # @TODO, figure out why
+    command += " --globals setImmediate,clearImmediate"
     exec command, (err, stdout, stderr) ->
         console.log stdout
         if err

@@ -8,6 +8,8 @@ clientDS = new Client 'http://localhost:9101'
 helpers = require './helpers'
 
 {ICalParser, VCalendar, VAlarm, VTodo, VEvent} = require 'cozy-ical'
+# THIS TEST DUPPLICATE cozy-ical's
+#@TODO : improve test there, remove here
 
 expectedContent = """
     BEGIN:VCALENDAR
@@ -34,7 +36,7 @@ expectedContent = """
     BEGIN:VALARM
     ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130423T144000Z
+    TRIGGER;VALUE=DATE-TIME:20130423T144000Z
     END:VALARM
     END:VTODO
     BEGIN:VTIMEZONE
@@ -58,7 +60,7 @@ expectedContent = """
     BEGIN:VALARM
     ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130424T133000Z
+    TRIGGER;VALUE=DATE-TIME:20130424T133000Z
     END:VALARM
     END:VTODO
     BEGIN:VTIMEZONE
@@ -82,13 +84,13 @@ expectedContent = """
     BEGIN:VALARM
     ACTION:DISPLAY
     REPEAT:1
-    TRIGGER:20130425T113000Z
+    TRIGGER;VALUE=DATE-TIME:20130425T113000Z
     END:VALARM
     END:VTODO
     BEGIN:VEVENT
-    DESCRIPTION:my description
-    DTSTART:20130609T150000Z
-    DTEND:20130610T150000Z
+    SUMMARY:my description
+    DTSTART;VALUE=DATE-TIME:20130609T150000Z
+    DTEND;VALUE=DATE-TIME:20130610T150000Z
     LOCATION:my place
     UID:[id-4]
     END:VEVENT
@@ -119,7 +121,7 @@ describe "Calendar export/import", ->
                     BEGIN:VALARM
                     ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130609T150000Z
+                    TRIGGER;VALUE=DATE-TIME:20130609T150000Z
                     END:VALARM""".replace(/\n/g, '\r\n')
 
         describe 'get vTodo string', ->
@@ -140,9 +142,9 @@ describe "Calendar export/import", ->
                 vevent = new VEvent startDate, endDate, "desc", "loc", "eid"
                 vevent.toString().should.equal """
                     BEGIN:VEVENT
-                    DESCRIPTION:desc
-                    DTSTART:20130609T150000Z
-                    DTEND:20130610T150000Z
+                    SUMMARY:desc
+                    DTSTART;VALUE=DATE-TIME:20130609T150000Z
+                    DTEND;VALUE=DATE-TIME:20130610T150000Z
                     LOCATION:loc
                     UID:eid
                     END:VEVENT""".replace(/\n/g, '\r\n')
@@ -166,7 +168,7 @@ describe "Calendar export/import", ->
                     BEGIN:VALARM
                     ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130609T150000Z
+                    TRIGGER;VALUE=DATE-TIME:20130609T150000Z
                     END:VALARM
                     END:VTODO
                     END:VCALENDAR""".replace(/\n/g, '\r\n')
@@ -210,7 +212,7 @@ describe "Calendar export/import", ->
                     BEGIN:VALARM
                     ACTION:DISPLAY
                     REPEAT:1
-                    TRIGGER:20130424T133000Z
+                    TRIGGER;VALUE=DATE-TIME:20130424T133000Z
                     END:VALARM
                     END:VTODO""".replace(/\n/g, '\r\n')
 
@@ -244,29 +246,35 @@ describe "Calendar export/import", ->
                 event = new Event
                     id: "testid"
                     place: "my place"
+                    details: "test"
                     description: "my description"
                     start: "Tue Apr 24 2013 13:30:00"
                     end: "Fri Apr 25 2013 13:30:00"
                 event.toIcal().toString().should.equal """
                     BEGIN:VEVENT
-                    DESCRIPTION:my description
-                    DTSTART:20130424T133000Z
-                    DTEND:20130425T133000Z
+                    SUMMARY:my description
+                    DTSTART;VALUE=DATE-TIME:20130424T133000Z
+                    DTEND;VALUE=DATE-TIME:20130425T133000Z
                     LOCATION:my place
                     UID:testid
+                    DESCRIPTION:test
                     END:VEVENT""".replace(/\n/g, '\r\n')
 
-            it 'fromIcal', ->
+            it 'fromIcal', (done) ->
                 start = new Date 2013, 5, 9, 15, 0, 0
                 end = new Date 2013, 5, 10, 15, 0, 0
                 location = 'my place'
                 description = 'description'
                 vEvent = new VEvent start, end, description, location
-                event = Event.fromIcal vEvent
-                event.description.should.equal description
-                event.place.should.equal location
-                event.start.should.equal "Sun Jun 09 2013 15:00:00"
-                event.end.should.equal "Mon Jun 10 2013 15:00:00"
+                vCalendar = new VCalendar '', ''
+                vCalendar.add vEvent
+                new ICalParser().parseString vCalendar.toString(), (err, cal) ->
+                    event = Event.fromIcal cal.subComponents[0]
+                    event.description.should.equal description
+                    event.place.should.equal location
+                    event.start.should.equal "Sun Jun 09 2013 15:00:00"
+                    event.end.should.equal "Mon Jun 10 2013 15:00:00"
+                    done()
 
             it 'extractEvents', ->
                 cal = Alarm.getICalCalendar()
@@ -280,15 +288,17 @@ describe "Calendar export/import", ->
                 location2 = 'my place2'
                 description2 = 'description2'
                 cal.add new VEvent start2, end2, description2, location2
-                events = Event.extractEvents cal
-                events[0].description.should.equal description
-                events[0].place.should.equal location
-                events[0].start.should.equal "Sun Jun 09 2013 15:00:00"
-                events[0].end.should.equal "Mon Jun 10 2013 15:00:00"
-                events[1].description.should.equal description2
-                events[1].place.should.equal location2
-                events[1].start.should.equal "Mon Jun 10 2013 15:00:00"
-                events[1].end.should.equal "Tue Jun 11 2013 15:00:00"
+
+                new ICalParser().parseString cal.toString(), (err, cal) ->
+                    events = Event.extractEvents cal
+                    events[0].description.should.equal description
+                    events[0].place.should.equal location
+                    events[0].start.should.equal "Sun Jun 09 2013 15:00:00"
+                    events[0].end.should.equal "Mon Jun 10 2013 15:00:00"
+                    events[1].description.should.equal description2
+                    events[1].place.should.equal location2
+                    events[1].start.should.equal "Mon Jun 10 2013 15:00:00"
+                    events[1].end.should.equal "Tue Jun 11 2013 15:00:00"
 
 
     describe 'Resources', ->
