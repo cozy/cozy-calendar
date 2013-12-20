@@ -34,7 +34,8 @@ module.exports = class Event extends ScheduleItem
         return errors if errors.length > 0
 
     #@TODO tags = color
-    getColor: -> '#EB1'
+    #getColor: -> '#EB1'
+    getColor: -> '#9B559B'
 
     # Date object management
     initialize: ->
