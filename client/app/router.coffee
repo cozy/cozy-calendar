@@ -22,8 +22,8 @@ module.exports = class Router extends Backbone.Router
             view: fcView
             model: {alarms:app.alarms, events:app.events}
         app.menu.activate 'calendar'
-        @handleFetch app.alarms, "alarms"
-        @handleFetch app.events, "events"
+        @handleFetch app.alarms, 'alarms'
+        @handleFetch app.events, 'events'
 
     calendarweek: ->
         @calendar 'agendaWeek'

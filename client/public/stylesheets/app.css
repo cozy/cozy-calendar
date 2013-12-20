@@ -8277,11 +8277,13 @@ textarea {
   font-family: styled;
 }
 input:hover,
-select:hover {
+select:hover,
+textarea:hover {
   border: 1px solid #fe8800;
 }
 input:active,
-select:active {
+select:active,
+textarea:active {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
@@ -8475,8 +8477,31 @@ ul#menu li:first-child {
   border-radius: 0px;
   padding: 5px;
 }
+#event-modal textarea,
+#event-modal textarea:focus {
+  font-family: styled;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: 1px solid #34a6ff;
+}
+#event-modal textarea:hover {
+  border: 1px solid #fe8800;
+}
 .datepicker {
   z-index: 1150;
+}
+.fc-day:hover {
+  background: #ffe7cc;
+}
+#viewContainer .fc-content .fc-cell-overlay {
+  background: #cbe4fb;
+}
+#viewContainer .fc-content tbody .fc-state-highlight {
+  background: #ccf0cc;
+}
+#viewContainer .fc-event-inner:hover {
+  background: #fe8800;
+  border: 0;
 }
 #addguest.btn {
   -webkit-border-radius: 0px;

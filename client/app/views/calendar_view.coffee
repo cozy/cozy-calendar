@@ -6,9 +6,6 @@ timezones = require('helpers/timezone').timezones
 
 Alarm = require 'models/alarm'
 Event = require 'models/event'
-# formSmallTemplate = {}
-# formSmallTemplate.alarm = require('./templates/alarm_form_small')
-# formSmallTemplate.event = require('./templates/event_form_small')
 
 
 module.exports = class CalendarView extends BaseView
@@ -259,4 +256,3 @@ module.exports = class CalendarView extends BaseView
         @showPopover
             model: model,
             target: $(jsEvent.currentTarget)
-

@@ -34,7 +34,7 @@ module.exports = class PopOver extends BaseView
 
     close: () ->
         @target.popover 'destroy'
-        @target.data('popover', undefined)
+        @target.data 'popover', undefined
         @remove()
 
     render: ->
