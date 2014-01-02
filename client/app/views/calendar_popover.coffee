@@ -56,6 +56,10 @@ module.exports = class PopOver extends BaseView
             showMeridian: false
         @$('.focused').focus()
 
+        @$("#input-start").data('timepicker').elementKeydown = (event) ->
+            console.log "toto"
+
+
     getTitle: ->
         title = if @model.isNew() then 'creation'
         else 'edit ' + @type

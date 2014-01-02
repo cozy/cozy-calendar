@@ -833,6 +833,8 @@ window.require.register("lib/view_collection", function(exports, require, module
 window.require.register("locales/en", function(exports, require, module) {
   module.exports = {
     "Add": "Add",
+    "alarm": "Alarm",
+    "event": "Event",
     "add the alarm": "add the alarm",
     "create alarm": "Alarm creation",
     "create event": "Event creation",
@@ -878,6 +880,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "DISPLAY": "Notification",
     "EMAIL": "E-mail",
     "advanced": "More details",
+    "enter email": "Enter email",
     "recurrence rule": "Recurrence rules",
     "make reccurent": "Make recurrent",
     "repeat every": "Repeat every",
@@ -929,6 +932,8 @@ window.require.register("locales/en", function(exports, require, module) {
 window.require.register("locales/fr", function(exports, require, module) {
   module.exports = {
     "Add": "Ajouter",
+    "alarm": "Alarme",
+    "event": "Evénement",
     "add the alarm": "Ajouter l'alarme",
     "create alarm": "Création d'une alarme",
     "create event": "Création d'un évènement",
@@ -979,6 +984,7 @@ window.require.register("locales/fr", function(exports, require, module) {
     "alarm": "Alarme",
     "are you sure": "Etes-vous sur ?",
     "advanced": "Détails",
+    "enter Email": "Entrez l'email",
     "recurrence rule": "Règle de recurrence",
     "make reccurent": "Rendre réccurent",
     "repeat every": "Répéter tous les",
@@ -1079,6 +1085,10 @@ window.require.register("models/alarm", function(exports, require, module) {
 
     Alarm.prototype.getColor = function() {
       return '#5C5';
+    };
+
+    Alarm.prototype.getColor = function() {
+      return '#8D8';
     };
 
     Alarm.prototype.initialize = function() {
@@ -1212,7 +1222,7 @@ window.require.register("models/event", function(exports, require, module) {
     };
 
     Event.prototype.getColor = function() {
-      return '#9B559B';
+      return '#FC2';
     };
 
     Event.prototype.initialize = function() {
@@ -1582,7 +1592,10 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         minuteStep: 5,
         showMeridian: false
       });
-      return this.$('.focused').focus();
+      this.$('.focused').focus();
+      return this.$("#input-start").data('timepicker').elementKeydown = function(event) {
+        return console.log("toto");
+      };
     };
 
     PopOver.prototype.getTitle = function() {

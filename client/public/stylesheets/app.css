@@ -8490,19 +8490,6 @@ ul#menu li:first-child {
 .datepicker {
   z-index: 1150;
 }
-.fc-day:hover {
-  background: #ffe7cc;
-}
-#viewContainer .fc-content .fc-cell-overlay {
-  background: #cbe4fb;
-}
-#viewContainer .fc-content tbody .fc-state-highlight {
-  background: #ccf0cc;
-}
-#viewContainer .fc-event-inner:hover {
-  background: #fe8800;
-  border: 0;
-}
 #addguest.btn {
   -webkit-border-radius: 0px;
   border-radius: 0px;
@@ -8838,6 +8825,9 @@ body {
   body {
     padding: 0;
   }
+  ul#menu li:first-child {
+    margin-left: 5px;
+  }
   #alarms {
     width: 100%;
     margin: 0px;
@@ -9105,6 +9095,7 @@ a:focus,
   -webkit-border-radius: 0;
   border-radius: 0;
   color: #fff;
+  cursor: default;
 }
 .fc-agenda-axis {
   background: #fff;
@@ -9120,6 +9111,21 @@ a:focus,
   border: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
+  color: #000;
+}
+.fc-day:hover {
+  background: #ffe7cc;
+}
+#viewContainer .fc-content .fc-cell-overlay {
+  background: #cbe4fb;
+}
+#viewContainer .fc-content tbody .fc-state-highlight {
+  background: #ccf0cc;
+}
+#viewContainer .fc-event-inner:hover {
+  color: #fff;
+  background: #fe8800;
+  border: 0;
 }
 .alarm-remove {
   cursor: pointer;
