@@ -88,8 +88,7 @@ module.exports = class CalendarView extends BaseView
 
 
     handleWindowResize: (initial) =>
-        diff = 2 * parseInt @cal.css('padding-top')
-        targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff
+        targetHeight = $(window).height() - 38
         @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
         @cal.height @$('.fc-header').height() + @$('.fc-content').height()
 

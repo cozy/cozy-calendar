@@ -1,20 +1,20 @@
-li
-    a.btn(href="#calendar")
-        i.icon-calendar.icon-white
+a(href="#calendar")
+    li
+        i.fa-calendar
         span
             = t('Calendar')
-li
-    a.btn(href="#list")
-        i.icon-list.icon-white
+a(href="#list")
+    li
+        i.fa-list
         span
             = t('List')
-li
-    a#import-menu-button.btn(href="#import")
-        i.icon-circle-arrow-up.icon-white
+a#import-menu-button(href="#import")
+    li
+        i.fa-chevron-circle-up
         span
             = t('Import')
-li
-    a.btn(href="export/calendar.ics", target="_blank")
-        i.icon-share.icon-white
+a(href="export/calendar.ics", target="_blank")
+    li
+        i.fa-share
         span
             = t('Export')

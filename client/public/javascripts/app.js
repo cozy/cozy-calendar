@@ -104,8 +104,8 @@ window.require.register("application", function(exports, require, module) {
       ContactCollection = require('collections/contacts');
       this.router = new Router();
       this.menu = new Menu().render();
+      this.menu.$el.appendTo('body');
       $("body").append('<div class="main-container"></div>');
-      this.menu.$el.appendTo('.main-container');
       this.alarms = new AlarmCollection();
       this.events = new EventCollection();
       this.contacts = new ContactCollection();
@@ -1955,9 +1955,8 @@ window.require.register("views/calendar_view", function(exports, require, module
     };
 
     CalendarView.prototype.handleWindowResize = function(initial) {
-      var diff, targetHeight;
-      diff = 2 * parseInt(this.cal.css('padding-top'));
-      targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff;
+      var targetHeight;
+      targetHeight = $(window).height() - 38;
       if (initial !== 'initial') {
         this.cal.fullCalendar('option', 'height', targetHeight);
       }
@@ -3450,19 +3449,19 @@ window.require.register("views/templates/menu", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<li><a href="#calendar" class="btn"><i class="icon-calendar icon-white"></i><span>');
+  buf.push('<a href="#calendar"><li><i class="fa-calendar"></i><span>');
   var __val__ = t('Calendar')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a></li><li><a href="#list" class="btn"><i class="icon-list icon-white"></i><span>');
+  buf.push('</span></li></a><a href="#list"><li><i class="fa-list"></i><span>');
   var __val__ = t('List')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a></li><li><a id="import-menu-button" href="#import" class="btn"><i class="icon-circle-arrow-up icon-white"></i><span>');
+  buf.push('</span></li></a><a id="import-menu-button" href="#import"><li><i class="fa-chevron-circle-up"></i><span>');
   var __val__ = t('Import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a></li><li><a href="export/calendar.ics" target="_blank" class="btn"><i class="icon-share icon-white"></i><span>');
+  buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"><li><i class="fa-share"></i><span>');
   var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span></a></li>');
+  buf.push('</span></li></a>');
   }
   return buf.join("");
   };
