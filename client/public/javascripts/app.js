@@ -2109,7 +2109,6 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onEventResize = function(fcEvent, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
       var data, end, model,
         _this = this;
-      console.log("ok");
       if (fcEvent.type === "alarm") {
         fcEvent.isSaving = false;
         this.cal.fullCalendar('renderEvent', fcEvent);

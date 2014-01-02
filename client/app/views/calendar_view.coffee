@@ -220,7 +220,6 @@ module.exports = class CalendarView extends BaseView
     onEventResize: (fcEvent, dayDelta, minuteDelta, revertFunc,
                     jsEvent, ui, view) =>
 
-        console.log "ok"
         # alarms can't be resized
         if fcEvent.type is "alarm"
             fcEvent.isSaving = false

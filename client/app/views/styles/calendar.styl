@@ -102,6 +102,9 @@
     background: green
 
 
+.fc-header
+    cursor: default
+
 .fc-header-title
     h2
         font-weight: normal
@@ -129,12 +132,6 @@
     border-radius: 0
     color: white
 
-#alarms
-    thead
-        .fc-first
-            .fc-day-header
-                border-bottom: 1px solid #DDD
-
 .fc-day-number
     font-family: styled
 
@@ -146,17 +143,6 @@
 
 .fc-day:hover
     background orange + 80%
-
-#viewContainer .fc-content .fc-cell-overlay
-    background #CBE4FB
-
-#viewContainer .fc-content tbody .fc-state-highlight
-    background #CCF0CC
-
-#viewContainer .fc-event-inner:hover
-    color: white
-    background: orange
-    border: 0
 
 .alarm-remove
     cursor: pointer
@@ -170,3 +156,21 @@
 
 .fc-view
     overflow: visible
+
+#viewContainer .fc-content .fc-cell-overlay
+    background #CBE4FB
+
+#viewContainer .fc-content tbody .fc-state-highlight
+    background #CCF0CC
+
+#viewContainer .fc-event-inner:hover
+    color: white
+    background: orange
+    border: 0
+
+#alarms
+    thead
+        .fc-first
+            .fc-day-header
+            .fc-widget-header
+                border-bottom: 1px solid #DDD
