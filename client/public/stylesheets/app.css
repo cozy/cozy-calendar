@@ -9082,6 +9082,9 @@ a:focus,
 .fc-cell-overlay {
   background: #5c5;
 }
+.fc-header-title h2 {
+  font-weight: normal;
+}
 .fc-title thead,
 .fc-content thead,
 .fc-title thead > tr.fc-first,
@@ -9090,12 +9093,14 @@ a:focus,
 .fc-content .fc-day-header,
 .fc-title .fc-widget-header,
 .fc-content .fc-widget-header {
-  font-family: main;
+  font-family: styled;
   background: #34a6bb;
+  background: #fff;
   -webkit-border-radius: 0;
   border-radius: 0;
-  color: #fff;
+  color: #000;
   cursor: default;
+  font-weight: normal;
 }
 .fc-agenda-axis {
   background: #fff;
@@ -9103,15 +9108,23 @@ a:focus,
 }
 .fc-agenda-axis.fc-first {
   background: #34a6bb;
+  background: #fff;
   -webkit-border-radius: 0;
   border-radius: 0;
   color: #fff;
+}
+#alarms thead .fc-first .fc-day-header {
+  border-bottom: 1px solid #ddd;
+}
+.fc-day-number {
+  font-family: styled;
 }
 .fc-event-inner {
   border: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
-  color: #000;
+  color: #fff;
+  font-family: main;
 }
 .fc-day:hover {
   background: #ffe7cc;
@@ -9131,10 +9144,6 @@ a:focus,
   cursor: pointer;
 }
 .event-remove {
-  cursor: pointer;
-}
-.fc-widget-content,
-.fc-cell-overlay {
   cursor: pointer;
 }
 .fc-widget-content,

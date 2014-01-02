@@ -1088,7 +1088,7 @@ window.require.register("models/alarm", function(exports, require, module) {
     };
 
     Alarm.prototype.getColor = function() {
-      return '#8D8';
+      return '#00C67A';
     };
 
     Alarm.prototype.initialize = function() {
@@ -1223,6 +1223,10 @@ window.require.register("models/event", function(exports, require, module) {
 
     Event.prototype.getColor = function() {
       return '#FC2';
+    };
+
+    Event.prototype.getColor = function() {
+      return '#008AF6';
     };
 
     Event.prototype.initialize = function() {
@@ -2105,6 +2109,7 @@ window.require.register("views/calendar_view", function(exports, require, module
     CalendarView.prototype.onEventResize = function(fcEvent, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
       var data, end, model,
         _this = this;
+      console.log("ok");
       if (fcEvent.type === "alarm") {
         fcEvent.isSaving = false;
         this.cal.fullCalendar('renderEvent', fcEvent);
@@ -2135,6 +2140,9 @@ window.require.register("views/calendar_view", function(exports, require, module
 
     CalendarView.prototype.onEventClick = function(fcEvent, jsEvent, view) {
       var model;
+      if ($(jsEvent.target).hasClass('ui-resizable-handle')) {
+        return true;
+      }
       model = (function() {
         if (fcEvent.type === 'alarm') {
           return this.alarmCollection.get(fcEvent.id);

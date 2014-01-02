@@ -220,6 +220,7 @@ module.exports = class CalendarView extends BaseView
     onEventResize: (fcEvent, dayDelta, minuteDelta, revertFunc,
                     jsEvent, ui, view) =>
 
+        console.log "ok"
         # alarms can't be resized
         if fcEvent.type is "alarm"
             fcEvent.isSaving = false
@@ -248,6 +249,7 @@ module.exports = class CalendarView extends BaseView
 
 
     onEventClick: (fcEvent, jsEvent, view) =>
+        return true if $(jsEvent.target).hasClass 'ui-resizable-handle'
 
         model = if fcEvent.type is 'alarm' then @alarmCollection.get fcEvent.id
         else if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
