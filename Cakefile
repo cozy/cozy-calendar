@@ -27,7 +27,6 @@ walk = (dir, fileList) ->
                     fileList.push(filename)
     return fileList
 
-
 task 'tests', 'run server tests, ./test is parsed by default, otherwise use -f or --dir', (opts) ->
     options   = opts
     testFiles = []
@@ -37,48 +36,38 @@ task 'tests', 'run server tests, ./test is parsed by default, otherwise use -f o
     if options.file
         testFiles  = testFiles.concat(options.file)
     if not(options.dir or options.file)
-        testFiles = walk("test", [])
+        testFiles = walk("tests", [])
     runTests testFiles
 
 task 'tests:client', 'run client tests through mocha', (opts) ->
-    exec "mocha-phantomjs client/tests/index.html", (err, stdout, stderr) ->
+    exec "mocha-phantomjs client/_specs/index.html", (err, stdout, stderr) ->
         if err
             console.log "Running mocha caught exception: \n" + err
-
         console.log stdout
 
 
 runTests = (fileList) ->
-    command = "NODE_ENV='test' mocha " + fileList.join(" ") + " "
+    command = "mocha " + fileList.join(" ") + " "
     if options['debug-brk']
         command += "--debug-brk --forward-io --profile "
     if options.debug
         command += "--debug --forward-io --profile "
-    command += " --reporter spec --require should --compilers coffee:coffee-script --colors"
+    command += " --reporter spec --compilers coffee:coffee-script --colors"
+    exec command, (err, stdout, stderr) ->
+        if err
+            console.log "Running mocha caught exception: \n" + err
+        console.log stdout
+        process.exit if err then 1 else 0
 
-    # @TODO, figure out why
-    command += " --globals setImmediate,clearImmediate"
+task 'convert', 'convert from coffee to JS', ->
+    files = walk "server", []
+    console.log "Convert to JS..."
+    command = "coffee -cb server.coffee #{files.join ' '} "
     exec command, (err, stdout, stderr) ->
         console.log stdout
         if err
-            console.log "Running mocha caught exception: \n" + err
+            console.log "Running convertion caught exception: \n" + err
             process.exit 1
         else
+            console.log "Convertion succeeded."
             process.exit 0
-
-
-task "xunit", "", ->
-    process.env.TZ = "Europe/Paris"
-    command = "mocha "
-    command += " --require should --compilers coffee:coffee-script -R xunit > xunit.xml"
-    exec command, (err, stdout, stderr) ->
-        console.log stdout
-
-
-task "xunit:client", "", ->
-    process.env.TZ = "Europe/Paris"
-    command = "mocha client/test/*"
-    command += " --require should --compilers coffee:coffee-script -R xunit > xunitclient.xml"
-    exec command, (err, stdout, stderr) ->
-        console.log stdout
-
