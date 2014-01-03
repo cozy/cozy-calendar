@@ -9243,15 +9243,15 @@ table.fc-border-separate {
 }
 @font-face {
   font-family: styled;
-  src: url("fonts/maven-pro-light-300.otf");
+  src: url("/fonts/maven-pro-light-300.otf");
 }
 @font-face {
   font-family: main;
-  src: url("fonts/signika-regular.ttf");
+  src: url("/fonts/signika-regular.ttf");
 }
 @font-face {
   font-family: fontawesome;
-  src: url("fonts/fontawesome-webfont.ttf");
+  src: url("/fonts/fontawesome-webfont.ttf");
 }
 html,
 body {
@@ -9460,6 +9460,68 @@ cursor not-allowed {
 body {
   padding: 0;
 }
+.helptext {
+  font-family: main;
+  padding: 10px 20px;
+}
+.info {
+  font-size: 12px;
+  color: #777;
+}
+.datepicker {
+  z-index: 1150;
+}
+.showbefore {
+  margin: 0px 20px 20px 20px;
+}
+.main-container {
+  margin-left: 200px;
+  border: 1px solid #ddd;
+  border-width: 0px 1px;
+  background: #fff;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: auto;
+  border: 0;
+}
+#viewContainer {
+  border-bottom: 0;
+}
+input[type="date"] {
+  width: 150px;
+}
+input[type="time"] {
+  width: 75px;
+}
+.well {
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  background: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: 0;
+}
+.btn {
+  border: 0;
+  background: #34a6ff;
+  color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  text-shadow: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: main;
+  font-weight: bold;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+}
+.btn:hover {
+  background: #fe8800;
+  color: #fff;
+  border-color: #fe8800;
+  text-shadow: none;
+}
 ul#menu {
   float: left;
   left: 0;
@@ -9497,14 +9559,6 @@ ul#menu li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
-.helptext {
-  font-family: main;
-  padding: 10px 20px;
-}
-.info {
-  font-size: 12px;
-  color: #777;
-}
 #event-modal {
   padding: 0;
 }
@@ -9527,10 +9581,7 @@ ul#menu li:hover {
 #event-modal textarea:hover {
   border: 1px solid #fe8800;
 }
-.datepicker {
-  z-index: 1150;
-}
-#addguest.btn {
+#event-modal #addguest.btn {
   -webkit-border-radius: 0px;
   border-radius: 0px;
   padding: 5px;
@@ -9565,26 +9616,6 @@ ul#menu li:hover {
 .form-horizontal .controls .add-on i {
   margin-top: 2px !important;
 }
-.main-container {
-  margin-left: 200px;
-  border: 1px solid #ddd;
-  border-width: 0px 1px;
-  background: #fff;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  width: auto;
-  border: 0;
-}
-#viewContainer {
-  border-bottom: 0;
-}
-input[type="date"] {
-  width: 150px;
-}
-input[type="time"] {
-  width: 75px;
-}
 .dayprogram {
   border-bottom: 1px solid rgba(0,0,0,0.05);
   padding-bottom: 15px;
@@ -9618,47 +9649,6 @@ input[type="time"] {
 .dayprogram:nth-last-child(1) {
   border-bottom: 0;
   padding-bottom: 0;
-}
-.showbefore {
-  margin: 0px 20px 20px 20px;
-}
-.affix {
-  position: fixed;
-  top: 0px;
-  margin: auto;
-}
-.affix > div {
-  border-width: 5px;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-}
-.well {
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  background: #fff;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border: 0;
-}
-.btn {
-  border: 0;
-  background: #34a6ff;
-  color: #fff;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  text-shadow: none;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  font-family: main;
-  font-weight: bold;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-}
-.btn:hover {
-  background: #fe8800;
-  color: #fff;
-  border-color: #fe8800;
-  text-shadow: none;
 }
 .popover {
   padding: 0;
@@ -9949,15 +9939,15 @@ h2 {
 }
 @font-face {
   font-family: styled;
-  src: url("fonts/maven-pro-light-300.otf");
+  src: url("/fonts/maven-pro-light-300.otf");
 }
 @font-face {
   font-family: main;
-  src: url("fonts/signika-regular.ttf");
+  src: url("/fonts/signika-regular.ttf");
 }
 @font-face {
   font-family: fontawesome;
-  src: url("fonts/fontawesome-webfont.ttf");
+  src: url("/fonts/fontawesome-webfont.ttf");
 }
 html,
 body {
