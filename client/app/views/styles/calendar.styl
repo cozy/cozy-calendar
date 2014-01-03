@@ -73,6 +73,7 @@
         cursor: default
 
 .fc-content
+    clear:none
 
     thead
         background: blue
@@ -101,28 +102,46 @@
 .fc-cell-overlay
     background: green
 
+
+.fc-header
+    cursor: default
+
+.fc-header-title
+    h2
+        font-weight: normal
+
 .fc-title, .fc-content
     thead
     thead > tr.fc-first
     .fc-day-header
     .fc-widget-header
-        font-family: main
-        background: greyblue
+        font-family: styled
+        background: white
         border-radius: 0
-        color: white
+        color: black
+        cursor: default
+        font-weight: normal
 
 .fc-agenda-axis
     background: white
     color: darkgrey
 
 .fc-agenda-axis.fc-first
-    background: greyblue
+    background: white
     border-radius: 0
     color: white
+
+.fc-day-number
+    font-family: styled
 
 .fc-event-inner
     border: 0
     border-radius: 0
+    color: white
+    font-family: main
+
+.fc-day:hover
+    background orange + 80%
 
 .alarm-remove
     cursor: pointer
@@ -133,9 +152,24 @@
 .fc-widget-content
 .fc-cell-overlay
     cursor: pointer
-.fc-widget-content
-.fc-cell-overlay
-    cursor: pointer
 
 .fc-view
     overflow: visible
+
+#viewContainer .fc-content .fc-cell-overlay
+    background #CBE4FB
+
+#viewContainer .fc-content tbody .fc-state-highlight
+    background #CCF0CC
+
+#viewContainer .fc-event-inner:hover
+    color: white
+    background: orange
+    border: 0
+
+#alarms
+    thead
+        .fc-first
+            .fc-day-header
+            .fc-widget-header
+                border-bottom: 1px solid #DDD

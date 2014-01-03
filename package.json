@@ -17,10 +17,10 @@
     "coffee-script": "= 1.4.0",
     "mime": "= 1.2.7",
     "qs": "= 0.5.0",
-    "americano": "= 0.2.12",
-    "americano-cozy": "0.1.10",
+    "americano": "= 0.3.0",
+    "americano-cozy": "0.2.0",
     "async": "= 0.1.22",
-    "cozy-realtime-adapter": "= 0.11.0",
+    "cozy-realtime-adapter": "= 0.11.1",
     "time": "~0.9.2",
     "moment": "2.0.0",
     "cozy-ical": "0.0.8"

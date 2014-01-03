@@ -3,6 +3,7 @@ ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
 ImportView = require 'views/import_view'
+SyncView = require 'views/sync_view'
 DayBucketCollection = require 'collections/daybuckets'
 
 module.exports = class Router extends Backbone.Router
@@ -12,6 +13,7 @@ module.exports = class Router extends Backbone.Router
         'calendar'             : 'calendar'
         'calendarweek'         : 'calendarweek'
         'list'                 : 'list'
+        'sync'                 : 'sync'
         'calendar/:eventid'    : 'calendar_event'
         'calendarweek/:eventid': 'calendarweek_event'
         'list/:eventid'        : 'list_event'
@@ -22,8 +24,8 @@ module.exports = class Router extends Backbone.Router
             view: fcView
             model: {alarms:app.alarms, events:app.events}
         app.menu.activate 'calendar'
-        @handleFetch app.alarms, "alarms"
-        @handleFetch app.events, "events"
+        @handleFetch app.alarms, 'alarms'
+        @handleFetch app.events, 'events'
 
     calendarweek: ->
         @calendar 'agendaWeek'
@@ -32,6 +34,10 @@ module.exports = class Router extends Backbone.Router
         @displayView new ListView
             collection: new DayBucketCollection()
         app.menu.activate 'list'
+
+    sync: ->
+        @displayView new SyncView
+        app.menu.activate 'sync'
 
     calendar_event: (id) ->
         @calendar() unless @mainView instanceof CalendarView

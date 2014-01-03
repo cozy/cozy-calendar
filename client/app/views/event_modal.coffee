@@ -62,8 +62,10 @@ module.exports = class EventModal extends ViewCollection
 
         @$el.modal 'show'
         @$el.on 'hidden', =>
+            window.app.router.navigate "calendar",
+                trigger: false,
+                replace: true
             @remove()
-            window.history.back()
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'

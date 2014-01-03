@@ -1,5 +1,7 @@
 module.exports =
     "Add"                               : "Ajouter"
+    "alarm"                             : "Alarme"
+    "event"                             : "Evénement"
     "add the alarm"                     : "Ajouter l'alarme"
     "create alarm"                      : "Création d'une alarme"
     "create event"                      : "Création d'un évènement"
@@ -50,6 +52,7 @@ module.exports =
     "alarm"                             : "Alarme"
     "are you sure"                      : "Etes-vous sur ?"
     "advanced"                          : "Détails"
+    "enter Email"                       : "Entrez l'email"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"

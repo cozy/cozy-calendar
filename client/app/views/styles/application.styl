@@ -4,28 +4,53 @@
 @import '_base'
 @import '_cozy'
 @import '_ui'
-
-// Import your styles here
-
 @import '_states'
 @import '_layout'
-@import '_responsive'
 
+body
+    padding: 0
 
 ul#menu
+  float: left
+  left: 0
+  top: 0
+  width: 200px
   list-style-type: none
   text-align: left
+  background: #F2F2F2
+
+  a
+    color: #333
+    font-family: styled
+    font-weight: normal
+    text-decoration: none
+
+  a:hover
+    text-decoration: none
+
+  a.active
+      li
+        background: #AEDBFF
 
   li
-    display: inline-block
-    margin: 10px 3px 0 3px
+    display: block
+    margin: 0
+    padding: 10px 3px 10px 3px
+    cursor: pointer
 
-    a
-      color: #fff
-      border-radius: 4px
+    i
+        font-style: normal
+        font-family: fontawesome
+        margin-right: 10px
+        margin-left: 10px
 
-  li:first-child
-      margin-left: 20px
+  li:hover
+    background: #FFC47F
+    text-decoration: none
+
+.helptext
+    font-family: main
+    padding: 10px 20px
 
 .info
     font-size: 12px
@@ -35,11 +60,21 @@ ul#menu
     padding: 0
 
     .modal-header
-        background: bluegreen
+        background: white
+        color: #333
 
     a.btn.rrule-show
         border-radius: 0px
         padding: 5px
+
+    textarea
+    textarea:focus
+        font-family: styled
+        box-shadow: none
+        border: 1px solid blue
+
+    textarea:hover
+        border: 1px solid orange
 
 .datepicker
     z-index 1150
@@ -57,7 +92,6 @@ ul#menu
 
 #alarms
   box-sizing: border-box
-  padding 20px
   margin 0px
   border-bottom 0px
   border-top 0px
@@ -79,13 +113,16 @@ ul#menu
 
 
 .main-container
-    margin: auto
-    max-width: 1200px
+    margin-left: 200px
     border: 1px solid #DDD
     border-width 0px 1px
     background: white
-    box-shadow: 1px 1px 2px #CCC
     box-sizing: border-box
+    width: auto
+    border: 0
+
+#viewContainer
+    border-bottom: 0
 
 input[type="date"]
   width: 150px
@@ -165,11 +202,15 @@ input[type="time"]
 
 .popover-title
     color: white
-    background-color: bluegreen
+    background-color: white
+    color: #333
     border: 0
+    font-family: styled
+    font-size: 18px
+    margin-top: 5px
 
     .close
-        color: white
+        color: #333
         opacity: 0.7
 
 .popover-content
@@ -284,8 +325,9 @@ h2
     font-family: styled
 
 #alarm-list
-    margin-top: 10px
-
+    width: auto
+    div
+        width: auto
     h2
         font-weight: normal
 
@@ -310,7 +352,7 @@ h2
     cursor: default
 
 #import-form
-    margin-top: 20px
+    margin: 0
 
     h1
     h3
@@ -344,20 +386,10 @@ h2
             margin: 0
             sharefont-weight: 10px
 
-body
-    padding: 0
-
 .container
-    display: block
-    width: 100%
     margin: 0
-    padding: 0
-    box-sizing: border-box
 
 @media(max-width: 1000px)
-    body
-        padding: 0
-
 
     #alarms
         width: 100%
@@ -397,12 +429,27 @@ body
 
 
 @media(max-width: 600px)
-    #menu
+    ul#menu
+        height: 40px
+        width: 100%
+        float: none
+        position: absolute
+        top: 0
+        left: 0
+        margin: 0
+
+        li
+            display: inline-block
+
         span
             display: none
 
         #import-menu-button
             display: none
+
+    .main-container
+        margin-left: 0
+        margin-top: 40px
 
     #alarms
         .fc-day-header

@@ -2777,7 +2777,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
         } else if (this.showMeridian){
           this.highlightMeridian();
         } else {
-          this.highlightHour();
+          // this.highlightHour();
         }
         break;
       case 'second':
@@ -2796,7 +2796,8 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     highlightPrevUnit: function() {
       switch (this.highlightedUnit) {
       case 'hour':
-        this.highlightMeridian();
+        //console.log(this.previousSibling.previousSibling.tagName);
+        //this.highlightMeridian();
         break;
       case 'minute':
         this.highlightHour();

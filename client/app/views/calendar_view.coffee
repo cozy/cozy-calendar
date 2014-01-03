@@ -6,9 +6,6 @@ timezones = require('helpers/timezone').timezones
 
 Alarm = require 'models/alarm'
 Event = require 'models/event'
-# formSmallTemplate = {}
-# formSmallTemplate.alarm = require('./templates/alarm_form_small')
-# formSmallTemplate.event = require('./templates/event_form_small')
 
 
 module.exports = class CalendarView extends BaseView
@@ -91,8 +88,16 @@ module.exports = class CalendarView extends BaseView
 
 
     handleWindowResize: (initial) =>
-        diff = 2 * parseInt @cal.css('padding-top')
-        targetHeight = $(window).height() - $('#menu').outerHeight(true) - diff
+        if $(window).width() > 1000
+            targetHeight = $(window).height() - 40
+            $("#menu").height targetHeight + 40
+        else if $(window).width() > 600
+            targetHeight = $(window).height() - 10
+            $("#menu").height targetHeight + 10
+        else
+            targetHeight = $(window).height() - 50
+            $("#menu").height 40
+
         @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
         @cal.height @$('.fc-header').height() + @$('.fc-content').height()
 
@@ -251,6 +256,7 @@ module.exports = class CalendarView extends BaseView
 
 
     onEventClick: (fcEvent, jsEvent, view) =>
+        return true if $(jsEvent.target).hasClass 'ui-resizable-handle'
 
         model = if fcEvent.type is 'alarm' then @alarmCollection.get fcEvent.id
         else if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
@@ -259,4 +265,3 @@ module.exports = class CalendarView extends BaseView
         @showPopover
             model: model,
             target: $(jsEvent.currentTarget)
-

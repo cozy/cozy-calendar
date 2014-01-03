@@ -31,6 +31,7 @@ module.exports = class Alarm extends ScheduleItem
             return errors
 
     getColor: -> '#5C5'
+    getColor: -> '#00C67A'
 
     initialize: ->
         @dateObject = Date.create @get @mainDateField

@@ -34,7 +34,7 @@ module.exports = class PopOver extends BaseView
 
     close: () ->
         @target.popover 'destroy'
-        @target.data('popover', undefined)
+        @target.data 'popover', undefined
         @remove()
 
     render: ->
@@ -55,6 +55,10 @@ module.exports = class PopOver extends BaseView
             minuteStep: 5
             showMeridian: false
         @$('.focused').focus()
+
+        @$("#input-start").data('timepicker').elementKeydown = (event) ->
+            console.log "toto"
+
 
     getTitle: ->
         title = if @model.isNew() then 'creation'

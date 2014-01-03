@@ -397,7 +397,7 @@
         } else if (this.showMeridian){
           this.highlightMeridian();
         } else {
-          this.highlightHour();
+          // this.highlightHour();
         }
         break;
       case 'second':
@@ -416,7 +416,8 @@
     highlightPrevUnit: function() {
       switch (this.highlightedUnit) {
       case 'hour':
-        this.highlightMeridian();
+        //console.log(this.previousSibling.previousSibling.tagName);
+        //this.highlightMeridian();
         break;
       case 'minute':
         this.highlightHour();
