@@ -55,7 +55,8 @@ ul#menu
     padding: 0
 
     .modal-header
-        background: bluegreen
+        background: white
+        color: #333
 
     a.btn.rrule-show
         border-radius: 0px
@@ -193,11 +194,15 @@ input[type="time"]
 
 .popover-title
     color: white
-    background-color: bluegreen
+    background-color: white
+    color: #333
     border: 0
+    font-family: styled
+    font-size: 18px
+    margin-top: 5px
 
     .close
-        color: white
+        color: #333
         opacity: 0.7
 
 .popover-content
@@ -312,8 +317,9 @@ h2
     font-family: styled
 
 #alarm-list
-    margin-top: 10px
-
+    width: auto
+    div
+        width: auto
     h2
         font-weight: normal
 
@@ -338,7 +344,7 @@ h2
     cursor: default
 
 #import-form
-    margin-top: 20px
+    margin: 0
 
     h1
     h3
@@ -377,9 +383,6 @@ h2
 
 @media(max-width: 1000px)
 
-    ul#menu
-        li:first-child
-            margin-left: 5px
     #alarms
         width: 100%
         margin: 0px
@@ -418,12 +421,27 @@ h2
 
 
 @media(max-width: 600px)
-    #menu
+    ul#menu
+        height: 40px
+        width: 100%
+        float: none
+        position: absolute
+        top: 0
+        left: 0
+        margin: 0
+
+        li
+            display: inline-block
+
         span
             display: none
 
         #import-menu-button
             display: none
+
+    .main-container
+        margin-left: 0
+        margin-top: 40px
 
     #alarms
         .fc-day-header

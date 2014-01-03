@@ -1,19 +1,18 @@
-.container
-    #import-form.well
-        h3= t('ICalendar importer')
+#import-form.well
+    h3= t('ICalendar importer')
 
-        div.import-form
-            div#import-button.btn
-                span= t('select an icalendar file')
-                input#import-file-input(type="file")
+    div.import-form
+        div#import-button.btn
+            span= t('select an icalendar file')
+            input#import-file-input(type="file")
 
-        div.confirmation
-            button#confirm-import-button.btn= t('confirm import')
-            button#cancel-import-button.btn=t ('cancel')
+    div.confirmation
+        button#confirm-import-button.btn= t('confirm import')
+        button#cancel-import-button.btn=t ('cancel')
 
-        div.results
-            h4= t('Alarms to import')
-            #import-alarm-list
+    div.results
+        h4= t('Alarms to import')
+        #import-alarm-list
 
-            h4= t('Events to import')
-            #import-event-list
+        h4= t('Events to import')
+        #import-event-list

@@ -4,7 +4,7 @@ start = (port, callback) ->
     require('americano').start
             name: 'Agenda'
             port: port
-            host: process.env.HOST or "127.0.0.1"
+            host: process.env.HOST or "0.0.0.0"
     , (app, server) ->
         User = require './server/models/user'
         Realtimer = require('cozy-realtime-adapter')

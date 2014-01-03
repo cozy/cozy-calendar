@@ -1956,7 +1956,16 @@ window.require.register("views/calendar_view", function(exports, require, module
 
     CalendarView.prototype.handleWindowResize = function(initial) {
       var targetHeight;
-      targetHeight = $(window).height() - 38;
+      if ($(window).width() > 1000) {
+        targetHeight = $(window).height() - 40;
+        $("#menu").height(targetHeight + 40);
+      } else if ($(window).width() > 600) {
+        targetHeight = $(window).height() - 10;
+        $("#menu").height(targetHeight + 10);
+      } else {
+        targetHeight = $(window).height() - 50;
+        $("#menu").height(40);
+      }
       if (initial !== 'initial') {
         this.cal.fullCalendar('option', 'height', targetHeight);
       }
@@ -3366,7 +3375,7 @@ window.require.register("views/templates/import_view", function(exports, require
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><div id="import-form" class="well"><h3>');
+  buf.push('<div id="import-form" class="well"><h3>');
   var __val__ = t('ICalendar importer')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h3><div class="import-form"><div id="import-button" class="btn"><span>');
@@ -3384,7 +3393,7 @@ window.require.register("views/templates/import_view", function(exports, require
   buf.push('</h4><div id="import-alarm-list"></div><h4>');
   var __val__ = t('Events to import')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</h4><div id="import-event-list"></div></div></div></div>');
+  buf.push('</h4><div id="import-event-list"></div></div></div>');
   }
   return buf.join("");
   };
@@ -3395,10 +3404,10 @@ window.require.register("views/templates/list_view", function(exports, require, 
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="container"><div id="alarm-list" class="well"></div><a class="btn showbefore">');
+  buf.push('<div id="alarm-list" class="well"></div><a class="btn showbefore">');
   var __val__ = t('display previous events')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</a></div>');
+  buf.push('</a>');
   }
   return buf.join("");
   };
