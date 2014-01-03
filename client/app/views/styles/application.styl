@@ -19,6 +19,19 @@ ul#menu
   text-align: left
   background: #F2F2F2
 
+  a
+    color: #333
+    font-family: styled
+    font-weight: normal
+    text-decoration: none
+
+  a:hover
+    text-decoration: none
+
+  a.active
+      li
+        background: #AEDBFF
+
   li
     display: block
     margin: 0
@@ -31,22 +44,14 @@ ul#menu
         margin-right: 10px
         margin-left: 10px
 
-  a
-    color: #333
-    font-family: styled
-    font-weight: normal
-    text-decoration: none
-
-  a:hover
-    text-decoration: none
-
   li:hover
     background: #FFC47F
     text-decoration: none
 
-  a.active
-      li
-        background: #AEDBFF
+.helptext
+    font-family: main
+    padding: 10px 20px
+
 .info
     font-size: 12px
     color: #777
@@ -112,9 +117,12 @@ ul#menu
     border: 1px solid #DDD
     border-width 0px 1px
     background: white
-    box-shadow: 1px 1px 2px #CCC
     box-sizing: border-box
     width: auto
+    border: 0
+
+#viewContainer
+    border-bottom: 0
 
 input[type="date"]
   width: 150px

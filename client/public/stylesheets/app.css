@@ -9469,6 +9469,18 @@ ul#menu {
   text-align: left;
   background: #f2f2f2;
 }
+ul#menu a {
+  color: #333;
+  font-family: styled;
+  font-weight: normal;
+  text-decoration: none;
+}
+ul#menu a:hover {
+  text-decoration: none;
+}
+ul#menu a.active li {
+  background: #aedbff;
+}
 ul#menu li {
   display: block;
   margin: 0;
@@ -9481,21 +9493,13 @@ ul#menu li i {
   margin-right: 10px;
   margin-left: 10px;
 }
-ul#menu a {
-  color: #333;
-  font-family: styled;
-  font-weight: normal;
-  text-decoration: none;
-}
-ul#menu a:hover {
-  text-decoration: none;
-}
 ul#menu li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
-ul#menu a.active li {
-  background: #aedbff;
+.helptext {
+  font-family: main;
+  padding: 10px 20px;
 }
 .info {
   font-size: 12px;
@@ -9566,12 +9570,14 @@ ul#menu a.active li {
   border: 1px solid #ddd;
   border-width: 0px 1px;
   background: #fff;
-  -webkit-box-shadow: 1px 1px 2px #ccc;
-  box-shadow: 1px 1px 2px #ccc;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   width: auto;
+  border: 0;
+}
+#viewContainer {
+  border-bottom: 0;
 }
 input[type="date"] {
   width: 150px;

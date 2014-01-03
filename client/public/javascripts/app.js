@@ -1381,7 +1381,7 @@ window.require.register("models/scheduleitem", function(exports, require, module
   
 });
 window.require.register("router", function(exports, require, module) {
-  var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, app, _ref,
+  var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SyncView, app, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1395,6 +1395,8 @@ window.require.register("router", function(exports, require, module) {
   EventModal = require('views/event_modal');
 
   ImportView = require('views/import_view');
+
+  SyncView = require('views/sync_view');
 
   DayBucketCollection = require('collections/daybuckets');
 
@@ -1414,6 +1416,7 @@ window.require.register("router", function(exports, require, module) {
       'calendar': 'calendar',
       'calendarweek': 'calendarweek',
       'list': 'list',
+      'sync': 'sync',
       'calendar/:eventid': 'calendar_event',
       'calendarweek/:eventid': 'calendarweek_event',
       'list/:eventid': 'list_event',
@@ -1445,6 +1448,11 @@ window.require.register("router", function(exports, require, module) {
         collection: new DayBucketCollection()
       }));
       return app.menu.activate('list');
+    };
+
+    Router.prototype.sync = function() {
+      this.displayView(new SyncView);
+      return app.menu.activate('sync');
     };
 
     Router.prototype.calendar_event = function(id) {
@@ -3155,6 +3163,30 @@ window.require.register("views/menu", function(exports, require, module) {
   })(BaseView);
   
 });
+window.require.register("views/sync_view", function(exports, require, module) {
+  var BaseView, ImportView, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  BaseView = require('../lib/base_view');
+
+  module.exports = ImportView = (function(_super) {
+    __extends(ImportView, _super);
+
+    function ImportView() {
+      _ref = ImportView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    ImportView.prototype.id = 'viewContainer';
+
+    ImportView.prototype.template = require('./templates/sync_view');
+
+    return ImportView;
+
+  })(BaseView);
+  
+});
 window.require.register("views/templates/calendarview", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
   attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
@@ -3470,6 +3502,9 @@ window.require.register("views/templates/menu", function(exports, require, modul
   buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"><li><i class="fa-share"></i><span>');
   var __val__ = t('Export')
   buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"></a><a id="import-menu-button" href="#sync"><li><i class="fa-refresh"></i><span>');
+  var __val__ = t('Sync')
+  buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></li></a>');
   }
   return buf.join("");
@@ -3579,6 +3614,17 @@ window.require.register("views/templates/popover_title", function(exports, requi
   with (locals || {}) {
   var interp;
   buf.push('<span>' + escape((interp = title) == null ? '' : interp) + '&nbsp;<i class="remove icon-trash"> </i></span><button class="close">&times;</button>');
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/sync_view", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div class="helptext"><h2>Calendar Synchronization</h2></div><div class="helptext">To synchronize your calendar with your devices, you must follow two\nsteps:<ul><li>1. Install the webdav module from the Cozy App Store</li><li>2. Connect to it and follow the instructions related to CalDAV.</li></ul></div>');
   }
   return buf.join("");
   };
