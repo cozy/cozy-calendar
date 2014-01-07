@@ -31,7 +31,7 @@
   },
   "scripts": {
     "test": "cake tests",
-    "start": "coffee server.coffee"
+    "start": "node server.js"
   },
   "cozy-permissions": {
     "Alarm": {
