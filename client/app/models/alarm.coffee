@@ -38,6 +38,11 @@ module.exports = class Alarm extends ScheduleItem
         @on 'change:' + @mainDateField, =>
             @dateObject = Date.create @get @mainDateField
 
+    parse: (attrs) ->
+        if attrs.id is "undefined"
+            delete attrs.id
+        return attrs
+
     getDateObject: -> @dateObject
 
     getRRuleObject: -> false

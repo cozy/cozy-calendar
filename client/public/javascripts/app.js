@@ -1151,6 +1151,13 @@ module.exports = Alarm = (function(_super) {
     });
   };
 
+  Alarm.prototype.parse = function(attrs) {
+    if (attrs.id === "undefined") {
+      delete attrs.id;
+    }
+    return attrs;
+  };
+
   Alarm.prototype.getDateObject = function() {
     return this.dateObject;
   };
@@ -2917,7 +2924,9 @@ module.exports = ImportView = (function(_super) {
           _ref1 = result.alarms;
           for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
             valarm = _ref1[_i];
-            alarm = new Alarm(valarm);
+            alarm = new Alarm(valarm, {
+              parse: true
+            });
             _this.alarmList.collection.add(alarm);
           }
         }
@@ -2953,11 +2962,33 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var alarms, events, finish, saveAlarms, saveEvents,
+    var counter, finish, onFaillure, onSuccess,
       _this = this;
 
-    alarms = this.alarmList.collection.toArray();
-    events = this.eventList.collection.toArray();
+    counter = this.alarmList.collection.length + this.eventList.collection.length;
+    console.log(counter, this.alarmList.length, this.eventList.length);
+    onFaillure = function(model) {
+      console.log("faillure", model.cid, counter);
+      counter = counter - 1;
+      alert('some event fail to save');
+      if (counter === 0) {
+        return finish();
+      }
+    };
+    onSuccess = function(model) {
+      console.log("success", model.cid, counter);
+      switch (model.constructor) {
+        case Event:
+          app.events.add(model);
+          break;
+        case Alarm:
+          app.alarms.add(model);
+      }
+      counter = counter - 1;
+      if (counter === 0) {
+        return finish();
+      }
+    };
     finish = function() {
       _this.$(".confirmation").fadeOut();
       _this.$(".results").slideUp(function() {
@@ -2965,27 +2996,23 @@ module.exports = ImportView = (function(_super) {
         return _this.confirmButton.html(t('confirm import'));
       });
       _this.alarmList.collection.reset();
-      return _this.eventList.collection.reset();
-    };
-    saveAlarms = function(alarms) {
-      if (alarms.length > 0) {
-        alarms.pop().save();
-        return saveAlarms(alarms);
-      } else {
-        return finish();
-      }
-    };
-    saveEvents = function(events) {
-      if (events.length > 0) {
-        events.pop().save();
-        return saveEvents(events);
-      } else {
-        return saveAlarms(alarms);
-      }
+      _this.eventList.collection.reset();
+      return app.router.navigate("calendar", true);
     };
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
-    return saveEvents(events);
+    this.alarmList.collection.each(function(alarm) {
+      return alarm.save(null, {
+        success: onSuccess,
+        error: onFaillure
+      });
+    });
+    return this.eventList.collection.each(function(event) {
+      return event.save(null, {
+        success: onSuccess,
+        error: onFaillure
+      });
+    });
   };
 
   ImportView.prototype.onCancelImportClicked = function() {
