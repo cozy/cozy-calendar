@@ -1,10 +1,9 @@
 p
     | Hello, I would like to invite you to the following event:
 h2 #{event.description} @ #{event.place}
-
 p
     | Would you be there?
 p
-    a.btn(href=url + "?status=ACCEPTED&key=" + key) yes
+    a(href="#{url}?status=ACCEPTED&key=" + key) yes
 p
-    a.btn(href=url + "?status=DECLINED&key=" + key) no
+    a(href="#{url}?status=DECLINED&key=#{key}") no
