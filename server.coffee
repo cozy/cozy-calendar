@@ -2,7 +2,7 @@
 
 start = (port, callback) ->
     require('americano').start
-            name: 'Agenda'
+            name: 'Calendar'
             port: port
             host: process.env.HOST or "0.0.0.0"
     , (app, server) ->
