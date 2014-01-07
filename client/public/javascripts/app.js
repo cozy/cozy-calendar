@@ -698,17 +698,30 @@ SocketListener = (function(_super) {
   }
 
   SocketListener.prototype.models = {
-    'alarm': require('models/alarm')
+    'alarm': require('models/alarm'),
+    'event': require('models/event')
   };
 
-  SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete'];
+  SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete', 'event.create', 'event.update', 'event.delete'];
 
-  SocketListener.prototype.onRemoteCreate = function(alarm) {
-    return this.collection.add(alarm);
+  SocketListener.prototype.onRemoteCreate = function(model) {
+    var collection, _i, _len, _ref1, _results;
+
+    _ref1 = this.collections;
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      collection = _ref1[_i];
+      if (model instanceof collection.model) {
+        _results.push(collection.add(model));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
   };
 
-  SocketListener.prototype.onRemoteDelete = function(alarm) {
-    return this.collection.remove(alarm);
+  SocketListener.prototype.onRemoteDelete = function(model) {
+    return model.trigger('destroy', model, model.collection, {});
   };
 
   return SocketListener;

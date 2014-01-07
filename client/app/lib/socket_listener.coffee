@@ -2,14 +2,20 @@ class SocketListener extends CozySocketListener
 
     models:
         'alarm': require 'models/alarm'
+        'event': require 'models/event'
 
-    events: ['alarm.create','alarm.update', 'alarm.delete']
+    events: [
+        'alarm.create','alarm.update', 'alarm.delete'
+        'event.create','event.update', 'event.delete'
+    ]
 
-    onRemoteCreate: (alarm) ->
-        @collection.add alarm
+    onRemoteCreate: (model) ->
+        for collection in @collections
+            if model instanceof collection.model
+                collection.add model
 
-    onRemoteDelete: (alarm) ->
-        @collection.remove alarm
+    onRemoteDelete: (model) ->
+        model.trigger 'destroy', model, model.collection, {}
 
 
 module.exports = new SocketListener()
