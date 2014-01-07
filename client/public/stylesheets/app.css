@@ -9850,6 +9850,14 @@ h2 {
 .container {
   margin: 0;
 }
+.public-event-container {
+  width: 100%;
+}
+.public-event-container h2,
+.public-event-container h3,
+.public-event-container p {
+  font-family: styled;
+}
 @media (max-width: 1000px) {
   #alarms {
     width: 100%;
