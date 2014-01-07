@@ -44,10 +44,6 @@ module.exports = class MailHandler
                     subject = "Invitation : " + event.description
                     template = @templates.invitation
 
-                # else if guest.status is 'ACCEPTED'
-                #     subject = "This event has changed : " + event.description
-                #     template = @templates.update
-
                 else return cb()
 
                 mailOptions =
@@ -56,7 +52,7 @@ module.exports = class MailHandler
                     html: template
                         event: event.toJSON()
                         key: guest.key
-                        url: "#{domain}/public/calendar/event#{event.id}"
+                        url: "https://#{domain}/public/calendar/event#{event.id}"
 
                 CozyAdapter.sendMailFromUser mailOptions, (err) ->
                     if not err
