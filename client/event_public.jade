@@ -9,22 +9,27 @@ html
     link(rel="stylesheet", href="stylesheets/app.css")
 
   body.public
-    #container.container.well
-      h1 RSVP for #{event.description}
-      h2 #{event.place}
-
+    #container.container.public-event-container.well
+      h3 Will you come to this event? 
+      h2 #{event.description} @ #{event.place}
+      p on
+      h2 #{date}
 
       if visitor.status == 'NEEDS-ACTION'
 
-        p: a.btn(href="?status=ACCEPTED&key="+key) accept
-        p: a.btn(href="?status=DECLINED&key="+key) deny
+        p: a.btn(href="?status=ACCEPTED&key="+key) yes
+        p: a.btn(href="?status=DECLINED&key="+key) no
 
       else if visitor.status == 'ACCEPTED'
         h3 Your status is #{visitor.status}
-        p: a(href="event#{event.id}.ics?key="+key) Download in your agenda
-        p: a.btn(href="?status=DECLINED&key="+key) Change to DECLINED
+        p: a(href="event#{event.id}.ics?key="+key) Export this event to a file
+        p
+            a.btn(href="?status=DECLINED&key="+key) 
+                | Change your invitation to status "declined"
 
       else
         h3 Your status is #{visitor.status}
-        p: a.btn(href="?status=ACCEPTED&key="+key) Change to ACCEPTED
+        p
+            a.btn(href="?status=ACCEPTED&key="+key)
+                | Change your invitation to status "accepted"
 

@@ -46,12 +46,14 @@ module.exports = class MailHandler
 
                 else return cb()
 
+                dateFormat = 'MMMM Do YYYY, h:mm:ss a'
                 mailOptions =
                     to: guest.email
                     subject: subject
                     html: template
                         event: event.toJSON()
                         key: guest.key
+                        date: moment(event.date).format dateFormat
                         url: "https://#{domain}/public/calendar/event#{event.id}"
 
                 CozyAdapter.sendMailFromUser mailOptions, (err) ->
