@@ -70,7 +70,7 @@ module.exports = MailHandler = (function() {
           html: template({
             event: event.toJSON(),
             key: guest.key,
-            url: "" + domain + "/public/calendar/event" + event.id
+            url: "https://" + domain + "/public/calendar/event" + event.id
           })
         };
         return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
