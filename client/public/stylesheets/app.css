@@ -9861,6 +9861,9 @@ h2 {
 .public-event-container body {
   font-family: styled;
 }
+.public-event-container h3 {
+  margin-top: 0;
+}
 @media (max-width: 1000px) {
   #alarms {
     width: 100%;
