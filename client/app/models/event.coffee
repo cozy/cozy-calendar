@@ -2,7 +2,7 @@ ScheduleItem = require './scheduleitem'
 
 module.exports = class Event extends ScheduleItem
 
-    mainDateField: 'start'
+    fcEventType: 'event'
     startDateField: 'start'
     endDateField: 'end'
     urlRoot: 'events'
@@ -39,49 +39,4 @@ module.exports = class Event extends ScheduleItem
         return errors if errors.length > 0
 
     #@TODO tags = color
-    getColor: -> '#FC2'
-    #getColor: -> '#9B559B'
     getColor: -> '#008AF6'
-
-    # Date object management
-    initialize: ->
-        @startDateObject = Date.create @get @startDateField
-        @endDateObject = Date.create @get @endDateField
-        @on 'change:start', =>
-            @startDateObject = Date.create @get @startDateField
-        @on 'change:end', =>
-            @endDateObject = Date.create @get @endDateField
-
-    getStartDateObject: -> @startDateObject
-    getDateObject:      -> @startDateObject
-
-    getFormattedStartDate: (formatter) -> @getStartDateObject().format formatter
-
-    getEndDateObject: -> @endDateObject
-
-    getFormattedEndDate: (formatter) -> @getEndDateObject().format formatter
-
-    isOneDay: -> @startDateObject.short() is @endDateObject.short()
-
-    # FullCalendar presenter
-    toFullCalendarEvent: (trueStart) ->
-        start = @getStartDateObject()
-        end = @getEndDateObject()
-
-        color = @getColor()
-
-        if trueStart
-            end = end.clone().advance trueStart - start
-            start = trueStart
-
-        return fcEvent =
-            id: @cid
-            title: "#{start.format "{HH}:{mm}"} #{@get("description")}"
-            start: start.format Date.ISO8601_DATETIME
-            end: end.format Date.ISO8601_DATETIME
-            allDay: false
-            diff: @get "diff"
-            place: @get 'place'
-            type: 'event' # non standard field
-            backgroundColor: color
-            borderColor: color

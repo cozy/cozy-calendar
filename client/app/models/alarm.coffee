@@ -3,10 +3,13 @@ ScheduleItem = require './scheduleitem'
 
 module.exports = class Alarm extends ScheduleItem
 
-    mainDateField: 'trigg'
+    fcEventType: 'alarm'
+    startDateField: 'trigg'
     urlRoot: 'alarms'
 
-    @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
+    parse: (attrs) ->
+        delete attrs.id if attrs.id is "undefined"
+        return attrs
 
     validate: (attrs, options) ->
 
@@ -30,35 +33,4 @@ module.exports = class Alarm extends ScheduleItem
         if errors.length > 0
             return errors
 
-    getColor: -> '#5C5'
     getColor: -> '#00C67A'
-
-    initialize: ->
-        @dateObject = Date.create @get @mainDateField
-        @on 'change:' + @mainDateField, =>
-            @dateObject = Date.create @get @mainDateField
-
-    parse: (attrs) ->
-        if attrs.id is "undefined"
-            delete attrs.id
-        return attrs
-
-    getDateObject: -> @dateObject
-
-    getRRuleObject: -> false
-
-    toFullCalendarEvent: ->
-        time = @getDateObject()
-        end = time.clone().advance minutes: 30
-
-        event =
-            id: @cid
-            title: "#{time.format "{HH}:{mm}"} #{@get("description")}"
-            timezone: @get 'timezone'
-            allDay: false
-            start: time.format(Date.ISO8601_DATETIME)
-            end: end.format(Date.ISO8601_DATETIME)
-            type: 'alarm' # non standard field
-            timezoneHour: @get 'timezoneHour'
-            backgroundColor: @getColor()
-            borderColor: @getColor()
