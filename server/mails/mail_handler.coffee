@@ -1,8 +1,9 @@
-Event = require '../models/event'
-CozyInstance = require '../models/cozy_instance'
 async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
+moment = require 'moment'
+Event = require '../models/event'
+CozyInstance = require '../models/cozy_instance'
 try CozyAdapter = require('americano-cozy/node_modules/jugglingdb-cozy-adapter')
 catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
 
@@ -47,13 +48,15 @@ module.exports = class MailHandler
                 else return cb()
 
                 dateFormat = 'MMMM Do YYYY, h:mm:ss a'
+                date = moment(event.start).format dateFormat
+
                 mailOptions =
                     to: guest.email
                     subject: subject
                     html: template
                         event: event.toJSON()
                         key: guest.key
-                        date: moment(event.start).format dateFormat
+                        date: date
                         url: "https://#{domain}/public/calendar/event#{event.id}"
 
                 CozyAdapter.sendMailFromUser mailOptions, (err) ->
