@@ -1,4 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-agenda.png?label=ready)](https://waffle.io/mycozycloud/cozy-agenda)  
+[![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-calendar.png?label=ready)](https://waffle.io/mycozycloud/cozy-calendar)  
 
 # Description
 

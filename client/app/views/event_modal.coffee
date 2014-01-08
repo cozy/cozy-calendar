@@ -12,6 +12,7 @@ module.exports = class EventModal extends ViewCollection
 
     inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
+    exportDateFormat: '{year}-{MM}-{dd}-{HH}-{mm}'
 
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'
@@ -99,6 +100,7 @@ module.exports = class EventModal extends ViewCollection
             units: Date.getLocale().units
             start: @model.getStartDateObject().format @inputDateTimeFormat
             end: @model.getEndDateObject().format @inputDateTimeFormat
+            exportdate: @model.getStartDateObject().format @exportDateFormat
 
         if @model.get 'rrule'
             _.extend data, @getRRuleRenderData()

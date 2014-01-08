@@ -1,5 +1,9 @@
-h1 This event has changed : #{event.description}
-h2 #{event.place}
+p An event where you are invited has changed: 
+h2 #{event.description} @ #{event.place}
+p on
+h2 #{date}
 
-p: a.btn(href=url + "?status=ACCEPTED&key=" + key) still going
-p: a.btn(href=url + "?status=DECLINED&key=" + key) not going
+p
+    a.btn(href="#{url}?status=ACCEPTED&key=#{key}") still going
+p
+    a.btn(href="#{url}?status=DECLINED&key=#{key}") not going anymore
