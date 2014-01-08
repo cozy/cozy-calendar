@@ -53,7 +53,7 @@ module.exports = class MailHandler
                     html: template
                         event: event.toJSON()
                         key: guest.key
-                        date: moment(event.date).format dateFormat
+                        date: moment(event.start).format dateFormat
                         url: "https://#{domain}/public/calendar/event#{event.id}"
 
                 CozyAdapter.sendMailFromUser mailOptions, (err) ->
