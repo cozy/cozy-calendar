@@ -47,7 +47,7 @@ module.exports = class MailHandler
 
                 else return cb()
 
-                dateFormat = 'MMMM Do YYYY, h:mm:ss a'
+                dateFormat = 'MMMM Do YYYY, h:mm a'
                 date = moment(event.start).format dateFormat
 
                 mailOptions =

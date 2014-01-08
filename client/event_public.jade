@@ -10,10 +10,9 @@ html
 
   body.public
     #container.container.public-event-container.well
-      h3 Will you come to this event? 
+      h4 Will you come to this event? 
       h2 #{event.description} @ #{event.place}
-      p on
-      h2 #{date}
+      h3 on #{date}
 
       if visitor.status == 'NEEDS-ACTION'
 
