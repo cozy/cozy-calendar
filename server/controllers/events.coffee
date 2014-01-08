@@ -74,12 +74,19 @@ module.exports.public = (req, res) ->
             key: key
             visitor: visitor
 
+module.exports.ical = (req, res) ->
+    key = req.query.key
+    calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
+    calendar.add req.event.toIcal()
+    res.header 'Content-Type': 'text/calendar'
+    res.send calendar.toString()
+
 module.exports.publicIcal = (req, res) ->
     key = req.query.key
     if not visitor = req.event.getGuest key
         return res.send error: 'invalid key', 401
 
-    calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda')
+    calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()

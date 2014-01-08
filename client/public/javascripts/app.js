@@ -2222,6 +2222,8 @@ window.require.register("views/event_modal", function(exports, require, module) 
 
     EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
+    EventModal.prototype.exportDateFormat = '{year}-{MM}-{dd}-{HH}-{mm}';
+
     EventModal.prototype.collectionEl = '#guests-list';
 
     EventModal.prototype.itemview = require('./event_modal_guest');
@@ -2330,7 +2332,8 @@ window.require.register("views/event_modal", function(exports, require, module) 
         weekDays: Date.getLocale().weekdays.slice(0, 7),
         units: Date.getLocale().units,
         start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
-        end: this.model.getEndDateObject().format(this.inputDateTimeFormat)
+        end: this.model.getEndDateObject().format(this.inputDateTimeFormat),
+        exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
       });
       if (this.model.get('rrule')) {
         _.extend(data, this.getRRuleRenderData());
@@ -3207,7 +3210,9 @@ window.require.register("views/templates/event_modal", function(exports, require
   buf.push('<div class="modal-header"><span>');
   var __val__ = t('edit event')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</span><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span12"><label for="basic-summary" class="control-label">');
+  buf.push('</span>&nbsp;<a');
+  buf.push(attrs({ 'href':("events/" + (id) + "/" + (exportdate) + ".ics") }, {"href":true}));
+  buf.push('> <i class="fa fa-download fa-1"></i></a><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span12"><label for="basic-summary" class="control-label">');
   var __val__ = t('summary')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</label><div class="controls"><input');

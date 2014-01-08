@@ -31,6 +31,8 @@ module.exports =
         put   : events.update
         del   : events.delete
 
+    'events/:eventid/:name.ics':
+        get   : events.ical
     'public/event:eventid.ics':
         get   : events.publicIcal
     'public/event:eventid':

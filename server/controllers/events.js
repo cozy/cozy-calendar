@@ -131,6 +131,17 @@ module.exports["public"] = function(req, res) {
   }
 };
 
+module.exports.ical = function(req, res) {
+  var calendar, key;
+  key = req.query.key;
+  calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda');
+  calendar.add(req.event.toIcal());
+  res.header({
+    'Content-Type': 'text/calendar'
+  });
+  return res.send(calendar.toString());
+};
+
 module.exports.publicIcal = function(req, res) {
   var calendar, key, visitor;
   key = req.query.key;
