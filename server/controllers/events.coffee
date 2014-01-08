@@ -1,4 +1,5 @@
 time = require 'time'
+moment = require 'moment'
 User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
@@ -65,8 +66,11 @@ module.exports.public = (req, res) ->
             res.send 303
 
     else
+        dateFormat = 'MMMM Do YYYY, h:mm a'
+        date = moment(req.event.start).format dateFormat
         res.render 'event_public.jade',
             event: req.event.timezoned()
+            date: date
             key: key
             visitor: visitor
 
@@ -75,7 +79,7 @@ module.exports.publicIcal = (req, res) ->
     if not visitor = req.event.getGuest key
         return res.send error: 'invalid key', 401
 
-    calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda');
+    calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda')
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()
