@@ -9855,7 +9855,10 @@ h2 {
 }
 .public-event-container h2,
 .public-event-container h3,
-.public-event-container p {
+.public-event-container h4,
+.public-event-container p,
+.public-event-container a,
+.public-event-container body {
   font-family: styled;
 }
 @media (max-width: 1000px) {
