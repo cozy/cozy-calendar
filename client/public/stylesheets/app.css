@@ -2807,7 +2807,6 @@ input[type="submit"].btn.btn-mini {
   background-image: url("../img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
-  background: none;
   margin-top: 1px;
 }
 /* White icons with optional class, or on hover/focus/active states of certain elements */
@@ -9793,17 +9792,6 @@ h2 {
 }
 #alarm-list div {
   font-family: main;
-}
-.icon-bell:before,
-.icon-th:before,
-.icon-th-list:before,
-.icon-share:before,
-.icon-upload:before,
-.icon-arrow-down:before,
-.icon-arrow-up:before,
-.icon-circle-arrow-down:before,
-.icon-circle-arrow-up:before {
-  content: "";
 }
 .active.btn {
   background: #008af6;
