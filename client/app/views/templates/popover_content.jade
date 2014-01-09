@@ -9,8 +9,12 @@ if type == 'alarm'
         select#input-timezone.input
             each tz in timezones
                 option(value=tz, selected=(timezone == tz))= tz
+    .line
         input#input-desc.input-xlarge(type="text", value=description
             placeholder=t("alarm description placeholder"))
+
+    .line
+        #rrule-container
 
     .popover-footer
         a.btn.add= t('Edit')

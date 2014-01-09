@@ -45,57 +45,7 @@
         #guests-list
 
         h4= t('recurrence rule')
-        p#rrule-toggle: a.btn.rrule-show= t('make reccurent')
-        p#rrule-short
-            i.icon-arrow-right
-            span#rrule-help
-            span#rrule-action
-                | &nbsp;-&nbsp;
-                a.rrule-show= t('Edit')
-        form.form-inline#rrule
-
-            label.control-label(for="rrule-interval")= t('repeat every')
-            .control-group
-                input.col-xs2.input-mini#rrule-interval(type="number", min=1, value=rrule.interval)
-                select#rrule-freq
-                    option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
-                    option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= units[4]
-                    option(value=RRule.WEEKLY, selected=freqSelected(RRule.WEEKLY))= units[5]
-                    option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= units[6]
-                    option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= units[7]
-            #rrule-weekdays
-                label.control-label= t('repeat on')
-                .control-group
-                    label.checkbox.inline= weekDays[1]
-                        input(type="checkbox", value=1, checked=wkdaySelected(1))
-                    label.checkbox.inline= weekDays[2]
-                        input(type="checkbox", value=2, checked=wkdaySelected(2))
-                    label.checkbox.inline= weekDays[3]
-                        input(type="checkbox", value=3, checked=wkdaySelected(3))
-                    label.checkbox.inline= weekDays[4]
-                        input(type="checkbox", value=4, checked=wkdaySelected(4))
-                    label.checkbox.inline= weekDays[5]
-                        input(type="checkbox", value=5, checked=wkdaySelected(5))
-                    label.checkbox.inline= weekDays[6]
-                        input(type="checkbox", value=6, checked=wkdaySelected(6))
-                    label.checkbox.inline= weekDays[0]
-                        input(type="checkbox", value=0, checked=wkdaySelected(0))
-
-            .control-group#rrule-monthdays
-                .controls
-                    label.checkbox.inline
-                        input(type="radio", checked=yearModeIs('date'), name="rrule-month-option", value="date")
-                        = t('repeat on date')
-                    label.checkbox.inline
-                        input(type="radio", checked=yearModeIs('weekdate'), name="rrule-month-option", value="weekdate")
-                        = t('repeat on weekday')
-
-            label(for="rrule-until")= t('repeat until')
-            .control-group
-                input#rrule-until(type="date", value=rrule.until)
-                label(for="rrule-count")= t('or after')
-                input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
-                label(for="rrule-count")=t('occurences')
+        #rrule-container
 
 
 

@@ -1,4 +1,5 @@
 BaseView = require '../lib/base_view'
+RRuleFormView = require 'views/event_modal_rrule'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
 
@@ -56,8 +57,9 @@ module.exports = class PopOver extends BaseView
             showMeridian: false
         @$('.focused').focus()
 
-        @$("#input-start").data('timepicker').elementKeydown = (event) ->
-            console.log "toto"
+        @rruleForm = new RRuleFormView model: @model
+        @rruleForm.render()
+        @$('#rrule-container').append @rruleForm.$el
 
 
     getTitle: ->
