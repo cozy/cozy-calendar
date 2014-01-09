@@ -146,7 +146,6 @@ module.exports = {
 
 ;require.register("collections/alarms", function(exports, require, module) {
 var Alarm, AlarmCollection, ScheduleItemsCollection, _ref,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -158,36 +157,13 @@ module.exports = AlarmCollection = (function(_super) {
   __extends(AlarmCollection, _super);
 
   function AlarmCollection() {
-    this.asFCEventSource = __bind(this.asFCEventSource, this);    _ref = AlarmCollection.__super__.constructor.apply(this, arguments);
+    _ref = AlarmCollection.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
   AlarmCollection.prototype.model = Alarm;
 
   AlarmCollection.prototype.url = 'alarms';
-
-  AlarmCollection.prototype.asFCEventSource = function(start, end, callback) {
-    var eventsInRange;
-
-    eventsInRange = [];
-    this.each(function(alarm) {
-      var alarmTime, date, dates, rrule, _i, _len, _results;
-
-      alarmTime = alarm.getDateObject();
-      if (rrule = alarm.getRRuleObject()) {
-        dates = rrule.between(start, end);
-        _results = [];
-        for (_i = 0, _len = dates.length; _i < _len; _i++) {
-          date = dates[_i];
-          _results.push(eventsInRange.push(alarm.toFullCalendarEvent(date)));
-        }
-        return _results;
-      } else if (alarmTime.isBetween(start, end)) {
-        return eventsInRange.push(alarm.toFullCalendarEvent());
-      }
-    });
-    return callback(eventsInRange);
-  };
 
   return AlarmCollection;
 
@@ -253,9 +229,6 @@ DayBucket = DayBucket = (function(_super) {
   __extends(DayBucket, _super);
 
   function DayBucket(model) {
-    if (!model.getDateHash) {
-      console.log(model, new Error().stack);
-    }
     DayBucket.__super__.constructor.call(this, {
       id: model.getDateHash(),
       date: model.getDateObject().clone().beginningOfDay()
@@ -321,21 +294,21 @@ module.exports = DayBucketCollection = (function(_super) {
   };
 
   DayBucketCollection.prototype.onBaseCollectionChange = function(model) {
-    var bucket, old;
+    var newbucket, oldbucket;
 
-    old = this.get(model.getPreviousDateHash());
-    bucket = this.get(model.getDateHash());
-    if (old === bucket) {
+    oldbucket = this.get(model.getPreviousDateHash());
+    newbucket = this.get(model.getDateHash());
+    if (oldbucket === newbucket) {
       return;
     }
-    old.items.remove(model);
-    if (old.items.length === 0) {
-      this.remove(old);
+    oldbucket.items.remove(model);
+    if (oldbucket.items.length === 0) {
+      this.remove(oldbucket);
     }
-    if (!bucket) {
-      this.add(bucket = new DayBucket(model));
+    if (!newbucket) {
+      this.add(newbucket = new DayBucket(model));
     }
-    return bucket.items.add(model);
+    return newbucket.items.add(model);
   };
 
   DayBucketCollection.prototype.onBaseCollectionAdd = function(model) {
@@ -366,7 +339,6 @@ module.exports = DayBucketCollection = (function(_super) {
 
 ;require.register("collections/events", function(exports, require, module) {
 var Event, EventCollection, ScheduleItemsCollection, _ref,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -378,41 +350,13 @@ module.exports = EventCollection = (function(_super) {
   __extends(EventCollection, _super);
 
   function EventCollection() {
-    this.asFCEventSource = __bind(this.asFCEventSource, this);    _ref = EventCollection.__super__.constructor.apply(this, arguments);
+    _ref = EventCollection.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
   EventCollection.prototype.model = Event;
 
   EventCollection.prototype.url = 'events';
-
-  EventCollection.prototype.asFCEventSource = function(start, end, callback) {
-    var eventsInRange;
-
-    eventsInRange = [];
-    this.each(function(event) {
-      var date, dates, duration, eventEnd, eventStart, inRange, rrule, _i, _len, _results;
-
-      eventStart = event.getStartDateObject();
-      eventEnd = event.getEndDateObject();
-      duration = eventEnd - eventStart;
-      if (rrule = event.getRRuleObject()) {
-        dates = rrule.between(Date.create(start - duration), end);
-        _results = [];
-        for (_i = 0, _len = dates.length; _i < _len; _i++) {
-          date = dates[_i];
-          _results.push(eventsInRange.push(event.toFullCalendarEvent(date)));
-        }
-        return _results;
-      } else {
-        inRange = eventStart.isBetween(start, end) || eventEnd.isBetween(start, end) || (eventStart.isBefore(start) && eventEnd.isAfter(end));
-        if (inRange) {
-          return eventsInRange.push(event.toFullCalendarEvent());
-        }
-      }
-    });
-    return callback(eventsInRange);
-  };
 
   return EventCollection;
 
@@ -422,6 +366,7 @@ module.exports = EventCollection = (function(_super) {
 
 ;require.register("collections/scheduleitems", function(exports, require, module) {
 var ScheduleItemsCollection, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -429,24 +374,49 @@ module.exports = ScheduleItemsCollection = (function(_super) {
   __extends(ScheduleItemsCollection, _super);
 
   function ScheduleItemsCollection() {
-    _ref = ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
+    this.asFCEventSource = __bind(this.asFCEventSource, this);    _ref = ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
   ScheduleItemsCollection.prototype.model = require('../models/scheduleitem');
 
   ScheduleItemsCollection.prototype.comparator = function(si1, si2) {
-    var d1, d2;
+    var t1, t2;
 
-    d1 = si1.getDateObject();
-    d2 = si2.getDateObject();
-    if (d1.getTime() < d2.getTime()) {
+    t1 = si1.getDateObject().getTime();
+    t2 = si2.getDateObject().getTime();
+    if (t1 < t2) {
       return -1;
-    } else if (d1.getTime() === d2.getTime()) {
+    } else if (t1 === t2) {
       return 0;
     } else {
       return 1;
     }
+  };
+
+  ScheduleItemsCollection.prototype.asFCEventSource = function(start, end, callback) {
+    var eventsInRange;
+
+    eventsInRange = [];
+    this.each(function(item) {
+      var duration, itemEnd, itemStart, rdate, rrule, _i, _len, _ref1, _results;
+
+      itemStart = item.getStartDateObject();
+      itemEnd = item.getEndDateObject();
+      duration = itemEnd - itemStart;
+      if (rrule = item.getRRuleObject()) {
+        _ref1 = rrule.between(Date.create(start - duration), end);
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          rdate = _ref1[_i];
+          _results.push(eventsInRange.push(item.toFullCalendarEvent(rdate)));
+        }
+        return _results;
+      } else if (item.isInRange(start, end)) {
+        return eventsInRange.push(item.toFullCalendarEvent());
+      }
+    });
+    return callback(eventsInRange);
   };
 
   return ScheduleItemsCollection;
@@ -1114,11 +1084,18 @@ module.exports = Alarm = (function(_super) {
     return _ref;
   }
 
-  Alarm.prototype.mainDateField = 'trigg';
+  Alarm.prototype.fcEventType = 'alarm';
+
+  Alarm.prototype.startDateField = 'trigg';
 
   Alarm.prototype.urlRoot = 'alarms';
 
-  Alarm.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
+  Alarm.prototype.parse = function(attrs) {
+    if (attrs.id === "undefined") {
+      delete attrs.id;
+    }
+    return attrs;
+  };
 
   Alarm.prototype.validate = function(attrs, options) {
     var errors, _ref1;
@@ -1148,56 +1125,7 @@ module.exports = Alarm = (function(_super) {
   };
 
   Alarm.prototype.getColor = function() {
-    return '#5C5';
-  };
-
-  Alarm.prototype.getColor = function() {
     return '#00C67A';
-  };
-
-  Alarm.prototype.initialize = function() {
-    var _this = this;
-
-    this.dateObject = Date.create(this.get(this.mainDateField));
-    return this.on('change:' + this.mainDateField, function() {
-      return _this.dateObject = Date.create(_this.get(_this.mainDateField));
-    });
-  };
-
-  Alarm.prototype.parse = function(attrs) {
-    if (attrs.id === "undefined") {
-      delete attrs.id;
-    }
-    return attrs;
-  };
-
-  Alarm.prototype.getDateObject = function() {
-    return this.dateObject;
-  };
-
-  Alarm.prototype.getRRuleObject = function() {
-    return false;
-  };
-
-  Alarm.prototype.toFullCalendarEvent = function() {
-    var end, event, time;
-
-    time = this.getDateObject();
-    end = time.clone().advance({
-      minutes: 30
-    });
-    return event = {
-      id: this.cid,
-      title: "" + (time.format("{HH}:{mm}")) + " " + (this.get("description")),
-      timezone: this.get('timezone'),
-      allDay: false,
-      start: time.format(Date.ISO8601_DATETIME),
-      end: end.format(Date.ISO8601_DATETIME),
-      type: 'alarm',
-      timezoneHour: this.get('timezoneHour'),
-      backgroundColor: this.getColor(),
-      borderColor: this.getColor()
-    };
   };
 
   return Alarm;
@@ -1248,7 +1176,7 @@ module.exports = Event = (function(_super) {
     return _ref;
   }
 
-  Event.prototype.mainDateField = 'start';
+  Event.prototype.fcEventType = 'event';
 
   Event.prototype.startDateField = 'start';
 
@@ -1298,72 +1226,7 @@ module.exports = Event = (function(_super) {
   };
 
   Event.prototype.getColor = function() {
-    return '#FC2';
-  };
-
-  Event.prototype.getColor = function() {
     return '#008AF6';
-  };
-
-  Event.prototype.initialize = function() {
-    var _this = this;
-
-    this.startDateObject = Date.create(this.get(this.startDateField));
-    this.endDateObject = Date.create(this.get(this.endDateField));
-    this.on('change:start', function() {
-      return _this.startDateObject = Date.create(_this.get(_this.startDateField));
-    });
-    return this.on('change:end', function() {
-      return _this.endDateObject = Date.create(_this.get(_this.endDateField));
-    });
-  };
-
-  Event.prototype.getStartDateObject = function() {
-    return this.startDateObject;
-  };
-
-  Event.prototype.getDateObject = function() {
-    return this.startDateObject;
-  };
-
-  Event.prototype.getFormattedStartDate = function(formatter) {
-    return this.getStartDateObject().format(formatter);
-  };
-
-  Event.prototype.getEndDateObject = function() {
-    return this.endDateObject;
-  };
-
-  Event.prototype.getFormattedEndDate = function(formatter) {
-    return this.getEndDateObject().format(formatter);
-  };
-
-  Event.prototype.isOneDay = function() {
-    return this.startDateObject.short() === this.endDateObject.short();
-  };
-
-  Event.prototype.toFullCalendarEvent = function(trueStart) {
-    var color, end, fcEvent, start;
-
-    start = this.getStartDateObject();
-    end = this.getEndDateObject();
-    color = this.getColor();
-    if (trueStart) {
-      end = end.clone().advance(trueStart - start);
-      start = trueStart;
-    }
-    return fcEvent = {
-      id: this.cid,
-      title: "" + (start.format("{HH}:{mm}")) + " " + (this.get("description")),
-      start: start.format(Date.ISO8601_DATETIME),
-      end: end.format(Date.ISO8601_DATETIME),
-      allDay: false,
-      diff: this.get("diff"),
-      place: this.get('place'),
-      type: 'event',
-      backgroundColor: color,
-      borderColor: color
-    };
   };
 
   return Event;
@@ -1385,60 +1248,91 @@ module.exports = ScheduleItem = (function(_super) {
     return _ref;
   }
 
-  ScheduleItem.prototype.mainDateField = '';
+  ScheduleItem.prototype.fcEventType = 'unknown';
+
+  ScheduleItem.prototype.startDateField = '';
+
+  ScheduleItem.prototype.endDateField = false;
 
   ScheduleItem.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
 
-  ScheduleItem.prototype.getDateObject = function() {
-    if (this.dateObject == null) {
-      this.dateObject = Date.create(this.get(this.mainDateField));
+  ScheduleItem.prototype.initialize = function() {
+    var _this = this;
+
+    this.startDateObject = Date.create(this.get(this.startDateField));
+    this.on('change:' + this.startDateField, function() {
+      _this.previousDateObject = _this.startDateObject;
+      _this.startDateObject = Date.create(_this.get(_this.startDateField));
+      if (!_this.endDateField) {
+        _this.endDateObject = _this.startDateObject.clone();
+        return _this.endDateObject.advance({
+          minutes: 30
+        });
+      }
+    });
+    if (this.endDateField) {
+      this.endDateObject = Date.create(this.get(this.endDateField));
+      return this.on('change:' + this.endDateField, function() {
+        _this.endDateObject = _this.endDateObject;
+        return _this.endDateObject = Date.create(_this.get(_this.endDateField));
+      });
+    } else {
+      this.endDateObject = this.startDateObject.clone();
+      return this.endDateObject.advance({
+        minutes: 30
+      });
     }
-    return this.dateObject;
+  };
+
+  ScheduleItem.prototype.getColor = function() {
+    return 'grey';
+  };
+
+  ScheduleItem.prototype.getDateObject = function() {
+    return this.startDateObject;
+  };
+
+  ScheduleItem.prototype.getStartDateObject = function() {
+    return this.getDateObject();
+  };
+
+  ScheduleItem.prototype.getEndDateObject = function() {
+    return this.endDateObject;
   };
 
   ScheduleItem.prototype.getFormattedDate = function(formatter) {
     return this.getDateObject().format(formatter);
   };
 
+  ScheduleItem.prototype.getFormattedStartDate = function(formatter) {
+    return this.getStartDateObject().format(formatter);
+  };
+
+  ScheduleItem.prototype.getFormattedEndDate = function(formatter) {
+    return this.getEndDateObject().format(formatter);
+  };
+
+  ScheduleItem.prototype.getDateHash = function() {
+    return this.getDateObject().format('{yyyy}{MM}{dd}');
+  };
+
   ScheduleItem.prototype.getPreviousDateObject = function() {
-    if (this.previous(this.mainDateField) != null) {
-      return Date.create(this.previous(this.mainDateField));
+    var previous;
+
+    previous = this.previous(this.startDateField) != null;
+    if (previous) {
+      return Date.create(previous);
     } else {
       return false;
     }
-  };
-
-  ScheduleItem.prototype.getDateHash = function(date) {
-    if (date == null) {
-      date = this.getDateObject();
-    }
-    return date.format('{yyyy}{MM}{dd}');
   };
 
   ScheduleItem.prototype.getPreviousDateHash = function() {
-    var previousDateObject;
+    var previous;
 
-    previousDateObject = this.getPreviousDateObject();
-    if (previousDateObject) {
-      return this.getDateHash(previousDateObject);
-    } else {
-      return false;
-    }
-  };
-
-  ScheduleItem.prototype.getTimeHash = function(date) {
-    if (date == null) {
-      date = this.getDateObject();
-    }
-    return date.format('{yyyy}{MM}{dd}{HH}{mm}');
-  };
-
-  ScheduleItem.prototype.getPreviousTimeHash = function() {
-    var previousDateObject;
-
-    previousDateObject = this.getPreviousDateObject();
-    if (previousDateObject) {
-      return this.getTimeHash(previousDateObject);
+    previous = this.getPreviousDateObject();
+    if (previous) {
+      return previous.format('{yyyy}{MM}{dd}');
     } else {
       return false;
     }
@@ -1450,11 +1344,45 @@ module.exports = ScheduleItem = (function(_super) {
     try {
       options = RRule.parseString(this.get('rrule'));
       options.dtstart = this.getStartDateObject();
+      return new RRule(options);
     } catch (_error) {
       e = _error;
       return false;
     }
-    return new RRule(options);
+  };
+
+  ScheduleItem.prototype.isOneDay = function() {
+    return this.startDateObject.short() === this.endDateObject.short();
+  };
+
+  ScheduleItem.prototype.isInRange = function(start, end) {
+    return this.startDateObject.isBetween(start, end) || this.endDateObject.isBetween(start, end) || (this.startDateObject.isBefore(start) && this.endDateObject.isAfter(end));
+  };
+
+  ScheduleItem.prototype.toFullCalendarEvent = function(rstart) {
+    var duration, end, fcEvent, start;
+
+    start = this.getStartDateObject();
+    end = this.getEndDateObject();
+    if (rstart) {
+      duration = end - start;
+      end = Date.create(rstart).clone().advance(duration);
+      start = rstart;
+    }
+    return fcEvent = {
+      id: this.cid,
+      title: "" + (start.format("{HH}:{mm}")) + " " + (this.get("description")),
+      start: start.format(Date.ISO8601_DATETIME),
+      end: end.format(Date.ISO8601_DATETIME),
+      allDay: false,
+      diff: this.get("diff"),
+      place: this.get('place'),
+      timezone: this.get('timezone'),
+      timezoneHour: this.get('timezoneHour'),
+      type: this.fcEventType,
+      backgroundColor: this.getColor(),
+      borderColor: this.getColor()
+    };
   };
 
   return ScheduleItem;
@@ -1604,12 +1532,14 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("views/calendar_popover", function(exports, require, module) {
-var Alarm, BaseView, Event, PopOver, _ref,
+var Alarm, BaseView, Event, PopOver, RRuleFormView, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
+
+RRuleFormView = require('views/event_modal_rrule');
 
 Alarm = require('models/alarm');
 
@@ -1689,9 +1619,11 @@ module.exports = PopOver = (function(_super) {
       showMeridian: false
     });
     this.$('.focused').focus();
-    return this.$("#input-start").data('timepicker').elementKeydown = function(event) {
-      return console.log("toto");
-    };
+    this.rruleForm = new RRuleFormView({
+      model: this.model
+    });
+    this.rruleForm.render();
+    return this.$('#rrule-container').append(this.rruleForm.$el);
   };
 
   PopOver.prototype.getTitle = function() {
@@ -2288,13 +2220,14 @@ module.exports = CalendarView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var Event, EventModal, ViewCollection, app, random, _ref,
+var Event, EventModal, RRuleFormView, ViewCollection, app, random, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('lib/view_collection');
+
+RRuleFormView = require('views/event_modal_rrule');
 
 Event = require('models/event');
 
@@ -2308,10 +2241,6 @@ module.exports = EventModal = (function(_super) {
   function EventModal() {
     this.close = __bind(this.close, this);
     this.configureGuestTypeahead = __bind(this.configureGuestTypeahead, this);
-    this.updateHelp = __bind(this.updateHelp, this);
-    this.toggleCountUntil = __bind(this.toggleCountUntil, this);
-    this.getRRule = __bind(this.getRRule, this);
-    this.showRRule = __bind(this.showRRule, this);
     this.handleError = __bind(this.handleError, this);
     this.save = __bind(this.save, this);
     this.resizeDescription = __bind(this.resizeDescription, this);
@@ -2329,6 +2258,8 @@ module.exports = EventModal = (function(_super) {
   EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {HH}:{mm}';
 
   EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
+
+  EventModal.prototype.exportDateFormat = '{year}-{MM}-{dd}-{HH}-{mm}';
 
   EventModal.prototype.collectionEl = '#guests-list';
 
@@ -2349,11 +2280,6 @@ module.exports = EventModal = (function(_super) {
       'click  #confirm-btn': 'save',
       'click  #cancel-btn': 'close',
       'click  .close': 'close',
-      'click  .rrule-show': 'showRRule',
-      'change #rrule': 'updateHelp',
-      'changeDate #rrule-until': 'toggleCountUntil',
-      'input  #rrule-until': 'toggleCountUntil',
-      'change #rrule-count': 'toggleCountUntil',
       'click #addguest': function() {
         return _this.onGuestAdded(_this.$('#addguest-field').val());
       },
@@ -2366,14 +2292,6 @@ module.exports = EventModal = (function(_super) {
     var _this = this;
 
     EventModal.__super__.afterRender.apply(this, arguments);
-    this.$('#rrule').hide();
-    if (this.model.get('rrule')) {
-      this.updateHelp();
-      this.$('#rrule-toggle').hide();
-    } else {
-      this.$('#rrule').hide();
-      this.$('#rrule-short').hide();
-    }
     this.addGuestField = this.configureGuestTypeahead();
     this.startField = this.$('#basic-start').attr('type', 'text');
     this.startField.parent().datetimepicker({
@@ -2385,11 +2303,12 @@ module.exports = EventModal = (function(_super) {
       format: 'dd/mm/yyyy hh:ii',
       pickerPosition: 'bottom-left'
     });
-    this.$('#rrule-until').attr('type', 'text').datetimepicker({
-      format: 'dd/mm/yyyy',
-      minView: 2
-    }).on('changeDate', this.updateHelp);
     this.descriptionField = this.$('#basic-description');
+    this.rruleForm = new RRuleFormView({
+      model: this.model
+    });
+    this.rruleForm.render();
+    this.$('#rrule-container').append(this.rruleForm.$el);
     this.$el.modal('show');
     return this.$el.on('hidden', function() {
       window.app.router.navigate("calendar", {
@@ -2441,81 +2360,11 @@ module.exports = EventModal = (function(_super) {
     data = _.extend({}, this.model.toJSON(), {
       summary: this.model.get('description'),
       description: this.model.get('details'),
-      weekDays: Date.getLocale().weekdays.slice(0, 7),
-      units: Date.getLocale().units,
       start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
-      end: this.model.getEndDateObject().format(this.inputDateTimeFormat)
+      end: this.model.getEndDateObject().format(this.inputDateTimeFormat),
+      exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
     });
-    if (this.model.get('rrule')) {
-      _.extend(data, this.getRRuleRenderData());
-    } else {
-      _.extend(data, {
-        rrule: {
-          freq: RRule.WEEKLY,
-          interval: 1,
-          count: 4,
-          until: ""
-        },
-        freqSelected: function(value) {
-          if (value === RRule.WEEKLY) {
-            return 'selected';
-          }
-        },
-        wkdaySelected: function() {
-          return false;
-        },
-        yearModeIs: function(value) {
-          if (value === 'date') {
-            return "checked";
-          }
-        }
-      });
-    }
     return data;
-  };
-
-  EventModal.prototype.getRRuleRenderData = function() {
-    var data, options, rrule;
-
-    options = RRule.fromString(this.model.get('rrule')).options;
-    rrule = {
-      freq: options.freq,
-      interval: options.interval
-    };
-    if (options.until) {
-      rrule.until = Date.create(options.until).format(this.inputDateFormat);
-      rrule.count = "";
-    } else if (options.count) {
-      rrule.count = options.count;
-      rrule.until = "";
-    }
-    return data = {
-      rrule: rrule,
-      freqSelected: function(value) {
-        var result;
-
-        result = value === rrule.freq;
-        if (result) {
-          return 'selected';
-        }
-      },
-      wkdaySelected: function(value) {
-        var result, _ref1;
-
-        result = options.byweekday && (_ref1 = (value + 6) % 7, __indexOf.call(options.byweekday, _ref1) >= 0);
-        if (result) {
-          return 'checked';
-        }
-      },
-      yearModeIs: function(value) {
-        var result, _ref1, _ref2;
-
-        result = (value === 'weekdate' && ((_ref1 = options.bynweekday) != null ? _ref1.length : void 0)) || (value === 'date' && ((_ref2 = options.bymonthday) != null ? _ref2.length : void 0));
-        if (result) {
-          return 'checked';
-        }
-      }
-    };
   };
 
   EventModal.prototype.save = function() {
@@ -2529,8 +2378,8 @@ module.exports = EventModal = (function(_super) {
       start: Date.create(this.startField.val(), 'fr').format(Event.dateFormat, 'en'),
       end: Date.create(this.endField.val(), 'fr').format(Event.dateFormat, 'en')
     };
-    if (this.$('#rrule-help').is(':visible')) {
-      data.rrule = this.getRRule().toString();
+    if (this.rruleForm.isVisible()) {
+      data.rrule = this.rruleForm.getRRule().toString();
     } else {
       data.rrule = '';
     }
@@ -2544,7 +2393,6 @@ module.exports = EventModal = (function(_super) {
         return _this.close();
       }
     });
-    console.log("bip");
     if (!validModel) {
       this.$('.alert').remove();
       this.$('.control-group').removeClass('error');
@@ -2577,92 +2425,6 @@ module.exports = EventModal = (function(_super) {
     this.$(guiltyFields).parents('.control-group').addClass('error');
     alertMsg = $('<div class="alert"></div>').text(t(error.value));
     return this.$('.modal-body').before(alertMsg);
-  };
-
-  EventModal.prototype.showRRule = function() {
-    var _this = this;
-
-    this.updateHelp();
-    this.$('#rrule-short #rrule-action').hide();
-    return this.$('#rrule-toggle').fadeOut(function() {
-      return _this.$('#rrule-short').slideDown(function() {
-        return _this.$('#rrule').slideDown();
-      });
-    });
-  };
-
-  EventModal.prototype.getRRule = function() {
-    var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
-
-    start = this.model.getStartDateObject();
-    RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
-    options = {
-      dtstart: start,
-      freq: +this.$('#rrule-freq').val(),
-      interval: +this.$('#rrule-interval').val()
-    };
-    if (options.freq === RRule.WEEKLY) {
-      options.byweekday = [];
-      this.$('#rrule-weekdays :checked').each(function(idx, box) {
-        return options.byweekday.push(RRuleWdays[box.value]);
-      });
-      if (options.byweekday.length === 7) {
-        delete options.byweekday;
-      }
-    } else if (options.freq === RRule.MONTHLY) {
-      monthmode = this.$('#rrule-monthdays :radio:checked').val();
-      if (monthmode === "date") {
-        options.bymonthday = start.getDate();
-      } else if (monthmode === 'weekdate') {
-        day = RRuleWdays[start.getDay()];
-        endOfMonth = start.clone().endOfMonth();
-        if (start.getDate() > endOfMonth.getDate() - 7) {
-          wk = -1;
-        } else {
-          wk = Math.ceil(start.getDate() / 7);
-        }
-        options.byweekday = day.nth(wk);
-      }
-    }
-    if (this.$('#rrule-count').val() !== '') {
-      options.count = +this.$('#rrule-count').val();
-    } else {
-      options.until = Date.create(this.$('#rrule-until').val());
-    }
-    return new RRule(options);
-  };
-
-  EventModal.prototype.toggleCountUntil = function(event) {
-    if (event.target.id === "rrule-count") {
-      this.$('#rrule-until').val('');
-    } else if (event.target.id === "rrule-until") {
-      this.$('#rrule-count').val('');
-    }
-    return this.updateHelp();
-  };
-
-  EventModal.prototype.updateHelp = function() {
-    var freq, language, locale;
-
-    freq = this.$('#rrule-freq').val();
-    if (freq === 'NOREPEAT') {
-      this.$('#rrule-toggle').show();
-      this.$('#rrule-short').hide();
-      this.$('#rrule').hide();
-      this.$('#rrule-freq').val('WEEKLY');
-      return;
-    } else {
-      freq = +freq;
-    }
-    this.$('#rrule-monthdays').toggle(freq === RRule.MONTHLY);
-    this.$('#rrule-weekdays').toggle(freq === RRule.WEEKLY);
-    locale = Date.getLocale();
-    language = {
-      dayNames: locale.weekdays.slice(0, 7),
-      monthNames: locale.full_month.split('|').slice(1, 13)
-    };
-    this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
-    return true;
   };
 
   EventModal.prototype.configureGuestTypeahead = function() {
@@ -2730,6 +2492,238 @@ module.exports = GuestView = (function(_super) {
   GuestView.prototype.template = require('./templates/event_modal_guest');
 
   return GuestView;
+
+})(BaseView);
+
+});
+
+;require.register("views/event_modal_rrule", function(exports, require, module) {
+var BaseView, RRuleView, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+BaseView = require('../lib/base_view');
+
+module.exports = RRuleView = (function(_super) {
+  __extends(RRuleView, _super);
+
+  function RRuleView() {
+    this.updateHelp = __bind(this.updateHelp, this);
+    this.toggleCountUntil = __bind(this.toggleCountUntil, this);
+    this.showRRule = __bind(this.showRRule, this);
+    this.getRRule = __bind(this.getRRule, this);    _ref = RRuleView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  RRuleView.prototype.template = require('./templates/event_modal_rrule');
+
+  RRuleView.prototype.inputDateFormat = '{year}-{MM}-{dd}';
+
+  RRuleView.prototype.events = function() {
+    return {
+      'click  .rrule-show': 'showRRule',
+      'change #rrule': 'updateHelp',
+      'changeDate #rrule-until': 'toggleCountUntil',
+      'input  #rrule-until': 'toggleCountUntil',
+      'change #rrule-count': 'toggleCountUntil'
+    };
+  };
+
+  RRuleView.prototype.afterRender = function() {
+    this.$('#rrule').hide();
+    this.updateHelp();
+    return this.$('#rrule-until').attr('type', 'text').datetimepicker({
+      format: 'dd/mm/yyyy',
+      minView: 2
+    }).on('changeDate', this.updateHelp);
+  };
+
+  RRuleView.prototype.isVisible = function() {
+    return this.$('#rrule-help').is(':visible');
+  };
+
+  RRuleView.prototype.getRenderData = function() {
+    var data, options, rrule;
+
+    data = {
+      weekDays: Date.getLocale().weekdays.slice(0, 7),
+      units: Date.getLocale().units
+    };
+    if (!this.model.has('rrule')) {
+      return _.extend(data, {
+        rrule: {
+          freq: 'NOREPEAT',
+          interval: 1,
+          count: 4,
+          until: ""
+        },
+        freqSelected: function(value) {
+          if (value === 'NOREPEAT') {
+            return 'selected';
+          }
+        },
+        wkdaySelected: function() {
+          return false;
+        },
+        endModeSelected: function(value) {
+          if (value === 'forever') {
+            return 'selected';
+          }
+        },
+        yearModeIs: function(value) {
+          if (value === 'date') {
+            return "checked";
+          }
+        }
+      });
+    }
+    options = RRule.fromString(this.model.get('rrule')).options;
+    rrule = {
+      freq: options.freq,
+      interval: options.interval
+    };
+    if (options.until) {
+      rrule.endMode = 'until';
+      rrule.until = Date.create(options.until).format(this.inputDateFormat);
+      rrule.count = "";
+    } else if (options.count) {
+      rrule.endMode = 'count';
+      rrule.count = options.count;
+      rrule.until = "";
+    } else {
+      rrule.endMode = 'forever';
+      rrule.count = '';
+      rrule.until = '';
+    }
+    return _.extend(data, {
+      rrule: rrule,
+      freqSelected: function(value) {
+        var result;
+
+        result = value === rrule.freq;
+        if (result) {
+          return 'selected';
+        }
+      },
+      wkdaySelected: function(value) {
+        var result, _ref1;
+
+        result = options.byweekday && (_ref1 = (value + 6) % 7, __indexOf.call(options.byweekday, _ref1) >= 0);
+        if (result) {
+          return 'checked';
+        }
+      },
+      endModeSelected: function(value) {
+        if (value === rrule.endMode) {
+          return 'selected';
+        }
+      },
+      yearModeIs: function(value) {
+        var result, _ref1, _ref2;
+
+        result = (value === 'weekdate' && ((_ref1 = options.bynweekday) != null ? _ref1.length : void 0)) || (value === 'date' && ((_ref2 = options.bymonthday) != null ? _ref2.length : void 0));
+        if (result) {
+          return 'checked';
+        }
+      }
+    });
+  };
+
+  RRuleView.prototype.getRRule = function() {
+    var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
+
+    start = this.model.getStartDateObject();
+    RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
+    options = {
+      dtstart: start,
+      freq: +this.$('#rrule-freq').val(),
+      interval: +this.$('#rrule-interval').val()
+    };
+    if (options.freq === RRule.WEEKLY) {
+      options.byweekday = [];
+      this.$('#rrule-weekdays :checked').each(function(idx, box) {
+        return options.byweekday.push(RRuleWdays[box.value]);
+      });
+      if (options.byweekday.length === 7) {
+        delete options.byweekday;
+      }
+    } else if (options.freq === RRule.MONTHLY) {
+      monthmode = this.$('#rrule-monthdays :radio:checked').val();
+      if (monthmode === "date") {
+        options.bymonthday = start.getDate();
+      } else if (monthmode === 'weekdate') {
+        day = RRuleWdays[start.getDay()];
+        endOfMonth = start.clone().endOfMonth();
+        if (start.getDate() > endOfMonth.getDate() - 7) {
+          wk = -1;
+        } else {
+          wk = Math.ceil(start.getDate() / 7);
+        }
+        options.byweekday = day.nth(wk);
+      }
+    }
+    switch (this.$('input:radio[name=endMode]:checked').val()) {
+      case 'count':
+        options.count = +this.$('#rrule-count').val();
+        break;
+      case 'until':
+        options.until = Date.create(this.$('#rrule-until').val(), 'fr');
+    }
+    return new RRule(options);
+  };
+
+  RRuleView.prototype.showRRule = function() {
+    var _this = this;
+
+    this.updateHelp();
+    this.$('#rrule-short #rrule-action').hide();
+    return this.$('#rrule-short').slideDown(function() {
+      return _this.$('#rrule').slideDown();
+    });
+  };
+
+  RRuleView.prototype.toggleCountUntil = function(event) {
+    var radio;
+
+    radio = this.$('input:radio[name=endMode]');
+    if (event.target.id === "rrule-count") {
+      this.$('#rrule-until').val('');
+      radio[1].checked = true;
+    } else if (event.target.id === "rrule-until") {
+      this.$('#rrule-count').val('');
+      radio[2].checked = true;
+    }
+    return this.updateHelp();
+  };
+
+  RRuleView.prototype.updateHelp = function() {
+    var freq, language, locale;
+
+    freq = this.$('#rrule-freq').val();
+    if (freq === 'NOREPEAT') {
+      this.$('#rrule-toggle').show();
+      this.$('#rrule-short').hide();
+      this.$('#rrule').hide();
+      this.$('#rrule-freq').val('WEEKLY');
+      this.$('rrule-help').html(t('no reccurence'));
+      return;
+    } else {
+      freq = +freq;
+    }
+    this.$('#rrule-monthdays').toggle(freq === RRule.MONTHLY);
+    this.$('#rrule-weekdays').toggle(freq === RRule.WEEKLY);
+    locale = Date.getLocale();
+    language = {
+      dayNames: locale.weekdays.slice(0, 7),
+      monthNames: locale.full_month.split('|').slice(1, 13)
+    };
+    this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
+    return true;
+  };
+
+  return RRuleView;
 
 })(BaseView);
 
@@ -3374,7 +3368,9 @@ var interp;
 buf.push('<div class="modal-header"><span>');
 var __val__ = t('edit event')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span12"><label for="basic-summary" class="control-label">');
+buf.push('</span>&nbsp;<a');
+buf.push(attrs({ 'href':("events/" + (id) + "/" + (exportdate) + ".ics") }, {"href":true}));
+buf.push('> <i class="fa fa-download fa-1"></i></a><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span12"><label for="basic-summary" class="control-label">');
 var __val__ = t('summary')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
@@ -3414,10 +3410,50 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</p></form><div id="guests-list"></div><h4>');
 var __val__ = t('recurrence rule')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><p id="rrule-toggle"><a class="btn rrule-show">');
-var __val__ = t('make reccurent')
+buf.push('</h4><div id="rrule-container"></div></div></div><div class="modal-footer"><a id="cancel-btn">');
+var __val__ = t("cancel")
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a></p><p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
+buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');
+var __val__ = t("save changes")
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</a></div>');
+}
+return buf.join("");
+};
+});
+
+;require.register("views/templates/event_modal_guest", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<p>');
+if ( model.status == 'ACCEPTED')
+{
+buf.push('<i class="icon-ok-circle green"></i>');
+}
+else if ( model.status == 'DECLINED')
+{
+buf.push('<i class="icon-ban-circle red"></i>');
+}
+else if ( model.status == 'NEED-ACTION')
+{
+buf.push('<i class="icon-time blue"></i>');
+}
+buf.push('&nbsp;' + escape((interp = model.email) == null ? '' : interp) + '</p>');
+}
+return buf.join("");
+};
+});
+
+;require.register("views/templates/event_modal_rrule", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<p id="rrule-short"><i class="icon-arrow-right"></i><span id="rrule-help"></span><span id="rrule-action">&nbsp;-&nbsp;<a class="rrule-show">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a></span></p><form id="rrule" class="form-inline"><label for="rrule-interval" class="control-label">');
@@ -3499,50 +3535,31 @@ buf.push('/>');
 var __val__ = t('repeat on weekday')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label></div></div><label for="rrule-until">');
-var __val__ = t('repeat until')
+var __val__ = t('repeat')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label><div class="control-group"><input');
-buf.push(attrs({ 'id':('rrule-until'), 'type':("date"), 'value':(rrule.until) }, {"type":true,"value":true}));
+buf.push('</label><div class="control-group"><label class="radio"><input');
+buf.push(attrs({ 'type':("radio"), 'name':("endMode"), 'value':('forever'), 'checked':(endModeSelected('forever')) }, {"type":true,"name":true,"value":true,"checked":true}));
+buf.push('/>');
+var __val__ = t('forever')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</label></div><div class="control-group"><label class="radio"><input');
+buf.push(attrs({ 'type':("radio"), 'name':("endMode"), 'value':('count'), 'checked':(endModeSelected('count')) }, {"type":true,"name":true,"value":true,"checked":true}));
 buf.push('/><label for="rrule-count">');
-var __val__ = t('or after')
+var __val__ = t('after')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><input');
 buf.push(attrs({ 'id':('rrule-count'), 'type':("number"), 'min':(0), 'value':(rrule.count), "class": ('input-mini') }, {"type":true,"min":true,"value":true}));
 buf.push('/><label for="rrule-count">');
 var __val__ = t('occurences')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</label></div></form></div></div><div class="modal-footer"><a id="cancel-btn">');
-var __val__ = t("cancel")
+buf.push('</label></label></div><div class="control-group"><label class="radio"><input');
+buf.push(attrs({ 'type':("radio"), 'name':("endMode"), 'value':('until'), 'checked':(endModeSelected('until')) }, {"type":true,"name":true,"value":true,"checked":true}));
+buf.push('/><label for="rrule-count">');
+var __val__ = t('until')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a>&nbsp;<a id="confirm-btn" class="btn">');
-var __val__ = t("save changes")
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a></div>');
-}
-return buf.join("");
-};
-});
-
-;require.register("views/templates/event_modal_guest", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
-attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
-var buf = [];
-with (locals || {}) {
-var interp;
-buf.push('<p>');
-if ( model.status == 'ACCEPTED')
-{
-buf.push('<i class="icon-ok-circle green"></i>');
-}
-else if ( model.status == 'DECLINED')
-{
-buf.push('<i class="icon-ban-circle red"></i>');
-}
-else if ( model.status == 'NEED-ACTION')
-{
-buf.push('<i class="icon-time blue"></i>');
-}
-buf.push('&nbsp;' + escape((interp = model.email) == null ? '' : interp) + '</p>');
+buf.push('</label><input');
+buf.push(attrs({ 'id':('rrule-until'), 'type':("date"), 'value':(rrule.until) }, {"type":true,"value":true}));
+buf.push('/></label></div></form>');
 }
 return buf.join("");
 };
@@ -3742,9 +3759,9 @@ buf.push('</option>');
   }
 }).call(this);
 
-buf.push('</select><input');
+buf.push('</select></div><div class="line"><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div class="popover-footer"><a class="btn add">');
+buf.push('/></div><div class="line"><div id="rrule-container"></div></div><div class="popover-footer"><a class="btn add">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a></div>');

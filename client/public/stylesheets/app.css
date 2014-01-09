@@ -373,6 +373,7 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 /*!
  * Bootstrap v2.3.1
  *
@@ -2807,7 +2808,6 @@ input[type="submit"].btn.btn-mini {
   background-image: url("../img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
-  background: none;
   margin-top: 1px;
 }
 /* White icons with optional class, or on hover/focus/active states of certain elements */
@@ -6681,6 +6681,7 @@ button.close {
     overflow: visible !important;
   }
 }
+
 /*!
  * Timepicker Component for Twitter Bootstrap
  *
@@ -6802,6 +6803,7 @@ button.close {
     width: 100%;
   }
 }
+
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7381,6 +7383,7 @@ table.fc-border-separate {
 	}
 
 
+
 /*!
  * Datetimepicker for Bootstrap
  *
@@ -7795,6 +7798,7 @@ table.fc-border-separate {
 	width: 14px;
 	height: 14px;
 }
+
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -9133,6 +9137,7 @@ table.fc-border-separate {
 .fa-plus-square-o:before {
   content: "\f196";
 }
+
 #event-modal {
   padding: 2px;
 }
@@ -9241,6 +9246,7 @@ table.fc-border-separate {
     border-bottom: 1px solid #000;
   }
 }
+
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -9283,11 +9289,11 @@ body.modal-open,
   margin-right: 0;
 }
 textarea:hover,
-input:hover,
+input[type="text"]:hover,
 textarea:active,
-input:active,
+input[type="text"]:active,
 textarea:focus,
-input:focus,
+input[type="text"]:focus,
 a:focus,
 .btn:focus {
   outline: 0px !important;
@@ -9566,6 +9572,11 @@ ul#menu li:hover {
   background: #fff;
   color: #333;
 }
+#event-modal .modal-header a {
+  font-size: 16px;
+  text-decoration: none;
+  color: #333;
+}
 #event-modal a.btn.rrule-show {
   -webkit-border-radius: 0px;
   border-radius: 0px;
@@ -9794,17 +9805,6 @@ h2 {
 #alarm-list div {
   font-family: main;
 }
-.icon-bell:before,
-.icon-th:before,
-.icon-th-list:before,
-.icon-share:before,
-.icon-upload:before,
-.icon-arrow-down:before,
-.icon-arrow-up:before,
-.icon-circle-arrow-down:before,
-.icon-circle-arrow-up:before {
-  content: "";
-}
 .active.btn {
   background: #008af6;
   -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
@@ -9849,6 +9849,20 @@ h2 {
 }
 .container {
   margin: 0;
+}
+.public-event-container {
+  width: 100%;
+}
+.public-event-container h2,
+.public-event-container h3,
+.public-event-container h4,
+.public-event-container p,
+.public-event-container a,
+.public-event-container body {
+  font-family: styled;
+}
+.public-event-container h3 {
+  margin-top: 0;
 }
 @media (max-width: 1000px) {
   #alarms {
@@ -9937,6 +9951,7 @@ h2 {
     display: block;
   }
 }
+
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -9979,11 +9994,11 @@ body.modal-open,
   margin-right: 0;
 }
 textarea:hover,
-input:hover,
+input[type="text"]:hover,
 textarea:active,
-input:active,
+input[type="text"]:active,
 textarea:focus,
-input:focus,
+input[type="text"]:focus,
 a:focus,
 .btn:focus {
   outline: 0px !important;
@@ -10201,6 +10216,10 @@ a:focus,
 #alarms thead .fc-first .fc-widget-header {
   border-bottom: 1px solid #ddd;
 }
+a.btn:visited {
+  color: #fff;
+}
+
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -10226,3 +10245,6 @@ a:focus,
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+
+
+/*@ sourceMappingURL=app.css.map*/

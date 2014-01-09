@@ -13,6 +13,7 @@ module.exports = class EventModal extends ViewCollection
 
     inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
+    exportDateFormat: '{year}-{MM}-{dd}-{HH}-{mm}'
 
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'
@@ -85,6 +86,7 @@ module.exports = class EventModal extends ViewCollection
             description: @model.get('details')
             start: @model.getStartDateObject().format @inputDateTimeFormat
             end: @model.getEndDateObject().format @inputDateTimeFormat
+            exportdate: @model.getStartDateObject().format @exportDateFormat
 
         return data
 

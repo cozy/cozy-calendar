@@ -1,5 +1,10 @@
-h1 RSVP for #{event.description}
-h2 #{event.place}
-
-p: a.btn(href=url + "?status=ACCEPTED&key=" + key) accept
-p: a.btn(href=url + "?status=DECLINED&key=" + key) decline
+p
+    | Hello, I would like to invite you to the following event:
+h2 #{event.description} @ #{event.place}
+h3 on #{date}
+p
+    | Would you be there?
+p
+    a(href="#{url}?status=ACCEPTED&key=" + key) yes
+p
+    a(href="#{url}?status=DECLINED&key=#{key}") no
