@@ -1,44 +1,81 @@
 module.exports = class ScheduleItem extends Backbone.Model
 
-    mainDateField: ''
+    fcEventType: 'unknown'
+    startDateField: ''
+    endDateField: false
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
 
-    getDateObject: ->
-        if not @dateObject?
-            @dateObject = Date.create(@get(@mainDateField))
-        return @dateObject
+    initialize: ->
+        @startDateObject = Date.create @get @startDateField
+        @on 'change:' + @startDateField, =>
+            @previousDateObject = @startDateObject
+            @startDateObject = Date.create @get @startDateField
+            unless @endDateField
+                @endDateObject = @startDateObject.clone()
+                @endDateObject.advance minutes: 30
 
-    getFormattedDate: (formatter) ->
-        return @getDateObject().format formatter
+        if @endDateField
+            @endDateObject = Date.create @get @endDateField
+            @on 'change:' + @endDateField, =>
+                @endDateObject = @endDateObject
+                @endDateObject = Date.create @get @endDateField
+        else
+            @endDateObject = @startDateObject.clone()
+            @endDateObject.advance minutes: 30
 
+    getColor: -> 'grey'
+
+    getDateObject: -> @startDateObject
+    getStartDateObject: -> @getDateObject()
+    getEndDateObject: -> @endDateObject
+
+    getFormattedDate: (formatter) -> @getDateObject().format formatter
+    getFormattedStartDate: (formatter) -> @getStartDateObject().format formatter
+    getFormattedEndDate: (formatter) -> @getEndDateObject().format formatter
+
+    getDateHash: () -> @getDateObject().format '{yyyy}{MM}{dd}'
     getPreviousDateObject: ->
-        if @previous(@mainDateField)?
-            return Date.create @previous(@mainDateField)
-        else return false
-
-    getDateHash: (date) ->
-        date = @getDateObject() unless date?
-        return date.format '{yyyy}{MM}{dd}'
-
+        previous = @previous(@startDateField)?
+        if previous then Date.create previous else false
     getPreviousDateHash: ->
-        previousDateObject = @getPreviousDateObject()
-        if previousDateObject
-            return @getDateHash(previousDateObject)
-        else return false
-
-    getTimeHash: (date) ->
-        date = @getDateObject() unless date?
-        return date.format '{yyyy}{MM}{dd}{HH}{mm}'
-
-    getPreviousTimeHash: ->
-        previousDateObject = @getPreviousDateObject()
-        if previousDateObject
-            return @getTimeHash(previousDateObject)
-        else return false
+        previous = @getPreviousDateObject()
+        if previous then previous.format('{yyyy}{MM}{dd}') else false
 
     getRRuleObject: ->
         try
             options = RRule.parseString @get 'rrule'
             options.dtstart = @getStartDateObject()
+            return new RRule options
         catch e then return false
-        new RRule options
+
+    isOneDay: -> @startDateObject.short() is @endDateObject.short()
+
+    isInRange: (start, end) ->
+        @startDateObject.isBetween(start, end) or
+        @endDateObject.isBetween(start, end) or
+        (@startDateObject.isBefore(start) and @endDateObject.isAfter(end))
+
+    # transform a SI into a FC event
+    # allow overriding the startDate for reccurence management
+    toFullCalendarEvent: (rstart) ->
+        start = @getStartDateObject()
+        end = @getEndDateObject()
+
+        if rstart
+            duration = end - start
+            end = Date.create(rstart).clone().advance duration
+            start = rstart
+
+        return fcEvent =
+            id: @cid
+            title: "#{start.format "{HH}:{mm}"} #{@get("description")}"
+            start: start.format Date.ISO8601_DATETIME
+            end: end.format Date.ISO8601_DATETIME
+            allDay: false
+            diff: @get "diff"
+            place: @get 'place'
+            timezone: @get 'timezone'
+            timezoneHour: @get 'timezoneHour'
+            type: @fcEventType
+            backgroundColor: @getColor()
+            borderColor: @getColor()

@@ -2432,7 +2432,6 @@ input[type="submit"].btn.btn-mini {
   background-image: url("../img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
-  background: none;
   margin-top: 1px;
 }
 /* White icons with optional class, or on hover/focus/active states of certain elements */

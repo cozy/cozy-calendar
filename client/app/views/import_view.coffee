@@ -47,7 +47,7 @@ module.exports = class ImportView extends BaseView
 
                 if result?.alarms?
                     for valarm in result.alarms
-                        alarm = new Alarm valarm
+                        alarm = new Alarm valarm, parse: true
                         @alarmList.collection.add alarm
 
                 if result?.events?
@@ -73,8 +73,23 @@ module.exports = class ImportView extends BaseView
                 @importButton.find('span').html t 'select an icalendar file'
 
     onConfirmImportClicked: ->
-        alarms = @alarmList.collection.toArray()
-        events = @eventList.collection.toArray()
+        counter = @alarmList.collection.length + @eventList.collection.length
+        console.log counter, @alarmList.length, @eventList.length
+
+        onFaillure = (model) =>
+            console.log "faillure", model.cid, counter
+            counter = counter - 1
+            alert('some event fail to save');
+            finish() if counter is 0
+
+        onSuccess = (model) =>
+            console.log "success", model.cid, counter
+            switch model.constructor
+                when Event then app.events.add model
+                when Alarm then app.alarms.add model
+
+            counter = counter - 1
+            finish() if counter is 0
 
         finish = =>
             @$(".confirmation").fadeOut()
@@ -83,24 +98,19 @@ module.exports = class ImportView extends BaseView
                 @confirmButton.html t 'confirm import'
             @alarmList.collection.reset()
             @eventList.collection.reset()
-
-        saveAlarms = (alarms) ->
-            if alarms.length > 0
-                alarms.pop().save()
-                saveAlarms alarms
-            else
-                finish()
-
-        saveEvents = (events) ->
-            if events.length > 0
-                events.pop().save()
-                saveEvents events
-            else
-                saveAlarms alarms
+            app.router.navigate "calendar", true
 
         @confirmButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @confirmButton.spin 'tiny'
-        saveEvents events
+        @alarmList.collection.each (alarm) ->
+            alarm.save null,
+                success: onSuccess
+                error: onFaillure
+
+        @eventList.collection.each (event) ->
+            event.save null,
+                success: onSuccess
+                error: onFaillure
 
     onCancelImportClicked: ->
         @$(".confirmation").fadeOut()

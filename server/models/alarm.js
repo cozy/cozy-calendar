@@ -24,6 +24,9 @@ module.exports = Alarm = americano.getModel('Alarm', {
   timezoneHour: {
     type: String
   },
+  rrule: {
+    type: String
+  },
   related: {
     type: String,
     "default": null

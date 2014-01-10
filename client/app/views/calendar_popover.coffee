@@ -1,4 +1,6 @@
 BaseView = require '../lib/base_view'
+RRuleFormView = require 'views/event_modal_rrule'
+Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
 
@@ -47,6 +49,9 @@ module.exports = class PopOver extends BaseView
             content: @template @getRenderData()
         ).popover('show')
         @setElement $('#viewContainer .popover')
+        @afterRender()
+
+    afterRender: ->
         @addButton = @$('.btn.add').text @getButtonText()
         @removeButton = @$('.remove')
         @removeButton.hide() if @model.isNew()
@@ -56,8 +61,33 @@ module.exports = class PopOver extends BaseView
             showMeridian: false
         @$('.focused').focus()
 
-        @$("#input-start").data('timepicker').elementKeydown = (event) ->
-            console.log "toto"
+        if @type is 'alarm'
+            tzInput = @$('#input-timezone')
+            @actionMail = new Toggle
+                icon: 'envelope'
+                label: 'email notification'
+                value: @model.get('action') in ['EMAIL', 'BOTH']
+
+            @actionNotif = new Toggle
+                icon: 'exclamation-sign'
+                label: 'home notification'
+                value: @model.get('action') in ['DISPLAY', 'BOTH']
+
+            @actionMail.on 'toggle', (mailIsOn) =>
+                @actionNotif.toggle true unless mailIsOn
+
+            @actionNotif.on 'toggle', (notifIsOn) =>
+                @actionMail.toggle true unless notifIsOn
+
+            tzInput.after @actionMail.$el
+            tzInput.after @actionNotif.$el
+
+        if @model.get 'rrule'
+            @rruleForm = new RRuleFormView model: @model
+            @rruleForm.render()
+            @$('#rrule-container').append @rruleForm.$el
+            @$('#rrule-action').hide()
+            @$('#rrule-short i.icon-arrow-right').hide()
 
 
     getTitle: ->
@@ -159,10 +189,21 @@ module.exports = class PopOver extends BaseView
                 description: @$('#input-desc').val()
 
         else
+
+            action = if @actionNotif.value and @actionMail.value then 'BOTH'
+            else if @actionMail.value then 'EMAIL'
+            else 'DISPLAY'
+
             data =
                 timezone: @$('#input-timezone').val()
                 timezoneHour: @$('#input-time').val()
                 description: @$('#input-desc').val()
+                action: action
+
+            if @rruleForm?.hasRRule()
+                data.rrule = @rruleForm.getRRule().toString()
+            else
+                data.rrule = ''
 
         return data
 

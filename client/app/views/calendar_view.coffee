@@ -80,7 +80,8 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'addEventSource', @alarmCollection.asFCEventSource
 
         @handleWindowResize() #
-        $(window).resize _.debounce @handleWindowResize, 10
+        debounced = _.debounce @handleWindowResize, 10
+        $(window).resize (ev) -> debounced() if ev.target is window
 
     remove: ->
         @popover?.close()

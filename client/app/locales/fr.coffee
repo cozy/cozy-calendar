@@ -53,6 +53,8 @@ module.exports =
     "are you sure"                      : "Etes-vous sur ?"
     "advanced"                          : "Détails"
     "enter Email"                       : "Entrez l'email"
+    "ON"                                : "activée"
+    "OFF"                               : "désactivée"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"
@@ -63,7 +65,9 @@ module.exports =
     "repeat on date"                    : "Répéter les jours du mois"
     "repeat on weekday"                 : "Répéter le jour de la semaine"
     "repeat until"                      : "Répéter jusqu'au"
-    "or after"                          : "ou après"
+    "after"                             : "ou après"
+    "repeat"                            : "Répétition"
+    "forever"                           : "Pour toujours"
     "occurences"                        : "occasions"
     "every"                             : "tous les"
     "days"                              : "jours"

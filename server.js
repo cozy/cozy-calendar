@@ -3,9 +3,9 @@ var port, start;
 
 start = function(port, callback) {
   return require('americano').start({
-    name: 'Agenda',
+    name: 'Calendar',
     port: port,
-    host: process.env.HOST || "127.0.0.1"
+    host: process.env.HOST || "0.0.0.0"
   }, function(app, server) {
     var Realtimer, User, realtime;
     User = require('./server/models/user');

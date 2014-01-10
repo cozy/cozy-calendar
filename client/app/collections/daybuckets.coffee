@@ -2,14 +2,15 @@ ScheduleItemsCollection = require './scheduleitems'
 
 DayBucket = class DayBucket extends Backbone.Model
     constructor: (model) ->
-        console.log model, new Error().stack if not model.getDateHash
         super
             id: model.getDateHash()
             date: model.getDateObject().clone().beginningOfDay()
     initialize: ->
         @items = new ScheduleItemsCollection()
 
-
+# DayBucket Collection
+# mix alarms & events into one collection
+# split into DayBucket (= group by day)
 module.exports = class DayBucketCollection extends Backbone.Collection
 
     model: DayBucket
@@ -42,13 +43,13 @@ module.exports = class DayBucketCollection extends Backbone.Collection
         @eventCollection.each (model) => @onBaseCollectionAdd model
 
     onBaseCollectionChange: (model) ->
-        old = @get model.getPreviousDateHash()
-        bucket = @get model.getDateHash()
-        return if old is bucket
-        old.items.remove model
-        @remove old if old.items.length is 0
-        @add(bucket = new DayBucket model) unless bucket
-        bucket.items.add model
+        oldbucket = @get model.getPreviousDateHash()
+        newbucket = @get model.getDateHash()
+        return if oldbucket is newbucket
+        oldbucket.items.remove model
+        @remove oldbucket if oldbucket.items.length is 0
+        @add(newbucket = new DayBucket model) unless newbucket
+        newbucket.items.add model
 
     onBaseCollectionAdd: (model) ->
         bucket = @get model.getDateHash()

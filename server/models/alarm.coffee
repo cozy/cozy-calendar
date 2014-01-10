@@ -8,6 +8,7 @@ module.exports = Alarm = americano.getModel 'Alarm',
     description  : type : String
     timezone     : type : String
     timezoneHour : type : String
+    rrule        : type : String
     related      : type : String, default: null
 
 
