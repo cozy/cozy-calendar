@@ -54,7 +54,7 @@ module.exports =
     "advanced"                          : "Détails"
     "enter Email"                       : "Entrez l'email"
     "ON"                                : "activée"
-    "OFF"                                : "désactivée"
+    "OFF"                               : "désactivée"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"

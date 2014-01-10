@@ -36,7 +36,7 @@ task 'tests', 'run server tests, ./test is parsed by default, otherwise use -f o
     if options.file
         testFiles  = testFiles.concat(options.file)
     if not(options.dir or options.file)
-        testFiles = walk("tests", [])
+        testFiles = walk("test", [])
     runTests testFiles
 
 task 'tests:client', 'run client tests through mocha', (opts) ->
