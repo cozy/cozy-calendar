@@ -1642,7 +1642,7 @@ module.exports = PopOver = (function(_super) {
       this.actionMail = new Toggle({
         icon: 'envelope',
         label: 'email notification',
-        value: (_ref1 = this.model.get('action')) === 'MAIL' || _ref1 === 'BOTH'
+        value: (_ref1 = this.model.get('action')) === 'EMAIL' || _ref1 === 'BOTH'
       });
       this.actionNotif = new Toggle({
         icon: 'exclamation-sign',
@@ -1819,7 +1819,7 @@ module.exports = PopOver = (function(_super) {
         description: this.$('#input-desc').val()
       };
     } else {
-      action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'MAIL' : 'DISPLAY';
+      action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
       data = {
         timezone: this.$('#input-timezone').val(),
         timezoneHour: this.$('#input-time').val(),

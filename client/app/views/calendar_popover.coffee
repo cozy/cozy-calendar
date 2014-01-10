@@ -66,7 +66,7 @@ module.exports = class PopOver extends BaseView
             @actionMail = new Toggle
                 icon: 'envelope'
                 label: 'email notification'
-                value: @model.get('action') in ['MAIL', 'BOTH']
+                value: @model.get('action') in ['EMAIL', 'BOTH']
 
             @actionNotif = new Toggle
                 icon: 'exclamation-sign'
@@ -191,7 +191,7 @@ module.exports = class PopOver extends BaseView
         else
 
             action = if @actionNotif.value and @actionMail.value then 'BOTH'
-            else if @actionMail.value then 'MAIL'
+            else if @actionMail.value then 'EMAIL'
             else 'DISPLAY'
 
             data =
