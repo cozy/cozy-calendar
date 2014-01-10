@@ -192,13 +192,13 @@
 .fc-view
     overflow: visible
 
-#viewContainer .fc-content .fc-cell-overlay
+#view-container .fc-content .fc-cell-overlay
     background: #CBE4FB
 
-#viewContainer .fc-content tbody .fc-state-highlight
+#view-container .fc-content tbody .fc-state-highlight
     background: #CCF0CC
 
-#viewContainer .fc-event-inner:hover
+#view-container .fc-event-inner:hover
     color: white
     background: orange
     border: 0
@@ -212,3 +212,179 @@
 
 a.btn:visited
     color: white
+
+.popover
+    padding: 0
+
+.popover-title
+    color: white
+    background-color: white
+    color: #333
+    border: 0
+    font-family: styled
+    font-size: 18px
+    margin-top: 5px
+
+    .close
+        color: #333
+        opacity: 0.7
+
+.popover-content
+    font-family: styled
+
+    a.advanced-link
+        margin-left 10px
+
+    padding: 0
+
+    .line
+    .nav-tabs
+        padding: 10px 10px 0px 10px
+
+    div.popover-footer
+        text-align: right
+        background: #F5F5F5
+        padding: 5px
+        border-bottom-left-radius: 5px
+        border-bottom-right-radius: 5px
+
+    input
+    select
+    textarea
+        font-family: styled
+        margin-left: 5px
+        border-radius: 0
+        box-shadow: 0
+        border: 1px solid transparent
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+
+    input:active
+    select:active
+    input:focus
+    select:focus
+        box-shadow: none
+
+    .nav-tabs
+        li
+            a
+                font-size: 16px
+                cursor: pointer
+            a:hover
+                background: lightorange
+                color: #333
+        li.active
+            a:hover
+                background: white
+                color: #333
+
+#add-alarm
+
+    input
+    select
+        border: 1px solid lightgrey
+        box-shadow: 0
+        border-radius: 0px
+        shadow: none
+        font-family: styled, helvetica
+
+    input.disabled
+        border: 1px solid transparent
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+        border-radius: 0px
+        shadow: inset 1px 1px 2px rgba(100, 100, 100, 0.1)
+        color: #333
+
+    input:focus
+    input:active
+    select:active
+    select:focus
+        border: 1px solid blue
+        box-shadow: none
+
+    .add-on
+        border-radius: 0
+
+    .datepicker td.day:hover
+        background: lightorange
+
+    .bootstrap-timepicker-widget table td a:hover
+        background: lightorange
+        border: 1px solid transparent
+
+    #alarm-description-input
+        font-size: 24px
+        line-height: 40px
+        height: 40px
+
+    button.add-alarm.disabled
+      border: 1px solid grey
+
+    button.add-alarm
+        float: left
+        margin-top: 10px
+
+    button.cancel
+        margin-left: 5px
+        margin-top: 10px
+
+.dayprogram
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05)
+  padding-bottom: 15px
+  margin-bottom: 15px
+
+  h2
+    i
+      margin-top 10px
+      margin-left 10px
+      display none
+      cursor pointer
+  &:hover h2 i
+      display inline-block
+
+  .alarms
+    margin-top: 15px
+
+    p
+      line-height: 20px
+
+      i
+        margin: 3px 5px
+        display: none
+        line-height: 14px
+        height: 14px
+        cursor: pointer
+      &:hover i
+        display: inline-block
+
+.dayprogram:nth-last-child(1)
+  border-bottom: 0
+  padding-bottom: 0
+
+.public-event-container
+    width: 100%
+
+    h2
+    h3
+    h4
+    p
+    a
+    body
+        font-family: styled
+
+    h3
+        margin-top: 0
+
+#view-container
+    .popover
+        .arrow
+            box-shadow: none
+            left: -10px
+            border: 0
+
+

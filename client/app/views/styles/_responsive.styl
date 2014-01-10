@@ -1,31 +1,89 @@
-@media (max-width: 480px)
-    // Landscape phones and down
+@media(max-width: 1000px)
 
-    body
-        padding 0 20px
-        text-rendering optimizeSpeed
+    #alarms
+        width: 100%
+        margin: 0px
+        padding: 5px
+        box-sizing: border-box
 
-    .layout-container
-        width auto
+        .fc-header-title
+            h2
+                font-size: 16px
 
-@media (max-width: 767px)
-    // Landscape phone to portrait tablet
+    #view-container
+        padding: 0
 
-    body
-        padding 0 20px
-        text-rendering optimizeSpeed
+        .container:before
+        .container:after
+            display: block
 
-    .layout-container
-        width auto
 
-@media (min-width: 768px) and (max-width: 979px)
-    // Portrait tablet to landscape and desktop
+    #input-time
+    #input-timezone
+    #action
+    #date-control
+        display: block
+        margin-bottom: 10px
 
-    .layout-container
-        width 724px
+@media(max-width: 700px)
+    #alarms
+        .fc-day-header
+            font-size: 12px
+            text-align: center
+            padding-left: 5px
 
-@media (min-width: 1200px)
-    // Large desktop
+    #alarm-list
+        h2
+            font-size: 22px
 
-    .layout-container
-        width 1170px
+
+@media(max-width: 600px)
+    ul#menu
+        height: 40px
+        width: 100%
+        float: none
+        position: absolute
+        top: 0
+        left: 0
+        margin: 0
+
+        li
+            display: inline-block
+
+        span
+            display: none
+
+        #import-menu-button
+            display: none
+
+    .main-container
+        margin-left: 0
+        margin-top: 40px
+
+    #alarms
+        .fc-day-header
+            font-size: 10px
+
+        .fc-button-today
+            display: none
+
+        td.fc-header-right
+            span
+                display: none
+
+        .fc-event-title
+            display: none
+
+        .fc-border-separate
+            width: 100%
+
+@media(max-width: 500px)
+    #alarms
+        .popover
+            width: 310px
+
+            input
+                width: 260px
+
+            button
+                display: block

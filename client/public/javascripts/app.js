@@ -1556,7 +1556,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
         placement: this.getDirection(),
         content: this.template(this.getRenderData())
       }).popover('show');
-      this.setElement($('#viewContainer .popover'));
+      this.setElement($('#view-container .popover'));
       return this.afterRender();
     };
 
@@ -1888,7 +1888,7 @@ window.require.register("views/calendar_view", function(exports, require, module
       return _ref;
     }
 
-    CalendarView.prototype.id = 'viewContainer';
+    CalendarView.prototype.id = 'view-container';
 
     CalendarView.prototype.template = require('./templates/calendarview');
 
@@ -2826,7 +2826,7 @@ window.require.register("views/import_view", function(exports, require, module) 
       return _ref;
     }
 
-    ImportView.prototype.id = 'viewContainer';
+    ImportView.prototype.id = 'view-container';
 
     ImportView.prototype.events = {
       'change #import-file-input': 'onFileChanged',
@@ -3003,7 +3003,7 @@ window.require.register("views/list_view", function(exports, require, module) {
       return _ref;
     }
 
-    ListView.prototype.id = 'viewContainer';
+    ListView.prototype.id = 'view-container';
 
     ListView.prototype.template = require('./templates/list_view');
 
@@ -3271,7 +3271,7 @@ window.require.register("views/sync_view", function(exports, require, module) {
       return _ref;
     }
 
-    ImportView.prototype.id = 'viewContainer';
+    ImportView.prototype.id = 'view-container';
 
     ImportView.prototype.template = require('./templates/sync_view');
 

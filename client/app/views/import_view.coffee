@@ -9,7 +9,7 @@ EventList = require './import_event_list'
 
 module.exports = class ImportView extends BaseView
 
-    id: 'viewContainer'
+    id: 'view-container'
 
     events:
         'change #import-file-input': 'onFileChanged'
