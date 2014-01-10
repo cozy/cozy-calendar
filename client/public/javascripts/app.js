@@ -3128,11 +3128,12 @@ module.exports = ListView = (function(_super) {
   };
 
   ListView.prototype.appendView = function(view) {
-    var el, index, prevCid;
+    var el, index, prevCid, today;
 
     index = this.collection.indexOf(view.model);
     el = view.$el;
-    if (view.model.get('date').isBefore(Date.now())) {
+    today = (new Date()).beginningOfDay();
+    if (view.model.get('date').isBefore(today)) {
       el.addClass('before').hide();
     } else {
       el.addClass('after');
