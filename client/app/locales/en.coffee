@@ -49,6 +49,8 @@ module.exports =
     "EMAIL"                             : "E-mail"
     "advanced"                          : "More details"
     "enter email"                       : "Enter email"
+    "ON"                                : "on"
+    "OFF"                               : "off"
 
 # RRULE related
     "recurrence rule"                   : "Recurrence rules"

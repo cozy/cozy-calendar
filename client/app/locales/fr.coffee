@@ -53,6 +53,8 @@ module.exports =
     "are you sure"                      : "Etes-vous sur ?"
     "advanced"                          : "Détails"
     "enter Email"                       : "Entrez l'email"
+    "ON"                                : "activée"
+    "OFF"                                : "désactivée"
 
 # RRULE related
     "recurrence rule"                   : "Règle de recurrence"
