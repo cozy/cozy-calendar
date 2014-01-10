@@ -373,7 +373,6 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
-
 /*!
  * Bootstrap v2.3.1
  *
@@ -6681,7 +6680,6 @@ button.close {
     overflow: visible !important;
   }
 }
-
 /*!
  * Timepicker Component for Twitter Bootstrap
  *
@@ -6803,7 +6801,6 @@ button.close {
     width: 100%;
   }
 }
-
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7383,7 +7380,6 @@ table.fc-border-separate {
 	}
 
 
-
 /*!
  * Datetimepicker for Bootstrap
  *
@@ -7798,7 +7794,6 @@ table.fc-border-separate {
 	width: 14px;
 	height: 14px;
 }
-
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -9137,7 +9132,6 @@ table.fc-border-separate {
 .fa-plus-square-o:before {
   content: "\f196";
 }
-
 #event-modal {
   padding: 2px;
 }
@@ -9246,7 +9240,6 @@ table.fc-border-separate {
     border-bottom: 1px solid #000;
   }
 }
-
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -9951,7 +9944,6 @@ h2 {
     display: block;
   }
 }
-
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -10004,7 +9996,7 @@ a:focus,
   outline: 0px !important;
   -webkit-appearance: none;
 }
-/* Styles for the calendar view */
+/* Styles for the calendar popover (event and alarm creation/edition) */
 .popover {
   max-width: none;
   width: 400px;
@@ -10070,14 +10062,12 @@ a:focus,
 .fc-button-agendaWeek,
 .fc-button-day,
 .fc-button-agendaDay {
-  background: #34a6ff;
-  color: #fff;
+  border-color: transparent;
+  background: transparent;
+  color: #34a6ff;
   -webkit-box-shadow: none;
   box-shadow: none;
   text-shadow: none;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  border: 0;
   padding-bottom: 3px;
   font-family: main;
 }
@@ -10089,7 +10079,8 @@ a:focus,
 .fc-button-agendaWeek:hover,
 .fc-button-day:hover,
 .fc-button-agendaDay:hover {
-  background: #fe8800;
+  background: transparent;
+  color: #fe8800;
 }
 .fc-button-prev:hover.fc-state-disabled,
 .fc-button-next:hover.fc-state-disabled,
@@ -10109,10 +10100,18 @@ a:focus,
 .fc-button-agendaWeek:active,
 .fc-button-day:active,
 .fc-button-agendaDay:active {
-  background: #f68400;
-  -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset;
-  box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset;
+  background: #d6edff;
+  cursor: default;
+  color: #34a6ff;
 }
+.fc-button-prev.fc-button-today.fc-state-disabled,
+.fc-button-next.fc-button-today.fc-state-disabled,
+.fc-button-today.fc-button-today.fc-state-disabled,
+.fc-button-month.fc-button-today.fc-state-disabled,
+.fc-button-week.fc-button-today.fc-state-disabled,
+.fc-button-agendaWeek.fc-button-today.fc-state-disabled,
+.fc-button-day.fc-button-today.fc-state-disabled,
+.fc-button-agendaDay.fc-button-today.fc-state-disabled,
 .fc-button-prev.fc-state-active,
 .fc-button-next.fc-state-active,
 .fc-button-today.fc-state-active,
@@ -10121,10 +10120,32 @@ a:focus,
 .fc-button-agendaWeek.fc-state-active,
 .fc-button-day.fc-state-active,
 .fc-button-agendaDay.fc-state-active {
-  -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset;
-  box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset;
-  background: #008af6;
+  background: #d6edff;
+  color: #5db8ff;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
   cursor: default;
+}
+.fc-button-prev.fc-button-today.fc-state-disabled:hover,
+.fc-button-next.fc-button-today.fc-state-disabled:hover,
+.fc-button-today.fc-button-today.fc-state-disabled:hover,
+.fc-button-month.fc-button-today.fc-state-disabled:hover,
+.fc-button-week.fc-button-today.fc-state-disabled:hover,
+.fc-button-agendaWeek.fc-button-today.fc-state-disabled:hover,
+.fc-button-day.fc-button-today.fc-state-disabled:hover,
+.fc-button-agendaDay.fc-button-today.fc-state-disabled:hover,
+.fc-button-prev.fc-state-active:hover,
+.fc-button-next.fc-state-active:hover,
+.fc-button-today.fc-state-active:hover,
+.fc-button-month.fc-state-active:hover,
+.fc-button-week.fc-state-active:hover,
+.fc-button-agendaWeek.fc-state-active:hover,
+.fc-button-day.fc-state-active:hover,
+.fc-button-agendaDay.fc-state-active:hover {
+  color: #5db8ff;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  color: #34a6ff;
 }
 .fc-content {
   clear: none;
@@ -10232,7 +10253,6 @@ a:focus,
 a.btn:visited {
   color: #fff;
 }
-
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -10258,6 +10278,3 @@ a.btn:visited {
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
-
-
-/*@ sourceMappingURL=app.css.map*/

@@ -3,51 +3,59 @@
 @import '_base'
 @import '_ui'
 
-/* Styles for the calendar view */
+/* Styles for the calendar popover (event and alarm creation/edition) */
+
 .popover
     max-width: none
     width: 400px
 
-
     .timeseparator
-        display inline-block
-        margin-bottom 10px
-        vertical-align middle
+        display: inline-block
+        margin-bottom: 10px
+        vertical-align: middle
+
     #input-place
         min-width: 120px
 
     .popover-title
+
         button
             margin-top: -4px
+
         i.remove
             cursor: pointer
 
     .popover-content
 
         #input-start, #input-end, #input-time
-            width 3em
+            width: 3em
+
         #input-diff
-            width 35px
+            width: 35px
 
         .badge
-            margin-bottom 10px
-            margin-left 5px
-            line-height 20px
-            vertical-align middle
-            cursor pointer
+            margin-bottom: 10px
+            margin-left: 5px
+            line-height: 20px
+            vertical-align: middle
+            cursor: pointer
+
             i
-                margin-top 0px
+                margin-top: 0px
 
             &:hover
                 background: orange
 
         button
             margin-left: 5px
+
             &.disabled
                 border: 1px solid grey
+
                 &:hover
                     background: #e6e6e6
                     color: #333
+
         p
             font-size: 12px
             margin-left: 5px
@@ -58,31 +66,43 @@
 
 
 /* Styles for the fullcalendar plugin */
+
 .fc-button-prev, .fc-button-next, .fc-button-today,
 .fc-button-month, .fc-button-week, .fc-button-agendaWeek
 .fc-button-day, .fc-button-agendaDay
-    background: blue
-    color: #FFF
+
+    border-color: transparent
+    background: transparent
+    color: blue
     box-shadow: none
     text-shadow: none
-    border-radius: 0
-    border: 0
     padding-bottom: 3px
     font-family: main
 
     &:hover
-        background: orange
+        background: transparent
+        color: orange
+
         &.fc-state-disabled
             background: blue
 
     &:active
-        background: orange - 3%
-        box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset
-
-    &.fc-state-active
-        box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset
-        background: blue - 20%
+        background: blue + 80%
         cursor: default
+        color: blue
+
+    &.fc-button-today.fc-state-disabled
+    &.fc-state-active
+        background: blue + 80%
+        color: blue + 20%
+        border-radius: 4px
+        cursor: default
+
+    &.fc-button-today.fc-state-disabled:hover
+    &.fc-state-active:hover
+        color: blue + 20%
+        border-radius: 4px
+        color: blue
 
 .fc-content
     clear:none
@@ -98,15 +118,17 @@
                 border: none
 
                 &:first-child
-                    border-radius 10px    0 0 0
+                    border-radius: 10px 0 0 0
+
                 &:last-child
-                    border-radius 0 10px 0 0
+                    border-radius: 0 10px 0 0
 
     tbody
             .fc-state-highlight
                 background: lightblue
 
     .fc-event-inner .fc-event-time
+
         &.spinning
             display: inline-block
             margin: 3px
@@ -119,10 +141,12 @@
     cursor: default
 
 .fc-header-title
+
     h2
         font-weight: normal
 
 .fc-title, .fc-content
+
     thead
     thead > tr.fc-first
     .fc-day-header
@@ -153,7 +177,7 @@
     font-family: main
 
 .fc-day:hover
-    background orange + 80%
+    background: orange + 80%
 
 .alarm-remove
     cursor: pointer
@@ -169,10 +193,10 @@
     overflow: visible
 
 #viewContainer .fc-content .fc-cell-overlay
-    background #CBE4FB
+    background: #CBE4FB
 
 #viewContainer .fc-content tbody .fc-state-highlight
-    background #CCF0CC
+    background: #CCF0CC
 
 #viewContainer .fc-event-inner:hover
     color: white
