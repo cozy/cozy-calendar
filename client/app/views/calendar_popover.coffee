@@ -166,6 +166,9 @@ module.exports = class PopOver extends BaseView
                 timezoneHour: @$('#input-time').val()
                 description: @$('#input-desc').val()
 
+            if @rruleForm.isVisible()
+                data.rrule = @rruleForm.getRRule().toString()
+
         return data
 
     onRemoveClicked: =>

@@ -139,7 +139,7 @@ module.exports = class RRuleView extends BaseView
             @$('#rrule-short').hide()
             @$('#rrule').hide()
             @$('#rrule-freq').val 'WEEKLY'
-            @$('rrule-help').html t 'no reccurence'
+            @$('rrule-help').html t 'no recurrence'
             return
         else freq = +freq
 
