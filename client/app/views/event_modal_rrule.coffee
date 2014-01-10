@@ -21,8 +21,6 @@ module.exports = class RRuleView extends BaseView
             minView: 2 # datepicker only
         ).on 'changeDate', @updateHelp
 
-    isVisible: -> @$('#rrule-help').is ':visible'
-
     getRenderData: ->
         data =
             weekDays: Date.getLocale().weekdays.slice(0, 7)
@@ -70,6 +68,8 @@ module.exports = class RRuleView extends BaseView
                 (value is 'date' and options.bymonthday?.length)
                 if result then 'checked'
 
+    hasRRule: =>
+        @$('#rrule-freq').val() isnt 'NOREPEAT'
 
     getRRule: =>
         start = @model.getStartDateObject()
@@ -112,7 +112,7 @@ module.exports = class RRuleView extends BaseView
 
     showRRule: =>
         @updateHelp()
-        @$('#rrule-short #rrule-action').hide()
+        @$('#rrule-action').hide()
         @$('#rrule-short').slideDown =>
             @$('#rrule').slideDown()
 
@@ -135,11 +135,9 @@ module.exports = class RRuleView extends BaseView
     updateHelp: =>
         freq = @$('#rrule-freq').val()
         if freq is 'NOREPEAT'
-            @$('#rrule-toggle').show()
-            @$('#rrule-short').hide()
             @$('#rrule').hide()
-            @$('#rrule-freq').val 'WEEKLY'
-            @$('rrule-help').html t 'no recurrence'
+            @$('#rrule-action').show()
+            @$('#rrule-help').html t 'no recurrence'
             return
         else freq = +freq
 

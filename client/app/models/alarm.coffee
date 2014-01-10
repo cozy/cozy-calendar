@@ -20,7 +20,7 @@ module.exports = class Alarm extends ScheduleItem
                 field: 'description'
                 value: "no description"
 
-        if not attrs.action in ['DISPLAY', 'EMAIL']
+        if not attrs.action in ['DISPLAY', 'EMAIL', 'BOTH']
             errors.push
                 field: 'action'
                 value: "invalid action"

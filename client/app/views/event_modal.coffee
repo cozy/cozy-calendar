@@ -101,7 +101,7 @@ module.exports = class EventModal extends ViewCollection
             end: Date.create(@endField.val(), 'fr')
                 .format Event.dateFormat, 'en'
 
-        if @rruleForm.isVisible()
+        if @rruleForm.hasRRule()
             data.rrule = @rruleForm.getRRule().toString()
         else
             data.rrule = ''
