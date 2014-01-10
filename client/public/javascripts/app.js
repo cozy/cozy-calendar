@@ -885,6 +885,7 @@ module.exports = {
   "Export": "Export",
   "List": "List",
   "Calendar": "Calendar",
+  "Sync": "Sync",
   "ie: 9:00 important meeting": "ie: 9:00 important meeting",
   "Month": "Month",
   "Popup": "Popup",
@@ -912,15 +913,19 @@ module.exports = {
   "EMAIL": "E-mail",
   "advanced": "More details",
   "enter email": "Enter email",
+  "ON": "on",
+  "OFF": "off",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
   "repeat every": "Repeat every",
   "no recurrence": "No recurrence",
+  "repeat": "Repeat",
   "repeat on": "Repeat on",
   "repeat on date": "Repeat on dates",
   "repeat on weekday": "Repeat on weekday",
   "repeat until": "Repeat until",
-  "or after": "or after",
+  "after": "After",
+  "forever": "Forever",
   "occurences": "occurences",
   "every": "Every",
   "days": "days",
@@ -1017,6 +1022,8 @@ module.exports = {
   "are you sure": "Etes-vous sur ?",
   "advanced": "Détails",
   "enter Email": "Entrez l'email",
+  "ON": "activée",
+  "OFF": "désactivée",
   "recurrence rule": "Règle de recurrence",
   "make reccurent": "Rendre réccurent",
   "repeat every": "Répéter tous les",
@@ -1025,7 +1032,9 @@ module.exports = {
   "repeat on date": "Répéter les jours du mois",
   "repeat on weekday": "Répéter le jour de la semaine",
   "repeat until": "Répéter jusqu'au",
-  "or after": "ou après",
+  "after": "ou après",
+  "repeat": "Répétition",
+  "forever": "Pour toujours",
   "occurences": "occasions",
   "every": "tous les",
   "days": "jours",
@@ -1107,7 +1116,7 @@ module.exports = Alarm = (function(_super) {
         value: "no description"
       });
     }
-    if ((_ref1 = !attrs.action) === 'DISPLAY' || _ref1 === 'EMAIL') {
+    if ((_ref1 = !attrs.action) === 'DISPLAY' || _ref1 === 'EMAIL' || _ref1 === 'BOTH') {
       errors.push({
         field: 'action',
         value: "invalid action"
@@ -1532,7 +1541,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("views/calendar_popover", function(exports, require, module) {
-var Alarm, BaseView, Event, PopOver, RRuleFormView, _ref,
+var Alarm, BaseView, Event, PopOver, RRuleFormView, Toggle, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1540,6 +1549,8 @@ var Alarm, BaseView, Event, PopOver, RRuleFormView, _ref,
 BaseView = require('../lib/base_view');
 
 RRuleFormView = require('views/event_modal_rrule');
+
+Toggle = require('views/toggle');
 
 Alarm = require('models/alarm');
 
@@ -1608,6 +1619,13 @@ module.exports = PopOver = (function(_super) {
       content: this.template(this.getRenderData())
     }).popover('show');
     this.setElement($('#viewContainer .popover'));
+    return this.afterRender();
+  };
+
+  PopOver.prototype.afterRender = function() {
+    var tzInput, _ref1, _ref2,
+      _this = this;
+
     this.addButton = this.$('.btn.add').text(this.getButtonText());
     this.removeButton = this.$('.remove');
     if (this.model.isNew()) {
@@ -1619,11 +1637,40 @@ module.exports = PopOver = (function(_super) {
       showMeridian: false
     });
     this.$('.focused').focus();
-    this.rruleForm = new RRuleFormView({
-      model: this.model
-    });
-    this.rruleForm.render();
-    return this.$('#rrule-container').append(this.rruleForm.$el);
+    if (this.type === 'alarm') {
+      tzInput = this.$('#input-timezone');
+      this.actionMail = new Toggle({
+        icon: 'envelope',
+        label: 'email notification',
+        value: (_ref1 = this.model.get('action')) === 'MAIL' || _ref1 === 'BOTH'
+      });
+      this.actionNotif = new Toggle({
+        icon: 'exclamation-sign',
+        label: 'home notification',
+        value: (_ref2 = this.model.get('action')) === 'DISPLAY' || _ref2 === 'BOTH'
+      });
+      this.actionMail.on('toggle', function(mailIsOn) {
+        if (!mailIsOn) {
+          return _this.actionNotif.toggle(true);
+        }
+      });
+      this.actionNotif.on('toggle', function(notifIsOn) {
+        if (!notifIsOn) {
+          return _this.actionMail.toggle(true);
+        }
+      });
+      tzInput.after(this.actionMail.$el);
+      tzInput.after(this.actionNotif.$el);
+    }
+    if (this.model.get('rrule')) {
+      this.rruleForm = new RRuleFormView({
+        model: this.model
+      });
+      this.rruleForm.render();
+      this.$('#rrule-container').append(this.rruleForm.$el);
+      this.$('#rrule-action').hide();
+      return this.$('#rrule-short i.icon-arrow-right').hide();
+    }
   };
 
   PopOver.prototype.getTitle = function() {
@@ -1758,7 +1805,7 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getModelAttributes = function() {
-    var data, date, end, endDate, startDate;
+    var action, data, date, end, endDate, startDate, _ref1;
 
     if (this.model instanceof Event) {
       date = this.model.getStartDateObject();
@@ -1772,11 +1819,18 @@ module.exports = PopOver = (function(_super) {
         description: this.$('#input-desc').val()
       };
     } else {
+      action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'MAIL' : 'DISPLAY';
       data = {
         timezone: this.$('#input-timezone').val(),
         timezoneHour: this.$('#input-time').val(),
-        description: this.$('#input-desc').val()
+        description: this.$('#input-desc').val(),
+        action: action
       };
+      if ((_ref1 = this.rruleForm) != null ? _ref1.hasRRule() : void 0) {
+        data.rrule = this.rruleForm.getRRule().toString();
+      } else {
+        data.rrule = '';
+      }
     }
     return data;
   };
@@ -2378,7 +2432,7 @@ module.exports = EventModal = (function(_super) {
       start: Date.create(this.startField.val(), 'fr').format(Event.dateFormat, 'en'),
       end: Date.create(this.endField.val(), 'fr').format(Event.dateFormat, 'en')
     };
-    if (this.rruleForm.isVisible()) {
+    if (this.rruleForm.hasRRule()) {
       data.rrule = this.rruleForm.getRRule().toString();
     } else {
       data.rrule = '';
@@ -2513,7 +2567,8 @@ module.exports = RRuleView = (function(_super) {
     this.updateHelp = __bind(this.updateHelp, this);
     this.toggleCountUntil = __bind(this.toggleCountUntil, this);
     this.showRRule = __bind(this.showRRule, this);
-    this.getRRule = __bind(this.getRRule, this);    _ref = RRuleView.__super__.constructor.apply(this, arguments);
+    this.getRRule = __bind(this.getRRule, this);
+    this.hasRRule = __bind(this.hasRRule, this);    _ref = RRuleView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
@@ -2538,10 +2593,6 @@ module.exports = RRuleView = (function(_super) {
       format: 'dd/mm/yyyy',
       minView: 2
     }).on('changeDate', this.updateHelp);
-  };
-
-  RRuleView.prototype.isVisible = function() {
-    return this.$('#rrule-help').is(':visible');
   };
 
   RRuleView.prototype.getRenderData = function() {
@@ -2631,6 +2682,10 @@ module.exports = RRuleView = (function(_super) {
     });
   };
 
+  RRuleView.prototype.hasRRule = function() {
+    return this.$('#rrule-freq').val() !== 'NOREPEAT';
+  };
+
   RRuleView.prototype.getRRule = function() {
     var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
 
@@ -2678,7 +2733,7 @@ module.exports = RRuleView = (function(_super) {
     var _this = this;
 
     this.updateHelp();
-    this.$('#rrule-short #rrule-action').hide();
+    this.$('#rrule-action').hide();
     return this.$('#rrule-short').slideDown(function() {
       return _this.$('#rrule').slideDown();
     });
@@ -2703,11 +2758,9 @@ module.exports = RRuleView = (function(_super) {
 
     freq = this.$('#rrule-freq').val();
     if (freq === 'NOREPEAT') {
-      this.$('#rrule-toggle').show();
-      this.$('#rrule-short').hide();
       this.$('#rrule').hide();
-      this.$('#rrule-freq').val('WEEKLY');
-      this.$('rrule-help').html(t('no reccurence'));
+      this.$('#rrule-action').show();
+      this.$('#rrule-help').html(t('no recurrence'));
       return;
     } else {
       freq = +freq;
@@ -3823,6 +3876,80 @@ buf.push('<div class="helptext"><h2>Calendar Synchronization</h2></div><div clas
 }
 return buf.join("");
 };
+});
+
+;require.register("views/toggle", function(exports, require, module) {
+var BaseView, Toggle, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+module.exports = Toggle = (function(_super) {
+  __extends(Toggle, _super);
+
+  function Toggle() {
+    _ref = Toggle.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Toggle.prototype.value = false;
+
+  Toggle.prototype.tagName = 'span';
+
+  Toggle.prototype.className = 'badge';
+
+  Toggle.prototype.template = function(data) {
+    return "<i class='icon-" + data.icon + "'></i>";
+  };
+
+  Toggle.prototype.initialize = function(options) {
+    this.value = options.value;
+    this.icon = options.icon;
+    this.label = options.label;
+    this.render();
+    return this.toggle(this.value);
+  };
+
+  Toggle.prototype.getRenderData = function() {
+    return {
+      icon: this.icon
+    };
+  };
+
+  Toggle.prototype.events = function() {
+    var _this = this;
+
+    return {
+      'click': function() {
+        return _this.toggle();
+      }
+    };
+  };
+
+  Toggle.prototype.toggle = function(value) {
+    var title;
+
+    if (value == null) {
+      value = !this.value;
+    }
+    this.value = value;
+    if (this.value) {
+      this.$el.addClass('badge-info');
+      this.$('i').addClass('icon-white');
+    } else {
+      this.$el.removeClass('badge-info');
+      this.$('i').removeClass('icon-white');
+    }
+    title = this.label + ' : ' + t(value ? 'ON' : 'OFF');
+    this.$el.attr('title', title);
+    return this.trigger('toggle', value);
+  };
+
+  return Toggle;
+
+})(BaseView);
+
 });
 
 ;

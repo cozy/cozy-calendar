@@ -10031,6 +10031,19 @@ a:focus,
 .popover .popover-content #input-diff {
   width: 35px;
 }
+.popover .popover-content .badge {
+  margin-bottom: 10px;
+  margin-left: 5px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.popover .popover-content .badge i {
+  margin-top: 0px;
+}
+.popover .popover-content .badge:hover {
+  background: #fe8800;
+}
 .popover .popover-content button {
   margin-left: 5px;
 }
