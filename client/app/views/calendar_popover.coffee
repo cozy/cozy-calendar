@@ -48,7 +48,7 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
-        @setElement $('#viewContainer .popover')
+        @setElement $('#view-container .popover')
         @afterRender()
 
     afterRender: ->

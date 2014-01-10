@@ -10,7 +10,7 @@ Event = require 'models/event'
 
 module.exports = class CalendarView extends BaseView
 
-    id: 'viewContainer'
+    id: 'view-container'
     template: require('./templates/calendarview')
 
     initialize: (options) ->

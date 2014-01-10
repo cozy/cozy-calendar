@@ -5,7 +5,7 @@ defaultTimezone = 'timezone'
 
 module.exports = class ListView extends ViewCollection
 
-    id: 'viewContainer'
+    id: 'view-container'
     template: require './templates/list_view'
     itemview: require './list_view_bucket'
     collectionEl: '#alarm-list'
