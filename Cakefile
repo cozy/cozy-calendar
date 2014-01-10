@@ -52,6 +52,7 @@ runTests = (fileList) ->
         command += "--debug-brk --forward-io --profile "
     if options.debug
         command += "--debug --forward-io --profile "
+    command += " --globals setImmediate,clearImmediate "
     command += " --reporter spec --compilers coffee:coffee-script --colors"
     exec command, (err, stdout, stderr) ->
         if err
