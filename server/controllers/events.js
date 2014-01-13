@@ -17,7 +17,6 @@ mails = new MailHandler();
 
 module.exports.fetch = function(req, res, next, id) {
   var _this = this;
-  console.log(id);
   return Event.find(id, function(err, event) {
     var acceptLanguage;
     if (err || !event) {
@@ -70,16 +69,19 @@ module.exports.create = function(req, res) {
 };
 
 module.exports.update = function(req, res) {
-  var data,
+  var data, start,
     _this = this;
   data = Event.toUTC(req.body);
+  start = req.event.start;
   return req.event.updateAttributes(data, function(err, event) {
+    var dateChanged;
     if (err != null) {
       return res.send({
         error: "Server error while saving event"
       }, 500);
     } else {
-      return mails.sendInvitations(event, function(err, event2) {
+      dateChanged = data.start !== start;
+      return mails.sendInvitations(event, dateChanged, function(err, event2) {
         if (err) {
           console.log(err);
         }

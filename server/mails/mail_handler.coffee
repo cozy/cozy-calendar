@@ -34,7 +34,7 @@ module.exports = class MailHandler
             @templates.deletion = jade.compile jadeString
 
 
-    sendInvitations: (event, callback) ->
+    sendInvitations: (event, dateChanged, callback) ->
 
         guests = event.toJSON().attendees
         needSaving = false
@@ -44,10 +44,20 @@ module.exports = class MailHandler
                 return callback()
 
             async.forEach guests, (guest, cb) =>
-                if guest.status is 'INVITATION-NOT-SENT'
+                ismail = guest.status is 'INVITATION-NOT-SENT' or (guest.status is 'ACCEPTED' and dateChanged)
+                console.log dateChanged
+
+                console.log guest
+
+                console.log ismail
+
+                if guest.status is 'INVITATION-NOT-SENT' or
+                (guest.status is 'ACCEPTED' and dateChanged)
                     subject = "Invitation: " + event.description
-                    template = @templates.invitation
-                    templateText = @templates.invitationText
+                    if dateChanged
+                        template = @templates.update
+                    else
+                        template = @templates.invitation
                 else
                     return cb()
 
@@ -85,11 +95,7 @@ no
                         log.error "An error occured while sending invitation"
                         console.log err.stack
 
-                    # If too much requests are sent at the same time,
-                    # data system says it is busy and sends an error.
-                    setTimeout ->
-                        cb err
-                    , 500
+                    cb err
 
             , (err) ->
                 if err
@@ -103,6 +109,8 @@ no
 
         async.forEach event.toJSON().attendees, (guest, cb) =>
             return cb null unless guest.status is 'ACCEPTED'
+            dateFormat = 'MMMM Do YYYY, h:mm a'
+            date = moment(event.start).format dateFormat
 
             mailOptions =
                 to: guest.email
@@ -115,6 +123,7 @@ on #{date}
                 html: @templates.deletion
                     event: event.toJSON()
                     key: guest.key
+                    date: date
 
             CozyAdapter.sendMailFromUser mailOptions, (err) ->
                 if not err
@@ -124,10 +133,6 @@ on #{date}
                     log.error "An error occured while sending invitation"
                     console.log err.stack
 
-                # If too much requests are sent at the same time,
-                # data system says it is busy and sends an error.
-                setTimeout ->
-                    cb err
-                , 500
+                cb err
 
         , callback

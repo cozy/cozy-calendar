@@ -53,7 +53,7 @@ module.exports = MailHandler = (function() {
     });
   }
 
-  MailHandler.prototype.sendInvitations = function(event, callback) {
+  MailHandler.prototype.sendInvitations = function(event, dateChanged, callback) {
     var guests, needSaving,
       _this = this;
     guests = event.toJSON().attendees;
@@ -64,11 +64,18 @@ module.exports = MailHandler = (function() {
         return callback();
       }
       return async.forEach(guests, function(guest, cb) {
-        var date, dateFormat, mailOptions, subject, template, templateText, url;
-        if (guest.status === 'INVITATION-NOT-SENT') {
+        var date, dateFormat, ismail, mailOptions, subject, template, url;
+        ismail = guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged);
+        console.log(dateChanged);
+        console.log(guest);
+        console.log(ismail);
+        if (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged)) {
           subject = "Invitation: " + event.description;
-          template = _this.templates.invitation;
-          templateText = _this.templates.invitationText;
+          if (dateChanged) {
+            template = _this.templates.update;
+          } else {
+            template = _this.templates.invitation;
+          }
         } else {
           return cb();
         }
@@ -94,9 +101,7 @@ module.exports = MailHandler = (function() {
             log.error("An error occured while sending invitation");
             console.log(err.stack);
           }
-          return setTimeout(function() {
-            return cb(err);
-          }, 500);
+          return cb(err);
         });
       }, function(err) {
         if (err) {
@@ -115,17 +120,20 @@ module.exports = MailHandler = (function() {
   MailHandler.prototype.sendDeleteNotification = function(event, callback) {
     var _this = this;
     return async.forEach(event.toJSON().attendees, function(guest, cb) {
-      var mailOptions;
+      var date, dateFormat, mailOptions;
       if (guest.status !== 'ACCEPTED') {
         return cb(null);
       }
+      dateFormat = 'MMMM Do YYYY, h:mm a';
+      date = moment(event.start).format(dateFormat);
       mailOptions = {
         to: guest.email,
         subject: "This event has been canceled: " + event.description,
         content: "This event has been canceled:\n" + event.description + " @ " + event.location + "\non " + date,
         html: _this.templates.deletion({
           event: event.toJSON(),
-          key: guest.key
+          key: guest.key,
+          date: date
         })
       };
       return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
@@ -137,9 +145,7 @@ module.exports = MailHandler = (function() {
           log.error("An error occured while sending invitation");
           console.log(err.stack);
         }
-        return setTimeout(function() {
-          return cb(err);
-        }, 500);
+        return cb(err);
       });
     }, callback);
   };

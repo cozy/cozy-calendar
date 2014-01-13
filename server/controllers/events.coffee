@@ -9,8 +9,6 @@ mails = new MailHandler()
 
 
 module.exports.fetch = (req, res, next, id) ->
-    console.log id
-
     Event.find id, (err, event) =>
         if err or not event
             acceptLanguage = req.headers['accept-language']
@@ -48,11 +46,16 @@ module.exports.create = (req, res) ->
 
 module.exports.update = (req, res) ->
     data = Event.toUTC(req.body)
+
+    start = req.event.start
     req.event.updateAttributes data, (err, event) =>
+
         if err?
             res.send error: "Server error while saving event", 500
         else
-            mails.sendInvitations event, (err, event2) ->
+            dateChanged = data.start isnt start
+
+            mails.sendInvitations event, dateChanged, (err, event2) ->
                 console.log err if err
                 res.send (event2 or event).timezoned(), 200
 
