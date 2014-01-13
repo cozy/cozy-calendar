@@ -60,15 +60,13 @@ module.exports = MailHandler = (function() {
     needSaving = false;
     return CozyInstance.getURL(function(err, domain) {
       if (err) {
+        log.error('Cannot get Cozy instance');
         console.log(err.stack);
         return callback();
       }
       return async.forEach(guests, function(guest, cb) {
         var date, dateFormat, ismail, mailOptions, subject, template, url;
         ismail = guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged);
-        console.log(dateChanged);
-        console.log(guest);
-        console.log(ismail);
         if (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged)) {
           subject = "Invitation: " + event.description;
           if (dateChanged) {
