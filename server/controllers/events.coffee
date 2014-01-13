@@ -45,9 +45,9 @@ module.exports.create = (req, res) ->
 
 
 module.exports.update = (req, res) ->
+    start = req.event.start
     data = Event.toUTC(req.body)
 
-    start = req.event.start
     req.event.updateAttributes data, (err, event) =>
 
         if err?
