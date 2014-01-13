@@ -18,10 +18,16 @@ mails = new MailHandler();
 module.exports.fetch = function(req, res, next, id) {
   var _this = this;
   return Event.find(id, function(err, event) {
+    var acceptLanguage;
     if (err || !event) {
-      return res.send({
-        error: "Event not found"
-      }, 404);
+      acceptLanguage = req.headers['accept-language'];
+      if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
+        return res.send({
+          error: "Event not found"
+        }, 404);
+      } else {
+        return res.send("Event not found: the event is probably canceled.", 404);
+      }
     } else {
       req.event = event;
       return next();
