@@ -6,6 +6,15 @@ Event = require '../models/event'
 Contact = require '../models/contact'
 User  = require '../models/user'
 
+module.exports.tags = (req, res, next) ->
+    async.parallel [
+        Event.tags
+        Alarm.tags
+    ], (err, tags) ->
+        return next err if err
+        res.send tags[0].concat tags[1]
+
+
 module.exports.index = (req, res) ->
     async.parallel [
         (cb) => Contact.all (err, contacts) =>

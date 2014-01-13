@@ -9,6 +9,7 @@ module.exports = Alarm = americano.getModel 'Alarm',
     timezone     : type : String
     timezoneHour : type : String
     rrule        : type : String
+    tags         : type : [String]
     related      : type : String, default: null
 
 
@@ -16,6 +17,9 @@ require('cozy-ical').decorateAlarm Alarm
 
 Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
+
+Alarm.tags = (callback) ->
+    Alarm.request "tags", group: true, callback
 
 # before sending to the client
 # set the trigg in TZ time
