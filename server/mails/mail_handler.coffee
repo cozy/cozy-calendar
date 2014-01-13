@@ -40,16 +40,12 @@ module.exports = class MailHandler
         needSaving = false
         CozyInstance.getURL (err, domain) =>
             if err
+                log.error 'Cannot get Cozy instance'
                 console.log err.stack
                 return callback()
 
             async.forEach guests, (guest, cb) =>
                 ismail = guest.status is 'INVITATION-NOT-SENT' or (guest.status is 'ACCEPTED' and dateChanged)
-                console.log dateChanged
-
-                console.log guest
-
-                console.log ismail
 
                 if guest.status is 'INVITATION-NOT-SENT' or
                 (guest.status is 'ACCEPTED' and dateChanged)
