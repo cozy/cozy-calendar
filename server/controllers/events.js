@@ -17,6 +17,7 @@ mails = new MailHandler();
 
 module.exports.fetch = function(req, res, next, id) {
   var _this = this;
+  console.log(id);
   return Event.find(id, function(err, event) {
     var acceptLanguage;
     if (err || !event) {

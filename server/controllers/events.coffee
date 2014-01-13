@@ -9,6 +9,8 @@ mails = new MailHandler()
 
 
 module.exports.fetch = (req, res, next, id) ->
+    console.log id
+
     Event.find id, (err, event) =>
         if err or not event
             acceptLanguage = req.headers['accept-language']

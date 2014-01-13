@@ -23,7 +23,7 @@ html
         p 
             | Your status is 
             strong #{visitor.status}
-        p: a(href="event#{event.id}.ics?key=" + key) Export this event to a file
+        p: a(href="events/calendar/#{event.id}.ics?key=" + key) Export this event to a file
         p
             a.btn(href="?status=DECLINED&key=" + key) 
                 | Change your invitation to status "declined"

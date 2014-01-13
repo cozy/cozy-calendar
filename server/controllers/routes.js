@@ -42,10 +42,10 @@ module.exports = {
   'events/:eventid/:name.ics': {
     get: events.ical
   },
-  'public/event:eventid.ics': {
+  'public/events/:eventid/:name.ics': {
     get: events.publicIcal
   },
-  'public/event:eventid': {
+  'public/events/:eventid': {
     get: events["public"]
   },
   'export/calendar.ics': {

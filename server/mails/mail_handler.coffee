@@ -2,11 +2,14 @@ async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
 moment = require 'moment'
+log = require('printit')
+    prefix: 'MailHandler'
+    date: true
+
 Event = require '../models/event'
 CozyInstance = require '../models/cozy_instance'
 try CozyAdapter = require('americano-cozy/node_modules/jugglingdb-cozy-adapter')
 catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
-
 
 
 module.exports = class MailHandler
@@ -42,13 +45,15 @@ module.exports = class MailHandler
 
             async.forEach guests, (guest, cb) =>
                 if guest.status is 'INVITATION-NOT-SENT'
-                    subject = "Invitation : " + event.description
+                    subject = "Invitation: " + event.description
                     template = @templates.invitation
-
-                else return cb()
+                    templateText = @templates.invitationText
+                else
+                    return cb()
 
                 dateFormat = 'MMMM Do YYYY, h:mm a'
                 date = moment(event.start).format dateFormat
+                url = "https://#{domain}/public/calendar/events/#{event.id}"
 
                 mailOptions =
                     to: guest.email
@@ -57,16 +62,40 @@ module.exports = class MailHandler
                         event: event.toJSON()
                         key: guest.key
                         date: date
-                        url: "https://#{domain}/public/calendar/event#{event.id}"
+                        url: url
+                    content: """
+Hello, I would like to invite you to the following event:
+
+#{event.description} @ #{event.place}
+on #{date}
+Would you be there?
+
+yes
+#{url}?status=ACCEPTED&key=#{guest.key}
+
+no
+#{url}?status=DECLINED&key=#{guest.key}
+"""
 
                 CozyAdapter.sendMailFromUser mailOptions, (err) ->
                     if not err
                         needSaving = true
                         guest.status = 'NEEDS-ACTION' # ical = waiting an answer
-                    cb()
+                    else
+                        log.error "An error occured while sending invitation"
+                        console.log err.stack
+
+                    # If too much requests are sent at the same time,
+                    # data system says it is busy and sends an error.
+                    setTimeout ->
+                        cb err
+                    , 500
 
             , (err) ->
-                if not needSaving then callback()
+                if err
+                    callback err
+                else if not needSaving
+                    callback()
                 else event.updateAttributes attendees: guests, callback
 
 
@@ -77,13 +106,28 @@ module.exports = class MailHandler
 
             mailOptions =
                 to: guest.email
-                subject: "This event has been canceled : " + event.description
+                subject: "This event has been canceled: " + event.description
+                content: """
+This event has been canceled:
+#{event.description} @ #{event.location}
+on #{date}
+                """
                 html: @templates.deletion
                     event: event.toJSON()
                     key: guest.key
 
             CozyAdapter.sendMailFromUser mailOptions, (err) ->
-                console.log err if err
-                cb() # ignore err
+                if not err
+                    needSaving = true
+                    guest.status = 'NEEDS-ACTION' # ical = waiting an answer
+                else
+                    log.error "An error occured while sending invitation"
+                    console.log err.stack
+
+                # If too much requests are sent at the same time,
+                # data system says it is busy and sends an error.
+                setTimeout ->
+                    cb err
+                , 500
 
         , callback
