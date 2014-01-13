@@ -75,7 +75,7 @@ module.exports.public = (req, res) ->
 
         visitor.setStatus req.query.status, (err) =>
             return res.send error: "server error occured", 500 if err
-            res.header 'Location': "./event#{req.event.id}?key=#{key}"
+            res.header 'Location': "./#{req.event.id}?key=#{key}"
             res.send 303
 
     else

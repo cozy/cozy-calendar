@@ -122,7 +122,7 @@ module.exports["public"] = function(req, res) {
         }, 500);
       }
       res.header({
-        'Location': "./event" + req.event.id + "?key=" + key
+        'Location': "./" + req.event.id + "?key=" + key
       });
       return res.send(303);
     });
