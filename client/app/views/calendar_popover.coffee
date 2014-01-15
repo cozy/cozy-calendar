@@ -14,9 +14,8 @@ module.exports = class PopOver extends BaseView
         'change input': 'onKeyUp'
         'click .add'  : 'onAddClicked'
         'click .remove': 'onRemoveClicked'
+        'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
-        'click .event': 'onTabClicked'
-        'click .alarm': 'onTabClicked'
 
     initialize: (options) ->
         if options.type
@@ -43,7 +42,7 @@ module.exports = class PopOver extends BaseView
         @target.popover(
             selector: true
             trigger: 'manual'
-            title: require('./templates/popover_title')(title: @getTitle())
+            title: require('./templates/popover_title') @getRenderData()
             html: true
             placement: @getDirection()
             content: @template @getRenderData()
@@ -91,7 +90,7 @@ module.exports = class PopOver extends BaseView
 
 
     getTitle: ->
-        title = if @model.isNew() then 'creation'
+        title = if @model.isNew() then @type + ' creation'
         else 'edit ' + @type
         t(title)
 
@@ -110,6 +109,7 @@ module.exports = class PopOver extends BaseView
     getRenderData: ->
         data = _.extend type: @type,
             @model.attributes,
+            title: @getTitle()
             editionMode: not @model.isNew()
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
@@ -149,10 +149,8 @@ module.exports = class PopOver extends BaseView
             else throw new Error 'wrong type'
 
     onTabClicked: (event) ->
-        type = event.target.className
-        return false if type is @type
         @parentView.showPopover
-            type: type
+            type: if @type is 'event' then 'alarm' else 'event'
             target: @options.target
             start:  @options.start
             end:    @options.end
