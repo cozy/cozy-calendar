@@ -1,11 +1,15 @@
 .modal-header
     span= t('edit event')
     | &nbsp;
-    a(href="events/#{id}/#{exportdate}.ics") 
+    a(href="events/#{id}/#{exportdate}.ics")
         i.fa.fa-download.fa-1
     button.close &times;
 .modal-body
     form.form-inline#basic
+        .row-fluid
+            .control-group.span12
+                label.control-label(for="basic-tags")= t('tags')
+                .controls: input.span12#basic-tags.tagit(value=tags.join(','))
         .row-fluid
             .control-group.span12
                 label.control-label(for="basic-summary")= t('summary')

@@ -1,5 +1,6 @@
 ViewCollection = require 'lib/view_collection'
-RRuleFormView = require 'views/event_modal_rrule'
+RRuleFormView  = require 'views/event_modal_rrule'
+TagsView       = require 'views/tags'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
@@ -49,6 +50,10 @@ module.exports = class EventModal extends ViewCollection
         @rruleForm.render()
         @$('#rrule-container').append @rruleForm.$el
 
+        @tags = new TagsView
+            model: @model
+            el: @$('#basic-tags')
+
         @$el.modal 'show'
         @$el.on 'hidden', =>
             window.app.router.navigate "calendar",
@@ -96,6 +101,7 @@ module.exports = class EventModal extends ViewCollection
             details: @descriptionField.val()
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
+            tags: @tags.getTags()
             start: Date.create(@startField.val(), 'fr')
                 .format Event.dateFormat, 'en'
             end: Date.create(@endField.val(), 'fr')
