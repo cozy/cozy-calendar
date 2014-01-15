@@ -1,4 +1,5 @@
 ViewCollection      = require '../lib/view_collection'
+Header              = require 'views/calendar_header'
 helpers = require '../helpers'
 defaultTimezone = 'timezone'
 
@@ -11,6 +12,11 @@ module.exports = class ListView extends ViewCollection
     collectionEl: '#alarm-list'
     events:
         'click .showbefore': 'showbefore'
+
+    afterRender: ->
+        @calHeader = new Header()
+        super
+        @$('#alarm-list').prepend @calHeader.render().$el
 
     appendView: (view) ->
         index = @collection.indexOf view.model

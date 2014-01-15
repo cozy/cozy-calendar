@@ -20,6 +20,7 @@ module.exports =
 
         Router = require 'router'
         Menu = require 'views/menu'
+        Header = require 'views/calendar_header'
         SocketListener = require '../lib/socket_listener'
         AlarmCollection = require 'collections/alarms'
         EventCollection = require 'collections/events'
@@ -27,8 +28,7 @@ module.exports =
 
         @router = new Router()
         @menu = new Menu().render()
-        @menu.$el.appendTo 'body'
-        $("body").append '<div class="main-container"></div>'
+        @menu.$el.prependTo 'body'
         @alarms = new AlarmCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()

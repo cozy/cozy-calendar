@@ -1,0 +1,19 @@
+tbody
+    tr
+        td.fc-header-left
+            if calendarMode
+                span.fc-button.fc-button-prev.fc-corner-left
+                    span.fc-text-arrow ‹
+                span.fc-button.fc-button-next.fc-corner-right
+                    span.fc-text-arrow ›
+                span.fc-header-space
+                span.fc-button.fc-button-today(class=active('today'))= t('today')
+
+        td.fc-header-center
+            span.fc-header-title
+                h2= title
+
+        td.fc-header-right
+            span.fc-button.fc-button-month(class=active('month'))= t('month')
+            span.fc-button.fc-button-week(class=active('week'))= t('week')
+            span.fc-button.fc-button-list(class=active('list'))= t('list')
