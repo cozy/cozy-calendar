@@ -39,4 +39,4 @@ module.exports = class Event extends ScheduleItem
         return errors if errors.length > 0
 
     #@TODO tags = color
-    getColor: -> '#008AF6'
+    getDefaultColor: -> '#008AF6'
