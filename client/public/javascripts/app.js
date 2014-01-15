@@ -3700,9 +3700,9 @@ window.require.register("views/templates/popover_content", function(exports, req
   var __val__ = '&nbsp;' + t('days')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></div><div class="line"><input');
-  buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/><input');
   buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
+  buf.push('/><input');
+  buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/></div><div class="popover-footer line">');
   if ( editionMode)
   {

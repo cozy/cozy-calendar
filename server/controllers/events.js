@@ -18,10 +18,16 @@ mails = new MailHandler();
 module.exports.fetch = function(req, res, next, id) {
   var _this = this;
   return Event.find(id, function(err, event) {
+    var acceptLanguage;
     if (err || !event) {
-      return res.send({
-        error: "Event not found"
-      }, 404);
+      acceptLanguage = req.headers['accept-language'];
+      if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
+        return res.send({
+          error: "Event not found"
+        }, 404);
+      } else {
+        return res.send("Event not found: the event is probably canceled.", 404);
+      }
     } else {
       req.event = event;
       return next();
@@ -63,16 +69,19 @@ module.exports.create = function(req, res) {
 };
 
 module.exports.update = function(req, res) {
-  var data,
+  var data, start,
     _this = this;
   data = Event.toUTC(req.body);
+  start = req.event.start;
   return req.event.updateAttributes(data, function(err, event) {
+    var dateChanged;
     if (err != null) {
       return res.send({
         error: "Server error while saving event"
       }, 500);
     } else {
-      return mails.sendInvitations(event, function(err, event2) {
+      dateChanged = data.start !== start;
+      return mails.sendInvitations(event, dateChanged, function(err, event2) {
         if (err) {
           console.log(err);
         }
@@ -115,7 +124,7 @@ module.exports["public"] = function(req, res) {
         }, 500);
       }
       res.header({
-        'Location': "./event" + req.event.id + "?key=" + key
+        'Location': "./" + req.event.id + "?key=" + key
       });
       return res.send(303);
     });

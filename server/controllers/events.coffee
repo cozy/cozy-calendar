@@ -7,13 +7,20 @@ Event = require '../models/event'
 MailHandler = require '../mails/mail_handler'
 mails = new MailHandler()
 
+
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) =>
         if err or not event
-            res.send error: "Event not found", 404
+            acceptLanguage = req.headers['accept-language']
+            if acceptLanguage?.indexOf('text/html') isnt -1
+                res.send error: "Event not found", 404
+            else
+                res.send "Event not found: the event is probably canceled.",
+                         404
         else
             req.event = event
             next()
+
 
 module.exports.all = (req, res) ->
     Event.all (err, events) ->
@@ -22,6 +29,7 @@ module.exports.all = (req, res) ->
         else
             events[index] = evt.timezoned() for evt, index in events
             res.send events
+
 
 module.exports.read = (req, res) ->
     res.send req.event.timezoned()
@@ -35,15 +43,22 @@ module.exports.create = (req, res) ->
         # Recover dates with user timezone
         res.send event.timezoned(), 201
 
+
 module.exports.update = (req, res) ->
+    start = req.event.start
     data = Event.toUTC(req.body)
+
     req.event.updateAttributes data, (err, event) =>
+
         if err?
             res.send error: "Server error while saving event", 500
         else
-            mails.sendInvitations event, (err, event2) ->
+            dateChanged = data.start isnt start
+
+            mails.sendInvitations event, dateChanged, (err, event2) ->
                 console.log err if err
                 res.send (event2 or event).timezoned(), 200
+
 
 module.exports.delete = (req, res) ->
     req.event.destroy (err) ->
@@ -52,6 +67,7 @@ module.exports.delete = (req, res) ->
         else
             mails.sendDeleteNotification req.event, ->
                 res.send success: true, 200
+
 
 module.exports.public = (req, res) ->
     key = req.query.key
@@ -62,7 +78,7 @@ module.exports.public = (req, res) ->
 
         visitor.setStatus req.query.status, (err) =>
             return res.send error: "server error occured", 500 if err
-            res.header 'Location': "./event#{req.event.id}?key=#{key}"
+            res.header 'Location': "./#{req.event.id}?key=#{key}"
             res.send 303
 
     else
@@ -74,12 +90,14 @@ module.exports.public = (req, res) ->
             key: key
             visitor: visitor
 
+
 module.exports.ical = (req, res) ->
     key = req.query.key
     calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()
+
 
 module.exports.publicIcal = (req, res) ->
     key = req.query.key

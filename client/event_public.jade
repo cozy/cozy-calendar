@@ -6,7 +6,7 @@ html
     meta(http-equiv="X-UA-Compatible",content="IE=edge,chrome=1")
     meta(name="viewport", content="width=device-width,initial-scale=1.0")
     script(src="javascripts/modernizr-2.6.1.js")
-    link(rel="stylesheet", href="stylesheets/app.css")
+    link(rel="stylesheet", href="../stylesheets/app.css")
 
   body.public
     #container.container.public-event-container.well
@@ -23,7 +23,7 @@ html
         p 
             | Your status is 
             strong #{visitor.status}
-        p: a(href="event#{event.id}.ics?key=" + key) Export this event to a file
+        p: a(href="#{event.id}/file.ics?key=" + key) Export this event to a file
         p
             a.btn(href="?status=DECLINED&key=" + key) 
                 | Change your invitation to status "declined"

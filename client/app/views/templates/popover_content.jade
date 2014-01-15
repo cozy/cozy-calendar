@@ -4,6 +4,7 @@ if !editionMode
         li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
 
 if type == 'alarm'
+
     .line
         input#input-time.focused.input-mini(type="time", value=time)
         select#input-timezone.input
@@ -34,10 +35,10 @@ else if type = 'event'
         span.timeseparator= '&nbsp;' + t('days')
 
     .line
-        input#input-place.input-small(type="text", value=place,
-            placeholder=t("Place"))
         input#input-desc.input(type="text", value=description,
             placeholder=t("Description"))
+        input#input-place.input-small(type="text", value=place,
+            placeholder=t("Place"))
 
     .popover-footer.line
         if editionMode
