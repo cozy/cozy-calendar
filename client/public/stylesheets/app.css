@@ -373,6 +373,7 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 /*!
  * Bootstrap v2.3.1
  *
@@ -6680,6 +6681,7 @@ button.close {
     overflow: visible !important;
   }
 }
+
 /*!
  * Timepicker Component for Twitter Bootstrap
  *
@@ -6801,6 +6803,7 @@ button.close {
     width: 100%;
   }
 }
+
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7380,6 +7383,7 @@ table.fc-border-separate {
 	}
 
 
+
 /*!
  * Datetimepicker for Bootstrap
  *
@@ -7794,6 +7798,7 @@ table.fc-border-separate {
 	width: 14px;
 	height: 14px;
 }
+
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -9132,6 +9137,240 @@ table.fc-border-separate {
 .fa-plus-square-o:before {
   content: "\f196";
 }
+
+/*! jQuery UI - v1.10.3 - 2013-10-18
+* http://jqueryui.com
+* Includes: jquery.ui.core.css, jquery.ui.autocomplete.css, jquery.ui.menu.css
+* Copyright 2013 jQuery Foundation and other contributors; Licensed MIT */
+
+/* Layout helpers
+----------------------------------*/
+.ui-helper-hidden {
+	display: none;
+}
+.ui-helper-hidden-accessible {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+.ui-helper-reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	line-height: 1.3;
+	text-decoration: none;
+	font-size: 100%;
+	list-style: none;
+}
+.ui-helper-clearfix:before,
+.ui-helper-clearfix:after {
+	content: "";
+	display: table;
+	border-collapse: collapse;
+}
+.ui-helper-clearfix:after {
+	clear: both;
+}
+.ui-helper-clearfix {
+	min-height: 0; /* support: IE7 */
+}
+.ui-helper-zfix {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	position: absolute;
+	opacity: 0;
+	filter:Alpha(Opacity=0);
+}
+
+.ui-front {
+	z-index: 100;
+}
+
+
+/* Interaction Cues
+----------------------------------*/
+.ui-state-disabled {
+	cursor: default !important;
+}
+
+
+/* Icons
+----------------------------------*/
+
+/* states and images */
+.ui-icon {
+	display: block;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat;
+}
+
+
+/* Misc visuals
+----------------------------------*/
+
+/* Overlays */
+.ui-widget-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.ui-autocomplete {
+	position: absolute;
+	top: 0;
+	left: 0;
+	cursor: default;
+}
+.ui-menu {
+	list-style: none;
+	padding: 2px;
+	margin: 0;
+	display: block;
+	outline: none;
+}
+.ui-menu .ui-menu {
+	margin-top: -3px;
+	position: absolute;
+}
+.ui-menu .ui-menu-item {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	/* support: IE10, see #8844 */
+	list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+}
+.ui-menu .ui-menu-divider {
+	margin: 5px -2px 5px -2px;
+	height: 0;
+	font-size: 0;
+	line-height: 0;
+	border-width: 1px 0 0 0;
+}
+.ui-menu .ui-menu-item a {
+	text-decoration: none;
+	display: block;
+	padding: 2px .4em;
+	line-height: 1.5;
+	min-height: 0; /* support: IE7 */
+	font-weight: normal;
+}
+.ui-menu .ui-menu-item a.ui-state-focus,
+.ui-menu .ui-menu-item a.ui-state-active {
+	font-weight: normal;
+	margin: -1px;
+}
+
+.ui-menu .ui-state-disabled {
+	font-weight: normal;
+	margin: .4em 0 .2em;
+	line-height: 1.5;
+}
+.ui-menu .ui-state-disabled a {
+	cursor: default;
+}
+
+/* icon support */
+.ui-menu-icons {
+	position: relative;
+}
+.ui-menu-icons .ui-menu-item a {
+	position: relative;
+	padding-left: 2em;
+}
+
+/* left-aligned */
+.ui-menu .ui-icon {
+	position: absolute;
+	top: .2em;
+	left: .2em;
+}
+
+/* right-aligned */
+.ui-menu .ui-menu-icon {
+	position: static;
+	float: right;
+}
+
+ul.tagit {
+    padding: 1px 5px;
+    overflow: auto;
+    margin-left: inherit; /* usually we don't want the regular ul margins. */
+    margin-right: inherit;
+}
+ul.tagit li {
+    display: block;
+    float: left;
+    margin: 2px 5px 2px 0;
+}
+ul.tagit li.tagit-choice {
+    position: relative;
+    line-height: inherit;
+}
+input.tagit-hidden-field {
+    display: none;
+}
+ul.tagit li.tagit-choice-read-only {
+    padding: .2em .5em .2em .5em;
+}
+
+ul.tagit li.tagit-choice-editable {
+    padding: .2em 18px .2em .5em;
+}
+
+ul.tagit li.tagit-new {
+    padding: .25em 4px .25em 0;
+}
+
+ul.tagit li.tagit-choice a.tagit-label {
+    cursor: pointer;
+    text-decoration: none;
+}
+ul.tagit li.tagit-choice .tagit-close {
+    cursor: pointer;
+    position: absolute;
+    right: .1em;
+    top: 50%;
+    margin-top: -8px;
+    line-height: 17px;
+}
+
+/* used for some custom themes that don't need image icons */
+ul.tagit li.tagit-choice .tagit-close .text-icon {
+    display: none;
+}
+
+ul.tagit li.tagit-choice input {
+    display: block;
+    float: left;
+    margin: 2px 5px 2px 0;
+}
+ul.tagit input[type="text"] {
+    -moz-box-sizing:    border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing:         border-box;
+
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: inherit;
+    background-color: inherit;
+    outline: none;
+}
+
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -9209,6 +9448,13 @@ a:focus,
   font-weight: bold;
   -webkit-border-radius: 4px;
   border-radius: 4px;
+}
+.badge {
+  background: #f5f5f5;
+}
+.badge-info {
+  background: #34a6ff;
+  color: #fff;
 }
 .btn:hover {
   background: #fe8800;
@@ -9549,6 +9795,93 @@ ul#menu li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
+@media (max-width: 1000px) {
+  #alarms {
+    width: 100%;
+    margin: 0px;
+    padding: 5px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  #alarms .fc-header-title h2 {
+    font-size: 16px;
+  }
+  #view-container {
+    padding: 0;
+  }
+  #view-container .container:before,
+  #view-container .container:after {
+    display: block;
+  }
+  #input-time,
+  #input-timezone,
+  #action,
+  #date-control {
+    display: block;
+    margin-bottom: 10px;
+  }
+}
+@media (max-width: 700px) {
+  #alarms .fc-day-header {
+    font-size: 12px;
+    text-align: center;
+    padding-left: 5px;
+  }
+  #alarm-list h2 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 600px) {
+  ul#menu {
+    height: 40px;
+    width: 100%;
+    float: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+  }
+  ul#menu li {
+    display: inline-block;
+  }
+  ul#menu span {
+    display: none;
+  }
+  ul#menu #import-menu-button {
+    display: none;
+  }
+  .main-container {
+    margin-left: 0;
+    margin-top: 40px;
+  }
+  #alarms .fc-day-header {
+    font-size: 10px;
+  }
+  #alarms .fc-button-today {
+    display: none;
+  }
+  #alarms td.fc-header-right span {
+    display: none;
+  }
+  #alarms .fc-event-title {
+    display: none;
+  }
+  #alarms .fc-border-separate {
+    width: 100%;
+  }
+}
+@media (max-width: 500px) {
+  #alarms .popover {
+    width: 310px;
+  }
+  #alarms .popover input {
+    width: 260px;
+  }
+  #alarms .popover button {
+    display: block;
+  }
+}
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -9626,6 +9959,13 @@ a:focus,
   font-weight: bold;
   -webkit-border-radius: 4px;
   border-radius: 4px;
+}
+.badge {
+  background: #f5f5f5;
+}
+.badge-info {
+  background: #34a6ff;
+  color: #fff;
 }
 .btn:hover {
   background: #fe8800;
@@ -9833,11 +10173,19 @@ input[type="time"] {
 .popover #input-place {
   min-width: 120px;
 }
+.popover .popover-title {
+  font-weight: bold;
+}
 .popover .popover-title button {
   margin-top: -4px;
 }
+.popover .popover-title #toggle-type,
 .popover .popover-title i.remove {
   cursor: pointer;
+}
+.popover .popover-title a {
+  font-weight: normal;
+  font-size: 0.8em;
 }
 .popover .popover-content #input-start,
 .popover .popover-content #input-end,
@@ -9884,7 +10232,8 @@ input[type="time"] {
 .fc-button-week,
 .fc-button-agendaWeek,
 .fc-button-day,
-.fc-button-agendaDay {
+.fc-button-agendaDay,
+.fc-button-list {
   border-color: transparent;
   background: transparent;
   color: #34a6ff;
@@ -9901,7 +10250,8 @@ input[type="time"] {
 .fc-button-week:hover,
 .fc-button-agendaWeek:hover,
 .fc-button-day:hover,
-.fc-button-agendaDay:hover {
+.fc-button-agendaDay:hover,
+.fc-button-list:hover {
   background: transparent;
   color: #fe8800;
 }
@@ -9912,7 +10262,8 @@ input[type="time"] {
 .fc-button-week:hover.fc-state-disabled,
 .fc-button-agendaWeek:hover.fc-state-disabled,
 .fc-button-day:hover.fc-state-disabled,
-.fc-button-agendaDay:hover.fc-state-disabled {
+.fc-button-agendaDay:hover.fc-state-disabled,
+.fc-button-list:hover.fc-state-disabled {
   background: #34a6ff;
 }
 .fc-button-prev:active,
@@ -9922,7 +10273,8 @@ input[type="time"] {
 .fc-button-week:active,
 .fc-button-agendaWeek:active,
 .fc-button-day:active,
-.fc-button-agendaDay:active {
+.fc-button-agendaDay:active,
+.fc-button-list:active {
   background: #d6edff;
   cursor: default;
   color: #34a6ff;
@@ -9935,6 +10287,7 @@ input[type="time"] {
 .fc-button-agendaWeek.fc-button-today.fc-state-disabled,
 .fc-button-day.fc-button-today.fc-state-disabled,
 .fc-button-agendaDay.fc-button-today.fc-state-disabled,
+.fc-button-list.fc-button-today.fc-state-disabled,
 .fc-button-prev.fc-state-active,
 .fc-button-next.fc-state-active,
 .fc-button-today.fc-state-active,
@@ -9942,7 +10295,8 @@ input[type="time"] {
 .fc-button-week.fc-state-active,
 .fc-button-agendaWeek.fc-state-active,
 .fc-button-day.fc-state-active,
-.fc-button-agendaDay.fc-state-active {
+.fc-button-agendaDay.fc-state-active,
+.fc-button-list.fc-state-active {
   background: #d6edff;
   color: #5db8ff;
   -webkit-border-radius: 4px;
@@ -9957,6 +10311,7 @@ input[type="time"] {
 .fc-button-agendaWeek.fc-button-today.fc-state-disabled:hover,
 .fc-button-day.fc-button-today.fc-state-disabled:hover,
 .fc-button-agendaDay.fc-button-today.fc-state-disabled:hover,
+.fc-button-list.fc-button-today.fc-state-disabled:hover,
 .fc-button-prev.fc-state-active:hover,
 .fc-button-next.fc-state-active:hover,
 .fc-button-today.fc-state-active:hover,
@@ -9964,7 +10319,8 @@ input[type="time"] {
 .fc-button-week.fc-state-active:hover,
 .fc-button-agendaWeek.fc-state-active:hover,
 .fc-button-day.fc-state-active:hover,
-.fc-button-agendaDay.fc-state-active:hover {
+.fc-button-agendaDay.fc-state-active:hover,
+.fc-button-list.fc-state-active:hover {
   color: #5db8ff;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -10002,6 +10358,7 @@ input[type="time"] {
 }
 .fc-header {
   cursor: default;
+  width: 100%;
 }
 .fc-header-title h2 {
   font-weight: normal;
@@ -10386,6 +10743,7 @@ cursor not-allowed {
   margin: 0;
   sharefont-weight: 10px;
 }
+
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -10411,3 +10769,6 @@ cursor not-allowed {
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+
+
+/*@ sourceMappingURL=app.css.map*/
