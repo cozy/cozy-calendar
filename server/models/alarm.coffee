@@ -9,7 +9,7 @@ module.exports = Alarm = americano.getModel 'Alarm',
     timezone     : type : String
     timezoneHour : type : String
     rrule        : type : String
-    tags         : type : [String]
+    tags         : type : (x) -> x # DAMN IT JUGGLING
     related      : type : String, default: null
 
 
@@ -19,7 +19,9 @@ Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
 
 Alarm.tags = (callback) ->
-    Alarm.request "tags", group: true, callback
+    Alarm.rawRequest "tags", group: true, (err, results) ->
+        return callback err if err
+        callback null, (result.key for result in results)
 
 # before sending to the client
 # set the trigg in TZ time

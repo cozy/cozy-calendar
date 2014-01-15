@@ -11,7 +11,7 @@ module.exports = Event = americano.getModel 'Event',
     description : type : String # = ical SUMMARY
     diff        : type : Number
     rrule       : type : String
-    tags        : type : [String]
+    tags        : type : (x) -> x # DAMN IT JUGGLING
     attendees   : type : [Object]
     related: type: String, default: null
 
@@ -21,7 +21,9 @@ Event.all = (params, callback) ->
     Event.request "all", params, callback
 
 Event.tags = (callback) ->
-    Event.request "tags", group: true, callback
+    Event.rawRequest "tags", group: true, (err, results) ->
+        return callback err if err
+        callback null, (result.key for result in results)
 
 # before sending to the client
 # set the start/end in TZ time

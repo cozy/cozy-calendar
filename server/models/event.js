@@ -29,6 +29,11 @@ module.exports = Event = americano.getModel('Event', {
   rrule: {
     type: String
   },
+  tags: {
+    type: function(x) {
+      return x;
+    }
+  },
   attendees: {
     type: [Object]
   },
@@ -42,6 +47,26 @@ require('cozy-ical').decorateEvent(Event);
 
 Event.all = function(params, callback) {
   return Event.request("all", params, callback);
+};
+
+Event.tags = function(callback) {
+  return Event.rawRequest("tags", {
+    group: true
+  }, function(err, results) {
+    var result;
+    if (err) {
+      return callback(err);
+    }
+    return callback(null, (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = results.length; _i < _len; _i++) {
+        result = results[_i];
+        _results.push(result.key);
+      }
+      return _results;
+    })());
+  });
 };
 
 Event.prototype.timezoned = function(timezone) {

@@ -15,6 +15,15 @@ Contact = require('../models/contact');
 
 User = require('../models/user');
 
+module.exports.tags = function(req, res, next) {
+  return async.parallel([Event.tags, Alarm.tags], function(err, tags) {
+    if (err) {
+      return next(err);
+    }
+    return res.send(tags[0].concat(tags[1]));
+  });
+};
+
 module.exports.index = function(req, res) {
   var _this = this;
   return async.parallel([
