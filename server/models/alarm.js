@@ -28,7 +28,9 @@ module.exports = Alarm = americano.getModel('Alarm', {
     type: String
   },
   tags: {
-    type: [String]
+    type: function(x) {
+      return x;
+    }
   },
   related: {
     type: String,
@@ -46,19 +48,20 @@ Alarm.tags = function(callback) {
   return Alarm.rawRequest("tags", {
     group: true
   }, function(err, results) {
-    var result;
+    var out, result, tag, type, _i, _len, _ref;
     if (err) {
       return callback(err);
     }
-    return callback(null, (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = results.length; _i < _len; _i++) {
-        result = results[_i];
-        _results.push(result.key);
-      }
-      return _results;
-    })());
+    out = {
+      calendar: [],
+      tag: []
+    };
+    for (_i = 0, _len = results.length; _i < _len; _i++) {
+      result = results[_i];
+      _ref = result.key, type = _ref[0], tag = _ref[1];
+      out[type].push(tag);
+    }
+    return callback(null, out);
   });
 };
 

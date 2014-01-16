@@ -5,14 +5,12 @@ americano = require('americano-cozy');
 
 tagsView = {
   map: function(doc) {
-    var tag, _i, _len, _ref, _results;
-    _ref = doc.tags || [];
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tag = _ref[_i];
-      _results.push(emit(tag, true));
-    }
-    return _results;
+    var _ref;
+    return (_ref = doc.tags) != null ? typeof _ref.forEach === "function" ? _ref.forEach(function(tag, index) {
+      var type;
+      type = index === 0 ? 'calendar' : 'tag';
+      return emit([type, tag], true);
+    }) : void 0 : void 0;
   },
   reduce: function(key, values, rereduce) {
     return true;

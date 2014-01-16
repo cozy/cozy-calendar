@@ -1,7 +1,10 @@
 americano = require 'americano-cozy'
 
 tagsView =
-    map    : (doc) -> emit tag, true for tag in doc.tags or []
+    map    : (doc) ->
+        doc.tags?.forEach? (tag, index) ->
+            type = if index is 0 then 'calendar' else 'tag'
+            emit [type, tag], true
     reduce : (key, values, rereduce) -> true
 
 module.exports =

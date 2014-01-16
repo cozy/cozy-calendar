@@ -71,8 +71,8 @@ module.exports.create = function(req, res) {
 module.exports.update = function(req, res) {
   var data, start,
     _this = this;
-  data = Event.toUTC(req.body);
   start = req.event.start;
+  data = Event.toUTC(req.body);
   return req.event.updateAttributes(data, function(err, event) {
     var dateChanged;
     if (err != null) {

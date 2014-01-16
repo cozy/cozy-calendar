@@ -23,7 +23,11 @@ Event.all = (params, callback) ->
 Event.tags = (callback) ->
     Event.rawRequest "tags", group: true, (err, results) ->
         return callback err if err
-        callback null, (result.key for result in results)
+        out = calendar: [], tag: []
+        for result in results
+            [type, tag] = result.key
+            out[type].push tag
+        callback null, out
 
 # before sending to the client
 # set the start/end in TZ time
