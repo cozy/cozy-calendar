@@ -93,7 +93,8 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var AlarmCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, e, locales;
+    var AlarmCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales,
+      _this = this;
 
     window.app = this;
     this.locale = window.locale;
@@ -115,9 +116,18 @@ module.exports = {
     AlarmCollection = require('collections/alarms');
     EventCollection = require('collections/events');
     ContactCollection = require('collections/contacts');
+    TagsCollection = require('collections/tags');
+    this.tags = new TagsCollection();
+    this.tags.fetch({
+      success: function() {
+        return Backbone.history.start();
+      }
+    });
     this.router = new Router();
-    this.menu = new Menu().render();
-    this.menu.$el.prependTo('body');
+    this.menu = new Menu({
+      collection: this.tags
+    });
+    this.menu.render().$el.prependTo('body');
     this.alarms = new AlarmCollection();
     this.events = new EventCollection();
     this.contacts = new ContactCollection();
@@ -135,7 +145,6 @@ module.exports = {
       this.contacts.reset(window.initcontacts);
       delete window.initcontacts;
     }
-    Backbone.history.start();
     if (typeof Object.freeze === 'function') {
       return Object.freeze(this);
     }
@@ -270,6 +279,7 @@ module.exports = DayBucketCollection = (function(_super) {
   DayBucketCollection.prototype.initialize = function() {
     this.alarmCollection = app.alarms;
     this.eventCollection = app.events;
+    this.tagsCollection = app.tags;
     this.listenTo(this.alarmCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.alarmCollection, 'change:trigg', this.onBaseCollectionChange);
     this.listenTo(this.alarmCollection, 'remove', this.onBaseCollectionRemove);
@@ -278,6 +288,7 @@ module.exports = DayBucketCollection = (function(_super) {
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
     this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
     this.listenTo(this.eventCollection, 'reset', this.resetFromBase);
+    this.listenTo(this.tagsCollection, 'change', this.resetFromBase);
     return this.resetFromBase();
   };
 
@@ -312,9 +323,15 @@ module.exports = DayBucketCollection = (function(_super) {
   };
 
   DayBucketCollection.prototype.onBaseCollectionAdd = function(model) {
-    var bucket;
+    var bucket, tag;
 
     bucket = this.get(model.getDateHash());
+    tag = this.tagsCollection.findWhere({
+      label: model.getCalendar()
+    });
+    if (tag && tag.get('visible') === false) {
+      return null;
+    }
     if (!bucket) {
       this.add(bucket = new DayBucket(model));
     }
@@ -374,7 +391,7 @@ module.exports = ScheduleItemsCollection = (function(_super) {
   __extends(ScheduleItemsCollection, _super);
 
   function ScheduleItemsCollection() {
-    this.asFCEventSource = __bind(this.asFCEventSource, this);    _ref = ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
+    this.getFCEventSource = __bind(this.getFCEventSource, this);    _ref = ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
@@ -394,29 +411,39 @@ module.exports = ScheduleItemsCollection = (function(_super) {
     }
   };
 
-  ScheduleItemsCollection.prototype.asFCEventSource = function(start, end, callback) {
-    var eventsInRange;
+  ScheduleItemsCollection.prototype.getFCEventSource = function(tags) {
+    var _this = this;
 
-    eventsInRange = [];
-    this.each(function(item) {
-      var duration, itemEnd, itemStart, rdate, rrule, _i, _len, _ref1, _results;
+    return function(start, end, callback) {
+      var eventsInRange;
 
-      itemStart = item.getStartDateObject();
-      itemEnd = item.getEndDateObject();
-      duration = itemEnd - itemStart;
-      if (rrule = item.getRRuleObject()) {
-        _ref1 = rrule.between(Date.create(start - duration), end);
-        _results = [];
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          rdate = _ref1[_i];
-          _results.push(eventsInRange.push(item.toFullCalendarEvent(rdate)));
+      eventsInRange = [];
+      _this.each(function(item) {
+        var duration, itemEnd, itemStart, rdate, rrule, tag, _i, _len, _ref1, _results;
+
+        itemStart = item.getStartDateObject();
+        itemEnd = item.getEndDateObject();
+        duration = itemEnd - itemStart;
+        tag = tags.findWhere({
+          label: item.getCalendar()
+        });
+        if (tag && tag.get('visible') === false) {
+          return null;
         }
-        return _results;
-      } else if (item.isInRange(start, end)) {
-        return eventsInRange.push(item.toFullCalendarEvent());
-      }
-    });
-    return callback(eventsInRange);
+        if (rrule = item.getRRuleObject()) {
+          _ref1 = rrule.between(Date.create(start - duration), end);
+          _results = [];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            rdate = _ref1[_i];
+            _results.push(eventsInRange.push(item.toFullCalendarEvent(rdate)));
+          }
+          return _results;
+        } else if (item.isInRange(start, end)) {
+          return eventsInRange.push(item.toFullCalendarEvent());
+        }
+      });
+      return callback(eventsInRange);
+    };
   };
 
   return ScheduleItemsCollection;
@@ -431,7 +458,7 @@ var Tags, _ref,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = Tags = (function(_super) {
-  var Tag;
+  var Tag, stringify, _ref1;
 
   __extends(Tags, _super);
 
@@ -442,22 +469,62 @@ module.exports = Tags = (function(_super) {
 
   Tags.prototype.url = 'tags';
 
+  Tags.prototype.parse = function(raw) {
+    var out, tag, _i, _j, _len, _len1, _ref1, _ref2;
+
+    out = [];
+    _ref1 = raw.calendars;
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      tag = _ref1[_i];
+      out.push({
+        type: 'calendar',
+        label: tag
+      });
+    }
+    _ref2 = raw.tags;
+    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+      tag = _ref2[_j];
+      out.push({
+        type: 'tag',
+        label: tag
+      });
+    }
+    return out;
+  };
+
   Tags.prototype.model = Tag = (function(_super1) {
     __extends(Tag, _super1);
 
-    function Tag(tag) {
-      Tag.__super__.constructor.call(this, {
-        value: tag
-      });
+    function Tag() {
+      _ref1 = Tag.__super__.constructor.apply(this, arguments);
+      return _ref1;
     }
 
+    Tag.prototype.defaults = {
+      visible: true
+    };
+
     Tag.prototype.toString = function() {
-      return this.get('value');
+      return this.get('label');
     };
 
     return Tag;
 
   })(Backbone.Model);
+
+  stringify = function(tag) {
+    return tag.toString();
+  };
+
+  Tags.prototype.toArray = function() {
+    return this.map(stringify);
+  };
+
+  Tags.prototype.calendars = function() {
+    return this.find({
+      type: 'calendar'
+    });
+  };
 
   return Tags;
 
@@ -675,6 +742,23 @@ module.exports = BaseView = (function(_super) {
   return BaseView;
 
 })(Backbone.View);
+
+});
+
+;require.register("lib/colorhash", function(exports, require, module) {
+module.exports = function(tag) {
+  var colour, hash, i, _i, _j, _ref;
+
+  hash = 0;
+  for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+    hash = tag.charCodeAt(i++) + ((hash << 5) - hash);
+  }
+  colour = '#';
+  for (i = _j = 0; _j <= 2; i = ++_j) {
+    colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2);
+  }
+  return colour;
+};
 
 });
 
@@ -924,6 +1008,7 @@ module.exports = {
   "Import": "Import",
   "Export": "Export",
   "List": "List",
+  "list": "list",
   "Calendar": "Calendar",
   "Sync": "Sync",
   "ie: 9:00 important meeting": "ie: 9:00 important meeting",
@@ -951,7 +1036,9 @@ module.exports = {
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
+  "BOTH": "E-mail & Notification",
   "advanced": "More details",
+  "display previous events": "Display previous events",
   "enter email": "Enter email",
   "ON": "on",
   "OFF": "off",
@@ -1029,6 +1116,7 @@ module.exports = {
   "Import": "Import",
   "Export": "Export",
   "List": "Liste",
+  "list": "liste",
   "Calendar": "Calendrier",
   "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacque",
   "Month": "Mois",
@@ -1056,6 +1144,7 @@ module.exports = {
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
+  "BOTH": "E-mail & Notification",
   "display previous events": "Montrer les évènements précédent",
   "event": "Evenement",
   "alarm": "Alarme",
@@ -1285,9 +1374,11 @@ module.exports = Event = (function(_super) {
 });
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
-var ScheduleItem, _ref,
+var ScheduleItem, colorHash, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+colorHash = require('lib/colorhash');
 
 module.exports = ScheduleItem = (function(_super) {
   __extends(ScheduleItem, _super);
@@ -1333,26 +1424,24 @@ module.exports = ScheduleItem = (function(_super) {
     }
   };
 
+  ScheduleItem.prototype.getCalendar = function() {
+    var _ref1;
+
+    return (_ref1 = this.get('tags')) != null ? _ref1[0] : void 0;
+  };
+
   ScheduleItem.prototype.getDefaultColor = function() {
     return 'grey';
   };
 
   ScheduleItem.prototype.getColor = function() {
-    var colour, hash, i, tag, _i, _j, _ref1, _ref2;
+    var tag;
 
-    tag = (_ref1 = this.get('tags')) != null ? _ref1[0] : void 0;
+    tag = this.getCalendar();
     if (!tag) {
       return this.getDefaultColor();
     }
-    hash = 0;
-    for (i = _i = 0, _ref2 = tag.length - 1; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
-      hash = tag.charCodeAt(i++) + ((hash << 5) - hash);
-    }
-    colour = '#';
-    for (i = _j = 0; _j <= 2; i = ++_j) {
-      colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2);
-    }
-    return colour;
+    return colorHash(tag);
   };
 
   ScheduleItem.prototype.getDateObject = function() {
@@ -1513,7 +1602,8 @@ module.exports = Router = (function(_super) {
     }));
     app.menu.activate('calendar');
     this.handleFetch(app.alarms, 'alarms');
-    return this.handleFetch(app.events, 'events');
+    this.handleFetch(app.events, 'events');
+    return this.onCalendar = true;
   };
 
   Router.prototype.calendarweek = function() {
@@ -1524,12 +1614,14 @@ module.exports = Router = (function(_super) {
     this.displayView(new ListView({
       collection: new DayBucketCollection()
     }));
-    return app.menu.activate('list');
+    app.menu.activate('calendar');
+    return this.onCalendar = true;
   };
 
   Router.prototype.sync = function() {
     this.displayView(new SyncView);
-    return app.menu.activate('sync');
+    app.menu.activate('sync');
+    return this.onCalendar = false;
   };
 
   Router.prototype.calendar_event = function(id) {
@@ -1564,12 +1656,14 @@ module.exports = Router = (function(_super) {
       backurl: backurl
     });
     $('body').append(view.$el);
-    return view.render();
+    view.render();
+    return this.onCalendar = true;
   };
 
   Router.prototype["import"] = function() {
     this.displayView(new ImportView());
-    return app.menu.activate('import');
+    app.menu.activate('import');
+    return this.onCalendar = false;
   };
 
   Router.prototype.handleFetch = function(collection, name) {
@@ -1642,7 +1736,7 @@ module.exports = CalendarHeader = (function(_super) {
     var format, view;
 
     if (!this.cal) {
-      return t('list');
+      return t('List');
     }
     view = this.cal.fullCalendar('getView');
     format = view.name === 'month' ? 'MMMM yyyy' : "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}";
@@ -1664,10 +1758,13 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   CalendarHeader.prototype.getRenderData = function() {
-    var _this = this;
+    var data, locale,
+      _this = this;
 
-    return {
+    locale = Date.getLocale();
+    return data = {
       title: this.getTitle(),
+      todaytxt: locale.day.split('|')[1],
       calendarMode: this.cal != null,
       active: function(item) {
         if (item === 'today' && _this.isToday() || item === _this.getViewName()) {
@@ -2138,11 +2235,13 @@ module.exports = CalendarView = (function(_super) {
     this.listenTo(this.eventCollection, 'reset', this.refresh);
     this.listenTo(this.eventCollection, 'remove', this.onRemove);
     this.listenTo(this.eventCollection, 'change', this.refreshOne);
-    return this.model = null;
+    this.model = null;
+    this.tagsCollection = app.tags;
+    return this.listenTo(this.tagsCollection, 'change', this.refresh);
   };
 
   CalendarView.prototype.afterRender = function() {
-    var debounced, locale,
+    var debounced, locale, source,
       _this = this;
 
     locale = Date.getLocale(app.locale);
@@ -2188,8 +2287,10 @@ module.exports = CalendarView = (function(_super) {
       eventResize: this.onEventResize,
       handleWindowResize: false
     });
-    this.cal.fullCalendar('addEventSource', this.eventCollection.asFCEventSource);
-    this.cal.fullCalendar('addEventSource', this.alarmCollection.asFCEventSource);
+    source = this.eventCollection.getFCEventSource(this.tagsCollection);
+    this.cal.fullCalendar('addEventSource', source);
+    source = this.alarmCollection.getFCEventSource(this.tagsCollection);
+    this.cal.fullCalendar('addEventSource', source);
     this.calHeader = new Header({
       cal: this.cal
     });
@@ -2319,7 +2420,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventRender = function(event, element) {
-    var spinTarget;
+    var icon, spinTarget;
 
     if ((event.isSaving != null) && event.isSaving) {
       spinTarget = $(element).find('.fc-event-time');
@@ -2328,6 +2429,10 @@ module.exports = CalendarView = (function(_super) {
       spinTarget.spin("tiny");
     }
     $(element).attr('title', event.title);
+    if (event.type === 'alarm') {
+      icon = '<i class="icon-bell icon-white"></i>';
+      element.find('.fc-event-title').prepend(icon);
+    }
     return element;
   };
 
@@ -2545,6 +2650,9 @@ module.exports = EventModal = (function(_super) {
       model: this.model,
       el: this.$('#basic-tags')
     });
+    this.$('#basic-calendar').autocomplete({
+      source: app.tags.toArray()
+    });
     this.$el.modal('show');
     return this.$el.on('hidden', function() {
       window.app.router.navigate("calendar", {
@@ -2591,7 +2699,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.getRenderData = function() {
-    var data;
+    var data, _ref1, _ref2;
 
     data = _.extend({}, this.model.toJSON(), {
       summary: this.model.get('description'),
@@ -2600,6 +2708,8 @@ module.exports = EventModal = (function(_super) {
       end: this.model.getEndDateObject().format(this.inputDateTimeFormat),
       exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
     });
+    data.calendar = ((_ref1 = data.tags) != null ? _ref1[0] : void 0) || '';
+    data.tags = ((_ref2 = data.tags) != null ? _ref2.slice(1) : void 0) || [];
     return data;
   };
 
@@ -2611,7 +2721,7 @@ module.exports = EventModal = (function(_super) {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
       place: this.$('#basic-place').val(),
-      tags: this.tags.getTags(),
+      tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags()),
       start: Date.create(this.startField.val(), 'fr').format(Event.dateFormat, 'en'),
       end: Date.create(this.endField.val(), 'fr').format(Event.dateFormat, 'en')
     };
@@ -3314,8 +3424,8 @@ module.exports = ListView = (function(_super) {
 
   ListView.prototype.afterRender = function() {
     this.calHeader = new Header();
-    ListView.__super__.afterRender.apply(this, arguments);
-    return this.$('#alarm-list').prepend(this.calHeader.render().$el);
+    this.$('#alarm-list').prepend(this.calHeader.render().$el);
+    return ListView.__super__.afterRender.apply(this, arguments);
   };
 
   ListView.prototype.appendView = function(view) {
@@ -3330,7 +3440,7 @@ module.exports = ListView = (function(_super) {
       el.addClass('after');
     }
     if (index === 0) {
-      return this.$collectionEl.prepend(el);
+      return this.calHeader.$el.after(el);
     } else {
       prevCid = this.collection.at(index - 1).cid;
       return this.views[prevCid].$el.after(el);
@@ -3447,7 +3557,7 @@ module.exports = BucketView = (function(_super) {
 });
 
 ;require.register("views/list_view_item", function(exports, require, module) {
-var AlarmView, BaseView, Event, Popover, _ref,
+var AlarmView, BaseView, Event, Popover, colorHash, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3456,6 +3566,8 @@ BaseView = require('../lib/base_view');
 Popover = require('./calendar_popover');
 
 Event = require('../models/event');
+
+colorHash = require('lib/colorhash');
 
 module.exports = AlarmView = (function(_super) {
   __extends(AlarmView, _super);
@@ -3475,7 +3587,8 @@ module.exports = AlarmView = (function(_super) {
   };
 
   AlarmView.prototype.initialize = function() {
-    return this.listenTo(this.model, "change", this.render);
+    this.listenTo(this.model, "change", this.render);
+    return this.listenTo(app.tags, 'change:visible', this.render);
   };
 
   AlarmView.prototype.deleteModel = function() {
@@ -3509,9 +3622,11 @@ module.exports = AlarmView = (function(_super) {
   };
 
   AlarmView.prototype.getRenderData = function() {
-    var data;
+    var data, tag;
 
     data = this.model.toJSON();
+    tag = this.model.getCalendar();
+    data.color = tag ? colorHash(tag) : '';
     if (this.model instanceof Event) {
       _.extend(data, {
         type: 'event',
@@ -3534,11 +3649,11 @@ module.exports = AlarmView = (function(_super) {
 });
 
 ;require.register("views/menu", function(exports, require, module) {
-var BaseView, MenuView, _ref,
+var MenuView, ViewCollection, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-BaseView = require('../lib/base_view');
+ViewCollection = require('../lib/view_collection');
 
 module.exports = MenuView = (function(_super) {
   __extends(MenuView, _super);
@@ -3556,12 +3671,74 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.template = require('./templates/menu');
 
+  MenuView.prototype.itemview = require('views/menu_item');
+
   MenuView.prototype.activate = function(href) {
     this.$('.active').removeClass('active');
     return this.$('a[href="#' + href + '"]').addClass('active');
   };
 
+  MenuView.prototype.addItem = function(model) {
+    if (model.get('type') !== 'calendar') {
+      return;
+    }
+    return MenuView.__super__.addItem.apply(this, arguments);
+  };
+
   return MenuView;
+
+})(ViewCollection);
+
+});
+
+;require.register("views/menu_item", function(exports, require, module) {
+var BaseView, Event, MenuItemView, Popover, colorhash, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+Popover = require('./calendar_popover');
+
+Event = require('../models/event');
+
+colorhash = require('lib/colorhash');
+
+module.exports = MenuItemView = (function(_super) {
+  __extends(MenuItemView, _super);
+
+  function MenuItemView() {
+    _ref = MenuItemView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  MenuItemView.prototype.tagName = 'a';
+
+  MenuItemView.prototype.className = 'tagmenuitem';
+
+  MenuItemView.prototype.template = require('./templates/menu_item');
+
+  MenuItemView.prototype.events = {
+    'click': 'toggleVisible'
+  };
+
+  MenuItemView.prototype.toggleVisible = function() {
+    if (!app.router.onCalendar) {
+      app.router.navigate('calendar', true);
+    }
+    this.model.set('visible', !this.model.get('visible'));
+    return this.render();
+  };
+
+  MenuItemView.prototype.getRenderData = function() {
+    return {
+      label: this.model.get('label'),
+      color: colorhash(this.model.get('label')),
+      visible: this.model.get('visible')
+    };
+  };
+
+  return MenuItemView;
 
 })(BaseView);
 
@@ -3593,42 +3770,37 @@ module.exports = ImportView = (function(_super) {
 });
 
 ;require.register("views/tags", function(exports, require, module) {
-var BaseView, TagsCollection, TagsView, _ref,
+var BaseView, TagsView, colorHash, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
-TagsCollection = require('collections/tags');
+colorHash = require('lib/colorhash');
 
 module.exports = TagsView = (function(_super) {
   __extends(TagsView, _super);
 
   function TagsView() {
-    this.refresh = __bind(this.refresh, this);    _ref = TagsView.__super__.constructor.apply(this, arguments);
+    this.refresh = __bind(this.refresh, this);
+    this.tagAdded = __bind(this.tagAdded, this);    _ref = TagsView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
   TagsView.prototype.initialize = function() {
-    var allTags,
-      _this = this;
-
     TagsView.__super__.initialize.apply(this, arguments);
-    allTags = new TagsCollection();
-    allTags.fetch({
-      success: function() {
-        return _this.$el.hide().tagit({
-          availableTags: allTags.map(function(tag) {
-            return tag.toString() || [];
-          }),
-          placeholderText: t('add tags'),
-          afterTagAdded: _this.tagAdded,
-          afterTagRemoved: _this.tagRemoved
-        });
-      }
-    }, this.duringRefresh = false);
+    this.$el.hide().tagit({
+      availableTags: app.tags.toArray(),
+      placeholderText: t('add tags'),
+      afterTagAdded: this.tagAdded
+    });
+    this.duringRefresh = false;
     return this;
+  };
+
+  TagsView.prototype.tagAdded = function(ev, ui) {
+    return ui.tag.css('background-color', colorHash(ui.tagLabel));
   };
 
   TagsView.prototype.getTags = function() {
@@ -3666,7 +3838,7 @@ if ( calendarMode)
 buf.push('<span class="fc-button fc-button-prev fc-corner-left"><span class="fc-text-arrow">‹</span></span><span class="fc-button fc-button-next fc-corner-right"><span class="fc-text-arrow">›</span></span><span class="fc-header-space"></span><span');
 buf.push(attrs({ "class": ('fc-button') + ' ' + ('fc-button-today') + ' ' + (active('today')) }, {"class":true}));
 buf.push('>');
-var __val__ = t('today')
+var __val__ = todaytxt
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span>');
 }
@@ -3717,12 +3889,17 @@ var __val__ = t('edit event')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span>&nbsp;<a');
 buf.push(attrs({ 'href':("events/" + (id) + "/" + (exportdate) + ".ics") }, {"href":true}));
-buf.push('><i class="fa fa-download fa-1"></i></a><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span12"><label for="basic-tags" class="control-label">');
+buf.push('><i class="fa fa-download fa-1"></i></a><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span4"><label for="basic-calendar" class="control-label">');
+var __val__ = t('calendar')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</label><div class="controls"><input');
+buf.push(attrs({ 'id':('basic-calendar'), 'value':(calendar), "class": ('span12') }, {"value":true}));
+buf.push('/></div></div><div class="control-group span8"><label for="basic-tags" class="control-label">');
 var __val__ = t('tags')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
 buf.push(attrs({ 'id':('basic-tags'), 'value':(tags.join(',')), "class": ('span12') + ' ' + ('tagit') }, {"value":true}));
-buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span12"><label for="basic-summary" class="control-label">');
+buf.push('/></div></div></div><div class="row-fluid"><div class="control-group span8"><label for="basic-summary" class="control-label">');
 var __val__ = t('summary')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
@@ -4006,7 +4183,9 @@ with (locals || {}) {
 var interp;
 if ( type == 'alarm')
 {
-buf.push('<p>');
+buf.push('<p><span');
+buf.push(attrs({ 'style':("background-color:"+color+";"), "class": ('badge') }, {"style":true}));
+buf.push('>&nbsp;</span>');
 if ( typeof timezoneHour != 'undefined')
 {
 buf.push('<span');
@@ -4021,7 +4200,9 @@ buf.push(' ' + escape((interp = description) == null ? '' : interp) + ' (' + esc
 }
 else if ( type == 'event')
 {
-buf.push('<p>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-trash"></i></p>');
+buf.push('<p><span');
+buf.push(attrs({ 'style':("background-color:"+color+";"), "class": ('badge') }, {"style":true}));
+buf.push('>&nbsp;</span>' + escape((interp = start) == null ? '' : interp) + ' - ' + escape((interp = end) == null ? '' : interp) + '\n' + escape((interp = description) == null ? '' : interp) + '<i class="icon-trash"></i></p>');
 }
 }
 return buf.join("");
@@ -4034,13 +4215,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<a href="#calendar"><li><i class="fa-calendar"></i><span>');
-var __val__ = t('Calendar')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a><a href="#list"><li><i class="fa-list"></i><span>');
-var __val__ = t('List')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a><a id="import-menu-button" href="#import"><li><i class="fa-chevron-circle-up"></i><span>');
+buf.push('<a id="import-menu-button" href="#import"><li><i class="fa-chevron-circle-up"></i><span>');
 var __val__ = t('Import')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"><li><i class="fa-share"></i><span>');
@@ -4049,7 +4224,29 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"></a><a id="import-menu-button" href="#sync"><li><i class="fa-refresh"></i><span>');
 var __val__ = t('Sync')
 buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</span></li></a><hr/><a href="#calendar"><li><i class="fa-calendar"></i><span>');
+var __val__ = t('Calendar')
+buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></li></a>');
+}
+return buf.join("");
+};
+});
+
+;require.register("views/templates/menu_item", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<li><span');
+buf.push(attrs({ 'style':("background-color:"+color+";"), "class": ('badge') }, {"style":true}));
+buf.push('><i class="fa-calendar"></i></span><span>');
+var __val__ = label
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</span><span class="pull-right"><i');
+buf.push(attrs({ "class": (visible?"icon-eye-open":"icon-eye-close") }, {"class":true}));
+buf.push('></i></span></li>');
 }
 return buf.join("");
 };
@@ -4098,7 +4295,7 @@ buf.push('</option>');
 }).call(this);
 
 buf.push('</select></div><div class="line"><input');
-buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') }, {"type":true,"value":true,"placeholder":true}));
+buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("alarm description placeholder")), "class": ('input-xlarge') + ' ' + ('w100') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/></div><div class="line"><div id="rrule-container"></div></div><div class="popover-footer"><a class="btn add">');
 var __val__ = t('Edit')
 buf.push(escape(null == __val__ ? "" : __val__));
