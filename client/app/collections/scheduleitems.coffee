@@ -10,18 +10,22 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
         else if t1 is t2 then return 0
         else return 1
 
-    asFCEventSource: (start, end, callback) =>
-        eventsInRange = []
-        @each (item) ->
-            itemStart = item.getStartDateObject()
-            itemEnd = item.getEndDateObject()
-            duration = itemEnd - itemStart
+    getFCEventSource: (tags) =>
+        return (start, end, callback) =>
+            eventsInRange = []
+            @each (item) ->
+                itemStart = item.getStartDateObject()
+                itemEnd = item.getEndDateObject()
+                duration = itemEnd - itemStart
 
-            if rrule = item.getRRuleObject()
-                for rdate in rrule.between Date.create(start - duration), end
-                    eventsInRange.push item.toFullCalendarEvent rdate
+                tag = tags.findWhere label: item.getCalendar()
+                return null if tag and tag.get('visible') is false
 
-            else if item.isInRange start, end
-                eventsInRange.push item.toFullCalendarEvent()
+                if rrule = item.getRRuleObject()
+                    for rdate in rrule.between Date.create(start - duration), end
+                        eventsInRange.push item.toFullCalendarEvent rdate
 
-        callback eventsInRange
+                else if item.isInRange start, end
+                    eventsInRange.push item.toFullCalendarEvent()
+
+            callback eventsInRange

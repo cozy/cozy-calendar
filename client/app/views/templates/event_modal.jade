@@ -7,11 +7,14 @@
 .modal-body
     form.form-inline#basic
         .row-fluid
-            .control-group.span12
+            .control-group.span4
+                label.control-label(for="basic-calendar")= t('calendar')
+                .controls: input.span12#basic-calendar(value=calendar)
+            .control-group.span8
                 label.control-label(for="basic-tags")= t('tags')
                 .controls: input.span12#basic-tags.tagit(value=tags.join(','))
         .row-fluid
-            .control-group.span12
+            .control-group.span8
                 label.control-label(for="basic-summary")= t('summary')
                 .controls: input.span12#basic-summary(type="text", value=summary)
 

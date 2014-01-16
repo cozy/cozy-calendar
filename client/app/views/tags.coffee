@@ -1,23 +1,23 @@
 BaseView = require 'lib/base_view'
-TagsCollection = require 'collections/tags'
+
+colorHash = require 'lib/colorhash'
 
 module.exports = class TagsView extends BaseView
 
     initialize: ->
         super
-        allTags = new TagsCollection()
-        allTags.fetch
-            success: =>
-                @$el.hide().tagit
-                    availableTags: allTags.map (tag) -> tag.toString() or []
-                    placeholderText: t 'add tags'
-                    afterTagAdded  : @tagAdded
-                    afterTagRemoved : @tagRemoved
+        @$el.hide().tagit
+            availableTags: app.tags.toArray()
+            placeholderText: t 'add tags'
+            afterTagAdded  : @tagAdded
 
-            # hack to prevent tagit events
-            @duringRefresh = false
+        # hack to prevent tagit events
+        @duringRefresh = false
 
         return this
+
+    tagAdded: (ev, ui) =>
+        ui.tag.css 'background-color', colorHash ui.tagLabel
 
     getTags: ->
         @$el.tagit 'assignedTags'

@@ -1,6 +1,7 @@
 BaseView = require '../lib/base_view'
 Popover = require './calendar_popover'
 Event = require '../models/event'
+colorHash = require 'lib/colorhash'
 
 
 module.exports = class AlarmView extends BaseView
@@ -14,6 +15,7 @@ module.exports = class AlarmView extends BaseView
 
     initialize: ->
         @listenTo @model, "change", @render
+        @listenTo app.tags, 'change:visible', @render
 
     deleteModel: ->
         return unless confirm t "are you sure"
@@ -36,6 +38,8 @@ module.exports = class AlarmView extends BaseView
 
     getRenderData: ->
         data = @model.toJSON()
+        tag = @model.getCalendar()
+        data.color = if tag then colorHash(tag) else ''
         if @model instanceof Event
             _.extend data,
                 type: 'event'

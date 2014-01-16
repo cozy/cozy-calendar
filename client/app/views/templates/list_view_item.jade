@@ -1,5 +1,6 @@
 if type == 'alarm'
     p
+        span.badge(style="background-color:"+color+";") &nbsp;
         if typeof timezoneHour != 'undefined'
             span(title="#{timezoneHour} - #{timezone}") #{time}
         else
@@ -8,6 +9,9 @@ if type == 'alarm'
         |  #{description} (#{t(action)})
         i.icon-trash
 else if type == 'event'
-    p #{start} - #{end}
+
+    p
+        span.badge(style="background-color:"+color+";") &nbsp;
+        | #{start} - #{end}
         | #{description}
         i.icon-trash

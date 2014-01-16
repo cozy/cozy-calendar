@@ -28,6 +28,9 @@ module.exports = class CalendarView extends BaseView
         @listenTo @eventCollection, 'change', @refreshOne
         @model = null
 
+        @tagsCollection = app.tags
+        @listenTo @tagsCollection, 'change', @refresh
+
     afterRender: ->
         locale = Date.getLocale(app.locale) # thanks sugarjs
         @cal = @$('#alarms')
@@ -73,8 +76,11 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
 
-        @cal.fullCalendar 'addEventSource', @eventCollection.asFCEventSource
-        @cal.fullCalendar 'addEventSource', @alarmCollection.asFCEventSource
+        source = @eventCollection.getFCEventSource @tagsCollection
+        @cal.fullCalendar 'addEventSource', source
+
+        source = @alarmCollection.getFCEventSource @tagsCollection
+        @cal.fullCalendar 'addEventSource', source
 
         @calHeader = new Header cal: @cal
 
@@ -172,6 +178,9 @@ module.exports = class CalendarView extends BaseView
             spinTarget.spin "tiny"
 
         $(element).attr 'title', event.title
+        if event.type is 'alarm'
+            icon = '<i class="icon-bell icon-white"></i>'
+            element.find('.fc-event-title').prepend icon
 
         return element
 

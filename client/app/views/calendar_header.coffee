@@ -18,7 +18,7 @@ module.exports = class CalendarHeader extends BaseView
         return 'month'
 
     getTitle: ->
-        return t('list') unless @cal
+        return t('List') unless @cal
         view = @cal.fullCalendar('getView')
         format = if view.name is 'month' then 'MMMM yyyy'
         else "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}"
@@ -33,11 +33,16 @@ module.exports = class CalendarHeader extends BaseView
         (new Date()).isBetween start, end
 
     getRenderData: ->
-        title: @getTitle()
-        calendarMode: @cal?
-        active: (item) =>
-            if item is 'today' and @isToday() or item is @getViewName()
-                return 'fc-state-active'
+
+        locale = Date.getLocale()
+
+        return data =
+            title: @getTitle()
+            todaytxt: locale.day.split('|')[1]
+            calendarMode: @cal?
+            active: (item) =>
+                if item is 'today' and @isToday() or item is @getViewName()
+                    return 'fc-state-active'
 
     events: ->
         'click .fc-button-next': => @trigger 'next'

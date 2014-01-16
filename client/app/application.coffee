@@ -25,10 +25,15 @@ module.exports =
         AlarmCollection = require 'collections/alarms'
         EventCollection = require 'collections/events'
         ContactCollection = require 'collections/contacts'
+        TagsCollection = require 'collections/tags'
+
+        @tags = new TagsCollection()
+        @tags.fetch
+            success: => Backbone.history.start()
 
         @router = new Router()
-        @menu = new Menu().render()
-        @menu.$el.prependTo 'body'
+        @menu = new Menu(collection: @tags)
+        @menu.render().$el.prependTo 'body'
         @alarms = new AlarmCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()
@@ -48,6 +53,5 @@ module.exports =
             @contacts.reset window.initcontacts
             delete window.initcontacts
 
-        Backbone.history.start()
 
         Object.freeze this if typeof Object.freeze is 'function'

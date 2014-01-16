@@ -24,6 +24,7 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     initialize: ->
         @alarmCollection = app.alarms
         @eventCollection = app.events
+        @tagsCollection = app.tags
 
         @listenTo @alarmCollection, 'add', @onBaseCollectionAdd
         @listenTo @alarmCollection, 'change:trigg', @onBaseCollectionChange
@@ -34,6 +35,8 @@ module.exports = class DayBucketCollection extends Backbone.Collection
         @listenTo @eventCollection, 'change:start', @onBaseCollectionChange
         @listenTo @eventCollection, 'remove', @onBaseCollectionRemove
         @listenTo @eventCollection, 'reset', @resetFromBase
+
+        @listenTo @tagsCollection, 'change', @resetFromBase
 
         @resetFromBase()
 
@@ -53,6 +56,10 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
     onBaseCollectionAdd: (model) ->
         bucket = @get model.getDateHash()
+
+        tag = @tagsCollection.findWhere label: model.getCalendar()
+        return null if tag and tag.get('visible') is false
+
         @add(bucket = new DayBucket model) unless bucket
         bucket.items.add model
 
