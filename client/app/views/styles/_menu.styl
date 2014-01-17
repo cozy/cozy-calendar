@@ -3,22 +3,31 @@ ul#menu
   left: 0
   top: 0
   width: 200px
+  padding 0px
   list-style-type: none
   text-align: left
   background: #F2F2F2
 
   a
     color: #333
+    padding 0px
+    margin 0px
     font-family: styled
     font-weight: normal
     text-decoration: none
 
   a:hover
     text-decoration: none
+    background-color transparent
 
-  a.active
-      li
-        background: #AEDBFF
+  li.active
+    background: #AEDBFF
+
+  li.divider
+    background-color transparent
+    &:hover
+      background-color transparent
+
 
   li
     display: block
@@ -32,15 +41,14 @@ ul#menu
         margin-right: 10px
         margin-left: 10px
 
-    .pull-right
-        margin-right 5px
-
   li:hover
     background: #FFC47F
     text-decoration: none
 
-  a.tagmenuitem
-    li i
+  ul#menuitems
+    margin-left 15px
+  li.tagmenuitem
+    i
       margin 0px
     .badge
       margin-right 10px

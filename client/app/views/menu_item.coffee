@@ -6,7 +6,7 @@ colorhash = require 'lib/colorhash'
 
 module.exports = class MenuItemView extends BaseView
 
-    tagName: 'a'
+    tagName: 'li'
     className: 'tagmenuitem'
     template: require './templates/menu_item'
 
@@ -22,4 +22,4 @@ module.exports = class MenuItemView extends BaseView
     getRenderData: ->
         label: @model.get 'label'
         color: colorhash @model.get 'label'
-        visible: @model.get 'visible'
+        visible: @model.get('visible')

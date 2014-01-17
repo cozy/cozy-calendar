@@ -1,6 +1,6 @@
 @media(max-width: 1000px)
 
-    #alarms
+    #alarms, #alarm-list
         width: 100%
         margin: 0px
         padding: 5px
@@ -53,8 +53,24 @@
         span
             display: none
 
-        #import-menu-button
-            display: none
+        li.calendars
+            float right
+
+        ul#menuitems
+            display none
+            &.visible
+                display block
+            position absolute
+            margin 0px
+            top 40px
+            right 0px
+            z-index 1050
+            background-color inherit
+            li
+                display list-item
+                list-style-type none
+            span
+                display inline
 
     .main-container
         margin-left: 0

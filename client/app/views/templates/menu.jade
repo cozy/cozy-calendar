@@ -1,24 +1,24 @@
-a#import-menu-button(href="#import")
-    li
+li
+    a#import-menu-button(href="#import")
         i.fa-chevron-circle-up
         span
             = t('Import')
-a(href="export/calendar.ics", target="_blank")
-    li
+li
+    a(href="export/calendar.ics", target="_blank")
         i.fa-share
         span
             = t('Export')
-a(href="export/calendar.ics", target="_blank")
-a#import-menu-button(href="#sync")
-    li
+
+li
+    a#import-menu-button(href="#sync")
         i.fa-refresh
         span
             = t('Sync')
 
-hr
-
-a(href="#calendar")
-    li
+li.calendars
+    a(href="#calendar")
         i.fa-calendar
         span
             = t('Calendar')
+
+ul#menuitems
