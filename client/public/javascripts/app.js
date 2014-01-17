@@ -3799,15 +3799,27 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.id = 'menu';
 
-  MenuView.prototype.className = 'container';
+  MenuView.prototype.className = 'container nav nav-list';
+
+  MenuView.prototype.collectionEl = '#menuitems';
 
   MenuView.prototype.template = require('./templates/menu');
 
   MenuView.prototype.itemview = require('views/menu_item');
 
+  MenuView.prototype.events = function() {
+    return {
+      'click .calendars': 'toggleDropdown'
+    };
+  };
+
   MenuView.prototype.activate = function(href) {
     this.$('.active').removeClass('active');
     return this.$('a[href="#' + href + '"]').addClass('active');
+  };
+
+  MenuView.prototype.toggleDropdown = function() {
+    return this.$('#menuitems').toggleClass('visible');
   };
 
   MenuView.prototype.addItem = function(model) {
@@ -3844,7 +3856,7 @@ module.exports = MenuItemView = (function(_super) {
     return _ref;
   }
 
-  MenuItemView.prototype.tagName = 'a';
+  MenuItemView.prototype.tagName = 'li';
 
   MenuItemView.prototype.className = 'tagmenuitem';
 
@@ -4031,7 +4043,7 @@ var __val__ = t('calendar')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
 buf.push(attrs({ 'id':('basic-calendar'), 'value':(calendar), "class": ('span12') }, {"value":true}));
-buf.push('/></div></div><div class="control-group span8"><label for="basic-tags" class="control-label">');
+buf.push('/></div></div><div style="display:none;" class="control-group span8"><label for="basic-tags" class="control-label">');
 var __val__ = t('tags')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
@@ -4352,19 +4364,19 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<a id="import-menu-button" href="#import"><li><i class="fa-chevron-circle-up"></i><span>');
+buf.push('<li><a id="import-menu-button" href="#import"><i class="fa-chevron-circle-up"></i><span>');
 var __val__ = t('Import')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"><li><i class="fa-share"></i><span>');
+buf.push('</span></a></li><li><a href="export/calendar.ics" target="_blank"><i class="fa-share"></i><span>');
 var __val__ = t('Export')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a><a href="export/calendar.ics" target="_blank"></a><a id="import-menu-button" href="#sync"><li><i class="fa-refresh"></i><span>');
+buf.push('</span></a></li><li><a href="#sync"><i class="fa-refresh"></i><span>');
 var __val__ = t('Sync')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a><hr/><a href="#calendar"><li><i class="fa-calendar"></i><span>');
+buf.push('</span></a></li><li class="calendars"><a href="#calendar"><i class="fa-calendar"></i><span>');
 var __val__ = t('Calendar')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></li></a>');
+buf.push('</span></a></li><ul id="menuitems"></ul>');
 }
 return buf.join("");
 };
@@ -4376,14 +4388,12 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<li><span');
-buf.push(attrs({ 'style':("background-color:"+color+";"), "class": ('badge') }, {"style":true}));
-buf.push('><i class="fa-calendar"></i></span><span>');
+buf.push('<span');
+buf.push(attrs({ 'style':("background-color:"+(visible?color:"transparent")+";"), "class": ('badge') }, {"style":true}));
+buf.push('>&nbsp;</span><span>');
 var __val__ = label
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span><span class="pull-right"><i');
-buf.push(attrs({ "class": (visible?"icon-eye-open":"icon-eye-close") }, {"class":true}));
-buf.push('></i></span></li>');
+buf.push('</span>');
 }
 return buf.join("");
 };

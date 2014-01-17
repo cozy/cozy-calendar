@@ -10240,21 +10240,31 @@ ul#menu {
   left: 0;
   top: 0;
   width: 200px;
+  padding: 0px;
   list-style-type: none;
   text-align: left;
   background: #f2f2f2;
 }
 ul#menu a {
   color: #333;
+  padding: 0px;
+  margin: 0px;
   font-family: styled;
   font-weight: normal;
   text-decoration: none;
 }
 ul#menu a:hover {
   text-decoration: none;
+  background-color: transparent;
 }
-ul#menu a.active li {
+ul#menu li.active {
   background: #aedbff;
+}
+ul#menu li.divider {
+  background-color: transparent;
+}
+ul#menu li.divider:hover {
+  background-color: transparent;
 }
 ul#menu li {
   display: block;
@@ -10268,105 +10278,18 @@ ul#menu li i {
   margin-right: 10px;
   margin-left: 10px;
 }
-ul#menu li .pull-right {
-  margin-right: 5px;
-}
 ul#menu li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
-ul#menu a.tagmenuitem li i {
+ul#menu ul#menuitems {
+  margin-left: 15px;
+}
+ul#menu li.tagmenuitem i {
   margin: 0px;
 }
-ul#menu a.tagmenuitem .badge {
+ul#menu li.tagmenuitem .badge {
   margin-right: 10px;
-}
-@media (max-width: 1000px) {
-  #alarms {
-    width: 100%;
-    margin: 0px;
-    padding: 5px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
-  #alarms .fc-header-title h2 {
-    font-size: 16px;
-  }
-  #view-container {
-    padding: 0;
-  }
-  #view-container .container:before,
-  #view-container .container:after {
-    display: block;
-  }
-  #input-time,
-  #input-timezone,
-  #action,
-  #date-control {
-    display: block;
-    margin-bottom: 10px;
-  }
-}
-@media (max-width: 700px) {
-  #alarms .fc-day-header {
-    font-size: 12px;
-    text-align: center;
-    padding-left: 5px;
-  }
-  #alarm-list h2 {
-    font-size: 22px;
-  }
-}
-@media (max-width: 600px) {
-  ul#menu {
-    height: 40px;
-    width: 100%;
-    float: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 0;
-  }
-  ul#menu li {
-    display: inline-block;
-  }
-  ul#menu span {
-    display: none;
-  }
-  ul#menu #import-menu-button {
-    display: none;
-  }
-  .main-container {
-    margin-left: 0;
-    margin-top: 40px;
-  }
-  #alarms .fc-day-header {
-    font-size: 10px;
-  }
-  #alarms .fc-button-today {
-    display: none;
-  }
-  #alarms td.fc-header-right span {
-    display: none;
-  }
-  #alarms .fc-event-title {
-    display: none;
-  }
-  #alarms .fc-border-separate {
-    width: 100%;
-  }
-}
-@media (max-width: 500px) {
-  #alarms .popover {
-    width: 310px;
-  }
-  #alarms .popover input {
-    width: 260px;
-  }
-  #alarms .popover button {
-    display: block;
-  }
 }
 @font-face {
   font-family: styled;
@@ -11246,6 +11169,115 @@ cursor not-allowed {
 #import-form .event p {
   margin: 0;
   sharefont-weight: 10px;
+}
+@media (max-width: 1000px) {
+  #alarms,
+  #alarm-list {
+    width: 100%;
+    margin: 0px;
+    padding: 5px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  #alarms .fc-header-title h2,
+  #alarm-list .fc-header-title h2 {
+    font-size: 16px;
+  }
+  #view-container {
+    padding: 0;
+  }
+  #view-container .container:before,
+  #view-container .container:after {
+    display: block;
+  }
+  #input-time,
+  #input-timezone,
+  #action,
+  #date-control {
+    display: block;
+    margin-bottom: 10px;
+  }
+}
+@media (max-width: 700px) {
+  #alarms .fc-day-header {
+    font-size: 12px;
+    text-align: center;
+    padding-left: 5px;
+  }
+  #alarm-list h2 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 600px) {
+  ul#menu {
+    height: 40px;
+    width: 100%;
+    float: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+  }
+  ul#menu li {
+    display: inline-block;
+  }
+  ul#menu #import-menu-button,
+  ul#menu span {
+    display: none;
+  }
+  ul#menu li.calendars {
+    float: right;
+  }
+  ul#menu ul#menuitems {
+    display: none;
+    position: absolute;
+    margin: 0px;
+    top: 40px;
+    right: 0px;
+    z-index: 1050;
+    background-color: inherit;
+  }
+  ul#menu ul#menuitems.visible {
+    display: block;
+  }
+  ul#menu ul#menuitems li {
+    display: list-item;
+    list-style-type: none;
+  }
+  ul#menu ul#menuitems span {
+    display: inline;
+  }
+  .main-container {
+    margin-left: 0;
+    margin-top: 40px;
+  }
+  #alarms .fc-day-header {
+    font-size: 10px;
+  }
+  #alarms .fc-button-today {
+    display: none;
+  }
+  #alarms td.fc-header-right span {
+    display: none;
+  }
+  #alarms .fc-event-title {
+    display: none;
+  }
+  #alarms .fc-border-separate {
+    width: 100%;
+  }
+}
+@media (max-width: 500px) {
+  #alarms .popover {
+    width: 310px;
+  }
+  #alarms .popover input {
+    width: 260px;
+  }
+  #alarms .popover button {
+    display: block;
+  }
 }
 
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
