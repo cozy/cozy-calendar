@@ -4,6 +4,7 @@ TagsView       = require 'views/tags'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
+colorhash      = require 'lib/colorhash'
 
 module.exports = class EventModal extends ViewCollection
 
@@ -54,8 +55,14 @@ module.exports = class EventModal extends ViewCollection
             model: @model
             el: @$('#basic-tags')
 
-        @$('#basic-calendar').autocomplete
-            source: app.tags.toArray()
+        @$('#basic-calendar').autocomplete(
+            delay: 50
+            source: app.tags.calendars()
+        ).data('ui-autocomplete')._renderItem = (ul, item) =>
+            badge = $('<span class="badge">').html('&nbsp;')
+            .css('backgroundColor', colorhash item.label)
+            a = $('<a>').text(item.label).prepend(badge)
+            $( "<li>" ).append(a).appendTo( ul );
 
         @$el.modal 'show'
         @$el.on 'hidden', =>

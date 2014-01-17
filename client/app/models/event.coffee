@@ -11,6 +11,7 @@ module.exports = class Event extends ScheduleItem
         description: ''
         title: ''
         place: ''
+        tags: ['my calendar']
 
     validate: (attrs, options) ->
 

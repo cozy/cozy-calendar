@@ -1,8 +1,9 @@
 .modal-header
     span= t('edit event')
     | &nbsp;
-    a(href="events/#{id}/#{exportdate}.ics")
-        i.fa.fa-download.fa-1
+    if typeof id != "undefined"
+        a(href="events/#{id}/#{exportdate}.ics")
+            i.fa.fa-download.fa-1
     button.close &times;
 .modal-body
     form.form-inline#basic

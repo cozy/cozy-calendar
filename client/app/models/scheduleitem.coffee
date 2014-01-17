@@ -8,6 +8,7 @@ module.exports = class ScheduleItem extends Backbone.Model
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
 
     initialize: ->
+        @set 'tags', ['my calendar'] unless @get('tags')?.length
         @startDateObject = Date.create @get @startDateField
         @on 'change:' + @startDateField, =>
             @previousDateObject = @startDateObject

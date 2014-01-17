@@ -1,5 +1,6 @@
 BaseView = require '../lib/base_view'
 RRuleFormView = require 'views/event_modal_rrule'
+EventModal = require 'views/event_modal'
 Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
@@ -13,6 +14,7 @@ module.exports = class PopOver extends BaseView
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
         'click .add'  : 'onAddClicked'
+        'click .advanced-link'  : 'onAdvancedClicked'
         'click .remove': 'onRemoveClicked'
         'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
@@ -154,6 +156,13 @@ module.exports = class PopOver extends BaseView
             target: @options.target
             start:  @options.start
             end:    @options.end
+
+    onAdvancedClicked: (event) =>
+        view = new EventModal(model: @model)
+        $('body').append view.$el
+        view.render()
+        event.preventDefault()
+        @selfclose()
 
     onKeyUp: (event) -> #
         if event.keyCode is 13 or event.which is 13

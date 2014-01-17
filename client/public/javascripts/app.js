@@ -93,8 +93,7 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var AlarmCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales,
-      _this = this;
+    var AlarmCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales;
 
     window.app = this;
     this.locale = window.locale;
@@ -117,20 +116,15 @@ module.exports = {
     EventCollection = require('collections/events');
     ContactCollection = require('collections/contacts');
     TagsCollection = require('collections/tags');
+    this.alarms = new AlarmCollection();
+    this.events = new EventCollection();
+    this.contacts = new ContactCollection();
     this.tags = new TagsCollection();
-    this.tags.fetch({
-      success: function() {
-        return Backbone.history.start();
-      }
-    });
     this.router = new Router();
     this.menu = new Menu({
       collection: this.tags
     });
     this.menu.render().$el.prependTo('body');
-    this.alarms = new AlarmCollection();
-    this.events = new EventCollection();
-    this.contacts = new ContactCollection();
     SocketListener.watch(this.alarms);
     SocketListener.watch(this.events);
     if (window.initalarms != null) {
@@ -145,6 +139,7 @@ module.exports = {
       this.contacts.reset(window.initcontacts);
       delete window.initcontacts;
     }
+    Backbone.history.start();
     if (typeof Object.freeze === 'function') {
       return Object.freeze(this);
     }
@@ -455,7 +450,8 @@ module.exports = ScheduleItemsCollection = (function(_super) {
 ;require.register("collections/tags", function(exports, require, module) {
 var Tags, _ref,
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 module.exports = Tags = (function(_super) {
   var Tag, stringify, _ref1;
@@ -469,29 +465,6 @@ module.exports = Tags = (function(_super) {
 
   Tags.prototype.url = 'tags';
 
-  Tags.prototype.parse = function(raw) {
-    var out, tag, _i, _j, _len, _len1, _ref1, _ref2;
-
-    out = [];
-    _ref1 = raw.calendars;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      tag = _ref1[_i];
-      out.push({
-        type: 'calendar',
-        label: tag
-      });
-    }
-    _ref2 = raw.tags;
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      tag = _ref2[_j];
-      out.push({
-        type: 'tag',
-        label: tag
-      });
-    }
-    return out;
-  };
-
   Tags.prototype.model = Tag = (function(_super1) {
     __extends(Tag, _super1);
 
@@ -499,6 +472,8 @@ module.exports = Tags = (function(_super) {
       _ref1 = Tag.__super__.constructor.apply(this, arguments);
       return _ref1;
     }
+
+    Tag.prototype.idAttribute = 'label';
 
     Tag.prototype.defaults = {
       visible: true
@@ -512,6 +487,82 @@ module.exports = Tags = (function(_super) {
 
   })(Backbone.Model);
 
+  Tags.prototype.initialize = function() {
+    this.alarmCollection = app.alarms;
+    this.eventCollection = app.events;
+    this.listenTo(this.alarmCollection, 'add', this.onBaseCollectionAdd);
+    this.listenTo(this.alarmCollection, 'change:tags', this.onBaseCollectionChange);
+    this.listenTo(this.alarmCollection, 'remove', this.onBaseCollectionRemove);
+    this.listenTo(this.alarmCollection, 'reset', this.resetFromBase);
+    this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
+    this.listenTo(this.eventCollection, 'change:tags', this.onBaseCollectionChange);
+    this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
+    this.listenTo(this.eventCollection, 'reset', this.resetFromBase);
+    return this.resetFromBase();
+  };
+
+  Tags.prototype.resetFromBase = function() {
+    var _this = this;
+
+    this.reset([]);
+    this.alarmCollection.each(function(model) {
+      return _this.onBaseCollectionAdd(model);
+    });
+    return this.eventCollection.each(function(model) {
+      return _this.onBaseCollectionAdd(model);
+    });
+  };
+
+  Tags.prototype.onBaseCollectionChange = function(model) {
+    return this.resetFromBase();
+  };
+
+  Tags.prototype.onBaseCollectionAdd = function(model) {
+    var calendar, tag, tags, _i, _len, _ref2, _results;
+
+    _ref2 = model.get('tags'), calendar = _ref2[0], tags = 2 <= _ref2.length ? __slice.call(_ref2, 1) : [];
+    this.add({
+      type: 'calendar',
+      label: calendar
+    });
+    _results = [];
+    for (_i = 0, _len = tags.length; _i < _len; _i++) {
+      tag = tags[_i];
+      _results.push(this.add({
+        type: 'tag',
+        label: tag
+      }));
+    }
+    return _results;
+  };
+
+  Tags.prototype.onBaseCollectionRemove = function(model) {
+    return this.resetFromBase();
+  };
+
+  Tags.prototype.parse = function(raw) {
+    var out, tag, _i, _j, _len, _len1, _ref2, _ref3;
+
+    out = [];
+    _ref2 = raw.calendars;
+    for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+      tag = _ref2[_i];
+      out.push({
+        type: 'calendar',
+        label: tag
+      });
+    }
+    _ref3 = raw.tags;
+    for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+      tag = _ref3[_j];
+      out.push({
+        type: 'tag',
+        label: tag
+      });
+    }
+    return out;
+  };
+
   stringify = function(tag) {
     return tag.toString();
   };
@@ -521,8 +572,10 @@ module.exports = Tags = (function(_super) {
   };
 
   Tags.prototype.calendars = function() {
-    return this.find({
+    return this.where({
       type: 'calendar'
+    }).map(function(tag) {
+      return tag.attributes;
     });
   };
 
@@ -746,18 +799,67 @@ module.exports = BaseView = (function(_super) {
 });
 
 ;require.register("lib/colorhash", function(exports, require, module) {
+var hslToRgb, hue2rgb,
+  _this = this;
+
+hue2rgb = function(p, q, t) {
+  if (t < 0) {
+    t += 1;
+  }
+  if (t > 1) {
+    t -= 1;
+  }
+  if (t < 1 / 6) {
+    return p + (q - p) * 6 * t;
+  }
+  if (t < 1 / 2) {
+    return q;
+  }
+  if (t < 2 / 3) {
+    return p + (q - p) * (2 / 3 - t) * 6;
+  }
+  return p;
+};
+
+hslToRgb = function(h, s, l) {
+  var b, g, p, q, r;
+
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  return "#" + ((1 << 24) + (r * 255 << 16) + (g * 255 << 8) + parseInt(b * 255)).toString(16).slice(1);
+};
+
 module.exports = function(tag) {
-  var colour, hash, i, _i, _j, _ref;
+  var colour, h, hash, i, l, s, _i, _ref;
 
   hash = 0;
   for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-    hash = tag.charCodeAt(i++) + ((hash << 5) - hash);
+    hash = tag.charCodeAt(i) + (hash << 5) - hash;
   }
-  colour = '#';
-  for (i = _j = 0; _j <= 2; i = ++_j) {
-    colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2);
-  }
+  h = (hash % 100) / 100;
+  s = (hash % 1000) / 1000;
+  console.log(h);
+  l = 0.5 + 0.2 * (hash % 2) / 2;
+  colour = hslToRgb(h, s, l);
   return colour;
+};
+
+module.exports.test = function() {
+  var i, random, _i, _results;
+
+  random = require('lib/random');
+  _results = [];
+  for (i = _i = 0; _i <= 200; i = ++_i) {
+    _results.push($('<span>').text('HELLO').css('background-color', module.exports(random.randomString())).appendTo($('body')));
+  }
+  return _results;
 };
 
 });
@@ -1326,7 +1428,8 @@ module.exports = Event = (function(_super) {
     return {
       description: '',
       title: '',
-      place: ''
+      place: '',
+      tags: ['my calendar']
     };
   };
 
@@ -1397,8 +1500,12 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
 
   ScheduleItem.prototype.initialize = function() {
-    var _this = this;
+    var _ref1,
+      _this = this;
 
+    if (!((_ref1 = this.get('tags')) != null ? _ref1.length : void 0)) {
+      this.set('tags', ['my calendar']);
+    }
     this.startDateObject = Date.create(this.get(this.startDateField));
     this.on('change:' + this.startDateField, function() {
       _this.previousDateObject = _this.startDateObject;
@@ -1806,7 +1913,7 @@ module.exports = CalendarHeader = (function(_super) {
 });
 
 ;require.register("views/calendar_popover", function(exports, require, module) {
-var Alarm, BaseView, Event, PopOver, RRuleFormView, Toggle, _ref,
+var Alarm, BaseView, Event, EventModal, PopOver, RRuleFormView, Toggle, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1814,6 +1921,8 @@ var Alarm, BaseView, Event, PopOver, RRuleFormView, Toggle, _ref,
 BaseView = require('../lib/base_view');
 
 RRuleFormView = require('views/event_modal_rrule');
+
+EventModal = require('views/event_modal');
 
 Toggle = require('views/toggle');
 
@@ -1828,7 +1937,8 @@ module.exports = PopOver = (function(_super) {
     this.handleError = __bind(this.handleError, this);
     this.onAddClicked = __bind(this.onAddClicked, this);
     this.onRemoveClicked = __bind(this.onRemoveClicked, this);
-    this.getModelAttributes = __bind(this.getModelAttributes, this);    _ref = PopOver.__super__.constructor.apply(this, arguments);
+    this.getModelAttributes = __bind(this.getModelAttributes, this);
+    this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);    _ref = PopOver.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
@@ -1839,6 +1949,7 @@ module.exports = PopOver = (function(_super) {
     'change select': 'onKeyUp',
     'change input': 'onKeyUp',
     'click .add': 'onAddClicked',
+    'click .advanced-link': 'onAdvancedClicked',
     'click .remove': 'onRemoveClicked',
     'click #toggle-type': 'onTabClicked',
     'click .close': 'selfclose'
@@ -2031,6 +2142,18 @@ module.exports = PopOver = (function(_super) {
       start: this.options.start,
       end: this.options.end
     });
+  };
+
+  PopOver.prototype.onAdvancedClicked = function(event) {
+    var view;
+
+    view = new EventModal({
+      model: this.model
+    });
+    $('body').append(view.$el);
+    view.render();
+    event.preventDefault();
+    return this.selfclose();
   };
 
   PopOver.prototype.onKeyUp = function(event) {
@@ -2555,7 +2678,7 @@ module.exports = CalendarView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var Event, EventModal, RRuleFormView, TagsView, ViewCollection, app, random, _ref,
+var Event, EventModal, RRuleFormView, TagsView, ViewCollection, app, colorhash, random, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2571,6 +2694,8 @@ Event = require('models/event');
 random = require('lib/random');
 
 app = require('application');
+
+colorhash = require('lib/colorhash');
 
 module.exports = EventModal = (function(_super) {
   __extends(EventModal, _super);
@@ -2651,8 +2776,15 @@ module.exports = EventModal = (function(_super) {
       el: this.$('#basic-tags')
     });
     this.$('#basic-calendar').autocomplete({
-      source: app.tags.toArray()
-    });
+      delay: 50,
+      source: app.tags.calendars()
+    }).data('ui-autocomplete')._renderItem = function(ul, item) {
+      var a, badge;
+
+      badge = $('<span class="badge">').html('&nbsp;').css('backgroundColor', colorhash(item.label));
+      a = $('<a>').text(item.label).prepend(badge);
+      return $("<li>").append(a).appendTo(ul);
+    };
     this.$el.modal('show');
     return this.$el.on('hidden', function() {
       window.app.router.navigate("calendar", {
@@ -3887,9 +4019,14 @@ var interp;
 buf.push('<div class="modal-header"><span>');
 var __val__ = t('edit event')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span>&nbsp;<a');
+buf.push('</span>&nbsp;');
+if ( typeof id != "undefined")
+{
+buf.push('<a');
 buf.push(attrs({ 'href':("events/" + (id) + "/" + (exportdate) + ".ics") }, {"href":true}));
-buf.push('><i class="fa fa-download fa-1"></i></a><button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span4"><label for="basic-calendar" class="control-label">');
+buf.push('><i class="fa fa-download fa-1"></i></a>');
+}
+buf.push('<button class="close">&times;</button></div><div class="modal-body"><form id="basic" class="form-inline"><div class="row-fluid"><div class="control-group span4"><label for="basic-calendar" class="control-label">');
 var __val__ = t('calendar')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</label><div class="controls"><input');
@@ -4316,17 +4453,12 @@ buf.push('</span></div><div class="line"><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><input');
 buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div class="popover-footer line">');
-if ( editionMode)
-{
-buf.push('<a');
+buf.push('/></div><div class="popover-footer line"><a');
 buf.push(attrs({ 'href':('#'+advancedUrl), "class": ('advanced-link') }, {"href":true}));
 buf.push('>');
 var __val__ = t('advanced')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a>');
-}
-buf.push('<span>&nbsp;</span><a class="btn add">');
+buf.push('</a><span>&nbsp;</span><a class="btn add">');
 var __val__ = editionMode ? t('Edit') : t('Create')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a></div>');
