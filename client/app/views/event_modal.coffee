@@ -1,8 +1,10 @@
 ViewCollection = require 'lib/view_collection'
-RRuleFormView = require 'views/event_modal_rrule'
+RRuleFormView  = require 'views/event_modal_rrule'
+TagsView       = require 'views/tags'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
+colorhash      = require 'lib/colorhash'
 
 module.exports = class EventModal extends ViewCollection
 
@@ -49,6 +51,19 @@ module.exports = class EventModal extends ViewCollection
         @rruleForm.render()
         @$('#rrule-container').append @rruleForm.$el
 
+        @tags = new TagsView
+            model: @model
+            el: @$('#basic-tags')
+
+        @$('#basic-calendar').autocomplete(
+            delay: 50
+            source: app.tags.calendars()
+        ).data('ui-autocomplete')._renderItem = (ul, item) =>
+            badge = $('<span class="badge">').html('&nbsp;')
+            .css('backgroundColor', colorhash item.label)
+            a = $('<a>').text(item.label).prepend(badge)
+            $( "<li>" ).append(a).appendTo( ul );
+
         @$el.modal 'show'
         @$el.on 'hidden', =>
             window.app.router.navigate "calendar",
@@ -88,6 +103,9 @@ module.exports = class EventModal extends ViewCollection
             end: @model.getEndDateObject().format @inputDateTimeFormat
             exportdate: @model.getStartDateObject().format @exportDateFormat
 
+        data.calendar = data.tags?[0] or ''
+        data.tags = data.tags?[1..] or []
+
         return data
 
 
@@ -96,6 +114,7 @@ module.exports = class EventModal extends ViewCollection
             details: @descriptionField.val()
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
+            tags: [@$('#basic-calendar').val()].concat @tags.getTags()
             start: Date.create(@startField.val(), 'fr')
                 .format Event.dateFormat, 'en'
             end: Date.create(@endField.val(), 'fr')

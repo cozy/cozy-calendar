@@ -8,6 +8,7 @@ ical   = require './ical'
 module.exports =
 
     '' : get : index.index
+    'tags': get : index.tags
 
     # Alarm management
     'alarms':

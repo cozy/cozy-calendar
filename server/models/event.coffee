@@ -11,6 +11,7 @@ module.exports = Event = americano.getModel 'Event',
     description : type : String # = ical SUMMARY
     diff        : type : Number
     rrule       : type : String
+    tags        : type : (x) -> x # DAMN IT JUGGLING
     attendees   : type : [Object]
     related: type: String, default: null
 
@@ -18,6 +19,15 @@ require('cozy-ical').decorateEvent Event
 
 Event.all = (params, callback) ->
     Event.request "all", params, callback
+
+Event.tags = (callback) ->
+    Event.rawRequest "tags", group: true, (err, results) ->
+        return callback err if err
+        out = calendar: [], tag: []
+        for result in results
+            [type, tag] = result.key
+            out[type].push tag
+        callback null, out
 
 # before sending to the client
 # set the start/end in TZ time

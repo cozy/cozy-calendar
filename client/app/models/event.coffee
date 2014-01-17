@@ -11,6 +11,7 @@ module.exports = class Event extends ScheduleItem
         description: ''
         title: ''
         place: ''
+        tags: ['my calendar']
 
     validate: (attrs, options) ->
 
@@ -39,4 +40,4 @@ module.exports = class Event extends ScheduleItem
         return errors if errors.length > 0
 
     #@TODO tags = color
-    getColor: -> '#008AF6'
+    getDefaultColor: -> '#008AF6'

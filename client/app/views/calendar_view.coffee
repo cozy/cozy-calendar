@@ -1,6 +1,7 @@
 app = require 'application'
 BaseView = require '../lib/base_view'
 Popover = require './calendar_popover'
+Header = require './calendar_header'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
 
@@ -27,15 +28,15 @@ module.exports = class CalendarView extends BaseView
         @listenTo @eventCollection, 'change', @refreshOne
         @model = null
 
+        @tagsCollection = app.tags
+        @listenTo @tagsCollection, 'change', @refresh
+
     afterRender: ->
         locale = Date.getLocale(app.locale) # thanks sugarjs
         @cal = @$('#alarms')
         @view = @options.view
         @cal.fullCalendar
-            header:
-                left: 'prev,next today'
-                center: 'title'
-                right: 'month,agendaWeek'
+            header: false
             editable: true
             firstDay: 1 # first day of the week is monday
             weekMode: 'liquid'
@@ -75,9 +76,18 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
 
+        source = @eventCollection.getFCEventSource @tagsCollection
+        @cal.fullCalendar 'addEventSource', source
 
-        @cal.fullCalendar 'addEventSource', @eventCollection.asFCEventSource
-        @cal.fullCalendar 'addEventSource', @alarmCollection.asFCEventSource
+        source = @alarmCollection.getFCEventSource @tagsCollection
+        @cal.fullCalendar 'addEventSource', source
+
+        @calHeader = new Header cal: @cal
+
+        @calHeader.on 'next', => @cal.fullCalendar 'next'
+        @calHeader.on 'prev', => @cal.fullCalendar 'prev'
+        @calHeader.on 'today', => @cal.fullCalendar 'today'
+        @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize() #
         debounced = _.debounce @handleWindowResize, 10
@@ -90,11 +100,11 @@ module.exports = class CalendarView extends BaseView
 
     handleWindowResize: (initial) =>
         if $(window).width() > 1000
-            targetHeight = $(window).height() - 40
-            $("#menu").height targetHeight + 40
+            targetHeight = $(window).height() - 90
+            $("#menu").height targetHeight + 90
         else if $(window).width() > 600
-            targetHeight = $(window).height() - 10
-            $("#menu").height targetHeight + 10
+            targetHeight = $(window).height() - 100
+            $("#menu").height targetHeight + 100
         else
             targetHeight = $(window).height() - 50
             $("#menu").height 40
@@ -137,11 +147,12 @@ module.exports = class CalendarView extends BaseView
         @popover.render()
 
     onChangeView: (view) =>
-        return if @view is view.name
-        switch @view = view.name
-            when 'month' then app.router.navigate 'calendar'
-            when 'agendaWeek' then app.router.navigate 'calendarweek'
-        @handleWindowResize()
+        @calHeader?.render()
+        if @view isnt view.name
+            switch @view = view.name
+                when 'month' then app.router.navigate 'calendar'
+                when 'agendaWeek' then app.router.navigate 'calendarweek'
+            @handleWindowResize()
 
     getUrlHash: =>
         switch @cal.fullCalendar('getView').name
@@ -167,6 +178,9 @@ module.exports = class CalendarView extends BaseView
             spinTarget.spin "tiny"
 
         $(element).attr 'title', event.title
+        if event.type is 'alarm'
+            icon = '<i class="icon-bell icon-white"></i>'
+            element.find('.fc-event-title').prepend icon
 
         return element
 

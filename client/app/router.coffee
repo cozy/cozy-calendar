@@ -26,6 +26,7 @@ module.exports = class Router extends Backbone.Router
         app.menu.activate 'calendar'
         @handleFetch app.alarms, 'alarms'
         @handleFetch app.events, 'events'
+        @onCalendar = true
 
     calendarweek: ->
         @calendar 'agendaWeek'
@@ -33,11 +34,13 @@ module.exports = class Router extends Backbone.Router
     list: ->
         @displayView new ListView
             collection: new DayBucketCollection()
-        app.menu.activate 'list'
+        app.menu.activate 'calendar'
+        @onCalendar = true
 
     sync: ->
         @displayView new SyncView
         app.menu.activate 'sync'
+        @onCalendar = false
 
     calendar_event: (id) ->
         @calendar() unless @mainView instanceof CalendarView
@@ -56,10 +59,12 @@ module.exports = class Router extends Backbone.Router
         view = new EventModal(model: model, backurl: backurl)
         $('body').append view.$el
         view.render()
+        @onCalendar = true
 
     import: ->
         @displayView new ImportView()
         app.menu.activate 'import'
+        @onCalendar = false
 
     handleFetch: (collection, name) ->
         unless app[name].length > 0

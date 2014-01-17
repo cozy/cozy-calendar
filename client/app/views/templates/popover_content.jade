@@ -1,8 +1,3 @@
-if !editionMode
-    ul.nav.nav-tabs
-        li(class= type=='event'?'active':''): a.event= t('event')
-        li(class= type=='alarm'?'active':''): a.alarm= t('alarm')
-
 if type == 'alarm'
 
     .line
@@ -11,7 +6,7 @@ if type == 'alarm'
             each tz in timezones
                 option(value=tz, selected=(timezone == tz))= tz
     .line
-        input#input-desc.input-xlarge(type="text", value=description
+        input#input-desc.input-xlarge.w100(type="text", value=description
             placeholder=t("alarm description placeholder"))
 
     .line
@@ -41,7 +36,6 @@ else if type = 'event'
             placeholder=t("Place"))
 
     .popover-footer.line
-        if editionMode
-            a.advanced-link(href='#'+advancedUrl)= t('advanced')
+        a.advanced-link(href='#'+advancedUrl)= t('advanced')
         span &nbsp;
         a.btn.add= editionMode ? t('Edit') : t('Create')

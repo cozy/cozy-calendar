@@ -15,6 +15,9 @@ module.exports = {
   '': {
     get: index.index
   },
+  'tags': {
+    get: index.tags
+  },
   'alarms': {
     get: alarms.all,
     post: alarms.create

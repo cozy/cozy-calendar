@@ -1,5 +1,6 @@
 BaseView = require '../lib/base_view'
 RRuleFormView = require 'views/event_modal_rrule'
+EventModal = require 'views/event_modal'
 Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
@@ -13,10 +14,10 @@ module.exports = class PopOver extends BaseView
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
         'click .add'  : 'onAddClicked'
+        'click .advanced-link'  : 'onAdvancedClicked'
         'click .remove': 'onRemoveClicked'
+        'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
-        'click .event': 'onTabClicked'
-        'click .alarm': 'onTabClicked'
 
     initialize: (options) ->
         if options.type
@@ -43,7 +44,7 @@ module.exports = class PopOver extends BaseView
         @target.popover(
             selector: true
             trigger: 'manual'
-            title: require('./templates/popover_title')(title: @getTitle())
+            title: require('./templates/popover_title') @getRenderData()
             html: true
             placement: @getDirection()
             content: @template @getRenderData()
@@ -91,7 +92,7 @@ module.exports = class PopOver extends BaseView
 
 
     getTitle: ->
-        title = if @model.isNew() then 'creation'
+        title = if @model.isNew() then @type + ' creation'
         else 'edit ' + @type
         t(title)
 
@@ -110,6 +111,7 @@ module.exports = class PopOver extends BaseView
     getRenderData: ->
         data = _.extend type: @type,
             @model.attributes,
+            title: @getTitle()
             editionMode: not @model.isNew()
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
@@ -149,13 +151,18 @@ module.exports = class PopOver extends BaseView
             else throw new Error 'wrong type'
 
     onTabClicked: (event) ->
-        type = event.target.className
-        return false if type is @type
         @parentView.showPopover
-            type: type
+            type: if @type is 'event' then 'alarm' else 'event'
             target: @options.target
             start:  @options.start
             end:    @options.end
+
+    onAdvancedClicked: (event) =>
+        view = new EventModal(model: @model)
+        $('body').append view.$el
+        view.render()
+        event.preventDefault()
+        @selfclose()
 
     onKeyUp: (event) -> #
         if event.keyCode is 13 or event.which is 13

@@ -33,4 +33,4 @@ module.exports = class Alarm extends ScheduleItem
         if errors.length > 0
             return errors
 
-    getColor: -> '#00C67A'
+    getDefaultColor: -> '#00C67A'

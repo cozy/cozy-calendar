@@ -27,6 +27,11 @@ module.exports = Alarm = americano.getModel('Alarm', {
   rrule: {
     type: String
   },
+  tags: {
+    type: function(x) {
+      return x;
+    }
+  },
   related: {
     type: String,
     "default": null
@@ -37,6 +42,27 @@ require('cozy-ical').decorateAlarm(Alarm);
 
 Alarm.all = function(params, callback) {
   return Alarm.request("all", params, callback);
+};
+
+Alarm.tags = function(callback) {
+  return Alarm.rawRequest("tags", {
+    group: true
+  }, function(err, results) {
+    var out, result, tag, type, _i, _len, _ref;
+    if (err) {
+      return callback(err);
+    }
+    out = {
+      calendar: [],
+      tag: []
+    };
+    for (_i = 0, _len = results.length; _i < _len; _i++) {
+      result = results[_i];
+      _ref = result.key, type = _ref[0], tag = _ref[1];
+      out[type].push(tag);
+    }
+    return callback(null, out);
+  });
 };
 
 Alarm.prototype.timezoned = function(timezone) {

@@ -1,3 +1,5 @@
+colorHash = require 'lib/colorhash'
+
 module.exports = class ScheduleItem extends Backbone.Model
 
     fcEventType: 'unknown'
@@ -6,6 +8,7 @@ module.exports = class ScheduleItem extends Backbone.Model
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
 
     initialize: ->
+        @set 'tags', ['my calendar'] unless @get('tags')?.length
         @startDateObject = Date.create @get @startDateField
         @on 'change:' + @startDateField, =>
             @previousDateObject = @startDateObject
@@ -23,7 +26,13 @@ module.exports = class ScheduleItem extends Backbone.Model
             @endDateObject = @startDateObject.clone()
             @endDateObject.advance minutes: 30
 
-    getColor: -> 'grey'
+    getCalendar: -> @get('tags')?[0]
+
+    getDefaultColor: -> 'grey'
+    getColor: ->
+        tag = @getCalendar()
+        return @getDefaultColor() if not tag
+        return colorHash tag
 
     getDateObject: -> @startDateObject
     getStartDateObject: -> @getDateObject()

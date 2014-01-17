@@ -1,3 +1,7 @@
 span #{title}&nbsp;
-    i.remove.icon-trash 
+    i.remove.icon-trash
+
+if !editionMode
+    a#toggle-type= t('change to') + " " + t(type=='event'?'alarm':'event')
+
 button.close &times;
