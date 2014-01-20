@@ -794,16 +794,20 @@ window.require.register("lib/colorhash", function(exports, require, module) {
 
   module.exports = function(tag) {
     var colour, h, hash, i, l, s, _i, _ref;
-    hash = 0;
-    for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-      hash = tag.charCodeAt(i) + (hash << 5) - hash;
+    if (tag !== "my calendar") {
+      hash = 0;
+      for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        hash = tag.charCodeAt(i) + (hash << 5) - hash;
+      }
+      h = (hash % 100) / 100;
+      s = (hash % 1000) / 1000;
+      console.log(h);
+      l = 0.5 + 0.2 * (hash % 2) / 2;
+      colour = hslToRgb(h, s, l);
+      return colour;
+    } else {
+      return '#008AF6';
     }
-    h = (hash % 100) / 100;
-    s = (hash % 1000) / 1000;
-    console.log(h);
-    l = 0.5 + 0.2 * (hash % 2) / 2;
-    colour = hslToRgb(h, s, l);
-    return colour;
   };
 
   module.exports.test = function() {

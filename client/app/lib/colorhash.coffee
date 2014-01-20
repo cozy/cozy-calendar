@@ -18,17 +18,19 @@ hslToRgb = (h, s, l) =>
     return "#" + ((1 << 24) + (r*255 << 16) + (g*255 << 8) + parseInt(b*255)).toString(16).slice(1)
 
 module.exports = (tag) ->
+    if tag isnt "my calendar"
+        hash = 0
+        for i in [0..tag.length-1]
+            hash = (tag.charCodeAt(i) + (hash << 5) - hash)
 
-    hash = 0
-    for i in [0..tag.length-1]
-        hash = (tag.charCodeAt(i) + (hash << 5) - hash)
-
-    h = (hash% 100)/100
-    s = (hash% 1000)/1000
-    console.log h
-    l = 0.5 + 0.2*(hash% 2)/ 2
-    colour = hslToRgb h, s, l
-    return colour
+        h = (hash% 100)/100
+        s = (hash% 1000)/1000
+        console.log h
+        l = 0.5 + 0.2*(hash% 2)/ 2
+        colour = hslToRgb h, s, l
+        return colour
+    else
+        return '#008AF6'
 
 module.exports.test = ->
     random = require 'lib/random'

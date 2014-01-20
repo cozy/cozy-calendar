@@ -10275,13 +10275,15 @@ ul#menu li:hover {
   text-decoration: none;
 }
 ul#menu ul#menuitems {
-  margin-left: 15px;
+  margin-left: 8px;
 }
 ul#menu li.tagmenuitem i {
   margin: 0px;
 }
 ul#menu li.tagmenuitem .badge {
   margin-right: 10px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 @font-face {
   font-family: styled;
