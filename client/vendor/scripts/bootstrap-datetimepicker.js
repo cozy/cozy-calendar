@@ -22,6 +22,7 @@
 
 /*
  * Improvement by CuGBabyBeaR @ 2013-09-12
+ * Customized by Cozy (CtrlF "cozy")
  *
  * Make it work in bootstrap v3
  */
@@ -290,6 +291,8 @@
 				type: 'show',
 				date: this.date
 			});
+			if(!this.refocus) this.dateBeforeEdit = new Date(this.date); // keep ref to current date cozy
+			this.refocus = false
 		},
 
 		hide: function (e) {
@@ -960,6 +963,9 @@
 						break;
 				}
 			}
+			// cozy - keep focus on input so key events get captured
+			this.refocus = true;
+			(this.isInput ? this.element : this.element.find('input')).focus();
 		},
 
 		_setDate: function (date, which) {
@@ -1068,7 +1074,7 @@
 		keydown: function (e) {
 			if (this.picker.is(':not(:visible)')) {
 				if (e.keyCode == 27) // allow escape to hide and re-show picker
-					this.show();
+					// this.show(); - disable escape reshow - cozy
 				return;
 			}
 			var dateChanged = false,
@@ -1077,6 +1083,9 @@
 			switch (e.keyCode) {
 				case 27: // escape
 					this.hide();
+					// restore date before widget
+					(this.isInput ? this.element : this.element.find('input')).blur()
+					if(this.dateBeforeEdit) this._setDate(this.dateBeforeEdit);
 					e.preventDefault();
 					break;
 				case 37: // left

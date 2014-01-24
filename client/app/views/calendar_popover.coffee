@@ -60,7 +60,21 @@ module.exports = class PopOver extends BaseView
             template: false
             minuteStep: 5
             showMeridian: false
+            onNext: @onTimePickerNext
+            onPrev: @onTimePickerPrev
         @$('.focused').focus()
+
+        inputEnd = @$('#input-end')
+        inputStart = @$('#input-start')
+        inputDiff = @$('#input-diff')
+        inputStart.on 'timepicker.next', => inputEnd.focus()
+        inputEnd.on 'timepicker.next', => inputDiff.focus()
+        inputEnd.on 'timepicker.prev', => inputStart.focus().timepicker 'highlightMinute'
+        inputDiff.on 'keydown', (ev) =>
+            if ev.keyCode is 37 # left
+                inputEnd.focus().timepicker 'highlightMinute'
+            if ev.keyCode is 39 # right
+                @$('#input-desc').focus()
 
         if @type is 'alarm'
             tzInput = @$('#input-timezone')

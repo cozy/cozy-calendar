@@ -8,16 +8,19 @@
 .modal-body
     form.form-inline#basic
         .row-fluid
-            .control-group.span4
-                label.control-label(for="basic-calendar")= t('calendar')
-                .controls: input.span12#basic-calendar(value=calendar)
-            .control-group.span8(style="display:none;")
-                label.control-label(for="basic-tags")= t('tags')
-                .controls: input.span12#basic-tags.tagit(value=tags.join(','))
-        .row-fluid
-            .control-group.span8
+            .control-group.span12
                 label.control-label(for="basic-summary")= t('summary')
                 .controls: input.span12#basic-summary(type="text", value=summary)
+        .row-fluid
+            .control-group.span6.date
+                label.control-label(for="basic-start")= t('start')
+                br
+                input.span12#basic-start(type="datetime-local", value=start)
+
+            .control-group.span6.date
+                label.control-label(for="basic-end")= t('end')
+                br
+                input.span12#basic-end(type="datetime-local", value=end)
 
         .row-fluid
             .control-group.span12
@@ -25,19 +28,12 @@
                 .controls: input.span12#basic-place(type="text", value=place)
 
         .row-fluid
-            .control-group.span6
-                label.control-label(for="basic-start")= t('start')
-                .controls.input-append.date
-                    input#basic-start(type="datetime-local", value=start)
-                    span.add-on
-                        i.icon.icon-calendar
-
-            .control-group.span6
-                label.control-label(for="basic-end")= t('end')
-                .controls.input-append.date
-                    input#basic-end(type="datetime-local", value=end)
-                    span.add-on
-                        i.icon.icon-calendar
+            .control-group.span12
+                label.control-label(for="basic-calendar")= t('calendar')
+                .controls: input#basic-calendar(value=calendar)
+            .control-group.span8(style="display:none;")
+                label.control-label(for="basic-tags")= t('tags')
+                .controls: input.span12#basic-tags.tagit(value=tags.join(','))
         .row-fluid
             .control-group.span12
                 label.control-label(for="basic-description")= t('description')

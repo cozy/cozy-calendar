@@ -26,7 +26,7 @@ else if type = 'event'
             placeholder=t("To hours:minutes+days"))
         span.timeseparator &nbsp;+
         input#input-diff.col-xs2.input-mini(type="number", value=diff,
-            placeholder=0)
+            placeholder=0, min=0)
         span.timeseparator= '&nbsp;' + t('days')
 
     .line
