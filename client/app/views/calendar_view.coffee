@@ -42,6 +42,9 @@ module.exports = class CalendarView extends BaseView
             weekMode: 'liquid'
             height: @handleWindowResize('initial') # initial ratio
             defaultView: @view
+            year: @options.year
+            month: @options.month
+            date: @options.date
             viewDisplay: @onChangeView # beware, deprected in next FC
 
             #i18n by SugarJs
@@ -87,6 +90,9 @@ module.exports = class CalendarView extends BaseView
         @calHeader.on 'next', => @cal.fullCalendar 'next'
         @calHeader.on 'prev', => @cal.fullCalendar 'prev'
         @calHeader.on 'today', => @cal.fullCalendar 'today'
+        @calHeader.on 'week', => @cal.fullCalendar 'changeView', 'agendaWeek'
+        @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
+        @calHeader.on 'list', => app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize() #
@@ -149,10 +155,21 @@ module.exports = class CalendarView extends BaseView
     onChangeView: (view) =>
         @calHeader?.render()
         if @view isnt view.name
-            switch @view = view.name
-                when 'month' then app.router.navigate 'calendar'
-                when 'agendaWeek' then app.router.navigate 'calendarweek'
             @handleWindowResize()
+
+        @view = view.name
+
+        start = view.start
+        hash = if @view is 'month'
+            "month/#{start.getFullYear()}/#{start.getMonth()+1}"
+        else
+            year = start.getFullYear()
+            month = start.getMonth()+1
+            date = start.getDate()
+            "week/#{year}/#{month}/#{date}"
+
+        app.router.navigate hash
+
 
     getUrlHash: =>
         switch @cal.fullCalendar('getView').name

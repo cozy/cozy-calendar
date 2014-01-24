@@ -20,16 +20,17 @@ module.exports = class EventModal extends ViewCollection
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'
 
-    initialize: ->
+    initialize: (options) ->
         guests = @model.get('attendees') or []
         @collection = new Backbone.Collection guests
+        @backurl = options.backurl
         super
 
     events: ->
         'click  #confirm-btn': 'save'
         'click  #cancel-btn': 'close'
         'click  .close': 'close'
-        'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
+        'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
 

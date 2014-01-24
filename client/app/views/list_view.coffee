@@ -16,6 +16,8 @@ module.exports = class ListView extends ViewCollection
     afterRender: ->
         @calHeader = new Header()
         @$('#alarm-list').prepend @calHeader.render().$el
+        @calHeader.on 'month', => app.router.navigate '', trigger:true
+        @calHeader.on 'week', => app.router.navigate 'week', trigger:true
         super
 
     appendView: (view) ->

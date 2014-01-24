@@ -158,15 +158,22 @@ module.exports = class PopOver extends BaseView
             end:    @options.end
 
     onAdvancedClicked: (event) =>
-        view = new EventModal(model: @model)
-        $('body').append view.$el
-        view.render()
+        if @model.isNew()
+            modal = new EventModal
+                model: @model
+                backurl: window.location.hash
+            $('body').append modal.$el
+            modal.render()
+        else
+            window.location.hash += "/#{@model.id}"
         event.preventDefault()
         @selfclose()
 
     onKeyUp: (event) -> #
-        if event.keyCode is 13 or event.which is 13
+        if event.keyCode is 13 or event.which is 13 #ENTER
             @addButton.click()
+        else if event.keyCode is 27 # ESC
+            @selfclose()
         else
             @addButton.removeClass 'disabled'
 

@@ -9,27 +9,33 @@ DayBucketCollection = require 'collections/daybuckets'
 module.exports = class Router extends Backbone.Router
 
     routes:
-        ''                     : -> @navigate 'calendar', true
-        'calendar'             : 'calendar'
-        'calendarweek'         : 'calendarweek'
-        'list'                 : 'list'
-        'sync'                 : 'sync'
-        'calendar/:eventid'    : 'calendar_event'
-        'calendarweek/:eventid': 'calendarweek_event'
-        'list/:eventid'        : 'list_event'
-        'import'               : 'import'
+        ''                                : 'month'
+        'month'                           : 'month'
+        'month/:year/:month'              : 'month'
+        'week'                            : 'week'
+        'week/:year/:month/:day'          : 'week'
+        'list'                            : 'list'
+        'event/:eventid'                  : 'auto_event'
+        'month/:year/:month/:eventid'     : 'month_event'
+        'week/:year/:month/:day/:eventid' : 'week_event'
+        'list/:eventid'                   : 'list_event'
+        'sync'                            : 'sync'
+        'calendar'                        : 'backToCalendar'
 
-    calendar: (fcView = 'month') ->
-        @displayView new CalendarView
-            view: fcView
-            model: {alarms:app.alarms, events:app.events}
-        app.menu.activate 'calendar'
-        @handleFetch app.alarms, 'alarms'
-        @handleFetch app.events, 'events'
-        @onCalendar = true
+    month: (year, month) ->
+        if year?
+            @displayCalendar 'month', year, month, 1
+        else
+            hash = new Date().format('month/{yyyy}/{M}')
+            @navigate hash, trigger: true
 
-    calendarweek: ->
-        @calendar 'agendaWeek'
+    week: (year, month, day) ->
+        if year?
+            [year, month, day] = getBeginningOfWeek year, month, day
+            @displayCalendar 'agendaWeek', year, month, day
+        else
+            hash = new Date().format('week/{yyyy}/{M}/{d}')
+            @navigate hash, trigger: true
 
     list: ->
         @displayView new ListView
@@ -42,40 +48,49 @@ module.exports = class Router extends Backbone.Router
         app.menu.activate 'sync'
         @onCalendar = false
 
-    calendar_event: (id) ->
-        @calendar() unless @mainView instanceof CalendarView
-        @event id, 'calendar'
+    auto_event: (id) ->
+        model = app.events.get(id)
+        unless model
+            alert 'This event does not exists'
+            @navigate ''
+        date = model.getDateObject()
+        @month_event date.getFullYear(), date.getMonth(), id
 
-    calendarweek_event: (id) ->
-        @calendarweek() unless @mainView instanceof CalendarView
-        @event id, 'calendarweek'
+    month_event: (year, month, id) ->
+        @month(year, month) unless @mainView instanceof CalendarView
+        @event id, "month/#{year}/#{month}"
+
+    week_event: (year, month, date, id) ->
+        [year, month, day] = getBeginningOfWeek year, month, day
+        @week(year, month, date) unless @mainView instanceof CalendarView
+        @event id, "week/#{year}/#{month}/#{date}"
 
     list_event: (id) ->
         @list() unless @mainView instanceof ListView
         @event id, 'list'
 
     event: (id, backurl) ->
-        model = app.events.get(id) or new Event(id: id).fetch()
+        model = app.events.get(id)
         view = new EventModal(model: model, backurl: backurl)
         $('body').append view.$el
         view.render()
         @onCalendar = true
 
-    import: ->
-        @displayView new ImportView()
-        app.menu.activate 'import'
-        @onCalendar = false
+    backToCalendar: =>
+        #@TODO, go back to same view we left
+        @navigate '', true
 
-    handleFetch: (collection, name) ->
-        unless app[name].length > 0
-            collection.fetch
-                success: (collection, response, options) ->
-                    # console.log collection
-                    # console.log "Fetch: success"
-                error: ->
-                    # console.log "Fetch: error"
-        else
-            collection.reset app[name].toJSON()
+    displayCalendar: (view, year, month, day) =>
+        @lastDisplayCall = Array.apply arguments
+        @displayView new CalendarView
+            year: parseInt(year)
+            month: (parseInt(month) + 11)%12
+            date: parseInt(day)
+            view: view
+            model: {alarms:app.alarms, events:app.events}
+
+        app.menu.activate 'calendar'
+        @onCalendar = true
 
     # display a page properly (remove previous page)
     displayView: (view) =>
@@ -83,3 +98,9 @@ module.exports = class Router extends Backbone.Router
         @mainView = view
         $('.main-container').append @mainView.$el
         @mainView.render()
+
+    getBeginningOfWeek = (year, month, day) =>
+        [year, month, day] = [year, month, day].map (x) -> parseInt x
+        monday = new Date(year, (month-1)%12, day)
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
+        [year, monday.getMonth()+1, monday.getDate()]

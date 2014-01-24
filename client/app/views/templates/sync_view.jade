@@ -1,8 +1,22 @@
 .helptext
-    h2 Calendar Synchronization
+    h2 Synchronization
+
 .helptext
+    h3 Mobile sync (Caldav)
     | To synchronize your calendar with your devices, you must follow two
     | steps:
-    ul
-        li 1. Install the webdav module from the Cozy App Store
-        li 2. Connect to it and follow the instructions related to CalDAV.
+    ol
+        li Install the webdav module from the Cozy App Store
+        li Connect to it and follow the instructions related to CalDAV.
+
+.helptext
+    h3 ICalendar Export
+    | To download a copy of your calendar on your computer as an ICal file, click
+    | on this button : &nbsp;
+    a.btn(href="export/calendar.ics") Export your calendar
+
+.helptext
+    h3= t('ICalendar Import')
+    | To import an ICal file into your cozy calendar, click on this button :
+    #importviewplaceholder
+
