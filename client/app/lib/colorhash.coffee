@@ -25,16 +25,8 @@ module.exports = (tag) ->
 
         h = (hash% 100)/100
         s = (hash% 1000)/1000
-        console.log h
         l = 0.5 + 0.2*(hash% 2)/ 2
         colour = hslToRgb h, s, l
         return colour
     else
         return '#008AF6'
-
-module.exports.test = ->
-    random = require 'lib/random'
-    for i in [0..200]
-        $('<span>').text('HELLO')
-        .css('background-color', module.exports random.randomString())
-        .appendTo $('body')
