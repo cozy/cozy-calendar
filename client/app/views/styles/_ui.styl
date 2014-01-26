@@ -1,8 +1,26 @@
 .ui-menu
     z-index 1200
 
+
+.combobox-badge
+    padding 0px 4px
+    margin-right 5px
 #event-modal
     padding: 0
+
+    .combobox
+        padding-left 20px
+        margin-left -11px
+    .combobox-caret
+        padding 4px
+        position relative
+        left -20px
+        .caret
+            margin-top 8px
+    .combobox-badge
+        margin-right 0px
+        position relative
+        left 3px
 
     .btn
         border-radius 5px
@@ -115,14 +133,22 @@
         border-radius: 0px
         padding: 5px
 
+    label
+        color #666
+
+    input
+    select
     textarea
-    textarea:focus
         font-family: styled
         box-shadow: none
-        border: 1px solid blue
+        border: 1px solid #CCC
+        color #111
 
-    textarea:hover
-        border: 1px solid orange
+        &:focus
+            border: 1px solid blue
+
+        &:hover
+            border: 1px solid orange
 
     #addguest.btn
         border-radius: 0px

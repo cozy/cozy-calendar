@@ -60,7 +60,21 @@ module.exports = class PopOver extends BaseView
             template: false
             minuteStep: 5
             showMeridian: false
+            onNext: @onTimePickerNext
+            onPrev: @onTimePickerPrev
         @$('.focused').focus()
+
+        inputEnd = @$('#input-end')
+        inputStart = @$('#input-start')
+        inputDiff = @$('#input-diff')
+        inputStart.on 'timepicker.next', => inputEnd.focus()
+        inputEnd.on 'timepicker.next', => inputDiff.focus()
+        inputEnd.on 'timepicker.prev', => inputStart.focus().timepicker 'highlightMinute'
+        inputDiff.on 'keydown', (ev) =>
+            if ev.keyCode is 37 # left
+                inputEnd.focus().timepicker 'highlightMinute'
+            if ev.keyCode is 39 # right
+                @$('#input-desc').focus()
 
         if @type is 'alarm'
             tzInput = @$('#input-timezone')
@@ -158,15 +172,22 @@ module.exports = class PopOver extends BaseView
             end:    @options.end
 
     onAdvancedClicked: (event) =>
-        view = new EventModal(model: @model)
-        $('body').append view.$el
-        view.render()
+        if @model.isNew()
+            modal = new EventModal
+                model: @model
+                backurl: window.location.hash
+            $('body').append modal.$el
+            modal.render()
+        else
+            window.location.hash += "/#{@model.id}"
         event.preventDefault()
         @selfclose()
 
     onKeyUp: (event) -> #
-        if event.keyCode is 13 or event.which is 13
+        if event.keyCode is 13 or event.which is 13 #ENTER
             @addButton.click()
+        else if event.keyCode is 27 # ESC
+            @selfclose()
         else
             @addButton.removeClass 'disabled'
 

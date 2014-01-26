@@ -1,10 +1,10 @@
 ViewCollection = require 'lib/view_collection'
 RRuleFormView  = require 'views/event_modal_rrule'
 TagsView       = require 'views/tags'
+ComboBox       = require 'views/widgets/combobox'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
-colorhash      = require 'lib/colorhash'
 
 module.exports = class EventModal extends ViewCollection
 
@@ -12,6 +12,8 @@ module.exports = class EventModal extends ViewCollection
 
     id: 'event-modal'
     className: 'modal fade'
+    attributes:
+        'data-keyboard': 'false'
 
     inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
@@ -20,16 +22,17 @@ module.exports = class EventModal extends ViewCollection
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'
 
-    initialize: ->
+    initialize: (options) ->
         guests = @model.get('attendees') or []
         @collection = new Backbone.Collection guests
+        @backurl = options.backurl
         super
 
     events: ->
         'click  #confirm-btn': 'save'
         'click  #cancel-btn': 'close'
         'click  .close': 'close'
-        'click #addguest': => @onGuestAdded(@$('#addguest-field').val())
+        'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
 
@@ -37,13 +40,17 @@ module.exports = class EventModal extends ViewCollection
         super
         @addGuestField = @configureGuestTypeahead()
         @startField = @$('#basic-start').attr('type', 'text')
-        @startField.parent().datetimepicker
+        @startField.datetimepicker
+                autoclose: true
                 format: 'dd/mm/yyyy hh:ii'
                 pickerPosition: 'bottom-left'
+                viewSelect: 4
         @endField = @$('#basic-end').attr('type', 'text')
-        @endField.parent().datetimepicker
+        @endField.datetimepicker
+                autoclose: true
                 format: 'dd/mm/yyyy hh:ii'
                 pickerPosition: 'bottom-left'
+                viewSelect: 4
 
         @descriptionField = @$('#basic-description')
 
@@ -55,21 +62,25 @@ module.exports = class EventModal extends ViewCollection
             model: @model
             el: @$('#basic-tags')
 
-        @$('#basic-calendar').autocomplete(
-            delay: 50
+        @calendar = new ComboBox
+            el: @$('#basic-calendar')
             source: app.tags.calendars()
-        ).data('ui-autocomplete')._renderItem = (ul, item) =>
-            badge = $('<span class="badge">').html('&nbsp;')
-            .css('backgroundColor', colorhash item.label)
-            a = $('<a>').text(item.label).prepend(badge)
-            $( "<li>" ).append(a).appendTo( ul );
 
         @$el.modal 'show'
+        $(document).on 'keydown', @hideOnEscape
         @$el.on 'hidden', =>
-            window.app.router.navigate "calendar",
+            $(document).off('keydown', @hideOnEscape)
+            window.app.router.navigate @backurl or '',
                 trigger: false,
                 replace: true
             @remove()
+
+        @$('#basic-summary').focus()
+
+    hideOnEscape: (e) =>
+        # escape from outside a datetimepicker
+        @close() if e.which is 27 and not e.isDefaultPrevented()
+
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'
@@ -184,3 +195,10 @@ module.exports = class EventModal extends ViewCollection
 
     close: =>
         @$el.modal 'hide'
+
+    remove: =>
+        @tags.remove()
+        @calendar.remove()
+        @startField.data('datetimepicker').remove()
+        @endField.data('datetimepicker').remove()
+        super

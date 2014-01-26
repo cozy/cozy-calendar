@@ -1,2 +1,7 @@
-span.badge(style="background-color:"+(visible?color:"transparent")+";") &nbsp;
+- back = visible?color:"transparent"
+- border = visible?"transparent":color
+span.badge(
+    style="background-color:" + back + "; border: 1px solid "+border+";"
+    class=)
+    | &nbsp;
 span=label

@@ -7,6 +7,9 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ *
+ * + Some edits by cozy (CtrlF "cozy")
+ *
  */
 (function($, window, document, undefined) {
   'use strict';
@@ -397,7 +400,7 @@
         } else if (this.showMeridian){
           this.highlightMeridian();
         } else {
-          // this.highlightHour();
+          this.$element.trigger('timepicker.next'); // cozy-change
         }
         break;
       case 'second':
@@ -416,8 +419,7 @@
     highlightPrevUnit: function() {
       switch (this.highlightedUnit) {
       case 'hour':
-        //console.log(this.previousSibling.previousSibling.tagName);
-        //this.highlightMeridian();
+        this.$element.trigger('timepicker.prev'); // cozy-change
         break;
       case 'minute':
         this.highlightHour();
