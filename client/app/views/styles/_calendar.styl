@@ -14,28 +14,79 @@
         margin-bottom: 10px
         vertical-align: middle
 
-    #input-place
-        min-width: 120px
-
     .popover-title
         font-weight bold
 
         button
             margin-top: -4px
 
-        #toggle-type, i.remove
-            cursor: pointer
         a
             font-weight normal
             font-size 0.8em
+            cursor pointer
+
+        .remove
+            float: right
+            margin-right: 20px
+            margin-top: -2px
+            display: inline-block
+
+        #calendarcombo
+            transition 0s
+            display inline-block
+            border-color transparent
+            width 1px
+            height 1em
+            overflow hidden
+        #calendarcombo.expanded
+            transition 0.1s
+            width 132px
+            border-width 1px
+
 
     .popover-content
+        font-family: styled
+        padding: 0
+
+        a.advanced-link
+            margin-left 10px
+
+        .popover-footer
+            text-align: right
+            background: #F5F5F5
+            padding: 5px
+            border-bottom-left-radius: 5px
+            border-bottom-right-radius: 5px
+
+        .nav-tabs
+            li
+                a
+                    font-size: 16px
+                    cursor: pointer
+                a:hover
+                    background: lightorange
+                    color: #333
+            li.active
+                a:hover
+                    background: white
+                    color: #333
 
         #input-start, #input-end, #input-time
             width: 3em
 
         #input-diff
             width: 35px
+
+        #input-place
+            min-width: 120px
+
+        #showmap
+            position: relative
+            display: inline-block
+            top: -5px
+            left: -20px
+            padding: 0px 1px 1px 0px
+            border-radius: 10px
 
         .badge
             margin-bottom: 10px
@@ -49,6 +100,12 @@
 
             &:hover
                 background: orange
+
+        #toggle-type, i.remove
+            cursor: pointer
+            margin 5px 0px 0px 5px
+
+
 
         button
             margin-left: 5px
@@ -67,6 +124,24 @@
         a
             font-size 12px
 
+    input
+    select
+    textarea
+        font-family: styled
+        margin-left: 5px
+        border-radius: 0
+        box-shadow: 0
+        border: 1px solid transparent
+
+    input:hover
+    select:hover
+        border: 1px solid orange
+
+    input:active
+    select:active
+    input:focus
+    select:focus
+        box-shadow: none
 
 
 /* Styles for the fullcalendar plugin */
@@ -235,55 +310,7 @@ a.btn:visited
         opacity: 0.7
 
 .popover-content
-    font-family: styled
 
-    a.advanced-link
-        margin-left 10px
-
-    padding: 0
-
-    .line
-    .nav-tabs
-        padding: 10px 10px 0px 10px
-
-    div.popover-footer
-        text-align: right
-        background: #F5F5F5
-        padding: 5px
-        border-bottom-left-radius: 5px
-        border-bottom-right-radius: 5px
-
-    input
-    select
-    textarea
-        font-family: styled
-        margin-left: 5px
-        border-radius: 0
-        box-shadow: 0
-        border: 1px solid transparent
-
-    input:hover
-    select:hover
-        border: 1px solid orange
-
-    input:active
-    select:active
-    input:focus
-    select:focus
-        box-shadow: none
-
-    .nav-tabs
-        li
-            a
-                font-size: 16px
-                cursor: pointer
-            a:hover
-                background: lightorange
-                color: #333
-        li.active
-            a:hover
-                background: white
-                color: #333
 
 #add-alarm
 
@@ -385,11 +412,11 @@ a.btn:visited
     h3
         margin-top: 0
 
-#view-container
-    .popover
-        .arrow
-            box-shadow: none
-            left: -10px
-            border: 0
+// #view-container
+//     .popover
+//         .arrow
+//             box-shadow: none
+//             left: -10px
+//             border: 0
 
 

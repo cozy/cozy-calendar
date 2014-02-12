@@ -7,6 +7,12 @@ module.exports = class Alarm extends ScheduleItem
     startDateField: 'trigg'
     urlRoot: 'alarms'
 
+    defaults: ->
+        description: ''
+        title: ''
+        place: ''
+        tags: ['my calendar']
+
     parse: (attrs) ->
         delete attrs.id if attrs.id is "undefined"
         return attrs

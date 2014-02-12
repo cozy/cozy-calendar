@@ -1,6 +1,7 @@
 BaseView = require '../lib/base_view'
 RRuleFormView = require 'views/event_modal_rrule'
 EventModal = require 'views/event_modal'
+ComboBox       = require 'views/widgets/combobox'
 Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
@@ -13,6 +14,7 @@ module.exports = class PopOver extends BaseView
         'keyup input': 'onKeyUp'
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
+        'change #input-place': 'updateMapLink'
         'click .add'  : 'onAddClicked'
         'click .advanced-link'  : 'onAdvancedClicked'
         'click .remove': 'onRemoveClicked'
@@ -60,8 +62,6 @@ module.exports = class PopOver extends BaseView
             template: false
             minuteStep: 5
             showMeridian: false
-            onNext: @onTimePickerNext
-            onPrev: @onTimePickerPrev
         @$('.focused').focus()
 
         inputEnd = @$('#input-end')
@@ -75,6 +75,13 @@ module.exports = class PopOver extends BaseView
                 inputEnd.focus().timepicker 'highlightMinute'
             if ev.keyCode is 39 # right
                 @$('#input-desc').focus()
+
+        # keep the endDate after the startDate
+        inputStart.on 'changeTime.timepicker', (ev) =>
+            @adjustTimePickers 'start', ev.time.value
+
+        inputEnd.on 'changeTime.timepicker', (ev) =>
+            @adjustTimePickers 'end', ev.time.value
 
         if @type is 'alarm'
             tzInput = @$('#input-timezone')
@@ -104,6 +111,13 @@ module.exports = class PopOver extends BaseView
             @$('#rrule-action').hide()
             @$('#rrule-short i.icon-arrow-right').hide()
 
+        @calendar = new ComboBox
+            el: @$('#calendarcombo')
+            small: true
+            source: app.tags.calendars()
+
+        @updateMapLink()
+
 
     getTitle: ->
         title = if @model.isNew() then @type + ' creation'
@@ -128,6 +142,8 @@ module.exports = class PopOver extends BaseView
             title: @getTitle()
             editionMode: not @model.isNew()
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
+
+        data.calendar = data.tags?[0] or ''
 
         if @model instanceof Event
             endDate = @model.getEndDateObject()
@@ -173,6 +189,7 @@ module.exports = class PopOver extends BaseView
 
     onAdvancedClicked: (event) =>
         if @model.isNew()
+            @model.set @getModelAttributes()
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash
@@ -231,7 +248,9 @@ module.exports = class PopOver extends BaseView
             if @rruleForm?.hasRRule()
                 data.rrule = @rruleForm.getRRule().toString()
             else
-                data.rrule = ''
+                data.rrule = ""
+
+        data.tags = [@calendar.value()]
 
         return data
 
@@ -247,6 +266,7 @@ module.exports = class PopOver extends BaseView
                     @removeButton.spin()
                     @removeButton.css 'width', '14px'
                     @selfclose()
+        else @removeButton.spin()
 
     onAddClicked: () =>
         return if @$('.btn.add').hasClass 'disabled'
@@ -270,6 +290,68 @@ module.exports = class PopOver extends BaseView
             @$('.alert').remove()
             @$('input').css('border-color', '')
             @handleError(err) for err in @model.validationError
+
+
+
+    updateMapLink: =>
+        value = encodeURIComponent @$('#input-place').val()
+        btn = @$('#showmap')
+        if value
+            url = "http://www.openstreetmap.org/search?query=#{value}"
+            btn.show().attr 'href', url
+        else
+            btn.hide()
+
+    # @TODO : refactor this
+    adjustTimePickers: (changed, newvalue) =>
+        date = @model.getStartDateObject()
+
+        start = @$('#input-start').val()
+        end = @$('#input-end').val()
+        diff = parseInt @$('#input-diff').val()
+
+        startDate = @formatDate date, start
+        endDate = @formatDate date, end + '+' + diff
+
+        if changed is 'start'
+            newStart = @formatDate date, newvalue
+            newEnd = endDate.clone()
+            if newStart.is(newEnd) or newStart.isAfter(newEnd)
+                newEnd = newStart.clone().addHours 1
+
+        else if changed is 'end'
+            newStart = startDate.clone()
+            newEnd = @formatDate date, newvalue + '+' + diff
+
+            if endDate.getHours() is 23 and newEnd.getHours() is 0
+                newEnd.addDays 1
+            else if endDate.getHours() is 0 and newEnd.getHours() is 23
+                newEnd.addDays -1
+
+            if newStart.is(newEnd) or newStart.isAfter(newEnd)
+                newStart = newEnd.clone().addHours -1
+                if newStart.getHours() is 0
+                    newStart.beginningOfDay()
+
+        else if changed is 'diff'
+            if newStart.is(newEnd) or newStart.isAfter(newEnd)
+                newEnd = newStart.clone().addHours 1
+
+        if newEnd.short() is newStart.short()
+            diff = 0
+        else
+            oneday = 1000 * 3600 * 24
+            bde = newEnd.clone().beginningOfDay()
+            bds = newStart.clone().beginningOfDay()
+            console.log "HERE", diff, (bde - bds) / oneday
+            diff = Math.round (bde - bds) / oneday
+
+        @$('#input-start').val newStart.format '{HH}:{mm}'
+        @$('#input-end').val newEnd.format '{HH}:{mm}'
+        @$('#input-diff').val diff
+
+        return true
+
 
     handleError: (error) =>
         switch error.field

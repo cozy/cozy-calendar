@@ -1,7 +1,10 @@
-span #{title}&nbsp;
-    i.remove.icon-trash
+
+
+input#calendarcombo(value=calendar)
 
 if !editionMode
     a#toggle-type= t('change to') + " " + t(type=='event'?'alarm':'event')
 
-button.close &times;
+
+button.close(title=t('close')) &times;
+i.remove.icon-trash(title=t('delete'))

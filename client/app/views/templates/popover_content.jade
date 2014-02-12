@@ -24,16 +24,17 @@ else if type = 'event'
         span.timeseparator &nbsp;to
         input#input-end.input-mini(type="time", value=end,
             placeholder=t("To hours:minutes+days"))
-        span.timeseparator &nbsp;+
+        span.timeseparator &nbsp;,
         input#input-diff.col-xs2.input-mini(type="number", value=diff,
             placeholder=0, min=0)
-        span.timeseparator= '&nbsp;' + t('days')
+        span.timeseparator= '&nbsp;' + t('days later')
 
     .line
         input#input-desc.input(type="text", value=description,
             placeholder=t("Description"))
         input#input-place.input-small(type="text", value=place,
             placeholder=t("Place"))
+        a#showmap(target="_blank").btn: i.icon-white.icon-map-marker
 
     .popover-footer.line
         a.advanced-link(href='#'+advancedUrl)= t('advanced')
