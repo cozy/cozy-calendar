@@ -1093,6 +1093,8 @@ module.exports = {
   "create": "Create",
   "creation": "Creation",
   "invite": "Invite",
+  "close": "Close",
+  "delete": "Delete",
   "Place": "Place",
   "description": "Description",
   "date": "date",
@@ -1104,6 +1106,7 @@ module.exports = {
   "List": "List",
   "list": "list",
   "Calendar": "Calendar",
+  "calendar": "Calendar",
   "Sync": "Sync",
   "ie: 9:00 important meeting": "ie: 9:00 important meeting",
   "Month": "Month",
@@ -1114,7 +1117,8 @@ module.exports = {
   "Today": "Today",
   "What should I remind you ?": "What should I remind you?",
   "alarm description placeholder": "What do you want to be reminded?",
-  "ICalendar importer": "ICalendar importer",
+  "ICalendar import": "ICalendar import",
+  "select an icalendar file": "Select an icalendar file",
   "import your icalendar file": "import your icalendar file",
   "confirm import": "confirm import",
   "cancel": "cancel",
@@ -1126,26 +1130,32 @@ module.exports = {
   "To hours:minutes+days": "To hours:minutes+days",
   "Description": "Description",
   "days after": "days after",
+  "days later": "days later",
+  "Week": "Semaine",
   "Alarms": "Alarms",
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
   "BOTH": "E-mail & Notification",
-  "advanced": "More details",
   "display previous events": "Display previous events",
+  "event": "Event",
+  "alarm": "Alarm",
+  "are you sure": "Are you sure ?",
+  "advanced": "More details",
   "enter email": "Enter email",
   "ON": "on",
   "OFF": "off",
+  "recurrence": "Recurrence",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
   "repeat every": "Repeat every",
   "no recurrence": "No recurrence",
-  "repeat": "Repeat",
   "repeat on": "Repeat on",
   "repeat on date": "Repeat on dates",
   "repeat on weekday": "Repeat on weekday",
   "repeat until": "Repeat until",
   "after": "After",
+  "repeat": "Repeat",
   "forever": "Forever",
   "occurences": "occurences",
   "every": "Every",
@@ -1173,10 +1183,13 @@ module.exports = {
   "place": "Place",
   "start": "Start",
   "end": "End",
+  "tags": "Tags",
+  "add tags": "Add tags",
   "change": "Change",
+  "change calendar": "Change calendar",
   "save changes": "Save changes",
+  "save changes and invite guests": "Save changes and invite guests",
   "guests": "Guests",
-  "invite-info": "The invitations will be sent after you click \"Save Changes\"",
   "no description": "A title must be set.",
   "start after end": "The start date is after the end date.",
   "invalid start date": "The start date is invalid.",
@@ -1201,6 +1214,8 @@ module.exports = {
   "create": "Enregistrer",
   "creation": "Creation",
   "invite": "Inviter",
+  "close": "Fermer",
+  "delete": "Supprimer",
   "Place": "Lieu",
   "description": "Description",
   "date": "Date",
@@ -1212,6 +1227,8 @@ module.exports = {
   "List": "Liste",
   "list": "liste",
   "Calendar": "Calendrier",
+  "calendar": "Calendrier",
+  "Sync": "Sync",
   "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacque",
   "Month": "Mois",
   "Popup": "Popup",
@@ -1233,6 +1250,7 @@ module.exports = {
   "To hours:minutes+days": "A heures:minutes+jours",
   "Description": "Description",
   "days after": "jours plus tard",
+  "days later": "jours plus tard",
   "Week": "Semaine",
   "Alarms": "Alarmes",
   "Display": "Notification",
@@ -1244,9 +1262,10 @@ module.exports = {
   "alarm": "Alarme",
   "are you sure": "Etes-vous sur ?",
   "advanced": "Détails",
-  "enter Email": "Entrez l'email",
+  "enter email": "Entrer l'addresse email",
   "ON": "activée",
   "OFF": "désactivée",
+  "recurrence": "Recurrence",
   "recurrence rule": "Règle de recurrence",
   "make reccurent": "Rendre réccurent",
   "repeat every": "Répéter tous les",
@@ -1261,7 +1280,7 @@ module.exports = {
   "occurences": "occasions",
   "every": "tous les",
   "days": "jours",
-  "days": "jours",
+  "day": "jour",
   "weeks": "semaines",
   "week": "semaines",
   "months": "mois",
@@ -1284,11 +1303,13 @@ module.exports = {
   "place": "Endroit",
   "start": "Début",
   "end": "Fin",
+  "tags": "Tags",
+  "add tags": "Ajouter des tags",
   "change": "Modifier",
+  "change calendar": "Changer le calendrier",
   "save changes": "Enregistrer",
+  "save changes and invite guests": "Enregistrer et envoyer les invitations",
   "guests": "Invités",
-  "enter email": "Entrer l'addresse email",
-  "invite-info": "Les invitations seront envoyés dès que vous cliquerez sur\n\"Enregistrer\"",
   "no description": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
   "invalid start date": "Le début est invalide.",
@@ -1321,6 +1342,15 @@ module.exports = Alarm = (function(_super) {
   Alarm.prototype.startDateField = 'trigg';
 
   Alarm.prototype.urlRoot = 'alarms';
+
+  Alarm.prototype.defaults = function() {
+    return {
+      description: '',
+      title: '',
+      place: '',
+      tags: ['my calendar']
+    };
+  };
 
   Alarm.prototype.parse = function(attrs) {
     if (attrs.id === "undefined") {
@@ -1944,7 +1974,7 @@ module.exports = CalendarHeader = (function(_super) {
 });
 
 ;require.register("views/calendar_popover", function(exports, require, module) {
-var Alarm, BaseView, Event, EventModal, PopOver, RRuleFormView, Toggle, _ref,
+var Alarm, BaseView, ComboBox, Event, EventModal, PopOver, RRuleFormView, Toggle, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1954,6 +1984,8 @@ BaseView = require('../lib/base_view');
 RRuleFormView = require('views/event_modal_rrule');
 
 EventModal = require('views/event_modal');
+
+ComboBox = require('views/widgets/combobox');
 
 Toggle = require('views/toggle');
 
@@ -1966,6 +1998,8 @@ module.exports = PopOver = (function(_super) {
 
   function PopOver() {
     this.handleError = __bind(this.handleError, this);
+    this.adjustTimePickers = __bind(this.adjustTimePickers, this);
+    this.updateMapLink = __bind(this.updateMapLink, this);
     this.onAddClicked = __bind(this.onAddClicked, this);
     this.onRemoveClicked = __bind(this.onRemoveClicked, this);
     this.getModelAttributes = __bind(this.getModelAttributes, this);
@@ -1979,6 +2013,7 @@ module.exports = PopOver = (function(_super) {
     'keyup input': 'onKeyUp',
     'change select': 'onKeyUp',
     'change input': 'onKeyUp',
+    'change #input-place': 'updateMapLink',
     'click .add': 'onAddClicked',
     'click .advanced-link': 'onAdvancedClicked',
     'click .remove': 'onRemoveClicked',
@@ -2038,9 +2073,7 @@ module.exports = PopOver = (function(_super) {
     this.$('input[type="time"]').attr('type', 'text').timepicker({
       template: false,
       minuteStep: 5,
-      showMeridian: false,
-      onNext: this.onTimePickerNext,
-      onPrev: this.onTimePickerPrev
+      showMeridian: false
     });
     this.$('.focused').focus();
     inputEnd = this.$('#input-end');
@@ -2062,6 +2095,12 @@ module.exports = PopOver = (function(_super) {
       if (ev.keyCode === 39) {
         return _this.$('#input-desc').focus();
       }
+    });
+    inputStart.on('changeTime.timepicker', function(ev) {
+      return _this.adjustTimePickers('start', ev.time.value);
+    });
+    inputEnd.on('changeTime.timepicker', function(ev) {
+      return _this.adjustTimePickers('end', ev.time.value);
     });
     if (this.type === 'alarm') {
       tzInput = this.$('#input-timezone');
@@ -2095,8 +2134,14 @@ module.exports = PopOver = (function(_super) {
       this.rruleForm.render();
       this.$('#rrule-container').append(this.rruleForm.$el);
       this.$('#rrule-action').hide();
-      return this.$('#rrule-short i.icon-arrow-right').hide();
+      this.$('#rrule-short i.icon-arrow-right').hide();
     }
+    this.calendar = new ComboBox({
+      el: this.$('#calendarcombo'),
+      small: true,
+      source: app.tags.calendars()
+    });
+    return this.updateMapLink();
   };
 
   PopOver.prototype.getTitle = function() {
@@ -2135,7 +2180,7 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getRenderData = function() {
-    var data, diff, endDate, startDate;
+    var data, diff, endDate, startDate, _ref1;
 
     data = _.extend({
       type: this.type
@@ -2144,6 +2189,7 @@ module.exports = PopOver = (function(_super) {
       editionMode: !this.model.isNew(),
       advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id
     });
+    data.calendar = ((_ref1 = data.tags) != null ? _ref1[0] : void 0) || '';
     if (this.model instanceof Event) {
       endDate = this.model.getEndDateObject();
       startDate = this.model.getStartDateObject();
@@ -2201,6 +2247,7 @@ module.exports = PopOver = (function(_super) {
     var modal;
 
     if (this.model.isNew()) {
+      this.model.set(this.getModelAttributes());
       modal = new EventModal({
         model: this.model,
         backurl: window.location.hash
@@ -2269,9 +2316,10 @@ module.exports = PopOver = (function(_super) {
       if ((_ref1 = this.rruleForm) != null ? _ref1.hasRRule() : void 0) {
         data.rrule = this.rruleForm.getRRule().toString();
       } else {
-        data.rrule = '';
+        data.rrule = "";
       }
     }
+    data.tags = [this.calendar.value()];
     return data;
   };
 
@@ -2292,6 +2340,8 @@ module.exports = PopOver = (function(_super) {
           return _this.selfclose();
         }
       });
+    } else {
+      return this.removeButton.spin();
     }
   };
 
@@ -2334,6 +2384,68 @@ module.exports = PopOver = (function(_super) {
       }
       return _results;
     }
+  };
+
+  PopOver.prototype.updateMapLink = function() {
+    var btn, url, value;
+
+    value = encodeURIComponent(this.$('#input-place').val());
+    btn = this.$('#showmap');
+    if (value) {
+      url = "http://www.openstreetmap.org/search?query=" + value;
+      return btn.show().attr('href', url);
+    } else {
+      return btn.hide();
+    }
+  };
+
+  PopOver.prototype.adjustTimePickers = function(changed, newvalue) {
+    var bde, bds, date, diff, end, endDate, newEnd, newStart, oneday, start, startDate;
+
+    date = this.model.getStartDateObject();
+    start = this.$('#input-start').val();
+    end = this.$('#input-end').val();
+    diff = parseInt(this.$('#input-diff').val());
+    startDate = this.formatDate(date, start);
+    endDate = this.formatDate(date, end + '+' + diff);
+    if (changed === 'start') {
+      newStart = this.formatDate(date, newvalue);
+      newEnd = endDate.clone();
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newEnd = newStart.clone().addHours(1);
+      }
+    } else if (changed === 'end') {
+      newStart = startDate.clone();
+      newEnd = this.formatDate(date, newvalue + '+' + diff);
+      if (endDate.getHours() === 23 && newEnd.getHours() === 0) {
+        newEnd.addDays(1);
+      } else if (endDate.getHours() === 0 && newEnd.getHours() === 23) {
+        newEnd.addDays(-1);
+      }
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newStart = newEnd.clone().addHours(-1);
+        if (newStart.getHours() === 0) {
+          newStart.beginningOfDay();
+        }
+      }
+    } else if (changed === 'diff') {
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newEnd = newStart.clone().addHours(1);
+      }
+    }
+    if (newEnd.short() === newStart.short()) {
+      diff = 0;
+    } else {
+      oneday = 1000 * 3600 * 24;
+      bde = newEnd.clone().beginningOfDay();
+      bds = newStart.clone().beginningOfDay();
+      console.log("HERE", diff, (bde - bds) / oneday);
+      diff = Math.round((bde - bds) / oneday);
+    }
+    this.$('#input-start').val(newStart.format('{HH}:{mm}'));
+    this.$('#input-end').val(newEnd.format('{HH}:{mm}'));
+    this.$('#input-diff').val(diff);
+    return true;
   };
 
   PopOver.prototype.handleError = function(error) {
@@ -2888,15 +3000,20 @@ module.exports = EventModal = (function(_super) {
       return "";
     }
     guests = this.model.get('attendees') || [];
-    guests.push({
-      key: random.randomString(),
-      status: 'INVITATION-NOT-SENT',
-      email: email,
-      contactid: id || null
-    });
-    this.model.set('attendees', guests);
+    if (!_.findWhere(guests, {
+      email: email
+    })) {
+      guests.push({
+        key: random.randomString(),
+        status: 'INVITATION-NOT-SENT',
+        email: email,
+        contactid: id || null
+      });
+      this.model.set('attendees', guests);
+      this.refreshGuestList();
+      this.$('#confirm-btn').text(t('save changes and invite guests'));
+    }
     this.addGuestField.val('');
-    this.refreshGuestList();
     return "";
   };
 
@@ -4193,11 +4310,8 @@ buf.push(attrs({ 'id':('addguest-field'), 'type':("text"), 'placeholder':(t('ent
 buf.push('/><a id="addguest" class="btn">');
 var __val__ = t('invite')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</a></div></div><p class="info">');
-var __val__ = t('invite-info')
-buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</p></form><div id="guests-list"></div><h4>');
-var __val__ = t('recurrence rule')
+buf.push('</a></div></div></form><div id="guests-list"></div><h4>');
+var __val__ = t('recurrence')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</h4><div id="rrule-container"></div></div></div><div class="modal-footer"><a id="cancel-btn">');
 var __val__ = t("cancel")
@@ -4558,16 +4672,16 @@ buf.push('<div class="line"><span class="timeseparator">&nbsp;From</span><input'
 buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><span class="timeseparator">&nbsp;to</span><input');
 buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/><span class="timeseparator">&nbsp;+</span><input');
+buf.push('/><span class="timeseparator">&nbsp;,</span><input');
 buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), 'min':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true,"min":true}));
 buf.push('/><span class="timeseparator">');
-var __val__ = '&nbsp;' + t('days')
+var __val__ = '&nbsp;' + t('days later')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></div><div class="line"><input');
 buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
 buf.push('/><input');
 buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
-buf.push('/></div><div class="popover-footer line"><a');
+buf.push('/><a id="showmap" target="_blank" class="btn"><i class="icon-white icon-map-marker"></i></a></div><div class="popover-footer line"><a');
 buf.push(attrs({ 'href':('#'+advancedUrl), "class": ('advanced-link') }, {"href":true}));
 buf.push('>');
 var __val__ = t('advanced')
@@ -4588,7 +4702,9 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<span>' + escape((interp = title) == null ? '' : interp) + '&nbsp;<i class="remove icon-trash"></i></span>');
+buf.push('<input');
+buf.push(attrs({ 'id':('calendarcombo'), 'value':(calendar) }, {"value":true}));
+buf.push('/>');
 if ( !editionMode)
 {
 buf.push('<a id="toggle-type">');
@@ -4596,7 +4712,11 @@ var __val__ = t('change to') + " " + t(type=='event'?'alarm':'event')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</a>');
 }
-buf.push('<button class="close">&times;</button>');
+buf.push('<button');
+buf.push(attrs({ 'title':(t('close')), "class": ('close') }, {"title":true}));
+buf.push('>&times;</button><i');
+buf.push(attrs({ 'title':(t('delete')), "class": ('remove') + ' ' + ('icon-trash') }, {"title":true}));
+buf.push('></i>');
 }
 return buf.join("");
 };
@@ -4706,7 +4826,13 @@ module.exports = ComboBox = (function(_super) {
 
   function ComboBox() {
     this.remove = __bind(this.remove, this);
-    this.renderItem = __bind(this.renderItem, this);    _ref = ComboBox.__super__.constructor.apply(this, arguments);
+    this.renderItem = __bind(this.renderItem, this);
+    this.updateBadge = __bind(this.updateBadge, this);
+    this.onSelect = __bind(this.onSelect, this);
+    this.onBlur = __bind(this.onBlur, this);
+    this.onClose = __bind(this.onClose, this);
+    this.onOpen = __bind(this.onOpen, this);
+    this.openMenu = __bind(this.openMenu, this);    _ref = ComboBox.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
@@ -4714,31 +4840,66 @@ module.exports = ComboBox = (function(_super) {
     'keyup': 'updateBadge',
     'keypress': 'updateBadge',
     'change': 'updateBadge',
-    'autocompleteselect': 'updateBadge'
+    'blur': 'onBlur'
   };
 
   ComboBox.prototype.initialize = function(options) {
-    var caret,
+    var caret, isInput, method,
       _this = this;
 
     ComboBox.__super__.initialize.apply(this, arguments);
     this.$el.autocomplete({
       delay: 0,
       minLength: 0,
-      source: options.source
+      source: options.source,
+      close: this.onClose,
+      open: this.onOpen,
+      select: this.onSelect
     });
     this.$el.addClass('combobox');
+    this.small = options.small;
     this.autocompleteWidget = this.$el.data('ui-autocomplete');
     this.autocompleteWidget._renderItem = this.renderItem;
-    caret = $('<a class="combobox-caret">');
-    caret.append($('<span class="caret"></span>'));
-    caret.click(function() {
-      return _this.$el.focus().val(_this.$el.val()).autocomplete('search', '');
-    });
-    this.$el.after(caret);
-    if (this.$el.val() !== '') {
-      return this.updateBadge();
+    isInput = this.$el[0].nodeName.toLowerCase() === 'input';
+    method = this.$el[isInput ? "val" : "text"];
+    this.value = function() {
+      return method.apply(_this.$el, arguments);
+    };
+    if (!this.small) {
+      caret = $('<a class="combobox-caret">');
+      caret.append($('<span class="caret"></span>'));
+      caret.click(this.openMenu);
+      this.$el.after(caret);
     }
+    return this.updateBadge();
+  };
+
+  ComboBox.prototype.openMenu = function() {
+    this.menuOpen = true;
+    this.$el.addClass('expanded');
+    return this.$el.focus().val(this.value()).autocomplete('search', '');
+  };
+
+  ComboBox.prototype.onOpen = function() {
+    return this.menuOpen = true;
+  };
+
+  ComboBox.prototype.onClose = function() {
+    this.menuOpen = false;
+    if (!this.$el.is(':focus')) {
+      return this.$el.removeClass('expanded');
+    }
+  };
+
+  ComboBox.prototype.onBlur = function() {
+    if (!this.menuOpen) {
+      return this.$el.removeClass('expanded');
+    }
+  };
+
+  ComboBox.prototype.onSelect = function(ev, ui) {
+    this.$el.blur().removeClass('expanded');
+    return this.updateBadge(ev, ui);
   };
 
   ComboBox.prototype.updateBadge = function(ev, ui) {
@@ -4747,7 +4908,7 @@ module.exports = ComboBox = (function(_super) {
     if ((_ref1 = this.badge) != null) {
       _ref1.remove();
     }
-    value = (ui != null ? (_ref2 = ui.item) != null ? _ref2.value : void 0 : void 0) || this.$el.val();
+    value = (ui != null ? (_ref2 = ui.item) != null ? _ref2.value : void 0 : void 0) || this.value();
     this.badge = this.makeBadge(colorhash(value));
     this.$el.before(this.badge);
     return true;
@@ -4764,7 +4925,11 @@ module.exports = ComboBox = (function(_super) {
   ComboBox.prototype.makeBadge = function(color) {
     var badge;
 
-    return badge = $('<span class="badge combobox-badge">').html('&nbsp;').css('backgroundColor', color);
+    badge = $('<span class="badge combobox-badge">').html('&nbsp;').css('backgroundColor', color).css('cursor', 'pointer').click(this.openMenu);
+    if (this.small) {
+      badge.attr('title', t('change calendar'));
+    }
+    return badge;
   };
 
   ComboBox.prototype.remove = function() {
