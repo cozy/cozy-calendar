@@ -86,14 +86,17 @@ module.exports = class EventModal extends ViewCollection
         [email, id] = info.split ';'
         return "" unless email
         guests = @model.get('attendees') or []
-        guests.push
-            key: random.randomString()
-            status: 'INVITATION-NOT-SENT'
-            email: email
-            contactid: id or null
-        @model.set 'attendees', guests
+        if not _.findWhere(guests, email: email)
+            guests.push
+                key: random.randomString()
+                status: 'INVITATION-NOT-SENT'
+                email: email
+                contactid: id or null
+            @model.set 'attendees', guests
+            @refreshGuestList()
+            @$('#confirm-btn').text t 'save changes and invite guests'
+
         @addGuestField.val ''
-        @refreshGuestList()
         return ""
 
     refreshGuestList: =>

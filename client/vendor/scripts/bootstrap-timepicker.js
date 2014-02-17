@@ -501,9 +501,9 @@
         }
       }
       if (this.hour === 23) {
-        this.hour = 0;
-
-        return;
+        //this.hour = 0; // cozy-changes
+        // return;  // cozy-changes
+        this.hour = -1 // cozy-changes
       }
       this.hour++;
       this.update();

@@ -53,7 +53,7 @@ runTests = (fileList) ->
     if options.debug
         command += "--debug --forward-io --profile "
     command += " --globals setImmediate,clearImmediate "
-    command += " --reporter spec --compilers coffee:coffee-script --colors"
+    command += " --reporter spec --compilers coffee:coffee-script/register --colors"
     exec command, (err, stdout, stderr) ->
         if err
             console.log "Running mocha caught exception: \n" + err

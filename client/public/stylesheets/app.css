@@ -10671,22 +10671,69 @@ input[type="time"] {
   margin-bottom: 10px;
   vertical-align: middle;
 }
-.popover #input-place {
-  min-width: 120px;
-}
 .popover .popover-title {
   font-weight: bold;
 }
 .popover .popover-title button {
   margin-top: -4px;
 }
-.popover .popover-title #toggle-type,
-.popover .popover-title i.remove {
-  cursor: pointer;
-}
 .popover .popover-title a {
   font-weight: normal;
   font-size: 0.8em;
+  cursor: pointer;
+}
+.popover .popover-title .remove {
+  float: right;
+  margin-right: 20px;
+  margin-top: -2px;
+  display: inline-block;
+}
+.popover .popover-title #calendarcombo {
+  -webkit-transition: 0s;
+  -moz-transition: 0s;
+  -o-transition: 0s;
+  -ms-transition: 0s;
+  transition: 0s;
+  display: inline-block;
+  border-color: transparent;
+  width: 1px;
+  height: 1em;
+  overflow: hidden;
+}
+.popover .popover-title #calendarcombo.expanded {
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  -o-transition: 0.1s;
+  -ms-transition: 0.1s;
+  transition: 0.1s;
+  width: 132px;
+  border-width: 1px;
+}
+.popover .popover-content {
+  font-family: styled;
+  padding: 0;
+}
+.popover .popover-content a.advanced-link {
+  margin-left: 10px;
+}
+.popover .popover-content .popover-footer {
+  text-align: right;
+  background: #f5f5f5;
+  padding: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.popover .popover-content .nav-tabs li a {
+  font-size: 16px;
+  cursor: pointer;
+}
+.popover .popover-content .nav-tabs li a:hover {
+  background: #ffc47f;
+  color: #333;
+}
+.popover .popover-content .nav-tabs li.active a:hover {
+  background: #fff;
+  color: #333;
 }
 .popover .popover-content #input-start,
 .popover .popover-content #input-end,
@@ -10695,6 +10742,18 @@ input[type="time"] {
 }
 .popover .popover-content #input-diff {
   width: 35px;
+}
+.popover .popover-content #input-place {
+  min-width: 120px;
+}
+.popover .popover-content #showmap {
+  position: relative;
+  display: inline-block;
+  top: -5px;
+  left: -20px;
+  padding: 0px 1px 1px 0px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
 }
 .popover .popover-content .badge {
   margin-bottom: 10px;
@@ -10708,6 +10767,11 @@ input[type="time"] {
 }
 .popover .popover-content .badge:hover {
   background: #fe8800;
+}
+.popover .popover-content #toggle-type,
+.popover .popover-content i.remove {
+  cursor: pointer;
+  margin: 5px 0px 0px 5px;
 }
 .popover .popover-content button {
   margin-left: 5px;
@@ -10725,6 +10789,28 @@ input[type="time"] {
 }
 .popover .popover-content a {
   font-size: 12px;
+}
+.popover input,
+.popover select,
+.popover textarea {
+  font-family: styled;
+  margin-left: 5px;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  -webkit-box-shadow: 0;
+  box-shadow: 0;
+  border: 1px solid transparent;
+}
+.popover input:hover,
+.popover select:hover {
+  border: 1px solid #fe8800;
+}
+.popover input:active,
+.popover select:active,
+.popover input:focus,
+.popover select:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .fc-button-prev,
 .fc-button-next,
@@ -10952,59 +11038,9 @@ a.btn:visited {
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
   filter: alpha(opacity=70);
 }
-.popover-content {
-  font-family: styled;
-  padding: 0;
-}
-.popover-content a.advanced-link {
-  margin-left: 10px;
-}
-.popover-content .line,
-.popover-content .nav-tabs {
-  padding: 10px 10px 0px 10px;
-}
-.popover-content div.popover-footer {
-  text-align: right;
-  background: #f5f5f5;
-  padding: 5px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
 .popover-content input,
-.popover-content select,
-.popover-content textarea {
-  font-family: styled;
-  margin-left: 5px;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  -webkit-box-shadow: 0;
-  box-shadow: 0;
-  border: 1px solid transparent;
-}
-.popover-content input:hover,
-.popover-content select:hover {
-  border: 1px solid #fe8800;
-}
-.popover-content input:active,
-.popover-content select:active,
-.popover-content input:focus,
-.popover-content select:focus {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-.popover-content .nav-tabs li a {
-  font-size: 16px;
-  cursor: pointer;
-}
-.popover-content .nav-tabs li a:hover {
-  background: #ffc47f;
-  color: #333;
-}
-.popover-content .nav-tabs li.active a:hover {
-  background: #fff;
-  color: #333;
-}
 #add-alarm input,
+.popover-content select,
 #add-alarm select {
   border: 1px solid #ccc;
   -webkit-box-shadow: 0;
@@ -11014,10 +11050,13 @@ a.btn:visited {
   shadow: none;
   font-family: styled, helvetica;
 }
+.popover-content input.disabled,
 #add-alarm input.disabled {
   border: 1px solid transparent;
 }
+.popover-content input:hover,
 #add-alarm input:hover,
+.popover-content select:hover,
 #add-alarm select:hover {
   border: 1px solid #fe8800;
   -webkit-border-radius: 0px;
@@ -11025,37 +11064,48 @@ a.btn:visited {
   shadow: inset 1px 1px 2px rgba(100,100,100,0.1);
   color: #333;
 }
+.popover-content input:focus,
 #add-alarm input:focus,
+.popover-content input:active,
 #add-alarm input:active,
+.popover-content select:active,
 #add-alarm select:active,
+.popover-content select:focus,
 #add-alarm select:focus {
   border: 1px solid #34a6ff;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
+.popover-content .add-on,
 #add-alarm .add-on {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
+.popover-content .datepicker td.day:hover,
 #add-alarm .datepicker td.day:hover {
   background: #ffc47f;
 }
+.popover-content .bootstrap-timepicker-widget table td a:hover,
 #add-alarm .bootstrap-timepicker-widget table td a:hover {
   background: #ffc47f;
   border: 1px solid transparent;
 }
+.popover-content #alarm-description-input,
 #add-alarm #alarm-description-input {
   font-size: 24px;
   line-height: 40px;
   height: 40px;
 }
+.popover-content button.add-alarm.disabled,
 #add-alarm button.add-alarm.disabled {
   border: 1px solid #aaa;
 }
+.popover-content button.add-alarm,
 #add-alarm button.add-alarm {
   float: left;
   margin-top: 10px;
 }
+.popover-content button.cancel,
 #add-alarm button.cancel {
   margin-left: 5px;
   margin-top: 10px;
@@ -11107,12 +11157,6 @@ a.btn:visited {
 }
 .public-event-container h3 {
   margin-top: 0;
-}
-#view-container .popover .arrow {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  left: -10px;
-  border: 0;
 }
 [data-state~="default"],
 [data-state~="enabled"] {
@@ -11339,7 +11383,7 @@ cursor not-allowed {
     display: none;
   }
   #alarms .fc-event-title {
-    display: none;
+    white-space: nowrap;
   }
   #alarms .fc-border-separate {
     width: 100%;

@@ -335,11 +335,13 @@ describe "Calendar export/import", ->
 
             it "Then it should contains my alarms", ->
 
-                @body.should.equal expectedContent
+                expectedBody = expectedContent
                     .replace('[id-1]', ids[0])
                     .replace('[id-2]', ids[1])
                     .replace('[id-3]', ids[2])
                     .replace('[id-4]', ids[3])
+
+                @body.should.equal expectedBody
 
 
         describe "POST /import/ical", ->
