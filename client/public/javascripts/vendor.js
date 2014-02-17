@@ -37,29 +37,28 @@
     return function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return globals.require(absolute, path);
+      return globals.require(absolute);
     };
   };
 
   var initModule = function(name, definition) {
     var module = {id: name, exports: {}};
-    cache[name] = module;
     definition(module.exports, localRequire(name), module);
-    return module.exports;
+    var exports = cache[name] = module.exports;
+    return exports;
   };
 
-  var require = function(name, loaderPath) {
+  var require = function(name) {
     var path = expand(name, '.');
-    if (loaderPath == null) loaderPath = '/';
 
-    if (has(cache, path)) return cache[path].exports;
+    if (has(cache, path)) return cache[path];
     if (has(modules, path)) return initModule(path, modules[path]);
 
     var dirIndex = expand(path, './index');
-    if (has(cache, dirIndex)) return cache[dirIndex].exports;
+    if (has(cache, dirIndex)) return cache[dirIndex];
     if (has(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
 
-    throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
+    throw new Error('Cannot find module "' + name + '"');
   };
 
   var define = function(bundle, fn) {
@@ -74,22 +73,12 @@
     }
   };
 
-  var list = function() {
-    var result = [];
-    for (var item in modules) {
-      if (has(modules, item)) {
-        result.push(item);
-      }
-    }
-    return result;
-  };
-
   globals.require = require;
   globals.require.define = define;
   globals.require.register = define;
-  globals.require.list = list;
   globals.require.brunch = true;
 })();
+
 /*!
  * jQuery JavaScript Library v1.9.1
  * http://jquery.com/
@@ -9687,8 +9676,8 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }
 
 })( window );
-
-;/*! jQuery UI - v1.10.3 - 2014-01-16
+;
+/*! jQuery UI - v1.10.3 - 2014-01-16
 * http://jqueryui.com
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.draggable.js, jquery.ui.resizable.js, jquery.ui.autocomplete.js, jquery.ui.menu.js, jquery.ui.effect.js, jquery.ui.effect-blind.js, jquery.ui.effect-highlight.js
 * Copyright 2014 jQuery Foundation and other contributors; Licensed MIT */
@@ -15638,8 +15627,8 @@ $.effects.effect.highlight = function( o, done ) {
 };
 
 })(jQuery);
-
-;/* ===================================================
+;
+/* ===================================================
  * bootstrap-transition.js v2.3.1
  * http://twitter.github.com/bootstrap/javascript.html#transitions
  * ===================================================
@@ -17926,8 +17915,8 @@ $.effects.effect.highlight = function( o, done ) {
   })
 
 }(window.jQuery);
-
-;/*!
+;
+/*!
  * Timepicker Component for Twitter Bootstrap
  *
  * Copyright 2013 Joris de Wit
@@ -18818,8 +18807,8 @@ $.effects.effect.highlight = function( o, done ) {
   $.fn.timepicker.Constructor = Timepicker;
 
 })(jQuery, window, document);
-
-;// Underscore.js 1.4.4
+;
+// Underscore.js 1.4.4
 // ===================
 
 // > http://underscorejs.org
@@ -20046,8 +20035,8 @@ $.effects.effect.highlight = function( o, done ) {
   });
 
 }).call(this);
-
-;//     Backbone.js 1.0.0
+;
+//     Backbone.js 1.0.0
 
 //     (c) 2010-2013 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.
@@ -21618,8 +21607,8 @@ $.effects.effect.highlight = function( o, done ) {
   };
 
 }).call(this);
-
-;//fgnass.github.com/spin.js#v1.2.5
+;
+//fgnass.github.com/spin.js#v1.2.5
 (function(window, document, undefined) {
 
 /**
@@ -21925,8 +21914,8 @@ $.effects.effect.highlight = function( o, done ) {
   window.Spinner = Spinner;
 
 })(window, document);
-
-;/*!
+;
+/*!
  * FullCalendar v1.6.1
  * Docs & License: http://arshaw.com/fullcalendar/
  * (c) 2013 Adam Shaw
@@ -27302,8 +27291,8 @@ function HorizontalPositionCache(getElement) {
 
 ;;
 
-})(jQuery);
-;/*!
+})(jQuery);;
+/*!
  * rrule.js - Library for working with recurrence rules for calendar dates.
  * https://github.com/jkbr/rrule
  *
@@ -29202,231 +29191,8 @@ if (typeof define === "function" && define.amd) {
 }
 
 }(this));
-
-;(function() {
-  var WebSocket = window.WebSocket || window.MozWebSocket;
-  var br = window.brunch || {};
-  var ar = br['auto-reload'] || {};
-  if (!WebSocket || !ar.enabled) return;
-
-  var cacheBuster = function(url){
-    var date = Math.round(Date.now() / 1000).toString();
-    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
-    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
-  };
-
-  var reloaders = {
-    page: function(){
-      window.location.reload(true);
-    },
-
-    stylesheet: function(){
-      [].slice
-        .call(document.querySelectorAll('link[rel="stylesheet"]'))
-        .filter(function(link){
-          return (link != null && link.href != null);
-        })
-        .forEach(function(link) {
-          link.href = cacheBuster(link.href);
-        });
-    }
-  };
-  var port = ar.port || 9485;
-  var host = (!br['server']) ? window.location.hostname : br['server'];
-  var connection = new WebSocket('ws://' + host + ':' + port);
-  connection.onmessage = function(event) {
-    var message = event.data;
-    var b = window.brunch;
-    if (!b || !b['auto-reload'] || !b['auto-reload'].enabled) return;
-    if (reloaders[message] != null) {
-      reloaders[message]();
-    } else {
-      reloaders.page();
-    }
-  };
-})();
-
 ;
-jade = (function(exports){
-/*!
- * Jade - runtime
- * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
- * MIT Licensed
- */
-
 /**
- * Lame Array.isArray() polyfill for now.
- */
-
-if (!Array.isArray) {
-  Array.isArray = function(arr){
-    return '[object Array]' == Object.prototype.toString.call(arr);
-  };
-}
-
-/**
- * Lame Object.keys() polyfill for now.
- */
-
-if (!Object.keys) {
-  Object.keys = function(obj){
-    var arr = [];
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        arr.push(key);
-      }
-    }
-    return arr;
-  }
-}
-
-/**
- * Merge two attribute objects giving precedence
- * to values in object `b`. Classes are special-cased
- * allowing for arrays and merging/joining appropriately
- * resulting in a string.
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Object} a
- * @api private
- */
-
-exports.merge = function merge(a, b) {
-  var ac = a['class'];
-  var bc = b['class'];
-
-  if (ac || bc) {
-    ac = ac || [];
-    bc = bc || [];
-    if (!Array.isArray(ac)) ac = [ac];
-    if (!Array.isArray(bc)) bc = [bc];
-    ac = ac.filter(nulls);
-    bc = bc.filter(nulls);
-    a['class'] = ac.concat(bc).join(' ');
-  }
-
-  for (var key in b) {
-    if (key != 'class') {
-      a[key] = b[key];
-    }
-  }
-
-  return a;
-};
-
-/**
- * Filter null `val`s.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function nulls(val) {
-  return val != null;
-}
-
-/**
- * Render the given attributes object.
- *
- * @param {Object} obj
- * @param {Object} escaped
- * @return {String}
- * @api private
- */
-
-exports.attrs = function attrs(obj, escaped){
-  var buf = []
-    , terse = obj.terse;
-
-  delete obj.terse;
-  var keys = Object.keys(obj)
-    , len = keys.length;
-
-  if (len) {
-    buf.push('');
-    for (var i = 0; i < len; ++i) {
-      var key = keys[i]
-        , val = obj[key];
-
-      if ('boolean' == typeof val || null == val) {
-        if (val) {
-          terse
-            ? buf.push(key)
-            : buf.push(key + '="' + key + '"');
-        }
-      } else if (0 == key.indexOf('data') && 'string' != typeof val) {
-        buf.push(key + "='" + JSON.stringify(val) + "'");
-      } else if ('class' == key && Array.isArray(val)) {
-        buf.push(key + '="' + exports.escape(val.join(' ')) + '"');
-      } else if (escaped && escaped[key]) {
-        buf.push(key + '="' + exports.escape(val) + '"');
-      } else {
-        buf.push(key + '="' + val + '"');
-      }
-    }
-  }
-
-  return buf.join(' ');
-};
-
-/**
- * Escape the given string of `html`.
- *
- * @param {String} html
- * @return {String}
- * @api private
- */
-
-exports.escape = function escape(html){
-  return String(html)
-    .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-};
-
-/**
- * Re-throw the given `err` in context to the
- * the jade in `filename` at the given `lineno`.
- *
- * @param {Error} err
- * @param {String} filename
- * @param {String} lineno
- * @api private
- */
-
-exports.rethrow = function rethrow(err, filename, lineno){
-  if (!filename) throw err;
-
-  var context = 3
-    , str = require('fs').readFileSync(filename, 'utf8')
-    , lines = str.split('\n')
-    , start = Math.max(lineno - context, 0)
-    , end = Math.min(lines.length, lineno + context);
-
-  // Error context
-  var context = lines.slice(start, end).map(function(line, i){
-    var curr = i + start + 1;
-    return (curr == lineno ? '  > ' : '    ')
-      + curr
-      + '| '
-      + line;
-  }).join('\n');
-
-  // Alter exception message
-  err.path = filename;
-  err.message = (filename || 'Jade') + ':' + lineno
-    + '\n' + context + '\n\n' + err.message;
-  throw err;
-};
-
-  return exports;
-
-})({});
-
-;/**
  * |-------------------|
  * | Backbone-Mediator |
  * |-------------------|
@@ -29627,8 +29393,8 @@ exports.rethrow = function rethrow(err, filename, lineno){
   return Backbone;
 
 });
-
-;﻿/* =========================================================
+;
+﻿/* =========================================================
  * bootstrap-datetimepicker.js
  * =========================================================
  * Copyright 2012 Stefan Petre
@@ -31334,8 +31100,231 @@ exports.rethrow = function rethrow(err, filename, lineno){
 	});
 
 }(window.jQuery);
+;
+(function() {
+  var WebSocket = window.WebSocket || window.MozWebSocket;
+  var br = window.brunch || {};
+  var ar = br['auto-reload'] || {};
+  if (!WebSocket || !ar.enabled) return;
 
-;//     (c) 2012 Airbnb, Inc.
+  var cacheBuster = function(url){
+    var date = Math.round(Date.now() / 1000).toString();
+    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
+  };
+
+  var reloaders = {
+    page: function(){
+      window.location.reload(true);
+    },
+
+    stylesheet: function(){
+      [].slice
+        .call(document.querySelectorAll('link[rel="stylesheet"]'))
+        .filter(function(link){
+          return (link != null && link.href != null);
+        })
+        .forEach(function(link) {
+          link.href = cacheBuster(link.href);
+        });
+    }
+  };
+  var port = ar.port || 9485;
+  var host = (!br['server']) ? window.location.hostname : br['server'];
+  var connection = new WebSocket('ws://' + host + ':' + port);
+  connection.onmessage = function(event) {
+    var message = event.data;
+    var b = window.brunch;
+    if (!b || !b['auto-reload'] || !b['auto-reload'].enabled) return;
+    if (reloaders[message] != null) {
+      reloaders[message]();
+    } else {
+      reloaders.page();
+    }
+  };
+})();
+;
+
+jade = (function(exports){
+/*!
+ * Jade - runtime
+ * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
+ * MIT Licensed
+ */
+
+/**
+ * Lame Array.isArray() polyfill for now.
+ */
+
+if (!Array.isArray) {
+  Array.isArray = function(arr){
+    return '[object Array]' == Object.prototype.toString.call(arr);
+  };
+}
+
+/**
+ * Lame Object.keys() polyfill for now.
+ */
+
+if (!Object.keys) {
+  Object.keys = function(obj){
+    var arr = [];
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        arr.push(key);
+      }
+    }
+    return arr;
+  }
+}
+
+/**
+ * Merge two attribute objects giving precedence
+ * to values in object `b`. Classes are special-cased
+ * allowing for arrays and merging/joining appropriately
+ * resulting in a string.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Object} a
+ * @api private
+ */
+
+exports.merge = function merge(a, b) {
+  var ac = a['class'];
+  var bc = b['class'];
+
+  if (ac || bc) {
+    ac = ac || [];
+    bc = bc || [];
+    if (!Array.isArray(ac)) ac = [ac];
+    if (!Array.isArray(bc)) bc = [bc];
+    ac = ac.filter(nulls);
+    bc = bc.filter(nulls);
+    a['class'] = ac.concat(bc).join(' ');
+  }
+
+  for (var key in b) {
+    if (key != 'class') {
+      a[key] = b[key];
+    }
+  }
+
+  return a;
+};
+
+/**
+ * Filter null `val`s.
+ *
+ * @param {Mixed} val
+ * @return {Mixed}
+ * @api private
+ */
+
+function nulls(val) {
+  return val != null;
+}
+
+/**
+ * Render the given attributes object.
+ *
+ * @param {Object} obj
+ * @param {Object} escaped
+ * @return {String}
+ * @api private
+ */
+
+exports.attrs = function attrs(obj, escaped){
+  var buf = []
+    , terse = obj.terse;
+
+  delete obj.terse;
+  var keys = Object.keys(obj)
+    , len = keys.length;
+
+  if (len) {
+    buf.push('');
+    for (var i = 0; i < len; ++i) {
+      var key = keys[i]
+        , val = obj[key];
+
+      if ('boolean' == typeof val || null == val) {
+        if (val) {
+          terse
+            ? buf.push(key)
+            : buf.push(key + '="' + key + '"');
+        }
+      } else if (0 == key.indexOf('data') && 'string' != typeof val) {
+        buf.push(key + "='" + JSON.stringify(val) + "'");
+      } else if ('class' == key && Array.isArray(val)) {
+        buf.push(key + '="' + exports.escape(val.join(' ')) + '"');
+      } else if (escaped && escaped[key]) {
+        buf.push(key + '="' + exports.escape(val) + '"');
+      } else {
+        buf.push(key + '="' + val + '"');
+      }
+    }
+  }
+
+  return buf.join(' ');
+};
+
+/**
+ * Escape the given string of `html`.
+ *
+ * @param {String} html
+ * @return {String}
+ * @api private
+ */
+
+exports.escape = function escape(html){
+  return String(html)
+    .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+};
+
+/**
+ * Re-throw the given `err` in context to the
+ * the jade in `filename` at the given `lineno`.
+ *
+ * @param {Error} err
+ * @param {String} filename
+ * @param {String} lineno
+ * @api private
+ */
+
+exports.rethrow = function rethrow(err, filename, lineno){
+  if (!filename) throw err;
+
+  var context = 3
+    , str = require('fs').readFileSync(filename, 'utf8')
+    , lines = str.split('\n')
+    , start = Math.max(lineno - context, 0)
+    , end = Math.min(lines.length, lineno + context);
+
+  // Error context
+  var context = lines.slice(start, end).map(function(line, i){
+    var curr = i + start + 1;
+    return (curr == lineno ? '  > ' : '    ')
+      + curr
+      + '| '
+      + line;
+  }).join('\n');
+
+  // Alter exception message
+  err.path = filename;
+  err.message = (filename || 'Jade') + ':' + lineno
+    + '\n' + context + '\n\n' + err.message;
+  throw err;
+};
+
+  return exports;
+
+})({});
+;
+//     (c) 2012 Airbnb, Inc.
 //
 //     polyglot.js may be freely distributed under the terms of the BSD
 //     license. For all licensing information, details, and documention:
@@ -31588,8 +31577,8 @@ exports.rethrow = function rethrow(err, filename, lineno){
 
 }(this);
 
-
-;/*!
+;
+/*!
  * rrule.js - Library for working with recurrence rules for calendar dates.
  * https://github.com/jkbr/rrule
  *
@@ -32647,8 +32636,8 @@ if (typeof define === "function" && define.amd) {
 }
 
 })(this);
-
-;// Generated by CoffeeScript 1.4.0
+;
+// Generated by CoffeeScript 1.4.0
 (function() {
   var CozySocketListener, global,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -32873,8 +32862,8 @@ if (typeof define === "function" && define.amd) {
   global.CozySocketListener = CozySocketListener;
 
 }).call(this);
-
-;/*
+;
+/*
  *  Sugar Library v1.3.9
  *
  *  Freely distributable and licensed under the MIT-style license.
@@ -37428,8 +37417,8 @@ Date.addLocale('zh-TW', {
 
   });
 
-})();
-;/*
+})();;
+/*
 * jQuery UI Tag-it!
 *
 * @version v2.0 (06/2011)
@@ -38016,6 +38005,4 @@ Date.addLocale('zh-TW', {
     });
 })(jQuery);
 
-
 ;
-//# sourceMappingURL=vendor.js.map
