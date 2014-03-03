@@ -15,7 +15,7 @@ module.exports = class MenuView extends ViewCollection
 
     activate: (href) ->
         @$('.active').removeClass 'active'
-        @$('a[href="#' + href + '"]').addClass 'active'
+        @$('a[href="#' + href + '"]').parent().addClass 'active'
 
     toggleDropdown: ->
         @$('#menuitems').toggleClass 'visible'

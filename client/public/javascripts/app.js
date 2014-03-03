@@ -3895,7 +3895,7 @@ window.require.register("views/menu", function(exports, require, module) {
 
     MenuView.prototype.activate = function(href) {
       this.$('.active').removeClass('active');
-      return this.$('a[href="#' + href + '"]').addClass('active');
+      return this.$('a[href="#' + href + '"]').parent().addClass('active');
     };
 
     MenuView.prototype.toggleDropdown = function() {

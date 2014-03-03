@@ -10289,6 +10289,9 @@ ul#menu a:hover {
 ul#menu li.active {
   background: #aedbff;
 }
+ul#menu li.active a {
+  background: transparent;
+}
 ul#menu li.divider {
   background-color: transparent;
 }
