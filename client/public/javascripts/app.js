@@ -1130,25 +1130,37 @@ window.require.register("locales/en", function(exports, require, module) {
     "tags": "Tags",
     "add tags": "Add tags",
     "change": "Change",
+    "change to": "Change to",
     "change calendar": "Change calendar",
     "save changes": "Save changes",
     "save changes and invite guests": "Save changes and invite guests",
     "guests": "Guests",
+    "from": "From",
+    "to": "&nbsp;to",
     "no description": "A title must be set.",
     "no summary": "A summary must be set.",
     "start after end": "The start date is after the end date.",
     "invalid start date": "The start date is invalid.",
     "invalid end date": "The end date is invalid.",
     "invalid trigg date": "The date is invalid.",
-    "invalid action": "The action is invalid."
+    "invalid action": "The action is invalid.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "import an ical file": "To import an ICal file into your cozy calendar, click on this button:",
+    "download a copy of your calendar": "To download a copy of your calendar on your computer as an ICal file, click on this button:",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "install the webdav module": "Install the webdav module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV."
   };
   
 });
 window.require.register("locales/fr", function(exports, require, module) {
   module.exports = {
     "Add": "Ajouter",
-    "alarm": "Alarme",
-    "event": "Evénement",
+    "alarm": "alarme",
+    "event": "événement",
     "add the alarm": "Ajouter l'alarme",
     "create alarm": "Création d'une alarme",
     "create event": "Création d'un évènement",
@@ -1202,8 +1214,6 @@ window.require.register("locales/fr", function(exports, require, module) {
     "EMAIL": "E-mail",
     "BOTH": "E-mail & Notification",
     "display previous events": "Montrer les évènements précédent",
-    "event": "Evenement",
-    "alarm": "Alarme",
     "are you sure": "Etes-vous sur ?",
     "advanced": "Détails",
     "enter email": "Entrer l'addresse email",
@@ -1244,23 +1254,36 @@ window.require.register("locales/fr", function(exports, require, module) {
     "times": "fois",
     "weekday": "jours de la semaine",
     "summary": "Titre",
+    "Summary": "Titre",
     "place": "Endroit",
     "start": "Début",
     "end": "Fin",
     "tags": "Tags",
     "add tags": "Ajouter des tags",
+    "change to": "Changer en",
     "change": "Modifier",
     "change calendar": "Changer le calendrier",
     "save changes": "Enregistrer",
     "save changes and invite guests": "Enregistrer et envoyer les invitations",
     "guests": "Invités",
+    "from": "De",
+    "to": "&nbsp;à",
     "no description": "Le titre est obligatoire",
     "no summary": "Le titre est obligatoire",
     "start after end": "La fin est après le début.",
     "invalid start date": "Le début est invalide.",
     "invalid end date": "La fin est invalide.",
     "invalid trigg date": "Le moment est invalide.",
-    "invalid action": "L'action est invalide."
+    "invalid action": "L'action est invalide.",
+    "synchronization": "Synchronisation",
+    "mobile sync": "Synchro Mobile (CalDAV)",
+    "import an ical file": "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :",
+    "download a copy of your calendar": "Pour télécharger une copie de votre calendrier sur votre ordinateur comme un fichier iCal, cliquez sur ce bouton :",
+    "icalendar export": "Export ICalendar",
+    "icalendar import": "Import ICalendar",
+    "to sync your cal with": "Pour synchronisez votre calendrier avec votre mobile vous devez :",
+    "install the webdav module": "Installer le module WebDAV depuis l'applithèque.",
+    "connect to it and follow": "Vous connectez et suivre les instructions relatives à CalDAV."
   };
   
 });
@@ -4509,9 +4532,15 @@ window.require.register("views/templates/popover_content", function(exports, req
   }
   else if ( type = 'event')
   {
-  buf.push('<div class="line"><span class="timeseparator">&nbsp;From</span><input');
+  buf.push('<div class="line"><span class="timeseparator">');
+  var __val__ = t("from")
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</span><input');
   buf.push(attrs({ 'id':('input-start'), 'type':("time"), 'value':(start), 'placeholder':(t("From hours:minutes")), "class": ('focused') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
-  buf.push('/><span class="timeseparator">&nbsp;to</span><input');
+  buf.push('/><span class="timeseparator">');
+  var __val__ = t("to")
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</span><input');
   buf.push(attrs({ 'id':('input-end'), 'type':("time"), 'value':(end), 'placeholder':(t("To hours:minutes+days")), "class": ('input-mini') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><span class="timeseparator">&nbsp;,</span><input');
   buf.push(attrs({ 'id':('input-diff'), 'type':("number"), 'value':(diff), 'placeholder':(0), 'min':(0), "class": ('col-xs2') + ' ' + ('input-mini') }, {"type":true,"value":true,"placeholder":true,"min":true}));
@@ -4567,10 +4596,34 @@ window.require.register("views/templates/sync_view", function(exports, require, 
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div class="helptext"><h2>Synchronization</h2></div><div class="helptext"><h3>Mobile sync (Caldav)</h3>To synchronize your calendar with your devices, you must follow two\nsteps:<ol><li>Install the webdav module from the Cozy App Store</li><li>Connect to it and follow the instructions related to CalDAV.</li></ol></div><div class="helptext"><h3>ICalendar Export</h3><p>To download a copy of your calendar on your computer as an ICal file, click\non this button : &nbsp;</p><p><a href="export/calendar.ics" class="btn">Export your calendar</a></p></div><div class="helptext"><h3>');
-  var __val__ = t('ICalendar Import')
+  buf.push('<div class="helptext"><h2>');
+  var __val__ = t('synchronization')
   buf.push(escape(null == __val__ ? "" : __val__));
-  buf.push('</h3>To import an ICal file into your cozy calendar, click on this button :<div id="importviewplaceholder"></div></div>');
+  buf.push('</h2></div><div class="helptext"><h3>');
+  var __val__ = t('mobile sync')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h3><p>');
+  var __val__ = t('to sync your cal with') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p><ol><li>');
+  var __val__ = t('install the webdav module') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</li><li> ');
+  var __val__ = t('connect to it and follow') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</li></ol></div><div class="helptext"><h3>');
+  var __val__ = t('icalendar import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h3><p>');
+  var __val__ = t('download a copy of your calendar') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p><p><a href="export/calendar.ics" class="btn">Export your calendar</a></p></div><div class="helptext"><h3>');
+  var __val__ = t('icalendar import')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h3><p>');
+  var __val__ = t('import an ical file') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p><div id="importviewplaceholder"></div></div>');
   }
   return buf.join("");
   };

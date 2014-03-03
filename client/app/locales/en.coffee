@@ -108,10 +108,13 @@ module.exports =
     "tags"                              : "Tags"
     "add tags"                          : "Add tags"
     "change"                            : "Change"
+    "change to"                         : "Change to"
     "change calendar"                   : "Change calendar"
     "save changes"                      : "Save changes"
     "save changes and invite guests"    : "Save changes and invite guests"
     "guests"                            : "Guests"
+    "from"                              : "From"
+    "to"                                : "&nbsp;to"
 
 # ERRORS
     "no description"                    : "A title must be set."
@@ -122,10 +125,13 @@ module.exports =
     "invalid trigg date"                : "The date is invalid."
     "invalid action"                    : "The action is invalid."
 
-
-
-
-
-
-
-
+# SYNC
+    "synchronization"                   : "Synchronization"
+    "mobile sync"                       : "Mobile Sync (CalDAV)"
+    "import an ical file"               : "To import an ICal file into your cozy calendar, click on this button:"
+    "download a copy of your calendar"  : "To download a copy of your calendar on your computer as an ICal file, click on this button:"
+    "icalendar export"                  : "ICalendar Export"
+    "icalendar import"                  : "ICalendar Import"
+    "to sync your cal with"             : "To synchronize your calendar with your devices, you must follow two steps"
+    "install the webdav module"         : "Install the webdav module from the Cozy App Store"
+    "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."

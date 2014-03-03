@@ -1,7 +1,7 @@
 module.exports =
     "Add"                               : "Ajouter"
-    "alarm"                             : "Alarme"
-    "event"                             : "Evénement"
+    "alarm"                             : "alarme"
+    "event"                             : "événement"
     "add the alarm"                     : "Ajouter l'alarme"
     "create alarm"                      : "Création d'une alarme"
     "create event"                      : "Création d'un évènement"
@@ -55,8 +55,6 @@ module.exports =
     "EMAIL"                             : "E-mail"
     "BOTH"                              : "E-mail & Notification"
     "display previous events"           : "Montrer les évènements précédent"
-    "event"                             : "Evenement"
-    "alarm"                             : "Alarme"
     "are you sure"                      : "Etes-vous sur ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'addresse email"
@@ -101,16 +99,20 @@ module.exports =
 
 # MODAL
     "summary"                           : "Titre"
+    "Summary"                           : "Titre"
     "place"                             : "Endroit"
     "start"                             : "Début"
     "end"                               : "Fin"
     "tags"                              : "Tags"
     "add tags"                          : "Ajouter des tags"
+    "change to"                         : "Changer en"
     "change"                            : "Modifier"
     "change calendar"                   : "Changer le calendrier"
     "save changes"                      : "Enregistrer"
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
+    "from"                              : "De"
+    "to"                                : "&nbsp;à"
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
@@ -120,3 +122,15 @@ module.exports =
     "invalid end date"                  : "La fin est invalide."
     "invalid trigg date"                : "Le moment est invalide."
     "invalid action"                    : "L'action est invalide."
+
+# SYNC
+    "synchronization"                   : "Synchronisation"
+    "mobile sync"                       : "Synchro Mobile (CalDAV)"
+    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :"
+    "download a copy of your calendar"  : "Pour télécharger une copie de votre calendrier sur votre ordinateur comme un fichier iCal, cliquez sur ce bouton :"
+    "icalendar export"                  : "Export ICalendar"
+    "icalendar import"                  : "Import ICalendar"
+    "to sync your cal with"             : "Pour synchronisez votre calendrier avec votre mobile vous devez :"
+    "install the webdav module"         : "Installer le module WebDAV depuis l'applithèque."
+    "connect to it and follow"          : "Vous connectez et suivre les instructions relatives à CalDAV."
+
