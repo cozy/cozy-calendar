@@ -11262,6 +11262,9 @@ cursor not-allowed {
 #import-form h3 {
   font-weight: normal;
 }
+#import-form #confirm-import-button {
+  margin-right: 10px;
+}
 #import-form #import-button {
   position: relative;
   overflow: hidden;
