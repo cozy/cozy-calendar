@@ -54,7 +54,7 @@ module.exports =
     "DISPLAY"                           : "Notification"
     "EMAIL"                             : "E-mail"
     "BOTH"                              : "E-mail & Notification"
-    "display previous events"           : "Montrer les évènements précédent"
+    "display previous events"           : "Montrer les évènements précédents"
     "are you sure"                      : "Etes-vous sur ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'addresse email"
