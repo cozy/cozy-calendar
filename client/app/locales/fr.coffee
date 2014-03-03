@@ -114,6 +114,7 @@ module.exports =
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
+    "no summary"                        : "Le titre est obligatoire"
     "start after end"                   : "La fin est après le début."
     "invalid start date"                : "Le début est invalide."
     "invalid end date"                  : "La fin est invalide."

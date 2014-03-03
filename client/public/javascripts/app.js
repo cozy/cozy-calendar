@@ -1135,6 +1135,7 @@ window.require.register("locales/en", function(exports, require, module) {
     "save changes and invite guests": "Save changes and invite guests",
     "guests": "Guests",
     "no description": "A title must be set.",
+    "no summary": "A summary must be set.",
     "start after end": "The start date is after the end date.",
     "invalid start date": "The start date is invalid.",
     "invalid end date": "The end date is invalid.",
@@ -1254,6 +1255,7 @@ window.require.register("locales/fr", function(exports, require, module) {
     "save changes and invite guests": "Enregistrer et envoyer les invitations",
     "guests": "Invités",
     "no description": "Le titre est obligatoire",
+    "no summary": "Le titre est obligatoire",
     "start after end": "La fin est après le début.",
     "invalid start date": "Le début est invalide.",
     "invalid end date": "La fin est invalide.",
@@ -1307,7 +1309,7 @@ window.require.register("models/alarm", function(exports, require, module) {
       if (!attrs.description || attrs.description === "") {
         errors.push({
           field: 'description',
-          value: "no description"
+          value: "no summary"
         });
       }
       if ((_ref1 = !attrs.action) === 'DISPLAY' || _ref1 === 'EMAIL' || _ref1 === 'BOTH') {
@@ -1400,7 +1402,7 @@ window.require.register("models/event", function(exports, require, module) {
       if (!attrs.description) {
         errors.push({
           field: 'description',
-          value: "no description"
+          value: "no summary"
         });
       }
       if (!attrs.start || !(start = Date.create(attrs.start)).isValid()) {
@@ -2371,6 +2373,7 @@ window.require.register("views/calendar_popover", function(exports, require, mod
           guiltyFields = '#input-start, #input-end';
       }
       this.$(guiltyFields).css('border-color', 'red');
+      this.$(guiltyFields).focus();
       alertMsg = $('<div class="alert"></div>').text(t(error.value));
       return this.$('.popover-content').before(alertMsg);
     };
@@ -4516,7 +4519,7 @@ window.require.register("views/templates/popover_content", function(exports, req
   var __val__ = '&nbsp;' + t('days later')
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</span></div><div class="line"><input');
-  buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Description")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
+  buf.push(attrs({ 'id':('input-desc'), 'type':("text"), 'value':(description), 'placeholder':(t("Summary")), "class": ('input') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><input');
   buf.push(attrs({ 'id':('input-place'), 'type':("text"), 'value':(place), 'placeholder':(t("Place")), "class": ('input-small') }, {"type":true,"value":true,"placeholder":true}));
   buf.push('/><a id="showmap" target="_blank" class="btn"><i class="icon-white icon-map-marker"></i></a></div><div class="popover-footer line"><a');

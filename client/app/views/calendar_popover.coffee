@@ -371,5 +371,6 @@ module.exports = class PopOver extends BaseView
                 guiltyFields = '#input-start, #input-end'
 
         @$(guiltyFields).css('border-color', 'red')
+        @$(guiltyFields).focus()
         alertMsg = $('<div class="alert"></div>').text(t(error.value))
         @$('.popover-content').before alertMsg

@@ -24,7 +24,7 @@ module.exports = class Alarm extends ScheduleItem
         if not attrs.description or attrs.description is ""
             errors.push
                 field: 'description'
-                value: "no description"
+                value: "no summary"
 
         if not attrs.action in ['DISPLAY', 'EMAIL', 'BOTH']
             errors.push

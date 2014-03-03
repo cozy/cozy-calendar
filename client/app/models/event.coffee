@@ -20,7 +20,7 @@ module.exports = class Event extends ScheduleItem
         if not attrs.description
             errors.push
                 field: 'description'
-                value: "no description"
+                value: "no summary"
 
         if not attrs.start or not (start = Date.create(attrs.start)).isValid()
             errors.push
