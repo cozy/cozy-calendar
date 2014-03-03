@@ -10679,6 +10679,7 @@ input[type="time"] {
   margin-right: 20px;
   margin-top: -2px;
   display: inline-block;
+  cursor: pointer;
 }
 .popover .popover-title #calendarcombo {
   -webkit-transition: 0s;
