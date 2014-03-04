@@ -1152,7 +1152,32 @@ window.require.register("locales/en", function(exports, require, module) {
     "icalendar import": "ICalendar Import",
     "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
     "install the webdav module": "Install the webdav module from the Cozy App Store",
-    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV."
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "January": "January",
+    "February": "February",
+    'Jan': 'Jan',
+    'Feb': 'Feb',
+    'Mar': 'Mar',
+    'Apr': 'Apr',
+    'Jun': 'Jun',
+    'Jul': 'Jul',
+    'Aug': 'Aug',
+    'Sep': 'Sep',
+    'Oct': 'Oct',
+    'Nov': 'Nov',
+    'Dec': 'Dec'
   };
   
 });
@@ -1283,7 +1308,30 @@ window.require.register("locales/fr", function(exports, require, module) {
     "icalendar import": "Import ICalendar",
     "to sync your cal with": "Pour synchronisez votre calendrier avec votre mobile vous devez :",
     "install the webdav module": "Installer le module WebDAV depuis l'applithèque.",
-    "connect to it and follow": "Vous connectez et suivre les instructions relatives à CalDAV."
+    "connect to it and follow": "Vous connectez et suivre les instructions relatives à CalDAV.",
+    "January": "Janvier",
+    "February": "Février",
+    "March": "Mars",
+    "April": "Avril",
+    "May": "Mai",
+    "June": "Juin",
+    "July": "Juillet",
+    "August": "Août",
+    "September": "Septembre",
+    "October": "Octobre",
+    "November": "Novembre",
+    "December": "Décembre",
+    'Jan': 'Jan',
+    'Feb': 'Fév',
+    'Mar': 'Mar',
+    'Apr': 'Avr',
+    'Jun': 'Jui',
+    'Jul': 'Jul',
+    'Aug': 'Aou',
+    'Sep': 'Sep',
+    'Oct': 'Oct',
+    'Nov': 'Nov',
+    'Dec': 'Déc'
   };
   
 });
@@ -1848,13 +1896,33 @@ window.require.register("views/calendar_header", function(exports, require, modu
     };
 
     CalendarHeader.prototype.getTitle = function() {
-      var format, view;
+      var format, formatDates, formatMonth, formatYear, res, view;
       if (!this.cal) {
         return t('List');
       }
+      formatDates = $.fullCalendar.formatDates;
       view = this.cal.fullCalendar('getView');
-      format = view.name === 'month' ? 'MMMM yyyy' : "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}";
-      return $.fullCalendar.formatDates(view.start, view.end, format);
+      if (view.name === 'month') {
+        formatMonth = 'MMMM';
+        formatYear = ' yyyy';
+        res = t(formatDates(view.start, '', formatMonth));
+        res += formatDates(view.start, '', formatYear);
+      } else {
+        format = "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}";
+        res = $.fullCalendar.formatDates(view.start, view.end, format);
+        res = res.replace('Jan', t('Jan'));
+        res = res.replace('Feb', t('Feb'));
+        res = res.replace('Mar', t('Mar'));
+        res = res.replace('Apr', t('Apr'));
+        res = res.replace('Jun', t('Jun'));
+        res = res.replace('Jul', t('Jul'));
+        res = res.replace('Aug', t('Aug'));
+        res = res.replace('Sep', t('Sep'));
+        res = res.replace('Oct', t('Oct'));
+        res = res.replace('Nov', t('Nov'));
+        res = res.replace('Dec', t('Dec'));
+      }
+      return res;
     };
 
     CalendarHeader.prototype.getDates = function() {
@@ -4622,6 +4690,12 @@ window.require.register("views/templates/sync_view", function(exports, require, 
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</h3><p>');
   var __val__ = t('import an ical file') 
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</p><div id="importviewplaceholder"></div></div><div class="helptext"><h3>');
+  var __val__ = t('publish your calendar')
+  buf.push(escape(null == __val__ ? "" : __val__));
+  buf.push('</h3><p>');
+  var __val__ = t('Select calendar to publish') 
   buf.push(escape(null == __val__ ? "" : __val__));
   buf.push('</p><div id="importviewplaceholder"></div></div>');
   }

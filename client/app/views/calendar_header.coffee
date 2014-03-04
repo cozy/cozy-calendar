@@ -19,10 +19,32 @@ module.exports = class CalendarHeader extends BaseView
 
     getTitle: ->
         return t('List') unless @cal
-        view = @cal.fullCalendar('getView')
-        format = if view.name is 'month' then 'MMMM yyyy'
-        else "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}"
-        return $.fullCalendar.formatDates view.start, view.end, format
+
+        formatDates = $.fullCalendar.formatDates
+
+        view = @cal.fullCalendar 'getView'
+
+        if view.name is 'month'
+            formatMonth = 'MMMM'
+            formatYear = ' yyyy'
+            res = t formatDates view.start, '', formatMonth
+            res += formatDates view.start, '', formatYear
+
+        else
+            format = "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}"
+            res = $.fullCalendar.formatDates view.start, view.end, format
+            res = res.replace 'Jan', t 'Jan'
+            res = res.replace 'Feb', t 'Feb'
+            res = res.replace 'Mar', t 'Mar'
+            res = res.replace 'Apr', t 'Apr'
+            res = res.replace 'Jun', t 'Jun'
+            res = res.replace 'Jul', t 'Jul'
+            res = res.replace 'Aug', t 'Aug'
+            res = res.replace 'Sep', t 'Sep'
+            res = res.replace 'Oct', t 'Oct'
+            res = res.replace 'Nov', t 'Nov'
+            res = res.replace 'Dec', t 'Dec'
+        res
 
     getDates: ->
         view = @cal.fullCalendar('getView')

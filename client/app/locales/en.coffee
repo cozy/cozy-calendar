@@ -135,3 +135,31 @@ module.exports =
     "to sync your cal with"             : "To synchronize your calendar with your devices, you must follow two steps"
     "install the webdav module"         : "Install the webdav module from the Cozy App Store"
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."
+
+# DATE
+    "January"                           : "January"
+    "February"                          : "February"
+    "March"                             : "March"
+    "April"                             : "April"
+    "May"                               : "May"
+    "June"                              : "June"
+    "July"                              : "July"
+    "August"                            : "August"
+    "September"                         : "September"
+    "October"                           : "October"
+    "November"                          : "November"
+    "December"                          : "December"
+    "January"                           : "January"
+    "February"                          : "February"
+
+    'Jan'                               : 'Jan'
+    'Feb'                               : 'Feb'
+    'Mar'                               : 'Mar'
+    'Apr'                               : 'Apr'
+    'Jun'                               : 'Jun'
+    'Jul'                               : 'Jul'
+    'Aug'                               : 'Aug'
+    'Sep'                               : 'Sep'
+    'Oct'                               : 'Oct'
+    'Nov'                               : 'Nov'
+    'Dec'                               : 'Dec'
