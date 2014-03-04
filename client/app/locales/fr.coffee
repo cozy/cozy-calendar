@@ -134,3 +134,27 @@ module.exports =
     "install the webdav module"         : "Installer le module WebDAV depuis l'applithèque."
     "connect to it and follow"          : "Vous connectez et suivre les instructions relatives à CalDAV."
 
+    "January"                           : "Janvier"
+    "February"                          : "Février"
+    "March"                             : "Mars"
+    "April"                             : "Avril"
+    "May"                               : "Mai"
+    "June"                              : "Juin"
+    "July"                              : "Juillet"
+    "August"                            : "Août"
+    "September"                         : "Septembre"
+    "October"                           : "Octobre"
+    "November"                          : "Novembre"
+    "December"                          : "Décembre"
+
+    'Jan'                               : 'Jan'
+    'Feb'                               : 'Fév'
+    'Mar'                               : 'Mar'
+    'Apr'                               : 'Avr'
+    'Jun'                               : 'Jui'
+    'Jul'                               : 'Jul'
+    'Aug'                               : 'Aou'
+    'Sep'                               : 'Sep'
+    'Oct'                               : 'Oct'
+    'Nov'                               : 'Nov'
+    'Dec'                               : 'Déc'

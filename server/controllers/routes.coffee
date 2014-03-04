@@ -44,6 +44,8 @@ module.exports =
         get   : ical.export
     'import/ical':
         post  : ical.import
+    'public/calendars/:calendarname.ics':
+        get   : ical.calendar
 
     # Contacts
     'contacts':
