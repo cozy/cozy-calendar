@@ -5,7 +5,7 @@
 A simple application to manage your events and your alarm.
 
 [![Build
-Status](https://travis-ci.org/mycozycloud/cozy-agenda.png?branch=master)](https://travis-ci.org/mycozycloud/cozy-agenda)
+Status](https://travis-ci.org/mycozycloud/cozy-calendar.png?branch=master)](https://travis-ci.org/mycozycloud/cozy-calendar)
 
 # Run
 
