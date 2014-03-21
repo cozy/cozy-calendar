@@ -13,7 +13,7 @@ Cozy Calendars makes your event management easy. Main features are:
 We assume here that the Cozy platform is correctly [installed](http://cozy.io/host/install.html)
  on your server.
 
-You can simply install the Calendar application via the app registry. Click on ythe *Chose Your Apps* button located on the right of your Cozy Home.
+You can simply install the Calendar application via the app registry. Click on ythe *Chose Your Apps* button located on the right of your Cozy Calendar.
 
 From the command line you can type this command:
 
@@ -57,7 +57,7 @@ Each modification of the client requires a specific build too.
 ![Build
 Status](https://travis-ci.org/mycozycloud/cozy-calendar.png?branch=master)
 
-To run tests type the following command into the Cozy Home folder:
+To run tests type the following command into the Cozy Calendar folder:
 
     cake tests
 
@@ -69,7 +69,7 @@ by [iconmonstr](http://iconmonstr.com/)
 
 ## License
 
-Cozy Home is developed by Cozy Cloud and distributed under the AGPL v3 license.
+Cozy Calendar is developed by Cozy Cloud and distributed under the AGPL v3 license.
 
 ## What is Cozy?
 
