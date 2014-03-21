@@ -1,6 +1,6 @@
 # [Cozy](http://cozy.io) Calendar
 
-Cozy Calendars makes your event management easy. Main features are: 
+Cozy Calendar makes your event management easy. Main features are: 
 
 * Simple UI
 * Event tagging
