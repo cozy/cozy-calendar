@@ -13,7 +13,7 @@ Cozy Calendars makes your event management easy. Main features are:
 We assume here that the Cozy platform is correctly [installed](http://cozy.io/host/install.html)
  on your server.
 
-You can simply install the Calendar application via the app registry (click onChose your apps button located on the right of your Cozy Home.
+You can simply install the Calendar application via the app registry. Click on ythe *Chose Your Apps* button located on the right of your Cozy Home.
 
 From the command line you can type this command:
 
