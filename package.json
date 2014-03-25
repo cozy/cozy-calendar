@@ -38,8 +38,8 @@
     "coffee-script": "latest"
   },
   "scripts": {
-    "test": "cake tests",
-    "start": "node server.js"
+    "test": "cake --use-js tests",
+    "start": "node build/server.js"
   },
   "cozy-permissions": {
     "Alarm": {

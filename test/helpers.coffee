@@ -1,15 +1,20 @@
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 
-Event = require '../server/models/event'
-Alarm = require '../server/models/alarm'
-User  = require '../server/models/user'
-
 module.exports = helpers = {}
+
+if process.env.USE_JS
+    helpers.prefix = '../build/'
+else
+    helpers.prefix = '../'
+
+Event = require "#{helpers.prefix}server/models/event"
+Alarm = require "#{helpers.prefix}server/models/alarm"
+User  = require "#{helpers.prefix}server/models/user"
 
 helpers.before = (done) ->
     @timeout 10000
-    start = require('../server')
+    start = require "#{helpers.prefix}server"
     start 8888, (err, app, server) =>
         @server = server
         data =

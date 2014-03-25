@@ -5,6 +5,7 @@ start = (port, callback) ->
             name: 'Calendar'
             port: port
             host: process.env.HOST or "0.0.0.0"
+            root: __dirname
     , (app, server) ->
         User = require './server/models/user'
         Realtimer = require('cozy-realtime-adapter')
