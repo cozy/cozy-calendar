@@ -15,13 +15,12 @@ describe "Alarms management", ->
 
         before helpers.cleanDb
         before helpers.createAlarm("DISPLAY", "Something to remind",
-                                    "Tue Apr 23 2013 14:40:00 ")
+                                    "Tue Apr 23 2013 14:40:00 ", "Europe/Paris")
         before helpers.createAlarm("EMAIL", "Something else to remind",
                                     "Tue Apr 24 2013 13:30:00")
 
         it "should return all the alarms in database", (done) ->
             client.get "alarms/", (error, response, body) ->
-
                 should.not.exist error
                 should.exist response
                 should.exist body

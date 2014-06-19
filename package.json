@@ -3,10 +3,16 @@
   "version": "1.0.1",
   "displayName": "Calendar",
   "description": "Manage your events and alarms with your Cozy.",
+  "author": "Cozy Cloud <contact@cozycloud.cc> (http://cozycloud.cc)",
+  "licenses": [
+    {
+      "type": "AGPL v3",
+      "url": "http://www.gnu.org/licenses/agpl-3.0.html"
+    }
+  ],
   "engines": [
     "node = 0.8.x"
   ],
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/mycozycloud/cozy-agenda.git"
@@ -32,8 +38,8 @@
     "coffee-script": "latest"
   },
   "scripts": {
-    "test": "cake tests",
-    "start": "node server.js"
+    "test": "cake --use-js tests",
+    "start": "node build/server.js"
   },
   "cozy-permissions": {
     "Alarm": {

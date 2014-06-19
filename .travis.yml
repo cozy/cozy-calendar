@@ -1,5 +1,6 @@
 language: node_js
 node_js:
+    - "0.10"
     - "0.8"
 services:
     - couchdb
@@ -12,7 +13,7 @@ before_install:
     - npm install forever coffee-script -g
     - npm install # data-system
     - pwd
-    - forever start -o forever-ds.log server.js
+    - NAME=data-system TOKEN=token forever start -o forever-ds.log build/server.js
     - ps aux | grep server.js
     - sleep 5
     - cat forever-ds.log
