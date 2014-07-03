@@ -1,34 +1,12 @@
 {
-    "author": "Your Name",
-    "name": "package-name",
-    "description": "Package description",
-    "version": "0.0.1",
-    "homepage": "",
-    "repository": {
-        "type": "git",
-        "url": ""
-    },
-    "engines": {
-        "node": "~0.6.10 || 0.8 || 0.9"
-    },
-    "scripts": {
-        "start": "brunch watch --server"
-    },
-    "dependencies": {
-        "css-brunch": "> 1.0 < 1.5",
-        "javascript-brunch": "> 1.0 < 1.5",
-        "coffee-script-brunch": "> 1.0 < 1.5",
-        "jade-brunch": "> 1.0 < 1.5",
-        "stylus-brunch": ">= 1.0 < 1.4",
-
-        "uglify-js-brunch": "> 1.0 < 1.5",
-        "clean-css-brunch": "> 1.0 < 1.5",
-
-        "auto-reload-brunch": "> 1.0 < 1.5"
-    },
-    "devDependencies": {
-        "mocha": "0.14.0",
-        "expect.js": "0.1.2",
-        "ws": "0.4.21"
-    }
+  "dependencies": {
+    "javascript-brunch": "1.7.1",
+    "css-brunch": "1.7.0",
+    "coffee-script-brunch": "1.8.0",
+    "stylus-brunch": "1.8.0",
+    "jade-brunch": "1.8.1",
+    "digest-brunch": "1.2.2",
+    "clean-css-brunch": "1.7.1"
+  },
+  "devDependencies": {}
 }
