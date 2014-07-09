@@ -68,6 +68,8 @@ In order to run the tests, you must only have the Data System started.
 
 by [iconmonstr](http://iconmonstr.com/)
 
+Main icon by [Elegant Themes](http://www.elegantthemes.com/blog/freebie-of-the-week/beautiful-flat-icons-for-free).
+
 ## License
 
 Cozy Calendar is developed by Cozy Cloud and distributed under the AGPL v3 license.
