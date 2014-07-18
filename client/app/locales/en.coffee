@@ -128,6 +128,7 @@ module.exports =
 # SYNC
     "synchronization"                   : "Synchronization"
     "mobile sync"                       : "Mobile Sync (CalDAV)"
+    "link imported events with calendar": "Link events to import with following calendar:"
     "import an ical file"               : "To import an ICal file into your cozy calendar, click on this button:"
     "download a copy of your calendar"  : "To download a copy of your calendar on your computer as an ICal file, click on this button:"
     "icalendar export"                  : "ICalendar Export"
@@ -135,6 +136,8 @@ module.exports =
     "to sync your cal with"             : "To synchronize your calendar with your devices, you must follow two steps"
     "install the webdav module"         : "Install the webdav module from the Cozy App Store"
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."
+    "some event fail to save"           : "An event was not saved (an error occured)."
+
 
 # DATE
     "January"                           : "January"

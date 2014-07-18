@@ -373,6 +373,7 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 /*!
  * Bootstrap v2.3.1
  *
@@ -6680,6 +6681,7 @@ button.close {
     overflow: visible !important;
   }
 }
+
 /*!
  * Timepicker Component for Twitter Bootstrap
  *
@@ -6801,6 +6803,7 @@ button.close {
     width: 100%;
   }
 }
+
 /*!
  * FullCalendar v1.6.1 Stylesheet
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -7380,6 +7383,7 @@ table.fc-border-separate {
 	}
 
 
+
 /*!
  * Datetimepicker for Bootstrap
  *
@@ -7794,6 +7798,7 @@ table.fc-border-separate {
 	width: 14px;
 	height: 14px;
 }
+
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -9132,6 +9137,7 @@ table.fc-border-separate {
 .fa-plus-square-o:before {
   content: "\f196";
 }
+
 /*! jQuery UI - v1.10.3 - 2014-01-16
 * http://jqueryui.com
 * Includes: jquery.ui.core.css, jquery.ui.resizable.css, jquery.ui.autocomplete.css, jquery.ui.menu.css, jquery.ui.theme.css
@@ -9756,6 +9762,7 @@ table.fc-border-separate {
 	filter: Alpha(Opacity=60);
 	border-radius: 0px;
 }
+
 ul.tagit {
     padding: 1px 5px;
     overflow: auto;
@@ -9825,6 +9832,7 @@ ul.tagit input[type="text"] {
     background-color: inherit;
     outline: none;
 }
+
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");
@@ -10246,7 +10254,7 @@ textarea:active {
   border-radius: 0px;
   padding: 5px;
 }
-@media (min-width: 1100px) {
+@media( min-width: 1100px) {
   #event-modal {
     width: 1000px;
     margin-left: -500px;
@@ -10639,7 +10647,7 @@ input[type="time"] {
   border-radius: 0px;
   padding: 5px;
 }
-@media (min-width: 1100px) {
+@media( min-width: 1100px) {
   #event-modal {
     width: 1000px;
     margin-left: -500px;
@@ -11037,7 +11045,7 @@ a.btn:visited {
 .popover-title .close {
   color: #333;
   opacity: 0.7;
-  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
   filter: alpha(opacity=70);
 }
 .popover-content input,
@@ -11172,10 +11180,10 @@ a.btn:visited {
   -ms-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
-[data-state~="disabled"],
-cursor not-allowed {
+[data-state~="disabled"] {
+  cursor: not-allowed;
   opacity: 0.5;
-  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: alpha(opacity=50);
   -webkit-transition: opacity 0.2s linear;
   -moz-transition: opacity 0.2s linear;
@@ -11215,6 +11223,18 @@ cursor not-allowed {
   -o-transition: color 0.2s linear, border-color 0.2s linear;
   -ms-transition: color 0.2s linear, border-color 0.2s linear;
   transition: color 0.2s linear, border-color 0.2s linear;
+}
+.mt1 {
+  margin-top: 10px;
+}
+.mt2 {
+  margin-top: 20px;
+}
+.mt3 {
+  margin-top: 30px;
+}
+.mb2 {
+  margin-bottom: 20px;
 }
 #view-container {
   border-bottom: 0;
@@ -11275,7 +11295,7 @@ cursor not-allowed {
 }
 #import-form #import-button input {
   opacity: 0.01;
-  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=1);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=1)";
   filter: alpha(opacity=1);
   cursor: pointer;
   position: absolute;
@@ -11298,7 +11318,7 @@ cursor not-allowed {
   margin: 0;
   sharefont-weight: 10px;
 }
-@media (max-width: 1000px) {
+@media( max-width: 1000px) {
   #alarms,
   #alarm-list {
     width: 100%;
@@ -11327,7 +11347,7 @@ cursor not-allowed {
     margin-bottom: 10px;
   }
 }
-@media (max-width: 700px) {
+@media( max-width: 700px) {
   #alarms .fc-day-header {
     font-size: 12px;
     text-align: center;
@@ -11337,7 +11357,7 @@ cursor not-allowed {
     font-size: 22px;
   }
 }
-@media (max-width: 600px) {
+@media( max-width: 600px) {
   ul#menu {
     height: 40px;
     width: 100%;
@@ -11396,7 +11416,7 @@ cursor not-allowed {
     width: 100%;
   }
 }
-@media (max-width: 500px) {
+@media( max-width: 500px) {
   #alarms .popover {
     width: 310px;
   }
@@ -11407,6 +11427,7 @@ cursor not-allowed {
     display: block;
   }
 }
+
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
@@ -11432,3 +11453,6 @@ cursor not-allowed {
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+
+
+/*# sourceMappingURL=app.css.map*/

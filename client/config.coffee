@@ -4,12 +4,13 @@ exports.config =
 
     paths:
         public:  'public'
-        test: 'tests'
 
     plugins:
         coffeelint:
             options:
                 indentation: value: 4, level: 'error'
+        jade:
+            globals: ['t', 'moment']
 
     conventions:
         vendor:  /(vendor)|(tests)(\/|\\)/ # do not wrap tests in modules
@@ -19,7 +20,6 @@ exports.config =
             joinTo:
                 'javascripts/app.js': /^app/
                 'javascripts/vendor.js': /^vendor/
-                '../tests/tests.js': /^test.*\.coffee/
             order:
                 # Files in `vendor` directories are compiled before other files
                 # even if they aren't specified in order.
