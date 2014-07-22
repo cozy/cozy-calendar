@@ -1,4 +1,5 @@
 BaseView = require '../lib/base_view'
+ComboBox = require 'views/widgets/combobox'
 helpers = require '../helpers'
 
 Alarm = require '../models/alarm'
@@ -29,6 +30,15 @@ module.exports = class ImportView extends BaseView
         @importButton = @$ '#import-button'
         @confirmButton = @$ 'button#confirm-button'
 
+        # Combo to select in which calendar events will be imported.
+        # Autocomplete method cannot be loaded too early. So, we delay its
+        # call (the render of the top view occurs after).
+        setTimeout =>
+            @calendarCombo = new ComboBox
+                el: @$('#import-calendar-combo')
+                small: true
+                source: app.tags.calendars()
+        , 500
 
     onFileChanged: (event) ->
         file = @uploader[0].files[0]
@@ -55,7 +65,6 @@ module.exports = class ImportView extends BaseView
                         event = new Event vevent
                         @eventList.collection.add event
 
-
                 @$(".import-form").fadeOut =>
                     @resetUploader()
                     @importButton.spin()
@@ -72,18 +81,29 @@ module.exports = class ImportView extends BaseView
                 @importButton.spin()
                 @importButton.find('span').html t 'select an icalendar file'
 
+    # When import confirmation is clicked, all events and alarm loaded are
+    # saved to the backend and linked with the selected calendar.
     onConfirmImportClicked: ->
-        counter = @alarmList.collection.length + @eventList.collection.length
-        console.log counter, @alarmList.length, @eventList.length
 
+        # The user selects the calendar that will be set on all imported events
+        # and alarms.
+        calendar = @calendarCombo.value()
+        calendar = 'my calendar' if not calendar? or calendar is ''
+
+        # Amount of elements to import.
+        counter = @alarmList.collection.length + @eventList.collection.length
+
+        # When an element failed to import, an error message is displayed.
+        # Finish function is called when there is no more element to save.
         onFaillure = (model) =>
-            console.log "faillure", model.cid, counter
             counter = counter - 1
-            alert('some event fail to save');
+            alert t 'some event fail to save'
             finish() if counter is 0
 
+        # When an element is successfully imported, it is added to the current
+        # calendar view.
+        # Finish function is called when there is no more element to save.
         onSuccess = (model) =>
-            console.log "success", model.cid, counter
             switch model.constructor
                 when Event then app.events.add model
                 when Alarm then app.alarms.add model
@@ -91,6 +111,8 @@ module.exports = class ImportView extends BaseView
             counter = counter - 1
             finish() if counter is 0
 
+        # When import is finished, the import form is reset and the calendar
+        # view is displayed.
         finish = =>
             @$(".confirmation").fadeOut()
             @$(".results").slideUp =>
@@ -100,14 +122,20 @@ module.exports = class ImportView extends BaseView
             @eventList.collection.reset()
             app.router.navigate "calendar", true
 
+        # Show loading spinner.
         @confirmButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @confirmButton.spin 'tiny'
+
+        # Save every imported alarms to the database.
         @alarmList.collection.each (alarm) ->
+            alarm.set 'tags', [calendar]
             alarm.save null,
                 success: onSuccess
                 error: onFaillure
 
+        # Save every imported events to the database.
         @eventList.collection.each (event) ->
+            event.set 'tags', [calendar]
             event.save null,
                 success: onSuccess
                 error: onFaillure

@@ -1,5 +1,13 @@
 #import-form.well
 
+    div.import-calendar-selection.mb2
+        span= t('link imported events with calendar')
+        br
+        input#import-calendar-combo.mt1
+
+    p
+        = t('import an ical file') 
+
     div.import-form
         div#import-button.btn
             span= t('select an icalendar file')
@@ -9,7 +17,7 @@
         button#confirm-import-button.btn= t('confirm import')
         button#cancel-import-button.btn=t ('cancel')
 
-    div.results
+    div.results.mt3
         h4= t('Alarms to import')
         #import-alarm-list
 

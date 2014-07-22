@@ -42,27 +42,3 @@ module.exports.import = (req, res) ->
                     alarms: Alarm.extractAlarms result, User.timezone
     else
         res.send error: 'no file sent', 500
-
-
-#module.exports.export = (req, res) ->
-    #calendar = Alarm.getICalCalendar()
-    #key = ['tag', req.params.calendarname]
-    #Alarm.request "tags", key: key, (err, alarms) ->
-        #if err
-            #res.send error: true, msg: 'Server error occurred while retrieving data'
-        #else
-            #Event.request "tags", key: key, (err, events) ->
-                #if err then res.send
-                        #error: true
-                        #msg: 'Server error occurred while retrieving data'
-                #else
-                    #if alarms.length > 0
-                        #for alarm in alarms
-                            #calendar.add alarm.timezoneToIcal()
-                            #calendar.add alarm.toIcal()
-
-                    #if events.length > 0
-                        #calendar.add event.toIcal() for event in events
-
-                    #res.header 'Content-Type': 'text/calendar'
-                    #res.send calendar.toString()
