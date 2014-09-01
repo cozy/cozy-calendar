@@ -114,7 +114,7 @@ module.exports =
     "save changes and invite guests"    : "Save changes and invite guests"
     "guests"                            : "Guests"
     "from"                              : "From"
-    "to"                                : "&nbsp;to"
+    "to"                                : "to"
 
 # ERRORS
     "no description"                    : "A title must be set."
