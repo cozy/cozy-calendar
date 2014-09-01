@@ -24,13 +24,13 @@ exports.config =
                 # Files in `vendor` directories are compiled before other files
                 # even if they aren't specified in order.
                 before: [
-                    'vendor/scripts/jquery-1.9.1.js'
+                    'vendor/scripts/jquery-2.1.1.js'
                     'vendor/scripts/jquery-ui-1.10.3.custom.js'
                     'vendor/scripts/bootstrap.js'
                     'vendor/scripts/bootstrap-datepicker.js'
                     'vendor/scripts/bootstrap-timepicker.js'
                     'vendor/scripts/underscore-1.4.4.js'
-                    'vendor/scripts/backbone-1.0.0.js'
+                    'vendor/scripts/backbone-1.1.2.js'
                     'vendor/scripts/spin.js'
                     'vendor/scripts/fullcalendar.js'
                     'vendor/scripts/rrule.js'
