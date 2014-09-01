@@ -14,7 +14,7 @@ module.exports = class CalendarView extends BaseView
     id: 'view-container'
     template: require('./templates/calendarview')
 
-    initialize: (options) ->
+    initialize: (@options) ->
         @alarmCollection = @model.alarms
         @listenTo @alarmCollection, 'add'  , @refresh
         @listenTo @alarmCollection, 'reset', @refresh
