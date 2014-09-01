@@ -1142,7 +1142,7 @@ module.exports = {
   "save changes and invite guests": "Save changes and invite guests",
   "guests": "Guests",
   "from": "From",
-  "to": "&nbsp;to",
+  "to": "to",
   "no description": "A title must be set.",
   "no summary": "A summary must be set.",
   "start after end": "The start date is after the end date.",
@@ -1300,7 +1300,7 @@ module.exports = {
   "save changes and invite guests": "Enregistrer et envoyer les invitations",
   "guests": "Invités",
   "from": "De",
-  "to": "&nbsp;à",
+  "to": "à",
   "no description": "Le titre est obligatoire",
   "no summary": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
@@ -1914,7 +1914,7 @@ module.exports = CalendarHeader = (function(_super) {
       res = t(formatDates(view.start, '', formatMonth));
       res += formatDates(view.start, '', formatYear);
     } else {
-      format = "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}";
+      format = "MMM d[ yyyy]{ ' - '[ MMM] d yyyy}";
       res = $.fullCalendar.formatDates(view.start, view.end, format);
       res = res.replace('Jan', t('Jan'));
       res = res.replace('Feb', t('Feb'));
@@ -2554,6 +2554,7 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.template = require('./templates/calendarview');
 
   CalendarView.prototype.initialize = function(options) {
+    this.options = options;
     this.alarmCollection = this.model.alarms;
     this.listenTo(this.alarmCollection, 'add', this.refresh);
     this.listenTo(this.alarmCollection, 'reset', this.refresh);
@@ -4541,7 +4542,7 @@ buf.push("</select></div><div class=\"line\"><input id=\"input-desc\" type=\"tex
 }
 else if ( type = 'event')
 {
-buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span class=\"timeseparator\">&nbsp;,</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = '&nbsp;' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
+buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
 };return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
