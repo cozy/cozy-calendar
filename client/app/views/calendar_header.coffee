@@ -31,7 +31,7 @@ module.exports = class CalendarHeader extends BaseView
             res += formatDates view.start, '', formatYear
 
         else
-            format = "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}"
+            format = "MMM d[ yyyy]{ ' - '[ MMM] d yyyy}"
             res = $.fullCalendar.formatDates view.start, view.end, format
             res = res.replace 'Jan', t 'Jan'
             res = res.replace 'Feb', t 'Feb'
