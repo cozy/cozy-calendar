@@ -10,7 +10,7 @@ exports.config =
             options:
                 indentation: value: 4, level: 'error'
         jade:
-            globals: ['t', 'moment']
+            globals: ['t', 'moment','RRule']
 
     conventions:
         vendor:  /(vendor)|(tests)(\/|\\)/ # do not wrap tests in modules
