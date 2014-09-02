@@ -112,7 +112,7 @@ module.exports =
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
     "from"                              : "De"
-    "to"                                : "&nbsp;à"
+    "to"                                : "à"
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
