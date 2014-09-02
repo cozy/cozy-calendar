@@ -89,10 +89,10 @@ expectedContent = """
     END:VTODO
     BEGIN:VEVENT
     SUMMARY:my description
-    DTSTART;VALUE=DATE-TIME:20130609T150000Z
-    DTEND;VALUE=DATE-TIME:20130610T150000Z
     LOCATION:my place
     UID:[id-4]
+    DTSTART;VALUE=DATE-TIME:20130609T150000Z
+    DTEND;VALUE=DATE-TIME:20130610T150000Z
     END:VEVENT
     END:VCALENDAR
     """.replace(/\n/g, '\r\n')
@@ -143,10 +143,10 @@ describe "Calendar export/import", ->
                 vevent.toString().should.equal """
                     BEGIN:VEVENT
                     SUMMARY:desc
-                    DTSTART;VALUE=DATE-TIME:20130609T150000Z
-                    DTEND;VALUE=DATE-TIME:20130610T150000Z
                     LOCATION:loc
                     UID:eid
+                    DTSTART;VALUE=DATE-TIME:20130609T150000Z
+                    DTEND;VALUE=DATE-TIME:20130610T150000Z
                     END:VEVENT""".replace(/\n/g, '\r\n')
 
 
@@ -253,11 +253,11 @@ describe "Calendar export/import", ->
                 event.toIcal().toString().should.equal """
                     BEGIN:VEVENT
                     SUMMARY:my description
-                    DTSTART;VALUE=DATE-TIME:20130424T133000Z
-                    DTEND;VALUE=DATE-TIME:20130425T133000Z
                     LOCATION:my place
                     UID:testid
                     DESCRIPTION:test
+                    DTSTART;VALUE=DATE-TIME:20130424T133000Z
+                    DTEND;VALUE=DATE-TIME:20130425T133000Z
                     END:VEVENT""".replace(/\n/g, '\r\n')
 
             it 'fromIcal', (done) ->
