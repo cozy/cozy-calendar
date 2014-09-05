@@ -1,8 +1,17 @@
 module.exports =
 
+
     initialize: ->
+        # Initialize timezone with the Cozy User's one. 
+        # Need page refresh to realod it ; not that nice ...
+        $.get "users/current?keys=timezone", (data) =>
+            @timezone = data
+            @_initialize()
+
+    _initialize: ->
 
         window.app = @
+
 
         @locale = window.locale
         delete window.locale
@@ -51,6 +60,7 @@ module.exports =
             @contacts.reset window.initcontacts
             delete window.initcontacts
 
+       
 
         Backbone.history.start()
 

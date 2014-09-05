@@ -1,6 +1,7 @@
 app = require 'application'
 BaseView = require '../lib/base_view'
 Popover = require './calendar_popover'
+EventPopover = require './calendar_popover_event'
 Header = require './calendar_header'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
@@ -58,7 +59,8 @@ module.exports = class CalendarView extends BaseView
                 week:  locale.units[5]
                 day:   locale.units[4]
 
-            ignoreTimezone: true
+            timezone: "UTC" # "In other parts of the API, moments will be represented in UTC." http://arshaw.com/fullcalendar/docs/timezone/timezone/ 
+            #ignoreTimezone: true # 20140904 TODO : what's behaviour of this indead ? http://arshaw.com/fullcalendar/docs1/event_data/ignoreTimezone/
             timeFormat:
                 '' : '' # do not display times on event
                 'agendaWeek': ''
@@ -149,7 +151,8 @@ module.exports = class CalendarView extends BaseView
                 @popover = null
                 return
 
-        @popover = new Popover options
+        # @popover = new Popover options
+        @popover = new EventPopover options
         @popover.render()
 
     onChangeView: (view) =>

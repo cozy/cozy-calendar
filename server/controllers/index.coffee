@@ -31,15 +31,18 @@ module.exports.index = (req, res) ->
                 for alarm, index in alarms
                     alarms[index] = alarm.timezoned()
             catch err then cb err
-            cb null, alarms
+            #stub
+            # cb null, alarms
+            cb null, []
 
-        (cb) => Event.all (err, events) =>
-            return cb err if err
-            try
-                for evt, index in events
-                    events[index] = evt.timezoned()
-            catch err then cb err
-            cb null, events
+        Event.all
+        # (cb) => Event.all (err, events) =>
+        #     return cb err if err
+        #     try
+        #         for evt, index in events
+        #             events[index] = evt.timezoned()
+        #     catch err then cb err
+        #     cb null, events
 
         (cb) => CozyInstance.getLocale (err, locale) ->
             console.log err if err
@@ -60,3 +63,11 @@ module.exports.index = (req, res) ->
                 window.initevents = #{JSON.stringify(events)};
                 window.initcontacts = #{JSON.stringify(contacts)};
             """
+
+module.exports.userTimezone = (req, res) ->
+
+    if req.query.keys != "timezone"
+        res.send "keys not exposed", 403
+    
+    else
+        res.send User.timezone

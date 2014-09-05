@@ -34,6 +34,8 @@ exports.config =
                     'vendor/scripts/spin.js'
                     'vendor/scripts/fullcalendar.js'
                     'vendor/scripts/rrule.js'
+                    'vendor/scripts/moment.js'
+                    'vendor/scripts/moment-timezone-with-data.js'
                 ]
 
         stylesheets:

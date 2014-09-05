@@ -1,4 +1,4 @@
-BaseView = require '../lib/base_view'
+PopoverView = require '../lib/popover_view'
 RRuleFormView = require 'views/event_modal_rrule'
 EventModal = require 'views/event_modal'
 ComboBox = require 'views/widgets/combobox'
@@ -6,9 +6,10 @@ Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
 
-module.exports = class PopOver extends BaseView
+module.exports = class PopOver extends PopoverView
 
-    template: require('./templates/popover_content')
+    titleTemplate: require('./templates/popover_title')
+    template: require('./templates/popover_event')
 
     events:
         'keyup input': 'onKeyUp'
@@ -21,46 +22,28 @@ module.exports = class PopOver extends BaseView
         'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
 
+                # keep the endDate after the startDate
+
+        'changeTime.timepicker #input-start': 'adjustTimePickers'
+         # (ev) =>
+            # @adjustTimePickers 'start', ev.time.value
+
+        'changeTime.timepicker #input-end': 'adjustTimePickers'
+        # , (ev) =>
+            # @adjustTimePickers 'end', ev.time.value
+
     initialize: (options) ->
-        # options { 
-        #    model: #event or alarm
-        #    target: # elem on which attach the popover.
-        # }
-        if options.type
-            @type = options.type
+        super options
+
+        if not @model
             @model = @makeNewModel options
 
-        else if @model
-            @type = if @model instanceof Event then 'event' else 'alarm'
-
-        @target = options.target
-        @container = options.container
-        @parentView = options.parentView
-
-    selfclose: () ->
-        @parentView.onPopoverClose?()
-        @close()
-
-    close: () ->
-        @target.popover 'destroy'
-        @target.data 'popover', undefined
-        @remove()
-
-    render: ->
-        @target.popover(
-            selector: true
-            trigger: 'manual'
-            title: require('./templates/popover_title') @getRenderData()
-            html: true
-            placement: @getDirection()
-            content: @template @getRenderData()
-        ).popover('show')
-        @setElement $('#view-container .popover')
-        @afterRender()
 
     afterRender: ->
-        @addButton = @$('.btn.add').text @getButtonText()
+        # @addButton = @$('.btn.add').text @getButtonText()
+        @addButton = @$('.btn.add')
         @removeButton = @$('.remove')
+
         @removeButton.hide() if @model.isNew()
         @$('input[type="time"]').attr('type', 'text').timepicker
             template: false
@@ -68,6 +51,7 @@ module.exports = class PopOver extends BaseView
             showMeridian: false
         @$('.focused').focus()
 
+        # 20140904 : Put them with backbone events ?
         inputEnd = @$('#input-end')
         inputStart = @$('#input-start')
         inputDiff = @$('#input-diff')
@@ -80,33 +64,13 @@ module.exports = class PopOver extends BaseView
             if ev.keyCode is 39 # right
                 @$('#input-desc').focus()
 
-        # keep the endDate after the startDate
-        inputStart.on 'changeTime.timepicker', (ev) =>
-            @adjustTimePickers 'start', ev.time.value
+        # # keep the endDate after the startDate
+        # inputStart.on 'changeTime.timepicker', (ev) =>
+        #     @adjustTimePickers 'start', ev.time.value
 
-        inputEnd.on 'changeTime.timepicker', (ev) =>
-            @adjustTimePickers 'end', ev.time.value
+        # inputEnd.on 'changeTime.timepicker', (ev) =>
+        #     @adjustTimePickers 'end', ev.time.value
 
-        if @type is 'alarm'
-            tzInput = @$('#input-timezone')
-            @actionMail = new Toggle
-                icon: 'envelope'
-                label: 'email notification'
-                value: @model.get('action') in ['EMAIL', 'BOTH']
-
-            @actionNotif = new Toggle
-                icon: 'exclamation-sign'
-                label: 'home notification'
-                value: @model.get('action') in ['DISPLAY', 'BOTH']
-
-            @actionMail.on 'toggle', (mailIsOn) =>
-                @actionNotif.toggle true unless mailIsOn
-
-            @actionNotif.on 'toggle', (notifIsOn) =>
-                @actionMail.toggle true unless notifIsOn
-
-            tzInput.after @actionMail.$el
-            tzInput.after @actionNotif.$el
 
         if @model.get 'rrule'
             @rruleForm = new RRuleFormView model: @model
@@ -138,7 +102,6 @@ module.exports = class PopOver extends BaseView
         else if fitRight then 'right'
         else 'left'
 
-    getButtonText: -> if @model.isNew() then t('create') else t('edit')
 
     getRenderData: ->
         data = _.extend type: @type,
@@ -149,40 +112,28 @@ module.exports = class PopOver extends BaseView
 
         data.calendar = data.tags?[0] or ''
 
-        if @model instanceof Event
-            endDate = @model.getEndDateObject()
-            startDate = @model.getStartDateObject()
-            unless @model.isOneDay()
-                diff = endDate - startDate
-                diff = Math.round(diff / 1000 / 3600 / 24)
-            data.start = startDate.format '{HH}:{mm}'
-            data.end = endDate.format '{HH}:{mm}'
-            data.start = '10:00' if data.start is '00:00'
-            data.end = '18:00' if data.end is '00:00'
-            data.diff = diff or 0
+        endDate = @model.getEndDateObject()
+        startDate = @model.getStartDateObject()
+        unless @model.isOneDay()
+            diff = endDate - startDate
+            diff = Math.round(diff / 1000 / 3600 / 24)
+        data.start = startDate.format 'HH:mm'
+        data.end = endDate.format 'HH:mm'
+        data.start = '10:00' if data.start is '00:00'
+        data.end = '18:00' if data.end is '00:00'
+        data.diff = diff or 0
 
-        else
-            data.time = @model.get('timezoneHour')
-            # data.time = @model.getDateObject().format '{HH}:{mm}'
-            data.timezones = require('helpers/timezone').timezones
 
         return data
 
     makeNewModel: (options) ->
-        switch @type
-            when 'event' then new Event
-                start: options.start.format Event.dateFormat, 'en-en'
-                end: options.end.format Event.dateFormat, 'en-en'
-                description: ''
-                place: ''
+        new Event
+            start: options.start.format Event.dateFormat, 'en-en'
+            end: options.end.format Event.dateFormat, 'en-en'
+            description: ''
+            place: ''
 
-            when 'alarm' then new Alarm
-                trigg: options.start.format Alarm.dateFormat, 'en-en'
-                timezone: 'Europe/Paris'
-                description: ''
-                action: 'DISPLAY'
 
-            else throw new Error 'wrong type'
 
     onTabClicked: (event) ->
         @parentView.showPopover
@@ -214,45 +165,31 @@ module.exports = class PopOver extends BaseView
 
     formatDate: (relativeTo, value) ->
         # Intitialize new alarm
-        date = Date.create relativeTo
+        # date = Date.create relativeTo
+        date = moment.tz(relativeTo, window.app.timezone)
 
         # smart detection: set the time if the user input has a time
         splitted = value.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
         if splitted and splitted[0]
             [all, hours, minutes, diff] = splitted
-            date.set {hours: +hours, minutes: +minutes}
-            date.advance(days: +diff) if diff
+            # date.set {hours: +hours, minutes: +minutes}
+            date.set('hour', +hours)
+            date.set('minute', +minutes)
+            # date.advance(days: +diff) if diff
+            date.add('day', +diff) if diff
 
         return date
 
     getModelAttributes: =>
-        if @model instanceof Event
-            date = @model.getStartDateObject()
-            startDate = @formatDate date, @$('#input-start').val()
-            end = @$('#input-end').val() + '+' + @$('#input-diff').val()
-            endDate = @formatDate date, end
-            data =
-                start: startDate.format Event.dateFormat, 'en-en'
-                end: endDate.format Event.dateFormat, 'en-en'
-                place: @$('#input-place').val()
-                description: @$('#input-desc').val()
-
-        else
-
-            action = if @actionNotif.value and @actionMail.value then 'BOTH'
-            else if @actionMail.value then 'EMAIL'
-            else 'DISPLAY'
-
-            data =
-                timezone: @$('#input-timezone').val()
-                timezoneHour: @$('#input-time').val()
-                description: @$('#input-desc').val()
-                action: action
-
-            if @rruleForm?.hasRRule()
-                data.rrule = @rruleForm.getRRule().toString()
-            else
-                data.rrule = ""
+        date = @model.getStartDateObject()
+        startDate = @formatDate date, @$('#input-start').val()
+        end = @$('#input-end').val() + '+' + @$('#input-diff').val()
+        endDate = @formatDate date, end
+        data =
+            start: startDate.format Event.dateFormat, 'en-en'
+            end: endDate.format Event.dateFormat, 'en-en'
+            place: @$('#input-place').val()
+            description: @$('#input-desc').val()
 
         data.tags = [@calendar.value()]
 
@@ -274,7 +211,8 @@ module.exports = class PopOver extends BaseView
 
     onAddClicked: () =>
         return if @$('.btn.add').hasClass 'disabled'
-        @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        # @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @addButton.children().hide()
         @addButton.spin 'small'
         validModel = @model.save @getModelAttributes(),
             wait: true
@@ -285,11 +223,14 @@ module.exports = class PopOver extends BaseView
                 alert 'server error occured'
             complete: =>
                 @addButton.spin false
-                @addButton.html @getButtonText()
+                # @addButton.html @getButtonText()
+                @addButton.children().show()
                 @selfclose()
 
         if not validModel
-            @addButton.html @getButtonText()
+            # @addButton.html @getButtonText()
+            @addButton.children().show()
+
             @addButton.spin()
             @$('.alert').remove()
             @$('input').css('border-color', '')
@@ -307,7 +248,10 @@ module.exports = class PopOver extends BaseView
             btn.hide()
 
     # @TODO : refactor this
-    adjustTimePickers: (changed, newvalue) =>
+    # adjustTimePickers: (changed, newvalue) =>
+    adjustTimePickers: (e) =>
+        changed = e.target.id.split("-")[1]
+        newvalue = e.time.value
         date = @model.getStartDateObject()
 
         start = @$('#input-start').val()
@@ -318,40 +262,48 @@ module.exports = class PopOver extends BaseView
         endDate = @formatDate date, end + '+' + diff
 
         if changed is 'start'
+            # Check and put end after start.
             newStart = @formatDate date, newvalue
             newEnd = endDate.clone()
-            if newStart.is(newEnd) or newStart.isAfter(newEnd)
-                newEnd = newStart.clone().addHours 1
+            if newStart >=  newEnd
+                newEnd = newStart.clone().add(1, 'hour')
 
         else if changed is 'end'
+            # 
             newStart = startDate.clone()
             newEnd = @formatDate date, newvalue + '+' + diff
 
-            if endDate.getHours() is 23 and newEnd.getHours() is 0
-                newEnd.addDays 1
-            else if endDate.getHours() is 0 and newEnd.getHours() is 23
-                newEnd.addDays -1
+            # Add or remove a day if midnight is crossed (from and to 23... ?)
+            # # 20140905 : TODO : seems crapy.
+            # if endDate.getHours() is 23 and newEnd.getHours() is 0
+            #     newEnd.addDays 1
+            # else if endDate.getHours() is 0 and newEnd.getHours() is 23
+            #     newEnd.addDays -1
 
-            if newStart.is(newEnd) or newStart.isAfter(newEnd)
-                newStart = newEnd.clone().addHours -1
-                if newStart.getHours() is 0
-                    newStart.beginningOfDay()
+            # Check start is before end, and move start.
+            if newStart >= newEnd
+                newStart = newEnd.clone().add(-1, 'hour')
+                # if newStart.getHours() is 0
+                #     newStart.beginningOfDay()
 
         else if changed is 'diff'
-            if newStart.is(newEnd) or newStart.isAfter(newEnd)
-                newEnd = newStart.clone().addHours 1
+            # Check start is before end, and move end.
+            if newStart >= newEnd
+                newEnd = newStart.clone().add(1, 'hour')
 
-        if newEnd.short() is newStart.short()
+        # if newEnd.short() is newStart.short()
+        if newEnd.isSame(newStart, 'day')
             diff = 0
         else
-            oneday = 1000 * 3600 * 24
-            bde = newEnd.clone().beginningOfDay()
-            bds = newStart.clone().beginningOfDay()
-            console.log "HERE", diff, (bde - bds) / oneday
-            diff = Math.round (bde - bds) / oneday
+            diff = newEnd.diff(newStart, 'day')
+            # oneday = 1000 * 3600 * 24
+            # bde = newEnd.clone().beginningOfDay()
+            # bds = newStart.clone().beginningOfDay()
+            # console.log "HERE", diff, (bde - bds) / oneday
+            # diff = Math.round (bde - bds) / oneday
 
-        @$('#input-start').val newStart.format '{HH}:{mm}'
-        @$('#input-end').val newEnd.format '{HH}:{mm}'
+        @$('#input-start').val newStart.format 'HH:mm'
+        @$('#input-end').val newEnd.format 'HH:mm'
         @$('#input-diff').val diff
 
         return true
@@ -378,3 +330,6 @@ module.exports = class PopOver extends BaseView
         @$(guiltyFields).focus()
         alertMsg = $('<div class="alert"></div>').text(t(error.value))
         @$('.popover-content').before alertMsg
+
+
+    # getButtonText: -> if @model.isNew() then t('create') else t('edit')

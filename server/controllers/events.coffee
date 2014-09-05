@@ -27,26 +27,31 @@ module.exports.all = (req, res) ->
         if err
             res.send error: 'Server error occurred while retrieving data'
         else
-            events[index] = evt.timezoned() for evt, index in events
+            #events[index] = evt.timezoned() for evt, index in events
+            console.log events
             res.send events
 
 
 module.exports.read = (req, res) ->
-    res.send req.event.timezoned()
+    #res.send req.event.timezoned()
+    res.send req.event
 
 
 module.exports.create = (req, res) ->
-    data = Event.toUTC(req.body)
+    #data = Event.toUTC(req.body)
+    data = req.body
     Event.create data, (err, event) =>
         return res.error "Server error while creating event." if err
 
-        # Recover dates with user timezone
-        res.send event.timezoned(), 201
+        ## Recover dates with user timezone
+        #res.send event.timezoned(), 201
+        res.send event, 201
 
 
 module.exports.update = (req, res) ->
     start = req.event.start
-    data = Event.toUTC(req.body)
+    #data = Event.toUTC(req.body)
+    data = req.body
 
     req.event.updateAttributes data, (err, event) =>
 
@@ -57,7 +62,8 @@ module.exports.update = (req, res) ->
 
             mails.sendInvitations event, dateChanged, (err, event2) ->
                 console.log err if err
-                res.send (event2 or event).timezoned(), 200
+                #res.send (event2 or event).timezoned(), 200
+                res.send (event2 or event), 200
 
 
 module.exports.delete = (req, res) ->
@@ -85,7 +91,8 @@ module.exports.public = (req, res) ->
         dateFormat = 'MMMM Do YYYY, h:mm a'
         date = moment(req.event.start).format dateFormat
         res.render 'event_public.jade',
-            event: req.event.timezoned()
+            event: req.event
+            # event: req.event.timezoned()
             date: date
             key: key
             visitor: visitor

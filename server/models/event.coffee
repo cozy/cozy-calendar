@@ -3,7 +3,7 @@ time = require 'time'
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
-    start       : type : String
+    start       : type : String # ISO8601
     end         : type : String
     place       : type : String
     # @TODO : rename those to follow ical (NEED PATCH)
@@ -16,6 +16,30 @@ module.exports = Event = americano.getModel 'Event',
     related: type: String, default: null
 
 require('cozy-ical').decorateEvent Event
+
+insinuatingUTCToISO8601 = (dateStr) ->
+    # Skip buggy or empty values.
+    if not dateStr
+        return dateStr
+
+    # Check if it's already ISO8601
+    if (dateStr.charAt 10) == 'T'
+        return dateStr
+
+    d = dateStr
+    # Check for a timezone
+    if "GMT" not in dateStr
+        d = d + " GMT+0000"
+
+    return new Date(d).toISOString()
+
+
+Event.afterInitialize = () ->
+    @start = insinuatingUTCToISO8601(@start)
+    @end = insinuatingUTCToISO8601(@end)
+
+    @
+
 
 Event.all = (params, callback) ->
     Event.request "all", params, callback

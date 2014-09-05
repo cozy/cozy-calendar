@@ -5,10 +5,12 @@ index  = require './index'
 ical   = require './ical'
 
 
+
 module.exports =
 
     '' : get : index.index
     'tags': get : index.tags
+    'users/current': get : index.userTimezone
 
     # Alarm management
     'alarms':
