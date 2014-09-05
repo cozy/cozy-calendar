@@ -32,6 +32,7 @@ module.exports = class PopOver extends BaseView
         @target = options.target
         @container = options.container
         @parentView = options.parentView
+        @options = options
 
     selfclose: () ->
         @parentView.onPopoverClose?()
@@ -165,6 +166,10 @@ module.exports = class PopOver extends BaseView
         return data
 
     makeNewModel: (options) ->
+        options.start ?= '10:00'
+        options.end ?= '18:00'
+        options.diff ?= 0
+
         switch @type
             when 'event' then new Event
                 start: options.start.format Event.dateFormat, 'en-en'

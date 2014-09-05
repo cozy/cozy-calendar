@@ -142,7 +142,6 @@ module.exports = class CalendarView extends BaseView
 
             # click on same case
 
-            console.log @popover.options
             if @popover.options?
                 if @popover.options.model? and @popover.options.model is options.model or(
                     @popover.options.start?.is(options.start) and
@@ -172,7 +171,6 @@ module.exports = class CalendarView extends BaseView
             "week/#{year}/#{month}/#{date}"
 
         app.router.navigate hash
-
 
     getUrlHash: =>
         switch @cal.fullCalendar('getView').name

@@ -2057,7 +2057,8 @@ module.exports = PopOver = (function(_super) {
     }
     this.target = options.target;
     this.container = options.container;
-    return this.parentView = options.parentView;
+    this.parentView = options.parentView;
+    return this.options = options;
   };
 
   PopOver.prototype.selfclose = function() {
@@ -2251,6 +2252,15 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.makeNewModel = function(options) {
+    if (options.start == null) {
+      options.start = '10:00';
+    }
+    if (options.end == null) {
+      options.end = '18:00';
+    }
+    if (options.diff == null) {
+      options.diff = 0;
+    }
     switch (this.type) {
       case 'event':
         return new Event({
@@ -2718,7 +2728,6 @@ module.exports = CalendarView = (function(_super) {
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      console.log(this.popover.options);
       if (this.popover.options != null) {
         if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.is(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.is(options.end) : void 0) && this.popover.options.type === options.type)) {
           this.cal.fullCalendar('unselect');
