@@ -2718,10 +2718,13 @@ module.exports = CalendarView = (function(_super) {
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.is(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.is(options.end) : void 0) && this.popover.options.type === options.type)) {
-        this.cal.fullCalendar('unselect');
-        this.popover = null;
-        return;
+      console.log(this.popover.options);
+      if (this.popover.options != null) {
+        if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.is(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.is(options.end) : void 0) && this.popover.options.type === options.type)) {
+          this.cal.fullCalendar('unselect');
+          this.popover = null;
+          return;
+        }
       }
     }
     this.popover = new Popover(options);

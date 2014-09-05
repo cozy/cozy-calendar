@@ -141,13 +141,16 @@ module.exports = class CalendarView extends BaseView
             @popover.close()
 
             # click on same case
-            if @popover.options.model? and @popover.options.model is options.model or(
-                @popover.options.start?.is(options.start) and
-                @popover.options.end?.is(options.end) and
-                @popover.options.type is options.type)
-                @cal.fullCalendar 'unselect'
-                @popover = null
-                return
+
+            console.log @popover.options
+            if @popover.options?
+                if @popover.options.model? and @popover.options.model is options.model or(
+                    @popover.options.start?.is(options.start) and
+                    @popover.options.end?.is(options.end) and
+                    @popover.options.type is options.type)
+                    @cal.fullCalendar 'unselect'
+                    @popover = null
+                    return
 
         @popover = new Popover options
         @popover.render()
