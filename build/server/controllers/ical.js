@@ -69,6 +69,9 @@ module.exports["import"] = function(req, res) {
           error: 'error occured while saving file'
         }, 500);
       } else {
+        if (User.timezone == null) {
+          User.timezone = 'Europe/Paris';
+        }
         return res.send({
           events: Event.extractEvents(result),
           alarms: Alarm.extractAlarms(result, User.timezone)

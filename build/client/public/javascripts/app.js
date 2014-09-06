@@ -2084,6 +2084,10 @@ module.exports = PopOver = (function(_super) {
       placement: this.getDirection(),
       content: this.template(this.getRenderData())
     }).popover('show');
+    if ($(window).width() <= 500) {
+      $('.popover').css('top', 0);
+      $('.popover').css('left', 0);
+    }
     this.setElement($('#view-container .popover'));
     return this.afterRender();
   };
@@ -2282,22 +2286,6 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.onTabClicked = function(event) {
-    var _base, _base1, _base2, _base3;
-    if (this.options == null) {
-      this.options = {};
-    }
-    if ((_base = this.options).start == null) {
-      _base.start = '10:00';
-    }
-    if ((_base1 = this.options).end == null) {
-      _base1.end = '18:00';
-    }
-    if ((_base2 = this.options).diff == null) {
-      _base2.diff = 0;
-    }
-    if ((_base3 = this.options).target == null) {
-      _base3.target = this.target;
-    }
     return this.parentView.showPopover({
       type: this.type === 'event' ? 'alarm' : 'event',
       target: this.options.target,

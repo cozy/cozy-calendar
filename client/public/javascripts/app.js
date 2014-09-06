@@ -3703,7 +3703,7 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var calendar, counter, finish, onFaillure, onSuccess;
+    var calendar, counter, onFaillure;
     calendar = this.calendarCombo.value();
     if ((calendar == null) || calendar === '') {
       calendar = 'my calendar';
@@ -3712,53 +3712,49 @@ module.exports = ImportView = (function(_super) {
     onFaillure = (function(_this) {
       return function(model) {
         counter = counter - 1;
-        alert(t('some event fail to save'));
         if (counter === 0) {
           return finish();
         }
-      };
-    })(this);
-    onSuccess = (function(_this) {
-      return function(model) {
-        switch (model.constructor) {
-          case Event:
-            app.events.add(model);
-            break;
-          case Alarm:
-            app.alarms.add(model);
-        }
-        counter = counter - 1;
-        if (counter === 0) {
-          return finish();
-        }
-      };
-    })(this);
-    finish = (function(_this) {
-      return function() {
-        _this.$(".confirmation").fadeOut();
-        _this.$(".results").slideUp(function() {
-          _this.$(".import-form").fadeIn();
-          return _this.confirmButton.html(t('confirm import'));
-        });
-        _this.alarmList.collection.reset();
-        _this.eventList.collection.reset();
-        return app.router.navigate("calendar", true);
       };
     })(this);
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
-    this.alarmList.collection.each(function(alarm) {
+    return async.eachSeries(this.alarmList.collection.models, function(alarm, callback) {
       alarm.set('tags', [calendar]);
       return alarm.save(null, {
-        success: onSuccess,
-        error: onFaillure
+        success: function(model) {
+          app.alarms.add(model);
+          return callback();
+        },
+        error: function() {
+          alert(t('some alarm failed to save'));
+          return callback();
+        }
       });
-    });
-    return this.eventList.collection.each(function(event) {
-      event.set('tags', [calendar]);
-      return event.save(null, {
-        success: onSuccess,
-        error: onFaillure
+    }, function(err) {
+      return async.eachSeries(this.eventList.collection.models, function(event, callback) {
+        event.set('tags', [calendar]);
+        return event.save(null, {
+          success: function(model) {
+            app.events.add(model);
+            return callback();
+          },
+          error: function() {
+            alert(t('some event failed to save'));
+            return callback();
+          }
+        });
+      }, function(err) {
+        this.$(".confirmation").fadeOut();
+        this.$(".results").slideUp((function(_this) {
+          return function() {
+            _this.$(".import-form").fadeIn();
+            return _this.confirmButton.html(t('confirm import'));
+          };
+        })(this));
+        this.alarmList.collection.reset();
+        this.eventList.collection.reset();
+        return app.router.navigate("calendar", true);
       });
     });
   };
