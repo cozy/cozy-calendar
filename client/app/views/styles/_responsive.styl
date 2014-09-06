@@ -78,7 +78,7 @@
 
     #alarms
         .fc-day-header
-            font-size: 10px
+            font-size: 12px
 
         .fc-button-today
             display: none
@@ -94,13 +94,28 @@
         .fc-border-separate
             width: 100%
 
+        .fc-day-number
+            font-size: 12px
+
 @media(max-width: 500px)
     #alarms
+        .fc-day-header
+            font-size: 10px
+
         .popover
-            width: 310px
+            width: auto
+            position: absolute
+            min-width: 320px
+            top: 0
+            left: 0
 
             input
-                width: 260px
+                width: 90%
 
             button
                 display: block
+
+            .arrow
+            .icon-map-marker
+                display: none
+

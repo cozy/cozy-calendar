@@ -2084,6 +2084,10 @@ module.exports = PopOver = (function(_super) {
       placement: this.getDirection(),
       content: this.template(this.getRenderData())
     }).popover('show');
+    if ($(window).width() <= 500) {
+      $('.popover').css('top', 0);
+      $('.popover').css('left', 0);
+    }
     this.setElement($('#view-container .popover'));
     return this.afterRender();
   };
