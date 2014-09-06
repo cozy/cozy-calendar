@@ -9839,7 +9839,7 @@ ul.tagit input[type="text"] {
 }
 @font-face {
   font-family: main;
-  src: url("../fonts/signika-regular.ttf");
+  src: url("../fonts/source-sans-pro.ttf");
 }
 @font-face {
   font-family: fontawesome;
@@ -10344,7 +10344,7 @@ ul#menu ul#menuitems li.tagmenuitem .badge {
 }
 @font-face {
   font-family: main;
-  src: url("../fonts/signika-regular.ttf");
+  src: url("../fonts/source-sans-pro.ttf");
 }
 @font-face {
   font-family: fontawesome;
@@ -10995,6 +10995,12 @@ input[type="time"] {
   border-radius: 0;
   color: #fff;
   font-family: main;
+  font-weight: bold;
+  padding: 2px;
+}
+.fc-event-inner i {
+  margin-top: 2px;
+  margin-right: 5px;
 }
 .fc-day:hover {
   background: #ffe7cc;
