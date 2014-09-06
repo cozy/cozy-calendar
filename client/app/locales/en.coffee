@@ -49,7 +49,7 @@ module.exports =
     "Description"                       : "Description"
     "days after"                        : "days after"
     "days later"                        : "days later"
-    "Week"                              : "Semaine"
+    "Week"                              : "Week"
     "Alarms"                            : "Alarms"
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
