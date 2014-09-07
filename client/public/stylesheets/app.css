@@ -11230,6 +11230,10 @@ cursor not-allowed {
   -ms-transition: color 0.2s linear, border-color 0.2s linear;
   transition: color 0.2s linear, border-color 0.2s linear;
 }
+h2,
+h3 {
+  font-weight: normal;
+}
 .mt1 {
   margin-top: 10px;
 }

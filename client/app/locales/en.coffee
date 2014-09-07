@@ -137,6 +137,9 @@ module.exports =
     "install the webdav module"         : "Install the webdav module from the Cozy App Store"
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."
     "some event fail to save"           : "An event was not saved (an error occured)."
+    "imported events and alarms": "Amount of imported alarms and events"
+    "import finished": "Your import is now finished"
+    "import error occured for": "Import error occured for following elements"
 
 
 # DATE

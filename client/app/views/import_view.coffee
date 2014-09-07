@@ -47,6 +47,13 @@ module.exports = class ImportView extends BaseView
         form.append "file", file
         @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @importButton.spin 'tiny'
+
+        # Reset alarm and event to import lists.
+        @alarmList.collection.reset()
+        @eventList.collection.reset()
+        @$('.import-progress').html null
+        @$('.import-errors').html null
+
         $.ajax
             url: "import/ical"
             type: "POST"
@@ -91,62 +98,91 @@ module.exports = class ImportView extends BaseView
         calendar = 'my calendar' if not calendar? or calendar is ''
 
         # Amount of elements to import.
-        counter = @alarmList.collection.length + @eventList.collection.length
+        total = @alarmList.collection.length + @eventList.collection.length
+        counter = 0
 
-        # Finish function is called when there is no more element to save.
-        onFaillure = (model) =>
-            counter = counter - 1
-            finish() if counter is 0
+        # Set the progress widget
+        $('.import-progress').html """
+        <p>#{t 'imported events and alarms'}:
+            <span class="import-counter">0</span>/#{total}</p>
+        """
+        updateCounter = ->
+            counter++
+            $('.import-counter').html counter
+
+        addAlarmError = (alarm) ->
+            if $('.import-errors').html().length is 0
+                $('.import-errors').html """
+                <p>#{t 'import error occured for'}:</p>
+                """
+
+            $('.import-errors').append(
+                require('./templates/import_alarm')(alarm.attributes)
+            )
+
+        addEventError = (event) ->
+            $('.import-errors').append(
+                require('./templates/import_event')(event.attributes)
+            )
 
         # Show loading spinner.
         @confirmButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @confirmButton.spin 'tiny'
 
-        # Save every imported alarms to the database.
-        async.eachSeries @alarmList.collection.models, (alarm, callback) ->
+        importAlarm = (alarm, callback) ->
             alarm.set 'tags', [calendar]
             alarm.set 'id', null
+            alarm.set 'import', true
             alarm.save null,
                 success: (model) ->
                     # When an element is successfully imported, it is added to
                     # the current calendar view.
                     app.alarms.add model
+                    updateCounter()
                     callback()
 
                 error: ->
                     # When an element failed to import, an error message is
                     # displayed.
-                    alert t 'some alarm failed to save'
+                    addAlarmError alarm
+                    updateCounter()
                     callback()
-        , (err) =>
+
+        importEvent = (event, callback) ->
+            event.set 'tags', [calendar]
+            event.set 'id', null
+            event.set 'import', true
+            event.save null,
+                success: (model) ->
+                    # When an element is successfully imported, it is added
+                    # to the current calendar view.
+                    app.events.add model
+                    updateCounter()
+                    callback()
+                error: ->
+                    # When an element failed to import, an error message is
+                    # displayed.
+                    addEventError event
+                    updateCounter()
+                    callback()
+
+        # When import is finished, the import form is reset and the
+        # calendar view is displayed.
+        finalizeImport = (err) =>
+            alert t 'import finished'
+            @$(".confirmation").fadeOut()
+            @$(".results").slideUp =>
+                @$(".import-form").fadeIn()
+                @confirmButton.html t 'confirm import'
+                if $('.import-errors').html().length is 0
+                    app.router.navigate "calendar", true
+
+        # Save every imported alarms to the database.
+        alarms = @alarmList.collection.models
+        async.eachSeries alarms, importAlarm, (err) =>
             # Save every imported events to the database.
-            async.eachSeries @eventList.collection.models, (event, callback) ->
-                event.set 'tags', [calendar]
-                event.set 'id', null
-                event.save null,
-                    success: (model) ->
-                        # When an element is successfully imported, it is added
-                        # to the current calendar view.
-                        app.events.add model
-                        callback()
-                    error: ->
-                        # When an element failed to import, an error message is
-                        # displayed.
-                        alert t 'some event failed to save'
-                        callback()
-
-            , (err) =>
-                alert t 'import succeeded'
-                # When import is finished, the import form is reset and the
-                # calendar view is displayed.
-                @$(".confirmation").fadeOut()
-                @$(".results").slideUp =>
-                    @$(".import-form").fadeIn()
-                    @confirmButton.html t 'confirm import'
-                @alarmList.collection.reset()
-                @eventList.collection.reset()
-                app.router.navigate "calendar", true
-
+            events = @eventList.collection.models
+            async.eachSeries events, importEvent, finalizeImport
 
     onCancelImportClicked: ->
         @$(".confirmation").fadeOut()
