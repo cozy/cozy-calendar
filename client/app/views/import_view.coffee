@@ -105,6 +105,7 @@ module.exports = class ImportView extends BaseView
         # Save every imported alarms to the database.
         async.eachSeries @alarmList.collection.models, (alarm, callback) ->
             alarm.set 'tags', [calendar]
+            alarm.set 'id', null
             alarm.save null,
                 success: (model) ->
                     # When an element is successfully imported, it is added to
@@ -117,24 +118,25 @@ module.exports = class ImportView extends BaseView
                     # displayed.
                     alert t 'some alarm failed to save'
                     callback()
-        , (err) ->
+        , (err) =>
             # Save every imported events to the database.
             async.eachSeries @eventList.collection.models, (event, callback) ->
                 event.set 'tags', [calendar]
+                event.set 'id', null
                 event.save null,
                     success: (model) ->
                         # When an element is successfully imported, it is added
                         # to the current calendar view.
                         app.events.add model
                         callback()
-
                     error: ->
                         # When an element failed to import, an error message is
                         # displayed.
                         alert t 'some event failed to save'
                         callback()
 
-            , (err) ->
+            , (err) =>
+                alert t 'import succeeded'
                 # When import is finished, the import form is reset and the
                 # calendar view is displayed.
                 @$(".confirmation").fadeOut()
