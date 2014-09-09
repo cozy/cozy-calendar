@@ -33,33 +33,44 @@ module.exports = class CalendarView extends BaseView
         @listenTo @tagsCollection, 'change', @refresh
 
     afterRender: ->
-        locale = Date.getLocale(app.locale) # thanks sugarjs
+        locale = moment.localeData()
+
         @cal = @$('#alarms')
         @view = @options.view
         @cal.fullCalendar
             header: false
             editable: true
             firstDay: 1 # first day of the week is monday
-            weekMode: 'liquid'
+            # weekMode: 'liquid' deprecated --> http://fullcalendar.io/docs/display/weekMode/
             height: @handleWindowResize('initial') # initial ratio
             defaultView: @view
             year: @options.year
             month: @options.month
             date: @options.date
-            viewDisplay: @onChangeView # beware, deprected in next FC
+            # viewDisplay: @onChangeView # beware, deprected in next FC --> # viewRender 
+            viewRender: @onChangeView
 
-            #i18n by SugarJs
-            monthNames: locale.full_month.split('|').slice(1,13)
-            monthNamesShort: locale.full_month.split('|').slice(13, 26)
-            dayNames: locale.weekdays.slice(0, 7)
-            dayNamesShort: locale.weekdays.slice(0, 7)
+
+            #i18n with momentjs.
+            monthNames: locale._months
+            monthNamesShort: locale._monthsShort
+            dayNames: locale._weekdays
+            dayNamesShort: locale._weekdaysShort
             buttonText:
-                today: locale.day.split('|')[1]
-                month: locale.units[6]
-                week:  locale.units[5]
-                day:   locale.units[4]
+                today: t('today')
+                month: t('month')
+                week:  t('week')
+                day:   t('day')
 
-            timezone: "UTC" # "In other parts of the API, moments will be represented in UTC." http://arshaw.com/fullcalendar/docs/timezone/timezone/ 
+            timezone: window.app.timezone
+            # timezone: "UTC"
+
+            # timezone: "UTC"  --> selectEvent : view : browser locale time ; event : UTC. Ex with Europe/Paris TZ, 2014/09/02, 5:00 --> 2014-09-02T03:30:00.000Z || America/NewYork --> 2014-09-02T09:00:00.000Z
+            # timezone: false <-- idem. || 
+            # timezone: window.app.timezone
+            # timezone: "local"
+
+            # "In other parts of the API, moments will be represented in UTC." http://arshaw.com/fullcalendar/docs/timezone/timezone/ 
             #ignoreTimezone: true # 20140904 TODO : what's behaviour of this indead ? http://arshaw.com/fullcalendar/docs1/event_data/ignoreTimezone/
             timeFormat:
                 '' : '' # do not display times on event
@@ -118,16 +129,23 @@ module.exports = class CalendarView extends BaseView
             $("#menu").height 40
 
         @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
-        @cal.height @$('.fc-header').height() + @$('.fc-content').height()
+        @cal.height @$('.fc-header').height() + @$('.fc-view-container').height()
+        # @cal.height @$('.fc-header').height() + @$('.fc-content').height()
 
 
     refresh: (collection) ->
+        console.log "refresh"
         @cal.fullCalendar 'refetchEvents'
 
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
 
     refreshOne: (model) =>
+        # Skip if Popover is open, to avoid autoclosing.
+        console.log "refreshOne"
+        if @popover
+            return 
+
         return @refresh() if model.getRRuleObject() #@TODO: may be smarter
 
         data = model.toFullCalendarEvent()
@@ -136,8 +154,10 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'updateEvent', fcEvent
 
     showPopover: (options) ->
+        console.log "show popover"
         options.container = @cal
-        options.parentView = this
+        options.parentView = @
+        console.log options
 
         if @popover
             @popover.close()
@@ -164,12 +184,10 @@ module.exports = class CalendarView extends BaseView
 
         start = view.start
         hash = if @view is 'month'
-            "month/#{start.getFullYear()}/#{start.getMonth()+1}"
+            start.format('[month]/YYYY/M')
+
         else
-            year = start.getFullYear()
-            month = start.getMonth()+1
-            date = start.getDate()
-            "week/#{year}/#{month}/#{date}"
+            start.format('[week]/YYYY/M/D')
 
         app.router.navigate hash
 
@@ -179,16 +197,21 @@ module.exports = class CalendarView extends BaseView
             when 'month' then 'calendar'
             when 'agendaWeek' then 'calendarweek'
 
-    onSelect: (startDate, endDate, allDay, jsEvent, view) =>
+    onSelect: (startDate, endDate, jsEvent, view) =>
+        console.log jsEvent
+        console.log view
         @showPopover
             type: 'event'
-            start: startDate
-            end: endDate
+            start: Event.ambiguousToTimezoned(startDate)
+            end: Event.ambiguousToTimezoned(endDate)
             target: $(jsEvent.target)
 
     onPopoverClose: ->
         @cal.fullCalendar 'unselect'
         @popover = null
+
+        # Force a refresh, as refresh was deactivated while popover was open.
+        @refresh()
 
     onEventRender: (event, element) ->
         if event.isSaving? and event.isSaving
@@ -207,10 +230,9 @@ module.exports = class CalendarView extends BaseView
     onEventDragStop: (event, jsEvent, ui, view) ->
         event.isSaving = true
 
-    onEventDrop: (fcEvent, dayDelta, minuteDelta, allDay,
-                  revertFunc, jsEvent, ui, view) =>
-
+    onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
         # Update new dates of event
+        ## 20140909 TODO.
         if fcEvent.type is 'alarm'
             alarm = @alarmCollection.get fcEvent.id
 
@@ -237,22 +259,15 @@ module.exports = class CalendarView extends BaseView
                     revertFunc()
         else
             evt = @eventCollection.get fcEvent.id
-            start = evt.getStartDateObject().clone().advance
-                days: dayDelta
-                minutes: minuteDelta
 
-            end = evt.getEndDateObject().clone().advance
-                days: dayDelta
-                minutes: minuteDelta
+            evt.addToStart(delta)
+            evt.addToEnd(delta)
 
-            evt.save
-                start: start.format Event.dateFormat, 'en-en'
-                end: end.format Event.dateFormat, 'en-en'
-            ,
+            evt.save {},
                 wait: true
                 success: =>
                     fcEvent.isSaving = false
-                    @cal.fullCalendar 'renderEvent', fcEvent
+                    #@cal.fullCalendar 'renderEvent', fcEvent
                 error: =>
                     fcEvent.isSaving = false
                     revertFunc()
@@ -260,9 +275,7 @@ module.exports = class CalendarView extends BaseView
     onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
         fcEvent.isSaving = true
 
-    onEventResize: (fcEvent, dayDelta, minuteDelta, revertFunc,
-                    jsEvent, ui, view) =>
-
+    onEventResize: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
         # alarms can't be resized
         if fcEvent.type is "alarm"
             fcEvent.isSaving = false
@@ -271,19 +284,14 @@ module.exports = class CalendarView extends BaseView
             return
 
         model = @eventCollection.get fcEvent.id
-        end = model.getEndDateObject().clone()
-        end.advance
-            days: dayDelta
-            minutes: minuteDelta
 
-        data =
-            end: end.format Event.dateFormat, 'en-en'
+        model.addToEnd(delta)
 
-        model.save data,
+        model.save {},
             wait: true
             success: =>
                 fcEvent.isSaving = false
-                @cal.fullCalendar 'renderEvent', fcEvent
+                # @cal.fullCalendar 'renderEvent', fcEvent
 
             error: =>
                 fcEvent.isSaving = false

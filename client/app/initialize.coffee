@@ -3,18 +3,21 @@ app = require 'application'
 $ ->
     require 'lib/app_helpers'
 
-    locale = Date.getLocale(window.locale)
+    moment.locale(window.locale)
+    # Add new ones from : https://github.com/moment/moment/tree/develop/locale
+    locale = moment.localeData()
+    # TODO : why "en" default ,...
     $.fn.datetimepicker.dates['en'] = { # as default
-        days: locale.weekdays.slice(0, 7)
-        daysShort: locale.weekdays.slice(7, 15)
-        daysMin: locale.weekdays.slice(7, 15)
-        months: locale.full_month.split('|').slice(1,13)
-        monthsShort: locale.full_month.split('|').slice(13,26)
-        today: locale.day.split('|')[1],
-        suffix: [],
-        meridiem: locale.ampm
-        weekStart: 1
-        format: "dd/mm/yyyy"
+        days: locale._weekdays
+        daysShort: locale._weekdaysShort
+        daysMin: locale._weekdaysMin
+        months: locale._months
+        monthsShort: locale._monthsShort
+        today: locale.calendar["sameDay"]
+        suffix: [], # ?
+        meridiem: locale.meridiem()
+        weekStart: locale._week["dow"]
+        format: "dd/mm/yyyy" #? locale.longDateFormat() ?
     };
 
     app.initialize()

@@ -6,10 +6,11 @@ Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
 Event = require 'models/event'
 
-module.exports = class PopOver extends PopoverView
+module.exports = class EventPopOver extends PopoverView
 
     titleTemplate: require('./templates/popover_title')
     template: require('./templates/popover_event')
+    dtFormat: "HH:mm"
 
     events:
         'keyup input': 'onKeyUp'
@@ -23,20 +24,24 @@ module.exports = class PopOver extends PopoverView
         'click .close' : 'selfclose'
 
                 # keep the endDate after the startDate
+        'changeTime.timepicker #input-start': 'onSetStart'
+        'changeTime.timepicker #input-end': 'onSetEnd'
+        'input #input-desc': 'onSetDesc' 
 
-        'changeTime.timepicker #input-start': 'adjustTimePickers'
-         # (ev) =>
-            # @adjustTimePickers 'start', ev.time.value
 
-        'changeTime.timepicker #input-end': 'adjustTimePickers'
-        # , (ev) =>
-            # @adjustTimePickers 'end', ev.time.value
 
     initialize: (options) ->
-        super options
 
         if not @model
             @model = @makeNewModel options
+            console.log 'truc'
+
+        console.log @model
+        super options
+
+        @listenTo @model, 'change', @refresh
+
+        @options = options
 
 
     afterRender: ->
@@ -64,14 +69,6 @@ module.exports = class PopOver extends PopoverView
             if ev.keyCode is 39 # right
                 @$('#input-desc').focus()
 
-        # # keep the endDate after the startDate
-        # inputStart.on 'changeTime.timepicker', (ev) =>
-        #     @adjustTimePickers 'start', ev.time.value
-
-        # inputEnd.on 'changeTime.timepicker', (ev) =>
-        #     @adjustTimePickers 'end', ev.time.value
-
-
         if @model.get 'rrule'
             @rruleForm = new RRuleFormView model: @model
             @rruleForm.render()
@@ -85,6 +82,8 @@ module.exports = class PopOver extends PopoverView
             source: app.tags.calendars()
 
         @updateMapLink()
+
+        @refresh()
 
 
     getTitle: ->
@@ -102,38 +101,40 @@ module.exports = class PopOver extends PopoverView
         else if fitRight then 'right'
         else 'left'
 
-
     getRenderData: ->
-        data = _.extend type: @type,
-            @model.attributes,
-            title: @getTitle()
+        data =
+            model: @model
+            dtFormat: @dtFormat
             editionMode: not @model.isNew()
+
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
-        data.calendar = data.tags?[0] or ''
-
-        endDate = @model.getEndDateObject()
-        startDate = @model.getStartDateObject()
-        unless @model.isOneDay()
-            diff = endDate - startDate
-            diff = Math.round(diff / 1000 / 3600 / 24)
-        data.start = startDate.format 'HH:mm'
-        data.end = endDate.format 'HH:mm'
-        data.start = '10:00' if data.start is '00:00'
-        data.end = '18:00' if data.end is '00:00'
-        data.diff = diff or 0
-
+            calendar: @model.attributes.tags?[0] or ''
 
         return data
+        # return _.extend data, @model.attributes
+        
+
+    onSetStart: (ev) -> @model.setStart @formatDateTime ev.time.value
+    onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
+    onSetDesc: (ev) -> @model.set('description', ev.target.value)
+
+    # onInputs: (ev) ->
+    #     @model.set('description', @$('#input-desc').val())
+    #     @model.plac
+    #     place: @$('#input-place').val()
+    #         description: 
+
+    #     data.tags = [@calendar.value()]
+
+
 
     makeNewModel: (options) ->
-        new Event
-            start: options.start.format Event.dateFormat, 'en-en'
-            end: options.end.format Event.dateFormat, 'en-en'
+        return new Event
+            start: options.start.toISOString()
+            end: options.end.toISOString()
             description: ''
             place: ''
-
-
 
     onTabClicked: (event) ->
         @parentView.showPopover
@@ -163,37 +164,15 @@ module.exports = class PopOver extends PopoverView
         else
             @addButton.removeClass 'disabled'
 
-    formatDate: (relativeTo, value) ->
-        # Intitialize new alarm
-        # date = Date.create relativeTo
-        date = moment.tz(relativeTo, window.app.timezone)
-
-        # smart detection: set the time if the user input has a time
-        splitted = value.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
+    formatDateTime: (dtStr) ->
+        splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
+        # splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})/
         if splitted and splitted[0]
-            [all, hours, minutes, diff] = splitted
-            # date.set {hours: +hours, minutes: +minutes}
-            date.set('hour', +hours)
-            date.set('minute', +minutes)
-            # date.advance(days: +diff) if diff
-            date.add('day', +diff) if diff
-
-        return date
-
-    getModelAttributes: =>
-        date = @model.getStartDateObject()
-        startDate = @formatDate date, @$('#input-start').val()
-        end = @$('#input-end').val() + '+' + @$('#input-diff').val()
-        endDate = @formatDate date, end
-        data =
-            start: startDate.format Event.dateFormat, 'en-en'
-            end: endDate.format Event.dateFormat, 'en-en'
-            place: @$('#input-place').val()
-            description: @$('#input-desc').val()
-
-        data.tags = [@calendar.value()]
-
-        return data
+            # [all, hours, minutes, diff] = splitted
+            setObj = 
+                hour: splitted[1]
+                minute: splitted[2]
+            return setObj
 
     onRemoveClicked: =>
         @removeButton.css 'width', '42px'
@@ -209,34 +188,40 @@ module.exports = class PopOver extends PopoverView
                     @selfclose()
         else @removeButton.spin()
 
+
     onAddClicked: () =>
         return if @$('.btn.add').hasClass 'disabled'
-        # @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        @addButton.children().hide()
+        @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        # @addButton.children().hide()
         @addButton.spin 'small'
-        validModel = @model.save @getModelAttributes(),
-            wait: true
-            success: =>
-                collection = app[@type + 's']
-                collection.add @model
-            error: =>
-                alert 'server error occured'
-            complete: =>
-                @addButton.spin false
-                # @addButton.html @getButtonText()
-                @addButton.children().show()
-                @selfclose()
-
-        if not validModel
-            # @addButton.html @getButtonText()
+        errors = @model.validate(@model.attributes)
+        if errors
+            @addButton.html @getButtonText()
             @addButton.children().show()
 
             @addButton.spin()
             @$('.alert').remove()
             @$('input').css('border-color', '')
-            @handleError(err) for err in @model.validationError
+            @handleError(err) for err in errors
 
-
+        else #no errors.
+            @model.save {},
+                wait: true
+                success: =>
+                    collection = app['events']
+                    collection.add @model
+                error: =>
+                    alert 'server error occured'
+                complete: =>
+                    @addButton.spin false
+                    @addButton.html @getButtonText()
+                    @addButton.children().show()
+                    @selfclose()
+            
+        
+    selfclose: =>
+        # Revert if not just saved with addButton.
+        @model.fetch( complete: super )
 
     updateMapLink: =>
         value = encodeURIComponent @$('#input-place').val()
@@ -247,66 +232,13 @@ module.exports = class PopOver extends PopoverView
         else
             btn.hide()
 
-    # @TODO : refactor this
-    # adjustTimePickers: (changed, newvalue) =>
-    adjustTimePickers: (e) =>
-        changed = e.target.id.split("-")[1]
-        newvalue = e.time.value
-        date = @model.getStartDateObject()
 
-        start = @$('#input-start').val()
-        end = @$('#input-end').val()
-        diff = parseInt @$('#input-diff').val()
+    refresh: =>
+        console.log  "fraicheur de vivre"
+        @$('#input-start').val @model.getStartDateObject().format(@dtFormat)
+        @$('#input-end').val @model.getEndDateObject().format(@dtFormat)
+        # @$('#input-diff').val diff
 
-        startDate = @formatDate date, start
-        endDate = @formatDate date, end + '+' + diff
-
-        if changed is 'start'
-            # Check and put end after start.
-            newStart = @formatDate date, newvalue
-            newEnd = endDate.clone()
-            if newStart >=  newEnd
-                newEnd = newStart.clone().add(1, 'hour')
-
-        else if changed is 'end'
-            # 
-            newStart = startDate.clone()
-            newEnd = @formatDate date, newvalue + '+' + diff
-
-            # Add or remove a day if midnight is crossed (from and to 23... ?)
-            # # 20140905 : TODO : seems crapy.
-            # if endDate.getHours() is 23 and newEnd.getHours() is 0
-            #     newEnd.addDays 1
-            # else if endDate.getHours() is 0 and newEnd.getHours() is 23
-            #     newEnd.addDays -1
-
-            # Check start is before end, and move start.
-            if newStart >= newEnd
-                newStart = newEnd.clone().add(-1, 'hour')
-                # if newStart.getHours() is 0
-                #     newStart.beginningOfDay()
-
-        else if changed is 'diff'
-            # Check start is before end, and move end.
-            if newStart >= newEnd
-                newEnd = newStart.clone().add(1, 'hour')
-
-        # if newEnd.short() is newStart.short()
-        if newEnd.isSame(newStart, 'day')
-            diff = 0
-        else
-            diff = newEnd.diff(newStart, 'day')
-            # oneday = 1000 * 3600 * 24
-            # bde = newEnd.clone().beginningOfDay()
-            # bds = newStart.clone().beginningOfDay()
-            # console.log "HERE", diff, (bde - bds) / oneday
-            # diff = Math.round (bde - bds) / oneday
-
-        @$('#input-start').val newStart.format 'HH:mm'
-        @$('#input-end').val newEnd.format 'HH:mm'
-        @$('#input-diff').val diff
-
-        return true
 
 
     handleError: (error) =>
@@ -331,5 +263,5 @@ module.exports = class PopOver extends PopoverView
         alertMsg = $('<div class="alert"></div>').text(t(error.value))
         @$('.popover-content').before alertMsg
 
+    getButtonText: -> if @model.isNew() then t('create') else t('edit')
 
-    # getButtonText: -> if @model.isNew() then t('create') else t('edit')

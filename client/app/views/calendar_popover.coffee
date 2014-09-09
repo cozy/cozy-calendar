@@ -295,7 +295,7 @@ module.exports = class PopOver extends BaseView
             @$('input').css('border-color', '')
             @handleError(err) for err in @model.validationError
 
-
+            
 
     updateMapLink: =>
         value = encodeURIComponent @$('#input-place').val()

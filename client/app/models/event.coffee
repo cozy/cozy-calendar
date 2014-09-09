@@ -13,6 +13,45 @@ module.exports = class Event extends ScheduleItem
         place: ''
         tags: ['my calendar']
 
+    setStart: (setObj) ->
+        sdo = @getStartDateObject()
+        edo = @getEndDateObject()
+
+
+        @_setDate(setObj, sdo, @startDateField)
+
+        # Check and put end after start.
+        if sdo >= edo
+            edo = sdo.clone().add('hour', 1)
+
+            @set @endDateField, edo.toISOString()
+
+    setEnd: (setObj) ->
+        sdo = @getStartDateObject()
+        edo = @getEndDateObject()
+
+        @_setDate(setObj, edo, @endDateField)
+
+         # Check start is before end, and move start.
+        if sdo >= edo
+            sdo = edo.clone().add('hour', -1)
+
+            @set @startDateField, sdo.toISOString()
+
+    _setDate: (setObj, dateObj, dateField) ->
+        for unit, value of setObj
+            dateObj.set(unit, value)
+
+        @set dateField, dateObj.toISOString()
+
+
+    addToStart: (duration) ->
+        @set @startDateField, @getStartDateObject().add(duration).toISOString()
+        
+    addToEnd: (duration) ->
+        # Improvement : handle other add format.
+        @set @endDateField, @getEndDateObject().add(duration).toISOString()
+
     validate: (attrs, options) ->
 
         errors = []
@@ -22,12 +61,12 @@ module.exports = class Event extends ScheduleItem
                 field: 'description'
                 value: "no summary"
 
-        if not attrs.start or not (start = Date.create(attrs.start)).isValid()
+        if not attrs.start or not (start = moment(attrs.start)).isValid()
             errors.push
                 field: 'startdate'
                 value: "invalid start date"
 
-        if not attrs.end or not (end = Date.create(attrs.end)).isValid()
+        if not attrs.end or not (end = moment(attrs.end)).isValid()
             errors.push
                 field: 'enddate'
                 value: "invalid end date"
@@ -41,3 +80,5 @@ module.exports = class Event extends ScheduleItem
 
     #@TODO tags = color
     getDefaultColor: -> '#008AF6'
+
+

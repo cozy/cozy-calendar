@@ -26,7 +26,7 @@ module.exports = class Router extends Backbone.Router
         if year?
             @displayCalendar 'month', year, month, 1
         else
-            hash = new Date().format('month/{yyyy}/{M}')
+            hash = moment().format('[month]/YYYY/M')
             @navigate hash, trigger: true
 
     week: (year, month, day) ->
@@ -34,7 +34,7 @@ module.exports = class Router extends Backbone.Router
             [year, month, day] = getBeginningOfWeek year, month, day
             @displayCalendar 'agendaWeek', year, month, day
         else
-            hash = new Date().format('week/{yyyy}/{M}/{d}')
+            hash = moment().format('[week]/YYYY/M/D')
             @navigate hash, trigger: true
 
     list: ->

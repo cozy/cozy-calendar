@@ -10,7 +10,8 @@ module.exports = class ComboBox extends BaseView
         'blur': 'onBlur'
 
     initialize: (options) ->
-        super
+        super()
+
         @$el.autocomplete
             delay: 0
             minLength: 0

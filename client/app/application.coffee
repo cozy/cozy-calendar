@@ -25,7 +25,8 @@ module.exports =
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
-        Date.setLocale @locale
+        #Date.setLocale @locale
+        moment.locale(@locale)
 
         Router = require 'router'
         Menu = require 'views/menu'

@@ -8,31 +8,31 @@ module.exports = class ScheduleItem extends Backbone.Model
     @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
 
     initialize: ->
+        # console.log "initialize"
         @set 'tags', ['my calendar'] unless @get('tags')?.length
-        #@startDateObject = Date.create @get @startDateField
-        console.log @get @startDateField
-        @startDateObject = @_toTimezonedMoment @get @startDateField
-        
-        console.log @startDateObject
-        # 20140904 : TODO !!
-        # @on 'change:' + @startDateField, =>
-        #     @previousDateObject = @startDateObject
-        #     @startDateObject = Date.create @get @startDateField
-        #     unless @endDateField
-        #         @endDateObject = @startDateObject.clone()
-        #         @endDateObject.advance minutes: 30
 
-        if @endDateField
-            @endDateObject = @_toTimezonedMoment @get @endDateField
-            # @endDateObject = Date.create @get @endDateField
-            # 20140904 : TODO !!
-            @on 'change:' + @endDateField, =>
-                @endDateObject = @endDateObject
-                @endDateObject = Date.create @get @endDateField
-        else
-            @endDateObject = @startDateObject.clone()
-            # @endDateObject.advance minutes: 30
-            @endDateObject.add('m', 30)
+        # #@startDateObject = Date.create @get @startDateField
+        #@startDateObject = @_toTimezonedMoment @get @startDateField
+        
+        # # 20140904 : TODO !!
+        # # @on 'change:' + @startDateField, =>
+        # #     @previousDateObject = @startDateObject
+        # #     @startDateObject = Date.create @get @startDateField
+        # #     unless @endDateField
+        # #         @endDateObject = @startDateObject.clone()
+        # #         @endDateObject.advance minutes: 30
+
+        # if @endDateField
+        #     @endDateObject = @_toTimezonedMoment @get @endDateField
+        #     # @endDateObject = Date.create @get @endDateField
+        #     # 20140904 : TODO !!
+        #     # @on 'change:' + @endDateField, =>
+        #     #     @endDateObject = @endDateObject
+        #     #     @endDateObject = Date.create @get @endDateField
+        # else
+        #     @endDateObject = @startDateObject.clone()
+        #     # @endDateObject.advance minutes: 30
+        #     @endDateObject.add('m', 30)
 
 
     getCalendar: -> @get('tags')?[0]
@@ -46,9 +46,16 @@ module.exports = class ScheduleItem extends Backbone.Model
     _toTimezonedMoment: (utcDateStr) -> moment.tz utcDateStr, window.app.timezone
 
 
-    getDateObject: -> @startDateObject
+    getDateObject: -> #@startDateObject
+        return @_toTimezonedMoment @get @startDateField
     getStartDateObject: -> @getDateObject()
-    getEndDateObject: -> @endDateObject
+    getEndDateObject: -> 
+        if @endDateField
+             @_toTimezonedMoment @get @endDateField
+        else
+            @getDateObject().add('m', 30)
+             
+
 
     getFormattedDate: (formatter) -> @getDateObject().format formatter
     getFormattedStartDate: (formatter) -> @getStartDateObject().format formatter
@@ -75,7 +82,10 @@ module.exports = class ScheduleItem extends Backbone.Model
         return false
 
     isInRange: (start, end) ->
-        return ((@startDateObject.isAfter(start) and @startDateObject.isBefore(end)) or (@endDateObject.isAfter(start) and @endDateObject.isBefore(end)) or (@startDateObject.isBefore(start) and @endDateObject.isAfter(end)))
+        sdo = @getStartDateObject()
+        edo = @getEndDateObject()
+
+        return ((sdo.isAfter(start) and sdo.isBefore(end)) or (edo.isAfter(start) and edo.isBefore(end)) or (sdo.isBefore(start) and edo.isAfter(end)))
 
     # transform a SI into a FC event
     # allow overriding the startDate for reccurence management
@@ -94,18 +104,17 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # console.log @get @startDateField
         # console.log @previous @startDateField
-        console.log start.format()
         # console.log @_toTimezonedMoment start
         # console.log @_toTimezonedMoment @get @startDateField
 
         return fcEvent =
             id: @cid
-            # title: "#{start.format "{HH}:{mm}"} #{@get("description")}"
-            title: "#{start.format "HH:mm"} #{@get("description")}"
+            #title: "#{start.format "HH:mm"} #{@get("description")}"
+            title: @get("description")
             # start: @get @startDateField
-            start: start.format()
+            start: start
             # start: start.format Date.ISO8601_DATETIME
-            end: end.format()
+            end: end
             # end: end.format Date.ISO8601_DATETIME
             allDay: false
             diff: @get "diff"
@@ -115,3 +124,10 @@ module.exports = class ScheduleItem extends Backbone.Model
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()
+
+    @ambiguousToTimezoned: (ambigM) ->
+        # Convert an ambiguously fullcalendar moment, to a timezoned moment.
+        # Use Cozy's timezone as reference. Fullcalendar should use timezone = "Cozy's timezone" to be coherent.
+
+        # TODO checks ?
+        return moment.tz(ambigM, window.app.timezone)

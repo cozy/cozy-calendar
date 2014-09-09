@@ -20,30 +20,14 @@ module.exports = class CalendarHeader extends BaseView
     getTitle: ->
         return t('List') unless @cal
 
-        formatDates = $.fullCalendar.formatDates
-
         view = @cal.fullCalendar 'getView'
 
         if view.name is 'month'
-            formatMonth = 'MMMM'
-            formatYear = ' yyyy'
-            res = t formatDates view.start, '', formatMonth
-            res += formatDates view.start, '', formatYear
-
+            res = view.start.format('MMMM YYYY')
+          
         else
-            format = "MMM d[ yyyy]{ ' - '[ MMM] d yyyy}"
-            res = $.fullCalendar.formatDates view.start, view.end, format
-            res = res.replace 'Jan', t 'Jan'
-            res = res.replace 'Feb', t 'Feb'
-            res = res.replace 'Mar', t 'Mar'
-            res = res.replace 'Apr', t 'Apr'
-            res = res.replace 'Jun', t 'Jun'
-            res = res.replace 'Jul', t 'Jul'
-            res = res.replace 'Aug', t 'Aug'
-            res = res.replace 'Sep', t 'Sep'
-            res = res.replace 'Oct', t 'Oct'
-            res = res.replace 'Nov', t 'Nov'
-            res = res.replace 'Dec', t 'Dec'
+            res = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY')
+
         res
 
     getDates: ->
@@ -52,15 +36,16 @@ module.exports = class CalendarHeader extends BaseView
 
     isToday: ->
         [start, end] = @getDates()
-        (new Date()).isBetween start, end
+        start < moment() < end
+        # (new Date()).isBetween start, end
 
     getRenderData: ->
 
-        locale = Date.getLocale()
+        # locale = Date.getLocale()
 
         return data =
             title: @getTitle()
-            todaytxt: locale.day.split('|')[1]
+            todaytxt: t('today')
             calendarMode: @cal?
             active: (item) =>
                 if item is 'today' and @isToday() or item is @getViewName()

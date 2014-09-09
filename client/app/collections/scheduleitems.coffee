@@ -11,7 +11,7 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
         # else return 1
 
     getFCEventSource: (tags) =>
-        return (start, end, callback) =>
+        return (start, end, timezone, callback) =>
             eventsInRange = []
             @each (item) ->
                 itemStart = item.getStartDateObject()
@@ -30,5 +30,4 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 else if item.isInRange start, end
                     eventsInRange.push item.toFullCalendarEvent()
 
-            console.log eventsInRange
             callback eventsInRange
