@@ -79,8 +79,8 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     isRecurrent: ->
         console.log @get 'rrule'
-        
-        return @has 'rrule' and @get 'rrule'
+
+        return @has('rrule') and @get('rrule') != ''
 
     getRecurrentFCEventBetween: (start, end) ->
         # start ; end : should be dates !
@@ -92,29 +92,27 @@ module.exports = class ScheduleItem extends Backbone.Model
         # Prepare datetimes.
 
         # bounds.
-        jsDateBoundS = new Date start.toISOString()
-        jsDateBoundE = new Date end.toISOString()
-
-        # Stubs
-        jsDateBoundS = new Date "2014-10-20"
-        jsDateBoundE = new Date "2014-11-10"
+        jsDateBoundS = start.toDate()
+        jsDateBoundE = end.toDate()
 
         # event start :
 
         # mDateEventS = moment.tz(@get @startDateField, @get "timezone")
         # TODO stub for tests ! DTSTART;TZID=Europe/Paris:20111003T103000
-        eventTimezone = "America/New_York" # "Europe/Paris"
-        mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone)
-        mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone)
-        # mDateEventS = moment.tz("20140910T103000", eventTimezone)
+        # eventTimezone = "America/New_York" # "Europe/Paris"
+        eventTimezone = @get 'timezone'
+        # mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone)
+        # mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone)
+        mDateEventS = moment.tz(@get(@startDateField), eventTimezone)
+        mDateEventE = moment.tz(@get(@endDateField), eventTimezone)
 
         console.log mDateEventS.toISOString()
 
         jsDateEventS = new Date(mDateEventS.toISOString())
     
 
-        # options = RRule.parseString @get 'rrule'
-        options = RRule.parseString "FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE"
+        options = RRule.parseString @get 'rrule'
+        #options = RRule.parseString "FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE"
         options.dtstart = jsDateEventS
         rrule = new RRule options
 
@@ -147,15 +145,21 @@ module.exports = class ScheduleItem extends Backbone.Model
             return mDateRecurrentS
 
 
-        return rrule.between(jsDateBoundS, jsDateBoundE).map (jsDateRecurrentS) =>
+        fces = rrule.between(jsDateBoundS, jsDateBoundE).map (jsDateRecurrentS) =>
             mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS)
 
             # Create FCEvent
-            duration = 
             mDateRecurrentE = mDateRecurrentS.clone().add('seconds', 
                 mDateEventE.diff(mDateEventS, 'seconds'))
             
-            return @_toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE)
+            console.log "yeee"
+            console.log @
+            fce = @_toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE)
+            console.log fce
+            return fce
+
+        console.log fces
+        return fces
 
 
     isOneDay: -> 

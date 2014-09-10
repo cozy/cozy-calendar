@@ -138,8 +138,16 @@ module.exports = class EventModal extends ViewCollection
 
         if @rruleForm.hasRRule()
             data.rrule = @rruleForm.getRRule().toString()
+
+            # Save timezoned DT : no timezone in start and end, and timezone field.
+            data.timezone = window.app.timezone # TODO: view things ??
+            data.start = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss") 
+            data.end = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss") 
         else
             data.rrule = ''
+            # Save UTC for punctual event.
+            data.start = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone).toISOString()
+            data.end = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone).toISOString()
 
         validModel = @model.save data,
             wait: true

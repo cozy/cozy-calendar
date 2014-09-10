@@ -3,7 +3,7 @@ BaseView = require '../lib/base_view'
 module.exports = class RRuleView extends BaseView
 
     template: require('./templates/event_modal_rrule')
-    inputDateFormat: '{year}-{MM}-{dd}'
+    inputDateFormat: moment.localeData()._longDateFormat.L #'{year}-{MM}-{dd}'
 
     events: ->
         'click  .rrule-show': 'showRRule'
@@ -41,8 +41,11 @@ module.exports = class RRuleView extends BaseView
             interval: options.interval
 
         if options.until
+            console.log "options.until"
+            console.log options.until
             rrule.endMode = 'until'
-            rrule.until = Date.create(options.until).format @inputDateFormat
+            rrule.until = moment(options.until).format(@inputDateFormat) #Date.create(options.until).format @inputDateFormat
+
             rrule.count = ""
         else if options.count
             rrule.endMode = 'count'
@@ -72,12 +75,12 @@ module.exports = class RRuleView extends BaseView
         @$('#rrule-freq').val() isnt 'NOREPEAT'
 
     getRRule: =>
-        start = @model.getStartDateObject()
+        start = @model.getStartDateObject() # TODO : use dat in form ?
         RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE,
             RRule.TH, RRule.FR, RRule.SA]
 
         options =
-            dtstart: start
+            dtstart: start.toDate()
             freq: +@$('#rrule-freq').val()
             interval: +@$('#rrule-interval').val()
 
@@ -90,14 +93,18 @@ module.exports = class RRuleView extends BaseView
         else if options.freq is RRule.MONTHLY
             monthmode = @$('#rrule-monthdays :radio:checked').val()
             if monthmode is "date"
-                options.bymonthday = start.getDate()
+                options.bymonthday = start.date()
             else if monthmode is 'weekdate'
-                day = RRuleWdays[start.getDay()]
-                endOfMonth = start.clone().endOfMonth()
-                if start.getDate() > endOfMonth.getDate() - 7
-                    wk = -1
-                else
-                    wk = Math.ceil start.getDate() / 7
+                day = RRuleWdays[start.day()]
+                # endOfMonth = start.clone().endOfMonth()
+                # if start.getDate() > endOfMonth.getDate() - 7
+                # if start.date() > start.daysOfMonth - 7
+                #     wk = -1
+                # else
+                #     wk = Math.ceil start.date() / 7
+                #TODO : test !
+                wk = Math.ceil start.date() / 7
+                wk = -1 if wk > 4
 
                 options.byweekday = day.nth(wk)
 
@@ -106,7 +113,9 @@ module.exports = class RRuleView extends BaseView
             when 'count'
                 options.count = +@$('#rrule-count').val()
             when 'until'
-                options.until = Date.create @$('#rrule-until').val(), 'fr'
+                console.log @$('#rrule-until').val()
+                options.until = moment(@$('#rrule-until').val(), @inputDateFormat).toDate() #.format('YYYY-MM-DD')
+                # options.until = Date.create @$('#rrule-until').val(), 'fr'
 
         new RRule options
 
@@ -143,9 +152,9 @@ module.exports = class RRuleView extends BaseView
 
         @$('#rrule-monthdays').toggle freq is RRule.MONTHLY
         @$('#rrule-weekdays').toggle  freq is RRule.WEEKLY
-        locale = Date.getLocale()
+        locale = moment.localeData()
         language =
-            dayNames: locale.weekdays.slice(0, 7)
-            monthNames: locale.full_month.split('|').slice(1,13)
+            dayNames: locale._weekdays
+            monthNames: locale._months
         @$('#rrule-help').html @getRRule().toText(window.t, language)
         return true

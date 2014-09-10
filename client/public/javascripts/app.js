@@ -408,7 +408,7 @@ module.exports = ScheduleItemsCollection = (function(_super) {
             return null;
           }
           if (item.isRecurrent()) {
-            return item.getRecurrentFCEventBetween(start, end);
+            return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
           } else if (item.isInRange(start, end)) {
             return eventsInRange.push(item.toPunctualFullCalendarEvent());
           }
@@ -635,7 +635,7 @@ $(function() {
     suffix: [],
     meridiem: locale.meridiem(),
     weekStart: locale._week["dow"],
-    format: "dd/mm/yyyy"
+    format: locale._longDateFormat.L.replace(/D/g, 'd').replace(/M/g, 'm').replace(/Y/g, 'y').replace(/H/g, 'h').replace(/h/g, 'H').replace(/m/g, 'i')
   };
   app.initialize();
   return $.fn.spin = function(opts, color) {
@@ -1724,25 +1724,23 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.isRecurrent = function() {
     console.log(this.get('rrule'));
-    return this.has('rrule' && this.get('rrule'));
+    return this.has('rrule') && this.get('rrule') !== '';
   };
 
   ScheduleItem.prototype.getRecurrentFCEventBetween = function(start, end) {
-    var eventTimezone, events, fixDSTTroubles, jsDateBoundE, jsDateBoundS, jsDateEventS, mDateEventE, mDateEventS, options, rrule;
+    var eventTimezone, events, fces, fixDSTTroubles, jsDateBoundE, jsDateBoundS, jsDateEventS, mDateEventE, mDateEventS, options, rrule;
     events = [];
     if (!this.isRecurrent()) {
       return events;
     }
-    jsDateBoundS = new Date(start.toISOString());
-    jsDateBoundE = new Date(end.toISOString());
-    jsDateBoundS = new Date("2014-10-20");
-    jsDateBoundE = new Date("2014-11-10");
-    eventTimezone = "America/New_York";
-    mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone);
-    mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone);
+    jsDateBoundS = start.toDate();
+    jsDateBoundE = end.toDate();
+    eventTimezone = this.get('timezone');
+    mDateEventS = moment.tz(this.get(this.startDateField), eventTimezone);
+    mDateEventE = moment.tz(this.get(this.endDateField), eventTimezone);
     console.log(mDateEventS.toISOString());
     jsDateEventS = new Date(mDateEventS.toISOString());
-    options = RRule.parseString("FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE");
+    options = RRule.parseString(this.get('rrule'));
     options.dtstart = jsDateEventS;
     rrule = new RRule(options);
     fixDSTTroubles = function(jsDateRecurrentS) {
@@ -1758,14 +1756,20 @@ module.exports = ScheduleItem = (function(_super) {
       mDateRecurrentS.add('hour', diff);
       return mDateRecurrentS;
     };
-    return rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
+    fces = rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
       return function(jsDateRecurrentS) {
-        var duration, mDateRecurrentE, mDateRecurrentS;
+        var fce, mDateRecurrentE, mDateRecurrentS;
         mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS);
-        duration = mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
-        return _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
+        mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
+        console.log("yeee");
+        console.log(_this);
+        fce = _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
+        console.log(fce);
+        return fce;
       };
     })(this));
+    console.log(fces);
+    return fces;
   };
 
   ScheduleItem.prototype.isOneDay = function() {
@@ -3175,10 +3179,10 @@ module.exports = CalendarView = (function(_super) {
     if (this.popover) {
       return;
     }
-    if (model.getRRuleObject()) {
+    if (model.isRecurrent()) {
       return this.refresh();
     }
-    data = model.toFullCalendarEvent();
+    data = model.toPunctualFullCalendarEvent();
     fcEvent = this.cal.fullCalendar('clientEvents', data.id)[0];
     _.extend(fcEvent, data);
     return this.cal.fullCalendar('updateEvent', fcEvent);
@@ -3557,8 +3561,13 @@ module.exports = EventModal = (function(_super) {
     };
     if (this.rruleForm.hasRRule()) {
       data.rrule = this.rruleForm.getRRule().toString();
+      data.timezone = window.app.timezone;
+      data.start = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss");
+      data.end = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss");
     } else {
       data.rrule = '';
+      data.start = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone).toISOString();
+      data.end = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone).toISOString();
     }
     validModel = this.model.save(data, {
       wait: true,
@@ -3702,7 +3711,7 @@ module.exports = RRuleView = (function(_super) {
 
   RRuleView.prototype.template = require('./templates/event_modal_rrule');
 
-  RRuleView.prototype.inputDateFormat = '{year}-{MM}-{dd}';
+  RRuleView.prototype.inputDateFormat = moment.localeData()._longDateFormat.L;
 
   RRuleView.prototype.events = function() {
     return {
@@ -3762,8 +3771,10 @@ module.exports = RRuleView = (function(_super) {
       interval: options.interval
     };
     if (options.until) {
+      console.log("options.until");
+      console.log(options.until);
       rrule.endMode = 'until';
-      rrule.until = Date.create(options.until).format(this.inputDateFormat);
+      rrule.until = moment(options.until).format(this.inputDateFormat);
       rrule.count = "";
     } else if (options.count) {
       rrule.endMode = 'count';
@@ -3810,11 +3821,11 @@ module.exports = RRuleView = (function(_super) {
   };
 
   RRuleView.prototype.getRRule = function() {
-    var RRuleWdays, day, endOfMonth, monthmode, options, start, wk;
+    var RRuleWdays, day, monthmode, options, start, wk;
     start = this.model.getStartDateObject();
     RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
     options = {
-      dtstart: start,
+      dtstart: start.toDate(),
       freq: +this.$('#rrule-freq').val(),
       interval: +this.$('#rrule-interval').val()
     };
@@ -3829,14 +3840,12 @@ module.exports = RRuleView = (function(_super) {
     } else if (options.freq === RRule.MONTHLY) {
       monthmode = this.$('#rrule-monthdays :radio:checked').val();
       if (monthmode === "date") {
-        options.bymonthday = start.getDate();
+        options.bymonthday = start.date();
       } else if (monthmode === 'weekdate') {
-        day = RRuleWdays[start.getDay()];
-        endOfMonth = start.clone().endOfMonth();
-        if (start.getDate() > endOfMonth.getDate() - 7) {
+        day = RRuleWdays[start.day()];
+        wk = Math.ceil(start.date() / 7);
+        if (wk > 4) {
           wk = -1;
-        } else {
-          wk = Math.ceil(start.getDate() / 7);
         }
         options.byweekday = day.nth(wk);
       }
@@ -3846,7 +3855,8 @@ module.exports = RRuleView = (function(_super) {
         options.count = +this.$('#rrule-count').val();
         break;
       case 'until':
-        options.until = Date.create(this.$('#rrule-until').val(), 'fr');
+        console.log(this.$('#rrule-until').val());
+        options.until = moment(this.$('#rrule-until').val(), this.inputDateFormat).toDate();
     }
     return new RRule(options);
   };
@@ -3887,10 +3897,10 @@ module.exports = RRuleView = (function(_super) {
     }
     this.$('#rrule-monthdays').toggle(freq === RRule.MONTHLY);
     this.$('#rrule-weekdays').toggle(freq === RRule.WEEKLY);
-    locale = Date.getLocale();
+    locale = moment.localeData();
     language = {
-      dayNames: locale.weekdays.slice(0, 7),
-      monthNames: locale.full_month.split('|').slice(1, 13)
+      dayNames: locale._weekdays,
+      monthNames: locale._months
     };
     this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
     return true;

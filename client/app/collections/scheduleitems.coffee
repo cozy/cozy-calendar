@@ -24,9 +24,8 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 return null if tag and tag.get('visible') is false
 
                 if item.isRecurrent()
-                    item.getRecurrentFCEventBetween(start, end)
+                    eventsInRange = eventsInRange.concat item.getRecurrentFCEventBetween(start, end)
                 # if rrule = item.getRRuleObject()
-                    ;
                     # 20140904 TODO !
                     # for rdate in rrule.between Date.create(start - duration), end
                     #     eventsInRange.push item.toFullCalendarEvent rdate

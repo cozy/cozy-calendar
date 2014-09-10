@@ -14,6 +14,7 @@ module.exports = Event = americano.getModel 'Event',
     tags        : type : (x) -> x # DAMN IT JUGGLING
     attendees   : type : [Object]
     related: type: String, default: null
+    timezone: type: String
 
 require('cozy-ical').decorateEvent Event
 

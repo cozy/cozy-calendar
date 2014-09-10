@@ -146,9 +146,10 @@ module.exports = class CalendarView extends BaseView
         if @popover
             return 
 
-        return @refresh() if model.getRRuleObject() #@TODO: may be smarter
+        # return @refresh() if model.getRRuleObject() #@TODO: may be smarter
+        return @refresh() if model.isRecurrent()
 
-        data = model.toFullCalendarEvent()
+        data = model.toPunctualFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
         _.extend fcEvent, data
         @cal.fullCalendar 'updateEvent', fcEvent

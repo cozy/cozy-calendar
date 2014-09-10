@@ -17,7 +17,14 @@ $ ->
         suffix: [], # ?
         meridiem: locale.meridiem()
         weekStart: locale._week["dow"]
-        format: "dd/mm/yyyy" #? locale.longDateFormat() ?
+        format: locale._longDateFormat.L
+                    .replace(/D/g, 'd')
+                    .replace(/M/g, 'm')
+                    .replace(/Y/g, 'y')
+                    .replace(/H/g, 'h')
+                    .replace(/h/g, 'H')
+                    .replace(/m/g, 'i') #     "dd/mm/yyyy" #? locale._longDateFormat() /# format standard is different... 
+
     };
 
     app.initialize()
