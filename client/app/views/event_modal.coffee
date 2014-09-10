@@ -15,7 +15,8 @@ module.exports = class EventModal extends ViewCollection
     attributes:
         'data-keyboard': 'false'
 
-    inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
+    inputDateTimeFormat: 'DD/MM/YYYY H:mm'
+    # inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
     inputDateFormat: '{year}-{MM}-{dd}'
     exportDateFormat: '{year}-{MM}-{dd}-{HH}-{mm}'
 
@@ -129,10 +130,11 @@ module.exports = class EventModal extends ViewCollection
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
             tags: [@$('#basic-calendar').val()].concat @tags.getTags()
-            start: Date.create(@startField.val(), 'fr')
-                .format Event.dateFormat, 'en'
-            end: Date.create(@endField.val(), 'fr')
-                .format Event.dateFormat, 'en'
+            
+            # start: Date.create(@startField.val(), 'fr')
+            #     .format Event.dateFormat, 'en'
+            # end: Date.create(@endField.val(), 'fr')
+            #     .format Event.dateFormat, 'en'
 
         if @rruleForm.hasRRule()
             data.rrule = @rruleForm.getRRule().toString()

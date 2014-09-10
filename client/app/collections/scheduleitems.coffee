@@ -12,6 +12,8 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
     getFCEventSource: (tags) =>
         return (start, end, timezone, callback) =>
+            # start and end : ambiguous moments ; only dates if month or week view.
+
             eventsInRange = []
             @each (item) ->
                 itemStart = item.getStartDateObject()
@@ -21,13 +23,15 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 tag = tags.findWhere label: item.getCalendar()
                 return null if tag and tag.get('visible') is false
 
-                if rrule = item.getRRuleObject()
+                if item.isRecurrent()
+                    item.getRecurrentFCEventBetween(start, end)
+                # if rrule = item.getRRuleObject()
                     ;
                     # 20140904 TODO !
                     # for rdate in rrule.between Date.create(start - duration), end
                     #     eventsInRange.push item.toFullCalendarEvent rdate
 
                 else if item.isInRange start, end
-                    eventsInRange.push item.toFullCalendarEvent()
+                    eventsInRange.push item.toPunctualFullCalendarEvent()
 
             callback eventsInRange

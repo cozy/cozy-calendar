@@ -11,10 +11,10 @@ form.form-inline#rrule
         input.col-xs2.input-mini#rrule-interval(type="number", min=1, value=rrule.interval)
         select#rrule-freq
             option(value="NOREPEAT", selected=freqSelected('NOREPEAT'))= t('no recurrence')
-            option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= units[4]
-            option(value=RRule.WEEKLY, selected=freqSelected(RRule.WEEKLY))= units[5]
-            option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= units[6]
-            option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= units[7]
+            option(value=RRule.DAILY, selected=freqSelected(RRule.DAILY))= t('day')
+            option(value=RRule.WEEKLY, selected=freqSelected(RRule.WEEKLY))= t('week')
+            option(value=RRule.MONTHLY, selected=freqSelected(RRule.MONTHLY))= t('month')
+            option(value=RRule.YEARLY, selected=freqSelected(RRule.YEARLY))= t('year')
     #rrule-weekdays
         label.control-label= t('repeat on')
         .control-group

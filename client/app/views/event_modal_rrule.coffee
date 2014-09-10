@@ -23,8 +23,8 @@ module.exports = class RRuleView extends BaseView
 
     getRenderData: ->
         data =
-            weekDays: Date.getLocale().weekdays.slice(0, 7)
-            units: Date.getLocale().units
+            weekDays: moment.localeData()._weekdays
+            # units: Date.getLocale().units
 
         unless @model.has 'rrule'
             return _.extend data,

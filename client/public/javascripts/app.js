@@ -397,7 +397,7 @@ module.exports = ScheduleItemsCollection = (function(_super) {
         var eventsInRange;
         eventsInRange = [];
         _this.each(function(item) {
-          var duration, itemEnd, itemStart, rrule, tag;
+          var duration, itemEnd, itemStart, tag;
           itemStart = item.getStartDateObject();
           itemEnd = item.getEndDateObject();
           duration = itemEnd - itemStart;
@@ -407,10 +407,10 @@ module.exports = ScheduleItemsCollection = (function(_super) {
           if (tag && tag.get('visible') === false) {
             return null;
           }
-          if (rrule = item.getRRuleObject()) {
-
+          if (item.isRecurrent()) {
+            return item.getRecurrentFCEventBetween(start, end);
           } else if (item.isInRange(start, end)) {
-            return eventsInRange.push(item.toFullCalendarEvent());
+            return eventsInRange.push(item.toPunctualFullCalendarEvent());
           }
         });
         return callback(eventsInRange);
@@ -1722,6 +1722,52 @@ module.exports = ScheduleItem = (function(_super) {
     }
   };
 
+  ScheduleItem.prototype.isRecurrent = function() {
+    console.log(this.get('rrule'));
+    return this.has('rrule' && this.get('rrule'));
+  };
+
+  ScheduleItem.prototype.getRecurrentFCEventBetween = function(start, end) {
+    var eventTimezone, events, fixDSTTroubles, jsDateBoundE, jsDateBoundS, jsDateEventS, mDateEventE, mDateEventS, options, rrule;
+    events = [];
+    if (!this.isRecurrent()) {
+      return events;
+    }
+    jsDateBoundS = new Date(start.toISOString());
+    jsDateBoundE = new Date(end.toISOString());
+    jsDateBoundS = new Date("2014-10-20");
+    jsDateBoundE = new Date("2014-11-10");
+    eventTimezone = "America/New_York";
+    mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone);
+    mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone);
+    console.log(mDateEventS.toISOString());
+    jsDateEventS = new Date(mDateEventS.toISOString());
+    options = RRule.parseString("FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE");
+    options.dtstart = jsDateEventS;
+    rrule = new RRule(options);
+    fixDSTTroubles = function(jsDateRecurrentS) {
+      var diff, mDateRecurrentS;
+      mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone);
+      diff = mDateEventS.hour() - mDateRecurrentS.hour();
+      console.log(diff);
+      if (diff === 23) {
+        diff = -1;
+      } else if (diff === -23) {
+        diff = 1;
+      }
+      mDateRecurrentS.add('hour', diff);
+      return mDateRecurrentS;
+    };
+    return rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
+      return function(jsDateRecurrentS) {
+        var duration, mDateRecurrentE, mDateRecurrentS;
+        mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS);
+        duration = mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
+        return _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
+      };
+    })(this));
+  };
+
   ScheduleItem.prototype.isOneDay = function() {
     return false;
   };
@@ -1733,10 +1779,12 @@ module.exports = ScheduleItem = (function(_super) {
     return (sdo.isAfter(start) && sdo.isBefore(end)) || (edo.isAfter(start) && edo.isBefore(end)) || (sdo.isBefore(start) && edo.isAfter(end));
   };
 
-  ScheduleItem.prototype.toFullCalendarEvent = function(rstart) {
-    var end, fcEvent, start;
-    start = this.getStartDateObject();
-    end = this.getEndDateObject();
+  ScheduleItem.prototype.toPunctualFullCalendarEvent = function() {
+    return this._toFullCalendarEvent(this.getStartDateObject(), this.getEndDateObject());
+  };
+
+  ScheduleItem.prototype._toFullCalendarEvent = function(start, end) {
+    var fcEvent;
     return fcEvent = {
       id: this.cid,
       title: this.get("description"),
@@ -2765,7 +2813,6 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.onAdvancedClicked = function(event) {
     var modal;
     if (this.model.isNew()) {
-      this.model.set(this.getModelAttributes());
       modal = new EventModal({
         model: this.model,
         backurl: window.location.hash
@@ -3363,7 +3410,7 @@ module.exports = EventModal = (function(_super) {
     'data-keyboard': 'false'
   };
 
-  EventModal.prototype.inputDateTimeFormat = '{dd}/{MM}/{year} {HH}:{mm}';
+  EventModal.prototype.inputDateTimeFormat = 'DD/MM/YYYY H:mm';
 
   EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
 
@@ -3506,9 +3553,7 @@ module.exports = EventModal = (function(_super) {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
       place: this.$('#basic-place').val(),
-      tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags()),
-      start: Date.create(this.startField.val(), 'fr').format(Event.dateFormat, 'en'),
-      end: Date.create(this.endField.val(), 'fr').format(Event.dateFormat, 'en')
+      tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags())
     };
     if (this.rruleForm.hasRRule()) {
       data.rrule = this.rruleForm.getRRule().toString();
@@ -3681,8 +3726,7 @@ module.exports = RRuleView = (function(_super) {
   RRuleView.prototype.getRenderData = function() {
     var data, options, rrule;
     data = {
-      weekDays: Date.getLocale().weekdays.slice(0, 7),
-      units: Date.getLocale().units
+      weekDays: moment.localeData()._weekdays
     };
     if (!this.model.has('rrule')) {
       return _.extend(data, {
@@ -4735,8 +4779,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),rrule = locals_.rrule,freqSelected = locals_.freqSelected,units = locals_.units,weekDays = locals_.weekDays,wkdaySelected = locals_.wkdaySelected,yearModeIs = locals_.yearModeIs,endModeSelected = locals_.endModeSelected;
-buf.push("<p id=\"rrule-short\"><i class=\"icon-arrow-right\"></i><span id=\"rrule-help\"></span><span id=\"rrule-action\">&nbsp;-&nbsp;<a class=\"rrule-show\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></span></p><form id=\"rrule\" class=\"form-inline\"><label for=\"rrule-interval\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat every')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><input id=\"rrule-interval\" type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " class=\"col-xs2 input-mini\"/><select id=\"rrule-freq\"><option value=\"NOREPEAT\"" + (jade.attr("selected", freqSelected('NOREPEAT'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('no recurrence')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", freqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = units[4]) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", freqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = units[5]) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", freqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = units[6]) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", freqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = units[7]) ? "" : jade_interp)) + "</option></select></div><div id=\"rrule-weekdays\"><label class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat on')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[1]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"1\"" + (jade.attr("checked", wkdaySelected(1), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[2]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"2\"" + (jade.attr("checked", wkdaySelected(2), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[3]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"3\"" + (jade.attr("checked", wkdaySelected(3), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[4]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"4\"" + (jade.attr("checked", wkdaySelected(4), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[5]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"5\"" + (jade.attr("checked", wkdaySelected(5), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[6]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"6\"" + (jade.attr("checked", wkdaySelected(6), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[0]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"0\"" + (jade.attr("checked", wkdaySelected(0), true, false)) + "/></label></div></div><div id=\"rrule-monthdays\" class=\"control-group\"><div class=\"controls\"><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('date'), true, false)) + " name=\"rrule-month-option\" value=\"date\"/>" + (jade.escape(null == (jade_interp = t('repeat on date')) ? "" : jade_interp)) + "</label><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('weekdate'), true, false)) + " name=\"rrule-month-option\" value=\"weekdate\"/>" + (jade.escape(null == (jade_interp = t('repeat on weekday')) ? "" : jade_interp)) + "</label></div></div><label for=\"rrule-until\">" + (jade.escape(null == (jade_interp = t('repeat')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"forever\"" + (jade.attr("checked", endModeSelected('forever'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('forever')) ? "" : jade_interp)) + "</label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", endModeSelected('count'), true, false)) + "/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('after')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('occurences')) ? "" : jade_interp)) + "</label></label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", endModeSelected('until'), true, false)) + "/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('until')) ? "" : jade_interp)) + "</label><input id=\"rrule-until\" type=\"date\"" + (jade.attr("value", rrule.until, true, false)) + "/></label></div></form>");;return buf.join("");
+var locals_ = (locals || {}),rrule = locals_.rrule,freqSelected = locals_.freqSelected,weekDays = locals_.weekDays,wkdaySelected = locals_.wkdaySelected,yearModeIs = locals_.yearModeIs,endModeSelected = locals_.endModeSelected;
+buf.push("<p id=\"rrule-short\"><i class=\"icon-arrow-right\"></i><span id=\"rrule-help\"></span><span id=\"rrule-action\">&nbsp;-&nbsp;<a class=\"rrule-show\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></span></p><form id=\"rrule\" class=\"form-inline\"><label for=\"rrule-interval\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat every')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><input id=\"rrule-interval\" type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " class=\"col-xs2 input-mini\"/><select id=\"rrule-freq\"><option value=\"NOREPEAT\"" + (jade.attr("selected", freqSelected('NOREPEAT'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('no recurrence')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", freqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", freqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", freqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", freqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('year')) ? "" : jade_interp)) + "</option></select></div><div id=\"rrule-weekdays\"><label class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat on')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[1]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"1\"" + (jade.attr("checked", wkdaySelected(1), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[2]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"2\"" + (jade.attr("checked", wkdaySelected(2), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[3]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"3\"" + (jade.attr("checked", wkdaySelected(3), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[4]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"4\"" + (jade.attr("checked", wkdaySelected(4), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[5]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"5\"" + (jade.attr("checked", wkdaySelected(5), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[6]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"6\"" + (jade.attr("checked", wkdaySelected(6), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[0]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"0\"" + (jade.attr("checked", wkdaySelected(0), true, false)) + "/></label></div></div><div id=\"rrule-monthdays\" class=\"control-group\"><div class=\"controls\"><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('date'), true, false)) + " name=\"rrule-month-option\" value=\"date\"/>" + (jade.escape(null == (jade_interp = t('repeat on date')) ? "" : jade_interp)) + "</label><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('weekdate'), true, false)) + " name=\"rrule-month-option\" value=\"weekdate\"/>" + (jade.escape(null == (jade_interp = t('repeat on weekday')) ? "" : jade_interp)) + "</label></div></div><label for=\"rrule-until\">" + (jade.escape(null == (jade_interp = t('repeat')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"forever\"" + (jade.attr("checked", endModeSelected('forever'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('forever')) ? "" : jade_interp)) + "</label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", endModeSelected('count'), true, false)) + "/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('after')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('occurences')) ? "" : jade_interp)) + "</label></label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", endModeSelected('until'), true, false)) + "/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('until')) ? "" : jade_interp)) + "</label><input id=\"rrule-until\" type=\"date\"" + (jade.attr("value", rrule.until, true, false)) + "/></label></div></form>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

@@ -69,12 +69,94 @@ module.exports = class ScheduleItem extends Backbone.Model
         previous = @getPreviousDateObject()
         if previous then previous.format('{yyyy}{MM}{dd}') else false
 
+    # TODO:  Hide RRule object as it send wrong dates.
     getRRuleObject: ->
         try
             options = RRule.parseString @get 'rrule'
             options.dtstart = @getStartDateObject()
             return new RRule options
         catch e then return false
+
+    isRecurrent: ->
+        console.log @get 'rrule'
+        
+        return @has 'rrule' and @get 'rrule'
+
+    getRecurrentFCEventBetween: (start, end) ->
+        # start ; end : should be dates !
+
+        events = []
+        # skip errors
+        return events if not @isRecurrent()
+
+        # Prepare datetimes.
+
+        # bounds.
+        jsDateBoundS = new Date start.toISOString()
+        jsDateBoundE = new Date end.toISOString()
+
+        # Stubs
+        jsDateBoundS = new Date "2014-10-20"
+        jsDateBoundE = new Date "2014-11-10"
+
+        # event start :
+
+        # mDateEventS = moment.tz(@get @startDateField, @get "timezone")
+        # TODO stub for tests ! DTSTART;TZID=Europe/Paris:20111003T103000
+        eventTimezone = "America/New_York" # "Europe/Paris"
+        mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone)
+        mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone)
+        # mDateEventS = moment.tz("20140910T103000", eventTimezone)
+
+        console.log mDateEventS.toISOString()
+
+        jsDateEventS = new Date(mDateEventS.toISOString())
+    
+
+        # options = RRule.parseString @get 'rrule'
+        options = RRule.parseString "FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE"
+        options.dtstart = jsDateEventS
+        rrule = new RRule options
+
+
+        fixDSTTroubles = (jsDateRecurrentS) ->
+            # jsDateRecurrentS.toISOString is the UTC start date of the event.
+            # unless, DST of browser's timezone is different from event's timezone.
+
+            mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone)
+
+            # console.log mDateRecurrentS
+
+            # console.log mDateRecurrentS.hour()
+            # console.log mDateRecurrentS.dayOfYear()
+            # console.log mDateEventS.hour()
+
+            # Fix DST troubles :
+            # Correction is -1, 1 or 0.
+            diff = mDateEventS.hour() - mDateRecurrentS.hour()
+            console.log diff
+            if diff == 23
+                diff = -1
+            else if diff == -23
+                diff = 1
+
+            mDateRecurrentS.add('hour', diff)
+
+            # console.log mDateRecurrentS.hour()
+            # console.log mDateRecurrentS.dayOfYear()
+            return mDateRecurrentS
+
+
+        return rrule.between(jsDateBoundS, jsDateBoundE).map (jsDateRecurrentS) =>
+            mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS)
+
+            # Create FCEvent
+            duration = 
+            mDateRecurrentE = mDateRecurrentS.clone().add('seconds', 
+                mDateEventE.diff(mDateEventS, 'seconds'))
+            
+            return @_toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE)
+
 
     isOneDay: -> 
         # 20140904 TODO !
@@ -89,10 +171,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     # transform a SI into a FC event
     # allow overriding the startDate for reccurence management
-    toFullCalendarEvent: (rstart) ->
-        # TODO: read that to manage recurrence.
-        start = @getStartDateObject()
-        end = @getEndDateObject()
+
+    toPunctualFullCalendarEvent : ->
+        return @_toFullCalendarEvent(@getStartDateObject(), @getEndDateObject())
 
         # if rstart
         #     duration = end - start
@@ -106,6 +187,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         # console.log @previous @startDateField
         # console.log @_toTimezonedMoment start
         # console.log @_toTimezonedMoment @get @startDateField
+
+    _toFullCalendarEvent: (start, end) ->
+
 
         return fcEvent =
             id: @cid

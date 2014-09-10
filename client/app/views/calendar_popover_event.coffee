@@ -145,7 +145,7 @@ module.exports = class EventPopOver extends PopoverView
 
     onAdvancedClicked: (event) =>
         if @model.isNew()
-            @model.set @getModelAttributes()
+            # @model.set @getModelAttributes()
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash
