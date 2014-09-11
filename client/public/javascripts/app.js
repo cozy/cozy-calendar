@@ -1791,7 +1791,7 @@ module.exports = ScheduleItem = (function(_super) {
     var fcEvent;
     return fcEvent = {
       id: this.cid,
-      title: this.get("description"),
+      title: "" + (start.format("HH:mm")) + " " + (this.get("description")),
       start: start,
       end: end,
       allDay: false,
@@ -3048,10 +3048,10 @@ module.exports = CalendarView = (function(_super) {
     this.cal = this.$('#alarms');
     this.view = this.options.view;
     this.cal.fullCalendar({
+      lang: window.locale,
       header: false,
       editable: true,
       firstDay: 1,
-      height: this.handleWindowResize('initial'),
       defaultView: this.view,
       year: this.options.year,
       month: this.options.month,
@@ -3068,12 +3068,10 @@ module.exports = CalendarView = (function(_super) {
         day: t('day')
       },
       timezone: window.app.timezone,
-      timeFormat: {
-        '': '',
-        'agendaWeek': ''
-      },
+      timeFormat: '',
       columnFormat: {
-        'week': 'ddd d'
+        'week': 'ddd d',
+        'month': 'dddd'
       },
       axisFormat: "H:mm",
       allDaySlot: false,
@@ -3087,7 +3085,7 @@ module.exports = CalendarView = (function(_super) {
       eventClick: this.onEventClick,
       eventResizeStop: this.onEventResizeStop,
       eventResize: this.onEventResize,
-      handleWindowResize: false
+      handleWindowResize: true
     });
     source = this.eventCollection.getFCEventSource(this.tagsCollection);
     this.cal.fullCalendar('addEventSource', source);

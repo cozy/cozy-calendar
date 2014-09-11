@@ -190,7 +190,7 @@
         border-radius: 4px
         color: blue
 
-.fc-content
+.fc-view-container
     clear:none
 
     thead
@@ -213,7 +213,7 @@
             .fc-state-highlight
                 background: lightblue
 
-    .fc-event-inner .fc-event-time
+    .fc-content .fc-time
 
         &.spinning
             display: inline-block
@@ -232,7 +232,8 @@
     h2
         font-weight: normal
 
-.fc-title, .fc-content
+// .fc-title, 
+.fc-view-container
 
     thead
     thead > tr.fc-first
@@ -257,7 +258,7 @@
 .fc-day-number
     font-family: styled
 
-.fc-event-inner
+.fc-content
     border: 0
     border-radius: 0
     color: white
@@ -279,13 +280,13 @@
 .fc-view
     overflow: visible
 
-#view-container .fc-content .fc-cell-overlay
+#view-container .fc-view-container .fc-cell-overlay
     background: #CBE4FB
 
-#view-container .fc-content tbody .fc-state-highlight
+#view-container .fc-view-container tbody .fc-state-highlight
     background: #CCF0CC
 
-#view-container .fc-event-inner:hover
+#view-container .fc-content:hover
     color: white
     background: orange
     border: 0

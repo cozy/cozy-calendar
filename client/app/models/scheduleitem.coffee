@@ -197,8 +197,8 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         return fcEvent =
             id: @cid
-            #title: "#{start.format "HH:mm"} #{@get("description")}"
-            title: @get("description")
+            title: "#{start.format "HH:mm"} #{@get("description")}"
+            # title: @get("description")
             # start: @get @startDateField
             start: start
             # start: start.format Date.ISO8601_DATETIME
@@ -209,6 +209,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             place: @get 'place'
             timezone: @get 'timezone'
             timezoneHour: @get 'timezoneHour'
+            # timeFormat: ''
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()

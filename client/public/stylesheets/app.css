@@ -10348,30 +10348,30 @@ input[type="time"] {
   border-radius: 4px;
   color: #34a6ff;
 }
-.fc-content {
+.fc-view-container {
   clear: none;
 }
-.fc-content thead {
+.fc-view-container thead {
   background: #34a6ff;
   color: #fff;
 }
-.fc-content thead tr th {
+.fc-view-container thead tr th {
   height: 30px;
   line-height: 30px;
   border: none;
 }
-.fc-content thead tr th:first-child {
+.fc-view-container thead tr th:first-child {
   -webkit-border-radius: 10px 0 0 0;
   border-radius: 10px 0 0 0;
 }
-.fc-content thead tr th:last-child {
+.fc-view-container thead tr th:last-child {
   -webkit-border-radius: 0 10px 0 0;
   border-radius: 0 10px 0 0;
 }
-.fc-content tbody .fc-state-highlight {
+.fc-view-container tbody .fc-state-highlight {
   background: #cbe4fb;
 }
-.fc-content .fc-event-inner .fc-event-time.spinning {
+.fc-view-container .fc-content .fc-time.spinning {
   display: inline-block;
   margin: 3px;
 }
@@ -10385,14 +10385,10 @@ input[type="time"] {
 .fc-header-title h2 {
   font-weight: normal;
 }
-.fc-title thead,
-.fc-content thead,
-.fc-title thead > tr.fc-first,
-.fc-content thead > tr.fc-first,
-.fc-title .fc-day-header,
-.fc-content .fc-day-header,
-.fc-title .fc-widget-header,
-.fc-content .fc-widget-header {
+.fc-view-container thead,
+.fc-view-container thead > tr.fc-first,
+.fc-view-container .fc-day-header,
+.fc-view-container .fc-widget-header {
   font-family: styled;
   background: #fff;
   -webkit-border-radius: 0;
@@ -10414,7 +10410,7 @@ input[type="time"] {
 .fc-day-number {
   font-family: styled;
 }
-.fc-event-inner {
+.fc-content {
   border: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
@@ -10437,13 +10433,13 @@ input[type="time"] {
 .fc-view {
   overflow: visible;
 }
-#view-container .fc-content .fc-cell-overlay {
+#view-container .fc-view-container .fc-cell-overlay {
   background: #cbe4fb;
 }
-#view-container .fc-content tbody .fc-state-highlight {
+#view-container .fc-view-container tbody .fc-state-highlight {
   background: #ccf0cc;
 }
-#view-container .fc-event-inner:hover {
+#view-container .fc-content:hover {
   color: #fff;
   background: #fe8800;
   border: 0;

@@ -38,11 +38,12 @@ module.exports = class CalendarView extends BaseView
         @cal = @$('#alarms')
         @view = @options.view
         @cal.fullCalendar
+            lang: window.locale
             header: false
             editable: true
             firstDay: 1 # first day of the week is monday
             # weekMode: 'liquid' deprecated --> http://fullcalendar.io/docs/display/weekMode/
-            height: @handleWindowResize('initial') # initial ratio
+            # height: @handleWindowResize('initial') # initial ratio
             defaultView: @view
             year: @options.year
             month: @options.month
@@ -72,11 +73,13 @@ module.exports = class CalendarView extends BaseView
 
             # "In other parts of the API, moments will be represented in UTC." http://arshaw.com/fullcalendar/docs/timezone/timezone/ 
             #ignoreTimezone: true # 20140904 TODO : what's behaviour of this indead ? http://arshaw.com/fullcalendar/docs1/event_data/ignoreTimezone/
-            timeFormat:
-                '' : '' # do not display times on event
-                'agendaWeek': ''
+            
+            timeFormat: ''
+                #'' : '' # do not display times on event
+                #'agendaWeek': ''
             columnFormat:
                 'week': 'ddd d'
+                'month': 'dddd'
 
             axisFormat: "H:mm"
             allDaySlot: false
@@ -90,7 +93,7 @@ module.exports = class CalendarView extends BaseView
             eventClick: @onEventClick
             eventResizeStop: @onEventResizeStop
             eventResize: @onEventResize
-            handleWindowResize: false
+            handleWindowResize: true
 
         source = @eventCollection.getFCEventSource @tagsCollection
         @cal.fullCalendar 'addEventSource', source
@@ -108,7 +111,7 @@ module.exports = class CalendarView extends BaseView
         @calHeader.on 'list', => app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
-        @handleWindowResize() #
+        @handleWindowResize()
         debounced = _.debounce @handleWindowResize, 10
         $(window).resize (ev) -> debounced() if ev.target is window
 
