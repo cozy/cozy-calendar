@@ -15,6 +15,30 @@ module.exports = Alarm = americano.getModel 'Alarm',
 
 require('cozy-ical').decorateAlarm Alarm
 
+
+# TODO : avoid duplication (Event and Alarm models.)
+insinuatingUTCToISO8601 = (dateStr) ->
+    # Skip buggy or empty values.
+    if not dateStr
+        return dateStr
+
+    # Check if it's already ISO8601
+    if (dateStr.charAt 10) == 'T'
+        return dateStr
+
+    d = dateStr
+    # Check for a timezone
+    if "GMT" not in dateStr
+        d = d + " GMT+0000"
+
+    return new Date(d).toISOString()
+
+Alarm.afterInitialize = () ->
+    @trigg = insinuatingUTCToISO8601(@trigg)
+
+    @
+
+
 Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
 

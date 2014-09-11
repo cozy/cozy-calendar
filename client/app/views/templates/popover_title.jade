@@ -1,7 +1,7 @@
 input#calendarcombo(value=calendar)
 
 if !editionMode
-    a#toggle-type= t('change to') + " " + t(type=='event'?'alarm':'event')
+    a#toggle-type= t('change to') + " " + t(model.fcEventType=='event'?'alarm':'event')
 
 
 button.close(title=t('close')) &times;

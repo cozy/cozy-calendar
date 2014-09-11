@@ -78,8 +78,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         catch e then return false
 
     isRecurrent: ->
-        console.log @get 'rrule'
-
         return @has('rrule') and @get('rrule') != ''
 
     getRecurrentFCEventBetween: (start, end) ->
@@ -106,8 +104,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         mDateEventS = moment.tz(@get(@startDateField), eventTimezone)
         mDateEventE = moment.tz(@get(@endDateField), eventTimezone)
 
-        console.log mDateEventS.toISOString()
-
         jsDateEventS = new Date(mDateEventS.toISOString())
     
 
@@ -132,7 +128,6 @@ module.exports = class ScheduleItem extends Backbone.Model
             # Fix DST troubles :
             # Correction is -1, 1 or 0.
             diff = mDateEventS.hour() - mDateRecurrentS.hour()
-            console.log diff
             if diff == 23
                 diff = -1
             else if diff == -23
@@ -152,13 +147,9 @@ module.exports = class ScheduleItem extends Backbone.Model
             mDateRecurrentE = mDateRecurrentS.clone().add('seconds', 
                 mDateEventE.diff(mDateEventS, 'seconds'))
             
-            console.log "yeee"
-            console.log @
             fce = @_toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE)
-            console.log fce
             return fce
 
-        console.log fces
         return fces
 
 

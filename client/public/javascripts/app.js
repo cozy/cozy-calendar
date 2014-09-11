@@ -1451,7 +1451,7 @@ module.exports = Alarm = (function(_super) {
         value: "invalid action"
       });
     }
-    if (!attrs.trigg || !Date.create(attrs.trigg).isValid()) {
+    if (!attrs.trigg || !moment(attrs.start).isValid()) {
       errors.push({
         field: 'triggdate',
         value: "invalid trigg date"
@@ -1723,7 +1723,6 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.isRecurrent = function() {
-    console.log(this.get('rrule'));
     return this.has('rrule') && this.get('rrule') !== '';
   };
 
@@ -1738,7 +1737,6 @@ module.exports = ScheduleItem = (function(_super) {
     eventTimezone = this.get('timezone');
     mDateEventS = moment.tz(this.get(this.startDateField), eventTimezone);
     mDateEventE = moment.tz(this.get(this.endDateField), eventTimezone);
-    console.log(mDateEventS.toISOString());
     jsDateEventS = new Date(mDateEventS.toISOString());
     options = RRule.parseString(this.get('rrule'));
     options.dtstart = jsDateEventS;
@@ -1747,7 +1745,6 @@ module.exports = ScheduleItem = (function(_super) {
       var diff, mDateRecurrentS;
       mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone);
       diff = mDateEventS.hour() - mDateRecurrentS.hour();
-      console.log(diff);
       if (diff === 23) {
         diff = -1;
       } else if (diff === -23) {
@@ -1761,14 +1758,10 @@ module.exports = ScheduleItem = (function(_super) {
         var fce, mDateRecurrentE, mDateRecurrentS;
         mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS);
         mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
-        console.log("yeee");
-        console.log(_this);
         fce = _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
-        console.log(fce);
         return fce;
       };
     })(this));
-    console.log(fces);
     return fces;
   };
 
@@ -2622,6 +2615,301 @@ module.exports = PopOver = (function(_super) {
 })(BaseView);
 });
 
+;require.register("views/calendar_popover_alarm", function(exports, require, module) {
+var Alarm, AlarmPopOver, ComboBox, PopoverView, RRuleFormView, Toggle,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverView = require('../lib/popover_view');
+
+RRuleFormView = require('views/event_modal_rrule');
+
+ComboBox = require('views/widgets/combobox');
+
+Toggle = require('views/toggle');
+
+Alarm = require('models/alarm');
+
+module.exports = AlarmPopOver = (function(_super) {
+  __extends(AlarmPopOver, _super);
+
+  function AlarmPopOver() {
+    this.handleError = __bind(this.handleError, this);
+    this.onAddClicked = __bind(this.onAddClicked, this);
+    this.onRemoveClicked = __bind(this.onRemoveClicked, this);
+    this.getModelAttributes = __bind(this.getModelAttributes, this);
+    return AlarmPopOver.__super__.constructor.apply(this, arguments);
+  }
+
+  AlarmPopOver.prototype.titleTemplate = require('./templates/popover_title');
+
+  AlarmPopOver.prototype.template = require('./templates/popover_alarm');
+
+  AlarmPopOver.prototype.dtFormat = "HH:mm";
+
+  AlarmPopOver.prototype.events = {
+    'keyup input': 'onKeyUp',
+    'change select': 'onKeyUp',
+    'change input': 'onKeyUp',
+    'click .add': 'onAddClicked',
+    'click .remove': 'onRemoveClicked',
+    'click #toggle-type': 'onTabClicked',
+    'click .close': 'selfclose'
+  };
+
+  AlarmPopOver.prototype.initialize = function(options) {
+    if (!this.model) {
+      this.model = new Alarm({
+        trigg: options.start.toISOString(),
+        timezone: 'Europe/Paris',
+        description: '',
+        action: 'DISPLAY'
+      });
+    }
+    AlarmPopOver.__super__.initialize.call(this, options);
+    return this.options = options;
+  };
+
+  AlarmPopOver.prototype.afterRender = function() {
+    var inputTime, _ref, _ref1;
+    this.addButton = this.$('.btn.add').text(this.getButtonText());
+    this.removeButton = this.$('.remove');
+    if (this.model.isNew()) {
+      this.removeButton.hide();
+    }
+    this.$('input[type="time"]').attr('type', 'text').timepicker({
+      template: false,
+      minuteStep: 5,
+      showMeridian: false
+    });
+    this.$('.focused').focus();
+    this.actionMail = new Toggle({
+      icon: 'envelope',
+      label: 'email notification',
+      value: (_ref = this.model.get('action')) === 'EMAIL' || _ref === 'BOTH'
+    });
+    this.actionNotif = new Toggle({
+      icon: 'exclamation-sign',
+      label: 'home notification',
+      value: (_ref1 = this.model.get('action')) === 'DISPLAY' || _ref1 === 'BOTH'
+    });
+    this.actionMail.on('toggle', (function(_this) {
+      return function(mailIsOn) {
+        if (!mailIsOn) {
+          return _this.actionNotif.toggle(true);
+        }
+      };
+    })(this));
+    this.actionNotif.on('toggle', (function(_this) {
+      return function(notifIsOn) {
+        if (!notifIsOn) {
+          return _this.actionMail.toggle(true);
+        }
+      };
+    })(this));
+    inputTime = this.$('#input-time');
+    inputTime.after(this.actionMail.$el);
+    inputTime.after(this.actionNotif.$el);
+    return this.calendar = new ComboBox({
+      el: this.$('#calendarcombo'),
+      small: true,
+      source: app.tags.calendars()
+    });
+  };
+
+  AlarmPopOver.prototype.getTitle = function() {
+    var title;
+    title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
+    return t(title);
+  };
+
+  AlarmPopOver.prototype.getDirection = function() {
+    var fitBottom, fitLeft, fitRight, pos;
+    pos = this.target.position();
+    fitRight = pos.left + this.target.width() + 411 < this.container.width();
+    fitLeft = pos.left - 411 > 0;
+    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
+    if (!fitLeft && !fitRight) {
+      if (fitBottom) {
+        return 'bottom';
+      } else {
+        return 'top';
+      }
+    } else if (fitRight) {
+      return 'right';
+    } else {
+      return 'left';
+    }
+  };
+
+  AlarmPopOver.prototype.getButtonText = function() {
+    if (this.model.isNew()) {
+      return t('create');
+    } else {
+      return t('edit');
+    }
+  };
+
+  AlarmPopOver.prototype.getRenderData = function() {
+    var data, _ref;
+    data = {
+      model: this.model,
+      dtFormat: this.dtFormat,
+      editionMode: !this.model.isNew(),
+      calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || ''
+    };
+    return data;
+    return data;
+  };
+
+  AlarmPopOver.prototype.onTabClicked = function(event) {
+    return this.parentView.showPopover({
+      type: 'event',
+      target: this.options.target,
+      start: this.options.start,
+      end: this.options.end
+    });
+  };
+
+  AlarmPopOver.prototype.onKeyUp = function(event) {
+    if (event.keyCode === 13 || event.which === 13) {
+      return this.addButton.click();
+    } else if (event.keyCode === 27) {
+      return this.selfclose();
+    } else {
+      return this.addButton.removeClass('disabled');
+    }
+  };
+
+  AlarmPopOver.prototype.formatDateTime = function(dtStr) {
+    var setObj, splitted;
+    splitted = dtStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
+    if (splitted && splitted[0]) {
+      setObj = {
+        hour: splitted[1],
+        minute: splitted[2]
+      };
+      return setObj;
+    }
+  };
+
+  AlarmPopOver.prototype.getModelAttributes = function() {
+    var action, data, trigg, unit, value, _ref;
+    action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
+    trigg = this.model.getStartDateObject();
+    console.log(trigg);
+    _ref = this.formatDateTime($('#input-time').val());
+    for (unit in _ref) {
+      value = _ref[unit];
+      trigg.set(unit, value);
+    }
+    console.log(trigg);
+    data = {
+      timezone: window.app.timezone,
+      trigg: trigg,
+      description: this.$('#input-desc').val(),
+      action: action
+    };
+    data.tags = [this.calendar.value()];
+    return data;
+  };
+
+  AlarmPopOver.prototype.onRemoveClicked = function() {
+    this.removeButton.css('width', '42px');
+    this.removeButton.spin('tiny');
+    if (confirm('Are you sure ?')) {
+      return this.model.destroy({
+        wait: true,
+        error: function() {
+          return alert('server error occured');
+        },
+        complete: (function(_this) {
+          return function() {
+            _this.removeButton.spin();
+            _this.removeButton.css('width', '14px');
+            return _this.selfclose();
+          };
+        })(this)
+      });
+    } else {
+      return this.removeButton.spin();
+    }
+  };
+
+  AlarmPopOver.prototype.onAddClicked = function() {
+    var err, validModel, _i, _len, _ref, _results;
+    if (this.$('.btn.add').hasClass('disabled')) {
+      return;
+    }
+    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+    this.addButton.spin('small');
+    validModel = this.model.save(this.getModelAttributes(), {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          var collection;
+          collection = app.alarms;
+          return collection.add(_this.model);
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          return alert('server error occured');
+        };
+      })(this),
+      complete: (function(_this) {
+        return function() {
+          _this.addButton.spin(false);
+          _this.addButton.html(_this.getButtonText());
+          return _this.selfclose();
+        };
+      })(this)
+    });
+    if (!validModel) {
+      this.addButton.html(this.getButtonText());
+      this.addButton.spin();
+      this.$('.alert').remove();
+      this.$('input').css('border-color', '');
+      _ref = this.model.validationError;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        err = _ref[_i];
+        _results.push(this.handleError(err));
+      }
+      return _results;
+    }
+  };
+
+  AlarmPopOver.prototype.handleError = function(error) {
+    var alertMsg, guiltyFields;
+    switch (error.field) {
+      case 'description':
+        guiltyFields = '#input-desc';
+        break;
+      case 'startdate':
+        guiltyFields = '#input-start';
+        break;
+      case 'enddate':
+        guiltyFields = '#input-end';
+        break;
+      case 'triggdate':
+        guiltyFields = '#input-time';
+        break;
+      case 'date':
+        guiltyFields = '#input-start, #input-end';
+    }
+    this.$(guiltyFields).css('border-color', 'red');
+    this.$(guiltyFields).focus();
+    alertMsg = $('<div class="alert"></div>').text(t(error.value));
+    return this.$('.popover-content').before(alertMsg);
+  };
+
+  return AlarmPopOver;
+
+})(PopoverView);
+});
+
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
 var Alarm, ComboBox, Event, EventModal, EventPopOver, PopoverView, RRuleFormView, Toggle,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -2680,9 +2968,7 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.initialize = function(options) {
     if (!this.model) {
       this.model = this.makeNewModel(options);
-      console.log('truc');
     }
-    console.log(this.model);
     EventPopOver.__super__.initialize.call(this, options);
     this.listenTo(this.model, 'change', this.refresh);
     return this.options = options;
@@ -2807,7 +3093,7 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.onTabClicked = function(event) {
     return this.parentView.showPopover({
-      type: this.type === 'event' ? 'alarm' : 'event',
+      type: 'alarm',
       target: this.options.target,
       start: this.options.start,
       end: this.options.end
@@ -2983,7 +3269,7 @@ module.exports = EventPopOver = (function(_super) {
 });
 
 ;require.register("views/calendar_view", function(exports, require, module) {
-var Alarm, BaseView, CalendarView, Event, EventPopover, Header, Popover, app, helpers, timezones,
+var Alarm, AlarmPopover, BaseView, CalendarView, Event, EventPopover, Header, Popover, app, helpers, timezones,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2995,6 +3281,8 @@ BaseView = require('../lib/base_view');
 Popover = require('./calendar_popover');
 
 EventPopover = require('./calendar_popover_event');
+
+AlarmPopover = require('./calendar_popover_alarm');
 
 Header = require('./calendar_header');
 
@@ -3187,20 +3475,14 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    var _ref, _ref1;
     console.log("show popover");
     options.container = this.cal;
     options.parentView = this;
     console.log(options);
     if (this.popover) {
       this.popover.close();
-      if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.is(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.is(options.end) : void 0) && this.popover.options.type === options.type)) {
-        this.cal.fullCalendar('unselect');
-        this.popover = null;
-        return;
-      }
     }
-    this.popover = new EventPopover(options);
+    this.popover = options.type === 'event' ? new EventPopover(options) : new AlarmPopover(options);
     return this.popover.render();
   };
 
@@ -3231,7 +3513,7 @@ module.exports = CalendarView = (function(_super) {
     console.log(jsEvent);
     console.log(view);
     return this.showPopover({
-      type: 'event',
+      type: 'alarm',
       start: Event.ambiguousToTimezoned(startDate),
       end: Event.ambiguousToTimezoned(endDate),
       target: $(jsEvent.target)
@@ -3255,7 +3537,7 @@ module.exports = CalendarView = (function(_super) {
     $(element).attr('title', event.title);
     if (event.type === 'alarm') {
       icon = '<i class="icon-bell icon-white"></i>';
-      element.find('.fc-event-title').prepend(icon);
+      element.find('.fc-title').prepend(icon);
     }
     return element;
   };
@@ -3356,6 +3638,7 @@ module.exports = CalendarView = (function(_super) {
       }
     }).call(this);
     return this.showPopover({
+      type: model.fcEventType,
       model: model,
       target: $(jsEvent.currentTarget)
     });
@@ -4971,6 +5254,25 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
+;require.register("views/templates/popover_alarm", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),model = locals_.model,dtFormat = locals_.dtFormat;
+buf.push("<div class=\"line\"><input id=\"input-time\" type=\"time\"" + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get('description'), true, false)) + (jade.attr("placeholder", t("alarm description placeholder"), true, false)) + " class=\"input-xlarge w100\"/></div><div class=\"line\"><div id=\"rrule-container\"></div></div><div class=\"popover-footer\"><a class=\"btn add\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
 ;require.register("views/templates/popover_content", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
@@ -5044,11 +5346,11 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar,editionMode = locals_.editionMode,type = locals_.type;
+var locals_ = (locals || {}),calendar = locals_.calendar,editionMode = locals_.editionMode,model = locals_.model;
 buf.push("<input id=\"calendarcombo\"" + (jade.attr("value", calendar, true, false)) + "/>");
 if ( !editionMode)
 {
-buf.push("<a id=\"toggle-type\">" + (jade.escape(null == (jade_interp = t('change to') + " " + t(type=='event'?'alarm':'event')) ? "" : jade_interp)) + "</a>");
+buf.push("<a id=\"toggle-type\">" + (jade.escape(null == (jade_interp = t('change to') + " " + t(model.fcEventType=='event'?'alarm':'event')) ? "" : jade_interp)) + "</a>");
 }
 buf.push("<button" + (jade.attr("title", t('close'), true, false)) + " class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"remove icon-trash\"></i>");;return buf.join("");
 };

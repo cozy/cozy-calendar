@@ -31,7 +31,7 @@ module.exports = class Alarm extends ScheduleItem
                 field: 'action'
                 value: "invalid action"
 
-        if not attrs.trigg or not Date.create(attrs.trigg).isValid()
+        if not attrs.trigg or not moment(attrs.start).isValid()
             errors.push
                 field: 'triggdate'
                 value: "invalid trigg date"

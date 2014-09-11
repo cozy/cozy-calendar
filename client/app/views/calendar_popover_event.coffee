@@ -34,9 +34,7 @@ module.exports = class EventPopOver extends PopoverView
 
         if not @model
             @model = @makeNewModel options
-            console.log 'truc'
 
-        console.log @model
         super options
 
         @listenTo @model, 'change', @refresh
@@ -138,7 +136,7 @@ module.exports = class EventPopOver extends PopoverView
 
     onTabClicked: (event) ->
         @parentView.showPopover
-            type: if @type is 'event' then 'alarm' else 'event'
+            type: 'alarm' #if @type is 'event' then 'alarm' else 'event'
             target: @options.target
             start:  @options.start
             end:    @options.end

@@ -2,6 +2,7 @@ app = require 'application'
 BaseView = require '../lib/base_view'
 Popover = require './calendar_popover'
 EventPopover = require './calendar_popover_event'
+AlarmPopover = require './calendar_popover_alarm'
 Header = require './calendar_header'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
@@ -166,17 +167,18 @@ module.exports = class CalendarView extends BaseView
         if @popover
             @popover.close()
 
-            # click on same case
-            if @popover.options.model? and @popover.options.model is options.model or(
-                @popover.options.start?.is(options.start) and
-                @popover.options.end?.is(options.end) and
-                @popover.options.type is options.type)
-                @cal.fullCalendar 'unselect'
-                @popover = null
-                return
+            # TODO: fix, or move out of showPopover. # click on same case
+            # if @popover.options.model? and @popover.options.model is options.model or(
+            #     @popover.options.start?.is(options.start) and
+            #     @popover.options.end?.is(options.end) and
+            #     @popover.options.type is options.type)
+            #     @cal.fullCalendar 'unselect'
+            #     @popover = null
+            #     return
 
         # @popover = new Popover options
-        @popover = new EventPopover options
+
+        @popover = if options.type == 'event' then new EventPopover options else new AlarmPopover options
         @popover.render()
 
     onChangeView: (view) =>
@@ -205,7 +207,7 @@ module.exports = class CalendarView extends BaseView
         console.log jsEvent
         console.log view
         @showPopover
-            type: 'event'
+            type: 'alarm' #'event'
             start: Event.ambiguousToTimezoned(startDate)
             end: Event.ambiguousToTimezoned(endDate)
             target: $(jsEvent.target)
@@ -227,7 +229,7 @@ module.exports = class CalendarView extends BaseView
         $(element).attr 'title', event.title
         if event.type is 'alarm'
             icon = '<i class="icon-bell icon-white"></i>'
-            element.find('.fc-event-title').prepend icon
+            element.find('.fc-title').prepend icon
 
         return element
 
@@ -310,5 +312,6 @@ module.exports = class CalendarView extends BaseView
         else throw new Error('wrong typed event in fc')
 
         @showPopover
-            model: model,
+            type: model.fcEventType
+            model: model
             target: $(jsEvent.currentTarget)

@@ -13,6 +13,7 @@ module.exports.tags = (req, res, next) ->
     ], (err, results) ->
         return next err if err
         res.send
+        
             calendars: results[0].calendar.concat results[1].calendar
             tags: results[0].tag.concat results[1].tag
 
@@ -25,15 +26,17 @@ module.exports.index = (req, res) ->
                 contacts[index] = contact.asNameAndEmails()
             cb null, contacts
 
-        (cb) => Alarm.all (err, alarms) =>
-            return cb err if err
-            try
-                for alarm, index in alarms
-                    alarms[index] = alarm.timezoned()
-            catch err then cb err
-            #stub
-            # cb null, alarms
-            cb null, []
+        Alarm.all
+
+        # (cb) => Alarm.all (err, alarms) =>
+        #     return cb err if err
+        #     try
+        #         for alarm, index in alarms
+        #             alarms[index] = alarm.timezoned()
+        #     catch err then cb err
+        #     #stub
+        #     # cb null, alarms
+        #     cb null, []
 
         Event.all
         # (cb) => Event.all (err, events) =>
