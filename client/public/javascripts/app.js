@@ -3358,7 +3358,7 @@ module.exports = CalendarView = (function(_super) {
       timezone: window.app.timezone,
       timeFormat: '',
       columnFormat: {
-        'week': 'ddd d',
+        'week': 'ddd D',
         'month': 'dddd'
       },
       axisFormat: "H:mm",
@@ -3373,7 +3373,7 @@ module.exports = CalendarView = (function(_super) {
       eventClick: this.onEventClick,
       eventResizeStop: this.onEventResizeStop,
       eventResize: this.onEventResize,
-      handleWindowResize: true
+      handleWindowResize: false
     });
     source = this.eventCollection.getFCEventSource(this.tagsCollection);
     this.cal.fullCalendar('addEventSource', source);

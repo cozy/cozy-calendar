@@ -79,7 +79,7 @@ module.exports = class CalendarView extends BaseView
                 #'' : '' # do not display times on event
                 #'agendaWeek': ''
             columnFormat:
-                'week': 'ddd d'
+                'week': 'ddd D'
                 'month': 'dddd'
 
             axisFormat: "H:mm"
@@ -94,7 +94,7 @@ module.exports = class CalendarView extends BaseView
             eventClick: @onEventClick
             eventResizeStop: @onEventResizeStop
             eventResize: @onEventResize
-            handleWindowResize: true
+            handleWindowResize: false
 
         source = @eventCollection.getFCEventSource @tagsCollection
         @cal.fullCalendar 'addEventSource', source

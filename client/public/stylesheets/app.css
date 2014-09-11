@@ -10385,9 +10385,40 @@ input[type="time"] {
 .fc-header-title h2 {
   font-weight: normal;
 }
+.fc-header-title h2 {
+  margin-top: 0px;
+  white-space: nowrap;
+}
+.fc-header td {
+  border-style: none;
+}
+.fc-header .fc-button {
+  margin-bottom: 1em;
+  vertical-align: top;
+}
+.fc-text-arrow {
+  margin: 0px 0.1em;
+  font-size: 2em;
+  font-family: "Courier New", Courier, monospace;
+  vertical-align: baseline;
+}
+.fc-button {
+  position: relative;
+  display: inline-block;
+  padding: 0px 0.6em;
+  overflow: hidden;
+  height: 1.9em;
+  line-height: 1.9em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.fc-title thead,
 .fc-view-container thead,
+.fc-title thead > tr.fc-first,
 .fc-view-container thead > tr.fc-first,
+.fc-title .fc-day-header,
 .fc-view-container .fc-day-header,
+.fc-title .fc-widget-header,
 .fc-view-container .fc-widget-header {
   font-family: styled;
   background: #fff;
@@ -10443,6 +10474,9 @@ input[type="time"] {
   color: #fff;
   background: #fe8800;
   border: 0;
+}
+td.fc-widget-header {
+  border-style: none;
 }
 #alarms thead .fc-first .fc-day-header,
 #alarms thead .fc-first .fc-widget-header {
