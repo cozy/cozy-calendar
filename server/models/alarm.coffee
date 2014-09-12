@@ -1,5 +1,7 @@
 americano = require 'americano-cozy'
 time = require 'time'
+moment = require 'moment'
+momentTz = require 'moment-timezone'
 User = require './user'
 
 module.exports = Alarm = americano.getModel 'Alarm',
@@ -26,6 +28,14 @@ Alarm.tags = (callback) ->
             [type, tag] = result.key
             out[type].push tag
         callback null, out
+
+Alarm::getCouchDate = ->
+    @timezone ?= User.timezone
+
+    momentTz(@trigg)
+        .tz(@timezone)
+        .tz('UTC')
+        .format('YYYY-MM-DDThh:mm:ss.000') + 'Z'
 
 # before sending to the client
 # set the trigg in TZ time

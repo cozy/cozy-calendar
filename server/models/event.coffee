@@ -1,5 +1,7 @@
 americano = require 'americano-cozy'
 time = require 'time'
+momentTz = require 'moment-timezone'
+
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
@@ -28,6 +30,14 @@ Event.tags = (callback) ->
             [type, tag] = result.key
             out[type].push tag
         callback null, out
+
+Event::getCouchStartDate = ->
+    @timezone ?= User.timezone
+
+    momentTz(@start)
+        .tz(@timezone)
+        .tz('UTC')
+        .format('YYYY-MM-DDThh:mm:ss.000') + 'Z'
 
 # before sending to the client
 # set the start/end in TZ time

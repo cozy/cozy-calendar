@@ -5,6 +5,7 @@ Event = require '../models/event'
 Alarm = require '../models/alarm'
 User = require  '../models/user'
 
+
 module.exports.export = (req, res) ->
     calendar = Alarm.getICalCalendar()
     Alarm.all (err, alarms) =>
@@ -37,6 +38,7 @@ module.exports.import = (req, res) ->
                 console.log err.message
                 res.send error: 'error occured while saving file', 500
             else
+                User.timezone ?= 'Europe/Paris'
                 res.send
                     events: Event.extractEvents result
                     alarms: Alarm.extractAlarms result, User.timezone

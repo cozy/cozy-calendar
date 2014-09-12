@@ -26,8 +26,9 @@
     "cozy-realtime-adapter": "0.11.3",
     "time": "0.11.0",
     "moment": "2.7.0",
-    "cozy-ical": "0.2.0",
-    "printit": "0.1.3"
+    "cozy-ical": "0.2.1",
+    "printit": "0.1.3",
+    "moment-timezone": "^0.2.2"
   },
   "devDependencies": {
     "should": "= 1.2.0",
