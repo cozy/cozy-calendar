@@ -23,7 +23,8 @@ module.exports = class ListView extends ViewCollection
     appendView: (view) ->
         index = @collection.indexOf view.model
         el = view.$el
-        today = (new Date()).beginningOfDay()
+        today = moment().startOf('day')
+        # today = (new Date()).beginningOfDay()
         if view.model.get('date').isBefore today
             el.addClass('before').hide()
         else

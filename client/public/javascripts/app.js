@@ -236,7 +236,7 @@ DayBucket = DayBucket = (function(_super) {
   function DayBucket(model) {
     DayBucket.__super__.constructor.call(this, {
       id: model.getDateHash(),
-      date: model.getDateObject().clone().beginningOfDay()
+      date: model.getDateObject().startOf('day')
     });
   }
 
@@ -257,18 +257,7 @@ module.exports = DayBucketCollection = (function(_super) {
 
   DayBucketCollection.prototype.model = DayBucket;
 
-  DayBucketCollection.prototype.comparator = function(db1, db2) {
-    var d1, d2;
-    d1 = Date.create(db1.get('date'));
-    d2 = Date.create(db2.get('date'));
-    if (d1 < d2) {
-      return -1;
-    } else if (d1 > d2) {
-      return 1;
-    } else {
-      return 0;
-    }
-  };
+  DayBucketCollection.prototype.comparator = 'date';
 
   DayBucketCollection.prototype.initialize = function() {
     this.alarmCollection = app.alarms;
@@ -1687,14 +1676,14 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.getDateHash = function() {
-    return this.getDateObject().format('{yyyy}{MM}{dd}');
+    return this.getDateObject().format('YYYYMMDD');
   };
 
   ScheduleItem.prototype.getPreviousDateObject = function() {
     var previous;
     previous = this.previous(this.startDateField) != null;
     if (previous) {
-      return Date.create(previous);
+      return this._toTimezonedMoment(previous);
     } else {
       return false;
     }
@@ -1704,7 +1693,7 @@ module.exports = ScheduleItem = (function(_super) {
     var previous;
     previous = this.getPreviousDateObject();
     if (previous) {
-      return previous.format('{yyyy}{MM}{dd}');
+      return previous.format('YYYYMMDD');
     } else {
       return false;
     }
@@ -4571,7 +4560,7 @@ module.exports = ListView = (function(_super) {
     var el, index, prevCid, today;
     index = this.collection.indexOf(view.model);
     el = view.$el;
-    today = (new Date()).beginningOfDay();
+    today = moment().startOf('day');
     if (view.model.get('date').isBefore(today)) {
       el.addClass('before').hide();
     } else {
@@ -4639,7 +4628,7 @@ module.exports = BucketView = (function(_super) {
 
   BucketView.prototype.getRenderData = function() {
     return {
-      date: this.model.get('date').format('short')
+      date: this.model.get('date').format('LL')
     };
   };
 
@@ -4761,13 +4750,13 @@ module.exports = AlarmView = (function(_super) {
     if (this.model instanceof Event) {
       _.extend(data, {
         type: 'event',
-        start: this.model.getFormattedStartDate('{HH}:{mm}'),
-        end: this.model.getFormattedEndDate('{HH}:{mm}')
+        start: this.model.getFormattedStartDate('HH:mm'),
+        end: this.model.getFormattedEndDate('HH:mm')
       });
     } else {
       _.extend(data, {
         type: 'alarm',
-        time: this.model.getFormattedDate('{HH}:{mm}')
+        time: this.model.getFormattedDate('HH:mm')
       });
     }
     return data;

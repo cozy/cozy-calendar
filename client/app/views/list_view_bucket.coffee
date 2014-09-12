@@ -17,7 +17,7 @@ module.exports = class BucketView extends ViewCollection
         super
 
     getRenderData: ->
-        date: @model.get('date').format 'short'
+        date: @model.get('date').format 'LL'
 
     makeNew: ->
         @showPopover

@@ -4,7 +4,7 @@ DayBucket = class DayBucket extends Backbone.Model
     constructor: (model) ->
         super
             id: model.getDateHash()
-            date: model.getDateObject().clone().beginningOfDay()
+            date: model.getDateObject().startOf('day')
     initialize: ->
         @items = new ScheduleItemsCollection()
 
@@ -14,12 +14,14 @@ DayBucket = class DayBucket extends Backbone.Model
 module.exports = class DayBucketCollection extends Backbone.Collection
 
     model: DayBucket
-    comparator: (db1, db2) ->
-        d1 = Date.create db1.get('date')
-        d2 = Date.create db2.get('date')
-        if d1 < d2 then return -1
-        else if d1 > d2 then return 1
-        else return 0
+    comparator: 'date'
+    # comparator: (db1, db2) ->
+
+    #     d1 = Date.create db1.get('date')
+    #     d2 = Date.create db2.get('date')
+    #     if d1 < d2 then return -1
+    #     else if d1 > d2 then return 1
+    #     else return 0
 
     initialize: ->
         @alarmCollection = app.alarms

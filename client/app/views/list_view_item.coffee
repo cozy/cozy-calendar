@@ -43,12 +43,12 @@ module.exports = class AlarmView extends BaseView
         if @model instanceof Event
             _.extend data,
                 type: 'event'
-                start: @model.getFormattedStartDate '{HH}:{mm}'
-                end: @model.getFormattedEndDate '{HH}:{mm}'
+                start: @model.getFormattedStartDate 'HH:mm'
+                end: @model.getFormattedEndDate 'HH:mm'
         else
             _.extend data,
                 type: 'alarm'
-                time: @model.getFormattedDate '{HH}:{mm}'
+                time: @model.getFormattedDate 'HH:mm'
 
         return data
 
