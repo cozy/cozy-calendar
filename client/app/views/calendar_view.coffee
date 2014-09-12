@@ -165,14 +165,11 @@ module.exports = class CalendarView extends BaseView
         if @popover
             @popover.close()
 
-            # TODO: fix, or move out of showPopover. # click on same case
-            # if @popover.options.model? and @popover.options.model is options.model or(
-            #     @popover.options.start?.is(options.start) and
-            #     @popover.options.end?.is(options.end) and
-            #     @popover.options.type is options.type)
-            #     @cal.fullCalendar 'unselect'
-            #     @popover = null
-            #     return
+            # click on same case
+            if @popover.options.target.is(options.target)
+                @cal.fullCalendar 'unselect'
+                @popover = null
+                return
 
         # @popover = new Popover options
 
@@ -202,8 +199,6 @@ module.exports = class CalendarView extends BaseView
             when 'agendaWeek' then 'calendarweek'
 
     onSelect: (startDate, endDate, jsEvent, view) =>
-        console.log jsEvent
-        console.log view
         start = Event.ambiguousToTimezoned(startDate)
         end = Event.ambiguousToTimezoned(endDate)
 

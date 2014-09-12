@@ -3468,6 +3468,11 @@ module.exports = CalendarView = (function(_super) {
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
+      if (this.popover.options.target.is(options.target)) {
+        this.cal.fullCalendar('unselect');
+        this.popover = null;
+        return;
+      }
     }
     this.popover = options.type === 'event' ? new EventPopover(options) : new AlarmPopover(options);
     return this.popover.render();
@@ -3498,8 +3503,6 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
     var end, start;
-    console.log(jsEvent);
-    console.log(view);
     start = Event.ambiguousToTimezoned(startDate);
     end = Event.ambiguousToTimezoned(endDate);
     if (this.view === 'month') {
