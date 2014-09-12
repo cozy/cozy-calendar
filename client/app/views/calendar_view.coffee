@@ -159,10 +159,8 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'updateEvent', fcEvent
 
     showPopover: (options) ->
-        console.log "show popover"
         options.container = @cal
         options.parentView = @
-        console.log options
 
         if @popover
             @popover.close()
@@ -207,7 +205,7 @@ module.exports = class CalendarView extends BaseView
         console.log jsEvent
         console.log view
         @showPopover
-            type: 'alarm' #'event'
+            type: 'event'
             start: Event.ambiguousToTimezoned(startDate)
             end: Event.ambiguousToTimezoned(endDate)
             target: $(jsEvent.target)

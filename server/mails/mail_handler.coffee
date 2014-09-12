@@ -58,7 +58,7 @@ module.exports = class MailHandler
                     return cb()
 
                 dateFormat = 'MMMM Do YYYY, h:mm a'
-                date = moment(event.start).format dateFormat
+                date = event.formatStart(dateFormat)
                 url = "https://#{domain}/public/calendar/events/#{event.id}"
 
                 mailOptions =
@@ -106,7 +106,7 @@ no
         async.forEach event.toJSON().attendees, (guest, cb) =>
             return cb null unless guest.status is 'ACCEPTED'
             dateFormat = 'MMMM Do YYYY, h:mm a'
-            date = moment(event.start).format dateFormat
+            date = event.formatStart(dateFormat)
 
             mailOptions =
                 to: guest.email

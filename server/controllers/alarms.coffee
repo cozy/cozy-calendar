@@ -15,32 +15,25 @@ module.exports.all = (req, res) ->
         if err
             res.send error: 'Server error occurred while retrieving data'
         else
-            # for alarm, index in alarms
-            #     alarms[index] = alarm.timezoned()
             res.send alarms
 
 module.exports.read = (req, res) ->
     res.send req.alarm
-    # res.send req.alarm.timezoned()
 
 module.exports.create = (req, res) ->
-    # data = Alarm.toUTC req.body
     data = req.body
     Alarm.create data, (err, alarm) =>
         if err
             res.send error: "Server error while creating alarm.", 500
         else
-            # alarm = alarm.timezoned()
             res.send alarm, 201
 
 module.exports.update = (req, res) ->
-    # data = Alarm.toUTC req.body
     data = req.body
     req.alarm.updateAttributes data, (err, alarm) =>
         if err?
             res.send error: "Server error while saving alarm", 500
         else
-            # alarm = alarm.timezoned()
             res.send alarm, 200
 
 module.exports.delete = (req, res) ->

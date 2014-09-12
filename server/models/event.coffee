@@ -1,9 +1,9 @@
 americano = require 'americano-cozy'
-time = require 'time'
+moment = require 'moment-timezone'
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
-    start       : type : String # ISO8601
+    start       : type : String
     end         : type : String
     place       : type : String
     # @TODO : rename those to follow ical (NEED PATCH)
@@ -18,28 +18,29 @@ module.exports = Event = americano.getModel 'Event',
 
 require('cozy-ical').decorateEvent Event
 
-insinuatingUTCToISO8601 = (dateStr) ->
-    # Skip buggy or empty values.
-    if not dateStr
-        return dateStr
+# TODO : pigration script.
+# insinuatingUTCToISO8601 = (dateStr) ->
+#     # Skip buggy or empty values.
+#     if not dateStr
+#         return dateStr
 
-    # Check if it's already ISO8601
-    if (dateStr.charAt 10) == 'T'
-        return dateStr
+#     # Check if it's already ISO8601
+#     if (dateStr.charAt 10) == 'T'
+#         return dateStr
 
-    d = dateStr
-    # Check for a timezone
-    if "GMT" not in dateStr
-        d = d + " GMT+0000"
+#     d = dateStr
+#     # Check for a timezone
+#     if "GMT" not in dateStr
+#         d = d + " GMT+0000"
 
-    return new Date(d).toISOString()
+#     return new Date(d).toISOString()
 
 
-Event.afterInitialize = () ->
-    @start = insinuatingUTCToISO8601(@start)
-    @end = insinuatingUTCToISO8601(@end)
+# Event.afterInitialize = () ->
+#     @start = insinuatingUTCToISO8601(@start)
+#     @end = insinuatingUTCToISO8601(@end)
 
-    @
+#     @
 
 
 Event.all = (params, callback) ->
@@ -54,20 +55,16 @@ Event.tags = (callback) ->
             out[type].push tag
         callback null, out
 
-# before sending to the client
-# set the start/end in TZ time
-Event::timezoned = (timezone) ->
-    timezone ?= User.timezone
+Event::formatStart = (dateFormat) ->        
+    if @rrule
+        date = moment.tz(@start, @timezone).format dateFormat
+        date += ' ' + @timezone
+    
+    else
+        date = moment.tz(@start, User.timezone).format dateFormat
 
-    timezonedDate = new time.Date(@start, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @start = timezonedDate.toString().slice(0, 24)
+    return date
 
-    timezonedDate = new time.Date(@end, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @end = timezonedDate.toString().slice(0, 24)
-
-    return @
 
 # @TODO : this doesn't handle merge correctly
 Event::getGuest = (key) ->
@@ -82,23 +79,38 @@ Event::getGuest = (key) ->
 
 
 
-# before saving
-# take an attributes object
-# if the object has a TZ, the start/end is considered to be in this TZ
-# else we use the User's TZ
-# set the start/end to UTC
-Event.toUTC = (attrs) ->
-    timezone = attrs.timezone or User.timezone
+# # before sending to the client
+# # set the start/end in TZ time
+# Event::timezoned = (timezone) ->
+#     timezone ?= User.timezone
 
-    start = new time.Date(attrs.start, timezone)
-    start.setTimezone 'UTC'
-    attrs.start = start.toString().slice(0, 24)
+#     timezonedDate = new time.Date(@start, 'UTC')
+#     timezonedDate.setTimezone(timezone)
+#     @start = timezonedDate.toString().slice(0, 24)
 
-    end = new time.Date(attrs.end, timezone)
-    end.setTimezone 'UTC'
-    attrs.end = end.toString().slice(0, 24)
+#     timezonedDate = new time.Date(@end, 'UTC')
+#     timezonedDate.setTimezone(timezone)
+#     @end = timezonedDate.toString().slice(0, 24)
 
-    return attrs
+#     return @
+
+# # before saving
+# # take an attributes object
+# # if the object has a TZ, the start/end is considered to be in this TZ
+# # else we use the User's TZ
+# # set the start/end to UTC
+# Event.toUTC = (attrs) ->
+#     timezone = attrs.timezone or User.timezone
+
+#     start = new time.Date(attrs.start, timezone)
+#     start.setTimezone 'UTC'
+#     attrs.start = start.toString().slice(0, 24)
+
+#     end = new time.Date(attrs.end, timezone)
+#     end.setTimezone 'UTC'
+#     attrs.end = end.toString().slice(0, 24)
+
+#     return attrs
 
 
     # Further work to make the doctype iCal compliant

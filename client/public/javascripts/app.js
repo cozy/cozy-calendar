@@ -3464,10 +3464,8 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    console.log("show popover");
     options.container = this.cal;
     options.parentView = this;
-    console.log(options);
     if (this.popover) {
       this.popover.close();
     }
@@ -3502,7 +3500,7 @@ module.exports = CalendarView = (function(_super) {
     console.log(jsEvent);
     console.log(view);
     return this.showPopover({
-      type: 'alarm',
+      type: 'event',
       start: Event.ambiguousToTimezoned(startDate),
       end: Event.ambiguousToTimezoned(endDate),
       target: $(jsEvent.target)

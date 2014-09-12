@@ -27,25 +27,7 @@ module.exports.index = (req, res) ->
             cb null, contacts
 
         Alarm.all
-
-        # (cb) => Alarm.all (err, alarms) =>
-        #     return cb err if err
-        #     try
-        #         for alarm, index in alarms
-        #             alarms[index] = alarm.timezoned()
-        #     catch err then cb err
-        #     #stub
-        #     # cb null, alarms
-        #     cb null, []
-
         Event.all
-        # (cb) => Event.all (err, events) =>
-        #     return cb err if err
-        #     try
-        #         for evt, index in events
-        #             events[index] = evt.timezoned()
-        #     catch err then cb err
-        #     cb null, events
 
         (cb) => CozyInstance.getLocale (err, locale) ->
             console.log err if err
