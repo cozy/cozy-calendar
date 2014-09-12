@@ -15,10 +15,8 @@ module.exports = class EventModal extends ViewCollection
     attributes:
         'data-keyboard': 'false'
 
-    inputDateTimeFormat: 'DD/MM/YYYY H:mm'
-    # inputDateTimeFormat: '{dd}/{MM}/{year} {HH}:{mm}'
-    inputDateFormat: '{year}-{MM}-{dd}'
-    exportDateFormat: '{year}-{MM}-{dd}-{HH}-{mm}'
+    inputDateTimeFormat: 'DD/MM/YYYY H:mm' # use locale ?
+    exportDateFormat: 'YYYY-MM-DD-HH-mm'
 
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'

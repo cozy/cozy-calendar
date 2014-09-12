@@ -10396,6 +10396,9 @@ input[type="time"] {
   margin-bottom: 1em;
   vertical-align: top;
 }
+.fc-header-right {
+  text-align: right;
+}
 .fc-text-arrow {
   margin: 0px 0.1em;
   font-size: 2em;
@@ -10477,6 +10480,10 @@ input[type="time"] {
 }
 td.fc-widget-header {
   border-style: none;
+}
+.fc-row .fc-content-skeleton td,
+.fc-row .fc-helper-skeleton td {
+  border-color: #ddd;
 }
 #alarms thead .fc-first .fc-day-header,
 #alarms thead .fc-first .fc-widget-header {

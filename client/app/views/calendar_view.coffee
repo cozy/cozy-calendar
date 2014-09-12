@@ -204,10 +204,18 @@ module.exports = class CalendarView extends BaseView
     onSelect: (startDate, endDate, jsEvent, view) =>
         console.log jsEvent
         console.log view
+        start = Event.ambiguousToTimezoned(startDate)
+        end = Event.ambiguousToTimezoned(endDate)
+
+        # In month view, default to 10:00 - 18:00 instead of fullday event.
+        if @view is 'month'
+            start.set('hour', 10)
+            end.set('hour', 18)
+
         @showPopover
             type: 'event'
-            start: Event.ambiguousToTimezoned(startDate)
-            end: Event.ambiguousToTimezoned(endDate)
+            start: start
+            end: end
             target: $(jsEvent.target)
 
     onPopoverClose: ->

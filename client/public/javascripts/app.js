@@ -3497,12 +3497,19 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
+    var end, start;
     console.log(jsEvent);
     console.log(view);
+    start = Event.ambiguousToTimezoned(startDate);
+    end = Event.ambiguousToTimezoned(endDate);
+    if (this.view === 'month') {
+      start.set('hour', 10);
+      end.set('hour', 18);
+    }
     return this.showPopover({
       type: 'event',
-      start: Event.ambiguousToTimezoned(startDate),
-      end: Event.ambiguousToTimezoned(endDate),
+      start: start,
+      end: end,
       target: $(jsEvent.target)
     });
   };
@@ -3684,9 +3691,7 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.inputDateTimeFormat = 'DD/MM/YYYY H:mm';
 
-  EventModal.prototype.inputDateFormat = '{year}-{MM}-{dd}';
-
-  EventModal.prototype.exportDateFormat = '{year}-{MM}-{dd}-{HH}-{mm}';
+  EventModal.prototype.exportDateFormat = 'YYYY-MM-DD-HH-mm';
 
   EventModal.prototype.collectionEl = '#guests-list';
 
