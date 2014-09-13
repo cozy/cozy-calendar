@@ -49,7 +49,7 @@ module.exports.create = (req, res) ->
             else if alarms.length is 0
                 create()
             else if data.description is alarms[0].description
-                log.warn 'Alarm alredy exists, it was not created.'
+                log.warn 'Alarm already exists, it was not created.'
                 res.send alarms[0].timezoned(), 201
             else
                 create()

@@ -51,7 +51,6 @@ module.exports.create = (req, res) ->
     if data.import
         event = new Event data
         start = event.getCouchStartDate()
-        console.log start
         Event.request 'byDate', key: start, (err, events) ->
             if err
                 console.log err
@@ -59,8 +58,8 @@ module.exports.create = (req, res) ->
             else if events.length is 0
                 create()
             else if data.description is events[0].description
-                log.warn 'Event alredy exists, it was not created.'
-                res.send event[0].timezoned(), 201
+                log.warn 'Event already exists, it was not created.'
+                res.send events[0].timezoned(), 201
             else
                 create()
 

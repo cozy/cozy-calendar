@@ -35,7 +35,7 @@ Alarm::getCouchDate = ->
     momentTz(@trigg)
         .tz(@timezone)
         .tz('UTC')
-        .format('YYYY-MM-DDThh:mm:ss.000') + 'Z'
+        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
 
 # before sending to the client
 # set the trigg in TZ time
