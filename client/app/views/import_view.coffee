@@ -110,19 +110,14 @@ module.exports = class ImportView extends BaseView
             counter++
             $('.import-counter').html counter
 
-        addAlarmError = (alarm) ->
+        addError = (element, templatePath) ->
             if $('.import-errors').html().length is 0
                 $('.import-errors').html """
                 <p>#{t 'import error occured for'}:</p>
                 """
 
             $('.import-errors').append(
-                require('./templates/import_alarm')(alarm.attributes)
-            )
-
-        addEventError = (event) ->
-            $('.import-errors').append(
-                require('./templates/import_event')(event.attributes)
+                require(templatePath)(element.attributes)
             )
 
         # Show loading spinner.
@@ -144,7 +139,7 @@ module.exports = class ImportView extends BaseView
                 error: ->
                     # When an element failed to import, an error message is
                     # displayed.
-                    addAlarmError alarm
+                    addAlarmError alarm, './templates/import_alarm'
                     updateCounter()
                     callback()
 
@@ -162,7 +157,7 @@ module.exports = class ImportView extends BaseView
                 error: ->
                     # When an element failed to import, an error message is
                     # displayed.
-                    addEventError event
+                    addEventError event, './templates/import_event'
                     updateCounter()
                     callback()
 
