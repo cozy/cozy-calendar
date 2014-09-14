@@ -84,6 +84,58 @@ describe "Alarms management", ->
 
                     done()
 
+            it "When I create the same alarm in import mode", (done) ->
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'Europe/Paris'
+                    import: true
+
+                client.post "alarms/", @alarm, (error, response, body) =>
+                    should.not.exist error
+                    should.exist response
+                    response.should.have.status 201
+                    should.exist body
+
+                    done()
+
+            it "Then no new alarm is created in the database", (done) ->
+
+                helpers.getAllAlarms (err, alarms) =>
+
+                    should.not.exist err
+                    should.exist alarms
+                    alarms.length.should.equal 1
+
+                    done()
+
+            it "When I create the same alarm not in import mode", (done) ->
+                @alarm =
+                    action: 'DISPLAY'
+                    trigg: "Tue Apr 23 2013 14:25:00"
+                    description: 'Something to remind'
+                    timezone: 'Europe/Paris'
+
+                client.post "alarms/", @alarm, (error, response, body) =>
+                    should.not.exist error
+                    should.exist response
+                    response.should.have.status 201
+                    should.exist body
+
+                    done()
+
+            it "Then a new alarm is created in the database", (done) ->
+
+                helpers.getAllAlarms (err, alarms) =>
+
+                    should.not.exist err
+                    should.exist alarms
+                    alarms.length.should.equal 2
+
+                    done()
+
+
         describe "Create alarm with a timezone different than user timezone", ->
 
             it "When I post an alarm with America/Chicago as timezone", (done) ->
@@ -130,7 +182,7 @@ describe "Alarms management", ->
 
                     should.not.exist err
                     should.exist alarms
-                    alarms.length.should.equal 2
+                    alarms.length.should.equal 3
 
                     done()
 
