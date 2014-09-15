@@ -1746,6 +1746,7 @@ module.exports = ScheduleItem = (function(_super) {
       return function(jsDateRecurrentS) {
         var fce, mDateRecurrentE, mDateRecurrentS;
         mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS);
+        mDateRecurrentS = _this._toTimezonedMoment(mDateRecurrentS);
         mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
         fce = _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
         return fce;

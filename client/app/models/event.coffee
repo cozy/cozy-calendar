@@ -13,6 +13,12 @@ module.exports = class Event extends ScheduleItem
         place: ''
         tags: ['my calendar']
 
+    # initialize: ->
+    #     super()
+
+    #     if @get('start').length == 10
+    #         @fullDay = true
+
     setStart: (setObj) ->
         sdo = @getStartDateObject()
         edo = @getEndDateObject()

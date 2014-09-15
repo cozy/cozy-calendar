@@ -143,7 +143,8 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         fces = rrule.between(jsDateBoundS, jsDateBoundE).map (jsDateRecurrentS) =>
             mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS)
-
+            mDateRecurrentS = @_toTimezonedMoment(mDateRecurrentS)
+            # mDateRecurrentS.tz(window.app.timezone)
             # Create FCEvent
             mDateRecurrentE = mDateRecurrentS.clone().add('seconds', 
                 mDateEventE.diff(mDateEventS, 'seconds'))
