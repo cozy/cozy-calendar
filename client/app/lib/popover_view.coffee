@@ -41,6 +41,18 @@ module.exports = class PopoverView extends BaseView
         @afterRender()
         @
 
-    @getDirection: ->
-        # TODO : a helper here ?
+
+
+    getDirection: ->
+        pos = @target.offset()
+        ctnOfs = @container.offset()
+        fitRight = pos.left + @target.width() + @popoverWidth < ctnOfs.left + @container.width()
+        fitLeft = pos.left - @popoverWidth > ctnOfs.left
+
+        fitBottom = pos.top + @target.height() + @popoverHeight < ctnOfs.top + @container.height()
+
+        if not fitLeft and not fitRight
+            if fitBottom then 'bottom' else 'top'
+        else if fitRight then 'right'
+        else 'left'
 

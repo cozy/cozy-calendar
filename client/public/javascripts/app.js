@@ -854,7 +854,25 @@ module.exports = PopoverView = (function(_super) {
     return this;
   };
 
-  PopoverView.getDirection = function() {};
+  PopoverView.prototype.getDirection = function() {
+    var ctnOfs, fitBottom, fitLeft, fitRight, pos;
+    pos = this.target.offset();
+    ctnOfs = this.container.offset();
+    fitRight = pos.left + this.target.width() + this.popoverWidth < ctnOfs.left + this.container.width();
+    fitLeft = pos.left - this.popoverWidth > ctnOfs.left;
+    fitBottom = pos.top + this.target.height() + this.popoverHeight < ctnOfs.top + this.container.height();
+    if (!fitLeft && !fitRight) {
+      if (fitBottom) {
+        return 'bottom';
+      } else {
+        return 'top';
+      }
+    } else if (fitRight) {
+      return 'right';
+    } else {
+      return 'left';
+    }
+  };
 
   return PopoverView;
 
@@ -2638,6 +2656,10 @@ module.exports = AlarmPopOver = (function(_super) {
 
   AlarmPopOver.prototype.dtFormat = "HH:mm";
 
+  AlarmPopOver.prototype.popoverWidth = 411;
+
+  AlarmPopOver.prototype.popoverHeight = 200;
+
   AlarmPopOver.prototype.events = {
     'keyup input': 'onKeyUp',
     'change select': 'onKeyUp',
@@ -2712,25 +2734,6 @@ module.exports = AlarmPopOver = (function(_super) {
     var title;
     title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
     return t(title);
-  };
-
-  AlarmPopOver.prototype.getDirection = function() {
-    var fitBottom, fitLeft, fitRight, pos;
-    pos = this.target.position();
-    fitRight = pos.left + this.target.width() + 411 < this.container.width();
-    fitLeft = pos.left - 411 > 0;
-    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
-    if (!fitLeft && !fitRight) {
-      if (fitBottom) {
-        return 'bottom';
-      } else {
-        return 'top';
-      }
-    } else if (fitRight) {
-      return 'right';
-    } else {
-      return 'left';
-    }
   };
 
   AlarmPopOver.prototype.getButtonText = function() {
@@ -2940,6 +2943,10 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.dtFormat = "HH:mm";
 
+  EventPopOver.prototype.popoverWidth = 411;
+
+  EventPopOver.prototype.popoverHeight = 200;
+
   EventPopOver.prototype.events = {
     'keyup input': 'onKeyUp',
     'change select': 'onKeyUp',
@@ -3027,25 +3034,6 @@ module.exports = EventPopOver = (function(_super) {
     var title;
     title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
     return t(title);
-  };
-
-  EventPopOver.prototype.getDirection = function() {
-    var fitBottom, fitLeft, fitRight, pos;
-    pos = this.target.position();
-    fitRight = pos.left + this.target.width() + 411 < this.container.width();
-    fitLeft = pos.left - 411 > 0;
-    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
-    if (!fitLeft && !fitRight) {
-      if (fitBottom) {
-        return 'bottom';
-      } else {
-        return 'top';
-      }
-    } else if (fitRight) {
-      return 'right';
-    } else {
-      return 'left';
-    }
   };
 
   EventPopOver.prototype.getRenderData = function() {
@@ -3469,7 +3457,9 @@ module.exports = CalendarView = (function(_super) {
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      if (this.popover.options.target.is(options.target)) {
+      console.log(this.popover.options.start);
+      console.log(options.start);
+      if ((this.popover.options.model != null) && this.popover.options.model === options.model || (this.popover.options.start.isSame(options.start) && this.popover.options.end.isSame(options.end) && this.popover.options.type === options.type)) {
         this.cal.fullCalendar('unselect');
         this.popover = null;
         return;

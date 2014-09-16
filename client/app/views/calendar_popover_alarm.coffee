@@ -9,6 +9,8 @@ module.exports = class AlarmPopOver extends PopoverView
     titleTemplate: require('./templates/popover_title')
     template: require('./templates/popover_alarm')
     dtFormat: "HH:mm"
+    popoverWidth: 411
+    popoverHeight: 200
 
     events:
         'keyup input': 'onKeyUp'
@@ -85,16 +87,6 @@ module.exports = class AlarmPopOver extends PopoverView
         title = if @model.isNew() then @type + ' creation'
         else 'edit ' + @type
         t(title)
-
-    getDirection: ->
-        pos = @target.position()
-        fitRight = pos.left + @target.width() + 411 < @container.width()
-        fitLeft = pos.left - 411 > 0
-        fitBottom = pos.top + @target.height() + 200 < @container.height()
-        if not fitLeft and not fitRight
-            if fitBottom then 'bottom' else 'top'
-        else if fitRight then 'right'
-        else 'left'
 
     getButtonText: -> if @model.isNew() then t('create') else t('edit')
 
