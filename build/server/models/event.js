@@ -76,7 +76,7 @@ Event.prototype.getCouchStartDate = function() {
   if (this.timezone == null) {
     this.timezone = User.timezone;
   }
-  return momentTz(this.start).tz(this.timezone).tz('UTC').format('YYYY-MM-DDThh:mm:ss.000') + 'Z';
+  return momentTz(this.start).tz(this.timezone).tz('UTC').format('YYYY-MM-DDTHH:mm:ss.000') + 'Z';
 };
 
 Event.prototype.timezoned = function(timezone) {
@@ -90,6 +90,9 @@ Event.prototype.timezoned = function(timezone) {
   timezonedDate = new time.Date(this.end, 'UTC');
   timezonedDate.setTimezone(timezone);
   this.end = timezonedDate.toString().slice(0, 24);
+  if (this.timezone == null) {
+    this.timezone = timezone;
+  }
   return this;
 };
 
