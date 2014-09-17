@@ -44,14 +44,15 @@ Event::getCouchStartDate = ->
 Event::timezoned = (timezone) ->
     timezone ?= User.timezone
 
-    timezonedDate = new time.Date(@start, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @start = timezonedDate.toString().slice(0, 24)
+    timezonedDate = new time.Date @start, 'UTC'
+    timezonedDate.setTimezone timezone
+    @start = timezonedDate.toString().slice 0, 24
 
-    timezonedDate = new time.Date(@end, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @end = timezonedDate.toString().slice(0, 24)
+    timezonedDate = new time.Date @end, 'UTC'
+    timezonedDate.setTimezone timezone
+    @end = timezonedDate.toString().slice 0, 24
 
+    @timezone ?= timezone
     return @
 
 # @TODO : this doesn't handle merge correctly
