@@ -3,7 +3,7 @@ var Event, MailHandler, User, VCalendar, mails, moment, time;
 
 time = require('time');
 
-moment = require('moment');
+moment = require('moment-timezone');
 
 User = require('../models/user');
 
@@ -38,34 +38,29 @@ module.exports.fetch = function(req, res, next, id) {
 
 module.exports.all = function(req, res) {
   return Event.all(function(err, events) {
-    var evt, index, _i, _len;
     if (err) {
       return res.send({
         error: 'Server error occurred while retrieving data'
       });
     } else {
-      for (index = _i = 0, _len = events.length; _i < _len; index = ++_i) {
-        evt = events[index];
-        events[index] = evt.timezoned();
-      }
       return res.send(events);
     }
   });
 };
 
 module.exports.read = function(req, res) {
-  return res.send(req.event.timezoned());
+  return res.send(req.event);
 };
 
 module.exports.create = function(req, res) {
   var data;
-  data = Event.toUTC(req.body);
+  data = req.body;
   return Event.create(data, (function(_this) {
     return function(err, event) {
       if (err) {
         return res.error("Server error while creating event.");
       }
-      return res.send(event.timezoned(), 201);
+      return res.send(event, 201);
     };
   })(this));
 };
@@ -73,7 +68,7 @@ module.exports.create = function(req, res) {
 module.exports.update = function(req, res) {
   var data, start;
   start = req.event.start;
-  data = Event.toUTC(req.body);
+  data = req.body;
   return req.event.updateAttributes(data, (function(_this) {
     return function(err, event) {
       var dateChanged;
@@ -84,10 +79,7 @@ module.exports.update = function(req, res) {
       } else {
         dateChanged = data.start !== start;
         return mails.sendInvitations(event, dateChanged, function(err, event2) {
-          if (err) {
-            console.log(err);
-          }
-          return res.send((event2 || event).timezoned(), 200);
+          return res.send(event2 || event, 200);
         });
       }
     };
@@ -136,7 +128,7 @@ module.exports["public"] = function(req, res) {
     dateFormat = 'MMMM Do YYYY, h:mm a';
     date = moment(req.event.start).format(dateFormat);
     return res.render('event_public.jade', {
-      event: req.event.timezoned(),
+      event: req.event,
       date: date,
       key: key,
       visitor: visitor

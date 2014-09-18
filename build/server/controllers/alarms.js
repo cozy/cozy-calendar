@@ -26,16 +26,11 @@ module.exports.fetch = function(req, res, next, id) {
 module.exports.all = function(req, res) {
   return Alarm.all((function(_this) {
     return function(err, alarms) {
-      var alarm, index, _i, _len;
       if (err) {
         return res.send({
           error: 'Server error occurred while retrieving data'
         });
       } else {
-        for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
-          alarm = alarms[index];
-          alarms[index] = alarm.timezoned();
-        }
         return res.send(alarms);
       }
     };
@@ -43,12 +38,12 @@ module.exports.all = function(req, res) {
 };
 
 module.exports.read = function(req, res) {
-  return res.send(req.alarm.timezoned());
+  return res.send(req.alarm);
 };
 
 module.exports.create = function(req, res) {
   var data;
-  data = Alarm.toUTC(req.body);
+  data = req.body;
   return Alarm.create(data, (function(_this) {
     return function(err, alarm) {
       if (err) {
@@ -56,7 +51,6 @@ module.exports.create = function(req, res) {
           error: "Server error while creating alarm."
         }, 500);
       } else {
-        alarm = alarm.timezoned();
         return res.send(alarm, 201);
       }
     };
@@ -65,7 +59,7 @@ module.exports.create = function(req, res) {
 
 module.exports.update = function(req, res) {
   var data;
-  data = Alarm.toUTC(req.body);
+  data = req.body;
   return req.alarm.updateAttributes(data, (function(_this) {
     return function(err, alarm) {
       if (err != null) {
@@ -73,7 +67,6 @@ module.exports.update = function(req, res) {
           error: "Server error while saving alarm"
         }, 500);
       } else {
-        alarm = alarm.timezoned();
         return res.send(alarm, 200);
       }
     };

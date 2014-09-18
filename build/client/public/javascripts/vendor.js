@@ -9281,7 +9281,7 @@ return jQuery;
 
 }));
 
-;/*! jQuery UI - v1.10.3 - 2014-01-16
+/*! jQuery UI - v1.10.3 - 2014-01-16
 * http://jqueryui.com
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.draggable.js, jquery.ui.resizable.js, jquery.ui.autocomplete.js, jquery.ui.menu.js, jquery.ui.effect.js, jquery.ui.effect-blind.js, jquery.ui.effect-highlight.js
 * Copyright 2014 jQuery Foundation and other contributors; Licensed MIT */
@@ -15232,7 +15232,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 })(jQuery);
 
-;/* ===================================================
+/* ===================================================
  * bootstrap-transition.js v2.3.1
  * http://twitter.github.com/bootstrap/javascript.html#transitions
  * ===================================================
@@ -17520,7 +17520,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 }(window.jQuery);
 
-;/*!
+/*!
  * Timepicker Component for Twitter Bootstrap
  *
  * Copyright 2013 Joris de Wit
@@ -18412,7 +18412,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 })(jQuery, window, document);
 
-;// Underscore.js 1.4.4
+// Underscore.js 1.4.4
 // ===================
 
 // > http://underscorejs.org
@@ -19640,7 +19640,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 }).call(this);
 
-;//     Backbone.js 1.1.2
+//     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Backbone may be freely distributed under the MIT license.
@@ -21249,7 +21249,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 }));
 
-;//fgnass.github.com/spin.js#v1.2.5
+//fgnass.github.com/spin.js#v1.2.5
 (function(window, document, undefined) {
 
 /**
@@ -21556,5384 +21556,7 @@ $.effects.effect.highlight = function( o, done ) {
 
 })(window, document);
 
-;/*!
- * FullCalendar v1.6.1
- * Docs & License: http://arshaw.com/fullcalendar/
- * (c) 2013 Adam Shaw
- */
-
-/*
- * Use fullcalendar.css for basic styling.
- * For event drag & drop, requires jQuery UI draggable.
- * For event resizing, requires jQuery UI resizable.
- */
- 
-(function($, undefined) {
-
-
-;;
-
-var defaults = {
-
-	// display
-	defaultView: 'month',
-	aspectRatio: 1.35,
-	header: {
-		left: 'title',
-		center: '',
-		right: 'today prev,next'
-	},
-	weekends: true,
-	weekNumbers: false,
-	weekNumberCalculation: 'iso',
-	weekNumberTitle: 'W',
-	
-	// editing
-	//editable: false,
-	//disableDragging: false,
-	//disableResizing: false,
-	
-	allDayDefault: true,
-	
-	// event ajax
-	lazyFetching: true,
-	startParam: 'start',
-	endParam: 'end',
-	
-	// time formats
-	titleFormat: {
-		month: 'MMMM yyyy',
-		week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
-		day: 'dddd, MMM d, yyyy'
-	},
-	columnFormat: {
-		month: 'ddd',
-		week: 'ddd M/d',
-		day: 'dddd M/d'
-	},
-	timeFormat: { // for event elements
-		'': 'h(:mm)t' // default
-	},
-	
-	// locale
-	isRTL: false,
-	firstDay: 0,
-	monthNames: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-	monthNamesShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-	dayNames: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-	dayNamesShort: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-	buttonText: {
-		prev: "<span class='fc-text-arrow'>&lsaquo;</span>",
-		next: "<span class='fc-text-arrow'>&rsaquo;</span>",
-		prevYear: "<span class='fc-text-arrow'>&laquo;</span>",
-		nextYear: "<span class='fc-text-arrow'>&raquo;</span>",
-		today: 'today',
-		month: 'month',
-		week: 'week',
-		day: 'day'
-	},
-	
-	// jquery-ui theming
-	theme: false,
-	buttonIcons: {
-		prev: 'circle-triangle-w',
-		next: 'circle-triangle-e'
-	},
-	
-	//selectable: false,
-	unselectAuto: true,
-	
-	dropAccept: '*'
-	
-};
-
-// right-to-left defaults
-var rtlDefaults = {
-	header: {
-		left: 'next,prev today',
-		center: '',
-		right: 'title'
-	},
-	buttonText: {
-		prev: "<span class='fc-text-arrow'>&rsaquo;</span>",
-		next: "<span class='fc-text-arrow'>&lsaquo;</span>",
-		prevYear: "<span class='fc-text-arrow'>&raquo;</span>",
-		nextYear: "<span class='fc-text-arrow'>&laquo;</span>"
-	},
-	buttonIcons: {
-		prev: 'circle-triangle-e',
-		next: 'circle-triangle-w'
-	}
-};
-
-
-
-;;
-
-var fc = $.fullCalendar = { version: "1.6.1" };
-var fcViews = fc.views = {};
-
-
-$.fn.fullCalendar = function(options) {
-
-
-	// method calling
-	if (typeof options == 'string') {
-		var args = Array.prototype.slice.call(arguments, 1);
-		var res;
-		this.each(function() {
-			var calendar = $.data(this, 'fullCalendar');
-			if (calendar && $.isFunction(calendar[options])) {
-				var r = calendar[options].apply(calendar, args);
-				if (res === undefined) {
-					res = r;
-				}
-				if (options == 'destroy') {
-					$.removeData(this, 'fullCalendar');
-				}
-			}
-		});
-		if (res !== undefined) {
-			return res;
-		}
-		return this;
-	}
-	
-	
-	// would like to have this logic in EventManager, but needs to happen before options are recursively extended
-	var eventSources = options.eventSources || [];
-	delete options.eventSources;
-	if (options.events) {
-		eventSources.push(options.events);
-		delete options.events;
-	}
-	
-
-	options = $.extend(true, {},
-		defaults,
-		(options.isRTL || options.isRTL===undefined && defaults.isRTL) ? rtlDefaults : {},
-		options
-	);
-	
-	
-	this.each(function(i, _element) {
-		var element = $(_element);
-		var calendar = new Calendar(element, options, eventSources);
-		element.data('fullCalendar', calendar); // TODO: look into memory leak implications
-		calendar.render();
-	});
-	
-	
-	return this;
-	
-};
-
-
-// function for adding/overriding defaults
-function setDefaults(d) {
-	$.extend(true, defaults, d);
-}
-
-
-
-;;
-
- 
-function Calendar(element, options, eventSources) {
-	var t = this;
-	
-	
-	// exports
-	t.options = options;
-	t.render = render;
-	t.destroy = destroy;
-	t.refetchEvents = refetchEvents;
-	t.reportEvents = reportEvents;
-	t.reportEventChange = reportEventChange;
-	t.rerenderEvents = rerenderEvents;
-	t.changeView = changeView;
-	t.select = select;
-	t.unselect = unselect;
-	t.prev = prev;
-	t.next = next;
-	t.prevYear = prevYear;
-	t.nextYear = nextYear;
-	t.today = today;
-	t.gotoDate = gotoDate;
-	t.incrementDate = incrementDate;
-	t.formatDate = function(format, date) { return formatDate(format, date, options) };
-	t.formatDates = function(format, date1, date2) { return formatDates(format, date1, date2, options) };
-	t.getDate = getDate;
-	t.getView = getView;
-	t.option = option;
-	t.trigger = trigger;
-	
-	
-	// imports
-	EventManager.call(t, options, eventSources);
-	var isFetchNeeded = t.isFetchNeeded;
-	var fetchEvents = t.fetchEvents;
-	
-	
-	// locals
-	var _element = element[0];
-	var header;
-	var headerElement;
-	var content;
-	var tm; // for making theme classes
-	var currentView;
-	var viewInstances = {};
-	var elementOuterWidth;
-	var suggestedViewHeight;
-	var absoluteViewElement;
-	var resizeUID = 0;
-	var ignoreWindowResize = 0;
-	var date = new Date();
-	var events = [];
-	var _dragElement;
-	
-	
-	
-	/* Main Rendering
-	-----------------------------------------------------------------------------*/
-	
-	
-	setYMD(date, options.year, options.month, options.date);
-	
-	
-	function render(inc) {
-		if (!content) {
-			initialRender();
-		}else{
-			calcSize();
-			markSizesDirty();
-			markEventsDirty();
-			renderView(inc);
-		}
-	}
-	
-	
-	function initialRender() {
-		tm = options.theme ? 'ui' : 'fc';
-		element.addClass('fc');
-		if (options.isRTL) {
-			element.addClass('fc-rtl');
-		}
-		else {
-			element.addClass('fc-ltr');
-		}
-		if (options.theme) {
-			element.addClass('ui-widget');
-		}
-		content = $("<div class='fc-content' style='position:relative'/>")
-			.prependTo(element);
-		header = new Header(t, options);
-		headerElement = header.render();
-		if (headerElement) {
-			element.prepend(headerElement);
-		}
-		changeView(options.defaultView);
-		$(window).resize(windowResize);
-		// needed for IE in a 0x0 iframe, b/c when it is resized, never triggers a windowResize
-		if (!bodyVisible()) {
-			lateRender();
-		}
-	}
-	
-	
-	// called when we know the calendar couldn't be rendered when it was initialized,
-	// but we think it's ready now
-	function lateRender() {
-		setTimeout(function() { // IE7 needs this so dimensions are calculated correctly
-			if (!currentView.start && bodyVisible()) { // !currentView.start makes sure this never happens more than once
-				renderView();
-			}
-		},0);
-	}
-	
-	
-	function destroy() {
-		$(window).unbind('resize', windowResize);
-		header.destroy();
-		content.remove();
-		element.removeClass('fc fc-rtl ui-widget');
-	}
-	
-	
-	
-	function elementVisible() {
-		return _element.offsetWidth !== 0;
-	}
-	
-	
-	function bodyVisible() {
-		return $('body')[0].offsetWidth !== 0;
-	}
-	
-	
-	
-	/* View Rendering
-	-----------------------------------------------------------------------------*/
-	
-	// TODO: improve view switching (still weird transition in IE, and FF has whiteout problem)
-	
-	function changeView(newViewName) {
-		if (!currentView || newViewName != currentView.name) {
-			ignoreWindowResize++; // because setMinHeight might change the height before render (and subsequently setSize) is reached
-
-			unselect();
-			
-			var oldView = currentView;
-			var newViewElement;
-				
-			if (oldView) {
-				(oldView.beforeHide || noop)(); // called before changing min-height. if called after, scroll state is reset (in Opera)
-				setMinHeight(content, content.height());
-				oldView.element.hide();
-			}else{
-				setMinHeight(content, 1); // needs to be 1 (not 0) for IE7, or else view dimensions miscalculated
-			}
-			content.css('overflow', 'hidden');
-			
-			currentView = viewInstances[newViewName];
-			if (currentView) {
-				currentView.element.show();
-			}else{
-				currentView = viewInstances[newViewName] = new fcViews[newViewName](
-					newViewElement = absoluteViewElement =
-						$("<div class='fc-view fc-view-" + newViewName + "' style='position:absolute'/>")
-							.appendTo(content),
-					t // the calendar object
-				);
-			}
-			
-			if (oldView) {
-				header.deactivateButton(oldView.name);
-			}
-			header.activateButton(newViewName);
-			
-			renderView(); // after height has been set, will make absoluteViewElement's position=relative, then set to null
-			
-			content.css('overflow', '');
-			if (oldView) {
-				setMinHeight(content, 1);
-			}
-			
-			if (!newViewElement) {
-				(currentView.afterShow || noop)(); // called after setting min-height/overflow, so in final scroll state (for Opera)
-			}
-			
-			ignoreWindowResize--;
-		}
-	}
-	
-	
-	
-	function renderView(inc) {
-		if (elementVisible()) {
-			ignoreWindowResize++; // because renderEvents might temporarily change the height before setSize is reached
-
-			unselect();
-			
-			if (suggestedViewHeight === undefined) {
-				calcSize();
-			}
-			
-			var forceEventRender = false;
-			if (!currentView.start || inc || date < currentView.start || date >= currentView.end) {
-				// view must render an entire new date range (and refetch/render events)
-				currentView.render(date, inc || 0); // responsible for clearing events
-				setSize(true);
-				forceEventRender = true;
-			}
-			else if (currentView.sizeDirty) {
-				// view must resize (and rerender events)
-				currentView.clearEvents();
-				setSize();
-				forceEventRender = true;
-			}
-			else if (currentView.eventsDirty) {
-				currentView.clearEvents();
-				forceEventRender = true;
-			}
-			currentView.sizeDirty = false;
-			currentView.eventsDirty = false;
-			updateEvents(forceEventRender);
-			
-			elementOuterWidth = element.outerWidth();
-			
-			header.updateTitle(currentView.title);
-			var today = new Date();
-			if (today >= currentView.start && today < currentView.end) {
-				header.disableButton('today');
-			}else{
-				header.enableButton('today');
-			}
-			
-			ignoreWindowResize--;
-			currentView.trigger('viewDisplay', _element);
-		}
-	}
-	
-	
-	
-	/* Resizing
-	-----------------------------------------------------------------------------*/
-	
-	
-	function updateSize() {
-		markSizesDirty();
-		if (elementVisible()) {
-			calcSize();
-			setSize();
-			unselect();
-			currentView.clearEvents();
-			currentView.renderEvents(events);
-			currentView.sizeDirty = false;
-		}
-	}
-	
-	
-	function markSizesDirty() {
-		$.each(viewInstances, function(i, inst) {
-			inst.sizeDirty = true;
-		});
-	}
-	
-	
-	function calcSize() {
-		if (options.contentHeight) {
-			suggestedViewHeight = options.contentHeight;
-		}
-		else if (options.height) {
-			suggestedViewHeight = options.height - (headerElement ? headerElement.height() : 0) - vsides(content);
-		}
-		else {
-			suggestedViewHeight = Math.round(content.width() / Math.max(options.aspectRatio, .5));
-		}
-	}
-	
-	
-	function setSize(dateChanged) { // todo: dateChanged?
-		ignoreWindowResize++;
-		currentView.setHeight(suggestedViewHeight, dateChanged);
-		if (absoluteViewElement) {
-			absoluteViewElement.css('position', 'relative');
-			absoluteViewElement = null;
-		}
-		currentView.setWidth(content.width(), dateChanged);
-		ignoreWindowResize--;
-	}
-	
-	
-	function windowResize() {
-		if (!ignoreWindowResize) {
-			if (currentView.start) { // view has already been rendered
-				var uid = ++resizeUID;
-				setTimeout(function() { // add a delay
-					if (uid == resizeUID && !ignoreWindowResize && elementVisible()) {
-						if (elementOuterWidth != (elementOuterWidth = element.outerWidth())) {
-							ignoreWindowResize++; // in case the windowResize callback changes the height
-							updateSize();
-							currentView.trigger('windowResize', _element);
-							ignoreWindowResize--;
-						}
-					}
-				}, 200);
-			}else{
-				// calendar must have been initialized in a 0x0 iframe that has just been resized
-				lateRender();
-			}
-		}
-	}
-	
-	
-	
-	/* Event Fetching/Rendering
-	-----------------------------------------------------------------------------*/
-	
-	
-	// fetches events if necessary, rerenders events if necessary (or if forced)
-	function updateEvents(forceRender) {
-		if (!options.lazyFetching || isFetchNeeded(currentView.visStart, currentView.visEnd)) {
-			refetchEvents();
-		}
-		else if (forceRender) {
-			rerenderEvents();
-		}
-	}
-	
-	
-	function refetchEvents() {
-		fetchEvents(currentView.visStart, currentView.visEnd); // will call reportEvents
-	}
-	
-	
-	// called when event data arrives
-	function reportEvents(_events) {
-		events = _events;
-		rerenderEvents();
-	}
-	
-	
-	// called when a single event's data has been changed
-	function reportEventChange(eventID) {
-		rerenderEvents(eventID);
-	}
-	
-	
-	// attempts to rerenderEvents
-	function rerenderEvents(modifiedEventID) {
-		markEventsDirty();
-		if (elementVisible()) {
-			currentView.clearEvents();
-			currentView.renderEvents(events, modifiedEventID);
-			currentView.eventsDirty = false;
-		}
-	}
-	
-	
-	function markEventsDirty() {
-		$.each(viewInstances, function(i, inst) {
-			inst.eventsDirty = true;
-		});
-	}
-	
-
-
-	/* Selection
-	-----------------------------------------------------------------------------*/
-	
-
-	function select(start, end, allDay) {
-		currentView.select(start, end, allDay===undefined ? true : allDay);
-	}
-	
-
-	function unselect() { // safe to be called before renderView
-		if (currentView) {
-			currentView.unselect();
-		}
-	}
-	
-	
-	
-	/* Date
-	-----------------------------------------------------------------------------*/
-	
-	
-	function prev() {
-		renderView(-1);
-	}
-	
-	
-	function next() {
-		renderView(1);
-	}
-	
-	
-	function prevYear() {
-		addYears(date, -1);
-		renderView();
-	}
-	
-	
-	function nextYear() {
-		addYears(date, 1);
-		renderView();
-	}
-	
-	
-	function today() {
-		date = new Date();
-		renderView();
-	}
-	
-	
-	function gotoDate(year, month, dateOfMonth) {
-		if (year instanceof Date) {
-			date = cloneDate(year); // provided 1 argument, a Date
-		}else{
-			setYMD(date, year, month, dateOfMonth);
-		}
-		renderView();
-	}
-	
-	
-	function incrementDate(years, months, days) {
-		if (years !== undefined) {
-			addYears(date, years);
-		}
-		if (months !== undefined) {
-			addMonths(date, months);
-		}
-		if (days !== undefined) {
-			addDays(date, days);
-		}
-		renderView();
-	}
-	
-	
-	function getDate() {
-		return cloneDate(date);
-	}
-	
-	
-	
-	/* Misc
-	-----------------------------------------------------------------------------*/
-	
-	
-	function getView() {
-		return currentView;
-	}
-	
-	
-	function option(name, value) {
-		if (value === undefined) {
-			return options[name];
-		}
-		if (name == 'height' || name == 'contentHeight' || name == 'aspectRatio') {
-			options[name] = value;
-			updateSize();
-		}
-	}
-	
-	
-	function trigger(name, thisObj) {
-		if (options[name]) {
-			return options[name].apply(
-				thisObj || _element,
-				Array.prototype.slice.call(arguments, 2)
-			);
-		}
-	}
-	
-	
-	
-	/* External Dragging
-	------------------------------------------------------------------------*/
-	
-	if (options.droppable) {
-		$(document)
-			.bind('dragstart', function(ev, ui) {
-				var _e = ev.target;
-				var e = $(_e);
-				if (!e.parents('.fc').length) { // not already inside a calendar
-					var accept = options.dropAccept;
-					if ($.isFunction(accept) ? accept.call(_e, e) : e.is(accept)) {
-						_dragElement = _e;
-						currentView.dragStart(_dragElement, ev, ui);
-					}
-				}
-			})
-			.bind('dragstop', function(ev, ui) {
-				if (_dragElement) {
-					currentView.dragStop(_dragElement, ev, ui);
-					_dragElement = null;
-				}
-			});
-	}
-	
-
-}
-
-;;
-
-function Header(calendar, options) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	t.destroy = destroy;
-	t.updateTitle = updateTitle;
-	t.activateButton = activateButton;
-	t.deactivateButton = deactivateButton;
-	t.disableButton = disableButton;
-	t.enableButton = enableButton;
-	
-	
-	// locals
-	var element = $([]);
-	var tm;
-	
-
-
-	function render() {
-		tm = options.theme ? 'ui' : 'fc';
-		var sections = options.header;
-		if (sections) {
-			element = $("<table class='fc-header' style='width:100%'/>")
-				.append(
-					$("<tr/>")
-						.append(renderSection('left'))
-						.append(renderSection('center'))
-						.append(renderSection('right'))
-				);
-			return element;
-		}
-	}
-	
-	
-	function destroy() {
-		element.remove();
-	}
-	
-	
-	function renderSection(position) {
-		var e = $("<td class='fc-header-" + position + "'/>");
-		var buttonStr = options.header[position];
-		if (buttonStr) {
-			$.each(buttonStr.split(' '), function(i) {
-				if (i > 0) {
-					e.append("<span class='fc-header-space'/>");
-				}
-				var prevButton;
-				$.each(this.split(','), function(j, buttonName) {
-					if (buttonName == 'title') {
-						e.append("<span class='fc-header-title'><h2>&nbsp;</h2></span>");
-						if (prevButton) {
-							prevButton.addClass(tm + '-corner-right');
-						}
-						prevButton = null;
-					}else{
-						var buttonClick;
-						if (calendar[buttonName]) {
-							buttonClick = calendar[buttonName]; // calendar method
-						}
-						else if (fcViews[buttonName]) {
-							buttonClick = function() {
-								button.removeClass(tm + '-state-hover'); // forget why
-								calendar.changeView(buttonName);
-							};
-						}
-						if (buttonClick) {
-							var icon = options.theme ? smartProperty(options.buttonIcons, buttonName) : null; // why are we using smartProperty here?
-							var text = smartProperty(options.buttonText, buttonName); // why are we using smartProperty here?
-							var button = $(
-								"<span class='fc-button fc-button-" + buttonName + " " + tm + "-state-default'>" +
-									(icon ?
-										"<span class='fc-icon-wrap'>" +
-											"<span class='ui-icon ui-icon-" + icon + "'/>" +
-										"</span>" :
-										text
-										) +
-								"</span>"
-								)
-								.click(function() {
-									if (!button.hasClass(tm + '-state-disabled')) {
-										buttonClick();
-									}
-								})
-								.mousedown(function() {
-									button
-										.not('.' + tm + '-state-active')
-										.not('.' + tm + '-state-disabled')
-										.addClass(tm + '-state-down');
-								})
-								.mouseup(function() {
-									button.removeClass(tm + '-state-down');
-								})
-								.hover(
-									function() {
-										button
-											.not('.' + tm + '-state-active')
-											.not('.' + tm + '-state-disabled')
-											.addClass(tm + '-state-hover');
-									},
-									function() {
-										button
-											.removeClass(tm + '-state-hover')
-											.removeClass(tm + '-state-down');
-									}
-								)
-								.appendTo(e);
-							disableTextSelection(button);
-							if (!prevButton) {
-								button.addClass(tm + '-corner-left');
-							}
-							prevButton = button;
-						}
-					}
-				});
-				if (prevButton) {
-					prevButton.addClass(tm + '-corner-right');
-				}
-			});
-		}
-		return e;
-	}
-	
-	
-	function updateTitle(html) {
-		element.find('h2')
-			.html(html);
-	}
-	
-	
-	function activateButton(buttonName) {
-		element.find('span.fc-button-' + buttonName)
-			.addClass(tm + '-state-active');
-	}
-	
-	
-	function deactivateButton(buttonName) {
-		element.find('span.fc-button-' + buttonName)
-			.removeClass(tm + '-state-active');
-	}
-	
-	
-	function disableButton(buttonName) {
-		element.find('span.fc-button-' + buttonName)
-			.addClass(tm + '-state-disabled');
-	}
-	
-	
-	function enableButton(buttonName) {
-		element.find('span.fc-button-' + buttonName)
-			.removeClass(tm + '-state-disabled');
-	}
-
-
-}
-
-;;
-
-fc.sourceNormalizers = [];
-fc.sourceFetchers = [];
-
-var ajaxDefaults = {
-	dataType: 'json',
-	cache: false
-};
-
-var eventGUID = 1;
-
-
-function EventManager(options, _sources) {
-	var t = this;
-	
-	
-	// exports
-	t.isFetchNeeded = isFetchNeeded;
-	t.fetchEvents = fetchEvents;
-	t.addEventSource = addEventSource;
-	t.removeEventSource = removeEventSource;
-	t.updateEvent = updateEvent;
-	t.renderEvent = renderEvent;
-	t.removeEvents = removeEvents;
-	t.clientEvents = clientEvents;
-	t.normalizeEvent = normalizeEvent;
-	
-	
-	// imports
-	var trigger = t.trigger;
-	var getView = t.getView;
-	var reportEvents = t.reportEvents;
-	
-	
-	// locals
-	var stickySource = { events: [] };
-	var sources = [ stickySource ];
-	var rangeStart, rangeEnd;
-	var currentFetchID = 0;
-	var pendingSourceCnt = 0;
-	var loadingLevel = 0;
-	var cache = [];
-	
-	
-	for (var i=0; i<_sources.length; i++) {
-		_addEventSource(_sources[i]);
-	}
-	
-	
-	
-	/* Fetching
-	-----------------------------------------------------------------------------*/
-	
-	
-	function isFetchNeeded(start, end) {
-		return !rangeStart || start < rangeStart || end > rangeEnd;
-	}
-	
-	
-	function fetchEvents(start, end) {
-		rangeStart = start;
-		rangeEnd = end;
-		cache = [];
-		var fetchID = ++currentFetchID;
-		var len = sources.length;
-		pendingSourceCnt = len;
-		for (var i=0; i<len; i++) {
-			fetchEventSource(sources[i], fetchID);
-		}
-	}
-	
-	
-	function fetchEventSource(source, fetchID) {
-		_fetchEventSource(source, function(events) {
-			if (fetchID == currentFetchID) {
-				if (events) {
-
-					if (options.eventDataTransform) {
-						events = $.map(events, options.eventDataTransform);
-					}
-					if (source.eventDataTransform) {
-						events = $.map(events, source.eventDataTransform);
-					}
-					// TODO: this technique is not ideal for static array event sources.
-					//  For arrays, we'll want to process all events right in the beginning, then never again.
-				
-					for (var i=0; i<events.length; i++) {
-						events[i].source = source;
-						normalizeEvent(events[i]);
-					}
-					cache = cache.concat(events);
-				}
-				pendingSourceCnt--;
-				if (!pendingSourceCnt) {
-					reportEvents(cache);
-				}
-			}
-		});
-	}
-	
-	
-	function _fetchEventSource(source, callback) {
-		var i;
-		var fetchers = fc.sourceFetchers;
-		var res;
-		for (i=0; i<fetchers.length; i++) {
-			res = fetchers[i](source, rangeStart, rangeEnd, callback);
-			if (res === true) {
-				// the fetcher is in charge. made its own async request
-				return;
-			}
-			else if (typeof res == 'object') {
-				// the fetcher returned a new source. process it
-				_fetchEventSource(res, callback);
-				return;
-			}
-		}
-		var events = source.events;
-		if (events) {
-			if ($.isFunction(events)) {
-				pushLoading();
-				events(cloneDate(rangeStart), cloneDate(rangeEnd), function(events) {
-					callback(events);
-					popLoading();
-				});
-			}
-			else if ($.isArray(events)) {
-				callback(events);
-			}
-			else {
-				callback();
-			}
-		}else{
-			var url = source.url;
-			if (url) {
-				var success = source.success;
-				var error = source.error;
-				var complete = source.complete;
-				var data = $.extend({}, source.data || {});
-				var startParam = firstDefined(source.startParam, options.startParam);
-				var endParam = firstDefined(source.endParam, options.endParam);
-				if (startParam) {
-					data[startParam] = Math.round(+rangeStart / 1000);
-				}
-				if (endParam) {
-					data[endParam] = Math.round(+rangeEnd / 1000);
-				}
-				pushLoading();
-				$.ajax($.extend({}, ajaxDefaults, source, {
-					data: data,
-					success: function(events) {
-						events = events || [];
-						var res = applyAll(success, this, arguments);
-						if ($.isArray(res)) {
-							events = res;
-						}
-						callback(events);
-					},
-					error: function() {
-						applyAll(error, this, arguments);
-						callback();
-					},
-					complete: function() {
-						applyAll(complete, this, arguments);
-						popLoading();
-					}
-				}));
-			}else{
-				callback();
-			}
-		}
-	}
-	
-	
-	
-	/* Sources
-	-----------------------------------------------------------------------------*/
-	
-
-	function addEventSource(source) {
-		source = _addEventSource(source);
-		if (source) {
-			pendingSourceCnt++;
-			fetchEventSource(source, currentFetchID); // will eventually call reportEvents
-		}
-	}
-	
-	
-	function _addEventSource(source) {
-		if ($.isFunction(source) || $.isArray(source)) {
-			source = { events: source };
-		}
-		else if (typeof source == 'string') {
-			source = { url: source };
-		}
-		if (typeof source == 'object') {
-			normalizeSource(source);
-			sources.push(source);
-			return source;
-		}
-	}
-	
-
-	function removeEventSource(source) {
-		sources = $.grep(sources, function(src) {
-			return !isSourcesEqual(src, source);
-		});
-		// remove all client events from that source
-		cache = $.grep(cache, function(e) {
-			return !isSourcesEqual(e.source, source);
-		});
-		reportEvents(cache);
-	}
-	
-	
-	
-	/* Manipulation
-	-----------------------------------------------------------------------------*/
-	
-	
-	function updateEvent(event) { // update an existing event
-		var i, len = cache.length, e,
-			defaultEventEnd = getView().defaultEventEnd, // getView???
-			startDelta = event.start - event._start,
-			endDelta = event.end ?
-				(event.end - (event._end || defaultEventEnd(event))) // event._end would be null if event.end
-				: 0;                                                      // was null and event was just resized
-		for (i=0; i<len; i++) {
-			e = cache[i];
-			if (e._id == event._id && e != event) {
-				e.start = new Date(+e.start + startDelta);
-				if (event.end) {
-					if (e.end) {
-						e.end = new Date(+e.end + endDelta);
-					}else{
-						e.end = new Date(+defaultEventEnd(e) + endDelta);
-					}
-				}else{
-					e.end = null;
-				}
-				e.title = event.title;
-				e.url = event.url;
-				e.allDay = event.allDay;
-				e.className = event.className;
-				e.editable = event.editable;
-				e.color = event.color;
-				e.backgroudColor = event.backgroudColor;
-				e.borderColor = event.borderColor;
-				e.textColor = event.textColor;
-				normalizeEvent(e);
-			}
-		}
-		normalizeEvent(event);
-		reportEvents(cache);
-	}
-	
-	
-	function renderEvent(event, stick) {
-		normalizeEvent(event);
-		if (!event.source) {
-			if (stick) {
-				stickySource.events.push(event);
-				event.source = stickySource;
-			}
-			cache.push(event);
-		}
-		reportEvents(cache);
-	}
-	
-	
-	function removeEvents(filter) {
-		if (!filter) { // remove all
-			cache = [];
-			// clear all array sources
-			for (var i=0; i<sources.length; i++) {
-				if ($.isArray(sources[i].events)) {
-					sources[i].events = [];
-				}
-			}
-		}else{
-			if (!$.isFunction(filter)) { // an event ID
-				var id = filter + '';
-				filter = function(e) {
-					return e._id == id;
-				};
-			}
-			cache = $.grep(cache, filter, true);
-			// remove events from array sources
-			for (var i=0; i<sources.length; i++) {
-				if ($.isArray(sources[i].events)) {
-					sources[i].events = $.grep(sources[i].events, filter, true);
-				}
-			}
-		}
-		reportEvents(cache);
-	}
-	
-	
-	function clientEvents(filter) {
-		if ($.isFunction(filter)) {
-			return $.grep(cache, filter);
-		}
-		else if (filter) { // an event ID
-			filter += '';
-			return $.grep(cache, function(e) {
-				return e._id == filter;
-			});
-		}
-		return cache; // else, return all
-	}
-	
-	
-	
-	/* Loading State
-	-----------------------------------------------------------------------------*/
-	
-	
-	function pushLoading() {
-		if (!loadingLevel++) {
-			trigger('loading', null, true);
-		}
-	}
-	
-	
-	function popLoading() {
-		if (!--loadingLevel) {
-			trigger('loading', null, false);
-		}
-	}
-	
-	
-	
-	/* Event Normalization
-	-----------------------------------------------------------------------------*/
-	
-	
-	function normalizeEvent(event) {
-		var source = event.source || {};
-		var ignoreTimezone = firstDefined(source.ignoreTimezone, options.ignoreTimezone);
-		event._id = event._id || (event.id === undefined ? '_fc' + eventGUID++ : event.id + '');
-		if (event.date) {
-			if (!event.start) {
-				event.start = event.date;
-			}
-			delete event.date;
-		}
-		event._start = cloneDate(event.start = parseDate(event.start, ignoreTimezone));
-		event.end = parseDate(event.end, ignoreTimezone);
-		if (event.end && event.end <= event.start) {
-			event.end = null;
-		}
-		event._end = event.end ? cloneDate(event.end) : null;
-		if (event.allDay === undefined) {
-			event.allDay = firstDefined(source.allDayDefault, options.allDayDefault);
-		}
-		if (event.className) {
-			if (typeof event.className == 'string') {
-				event.className = event.className.split(/\s+/);
-			}
-		}else{
-			event.className = [];
-		}
-		// TODO: if there is no start date, return false to indicate an invalid event
-	}
-	
-	
-	
-	/* Utils
-	------------------------------------------------------------------------------*/
-	
-	
-	function normalizeSource(source) {
-		if (source.className) {
-			// TODO: repeat code, same code for event classNames
-			if (typeof source.className == 'string') {
-				source.className = source.className.split(/\s+/);
-			}
-		}else{
-			source.className = [];
-		}
-		var normalizers = fc.sourceNormalizers;
-		for (var i=0; i<normalizers.length; i++) {
-			normalizers[i](source);
-		}
-	}
-	
-	
-	function isSourcesEqual(source1, source2) {
-		return source1 && source2 && getSourcePrimitive(source1) == getSourcePrimitive(source2);
-	}
-	
-	
-	function getSourcePrimitive(source) {
-		return ((typeof source == 'object') ? (source.events || source.url) : '') || source;
-	}
-
-
-}
-
-;;
-
-
-fc.addDays = addDays;
-fc.cloneDate = cloneDate;
-fc.parseDate = parseDate;
-fc.parseISO8601 = parseISO8601;
-fc.parseTime = parseTime;
-fc.formatDate = formatDate;
-fc.formatDates = formatDates;
-
-
-
-/* Date Math
------------------------------------------------------------------------------*/
-
-var dayIDs = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'],
-	DAY_MS = 86400000,
-	HOUR_MS = 3600000,
-	MINUTE_MS = 60000;
-	
-
-function addYears(d, n, keepTime) {
-	d.setFullYear(d.getFullYear() + n);
-	if (!keepTime) {
-		clearTime(d);
-	}
-	return d;
-}
-
-
-function addMonths(d, n, keepTime) { // prevents day overflow/underflow
-	if (+d) { // prevent infinite looping on invalid dates
-		var m = d.getMonth() + n,
-			check = cloneDate(d);
-		check.setDate(1);
-		check.setMonth(m);
-		d.setMonth(m);
-		if (!keepTime) {
-			clearTime(d);
-		}
-		while (d.getMonth() != check.getMonth()) {
-			d.setDate(d.getDate() + (d < check ? 1 : -1));
-		}
-	}
-	return d;
-}
-
-
-function addDays(d, n, keepTime) { // deals with daylight savings
-	if (+d) {
-		var dd = d.getDate() + n,
-			check = cloneDate(d);
-		check.setHours(9); // set to middle of day
-		check.setDate(dd);
-		d.setDate(dd);
-		if (!keepTime) {
-			clearTime(d);
-		}
-		fixDate(d, check);
-	}
-	return d;
-}
-
-
-function fixDate(d, check) { // force d to be on check's YMD, for daylight savings purposes
-	if (+d) { // prevent infinite looping on invalid dates
-		while (d.getDate() != check.getDate()) {
-			d.setTime(+d + (d < check ? 1 : -1) * HOUR_MS);
-		}
-	}
-}
-
-
-function addMinutes(d, n) {
-	d.setMinutes(d.getMinutes() + n);
-	return d;
-}
-
-
-function clearTime(d) {
-	d.setHours(0);
-	d.setMinutes(0);
-	d.setSeconds(0); 
-	d.setMilliseconds(0);
-	return d;
-}
-
-
-function cloneDate(d, dontKeepTime) {
-	if (dontKeepTime) {
-		return clearTime(new Date(+d));
-	}
-	return new Date(+d);
-}
-
-
-function zeroDate() { // returns a Date with time 00:00:00 and dateOfMonth=1
-	var i=0, d;
-	do {
-		d = new Date(1970, i++, 1);
-	} while (d.getHours()); // != 0
-	return d;
-}
-
-
-function skipWeekend(date, inc, excl) {
-	inc = inc || 1;
-	while (!date.getDay() || (excl && date.getDay()==1 || !excl && date.getDay()==6)) {
-		addDays(date, inc);
-	}
-	return date;
-}
-
-
-function dayDiff(d1, d2) { // d1 - d2
-	return Math.round((cloneDate(d1, true) - cloneDate(d2, true)) / DAY_MS);
-}
-
-
-function setYMD(date, y, m, d) {
-	if (y !== undefined && y != date.getFullYear()) {
-		date.setDate(1);
-		date.setMonth(0);
-		date.setFullYear(y);
-	}
-	if (m !== undefined && m != date.getMonth()) {
-		date.setDate(1);
-		date.setMonth(m);
-	}
-	if (d !== undefined) {
-		date.setDate(d);
-	}
-}
-
-
-
-/* Date Parsing
------------------------------------------------------------------------------*/
-
-
-function parseDate(s, ignoreTimezone) { // ignoreTimezone defaults to true
-	if (typeof s == 'object') { // already a Date object
-		return s;
-	}
-	if (typeof s == 'number') { // a UNIX timestamp
-		return new Date(s * 1000);
-	}
-	if (typeof s == 'string') {
-		if (s.match(/^\d+(\.\d+)?$/)) { // a UNIX timestamp
-			return new Date(parseFloat(s) * 1000);
-		}
-		if (ignoreTimezone === undefined) {
-			ignoreTimezone = true;
-		}
-		return parseISO8601(s, ignoreTimezone) || (s ? new Date(s) : null);
-	}
-	// TODO: never return invalid dates (like from new Date(<string>)), return null instead
-	return null;
-}
-
-
-function parseISO8601(s, ignoreTimezone) { // ignoreTimezone defaults to false
-	// derived from http://delete.me.uk/2005/03/iso8601.html
-	// TODO: for a know glitch/feature, read tests/issue_206_parseDate_dst.html
-	var m = s.match(/^([0-9]{4})(-([0-9]{2})(-([0-9]{2})([T ]([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2})(:?([0-9]{2}))?))?)?)?)?$/);
-	if (!m) {
-		return null;
-	}
-	var date = new Date(m[1], 0, 1);
-	if (ignoreTimezone || !m[13]) {
-		var check = new Date(m[1], 0, 1, 9, 0);
-		if (m[3]) {
-			date.setMonth(m[3] - 1);
-			check.setMonth(m[3] - 1);
-		}
-		if (m[5]) {
-			date.setDate(m[5]);
-			check.setDate(m[5]);
-		}
-		fixDate(date, check);
-		if (m[7]) {
-			date.setHours(m[7]);
-		}
-		if (m[8]) {
-			date.setMinutes(m[8]);
-		}
-		if (m[10]) {
-			date.setSeconds(m[10]);
-		}
-		if (m[12]) {
-			date.setMilliseconds(Number("0." + m[12]) * 1000);
-		}
-		fixDate(date, check);
-	}else{
-		date.setUTCFullYear(
-			m[1],
-			m[3] ? m[3] - 1 : 0,
-			m[5] || 1
-		);
-		date.setUTCHours(
-			m[7] || 0,
-			m[8] || 0,
-			m[10] || 0,
-			m[12] ? Number("0." + m[12]) * 1000 : 0
-		);
-		if (m[14]) {
-			var offset = Number(m[16]) * 60 + (m[18] ? Number(m[18]) : 0);
-			offset *= m[15] == '-' ? 1 : -1;
-			date = new Date(+date + (offset * 60 * 1000));
-		}
-	}
-	return date;
-}
-
-
-function parseTime(s) { // returns minutes since start of day
-	if (typeof s == 'number') { // an hour
-		return s * 60;
-	}
-	if (typeof s == 'object') { // a Date object
-		return s.getHours() * 60 + s.getMinutes();
-	}
-	var m = s.match(/(\d+)(?::(\d+))?\s*(\w+)?/);
-	if (m) {
-		var h = parseInt(m[1], 10);
-		if (m[3]) {
-			h %= 12;
-			if (m[3].toLowerCase().charAt(0) == 'p') {
-				h += 12;
-			}
-		}
-		return h * 60 + (m[2] ? parseInt(m[2], 10) : 0);
-	}
-}
-
-
-
-/* Date Formatting
------------------------------------------------------------------------------*/
-// TODO: use same function formatDate(date, [date2], format, [options])
-
-
-function formatDate(date, format, options) {
-	return formatDates(date, null, format, options);
-}
-
-
-function formatDates(date1, date2, format, options) {
-	options = options || defaults;
-	var date = date1,
-		otherDate = date2,
-		i, len = format.length, c,
-		i2, formatter,
-		res = '';
-	for (i=0; i<len; i++) {
-		c = format.charAt(i);
-		if (c == "'") {
-			for (i2=i+1; i2<len; i2++) {
-				if (format.charAt(i2) == "'") {
-					if (date) {
-						if (i2 == i+1) {
-							res += "'";
-						}else{
-							res += format.substring(i+1, i2);
-						}
-						i = i2;
-					}
-					break;
-				}
-			}
-		}
-		else if (c == '(') {
-			for (i2=i+1; i2<len; i2++) {
-				if (format.charAt(i2) == ')') {
-					var subres = formatDate(date, format.substring(i+1, i2), options);
-					if (parseInt(subres.replace(/\D/, ''), 10)) {
-						res += subres;
-					}
-					i = i2;
-					break;
-				}
-			}
-		}
-		else if (c == '[') {
-			for (i2=i+1; i2<len; i2++) {
-				if (format.charAt(i2) == ']') {
-					var subformat = format.substring(i+1, i2);
-					var subres = formatDate(date, subformat, options);
-					if (subres != formatDate(otherDate, subformat, options)) {
-						res += subres;
-					}
-					i = i2;
-					break;
-				}
-			}
-		}
-		else if (c == '{') {
-			date = date2;
-			otherDate = date1;
-		}
-		else if (c == '}') {
-			date = date1;
-			otherDate = date2;
-		}
-		else {
-			for (i2=len; i2>i; i2--) {
-				if (formatter = dateFormatters[format.substring(i, i2)]) {
-					if (date) {
-						res += formatter(date, options);
-					}
-					i = i2 - 1;
-					break;
-				}
-			}
-			if (i2 == i) {
-				if (date) {
-					res += c;
-				}
-			}
-		}
-	}
-	return res;
-};
-
-
-var dateFormatters = {
-	s	: function(d)	{ return d.getSeconds() },
-	ss	: function(d)	{ return zeroPad(d.getSeconds()) },
-	m	: function(d)	{ return d.getMinutes() },
-	mm	: function(d)	{ return zeroPad(d.getMinutes()) },
-	h	: function(d)	{ return d.getHours() % 12 || 12 },
-	hh	: function(d)	{ return zeroPad(d.getHours() % 12 || 12) },
-	H	: function(d)	{ return d.getHours() },
-	HH	: function(d)	{ return zeroPad(d.getHours()) },
-	d	: function(d)	{ return d.getDate() },
-	dd	: function(d)	{ return zeroPad(d.getDate()) },
-	ddd	: function(d,o)	{ return o.dayNamesShort[d.getDay()] },
-	dddd: function(d,o)	{ return o.dayNames[d.getDay()] },
-	M	: function(d)	{ return d.getMonth() + 1 },
-	MM	: function(d)	{ return zeroPad(d.getMonth() + 1) },
-	MMM	: function(d,o)	{ return o.monthNamesShort[d.getMonth()] },
-	MMMM: function(d,o)	{ return o.monthNames[d.getMonth()] },
-	yy	: function(d)	{ return (d.getFullYear()+'').substring(2) },
-	yyyy: function(d)	{ return d.getFullYear() },
-	t	: function(d)	{ return d.getHours() < 12 ? 'a' : 'p' },
-	tt	: function(d)	{ return d.getHours() < 12 ? 'am' : 'pm' },
-	T	: function(d)	{ return d.getHours() < 12 ? 'A' : 'P' },
-	TT	: function(d)	{ return d.getHours() < 12 ? 'AM' : 'PM' },
-	u	: function(d)	{ return formatDate(d, "yyyy-MM-dd'T'HH:mm:ss'Z'") },
-	S	: function(d)	{
-		var date = d.getDate();
-		if (date > 10 && date < 20) {
-			return 'th';
-		}
-		return ['st', 'nd', 'rd'][date%10-1] || 'th';
-	},
-	w   : function(d, o) { // local
-		return o.weekNumberCalculation(d);
-	},
-	W   : function(d) { // ISO
-		return iso8601Week(d);
-	}
-};
-fc.dateFormatters = dateFormatters;
-
-
-/* thanks jQuery UI (https://github.com/jquery/jquery-ui/blob/master/ui/jquery.ui.datepicker.js)
- * 
- * Set as calculateWeek to determine the week of the year based on the ISO 8601 definition.
- * @param  date  Date - the date to get the week for
- * @return  number - the number of the week within the year that contains this date
- */
-function iso8601Week(date) {
-	var time;
-	var checkDate = new Date(date.getTime());
-
-	// Find Thursday of this week starting on Monday
-	checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
-
-	time = checkDate.getTime();
-	checkDate.setMonth(0); // Compare with Jan 1
-	checkDate.setDate(1);
-	return Math.floor(Math.round((time - checkDate) / 86400000) / 7) + 1;
-}
-
-
-;;
-
-fc.applyAll = applyAll;
-
-
-/* Event Date Math
------------------------------------------------------------------------------*/
-
-
-function exclEndDay(event) {
-	if (event.end) {
-		return _exclEndDay(event.end, event.allDay);
-	}else{
-		return addDays(cloneDate(event.start), 1);
-	}
-}
-
-
-function _exclEndDay(end, allDay) {
-	end = cloneDate(end);
-	return allDay || end.getHours() || end.getMinutes() ? addDays(end, 1) : clearTime(end);
-}
-
-
-function segCmp(a, b) {
-	return (b.msLength - a.msLength) * 100 + (a.event.start - b.event.start);
-}
-
-
-function segsCollide(seg1, seg2) {
-	return seg1.end > seg2.start && seg1.start < seg2.end;
-}
-
-
-
-/* Event Sorting
------------------------------------------------------------------------------*/
-
-
-// event rendering utilities
-function sliceSegs(events, visEventEnds, start, end) {
-	var segs = [],
-		i, len=events.length, event,
-		eventStart, eventEnd,
-		segStart, segEnd,
-		isStart, isEnd;
-	for (i=0; i<len; i++) {
-		event = events[i];
-		eventStart = event.start;
-		eventEnd = visEventEnds[i];
-		if (eventEnd > start && eventStart < end) {
-			if (eventStart < start) {
-				segStart = cloneDate(start);
-				isStart = false;
-			}else{
-				segStart = eventStart;
-				isStart = true;
-			}
-			if (eventEnd > end) {
-				segEnd = cloneDate(end);
-				isEnd = false;
-			}else{
-				segEnd = eventEnd;
-				isEnd = true;
-			}
-			segs.push({
-				event: event,
-				start: segStart,
-				end: segEnd,
-				isStart: isStart,
-				isEnd: isEnd,
-				msLength: segEnd - segStart
-			});
-		}
-	}
-	return segs.sort(segCmp);
-}
-
-
-// event rendering calculation utilities
-function stackSegs(segs) {
-	var levels = [],
-		i, len = segs.length, seg,
-		j, collide, k;
-	for (i=0; i<len; i++) {
-		seg = segs[i];
-		j = 0; // the level index where seg should belong
-		while (true) {
-			collide = false;
-			if (levels[j]) {
-				for (k=0; k<levels[j].length; k++) {
-					if (segsCollide(levels[j][k], seg)) {
-						collide = true;
-						break;
-					}
-				}
-			}
-			if (collide) {
-				j++;
-			}else{
-				break;
-			}
-		}
-		if (levels[j]) {
-			levels[j].push(seg);
-		}else{
-			levels[j] = [seg];
-		}
-	}
-	return levels;
-}
-
-
-
-/* Event Element Binding
------------------------------------------------------------------------------*/
-
-
-function lazySegBind(container, segs, bindHandlers) {
-	container.unbind('mouseover').mouseover(function(ev) {
-		var parent=ev.target, e,
-			i, seg;
-		while (parent != this) {
-			e = parent;
-			parent = parent.parentNode;
-		}
-		if ((i = e._fci) !== undefined) {
-			e._fci = undefined;
-			seg = segs[i];
-			bindHandlers(seg.event, seg.element, seg);
-			$(ev.target).trigger(ev);
-		}
-		ev.stopPropagation();
-	});
-}
-
-
-
-/* Element Dimensions
------------------------------------------------------------------------------*/
-
-
-function setOuterWidth(element, width, includeMargins) {
-	for (var i=0, e; i<element.length; i++) {
-		e = $(element[i]);
-		e.width(Math.max(0, width - hsides(e, includeMargins)));
-	}
-}
-
-
-function setOuterHeight(element, height, includeMargins) {
-	for (var i=0, e; i<element.length; i++) {
-		e = $(element[i]);
-		e.height(Math.max(0, height - vsides(e, includeMargins)));
-	}
-}
-
-
-function hsides(element, includeMargins) {
-	return hpadding(element) + hborders(element) + (includeMargins ? hmargins(element) : 0);
-}
-
-
-function hpadding(element) {
-	return (parseFloat($.css(element[0], 'paddingLeft', true)) || 0) +
-	       (parseFloat($.css(element[0], 'paddingRight', true)) || 0);
-}
-
-
-function hmargins(element) {
-	return (parseFloat($.css(element[0], 'marginLeft', true)) || 0) +
-	       (parseFloat($.css(element[0], 'marginRight', true)) || 0);
-}
-
-
-function hborders(element) {
-	return (parseFloat($.css(element[0], 'borderLeftWidth', true)) || 0) +
-	       (parseFloat($.css(element[0], 'borderRightWidth', true)) || 0);
-}
-
-
-function vsides(element, includeMargins) {
-	return vpadding(element) +  vborders(element) + (includeMargins ? vmargins(element) : 0);
-}
-
-
-function vpadding(element) {
-	return (parseFloat($.css(element[0], 'paddingTop', true)) || 0) +
-	       (parseFloat($.css(element[0], 'paddingBottom', true)) || 0);
-}
-
-
-function vmargins(element) {
-	return (parseFloat($.css(element[0], 'marginTop', true)) || 0) +
-	       (parseFloat($.css(element[0], 'marginBottom', true)) || 0);
-}
-
-
-function vborders(element) {
-	return (parseFloat($.css(element[0], 'borderTopWidth', true)) || 0) +
-	       (parseFloat($.css(element[0], 'borderBottomWidth', true)) || 0);
-}
-
-
-function setMinHeight(element, height) {
-	height = (typeof height == 'number' ? height + 'px' : height);
-	element.each(function(i, _element) {
-		_element.style.cssText += ';min-height:' + height + ';_height:' + height;
-		// why can't we just use .css() ? i forget
-	});
-}
-
-
-
-/* Misc Utils
------------------------------------------------------------------------------*/
-
-
-//TODO: arraySlice
-//TODO: isFunction, grep ?
-
-
-function noop() { }
-
-
-function cmp(a, b) {
-	return a - b;
-}
-
-
-function arrayMax(a) {
-	return Math.max.apply(Math, a);
-}
-
-
-function zeroPad(n) {
-	return (n < 10 ? '0' : '') + n;
-}
-
-
-function smartProperty(obj, name) { // get a camel-cased/namespaced property of an object
-	if (obj[name] !== undefined) {
-		return obj[name];
-	}
-	var parts = name.split(/(?=[A-Z])/),
-		i=parts.length-1, res;
-	for (; i>=0; i--) {
-		res = obj[parts[i].toLowerCase()];
-		if (res !== undefined) {
-			return res;
-		}
-	}
-	return obj[''];
-}
-
-
-function htmlEscape(s) {
-	return s.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/'/g, '&#039;')
-		.replace(/"/g, '&quot;')
-		.replace(/\n/g, '<br />');
-}
-
-
-function cssKey(_element) {
-	return _element.id + '/' + _element.className + '/' + _element.style.cssText.replace(/(^|;)\s*(top|left|width|height)\s*:[^;]*/ig, '');
-}
-
-
-function disableTextSelection(element) {
-	element
-		.attr('unselectable', 'on')
-		.css('MozUserSelect', 'none')
-		.bind('selectstart.ui', function() { return false; });
-}
-
-
-/*
-function enableTextSelection(element) {
-	element
-		.attr('unselectable', 'off')
-		.css('MozUserSelect', '')
-		.unbind('selectstart.ui');
-}
-*/
-
-
-function markFirstLast(e) {
-	e.children()
-		.removeClass('fc-first fc-last')
-		.filter(':first-child')
-			.addClass('fc-first')
-		.end()
-		.filter(':last-child')
-			.addClass('fc-last');
-}
-
-
-function setDayID(cell, date) {
-	cell.each(function(i, _cell) {
-		_cell.className = _cell.className.replace(/^fc-\w*/, 'fc-' + dayIDs[date.getDay()]);
-		// TODO: make a way that doesn't rely on order of classes
-	});
-}
-
-
-function getSkinCss(event, opt) {
-	var source = event.source || {};
-	var eventColor = event.color;
-	var sourceColor = source.color;
-	var optionColor = opt('eventColor');
-	var backgroundColor =
-		event.backgroundColor ||
-		eventColor ||
-		source.backgroundColor ||
-		sourceColor ||
-		opt('eventBackgroundColor') ||
-		optionColor;
-	var borderColor =
-		event.borderColor ||
-		eventColor ||
-		source.borderColor ||
-		sourceColor ||
-		opt('eventBorderColor') ||
-		optionColor;
-	var textColor =
-		event.textColor ||
-		source.textColor ||
-		opt('eventTextColor');
-	var statements = [];
-	if (backgroundColor) {
-		statements.push('background-color:' + backgroundColor);
-	}
-	if (borderColor) {
-		statements.push('border-color:' + borderColor);
-	}
-	if (textColor) {
-		statements.push('color:' + textColor);
-	}
-	return statements.join(';');
-}
-
-
-function applyAll(functions, thisObj, args) {
-	if ($.isFunction(functions)) {
-		functions = [ functions ];
-	}
-	if (functions) {
-		var i;
-		var ret;
-		for (i=0; i<functions.length; i++) {
-			ret = functions[i].apply(thisObj, args) || ret;
-		}
-		return ret;
-	}
-}
-
-
-function firstDefined() {
-	for (var i=0; i<arguments.length; i++) {
-		if (arguments[i] !== undefined) {
-			return arguments[i];
-		}
-	}
-}
-
-
-;;
-
-fcViews.month = MonthView;
-
-function MonthView(element, calendar) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	
-	
-	// imports
-	BasicView.call(t, element, calendar, 'month');
-	var opt = t.opt;
-	var renderBasic = t.renderBasic;
-	var formatDate = calendar.formatDate;
-	
-	
-	
-	function render(date, delta) {
-		if (delta) {
-			addMonths(date, delta);
-			date.setDate(1);
-		}
-		var start = cloneDate(date, true);
-		start.setDate(1);
-		var end = addMonths(cloneDate(start), 1);
-		var visStart = cloneDate(start);
-		var visEnd = cloneDate(end);
-		var firstDay = opt('firstDay');
-		var nwe = opt('weekends') ? 0 : 1;
-		if (nwe) {
-			skipWeekend(visStart);
-			skipWeekend(visEnd, -1, true);
-		}
-		addDays(visStart, -((visStart.getDay() - Math.max(firstDay, nwe) + 7) % 7));
-		addDays(visEnd, (7 - visEnd.getDay() + Math.max(firstDay, nwe)) % 7);
-		var rowCnt = Math.round((visEnd - visStart) / (DAY_MS * 7));
-		if (opt('weekMode') == 'fixed') {
-			addDays(visEnd, (6 - rowCnt) * 7);
-			rowCnt = 6;
-		}
-		t.title = formatDate(start, opt('titleFormat'));
-		t.start = start;
-		t.end = end;
-		t.visStart = visStart;
-		t.visEnd = visEnd;
-		renderBasic(rowCnt, nwe ? 5 : 7, true);
-	}
-	
-	
-}
-
-;;
-
-fcViews.basicWeek = BasicWeekView;
-
-function BasicWeekView(element, calendar) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	
-	
-	// imports
-	BasicView.call(t, element, calendar, 'basicWeek');
-	var opt = t.opt;
-	var renderBasic = t.renderBasic;
-	var formatDates = calendar.formatDates;
-	
-	
-	
-	function render(date, delta) {
-		if (delta) {
-			addDays(date, delta * 7);
-		}
-		var start = addDays(cloneDate(date), -((date.getDay() - opt('firstDay') + 7) % 7));
-		var end = addDays(cloneDate(start), 7);
-		var visStart = cloneDate(start);
-		var visEnd = cloneDate(end);
-		var weekends = opt('weekends');
-		if (!weekends) {
-			skipWeekend(visStart);
-			skipWeekend(visEnd, -1, true);
-		}
-		t.title = formatDates(
-			visStart,
-			addDays(cloneDate(visEnd), -1),
-			opt('titleFormat')
-		);
-		t.start = start;
-		t.end = end;
-		t.visStart = visStart;
-		t.visEnd = visEnd;
-		renderBasic(1, weekends ? 7 : 5, false);
-	}
-	
-	
-}
-
-;;
-
-fcViews.basicDay = BasicDayView;
-
-//TODO: when calendar's date starts out on a weekend, shouldn't happen
-
-
-function BasicDayView(element, calendar) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	
-	
-	// imports
-	BasicView.call(t, element, calendar, 'basicDay');
-	var opt = t.opt;
-	var renderBasic = t.renderBasic;
-	var formatDate = calendar.formatDate;
-	
-	
-	
-	function render(date, delta) {
-		if (delta) {
-			addDays(date, delta);
-			if (!opt('weekends')) {
-				skipWeekend(date, delta < 0 ? -1 : 1);
-			}
-		}
-		t.title = formatDate(date, opt('titleFormat'));
-		t.start = t.visStart = cloneDate(date, true);
-		t.end = t.visEnd = addDays(cloneDate(t.start), 1);
-		renderBasic(1, 1, false);
-	}
-	
-	
-}
-
-;;
-
-setDefaults({
-	weekMode: 'fixed'
-});
-
-
-function BasicView(element, calendar, viewName) {
-	var t = this;
-	
-	
-	// exports
-	t.renderBasic = renderBasic;
-	t.setHeight = setHeight;
-	t.setWidth = setWidth;
-	t.renderDayOverlay = renderDayOverlay;
-	t.defaultSelectionEnd = defaultSelectionEnd;
-	t.renderSelection = renderSelection;
-	t.clearSelection = clearSelection;
-	t.reportDayClick = reportDayClick; // for selection (kinda hacky)
-	t.dragStart = dragStart;
-	t.dragStop = dragStop;
-	t.defaultEventEnd = defaultEventEnd;
-	t.getHoverListener = function() { return hoverListener };
-	t.colContentLeft = colContentLeft;
-	t.colContentRight = colContentRight;
-	t.dayOfWeekCol = dayOfWeekCol;
-	t.dateCell = dateCell;
-	t.cellDate = cellDate;
-	t.cellIsAllDay = function() { return true };
-	t.allDayRow = allDayRow;
-	t.allDayBounds = allDayBounds;
-	t.getRowCnt = function() { return rowCnt };
-	t.getColCnt = function() { return colCnt };
-	t.getColWidth = function() { return colWidth };
-	t.getDaySegmentContainer = function() { return daySegmentContainer };
-	
-	
-	// imports
-	View.call(t, element, calendar, viewName);
-	OverlayManager.call(t);
-	SelectionManager.call(t);
-	BasicEventRenderer.call(t);
-	var opt = t.opt;
-	var trigger = t.trigger;
-	var clearEvents = t.clearEvents;
-	var renderOverlay = t.renderOverlay;
-	var clearOverlays = t.clearOverlays;
-	var daySelectionMousedown = t.daySelectionMousedown;
-	var formatDate = calendar.formatDate;
-	
-	
-	// locals
-	
-	var table;
-	var head;
-	var headCells;
-	var body;
-	var bodyRows;
-	var bodyCells;
-	var bodyFirstCells;
-	var bodyCellTopInners;
-	var daySegmentContainer;
-	
-	var viewWidth;
-	var viewHeight;
-	var colWidth;
-	var weekNumberWidth;
-	
-	var rowCnt, colCnt;
-	var coordinateGrid;
-	var hoverListener;
-	var colContentPositions;
-	
-	var rtl, dis, dit;
-	var firstDay;
-	var nwe; // no weekends? a 0 or 1 for easy computations
-	var tm;
-	var colFormat;
-	var showWeekNumbers;
-	var weekNumberTitle;
-	var weekNumberFormat;
-	
-	
-	
-	/* Rendering
-	------------------------------------------------------------*/
-	
-	
-	disableTextSelection(element.addClass('fc-grid'));
-	
-	
-	function renderBasic(r, c, showNumbers) {
-		rowCnt = r;
-		colCnt = c;
-		updateOptions();
-		var firstTime = !body;
-		if (firstTime) {
-			buildEventContainer();
-		}else{
-			clearEvents();
-		}
-		buildTable(showNumbers);
-	}
-	
-	
-	
-	function updateOptions() {
-		rtl = opt('isRTL');
-		if (rtl) {
-			dis = -1;
-			dit = colCnt - 1;
-		}else{
-			dis = 1;
-			dit = 0;
-		}
-		firstDay = opt('firstDay');
-		nwe = opt('weekends') ? 0 : 1;
-		tm = opt('theme') ? 'ui' : 'fc';
-		colFormat = opt('columnFormat');
-
-		// week # options. (TODO: bad, logic also in other views)
-		showWeekNumbers = opt('weekNumbers');
-		weekNumberTitle = opt('weekNumberTitle');
-		if (opt('weekNumberCalculation') != 'iso') {
-			weekNumberFormat = "w";
-		}
-		else {
-			weekNumberFormat = "W";
-		}
-	}
-	
-	
-	
-	function buildEventContainer() {
-		daySegmentContainer =
-			$("<div style='position:absolute;z-index:8;top:0;left:0'/>")
-				.appendTo(element);
-	}
-	
-	
-	
-	function buildTable(showNumbers) {
-		var html = '';
-		var i, j;
-		var headerClass = tm + "-widget-header";
-		var contentClass = tm + "-widget-content";
-		var month = t.start.getMonth();
-		var today = clearTime(new Date());
-		var cellDate; // not to be confused with local function. TODO: better names
-		var cellClasses;
-		var cell;
-
-		html += "<table class='fc-border-separate' style='width:100%' cellspacing='0'>" +
-		        "<thead>" +
-		        "<tr>";
-
-		if (showWeekNumbers) {
-			html += "<th class='fc-week-number " + headerClass + "'/>";
-		}
-
-		for (i=0; i<colCnt; i++) {
-			cellDate = _cellDate(0, i); // a little confusing. cellDate is local variable. _cellDate is private function
-			html += "<th class='fc-day-header fc-" + dayIDs[cellDate.getDay()] + " " + headerClass + "'/>";
-		}
-
-		html += "</tr>" +
-		        "</thead>" +
-		        "<tbody>";
-
-		for (i=0; i<rowCnt; i++) {
-			html += "<tr class='fc-week'>";
-
-			if (showWeekNumbers) {
-				html += "<td class='fc-week-number " + contentClass + "'>" +
-				        "<div/>" +
-				        "</td>";
-			}
-
-			for (j=0; j<colCnt; j++) {
-				cellDate = _cellDate(i, j); // a little confusing. cellDate is local variable. _cellDate is private function
-
-				cellClasses = [
-					'fc-day',
-					'fc-' + dayIDs[cellDate.getDay()],
-					contentClass
-				];
-				if (cellDate.getMonth() != month) {
-					cellClasses.push('fc-other-month');
-				}
-				if (+cellDate == +today) {
-					cellClasses.push('fc-today');
-					cellClasses.push(tm + '-state-highlight');
-				}
-
-				html += "<td" +
-				        " class='" + cellClasses.join(' ') + "'" +
-				        " data-date='" + formatDate(cellDate, 'yyyy-MM-dd') + "'" +
-				        ">" + 
-				        "<div>";
-				if (showNumbers) {
-					html += "<div class='fc-day-number'>" + cellDate.getDate() + "</div>";
-				}
-				html += "<div class='fc-day-content'>" +
-				        "<div style='position:relative'>&nbsp;</div>" +
-				        "</div>" +
-				        "</div>" +
-				        "</td>";
-			}
-
-			html += "</tr>";
-		}
-		html += "</tbody>" +
-		        "</table>";
-
-		lockHeight(); // the unlock happens later, in setHeight()...
-		if (table) {
-			table.remove();
-		}
-		table = $(html).appendTo(element);
-
-		head = table.find('thead');
-		headCells = head.find('.fc-day-header');
-		body = table.find('tbody');
-		bodyRows = body.find('tr');
-		bodyCells = body.find('.fc-day');
-		bodyFirstCells = bodyRows.find('td:first-child');
-		bodyCellTopInners = bodyRows.eq(0).find('.fc-day-content > div');
-		
-		markFirstLast(head.add(head.find('tr'))); // marks first+last tr/th's
-		markFirstLast(bodyRows); // marks first+last td's
-		bodyRows.eq(0).addClass('fc-first');
-		bodyRows.filter(':last').addClass('fc-last');
-	
-		if (showWeekNumbers) {
-			head.find('.fc-week-number').text(weekNumberTitle);
-		}
-
-		headCells.each(function(i, _cell) {
-			var date = indexDate(i);
-			$(_cell).text(formatDate(date, colFormat));
-		});
-
-		if (showWeekNumbers) {
-			body.find('.fc-week-number > div').each(function(i, _cell) {
-				var weekStart = _cellDate(i, 0);
-				$(_cell).text(formatDate(weekStart, weekNumberFormat));
-			});
-		}
-		
-		bodyCells.each(function(i, _cell) {
-			var date = indexDate(i);
-			trigger('dayRender', t, date, $(_cell));
-		});
-
-		dayBind(bodyCells);
-	}
-	
-	
-	
-	function setHeight(height) {
-		viewHeight = height;
-		
-		var bodyHeight = viewHeight - head.height();
-		var rowHeight;
-		var rowHeightLast;
-		var cell;
-			
-		if (opt('weekMode') == 'variable') {
-			rowHeight = rowHeightLast = Math.floor(bodyHeight / (rowCnt==1 ? 2 : 6));
-		}else{
-			rowHeight = Math.floor(bodyHeight / rowCnt);
-			rowHeightLast = bodyHeight - rowHeight * (rowCnt-1);
-		}
-		
-		bodyFirstCells.each(function(i, _cell) {
-			if (i < rowCnt) {
-				cell = $(_cell);
-				setMinHeight(
-					cell.find('> div'),
-					(i==rowCnt-1 ? rowHeightLast : rowHeight) - vsides(cell)
-				);
-			}
-		});
-		
-		unlockHeight();
-	}
-	
-	
-	function setWidth(width) {
-		viewWidth = width;
-		colContentPositions.clear();
-
-		weekNumberWidth = 0;
-		if (showWeekNumbers) {
-			weekNumberWidth = head.find('th.fc-week-number').outerWidth();
-		}
-
-		colWidth = Math.floor((viewWidth - weekNumberWidth) / colCnt);
-		setOuterWidth(headCells.slice(0, -1), colWidth);
-	}
-	
-	
-	
-	/* Day clicking and binding
-	-----------------------------------------------------------*/
-	
-	
-	function dayBind(days) {
-		days.click(dayClick)
-			.mousedown(daySelectionMousedown);
-	}
-	
-	
-	function dayClick(ev) {
-		if (!opt('selectable')) { // if selectable, SelectionManager will worry about dayClick
-			var date = parseISO8601($(this).data('date'));
-			trigger('dayClick', this, date, true, ev);
-		}
-	}
-	
-	
-	
-	/* Semi-transparent Overlay Helpers
-	------------------------------------------------------*/
-	
-	
-	function renderDayOverlay(overlayStart, overlayEnd, refreshCoordinateGrid) { // overlayEnd is exclusive
-		if (refreshCoordinateGrid) {
-			coordinateGrid.build();
-		}
-		var rowStart = cloneDate(t.visStart);
-		var rowEnd = addDays(cloneDate(rowStart), colCnt);
-		for (var i=0; i<rowCnt; i++) {
-			var stretchStart = new Date(Math.max(rowStart, overlayStart));
-			var stretchEnd = new Date(Math.min(rowEnd, overlayEnd));
-			if (stretchStart < stretchEnd) {
-				var colStart, colEnd;
-				if (rtl) {
-					colStart = dayDiff(stretchEnd, rowStart)*dis+dit+1;
-					colEnd = dayDiff(stretchStart, rowStart)*dis+dit+1;
-				}else{
-					colStart = dayDiff(stretchStart, rowStart);
-					colEnd = dayDiff(stretchEnd, rowStart);
-				}
-				dayBind(
-					renderCellOverlay(i, colStart, i, colEnd-1)
-				);
-			}
-			addDays(rowStart, 7);
-			addDays(rowEnd, 7);
-		}
-	}
-	
-	
-	function renderCellOverlay(row0, col0, row1, col1) { // row1,col1 is inclusive
-		var rect = coordinateGrid.rect(row0, col0, row1, col1, element);
-		return renderOverlay(rect, element);
-	}
-	
-	
-	
-	/* Selection
-	-----------------------------------------------------------------------*/
-	
-	
-	function defaultSelectionEnd(startDate, allDay) {
-		return cloneDate(startDate);
-	}
-	
-	
-	function renderSelection(startDate, endDate, allDay) {
-		renderDayOverlay(startDate, addDays(cloneDate(endDate), 1), true); // rebuild every time???
-	}
-	
-	
-	function clearSelection() {
-		clearOverlays();
-	}
-	
-	
-	function reportDayClick(date, allDay, ev) {
-		var cell = dateCell(date);
-		var _element = bodyCells[cell.row*colCnt + cell.col];
-		trigger('dayClick', _element, date, allDay, ev);
-	}
-	
-	
-	
-	/* External Dragging
-	-----------------------------------------------------------------------*/
-	
-	
-	function dragStart(_dragElement, ev, ui) {
-		hoverListener.start(function(cell) {
-			clearOverlays();
-			if (cell) {
-				renderCellOverlay(cell.row, cell.col, cell.row, cell.col);
-			}
-		}, ev);
-	}
-	
-	
-	function dragStop(_dragElement, ev, ui) {
-		var cell = hoverListener.stop();
-		clearOverlays();
-		if (cell) {
-			var d = cellDate(cell);
-			trigger('drop', _dragElement, d, true, ev, ui);
-		}
-	}
-	
-	
-	
-	/* Utilities
-	--------------------------------------------------------*/
-	
-	
-	function defaultEventEnd(event) {
-		return cloneDate(event.start);
-	}
-	
-	
-	coordinateGrid = new CoordinateGrid(function(rows, cols) {
-		var e, n, p;
-		headCells.each(function(i, _e) {
-			e = $(_e);
-			n = e.offset().left;
-			if (i) {
-				p[1] = n;
-			}
-			p = [n];
-			cols[i] = p;
-		});
-		p[1] = n + e.outerWidth();
-		bodyRows.each(function(i, _e) {
-			if (i < rowCnt) {
-				e = $(_e);
-				n = e.offset().top;
-				if (i) {
-					p[1] = n;
-				}
-				p = [n];
-				rows[i] = p;
-			}
-		});
-		p[1] = n + e.outerHeight();
-	});
-	
-	
-	hoverListener = new HoverListener(coordinateGrid);
-	
-	
-	colContentPositions = new HorizontalPositionCache(function(col) {
-		return bodyCellTopInners.eq(col);
-	});
-	
-	
-	function colContentLeft(col) {
-		return colContentPositions.left(col);
-	}
-	
-	
-	function colContentRight(col) {
-		return colContentPositions.right(col);
-	}
-	
-	
-	
-	
-	function dateCell(date) {
-		return {
-			row: Math.floor(dayDiff(date, t.visStart) / 7),
-			col: dayOfWeekCol(date.getDay())
-		};
-	}
-	
-	
-	function cellDate(cell) {
-		return _cellDate(cell.row, cell.col);
-	}
-	
-	
-	function _cellDate(row, col) {
-		return addDays(cloneDate(t.visStart), row*7 + col*dis+dit);
-		// what about weekends in middle of week?
-	}
-	
-	
-	function indexDate(index) {
-		return _cellDate(Math.floor(index/colCnt), index%colCnt);
-	}
-	
-	
-	function dayOfWeekCol(dayOfWeek) {
-		return ((dayOfWeek - Math.max(firstDay, nwe) + colCnt) % colCnt) * dis + dit;
-	}
-	
-	
-	
-	
-	function allDayRow(i) {
-		return bodyRows.eq(i);
-	}
-	
-	
-	function allDayBounds(i) {
-		var left = 0;
-		if (showWeekNumbers) {
-			left += weekNumberWidth;
-		}
-		return {
-			left: left,
-			right: viewWidth
-		};
-	}
-
-
-
-	// makes sure height doesn't collapse while we destroy/render new cells
-	// (this causes a bad end-user scrollbar jump)
-	// TODO: generalize this for all view rendering. (also in Calendar.js)
-
-	function lockHeight() {
-		setMinHeight(element, element.height());
-	}
-
-	function unlockHeight() {
-		setMinHeight(element, 1);
-	}
-	
-}
-
-;;
-
-function BasicEventRenderer() {
-	var t = this;
-	
-	
-	// exports
-	t.renderEvents = renderEvents;
-	t.compileDaySegs = compileSegs; // for DayEventRenderer
-	t.clearEvents = clearEvents;
-	t.bindDaySeg = bindDaySeg;
-	
-	
-	// imports
-	DayEventRenderer.call(t);
-	var opt = t.opt;
-	var trigger = t.trigger;
-	//var setOverflowHidden = t.setOverflowHidden;
-	var isEventDraggable = t.isEventDraggable;
-	var isEventResizable = t.isEventResizable;
-	var reportEvents = t.reportEvents;
-	var reportEventClear = t.reportEventClear;
-	var eventElementHandlers = t.eventElementHandlers;
-	var showEvents = t.showEvents;
-	var hideEvents = t.hideEvents;
-	var eventDrop = t.eventDrop;
-	var getDaySegmentContainer = t.getDaySegmentContainer;
-	var getHoverListener = t.getHoverListener;
-	var renderDayOverlay = t.renderDayOverlay;
-	var clearOverlays = t.clearOverlays;
-	var getRowCnt = t.getRowCnt;
-	var getColCnt = t.getColCnt;
-	var renderDaySegs = t.renderDaySegs;
-	var resizableDayEvent = t.resizableDayEvent;
-	
-	
-	
-	/* Rendering
-	--------------------------------------------------------------------*/
-	
-	
-	function renderEvents(events, modifiedEventId) {
-		reportEvents(events);
-		renderDaySegs(compileSegs(events), modifiedEventId);
-		trigger('eventAfterAllRender');
-	}
-	
-	
-	function clearEvents() {
-		reportEventClear();
-		getDaySegmentContainer().empty();
-	}
-	
-	
-	function compileSegs(events) {
-		var rowCnt = getRowCnt(),
-			colCnt = getColCnt(),
-			d1 = cloneDate(t.visStart),
-			d2 = addDays(cloneDate(d1), colCnt),
-			visEventsEnds = $.map(events, exclEndDay),
-			i, row,
-			j, level,
-			k, seg,
-			segs=[];
-		for (i=0; i<rowCnt; i++) {
-			row = stackSegs(sliceSegs(events, visEventsEnds, d1, d2));
-			for (j=0; j<row.length; j++) {
-				level = row[j];
-				for (k=0; k<level.length; k++) {
-					seg = level[k];
-					seg.row = i;
-					seg.level = j; // not needed anymore
-					segs.push(seg);
-				}
-			}
-			addDays(d1, 7);
-			addDays(d2, 7);
-		}
-		return segs;
-	}
-	
-	
-	function bindDaySeg(event, eventElement, seg) {
-		if (isEventDraggable(event)) {
-			draggableDayEvent(event, eventElement);
-		}
-		if (seg.isEnd && isEventResizable(event)) {
-			resizableDayEvent(event, eventElement, seg);
-		}
-		eventElementHandlers(event, eventElement);
-			// needs to be after, because resizableDayEvent might stopImmediatePropagation on click
-	}
-	
-	
-	
-	/* Dragging
-	----------------------------------------------------------------------------*/
-	
-	
-	function draggableDayEvent(event, eventElement) {
-		var hoverListener = getHoverListener();
-		var dayDelta;
-		eventElement.draggable({
-			zIndex: 9,
-			delay: 50,
-			opacity: opt('dragOpacity'),
-			revertDuration: opt('dragRevertDuration'),
-			start: function(ev, ui) {
-				trigger('eventDragStart', eventElement, event, ev, ui);
-				hideEvents(event, eventElement);
-				hoverListener.start(function(cell, origCell, rowDelta, colDelta) {
-					eventElement.draggable('option', 'revert', !cell || !rowDelta && !colDelta);
-					clearOverlays();
-					if (cell) {
-						//setOverflowHidden(true);
-						dayDelta = rowDelta*7 + colDelta * (opt('isRTL') ? -1 : 1);
-						renderDayOverlay(
-							addDays(cloneDate(event.start), dayDelta),
-							addDays(exclEndDay(event), dayDelta)
-						);
-					}else{
-						//setOverflowHidden(false);
-						dayDelta = 0;
-					}
-				}, ev, 'drag');
-			},
-			stop: function(ev, ui) {
-				hoverListener.stop();
-				clearOverlays();
-				trigger('eventDragStop', eventElement, event, ev, ui);
-				if (dayDelta) {
-					eventDrop(this, event, dayDelta, 0, event.allDay, ev, ui);
-				}else{
-					eventElement.css('filter', ''); // clear IE opacity side-effects
-					showEvents(event, eventElement);
-				}
-				//setOverflowHidden(false);
-			}
-		});
-	}
-
-
-}
-
-;;
-
-fcViews.agendaWeek = AgendaWeekView;
-
-function AgendaWeekView(element, calendar) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	
-	
-	// imports
-	AgendaView.call(t, element, calendar, 'agendaWeek');
-	var opt = t.opt;
-	var renderAgenda = t.renderAgenda;
-	var formatDates = calendar.formatDates;
-	
-	
-	
-	function render(date, delta) {
-		if (delta) {
-			addDays(date, delta * 7);
-		}
-		var start = addDays(cloneDate(date), -((date.getDay() - opt('firstDay') + 7) % 7));
-		var end = addDays(cloneDate(start), 7);
-		var visStart = cloneDate(start);
-		var visEnd = cloneDate(end);
-		var weekends = opt('weekends');
-		if (!weekends) {
-			skipWeekend(visStart);
-			skipWeekend(visEnd, -1, true);
-		}
-		t.title = formatDates(
-			visStart,
-			addDays(cloneDate(visEnd), -1),
-			opt('titleFormat')
-		);
-		t.start = start;
-		t.end = end;
-		t.visStart = visStart;
-		t.visEnd = visEnd;
-		renderAgenda(weekends ? 7 : 5);
-	}
-	
-
-}
-
-;;
-
-fcViews.agendaDay = AgendaDayView;
-
-function AgendaDayView(element, calendar) {
-	var t = this;
-	
-	
-	// exports
-	t.render = render;
-	
-	
-	// imports
-	AgendaView.call(t, element, calendar, 'agendaDay');
-	var opt = t.opt;
-	var renderAgenda = t.renderAgenda;
-	var formatDate = calendar.formatDate;
-	
-	
-	
-	function render(date, delta) {
-		if (delta) {
-			addDays(date, delta);
-			if (!opt('weekends')) {
-				skipWeekend(date, delta < 0 ? -1 : 1);
-			}
-		}
-		var start = cloneDate(date, true);
-		var end = addDays(cloneDate(start), 1);
-		t.title = formatDate(date, opt('titleFormat'));
-		t.start = t.visStart = start;
-		t.end = t.visEnd = end;
-		renderAgenda(1);
-	}
-	
-
-}
-
-;;
-
-setDefaults({
-	allDaySlot: true,
-	allDayText: 'all-day',
-	firstHour: 6,
-	slotMinutes: 30,
-	defaultEventMinutes: 120,
-	axisFormat: 'h(:mm)tt',
-	timeFormat: {
-		agenda: 'h:mm{ - h:mm}'
-	},
-	dragOpacity: {
-		agenda: .5
-	},
-	minTime: 0,
-	maxTime: 24
-});
-
-
-// TODO: make it work in quirks mode (event corners, all-day height)
-// TODO: test liquid width, especially in IE6
-
-
-function AgendaView(element, calendar, viewName) {
-	var t = this;
-	
-	
-	// exports
-	t.renderAgenda = renderAgenda;
-	t.setWidth = setWidth;
-	t.setHeight = setHeight;
-	t.beforeHide = beforeHide;
-	t.afterShow = afterShow;
-	t.defaultEventEnd = defaultEventEnd;
-	t.timePosition = timePosition;
-	t.dayOfWeekCol = dayOfWeekCol;
-	t.dateCell = dateCell;
-	t.cellDate = cellDate;
-	t.cellIsAllDay = cellIsAllDay;
-	t.allDayRow = getAllDayRow;
-	t.allDayBounds = allDayBounds;
-	t.getHoverListener = function() { return hoverListener };
-	t.colContentLeft = colContentLeft;
-	t.colContentRight = colContentRight;
-	t.getDaySegmentContainer = function() { return daySegmentContainer };
-	t.getSlotSegmentContainer = function() { return slotSegmentContainer };
-	t.getMinMinute = function() { return minMinute };
-	t.getMaxMinute = function() { return maxMinute };
-	t.getBodyContent = function() { return slotContent }; // !!??
-	t.getRowCnt = function() { return 1 };
-	t.getColCnt = function() { return colCnt };
-	t.getColWidth = function() { return colWidth };
-	t.getSnapHeight = function() { return snapHeight };
-	t.getSnapMinutes = function() { return snapMinutes };
-	t.defaultSelectionEnd = defaultSelectionEnd;
-	t.renderDayOverlay = renderDayOverlay;
-	t.renderSelection = renderSelection;
-	t.clearSelection = clearSelection;
-	t.reportDayClick = reportDayClick; // selection mousedown hack
-	t.dragStart = dragStart;
-	t.dragStop = dragStop;
-	
-	
-	// imports
-	View.call(t, element, calendar, viewName);
-	OverlayManager.call(t);
-	SelectionManager.call(t);
-	AgendaEventRenderer.call(t);
-	var opt = t.opt;
-	var trigger = t.trigger;
-	var clearEvents = t.clearEvents;
-	var renderOverlay = t.renderOverlay;
-	var clearOverlays = t.clearOverlays;
-	var reportSelection = t.reportSelection;
-	var unselect = t.unselect;
-	var daySelectionMousedown = t.daySelectionMousedown;
-	var slotSegHtml = t.slotSegHtml;
-	var formatDate = calendar.formatDate;
-	
-	
-	// locals
-	
-	var dayTable;
-	var dayHead;
-	var dayHeadCells;
-	var dayBody;
-	var dayBodyCells;
-	var dayBodyCellInners;
-	var dayBodyFirstCell;
-	var dayBodyFirstCellStretcher;
-	var slotLayer;
-	var daySegmentContainer;
-	var allDayTable;
-	var allDayRow;
-	var slotScroller;
-	var slotContent;
-	var slotSegmentContainer;
-	var slotTable;
-	var slotTableFirstInner;
-	var axisFirstCells;
-	var gutterCells;
-	var selectionHelper;
-	
-	var viewWidth;
-	var viewHeight;
-	var axisWidth;
-	var colWidth;
-	var gutterWidth;
-	var slotHeight; // TODO: what if slotHeight changes? (see issue 650)
-
-	var snapMinutes;
-	var snapRatio; // ratio of number of "selection" slots to normal slots. (ex: 1, 2, 4)
-	var snapHeight; // holds the pixel hight of a "selection" slot
-	
-	var colCnt;
-	var slotCnt;
-	var coordinateGrid;
-	var hoverListener;
-	var colContentPositions;
-	var slotTopCache = {};
-	var savedScrollTop;
-	
-	var tm;
-	var firstDay;
-	var nwe;            // no weekends (int)
-	var rtl, dis, dit;  // day index sign / translate
-	var minMinute, maxMinute;
-	var colFormat;
-	var showWeekNumbers;
-	var weekNumberTitle;
-	var weekNumberFormat;
-	
-
-	
-	/* Rendering
-	-----------------------------------------------------------------------------*/
-	
-	
-	disableTextSelection(element.addClass('fc-agenda'));
-	
-	
-	function renderAgenda(c) {
-		colCnt = c;
-		updateOptions();
-		if (!dayTable) {
-			buildSkeleton();
-		}else{
-			clearEvents();
-		}
-		updateCells();
-	}
-	
-	
-	
-	function updateOptions() {
-		tm = opt('theme') ? 'ui' : 'fc';
-		nwe = opt('weekends') ? 0 : 1;
-		firstDay = opt('firstDay');
-		if (rtl = opt('isRTL')) {
-			dis = -1;
-			dit = colCnt - 1;
-		}else{
-			dis = 1;
-			dit = 0;
-		}
-		minMinute = parseTime(opt('minTime'));
-		maxMinute = parseTime(opt('maxTime'));
-		colFormat = opt('columnFormat');
-
-		// week # options. (TODO: bad, logic also in other views)
-		showWeekNumbers = opt('weekNumbers');
-		weekNumberTitle = opt('weekNumberTitle');
-		if (opt('weekNumberCalculation') != 'iso') {
-			weekNumberFormat = "w";
-		}
-		else {
-			weekNumberFormat = "W";
-		}
-
-		snapMinutes = opt('snapMinutes') || opt('slotMinutes');
-	}
-	
-	
-	
-	function buildSkeleton() {
-		var headerClass = tm + "-widget-header";
-		var contentClass = tm + "-widget-content";
-		var s;
-		var i;
-		var d;
-		var maxd;
-		var minutes;
-		var slotNormal = opt('slotMinutes') % 15 == 0;
-		
-		s =
-			"<table style='width:100%' class='fc-agenda-days fc-border-separate' cellspacing='0'>" +
-			"<thead>" +
-			"<tr>";
-
-		if (showWeekNumbers) {
-			s += "<th class='fc-agenda-axis fc-week-number " + headerClass + "'/>";
-		}
-		else {
-			s += "<th class='fc-agenda-axis " + headerClass + "'>&nbsp;</th>";
-		}
-
-		for (i=0; i<colCnt; i++) {
-			s +=
-				"<th class='fc- fc-col" + i + ' ' + headerClass + "'/>"; // fc- needed for setDayID
-		}
-		s +=
-			"<th class='fc-agenda-gutter " + headerClass + "'>&nbsp;</th>" +
-			"</tr>" +
-			"</thead>" +
-			"<tbody>" +
-			"<tr>" +
-			"<th class='fc-agenda-axis " + headerClass + "'>&nbsp;</th>";
-		for (i=0; i<colCnt; i++) {
-			s +=
-				"<td class='fc- fc-col" + i + ' ' + contentClass + "'>" + // fc- needed for setDayID
-				"<div>" +
-				"<div class='fc-day-content'>" +
-				"<div style='position:relative'>&nbsp;</div>" +
-				"</div>" +
-				"</div>" +
-				"</td>";
-		}
-		s +=
-			"<td class='fc-agenda-gutter " + contentClass + "'>&nbsp;</td>" +
-			"</tr>" +
-			"</tbody>" +
-			"</table>";
-		dayTable = $(s).appendTo(element);
-		dayHead = dayTable.find('thead');
-		dayHeadCells = dayHead.find('th').slice(1, -1);
-		dayBody = dayTable.find('tbody');
-		dayBodyCells = dayBody.find('td').slice(0, -1);
-		dayBodyCellInners = dayBodyCells.find('div.fc-day-content div');
-		dayBodyFirstCell = dayBodyCells.eq(0);
-		dayBodyFirstCellStretcher = dayBodyFirstCell.find('> div');
-		
-		markFirstLast(dayHead.add(dayHead.find('tr')));
-		markFirstLast(dayBody.add(dayBody.find('tr')));
-		
-		axisFirstCells = dayHead.find('th:first');
-		gutterCells = dayTable.find('.fc-agenda-gutter');
-		
-		slotLayer =
-			$("<div style='position:absolute;z-index:2;left:0;width:100%'/>")
-				.appendTo(element);
-				
-		if (opt('allDaySlot')) {
-		
-			daySegmentContainer =
-				$("<div style='position:absolute;z-index:8;top:0;left:0'/>")
-					.appendTo(slotLayer);
-		
-			s =
-				"<table style='width:100%' class='fc-agenda-allday' cellspacing='0'>" +
-				"<tr>" +
-				"<th class='" + headerClass + " fc-agenda-axis'>" + opt('allDayText') + "</th>" +
-				"<td>" +
-				"<div class='fc-day-content'><div style='position:relative'/></div>" +
-				"</td>" +
-				"<th class='" + headerClass + " fc-agenda-gutter'>&nbsp;</th>" +
-				"</tr>" +
-				"</table>";
-			allDayTable = $(s).appendTo(slotLayer);
-			allDayRow = allDayTable.find('tr');
-			
-			dayBind(allDayRow.find('td'));
-			
-			axisFirstCells = axisFirstCells.add(allDayTable.find('th:first'));
-			gutterCells = gutterCells.add(allDayTable.find('th.fc-agenda-gutter'));
-			
-			slotLayer.append(
-				"<div class='fc-agenda-divider " + headerClass + "'>" +
-				"<div class='fc-agenda-divider-inner'/>" +
-				"</div>"
-			);
-			
-		}else{
-		
-			daySegmentContainer = $([]); // in jQuery 1.4, we can just do $()
-		
-		}
-		
-		slotScroller =
-			$("<div style='position:absolute;width:100%;overflow-x:hidden;overflow-y:auto'/>")
-				.appendTo(slotLayer);
-				
-		slotContent =
-			$("<div style='position:relative;width:100%;overflow:hidden'/>")
-				.appendTo(slotScroller);
-				
-		slotSegmentContainer =
-			$("<div style='position:absolute;z-index:8;top:0;left:0'/>")
-				.appendTo(slotContent);
-		
-		s =
-			"<table class='fc-agenda-slots' style='width:100%' cellspacing='0'>" +
-			"<tbody>";
-		d = zeroDate();
-		maxd = addMinutes(cloneDate(d), maxMinute);
-		addMinutes(d, minMinute);
-		slotCnt = 0;
-		for (i=0; d < maxd; i++) {
-			minutes = d.getMinutes();
-			s +=
-				"<tr class='fc-slot" + i + ' ' + (!minutes ? '' : 'fc-minor') + "'>" +
-				"<th class='fc-agenda-axis " + headerClass + "'>" +
-				((!slotNormal || !minutes) ? formatDate(d, opt('axisFormat')) : '&nbsp;') +
-				"</th>" +
-				"<td class='" + contentClass + "'>" +
-				"<div style='position:relative'>&nbsp;</div>" +
-				"</td>" +
-				"</tr>";
-			addMinutes(d, opt('slotMinutes'));
-			slotCnt++;
-		}
-		s +=
-			"</tbody>" +
-			"</table>";
-		slotTable = $(s).appendTo(slotContent);
-		slotTableFirstInner = slotTable.find('div:first');
-		
-		slotBind(slotTable.find('td'));
-		
-		axisFirstCells = axisFirstCells.add(slotTable.find('th:first'));
-	}
-	
-	
-	
-	function updateCells() {
-		var i;
-		var headCell;
-		var bodyCell;
-		var date;
-		var today = clearTime(new Date());
-
-		if (showWeekNumbers) {
-			var weekText = formatDate(colDate(0), weekNumberFormat);
-			if (rtl) {
-				weekText = weekText + weekNumberTitle;
-			}
-			else {
-				weekText = weekNumberTitle + weekText;
-			}
-			dayHead.find('.fc-week-number').text(weekText);
-		}
-
-		for (i=0; i<colCnt; i++) {
-			date = colDate(i);
-			headCell = dayHeadCells.eq(i);
-			headCell.html(formatDate(date, colFormat));
-			bodyCell = dayBodyCells.eq(i);
-			if (+date == +today) {
-				bodyCell.addClass(tm + '-state-highlight fc-today');
-			}else{
-				bodyCell.removeClass(tm + '-state-highlight fc-today');
-			}
-			setDayID(headCell.add(bodyCell), date);
-		}
-	}
-	
-	
-	
-	function setHeight(height, dateChanged) {
-		if (height === undefined) {
-			height = viewHeight;
-		}
-		viewHeight = height;
-		slotTopCache = {};
-	
-		var headHeight = dayBody.position().top;
-		var allDayHeight = slotScroller.position().top; // including divider
-		var bodyHeight = Math.min( // total body height, including borders
-			height - headHeight,   // when scrollbars
-			slotTable.height() + allDayHeight + 1 // when no scrollbars. +1 for bottom border
-		);
-		
-		dayBodyFirstCellStretcher
-			.height(bodyHeight - vsides(dayBodyFirstCell));
-		
-		slotLayer.css('top', headHeight);
-		
-		slotScroller.height(bodyHeight - allDayHeight - 1);
-		
-		slotHeight = slotTableFirstInner.height() + 1; // +1 for border
-
-		snapRatio = opt('slotMinutes') / snapMinutes;
-		snapHeight = slotHeight / snapRatio;
-		
-		if (dateChanged) {
-			resetScroll();
-		}
-	}
-	
-	
-	
-	function setWidth(width) {
-		viewWidth = width;
-		colContentPositions.clear();
-		
-		axisWidth = 0;
-		setOuterWidth(
-			axisFirstCells
-				.width('')
-				.each(function(i, _cell) {
-					axisWidth = Math.max(axisWidth, $(_cell).outerWidth());
-				}),
-			axisWidth
-		);
-		
-		var slotTableWidth = slotScroller[0].clientWidth; // needs to be done after axisWidth (for IE7)
-		//slotTable.width(slotTableWidth);
-		
-		gutterWidth = slotScroller.width() - slotTableWidth;
-		if (gutterWidth) {
-			setOuterWidth(gutterCells, gutterWidth);
-			gutterCells
-				.show()
-				.prev()
-				.removeClass('fc-last');
-		}else{
-			gutterCells
-				.hide()
-				.prev()
-				.addClass('fc-last');
-		}
-		
-		colWidth = Math.floor((slotTableWidth - axisWidth) / colCnt);
-		setOuterWidth(dayHeadCells.slice(0, -1), colWidth);
-	}
-	
-
-
-	function resetScroll() {
-		var d0 = zeroDate();
-		var scrollDate = cloneDate(d0);
-		scrollDate.setHours(opt('firstHour'));
-		var top = timePosition(d0, scrollDate) + 1; // +1 for the border
-		function scroll() {
-			slotScroller.scrollTop(top);
-		}
-		scroll();
-		setTimeout(scroll, 0); // overrides any previous scroll state made by the browser
-	}
-	
-	
-	function beforeHide() {
-		savedScrollTop = slotScroller.scrollTop();
-	}
-	
-	
-	function afterShow() {
-		slotScroller.scrollTop(savedScrollTop);
-	}
-	
-	
-	
-	/* Slot/Day clicking and binding
-	-----------------------------------------------------------------------*/
-	
-
-	function dayBind(cells) {
-		cells.click(slotClick)
-			.mousedown(daySelectionMousedown);
-	}
-
-
-	function slotBind(cells) {
-		cells.click(slotClick)
-			.mousedown(slotSelectionMousedown);
-	}
-	
-	
-	function slotClick(ev) {
-		if (!opt('selectable')) { // if selectable, SelectionManager will worry about dayClick
-			var col = Math.min(colCnt-1, Math.floor((ev.pageX - dayTable.offset().left - axisWidth) / colWidth));
-			var date = colDate(col);
-			var rowMatch = this.parentNode.className.match(/fc-slot(\d+)/); // TODO: maybe use data
-			if (rowMatch) {
-				var mins = parseInt(rowMatch[1]) * opt('slotMinutes');
-				var hours = Math.floor(mins/60);
-				date.setHours(hours);
-				date.setMinutes(mins%60 + minMinute);
-				trigger('dayClick', dayBodyCells[col], date, false, ev);
-			}else{
-				trigger('dayClick', dayBodyCells[col], date, true, ev);
-			}
-		}
-	}
-	
-	
-	
-	/* Semi-transparent Overlay Helpers
-	-----------------------------------------------------*/
-	
-
-	function renderDayOverlay(startDate, endDate, refreshCoordinateGrid) { // endDate is exclusive
-		if (refreshCoordinateGrid) {
-			coordinateGrid.build();
-		}
-		var visStart = cloneDate(t.visStart);
-		var startCol, endCol;
-		if (rtl) {
-			startCol = dayDiff(endDate, visStart)*dis+dit+1;
-			endCol = dayDiff(startDate, visStart)*dis+dit+1;
-		}else{
-			startCol = dayDiff(startDate, visStart);
-			endCol = dayDiff(endDate, visStart);
-		}
-		startCol = Math.max(0, startCol);
-		endCol = Math.min(colCnt, endCol);
-		if (startCol < endCol) {
-			dayBind(
-				renderCellOverlay(0, startCol, 0, endCol-1)
-			);
-		}
-	}
-	
-	
-	function renderCellOverlay(row0, col0, row1, col1) { // only for all-day?
-		var rect = coordinateGrid.rect(row0, col0, row1, col1, slotLayer);
-		return renderOverlay(rect, slotLayer);
-	}
-	
-
-	function renderSlotOverlay(overlayStart, overlayEnd) {
-		var dayStart = cloneDate(t.visStart);
-		var dayEnd = addDays(cloneDate(dayStart), 1);
-		for (var i=0; i<colCnt; i++) {
-			var stretchStart = new Date(Math.max(dayStart, overlayStart));
-			var stretchEnd = new Date(Math.min(dayEnd, overlayEnd));
-			if (stretchStart < stretchEnd) {
-				var col = i*dis+dit;
-				var rect = coordinateGrid.rect(0, col, 0, col, slotContent); // only use it for horizontal coords
-				var top = timePosition(dayStart, stretchStart);
-				var bottom = timePosition(dayStart, stretchEnd);
-				rect.top = top;
-				rect.height = bottom - top;
-				slotBind(
-					renderOverlay(rect, slotContent)
-				);
-			}
-			addDays(dayStart, 1);
-			addDays(dayEnd, 1);
-		}
-	}
-	
-	
-	
-	/* Coordinate Utilities
-	-----------------------------------------------------------------------------*/
-	
-	
-	coordinateGrid = new CoordinateGrid(function(rows, cols) {
-		var e, n, p;
-		dayHeadCells.each(function(i, _e) {
-			e = $(_e);
-			n = e.offset().left;
-			if (i) {
-				p[1] = n;
-			}
-			p = [n];
-			cols[i] = p;
-		});
-		p[1] = n + e.outerWidth();
-		if (opt('allDaySlot')) {
-			e = allDayRow;
-			n = e.offset().top;
-			rows[0] = [n, n+e.outerHeight()];
-		}
-		var slotTableTop = slotContent.offset().top;
-		var slotScrollerTop = slotScroller.offset().top;
-		var slotScrollerBottom = slotScrollerTop + slotScroller.outerHeight();
-		function constrain(n) {
-			return Math.max(slotScrollerTop, Math.min(slotScrollerBottom, n));
-		}
-		for (var i=0; i<slotCnt*snapRatio; i++) { // adapt slot count to increased/decreased selection slot count
-			rows.push([
-				constrain(slotTableTop + snapHeight*i),
-				constrain(slotTableTop + snapHeight*(i+1))
-			]);
-		}
-	});
-	
-	
-	hoverListener = new HoverListener(coordinateGrid);
-	
-	
-	colContentPositions = new HorizontalPositionCache(function(col) {
-		return dayBodyCellInners.eq(col);
-	});
-	
-	
-	function colContentLeft(col) {
-		return colContentPositions.left(col);
-	}
-	
-	
-	function colContentRight(col) {
-		return colContentPositions.right(col);
-	}
-	
-	
-	
-	
-	function dateCell(date) { // "cell" terminology is now confusing
-		return {
-			row: Math.floor(dayDiff(date, t.visStart) / 7),
-			col: dayOfWeekCol(date.getDay())
-		};
-	}
-	
-	
-	function cellDate(cell) {
-		var d = colDate(cell.col);
-		var slotIndex = cell.row;
-		if (opt('allDaySlot')) {
-			slotIndex--;
-		}
-		if (slotIndex >= 0) {
-			addMinutes(d, minMinute + slotIndex * snapMinutes);
-		}
-		return d;
-	}
-	
-	
-	function colDate(col) { // returns dates with 00:00:00
-		return addDays(cloneDate(t.visStart), col*dis+dit);
-	}
-	
-	
-	function cellIsAllDay(cell) {
-		return opt('allDaySlot') && !cell.row;
-	}
-	
-	
-	function dayOfWeekCol(dayOfWeek) {
-		return ((dayOfWeek - Math.max(firstDay, nwe) + colCnt) % colCnt)*dis+dit;
-	}
-	
-	
-	
-	
-	// get the Y coordinate of the given time on the given day (both Date objects)
-	function timePosition(day, time) { // both date objects. day holds 00:00 of current day
-		day = cloneDate(day, true);
-		if (time < addMinutes(cloneDate(day), minMinute)) {
-			return 0;
-		}
-		if (time >= addMinutes(cloneDate(day), maxMinute)) {
-			return slotTable.height();
-		}
-		var slotMinutes = opt('slotMinutes'),
-			minutes = time.getHours()*60 + time.getMinutes() - minMinute,
-			slotI = Math.floor(minutes / slotMinutes),
-			slotTop = slotTopCache[slotI];
-		if (slotTop === undefined) {
-			slotTop = slotTopCache[slotI] = slotTable.find('tr:eq(' + slotI + ') td div')[0].offsetTop; //.position().top; // need this optimization???
-		}
-		return Math.max(0, Math.round(
-			slotTop - 1 + slotHeight * ((minutes % slotMinutes) / slotMinutes)
-		));
-	}
-	
-	
-	function allDayBounds() {
-		return {
-			left: axisWidth,
-			right: viewWidth - gutterWidth
-		}
-	}
-	
-	
-	function getAllDayRow(index) {
-		return allDayRow;
-	}
-	
-	
-	function defaultEventEnd(event) {
-		var start = cloneDate(event.start);
-		if (event.allDay) {
-			return start;
-		}
-		return addMinutes(start, opt('defaultEventMinutes'));
-	}
-	
-	
-	
-	/* Selection
-	---------------------------------------------------------------------------------*/
-	
-	
-	function defaultSelectionEnd(startDate, allDay) {
-		if (allDay) {
-			return cloneDate(startDate);
-		}
-		return addMinutes(cloneDate(startDate), opt('slotMinutes'));
-	}
-	
-	
-	function renderSelection(startDate, endDate, allDay) { // only for all-day
-		if (allDay) {
-			if (opt('allDaySlot')) {
-				renderDayOverlay(startDate, addDays(cloneDate(endDate), 1), true);
-			}
-		}else{
-			renderSlotSelection(startDate, endDate);
-		}
-	}
-	
-	
-	function renderSlotSelection(startDate, endDate) {
-		var helperOption = opt('selectHelper');
-		coordinateGrid.build();
-		if (helperOption) {
-			var col = dayDiff(startDate, t.visStart) * dis + dit;
-			if (col >= 0 && col < colCnt) { // only works when times are on same day
-				var rect = coordinateGrid.rect(0, col, 0, col, slotContent); // only for horizontal coords
-				var top = timePosition(startDate, startDate);
-				var bottom = timePosition(startDate, endDate);
-				if (bottom > top) { // protect against selections that are entirely before or after visible range
-					rect.top = top;
-					rect.height = bottom - top;
-					rect.left += 2;
-					rect.width -= 5;
-					if ($.isFunction(helperOption)) {
-						var helperRes = helperOption(startDate, endDate);
-						if (helperRes) {
-							rect.position = 'absolute';
-							rect.zIndex = 8;
-							selectionHelper = $(helperRes)
-								.css(rect)
-								.appendTo(slotContent);
-						}
-					}else{
-						rect.isStart = true; // conside rect a "seg" now
-						rect.isEnd = true;   //
-						selectionHelper = $(slotSegHtml(
-							{
-								title: '',
-								start: startDate,
-								end: endDate,
-								className: ['fc-select-helper'],
-								editable: false
-							},
-							rect
-						));
-						selectionHelper.css('opacity', opt('dragOpacity'));
-					}
-					if (selectionHelper) {
-						slotBind(selectionHelper);
-						slotContent.append(selectionHelper);
-						setOuterWidth(selectionHelper, rect.width, true); // needs to be after appended
-						setOuterHeight(selectionHelper, rect.height, true);
-					}
-				}
-			}
-		}else{
-			renderSlotOverlay(startDate, endDate);
-		}
-	}
-	
-	
-	function clearSelection() {
-		clearOverlays();
-		if (selectionHelper) {
-			selectionHelper.remove();
-			selectionHelper = null;
-		}
-	}
-	
-	
-	function slotSelectionMousedown(ev) {
-		if (ev.which == 1 && opt('selectable')) { // ev.which==1 means left mouse button
-			unselect(ev);
-			var dates;
-			hoverListener.start(function(cell, origCell) {
-				clearSelection();
-				if (cell && cell.col == origCell.col && !cellIsAllDay(cell)) {
-					var d1 = cellDate(origCell);
-					var d2 = cellDate(cell);
-					dates = [
-						d1,
-						addMinutes(cloneDate(d1), snapMinutes), // calculate minutes depending on selection slot minutes 
-						d2,
-						addMinutes(cloneDate(d2), snapMinutes)
-					].sort(cmp);
-					renderSlotSelection(dates[0], dates[3]);
-				}else{
-					dates = null;
-				}
-			}, ev);
-			$(document).one('mouseup', function(ev) {
-				hoverListener.stop();
-				if (dates) {
-					if (+dates[0] == +dates[1]) {
-						reportDayClick(dates[0], false, ev);
-					}
-					reportSelection(dates[0], dates[3], false, ev);
-				}
-			});
-		}
-	}
-	
-	
-	function reportDayClick(date, allDay, ev) {
-		trigger('dayClick', dayBodyCells[dayOfWeekCol(date.getDay())], date, allDay, ev);
-	}
-	
-	
-	
-	/* External Dragging
-	--------------------------------------------------------------------------------*/
-	
-	
-	function dragStart(_dragElement, ev, ui) {
-		hoverListener.start(function(cell) {
-			clearOverlays();
-			if (cell) {
-				if (cellIsAllDay(cell)) {
-					renderCellOverlay(cell.row, cell.col, cell.row, cell.col);
-				}else{
-					var d1 = cellDate(cell);
-					var d2 = addMinutes(cloneDate(d1), opt('defaultEventMinutes'));
-					renderSlotOverlay(d1, d2);
-				}
-			}
-		}, ev);
-	}
-	
-	
-	function dragStop(_dragElement, ev, ui) {
-		var cell = hoverListener.stop();
-		clearOverlays();
-		if (cell) {
-			trigger('drop', _dragElement, cellDate(cell), cellIsAllDay(cell), ev, ui);
-		}
-	}
-
-
-}
-
-;;
-
-function AgendaEventRenderer() {
-	var t = this;
-	
-	
-	// exports
-	t.renderEvents = renderEvents;
-	t.compileDaySegs = compileDaySegs; // for DayEventRenderer
-	t.clearEvents = clearEvents;
-	t.slotSegHtml = slotSegHtml;
-	t.bindDaySeg = bindDaySeg;
-	
-	
-	// imports
-	DayEventRenderer.call(t);
-	var opt = t.opt;
-	var trigger = t.trigger;
-	//var setOverflowHidden = t.setOverflowHidden;
-	var isEventDraggable = t.isEventDraggable;
-	var isEventResizable = t.isEventResizable;
-	var eventEnd = t.eventEnd;
-	var reportEvents = t.reportEvents;
-	var reportEventClear = t.reportEventClear;
-	var eventElementHandlers = t.eventElementHandlers;
-	var setHeight = t.setHeight;
-	var getDaySegmentContainer = t.getDaySegmentContainer;
-	var getSlotSegmentContainer = t.getSlotSegmentContainer;
-	var getHoverListener = t.getHoverListener;
-	var getMaxMinute = t.getMaxMinute;
-	var getMinMinute = t.getMinMinute;
-	var timePosition = t.timePosition;
-	var colContentLeft = t.colContentLeft;
-	var colContentRight = t.colContentRight;
-	var renderDaySegs = t.renderDaySegs;
-	var resizableDayEvent = t.resizableDayEvent; // TODO: streamline binding architecture
-	var getColCnt = t.getColCnt;
-	var getColWidth = t.getColWidth;
-	var getSnapHeight = t.getSnapHeight;
-	var getSnapMinutes = t.getSnapMinutes;
-	var getBodyContent = t.getBodyContent;
-	var reportEventElement = t.reportEventElement;
-	var showEvents = t.showEvents;
-	var hideEvents = t.hideEvents;
-	var eventDrop = t.eventDrop;
-	var eventResize = t.eventResize;
-	var renderDayOverlay = t.renderDayOverlay;
-	var clearOverlays = t.clearOverlays;
-	var calendar = t.calendar;
-	var formatDate = calendar.formatDate;
-	var formatDates = calendar.formatDates;
-	
-	
-	
-	/* Rendering
-	----------------------------------------------------------------------------*/
-	
-
-	function renderEvents(events, modifiedEventId) {
-		reportEvents(events);
-		var i, len=events.length,
-			dayEvents=[],
-			slotEvents=[];
-		for (i=0; i<len; i++) {
-			if (events[i].allDay) {
-				dayEvents.push(events[i]);
-			}else{
-				slotEvents.push(events[i]);
-			}
-		}
-		if (opt('allDaySlot')) {
-			renderDaySegs(compileDaySegs(dayEvents), modifiedEventId);
-			setHeight(); // no params means set to viewHeight
-		}
-		renderSlotSegs(compileSlotSegs(slotEvents), modifiedEventId);
-		trigger('eventAfterAllRender');
-	}
-	
-	
-	function clearEvents() {
-		reportEventClear();
-		getDaySegmentContainer().empty();
-		getSlotSegmentContainer().empty();
-	}
-	
-	
-	function compileDaySegs(events) {
-		var levels = stackSegs(sliceSegs(events, $.map(events, exclEndDay), t.visStart, t.visEnd)),
-			i, levelCnt=levels.length, level,
-			j, seg,
-			segs=[];
-		for (i=0; i<levelCnt; i++) {
-			level = levels[i];
-			for (j=0; j<level.length; j++) {
-				seg = level[j];
-				seg.row = 0;
-				seg.level = i; // not needed anymore
-				segs.push(seg);
-			}
-		}
-		return segs;
-	}
-	
-	
-	function compileSlotSegs(events) {
-		var colCnt = getColCnt(),
-			minMinute = getMinMinute(),
-			maxMinute = getMaxMinute(),
-			d = addMinutes(cloneDate(t.visStart), minMinute),
-			visEventEnds = $.map(events, slotEventEnd),
-			i, col,
-			j, level,
-			k, seg,
-			segs=[];
-		for (i=0; i<colCnt; i++) {
-			col = stackSegs(sliceSegs(events, visEventEnds, d, addMinutes(cloneDate(d), maxMinute-minMinute)));
-			countForwardSegs(col);
-			for (j=0; j<col.length; j++) {
-				level = col[j];
-				for (k=0; k<level.length; k++) {
-					seg = level[k];
-					seg.col = i;
-					seg.level = j;
-					segs.push(seg);
-				}
-			}
-			addDays(d, 1, true);
-		}
-		return segs;
-	}
-	
-	
-	function slotEventEnd(event) {
-		if (event.end) {
-			return cloneDate(event.end);
-		}else{
-			return addMinutes(cloneDate(event.start), opt('defaultEventMinutes'));
-		}
-	}
-	
-	
-	// renders events in the 'time slots' at the bottom
-	
-	function renderSlotSegs(segs, modifiedEventId) {
-	
-		var i, segCnt=segs.length, seg,
-			event,
-			classes,
-			top, bottom,
-			colI, levelI, forward,
-			leftmost,
-			availWidth,
-			outerWidth,
-			left,
-			html='',
-			eventElements,
-			eventElement,
-			triggerRes,
-			vsideCache={},
-			hsideCache={},
-			key, val,
-			titleElement,
-			height,
-			slotSegmentContainer = getSlotSegmentContainer(),
-			rtl, dis, dit,
-			colCnt = getColCnt();
-			
-		if (rtl = opt('isRTL')) {
-			dis = -1;
-			dit = colCnt - 1;
-		}else{
-			dis = 1;
-			dit = 0;
-		}
-			
-		// calculate position/dimensions, create html
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			event = seg.event;
-			top = timePosition(seg.start, seg.start);
-			bottom = timePosition(seg.start, seg.end);
-			colI = seg.col;
-			levelI = seg.level;
-			forward = seg.forward || 0;
-			leftmost = colContentLeft(colI*dis + dit);
-			availWidth = colContentRight(colI*dis + dit) - leftmost;
-			availWidth = Math.min(availWidth-6, availWidth*.95); // TODO: move this to CSS
-			if (levelI) {
-				// indented and thin
-				outerWidth = availWidth / (levelI + forward + 1);
-			}else{
-				if (forward) {
-					// moderately wide, aligned left still
-					outerWidth = ((availWidth / (forward + 1)) - (12/2)) * 2; // 12 is the predicted width of resizer =
-				}else{
-					// can be entire width, aligned left
-					outerWidth = availWidth;
-				}
-			}
-			left = leftmost +                                  // leftmost possible
-				(availWidth / (levelI + forward + 1) * levelI) // indentation
-				* dis + (rtl ? availWidth - outerWidth : 0);   // rtl
-			seg.top = top;
-			seg.left = left;
-			seg.outerWidth = outerWidth;
-			seg.outerHeight = bottom - top;
-			html += slotSegHtml(event, seg);
-		}
-		slotSegmentContainer[0].innerHTML = html; // faster than html()
-		eventElements = slotSegmentContainer.children();
-		
-		// retrieve elements, run through eventRender callback, bind event handlers
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			event = seg.event;
-			eventElement = $(eventElements[i]); // faster than eq()
-			triggerRes = trigger('eventRender', event, event, eventElement);
-			if (triggerRes === false) {
-				eventElement.remove();
-			}else{
-				if (triggerRes && triggerRes !== true) {
-					eventElement.remove();
-					eventElement = $(triggerRes)
-						.css({
-							position: 'absolute',
-							top: seg.top,
-							left: seg.left
-						})
-						.appendTo(slotSegmentContainer);
-				}
-				seg.element = eventElement;
-				if (event._id === modifiedEventId) {
-					bindSlotSeg(event, eventElement, seg);
-				}else{
-					eventElement[0]._fci = i; // for lazySegBind
-				}
-				reportEventElement(event, eventElement);
-			}
-		}
-		
-		lazySegBind(slotSegmentContainer, segs, bindSlotSeg);
-		
-		// record event sides and title positions
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			if (eventElement = seg.element) {
-				val = vsideCache[key = seg.key = cssKey(eventElement[0])];
-				seg.vsides = val === undefined ? (vsideCache[key] = vsides(eventElement, true)) : val;
-				val = hsideCache[key];
-				seg.hsides = val === undefined ? (hsideCache[key] = hsides(eventElement, true)) : val;
-				titleElement = eventElement.find('.fc-event-title');
-				if (titleElement.length) {
-					seg.contentTop = titleElement[0].offsetTop;
-				}
-			}
-		}
-		
-		// set all positions/dimensions at once
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			if (eventElement = seg.element) {
-				eventElement[0].style.width = Math.max(0, seg.outerWidth - seg.hsides) + 'px';
-				height = Math.max(0, seg.outerHeight - seg.vsides);
-				eventElement[0].style.height = height + 'px';
-				event = seg.event;
-				if (seg.contentTop !== undefined && height - seg.contentTop < 10) {
-					// not enough room for title, put it in the time (TODO: maybe make both display:inline instead)
-					eventElement.find('div.fc-event-time')
-						.text(formatDate(event.start, opt('timeFormat')) + ' - ' + event.title);
-					eventElement.find('div.fc-event-title')
-						.remove();
-				}
-				trigger('eventAfterRender', event, event, eventElement);
-			}
-		}
-					
-	}
-	
-	
-	function slotSegHtml(event, seg) {
-		var html = "<";
-		var url = event.url;
-		var skinCss = getSkinCss(event, opt);
-		var classes = ['fc-event', 'fc-event-vert'];
-		if (isEventDraggable(event)) {
-			classes.push('fc-event-draggable');
-		}
-		if (seg.isStart) {
-			classes.push('fc-event-start');
-		}
-		if (seg.isEnd) {
-			classes.push('fc-event-end');
-		}
-		classes = classes.concat(event.className);
-		if (event.source) {
-			classes = classes.concat(event.source.className || []);
-		}
-		if (url) {
-			html += "a href='" + htmlEscape(event.url) + "'";
-		}else{
-			html += "div";
-		}
-		html +=
-			" class='" + classes.join(' ') + "'" +
-			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'" +
-			">" +
-			"<div class='fc-event-inner'>" +
-			"<div class='fc-event-time'>" +
-			htmlEscape(formatDates(event.start, event.end, opt('timeFormat'))) +
-			"</div>" +
-			"<div class='fc-event-title'>" +
-			htmlEscape(event.title) +
-			"</div>" +
-			"</div>" +
-			"<div class='fc-event-bg'></div>";
-		if (seg.isEnd && isEventResizable(event)) {
-			html +=
-				"<div class='ui-resizable-handle ui-resizable-s'>=</div>";
-		}
-		html +=
-			"</" + (url ? "a" : "div") + ">";
-		return html;
-	}
-	
-	
-	function bindDaySeg(event, eventElement, seg) {
-		if (isEventDraggable(event)) {
-			draggableDayEvent(event, eventElement, seg.isStart);
-		}
-		if (seg.isEnd && isEventResizable(event)) {
-			resizableDayEvent(event, eventElement, seg);
-		}
-		eventElementHandlers(event, eventElement);
-			// needs to be after, because resizableDayEvent might stopImmediatePropagation on click
-	}
-	
-	
-	function bindSlotSeg(event, eventElement, seg) {
-		var timeElement = eventElement.find('div.fc-event-time');
-		if (isEventDraggable(event)) {
-			draggableSlotEvent(event, eventElement, timeElement);
-		}
-		if (seg.isEnd && isEventResizable(event)) {
-			resizableSlotEvent(event, eventElement, timeElement);
-		}
-		eventElementHandlers(event, eventElement);
-	}
-	
-	
-	
-	/* Dragging
-	-----------------------------------------------------------------------------------*/
-	
-	
-	// when event starts out FULL-DAY
-	
-	function draggableDayEvent(event, eventElement, isStart) {
-		var origWidth;
-		var revert;
-		var allDay=true;
-		var dayDelta;
-		var dis = opt('isRTL') ? -1 : 1;
-		var hoverListener = getHoverListener();
-		var colWidth = getColWidth();
-		var snapHeight = getSnapHeight();
-		var snapMinutes = getSnapMinutes();
-		var minMinute = getMinMinute();
-		eventElement.draggable({
-			zIndex: 9,
-			opacity: opt('dragOpacity', 'month'), // use whatever the month view was using
-			revertDuration: opt('dragRevertDuration'),
-			start: function(ev, ui) {
-				trigger('eventDragStart', eventElement, event, ev, ui);
-				hideEvents(event, eventElement);
-				origWidth = eventElement.width();
-				hoverListener.start(function(cell, origCell, rowDelta, colDelta) {
-					clearOverlays();
-					if (cell) {
-						//setOverflowHidden(true);
-						revert = false;
-						dayDelta = colDelta * dis;
-						if (!cell.row) {
-							// on full-days
-							renderDayOverlay(
-								addDays(cloneDate(event.start), dayDelta),
-								addDays(exclEndDay(event), dayDelta)
-							);
-							resetElement();
-						}else{
-							// mouse is over bottom slots
-							if (isStart) {
-								if (allDay) {
-									// convert event to temporary slot-event
-									eventElement.width(colWidth - 10); // don't use entire width
-									setOuterHeight(
-										eventElement,
-										snapHeight * Math.round(
-											(event.end ? ((event.end - event.start) / MINUTE_MS) : opt('defaultEventMinutes')) /
-												snapMinutes
-										)
-									);
-									eventElement.draggable('option', 'grid', [colWidth, 1]);
-									allDay = false;
-								}
-							}else{
-								revert = true;
-							}
-						}
-						revert = revert || (allDay && !dayDelta);
-					}else{
-						resetElement();
-						//setOverflowHidden(false);
-						revert = true;
-					}
-					eventElement.draggable('option', 'revert', revert);
-				}, ev, 'drag');
-			},
-			stop: function(ev, ui) {
-				hoverListener.stop();
-				clearOverlays();
-				trigger('eventDragStop', eventElement, event, ev, ui);
-				if (revert) {
-					// hasn't moved or is out of bounds (draggable has already reverted)
-					resetElement();
-					eventElement.css('filter', ''); // clear IE opacity side-effects
-					showEvents(event, eventElement);
-				}else{
-					// changed!
-					var minuteDelta = 0;
-					if (!allDay) {
-						minuteDelta = Math.round((eventElement.offset().top - getBodyContent().offset().top) / snapHeight)
-							* snapMinutes
-							+ minMinute
-							- (event.start.getHours() * 60 + event.start.getMinutes());
-					}
-					eventDrop(this, event, dayDelta, minuteDelta, allDay, ev, ui);
-				}
-				//setOverflowHidden(false);
-			}
-		});
-		function resetElement() {
-			if (!allDay) {
-				eventElement
-					.width(origWidth)
-					.height('')
-					.draggable('option', 'grid', null);
-				allDay = true;
-			}
-		}
-	}
-	
-	
-	// when event starts out IN TIMESLOTS
-	
-	function draggableSlotEvent(event, eventElement, timeElement) {
-		var origPosition;
-		var allDay=false;
-		var dayDelta;
-		var minuteDelta;
-		var prevMinuteDelta;
-		var dis = opt('isRTL') ? -1 : 1;
-		var hoverListener = getHoverListener();
-		var colCnt = getColCnt();
-		var colWidth = getColWidth();
-		var snapHeight = getSnapHeight();
-		var snapMinutes = getSnapMinutes();
-		eventElement.draggable({
-			zIndex: 9,
-			scroll: false,
-			grid: [colWidth, snapHeight],
-			axis: colCnt==1 ? 'y' : false,
-			opacity: opt('dragOpacity'),
-			revertDuration: opt('dragRevertDuration'),
-			start: function(ev, ui) {
-				trigger('eventDragStart', eventElement, event, ev, ui);
-				hideEvents(event, eventElement);
-				origPosition = eventElement.position();
-				minuteDelta = prevMinuteDelta = 0;
-				hoverListener.start(function(cell, origCell, rowDelta, colDelta) {
-					eventElement.draggable('option', 'revert', !cell);
-					clearOverlays();
-					if (cell) {
-						dayDelta = colDelta * dis;
-						if (opt('allDaySlot') && !cell.row) {
-							// over full days
-							if (!allDay) {
-								// convert to temporary all-day event
-								allDay = true;
-								timeElement.hide();
-								eventElement.draggable('option', 'grid', null);
-							}
-							renderDayOverlay(
-								addDays(cloneDate(event.start), dayDelta),
-								addDays(exclEndDay(event), dayDelta)
-							);
-						}else{
-							// on slots
-							resetElement();
-						}
-					}
-				}, ev, 'drag');
-			},
-			drag: function(ev, ui) {
-				minuteDelta = Math.round((ui.position.top - origPosition.top) / snapHeight) * snapMinutes;
-				if (minuteDelta != prevMinuteDelta) {
-					if (!allDay) {
-						updateTimeText(minuteDelta);
-					}
-					prevMinuteDelta = minuteDelta;
-				}
-			},
-			stop: function(ev, ui) {
-				var cell = hoverListener.stop();
-				clearOverlays();
-				trigger('eventDragStop', eventElement, event, ev, ui);
-				if (cell && (dayDelta || minuteDelta || allDay)) {
-					// changed!
-					eventDrop(this, event, dayDelta, allDay ? 0 : minuteDelta, allDay, ev, ui);
-				}else{
-					// either no change or out-of-bounds (draggable has already reverted)
-					resetElement();
-					eventElement.css('filter', ''); // clear IE opacity side-effects
-					eventElement.css(origPosition); // sometimes fast drags make event revert to wrong position
-					updateTimeText(0);
-					showEvents(event, eventElement);
-				}
-			}
-		});
-		function updateTimeText(minuteDelta) {
-			var newStart = addMinutes(cloneDate(event.start), minuteDelta);
-			var newEnd;
-			if (event.end) {
-				newEnd = addMinutes(cloneDate(event.end), minuteDelta);
-			}
-			timeElement.text(formatDates(newStart, newEnd, opt('timeFormat')));
-		}
-		function resetElement() {
-			// convert back to original slot-event
-			if (allDay) {
-				timeElement.css('display', ''); // show() was causing display=inline
-				eventElement.draggable('option', 'grid', [colWidth, snapHeight]);
-				allDay = false;
-			}
-		}
-	}
-	
-	
-	
-	/* Resizing
-	--------------------------------------------------------------------------------------*/
-	
-	
-	function resizableSlotEvent(event, eventElement, timeElement) {
-		var snapDelta, prevSnapDelta;
-		var snapHeight = getSnapHeight();
-		var snapMinutes = getSnapMinutes();
-		eventElement.resizable({
-			handles: {
-				s: '.ui-resizable-handle'
-			},
-			grid: snapHeight,
-			start: function(ev, ui) {
-				snapDelta = prevSnapDelta = 0;
-				hideEvents(event, eventElement);
-				eventElement.css('z-index', 9);
-				trigger('eventResizeStart', this, event, ev, ui);
-			},
-			resize: function(ev, ui) {
-				// don't rely on ui.size.height, doesn't take grid into account
-				snapDelta = Math.round((Math.max(snapHeight, eventElement.height()) - ui.originalSize.height) / snapHeight);
-				if (snapDelta != prevSnapDelta) {
-					timeElement.text(
-						formatDates(
-							event.start,
-							(!snapDelta && !event.end) ? null : // no change, so don't display time range
-								addMinutes(eventEnd(event), snapMinutes*snapDelta),
-							opt('timeFormat')
-						)
-					);
-					prevSnapDelta = snapDelta;
-				}
-			},
-			stop: function(ev, ui) {
-				trigger('eventResizeStop', this, event, ev, ui);
-				if (snapDelta) {
-					eventResize(this, event, 0, snapMinutes*snapDelta, ev, ui);
-				}else{
-					eventElement.css('z-index', 8);
-					showEvents(event, eventElement);
-					// BUG: if event was really short, need to put title back in span
-				}
-			}
-		});
-	}
-	
-
-}
-
-
-function countForwardSegs(levels) {
-	var i, j, k, level, segForward, segBack;
-	for (i=levels.length-1; i>0; i--) {
-		level = levels[i];
-		for (j=0; j<level.length; j++) {
-			segForward = level[j];
-			for (k=0; k<levels[i-1].length; k++) {
-				segBack = levels[i-1][k];
-				if (segsCollide(segForward, segBack)) {
-					segBack.forward = Math.max(segBack.forward||0, (segForward.forward||0)+1);
-				}
-			}
-		}
-	}
-}
-
-
-
-;;
-
-
-function View(element, calendar, viewName) {
-	var t = this;
-	
-	
-	// exports
-	t.element = element;
-	t.calendar = calendar;
-	t.name = viewName;
-	t.opt = opt;
-	t.trigger = trigger;
-	//t.setOverflowHidden = setOverflowHidden;
-	t.isEventDraggable = isEventDraggable;
-	t.isEventResizable = isEventResizable;
-	t.reportEvents = reportEvents;
-	t.eventEnd = eventEnd;
-	t.reportEventElement = reportEventElement;
-	t.reportEventClear = reportEventClear;
-	t.eventElementHandlers = eventElementHandlers;
-	t.showEvents = showEvents;
-	t.hideEvents = hideEvents;
-	t.eventDrop = eventDrop;
-	t.eventResize = eventResize;
-	// t.title
-	// t.start, t.end
-	// t.visStart, t.visEnd
-	
-	
-	// imports
-	var defaultEventEnd = t.defaultEventEnd;
-	var normalizeEvent = calendar.normalizeEvent; // in EventManager
-	var reportEventChange = calendar.reportEventChange;
-	
-	
-	// locals
-	var eventsByID = {};
-	var eventElements = [];
-	var eventElementsByID = {};
-	var options = calendar.options;
-	
-	
-	
-	function opt(name, viewNameOverride) {
-		var v = options[name];
-		if (typeof v == 'object') {
-			return smartProperty(v, viewNameOverride || viewName);
-		}
-		return v;
-	}
-
-	
-	function trigger(name, thisObj) {
-		return calendar.trigger.apply(
-			calendar,
-			[name, thisObj || t].concat(Array.prototype.slice.call(arguments, 2), [t])
-		);
-	}
-	
-	
-	/*
-	function setOverflowHidden(bool) {
-		element.css('overflow', bool ? 'hidden' : '');
-	}
-	*/
-	
-	
-	function isEventDraggable(event) {
-		return isEventEditable(event) && !opt('disableDragging');
-	}
-	
-	
-	function isEventResizable(event) { // but also need to make sure the seg.isEnd == true
-		return isEventEditable(event) && !opt('disableResizing');
-	}
-	
-	
-	function isEventEditable(event) {
-		return firstDefined(event.editable, (event.source || {}).editable, opt('editable'));
-	}
-	
-	
-	
-	/* Event Data
-	------------------------------------------------------------------------------*/
-	
-	
-	// report when view receives new events
-	function reportEvents(events) { // events are already normalized at this point
-		eventsByID = {};
-		var i, len=events.length, event;
-		for (i=0; i<len; i++) {
-			event = events[i];
-			if (eventsByID[event._id]) {
-				eventsByID[event._id].push(event);
-			}else{
-				eventsByID[event._id] = [event];
-			}
-		}
-	}
-	
-	
-	// returns a Date object for an event's end
-	function eventEnd(event) {
-		return event.end ? cloneDate(event.end) : defaultEventEnd(event);
-	}
-	
-	
-	
-	/* Event Elements
-	------------------------------------------------------------------------------*/
-	
-	
-	// report when view creates an element for an event
-	function reportEventElement(event, element) {
-		eventElements.push(element);
-		if (eventElementsByID[event._id]) {
-			eventElementsByID[event._id].push(element);
-		}else{
-			eventElementsByID[event._id] = [element];
-		}
-	}
-	
-	
-	function reportEventClear() {
-		eventElements = [];
-		eventElementsByID = {};
-	}
-	
-	
-	// attaches eventClick, eventMouseover, eventMouseout
-	function eventElementHandlers(event, eventElement) {
-		eventElement
-			.click(function(ev) {
-				if (!eventElement.hasClass('ui-draggable-dragging') &&
-					!eventElement.hasClass('ui-resizable-resizing')) {
-						return trigger('eventClick', this, event, ev);
-					}
-			})
-			.hover(
-				function(ev) {
-					trigger('eventMouseover', this, event, ev);
-				},
-				function(ev) {
-					trigger('eventMouseout', this, event, ev);
-				}
-			);
-		// TODO: don't fire eventMouseover/eventMouseout *while* dragging is occuring (on subject element)
-		// TODO: same for resizing
-	}
-	
-	
-	function showEvents(event, exceptElement) {
-		eachEventElement(event, exceptElement, 'show');
-	}
-	
-	
-	function hideEvents(event, exceptElement) {
-		eachEventElement(event, exceptElement, 'hide');
-	}
-	
-	
-	function eachEventElement(event, exceptElement, funcName) {
-		var elements = eventElementsByID[event._id],
-			i, len = elements.length;
-		for (i=0; i<len; i++) {
-			if (!exceptElement || elements[i][0] != exceptElement[0]) {
-				elements[i][funcName]();
-			}
-		}
-	}
-	
-	
-	
-	/* Event Modification Reporting
-	---------------------------------------------------------------------------------*/
-	
-	
-	function eventDrop(e, event, dayDelta, minuteDelta, allDay, ev, ui) {
-		var oldAllDay = event.allDay;
-		var eventId = event._id;
-		moveEvents(eventsByID[eventId], dayDelta, minuteDelta, allDay);
-		trigger(
-			'eventDrop',
-			e,
-			event,
-			dayDelta,
-			minuteDelta,
-			allDay,
-			function() {
-				// TODO: investigate cases where this inverse technique might not work
-				moveEvents(eventsByID[eventId], -dayDelta, -minuteDelta, oldAllDay);
-				reportEventChange(eventId);
-			},
-			ev,
-			ui
-		);
-		reportEventChange(eventId);
-	}
-	
-	
-	function eventResize(e, event, dayDelta, minuteDelta, ev, ui) {
-		var eventId = event._id;
-		elongateEvents(eventsByID[eventId], dayDelta, minuteDelta);
-		trigger(
-			'eventResize',
-			e,
-			event,
-			dayDelta,
-			minuteDelta,
-			function() {
-				// TODO: investigate cases where this inverse technique might not work
-				elongateEvents(eventsByID[eventId], -dayDelta, -minuteDelta);
-				reportEventChange(eventId);
-			},
-			ev,
-			ui
-		);
-		reportEventChange(eventId);
-	}
-	
-	
-	
-	/* Event Modification Math
-	---------------------------------------------------------------------------------*/
-	
-	
-	function moveEvents(events, dayDelta, minuteDelta, allDay) {
-		minuteDelta = minuteDelta || 0;
-		for (var e, len=events.length, i=0; i<len; i++) {
-			e = events[i];
-			if (allDay !== undefined) {
-				e.allDay = allDay;
-			}
-			addMinutes(addDays(e.start, dayDelta, true), minuteDelta);
-			if (e.end) {
-				e.end = addMinutes(addDays(e.end, dayDelta, true), minuteDelta);
-			}
-			normalizeEvent(e, options);
-		}
-	}
-	
-	
-	function elongateEvents(events, dayDelta, minuteDelta) {
-		minuteDelta = minuteDelta || 0;
-		for (var e, len=events.length, i=0; i<len; i++) {
-			e = events[i];
-			e.end = addMinutes(addDays(eventEnd(e), dayDelta, true), minuteDelta);
-			normalizeEvent(e, options);
-		}
-	}
-	
-
-}
-
-;;
-
-function DayEventRenderer() {
-	var t = this;
-
-	
-	// exports
-	t.renderDaySegs = renderDaySegs;
-	t.resizableDayEvent = resizableDayEvent;
-	
-	
-	// imports
-	var opt = t.opt;
-	var trigger = t.trigger;
-	var isEventDraggable = t.isEventDraggable;
-	var isEventResizable = t.isEventResizable;
-	var eventEnd = t.eventEnd;
-	var reportEventElement = t.reportEventElement;
-	var showEvents = t.showEvents;
-	var hideEvents = t.hideEvents;
-	var eventResize = t.eventResize;
-	var getRowCnt = t.getRowCnt;
-	var getColCnt = t.getColCnt;
-	var getColWidth = t.getColWidth;
-	var allDayRow = t.allDayRow;
-	var allDayBounds = t.allDayBounds;
-	var colContentLeft = t.colContentLeft;
-	var colContentRight = t.colContentRight;
-	var dayOfWeekCol = t.dayOfWeekCol;
-	var dateCell = t.dateCell;
-	var compileDaySegs = t.compileDaySegs;
-	var getDaySegmentContainer = t.getDaySegmentContainer;
-	var bindDaySeg = t.bindDaySeg; //TODO: streamline this
-	var formatDates = t.calendar.formatDates;
-	var renderDayOverlay = t.renderDayOverlay;
-	var clearOverlays = t.clearOverlays;
-	var clearSelection = t.clearSelection;
-	
-	
-	
-	/* Rendering
-	-----------------------------------------------------------------------------*/
-	
-	
-	function renderDaySegs(segs, modifiedEventId) {
-		var segmentContainer = getDaySegmentContainer();
-		var rowDivs;
-		var rowCnt = getRowCnt();
-		var colCnt = getColCnt();
-		var i = 0;
-		var rowI;
-		var levelI;
-		var colHeights;
-		var j;
-		var segCnt = segs.length;
-		var seg;
-		var top;
-		var k;
-		segmentContainer[0].innerHTML = daySegHTML(segs); // faster than .html()
-		daySegElementResolve(segs, segmentContainer.children());
-		daySegElementReport(segs);
-		daySegHandlers(segs, segmentContainer, modifiedEventId);
-		daySegCalcHSides(segs);
-		daySegSetWidths(segs);
-		daySegCalcHeights(segs);
-		rowDivs = getRowDivs();
-		// set row heights, calculate event tops (in relation to row top)
-		for (rowI=0; rowI<rowCnt; rowI++) {
-			levelI = 0;
-			colHeights = [];
-			for (j=0; j<colCnt; j++) {
-				colHeights[j] = 0;
-			}
-			while (i<segCnt && (seg = segs[i]).row == rowI) {
-				// loop through segs in a row
-				top = arrayMax(colHeights.slice(seg.startCol, seg.endCol));
-				seg.top = top;
-				top += seg.outerHeight;
-				for (k=seg.startCol; k<seg.endCol; k++) {
-					colHeights[k] = top;
-				}
-				i++;
-			}
-			rowDivs[rowI].height(arrayMax(colHeights));
-		}
-		daySegSetTops(segs, getRowTops(rowDivs));
-	}
-	
-	
-	function renderTempDaySegs(segs, adjustRow, adjustTop) {
-		var tempContainer = $("<div/>");
-		var elements;
-		var segmentContainer = getDaySegmentContainer();
-		var i;
-		var segCnt = segs.length;
-		var element;
-		tempContainer[0].innerHTML = daySegHTML(segs); // faster than .html()
-		elements = tempContainer.children();
-		segmentContainer.append(elements);
-		daySegElementResolve(segs, elements);
-		daySegCalcHSides(segs);
-		daySegSetWidths(segs);
-		daySegCalcHeights(segs);
-		daySegSetTops(segs, getRowTops(getRowDivs()));
-		elements = [];
-		for (i=0; i<segCnt; i++) {
-			element = segs[i].element;
-			if (element) {
-				if (segs[i].row === adjustRow) {
-					element.css('top', adjustTop);
-				}
-				elements.push(element[0]);
-			}
-		}
-		return $(elements);
-	}
-	
-	
-	function daySegHTML(segs) { // also sets seg.left and seg.outerWidth
-		var rtl = opt('isRTL');
-		var i;
-		var segCnt=segs.length;
-		var seg;
-		var event;
-		var url;
-		var classes;
-		var bounds = allDayBounds();
-		var minLeft = bounds.left;
-		var maxLeft = bounds.right;
-		var leftCol;
-		var rightCol;
-		var left;
-		var right;
-		var skinCss;
-		var html = '';
-		// calculate desired position/dimensions, create html
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			event = seg.event;
-			classes = ['fc-event', 'fc-event-hori'];
-			if (isEventDraggable(event)) {
-				classes.push('fc-event-draggable');
-			}
-			if (seg.isStart) {
-				classes.push('fc-event-start');
-			}
-			if (seg.isEnd) {
-				classes.push('fc-event-end');
-			}
-			if (rtl) {
-				leftCol = dayOfWeekCol(seg.end.getDay()-1);
-				rightCol = dayOfWeekCol(seg.start.getDay());
-				left = seg.isEnd ? colContentLeft(leftCol) : minLeft;
-				right = seg.isStart ? colContentRight(rightCol) : maxLeft;
-			}else{
-				leftCol = dayOfWeekCol(seg.start.getDay());
-				rightCol = dayOfWeekCol(seg.end.getDay()-1);
-				left = seg.isStart ? colContentLeft(leftCol) : minLeft;
-				right = seg.isEnd ? colContentRight(rightCol) : maxLeft;
-			}
-			classes = classes.concat(event.className);
-			if (event.source) {
-				classes = classes.concat(event.source.className || []);
-			}
-			url = event.url;
-			skinCss = getSkinCss(event, opt);
-			if (url) {
-				html += "<a href='" + htmlEscape(url) + "'";
-			}else{
-				html += "<div";
-			}
-			html +=
-				" class='" + classes.join(' ') + "'" +
-				" style='position:absolute;z-index:8;left:"+left+"px;" + skinCss + "'" +
-				">" +
-				"<div class='fc-event-inner'>";
-			if (!event.allDay && seg.isStart) {
-				html +=
-					"<span class='fc-event-time'>" +
-					htmlEscape(formatDates(event.start, event.end, opt('timeFormat'))) +
-					"</span>";
-			}
-			html +=
-				"<span class='fc-event-title'>" + htmlEscape(event.title) + "</span>" +
-				"</div>";
-			if (seg.isEnd && isEventResizable(event)) {
-				html +=
-					"<div class='ui-resizable-handle ui-resizable-" + (rtl ? 'w' : 'e') + "'>" +
-					"&nbsp;&nbsp;&nbsp;" + // makes hit area a lot better for IE6/7
-					"</div>";
-			}
-			html +=
-				"</" + (url ? "a" : "div" ) + ">";
-			seg.left = left;
-			seg.outerWidth = right - left;
-			seg.startCol = leftCol;
-			seg.endCol = rightCol + 1; // needs to be exclusive
-		}
-		return html;
-	}
-	
-	
-	function daySegElementResolve(segs, elements) { // sets seg.element
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var event;
-		var element;
-		var triggerRes;
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			event = seg.event;
-			element = $(elements[i]); // faster than .eq()
-			triggerRes = trigger('eventRender', event, event, element);
-			if (triggerRes === false) {
-				element.remove();
-			}else{
-				if (triggerRes && triggerRes !== true) {
-					triggerRes = $(triggerRes)
-						.css({
-							position: 'absolute',
-							left: seg.left
-						});
-					element.replaceWith(triggerRes);
-					element = triggerRes;
-				}
-				seg.element = element;
-			}
-		}
-	}
-	
-	
-	function daySegElementReport(segs) {
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				reportEventElement(seg.event, element);
-			}
-		}
-	}
-	
-	
-	function daySegHandlers(segs, segmentContainer, modifiedEventId) {
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		var event;
-		// retrieve elements, run through eventRender callback, bind handlers
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				event = seg.event;
-				if (event._id === modifiedEventId) {
-					bindDaySeg(event, element, seg);
-				}else{
-					element[0]._fci = i; // for lazySegBind
-				}
-			}
-		}
-		lazySegBind(segmentContainer, segs, bindDaySeg);
-	}
-	
-	
-	function daySegCalcHSides(segs) { // also sets seg.key
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		var key, val;
-		var hsideCache = {};
-		// record event horizontal sides
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				key = seg.key = cssKey(element[0]);
-				val = hsideCache[key];
-				if (val === undefined) {
-					val = hsideCache[key] = hsides(element, true);
-				}
-				seg.hsides = val;
-			}
-		}
-	}
-	
-	
-	function daySegSetWidths(segs) {
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				element[0].style.width = Math.max(0, seg.outerWidth - seg.hsides) + 'px';
-			}
-		}
-	}
-	
-	
-	function daySegCalcHeights(segs) {
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		var key, val;
-		var vmarginCache = {};
-		// record event heights
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				key = seg.key; // created in daySegCalcHSides
-				val = vmarginCache[key];
-				if (val === undefined) {
-					val = vmarginCache[key] = vmargins(element);
-				}
-				seg.outerHeight = element[0].offsetHeight + val;
-			}
-		}
-	}
-	
-	
-	function getRowDivs() {
-		var i;
-		var rowCnt = getRowCnt();
-		var rowDivs = [];
-		for (i=0; i<rowCnt; i++) {
-			rowDivs[i] = allDayRow(i)
-				.find('div.fc-day-content > div'); // optimal selector?
-		}
-		return rowDivs;
-	}
-	
-	
-	function getRowTops(rowDivs) {
-		var i;
-		var rowCnt = rowDivs.length;
-		var tops = [];
-		for (i=0; i<rowCnt; i++) {
-			tops[i] = rowDivs[i][0].offsetTop; // !!?? but this means the element needs position:relative if in a table cell!!!!
-		}
-		return tops;
-	}
-	
-	
-	function daySegSetTops(segs, rowTops) { // also triggers eventAfterRender
-		var i;
-		var segCnt = segs.length;
-		var seg;
-		var element;
-		var event;
-		for (i=0; i<segCnt; i++) {
-			seg = segs[i];
-			element = seg.element;
-			if (element) {
-				element[0].style.top = rowTops[seg.row] + (seg.top||0) + 'px';
-				event = seg.event;
-				trigger('eventAfterRender', event, event, element);
-			}
-		}
-	}
-	
-	
-	
-	/* Resizing
-	-----------------------------------------------------------------------------------*/
-	
-	
-	function resizableDayEvent(event, element, seg) {
-		var rtl = opt('isRTL');
-		var direction = rtl ? 'w' : 'e';
-		var handle = element.find('.ui-resizable-' + direction); // TODO: stop using this class because we aren't using jqui for this
-		var isResizing = false;
-		
-		// TODO: look into using jquery-ui mouse widget for this stuff
-		disableTextSelection(element); // prevent native <a> selection for IE
-		element
-			.mousedown(function(ev) { // prevent native <a> selection for others
-				ev.preventDefault();
-			})
-			.click(function(ev) {
-				if (isResizing) {
-					ev.preventDefault(); // prevent link from being visited (only method that worked in IE6)
-					ev.stopImmediatePropagation(); // prevent fullcalendar eventClick handler from being called
-					                               // (eventElementHandlers needs to be bound after resizableDayEvent)
-				}
-			});
-		
-		handle.mousedown(function(ev) {
-			if (ev.which != 1) {
-				return; // needs to be left mouse button
-			}
-			isResizing = true;
-			var hoverListener = t.getHoverListener();
-			var rowCnt = getRowCnt();
-			var colCnt = getColCnt();
-			var dis = rtl ? -1 : 1;
-			var dit = rtl ? colCnt-1 : 0;
-			var elementTop = element.css('top');
-			var dayDelta;
-			var helpers;
-			var eventCopy = $.extend({}, event);
-			var minCell = dateCell(event.start);
-			clearSelection();
-			$('body')
-				.css('cursor', direction + '-resize')
-				.one('mouseup', mouseup);
-			trigger('eventResizeStart', this, event, ev);
-			hoverListener.start(function(cell, origCell) {
-				if (cell) {
-					var r = Math.max(minCell.row, cell.row);
-					var c = cell.col;
-					if (rowCnt == 1) {
-						r = 0; // hack for all-day area in agenda views
-					}
-					if (r == minCell.row) {
-						if (rtl) {
-							c = Math.min(minCell.col, c);
-						}else{
-							c = Math.max(minCell.col, c);
-						}
-					}
-					dayDelta = (r*7 + c*dis+dit) - (origCell.row*7 + origCell.col*dis+dit);
-					var newEnd = addDays(eventEnd(event), dayDelta, true);
-					if (dayDelta) {
-						eventCopy.end = newEnd;
-						var oldHelpers = helpers;
-						helpers = renderTempDaySegs(compileDaySegs([eventCopy]), seg.row, elementTop);
-						helpers.find('*').css('cursor', direction + '-resize');
-						if (oldHelpers) {
-							oldHelpers.remove();
-						}
-						hideEvents(event);
-					}else{
-						if (helpers) {
-							showEvents(event);
-							helpers.remove();
-							helpers = null;
-						}
-					}
-					clearOverlays();
-					renderDayOverlay(event.start, addDays(cloneDate(newEnd), 1)); // coordinate grid already rebuild at hoverListener.start
-				}
-			}, ev);
-			
-			function mouseup(ev) {
-				trigger('eventResizeStop', this, event, ev);
-				$('body').css('cursor', '');
-				hoverListener.stop();
-				clearOverlays();
-				if (dayDelta) {
-					eventResize(this, event, dayDelta, 0, ev);
-					// event redraw will clear helpers
-				}
-				// otherwise, the drag handler already restored the old events
-				
-				setTimeout(function() { // make this happen after the element's click event
-					isResizing = false;
-				},0);
-			}
-			
-		});
-	}
-	
-
-}
-
-;;
-
-//BUG: unselect needs to be triggered when events are dragged+dropped
-
-function SelectionManager() {
-	var t = this;
-	
-	
-	// exports
-	t.select = select;
-	t.unselect = unselect;
-	t.reportSelection = reportSelection;
-	t.daySelectionMousedown = daySelectionMousedown;
-	
-	
-	// imports
-	var opt = t.opt;
-	var trigger = t.trigger;
-	var defaultSelectionEnd = t.defaultSelectionEnd;
-	var renderSelection = t.renderSelection;
-	var clearSelection = t.clearSelection;
-	
-	
-	// locals
-	var selected = false;
-
-
-
-	// unselectAuto
-	if (opt('selectable') && opt('unselectAuto')) {
-		$(document).mousedown(function(ev) {
-			var ignore = opt('unselectCancel');
-			if (ignore) {
-				if ($(ev.target).parents(ignore).length) { // could be optimized to stop after first match
-					return;
-				}
-			}
-			unselect(ev);
-		});
-	}
-	
-
-	function select(startDate, endDate, allDay) {
-		unselect();
-		if (!endDate) {
-			endDate = defaultSelectionEnd(startDate, allDay);
-		}
-		renderSelection(startDate, endDate, allDay);
-		reportSelection(startDate, endDate, allDay);
-	}
-	
-	
-	function unselect(ev) {
-		if (selected) {
-			selected = false;
-			clearSelection();
-			trigger('unselect', null, ev);
-		}
-	}
-	
-	
-	function reportSelection(startDate, endDate, allDay, ev) {
-		selected = true;
-		trigger('select', null, startDate, endDate, allDay, ev);
-	}
-	
-	
-	function daySelectionMousedown(ev) { // not really a generic manager method, oh well
-		var cellDate = t.cellDate;
-		var cellIsAllDay = t.cellIsAllDay;
-		var hoverListener = t.getHoverListener();
-		var reportDayClick = t.reportDayClick; // this is hacky and sort of weird
-		if (ev.which == 1 && opt('selectable')) { // which==1 means left mouse button
-			unselect(ev);
-			var _mousedownElement = this;
-			var dates;
-			hoverListener.start(function(cell, origCell) { // TODO: maybe put cellDate/cellIsAllDay info in cell
-				clearSelection();
-				if (cell && cellIsAllDay(cell)) {
-					dates = [ cellDate(origCell), cellDate(cell) ].sort(cmp);
-					renderSelection(dates[0], dates[1], true);
-				}else{
-					dates = null;
-				}
-			}, ev);
-			$(document).one('mouseup', function(ev) {
-				hoverListener.stop();
-				if (dates) {
-					if (+dates[0] == +dates[1]) {
-						reportDayClick(dates[0], true, ev);
-					}
-					reportSelection(dates[0], dates[1], true, ev);
-				}
-			});
-		}
-	}
-
-
-}
-
-;;
- 
-function OverlayManager() {
-	var t = this;
-	
-	
-	// exports
-	t.renderOverlay = renderOverlay;
-	t.clearOverlays = clearOverlays;
-	
-	
-	// locals
-	var usedOverlays = [];
-	var unusedOverlays = [];
-	
-	
-	function renderOverlay(rect, parent) {
-		var e = unusedOverlays.shift();
-		if (!e) {
-			e = $("<div class='fc-cell-overlay' style='position:absolute;z-index:3'/>");
-		}
-		if (e[0].parentNode != parent[0]) {
-			e.appendTo(parent);
-		}
-		usedOverlays.push(e.css(rect).show());
-		return e;
-	}
-	
-
-	function clearOverlays() {
-		var e;
-		while (e = usedOverlays.shift()) {
-			unusedOverlays.push(e.hide().unbind());
-		}
-	}
-
-
-}
-
-;;
-
-function CoordinateGrid(buildFunc) {
-
-	var t = this;
-	var rows;
-	var cols;
-	
-	
-	t.build = function() {
-		rows = [];
-		cols = [];
-		buildFunc(rows, cols);
-	};
-	
-	
-	t.cell = function(x, y) {
-		var rowCnt = rows.length;
-		var colCnt = cols.length;
-		var i, r=-1, c=-1;
-		for (i=0; i<rowCnt; i++) {
-			if (y >= rows[i][0] && y < rows[i][1]) {
-				r = i;
-				break;
-			}
-		}
-		for (i=0; i<colCnt; i++) {
-			if (x >= cols[i][0] && x < cols[i][1]) {
-				c = i;
-				break;
-			}
-		}
-		return (r>=0 && c>=0) ? { row:r, col:c } : null;
-	};
-	
-	
-	t.rect = function(row0, col0, row1, col1, originElement) { // row1,col1 is inclusive
-		var origin = originElement.offset();
-		return {
-			top: rows[row0][0] - origin.top,
-			left: cols[col0][0] - origin.left,
-			width: cols[col1][1] - cols[col0][0],
-			height: rows[row1][1] - rows[row0][0]
-		};
-	};
-
-}
-
-;;
-
-function HoverListener(coordinateGrid) {
-
-
-	var t = this;
-	var bindType;
-	var change;
-	var firstCell;
-	var cell;
-	
-	
-	t.start = function(_change, ev, _bindType) {
-		change = _change;
-		firstCell = cell = null;
-		coordinateGrid.build();
-		mouse(ev);
-		bindType = _bindType || 'mousemove';
-		$(document).bind(bindType, mouse);
-	};
-	
-	
-	function mouse(ev) {
-		_fixUIEvent(ev); // see below
-		var newCell = coordinateGrid.cell(ev.pageX, ev.pageY);
-		if (!newCell != !cell || newCell && (newCell.row != cell.row || newCell.col != cell.col)) {
-			if (newCell) {
-				if (!firstCell) {
-					firstCell = newCell;
-				}
-				change(newCell, firstCell, newCell.row-firstCell.row, newCell.col-firstCell.col);
-			}else{
-				change(newCell, firstCell);
-			}
-			cell = newCell;
-		}
-	}
-	
-	
-	t.stop = function() {
-		$(document).unbind(bindType, mouse);
-		return cell;
-	};
-	
-	
-}
-
-
-
-// this fix was only necessary for jQuery UI 1.8.16 (and jQuery 1.7 or 1.7.1)
-// upgrading to jQuery UI 1.8.17 (and using either jQuery 1.7 or 1.7.1) fixed the problem
-// but keep this in here for 1.8.16 users
-// and maybe remove it down the line
-
-function _fixUIEvent(event) { // for issue 1168
-	if (event.pageX === undefined) {
-		event.pageX = event.originalEvent.pageX;
-		event.pageY = event.originalEvent.pageY;
-	}
-}
-;;
-
-function HorizontalPositionCache(getElement) {
-
-	var t = this,
-		elements = {},
-		lefts = {},
-		rights = {};
-		
-	function e(i) {
-		return elements[i] = elements[i] || getElement(i);
-	}
-	
-	t.left = function(i) {
-		return lefts[i] = lefts[i] === undefined ? e(i).position().left : lefts[i];
-	};
-	
-	t.right = function(i) {
-		return rights[i] = rights[i] === undefined ? t.left(i) + e(i).width() : rights[i];
-	};
-	
-	t.clear = function() {
-		elements = {};
-		lefts = {};
-		rights = {};
-	};
-	
-}
-
-;;
-
-})(jQuery);
-;/*!
+/*!
  * rrule.js - Library for working with recurrence rules for calendar dates.
  * https://github.com/jkbr/rrule
  *
@@ -28833,7 +23456,3853 @@ if (typeof define === "function" && define.amd) {
 
 }(this));
 
-;/**
+//! moment.js
+//! version : 2.8.3
+//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
+//! license : MIT
+//! momentjs.com
+
+(function (undefined) {
+    /************************************
+        Constants
+    ************************************/
+
+    var moment,
+        VERSION = '2.8.3',
+        // the global-scope this is NOT the global object in Node.js
+        globalScope = typeof global !== 'undefined' ? global : this,
+        oldGlobalMoment,
+        round = Math.round,
+        hasOwnProperty = Object.prototype.hasOwnProperty,
+        i,
+
+        YEAR = 0,
+        MONTH = 1,
+        DATE = 2,
+        HOUR = 3,
+        MINUTE = 4,
+        SECOND = 5,
+        MILLISECOND = 6,
+
+        // internal storage for locale config files
+        locales = {},
+
+        // extra moment internal properties (plugins register props here)
+        momentProperties = [],
+
+        // check for nodeJS
+        hasModule = (typeof module !== 'undefined' && module.exports),
+
+        // ASP.NET json date format regex
+        aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
+        aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/,
+
+        // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
+        // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
+        isoDurationRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/,
+
+        // format tokens
+        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Q|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,4}|X|zz?|ZZ?|.)/g,
+        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
+
+        // parsing token regexes
+        parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
+        parseTokenOneToThreeDigits = /\d{1,3}/, // 0 - 999
+        parseTokenOneToFourDigits = /\d{1,4}/, // 0 - 9999
+        parseTokenOneToSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
+        parseTokenDigits = /\d+/, // nonzero number of digits
+        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
+        parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/gi, // +00:00 -00:00 +0000 -0000 or Z
+        parseTokenT = /T/i, // T (ISO separator)
+        parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
+        parseTokenOrdinal = /\d{1,2}/,
+
+        //strict parsing regexes
+        parseTokenOneDigit = /\d/, // 0 - 9
+        parseTokenTwoDigits = /\d\d/, // 00 - 99
+        parseTokenThreeDigits = /\d{3}/, // 000 - 999
+        parseTokenFourDigits = /\d{4}/, // 0000 - 9999
+        parseTokenSixDigits = /[+-]?\d{6}/, // -999,999 - 999,999
+        parseTokenSignedNumber = /[+-]?\d+/, // -inf - inf
+
+        // iso 8601 regex
+        // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
+        isoRegex = /^\s*(?:[+-]\d{6}|\d{4})-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+
+        isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
+
+        isoDates = [
+            ['YYYYYY-MM-DD', /[+-]\d{6}-\d{2}-\d{2}/],
+            ['YYYY-MM-DD', /\d{4}-\d{2}-\d{2}/],
+            ['GGGG-[W]WW-E', /\d{4}-W\d{2}-\d/],
+            ['GGGG-[W]WW', /\d{4}-W\d{2}/],
+            ['YYYY-DDD', /\d{4}-\d{3}/]
+        ],
+
+        // iso time formats and regexes
+        isoTimes = [
+            ['HH:mm:ss.SSSS', /(T| )\d\d:\d\d:\d\d\.\d+/],
+            ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
+            ['HH:mm', /(T| )\d\d:\d\d/],
+            ['HH', /(T| )\d\d/]
+        ],
+
+        // timezone chunker '+10:00' > ['10', '00'] or '-1530' > ['-15', '30']
+        parseTimezoneChunker = /([\+\-]|\d\d)/gi,
+
+        // getter and setter names
+        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
+        unitMillisecondFactors = {
+            'Milliseconds' : 1,
+            'Seconds' : 1e3,
+            'Minutes' : 6e4,
+            'Hours' : 36e5,
+            'Days' : 864e5,
+            'Months' : 2592e6,
+            'Years' : 31536e6
+        },
+
+        unitAliases = {
+            ms : 'millisecond',
+            s : 'second',
+            m : 'minute',
+            h : 'hour',
+            d : 'day',
+            D : 'date',
+            w : 'week',
+            W : 'isoWeek',
+            M : 'month',
+            Q : 'quarter',
+            y : 'year',
+            DDD : 'dayOfYear',
+            e : 'weekday',
+            E : 'isoWeekday',
+            gg: 'weekYear',
+            GG: 'isoWeekYear'
+        },
+
+        camelFunctions = {
+            dayofyear : 'dayOfYear',
+            isoweekday : 'isoWeekday',
+            isoweek : 'isoWeek',
+            weekyear : 'weekYear',
+            isoweekyear : 'isoWeekYear'
+        },
+
+        // format function strings
+        formatFunctions = {},
+
+        // default relative time thresholds
+        relativeTimeThresholds = {
+            s: 45,  // seconds to minute
+            m: 45,  // minutes to hour
+            h: 22,  // hours to day
+            d: 26,  // days to month
+            M: 11   // months to year
+        },
+
+        // tokens to ordinalize and pad
+        ordinalizeTokens = 'DDD w W M D d'.split(' '),
+        paddedTokens = 'M D H h m s w W'.split(' '),
+
+        formatTokenFunctions = {
+            M    : function () {
+                return this.month() + 1;
+            },
+            MMM  : function (format) {
+                return this.localeData().monthsShort(this, format);
+            },
+            MMMM : function (format) {
+                return this.localeData().months(this, format);
+            },
+            D    : function () {
+                return this.date();
+            },
+            DDD  : function () {
+                return this.dayOfYear();
+            },
+            d    : function () {
+                return this.day();
+            },
+            dd   : function (format) {
+                return this.localeData().weekdaysMin(this, format);
+            },
+            ddd  : function (format) {
+                return this.localeData().weekdaysShort(this, format);
+            },
+            dddd : function (format) {
+                return this.localeData().weekdays(this, format);
+            },
+            w    : function () {
+                return this.week();
+            },
+            W    : function () {
+                return this.isoWeek();
+            },
+            YY   : function () {
+                return leftZeroFill(this.year() % 100, 2);
+            },
+            YYYY : function () {
+                return leftZeroFill(this.year(), 4);
+            },
+            YYYYY : function () {
+                return leftZeroFill(this.year(), 5);
+            },
+            YYYYYY : function () {
+                var y = this.year(), sign = y >= 0 ? '+' : '-';
+                return sign + leftZeroFill(Math.abs(y), 6);
+            },
+            gg   : function () {
+                return leftZeroFill(this.weekYear() % 100, 2);
+            },
+            gggg : function () {
+                return leftZeroFill(this.weekYear(), 4);
+            },
+            ggggg : function () {
+                return leftZeroFill(this.weekYear(), 5);
+            },
+            GG   : function () {
+                return leftZeroFill(this.isoWeekYear() % 100, 2);
+            },
+            GGGG : function () {
+                return leftZeroFill(this.isoWeekYear(), 4);
+            },
+            GGGGG : function () {
+                return leftZeroFill(this.isoWeekYear(), 5);
+            },
+            e : function () {
+                return this.weekday();
+            },
+            E : function () {
+                return this.isoWeekday();
+            },
+            a    : function () {
+                return this.localeData().meridiem(this.hours(), this.minutes(), true);
+            },
+            A    : function () {
+                return this.localeData().meridiem(this.hours(), this.minutes(), false);
+            },
+            H    : function () {
+                return this.hours();
+            },
+            h    : function () {
+                return this.hours() % 12 || 12;
+            },
+            m    : function () {
+                return this.minutes();
+            },
+            s    : function () {
+                return this.seconds();
+            },
+            S    : function () {
+                return toInt(this.milliseconds() / 100);
+            },
+            SS   : function () {
+                return leftZeroFill(toInt(this.milliseconds() / 10), 2);
+            },
+            SSS  : function () {
+                return leftZeroFill(this.milliseconds(), 3);
+            },
+            SSSS : function () {
+                return leftZeroFill(this.milliseconds(), 3);
+            },
+            Z    : function () {
+                var a = -this.zone(),
+                    b = '+';
+                if (a < 0) {
+                    a = -a;
+                    b = '-';
+                }
+                return b + leftZeroFill(toInt(a / 60), 2) + ':' + leftZeroFill(toInt(a) % 60, 2);
+            },
+            ZZ   : function () {
+                var a = -this.zone(),
+                    b = '+';
+                if (a < 0) {
+                    a = -a;
+                    b = '-';
+                }
+                return b + leftZeroFill(toInt(a / 60), 2) + leftZeroFill(toInt(a) % 60, 2);
+            },
+            z : function () {
+                return this.zoneAbbr();
+            },
+            zz : function () {
+                return this.zoneName();
+            },
+            X    : function () {
+                return this.unix();
+            },
+            Q : function () {
+                return this.quarter();
+            }
+        },
+
+        deprecations = {},
+
+        lists = ['months', 'monthsShort', 'weekdays', 'weekdaysShort', 'weekdaysMin'];
+
+    // Pick the first defined of two or three arguments. dfl comes from
+    // default.
+    function dfl(a, b, c) {
+        switch (arguments.length) {
+            case 2: return a != null ? a : b;
+            case 3: return a != null ? a : b != null ? b : c;
+            default: throw new Error('Implement me');
+        }
+    }
+
+    function hasOwnProp(a, b) {
+        return hasOwnProperty.call(a, b);
+    }
+
+    function defaultParsingFlags() {
+        // We need to deep clone this object, and es5 standard is not very
+        // helpful.
+        return {
+            empty : false,
+            unusedTokens : [],
+            unusedInput : [],
+            overflow : -2,
+            charsLeftOver : 0,
+            nullInput : false,
+            invalidMonth : null,
+            invalidFormat : false,
+            userInvalidated : false,
+            iso: false
+        };
+    }
+
+    function printMsg(msg) {
+        if (moment.suppressDeprecationWarnings === false &&
+                typeof console !== 'undefined' && console.warn) {
+            console.warn('Deprecation warning: ' + msg);
+        }
+    }
+
+    function deprecate(msg, fn) {
+        var firstTime = true;
+        return extend(function () {
+            if (firstTime) {
+                printMsg(msg);
+                firstTime = false;
+            }
+            return fn.apply(this, arguments);
+        }, fn);
+    }
+
+    function deprecateSimple(name, msg) {
+        if (!deprecations[name]) {
+            printMsg(msg);
+            deprecations[name] = true;
+        }
+    }
+
+    function padToken(func, count) {
+        return function (a) {
+            return leftZeroFill(func.call(this, a), count);
+        };
+    }
+    function ordinalizeToken(func, period) {
+        return function (a) {
+            return this.localeData().ordinal(func.call(this, a), period);
+        };
+    }
+
+    while (ordinalizeTokens.length) {
+        i = ordinalizeTokens.pop();
+        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
+    }
+    while (paddedTokens.length) {
+        i = paddedTokens.pop();
+        formatTokenFunctions[i + i] = padToken(formatTokenFunctions[i], 2);
+    }
+    formatTokenFunctions.DDDD = padToken(formatTokenFunctions.DDD, 3);
+
+
+    /************************************
+        Constructors
+    ************************************/
+
+    function Locale() {
+    }
+
+    // Moment prototype object
+    function Moment(config, skipOverflow) {
+        if (skipOverflow !== false) {
+            checkOverflow(config);
+        }
+        copyConfig(this, config);
+        this._d = new Date(+config._d);
+    }
+
+    // Duration Constructor
+    function Duration(duration) {
+        var normalizedInput = normalizeObjectUnits(duration),
+            years = normalizedInput.year || 0,
+            quarters = normalizedInput.quarter || 0,
+            months = normalizedInput.month || 0,
+            weeks = normalizedInput.week || 0,
+            days = normalizedInput.day || 0,
+            hours = normalizedInput.hour || 0,
+            minutes = normalizedInput.minute || 0,
+            seconds = normalizedInput.second || 0,
+            milliseconds = normalizedInput.millisecond || 0;
+
+        // representation for dateAddRemove
+        this._milliseconds = +milliseconds +
+            seconds * 1e3 + // 1000
+            minutes * 6e4 + // 1000 * 60
+            hours * 36e5; // 1000 * 60 * 60
+        // Because of dateAddRemove treats 24 hours as different from a
+        // day when working around DST, we need to store them separately
+        this._days = +days +
+            weeks * 7;
+        // It is impossible translate months into days without knowing
+        // which months you are are talking about, so we have to store
+        // it separately.
+        this._months = +months +
+            quarters * 3 +
+            years * 12;
+
+        this._data = {};
+
+        this._locale = moment.localeData();
+
+        this._bubble();
+    }
+
+    /************************************
+        Helpers
+    ************************************/
+
+
+    function extend(a, b) {
+        for (var i in b) {
+            if (hasOwnProp(b, i)) {
+                a[i] = b[i];
+            }
+        }
+
+        if (hasOwnProp(b, 'toString')) {
+            a.toString = b.toString;
+        }
+
+        if (hasOwnProp(b, 'valueOf')) {
+            a.valueOf = b.valueOf;
+        }
+
+        return a;
+    }
+
+    function copyConfig(to, from) {
+        var i, prop, val;
+
+        if (typeof from._isAMomentObject !== 'undefined') {
+            to._isAMomentObject = from._isAMomentObject;
+        }
+        if (typeof from._i !== 'undefined') {
+            to._i = from._i;
+        }
+        if (typeof from._f !== 'undefined') {
+            to._f = from._f;
+        }
+        if (typeof from._l !== 'undefined') {
+            to._l = from._l;
+        }
+        if (typeof from._strict !== 'undefined') {
+            to._strict = from._strict;
+        }
+        if (typeof from._tzm !== 'undefined') {
+            to._tzm = from._tzm;
+        }
+        if (typeof from._isUTC !== 'undefined') {
+            to._isUTC = from._isUTC;
+        }
+        if (typeof from._offset !== 'undefined') {
+            to._offset = from._offset;
+        }
+        if (typeof from._pf !== 'undefined') {
+            to._pf = from._pf;
+        }
+        if (typeof from._locale !== 'undefined') {
+            to._locale = from._locale;
+        }
+
+        if (momentProperties.length > 0) {
+            for (i in momentProperties) {
+                prop = momentProperties[i];
+                val = from[prop];
+                if (typeof val !== 'undefined') {
+                    to[prop] = val;
+                }
+            }
+        }
+
+        return to;
+    }
+
+    function absRound(number) {
+        if (number < 0) {
+            return Math.ceil(number);
+        } else {
+            return Math.floor(number);
+        }
+    }
+
+    // left zero fill a number
+    // see http://jsperf.com/left-zero-filling for performance comparison
+    function leftZeroFill(number, targetLength, forceSign) {
+        var output = '' + Math.abs(number),
+            sign = number >= 0;
+
+        while (output.length < targetLength) {
+            output = '0' + output;
+        }
+        return (sign ? (forceSign ? '+' : '') : '-') + output;
+    }
+
+    function positiveMomentsDifference(base, other) {
+        var res = {milliseconds: 0, months: 0};
+
+        res.months = other.month() - base.month() +
+            (other.year() - base.year()) * 12;
+        if (base.clone().add(res.months, 'M').isAfter(other)) {
+            --res.months;
+        }
+
+        res.milliseconds = +other - +(base.clone().add(res.months, 'M'));
+
+        return res;
+    }
+
+    function momentsDifference(base, other) {
+        var res;
+        other = makeAs(other, base);
+        if (base.isBefore(other)) {
+            res = positiveMomentsDifference(base, other);
+        } else {
+            res = positiveMomentsDifference(other, base);
+            res.milliseconds = -res.milliseconds;
+            res.months = -res.months;
+        }
+
+        return res;
+    }
+
+    // TODO: remove 'name' arg after deprecation is removed
+    function createAdder(direction, name) {
+        return function (val, period) {
+            var dur, tmp;
+            //invert the arguments, but complain about it
+            if (period !== null && !isNaN(+period)) {
+                deprecateSimple(name, 'moment().' + name  + '(period, number) is deprecated. Please use moment().' + name + '(number, period).');
+                tmp = val; val = period; period = tmp;
+            }
+
+            val = typeof val === 'string' ? +val : val;
+            dur = moment.duration(val, period);
+            addOrSubtractDurationFromMoment(this, dur, direction);
+            return this;
+        };
+    }
+
+    function addOrSubtractDurationFromMoment(mom, duration, isAdding, updateOffset) {
+        var milliseconds = duration._milliseconds,
+            days = duration._days,
+            months = duration._months;
+        updateOffset = updateOffset == null ? true : updateOffset;
+
+        if (milliseconds) {
+            mom._d.setTime(+mom._d + milliseconds * isAdding);
+        }
+        if (days) {
+            rawSetter(mom, 'Date', rawGetter(mom, 'Date') + days * isAdding);
+        }
+        if (months) {
+            rawMonthSetter(mom, rawGetter(mom, 'Month') + months * isAdding);
+        }
+        if (updateOffset) {
+            moment.updateOffset(mom, days || months);
+        }
+    }
+
+    // check if is an array
+    function isArray(input) {
+        return Object.prototype.toString.call(input) === '[object Array]';
+    }
+
+    function isDate(input) {
+        return Object.prototype.toString.call(input) === '[object Date]' ||
+            input instanceof Date;
+    }
+
+    // compare two arrays, return the number of differences
+    function compareArrays(array1, array2, dontConvert) {
+        var len = Math.min(array1.length, array2.length),
+            lengthDiff = Math.abs(array1.length - array2.length),
+            diffs = 0,
+            i;
+        for (i = 0; i < len; i++) {
+            if ((dontConvert && array1[i] !== array2[i]) ||
+                (!dontConvert && toInt(array1[i]) !== toInt(array2[i]))) {
+                diffs++;
+            }
+        }
+        return diffs + lengthDiff;
+    }
+
+    function normalizeUnits(units) {
+        if (units) {
+            var lowered = units.toLowerCase().replace(/(.)s$/, '$1');
+            units = unitAliases[units] || camelFunctions[lowered] || lowered;
+        }
+        return units;
+    }
+
+    function normalizeObjectUnits(inputObject) {
+        var normalizedInput = {},
+            normalizedProp,
+            prop;
+
+        for (prop in inputObject) {
+            if (hasOwnProp(inputObject, prop)) {
+                normalizedProp = normalizeUnits(prop);
+                if (normalizedProp) {
+                    normalizedInput[normalizedProp] = inputObject[prop];
+                }
+            }
+        }
+
+        return normalizedInput;
+    }
+
+    function makeList(field) {
+        var count, setter;
+
+        if (field.indexOf('week') === 0) {
+            count = 7;
+            setter = 'day';
+        }
+        else if (field.indexOf('month') === 0) {
+            count = 12;
+            setter = 'month';
+        }
+        else {
+            return;
+        }
+
+        moment[field] = function (format, index) {
+            var i, getter,
+                method = moment._locale[field],
+                results = [];
+
+            if (typeof format === 'number') {
+                index = format;
+                format = undefined;
+            }
+
+            getter = function (i) {
+                var m = moment().utc().set(setter, i);
+                return method.call(moment._locale, m, format || '');
+            };
+
+            if (index != null) {
+                return getter(index);
+            }
+            else {
+                for (i = 0; i < count; i++) {
+                    results.push(getter(i));
+                }
+                return results;
+            }
+        };
+    }
+
+    function toInt(argumentForCoercion) {
+        var coercedNumber = +argumentForCoercion,
+            value = 0;
+
+        if (coercedNumber !== 0 && isFinite(coercedNumber)) {
+            if (coercedNumber >= 0) {
+                value = Math.floor(coercedNumber);
+            } else {
+                value = Math.ceil(coercedNumber);
+            }
+        }
+
+        return value;
+    }
+
+    function daysInMonth(year, month) {
+        return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    }
+
+    function weeksInYear(year, dow, doy) {
+        return weekOfYear(moment([year, 11, 31 + dow - doy]), dow, doy).week;
+    }
+
+    function daysInYear(year) {
+        return isLeapYear(year) ? 366 : 365;
+    }
+
+    function isLeapYear(year) {
+        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    }
+
+    function checkOverflow(m) {
+        var overflow;
+        if (m._a && m._pf.overflow === -2) {
+            overflow =
+                m._a[MONTH] < 0 || m._a[MONTH] > 11 ? MONTH :
+                m._a[DATE] < 1 || m._a[DATE] > daysInMonth(m._a[YEAR], m._a[MONTH]) ? DATE :
+                m._a[HOUR] < 0 || m._a[HOUR] > 23 ? HOUR :
+                m._a[MINUTE] < 0 || m._a[MINUTE] > 59 ? MINUTE :
+                m._a[SECOND] < 0 || m._a[SECOND] > 59 ? SECOND :
+                m._a[MILLISECOND] < 0 || m._a[MILLISECOND] > 999 ? MILLISECOND :
+                -1;
+
+            if (m._pf._overflowDayOfYear && (overflow < YEAR || overflow > DATE)) {
+                overflow = DATE;
+            }
+
+            m._pf.overflow = overflow;
+        }
+    }
+
+    function isValid(m) {
+        if (m._isValid == null) {
+            m._isValid = !isNaN(m._d.getTime()) &&
+                m._pf.overflow < 0 &&
+                !m._pf.empty &&
+                !m._pf.invalidMonth &&
+                !m._pf.nullInput &&
+                !m._pf.invalidFormat &&
+                !m._pf.userInvalidated;
+
+            if (m._strict) {
+                m._isValid = m._isValid &&
+                    m._pf.charsLeftOver === 0 &&
+                    m._pf.unusedTokens.length === 0;
+            }
+        }
+        return m._isValid;
+    }
+
+    function normalizeLocale(key) {
+        return key ? key.toLowerCase().replace('_', '-') : key;
+    }
+
+    // pick the locale from the array
+    // try ['en-au', 'en-gb'] as 'en-au', 'en-gb', 'en', as in move through the list trying each
+    // substring from most specific to least, but move to the next array item if it's a more specific variant than the current root
+    function chooseLocale(names) {
+        var i = 0, j, next, locale, split;
+
+        while (i < names.length) {
+            split = normalizeLocale(names[i]).split('-');
+            j = split.length;
+            next = normalizeLocale(names[i + 1]);
+            next = next ? next.split('-') : null;
+            while (j > 0) {
+                locale = loadLocale(split.slice(0, j).join('-'));
+                if (locale) {
+                    return locale;
+                }
+                if (next && next.length >= j && compareArrays(split, next, true) >= j - 1) {
+                    //the next array item is better than a shallower substring of this one
+                    break;
+                }
+                j--;
+            }
+            i++;
+        }
+        return null;
+    }
+
+    function loadLocale(name) {
+        var oldLocale = null;
+        if (!locales[name] && hasModule) {
+            try {
+                oldLocale = moment.locale();
+                require('./locale/' + name);
+                // because defineLocale currently also sets the global locale, we want to undo that for lazy loaded locales
+                moment.locale(oldLocale);
+            } catch (e) { }
+        }
+        return locales[name];
+    }
+
+    // Return a moment from input, that is local/utc/zone equivalent to model.
+    function makeAs(input, model) {
+        return model._isUTC ? moment(input).zone(model._offset || 0) :
+            moment(input).local();
+    }
+
+    /************************************
+        Locale
+    ************************************/
+
+
+    extend(Locale.prototype, {
+
+        set : function (config) {
+            var prop, i;
+            for (i in config) {
+                prop = config[i];
+                if (typeof prop === 'function') {
+                    this[i] = prop;
+                } else {
+                    this['_' + i] = prop;
+                }
+            }
+        },
+
+        _months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
+        months : function (m) {
+            return this._months[m.month()];
+        },
+
+        _monthsShort : 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
+        monthsShort : function (m) {
+            return this._monthsShort[m.month()];
+        },
+
+        monthsParse : function (monthName) {
+            var i, mom, regex;
+
+            if (!this._monthsParse) {
+                this._monthsParse = [];
+            }
+
+            for (i = 0; i < 12; i++) {
+                // make the regex if we don't have it already
+                if (!this._monthsParse[i]) {
+                    mom = moment.utc([2000, i]);
+                    regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._monthsParse[i].test(monthName)) {
+                    return i;
+                }
+            }
+        },
+
+        _weekdays : 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
+        weekdays : function (m) {
+            return this._weekdays[m.day()];
+        },
+
+        _weekdaysShort : 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
+        weekdaysShort : function (m) {
+            return this._weekdaysShort[m.day()];
+        },
+
+        _weekdaysMin : 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
+        weekdaysMin : function (m) {
+            return this._weekdaysMin[m.day()];
+        },
+
+        weekdaysParse : function (weekdayName) {
+            var i, mom, regex;
+
+            if (!this._weekdaysParse) {
+                this._weekdaysParse = [];
+            }
+
+            for (i = 0; i < 7; i++) {
+                // make the regex if we don't have it already
+                if (!this._weekdaysParse[i]) {
+                    mom = moment([2000, 1]).day(i);
+                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._weekdaysParse[i].test(weekdayName)) {
+                    return i;
+                }
+            }
+        },
+
+        _longDateFormat : {
+            LT : 'h:mm A',
+            L : 'MM/DD/YYYY',
+            LL : 'MMMM D, YYYY',
+            LLL : 'MMMM D, YYYY LT',
+            LLLL : 'dddd, MMMM D, YYYY LT'
+        },
+        longDateFormat : function (key) {
+            var output = this._longDateFormat[key];
+            if (!output && this._longDateFormat[key.toUpperCase()]) {
+                output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
+                    return val.slice(1);
+                });
+                this._longDateFormat[key] = output;
+            }
+            return output;
+        },
+
+        isPM : function (input) {
+            // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
+            // Using charAt should be more compatible.
+            return ((input + '').toLowerCase().charAt(0) === 'p');
+        },
+
+        _meridiemParse : /[ap]\.?m?\.?/i,
+        meridiem : function (hours, minutes, isLower) {
+            if (hours > 11) {
+                return isLower ? 'pm' : 'PM';
+            } else {
+                return isLower ? 'am' : 'AM';
+            }
+        },
+
+        _calendar : {
+            sameDay : '[Today at] LT',
+            nextDay : '[Tomorrow at] LT',
+            nextWeek : 'dddd [at] LT',
+            lastDay : '[Yesterday at] LT',
+            lastWeek : '[Last] dddd [at] LT',
+            sameElse : 'L'
+        },
+        calendar : function (key, mom) {
+            var output = this._calendar[key];
+            return typeof output === 'function' ? output.apply(mom) : output;
+        },
+
+        _relativeTime : {
+            future : 'in %s',
+            past : '%s ago',
+            s : 'a few seconds',
+            m : 'a minute',
+            mm : '%d minutes',
+            h : 'an hour',
+            hh : '%d hours',
+            d : 'a day',
+            dd : '%d days',
+            M : 'a month',
+            MM : '%d months',
+            y : 'a year',
+            yy : '%d years'
+        },
+
+        relativeTime : function (number, withoutSuffix, string, isFuture) {
+            var output = this._relativeTime[string];
+            return (typeof output === 'function') ?
+                output(number, withoutSuffix, string, isFuture) :
+                output.replace(/%d/i, number);
+        },
+
+        pastFuture : function (diff, output) {
+            var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
+            return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
+        },
+
+        ordinal : function (number) {
+            return this._ordinal.replace('%d', number);
+        },
+        _ordinal : '%d',
+
+        preparse : function (string) {
+            return string;
+        },
+
+        postformat : function (string) {
+            return string;
+        },
+
+        week : function (mom) {
+            return weekOfYear(mom, this._week.dow, this._week.doy).week;
+        },
+
+        _week : {
+            dow : 0, // Sunday is the first day of the week.
+            doy : 6  // The week that contains Jan 1st is the first week of the year.
+        },
+
+        _invalidDate: 'Invalid date',
+        invalidDate: function () {
+            return this._invalidDate;
+        }
+    });
+
+    /************************************
+        Formatting
+    ************************************/
+
+
+    function removeFormattingTokens(input) {
+        if (input.match(/\[[\s\S]/)) {
+            return input.replace(/^\[|\]$/g, '');
+        }
+        return input.replace(/\\/g, '');
+    }
+
+    function makeFormatFunction(format) {
+        var array = format.match(formattingTokens), i, length;
+
+        for (i = 0, length = array.length; i < length; i++) {
+            if (formatTokenFunctions[array[i]]) {
+                array[i] = formatTokenFunctions[array[i]];
+            } else {
+                array[i] = removeFormattingTokens(array[i]);
+            }
+        }
+
+        return function (mom) {
+            var output = '';
+            for (i = 0; i < length; i++) {
+                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
+            }
+            return output;
+        };
+    }
+
+    // format date using native date object
+    function formatMoment(m, format) {
+        if (!m.isValid()) {
+            return m.localeData().invalidDate();
+        }
+
+        format = expandFormat(format, m.localeData());
+
+        if (!formatFunctions[format]) {
+            formatFunctions[format] = makeFormatFunction(format);
+        }
+
+        return formatFunctions[format](m);
+    }
+
+    function expandFormat(format, locale) {
+        var i = 5;
+
+        function replaceLongDateFormatTokens(input) {
+            return locale.longDateFormat(input) || input;
+        }
+
+        localFormattingTokens.lastIndex = 0;
+        while (i >= 0 && localFormattingTokens.test(format)) {
+            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
+            localFormattingTokens.lastIndex = 0;
+            i -= 1;
+        }
+
+        return format;
+    }
+
+
+    /************************************
+        Parsing
+    ************************************/
+
+
+    // get the regex to find the next token
+    function getParseRegexForToken(token, config) {
+        var a, strict = config._strict;
+        switch (token) {
+        case 'Q':
+            return parseTokenOneDigit;
+        case 'DDDD':
+            return parseTokenThreeDigits;
+        case 'YYYY':
+        case 'GGGG':
+        case 'gggg':
+            return strict ? parseTokenFourDigits : parseTokenOneToFourDigits;
+        case 'Y':
+        case 'G':
+        case 'g':
+            return parseTokenSignedNumber;
+        case 'YYYYYY':
+        case 'YYYYY':
+        case 'GGGGG':
+        case 'ggggg':
+            return strict ? parseTokenSixDigits : parseTokenOneToSixDigits;
+        case 'S':
+            if (strict) {
+                return parseTokenOneDigit;
+            }
+            /* falls through */
+        case 'SS':
+            if (strict) {
+                return parseTokenTwoDigits;
+            }
+            /* falls through */
+        case 'SSS':
+            if (strict) {
+                return parseTokenThreeDigits;
+            }
+            /* falls through */
+        case 'DDD':
+            return parseTokenOneToThreeDigits;
+        case 'MMM':
+        case 'MMMM':
+        case 'dd':
+        case 'ddd':
+        case 'dddd':
+            return parseTokenWord;
+        case 'a':
+        case 'A':
+            return config._locale._meridiemParse;
+        case 'X':
+            return parseTokenTimestampMs;
+        case 'Z':
+        case 'ZZ':
+            return parseTokenTimezone;
+        case 'T':
+            return parseTokenT;
+        case 'SSSS':
+            return parseTokenDigits;
+        case 'MM':
+        case 'DD':
+        case 'YY':
+        case 'GG':
+        case 'gg':
+        case 'HH':
+        case 'hh':
+        case 'mm':
+        case 'ss':
+        case 'ww':
+        case 'WW':
+            return strict ? parseTokenTwoDigits : parseTokenOneOrTwoDigits;
+        case 'M':
+        case 'D':
+        case 'd':
+        case 'H':
+        case 'h':
+        case 'm':
+        case 's':
+        case 'w':
+        case 'W':
+        case 'e':
+        case 'E':
+            return parseTokenOneOrTwoDigits;
+        case 'Do':
+            return parseTokenOrdinal;
+        default :
+            a = new RegExp(regexpEscape(unescapeFormat(token.replace('\\', '')), 'i'));
+            return a;
+        }
+    }
+
+    function timezoneMinutesFromString(string) {
+        string = string || '';
+        var possibleTzMatches = (string.match(parseTokenTimezone) || []),
+            tzChunk = possibleTzMatches[possibleTzMatches.length - 1] || [],
+            parts = (tzChunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
+            minutes = +(parts[1] * 60) + toInt(parts[2]);
+
+        return parts[0] === '+' ? -minutes : minutes;
+    }
+
+    // function to convert string input to date
+    function addTimeToArrayFromToken(token, input, config) {
+        var a, datePartArray = config._a;
+
+        switch (token) {
+        // QUARTER
+        case 'Q':
+            if (input != null) {
+                datePartArray[MONTH] = (toInt(input) - 1) * 3;
+            }
+            break;
+        // MONTH
+        case 'M' : // fall through to MM
+        case 'MM' :
+            if (input != null) {
+                datePartArray[MONTH] = toInt(input) - 1;
+            }
+            break;
+        case 'MMM' : // fall through to MMMM
+        case 'MMMM' :
+            a = config._locale.monthsParse(input);
+            // if we didn't find a month name, mark the date as invalid.
+            if (a != null) {
+                datePartArray[MONTH] = a;
+            } else {
+                config._pf.invalidMonth = input;
+            }
+            break;
+        // DAY OF MONTH
+        case 'D' : // fall through to DD
+        case 'DD' :
+            if (input != null) {
+                datePartArray[DATE] = toInt(input);
+            }
+            break;
+        case 'Do' :
+            if (input != null) {
+                datePartArray[DATE] = toInt(parseInt(input, 10));
+            }
+            break;
+        // DAY OF YEAR
+        case 'DDD' : // fall through to DDDD
+        case 'DDDD' :
+            if (input != null) {
+                config._dayOfYear = toInt(input);
+            }
+
+            break;
+        // YEAR
+        case 'YY' :
+            datePartArray[YEAR] = moment.parseTwoDigitYear(input);
+            break;
+        case 'YYYY' :
+        case 'YYYYY' :
+        case 'YYYYYY' :
+            datePartArray[YEAR] = toInt(input);
+            break;
+        // AM / PM
+        case 'a' : // fall through to A
+        case 'A' :
+            config._isPm = config._locale.isPM(input);
+            break;
+        // 24 HOUR
+        case 'H' : // fall through to hh
+        case 'HH' : // fall through to hh
+        case 'h' : // fall through to hh
+        case 'hh' :
+            datePartArray[HOUR] = toInt(input);
+            break;
+        // MINUTE
+        case 'm' : // fall through to mm
+        case 'mm' :
+            datePartArray[MINUTE] = toInt(input);
+            break;
+        // SECOND
+        case 's' : // fall through to ss
+        case 'ss' :
+            datePartArray[SECOND] = toInt(input);
+            break;
+        // MILLISECOND
+        case 'S' :
+        case 'SS' :
+        case 'SSS' :
+        case 'SSSS' :
+            datePartArray[MILLISECOND] = toInt(('0.' + input) * 1000);
+            break;
+        // UNIX TIMESTAMP WITH MS
+        case 'X':
+            config._d = new Date(parseFloat(input) * 1000);
+            break;
+        // TIMEZONE
+        case 'Z' : // fall through to ZZ
+        case 'ZZ' :
+            config._useUTC = true;
+            config._tzm = timezoneMinutesFromString(input);
+            break;
+        // WEEKDAY - human
+        case 'dd':
+        case 'ddd':
+        case 'dddd':
+            a = config._locale.weekdaysParse(input);
+            // if we didn't get a weekday name, mark the date as invalid
+            if (a != null) {
+                config._w = config._w || {};
+                config._w['d'] = a;
+            } else {
+                config._pf.invalidWeekday = input;
+            }
+            break;
+        // WEEK, WEEK DAY - numeric
+        case 'w':
+        case 'ww':
+        case 'W':
+        case 'WW':
+        case 'd':
+        case 'e':
+        case 'E':
+            token = token.substr(0, 1);
+            /* falls through */
+        case 'gggg':
+        case 'GGGG':
+        case 'GGGGG':
+            token = token.substr(0, 2);
+            if (input) {
+                config._w = config._w || {};
+                config._w[token] = toInt(input);
+            }
+            break;
+        case 'gg':
+        case 'GG':
+            config._w = config._w || {};
+            config._w[token] = moment.parseTwoDigitYear(input);
+        }
+    }
+
+    function dayOfYearFromWeekInfo(config) {
+        var w, weekYear, week, weekday, dow, doy, temp;
+
+        w = config._w;
+        if (w.GG != null || w.W != null || w.E != null) {
+            dow = 1;
+            doy = 4;
+
+            // TODO: We need to take the current isoWeekYear, but that depends on
+            // how we interpret now (local, utc, fixed offset). So create
+            // a now version of current config (take local/utc/offset flags, and
+            // create now).
+            weekYear = dfl(w.GG, config._a[YEAR], weekOfYear(moment(), 1, 4).year);
+            week = dfl(w.W, 1);
+            weekday = dfl(w.E, 1);
+        } else {
+            dow = config._locale._week.dow;
+            doy = config._locale._week.doy;
+
+            weekYear = dfl(w.gg, config._a[YEAR], weekOfYear(moment(), dow, doy).year);
+            week = dfl(w.w, 1);
+
+            if (w.d != null) {
+                // weekday -- low day numbers are considered next week
+                weekday = w.d;
+                if (weekday < dow) {
+                    ++week;
+                }
+            } else if (w.e != null) {
+                // local weekday -- counting starts from begining of week
+                weekday = w.e + dow;
+            } else {
+                // default to begining of week
+                weekday = dow;
+            }
+        }
+        temp = dayOfYearFromWeeks(weekYear, week, weekday, doy, dow);
+
+        config._a[YEAR] = temp.year;
+        config._dayOfYear = temp.dayOfYear;
+    }
+
+    // convert an array to a date.
+    // the array should mirror the parameters below
+    // note: all values past the year are optional and will default to the lowest possible value.
+    // [year, month, day , hour, minute, second, millisecond]
+    function dateFromConfig(config) {
+        var i, date, input = [], currentDate, yearToUse;
+
+        if (config._d) {
+            return;
+        }
+
+        currentDate = currentDateArray(config);
+
+        //compute day of the year from weeks and weekdays
+        if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
+            dayOfYearFromWeekInfo(config);
+        }
+
+        //if the day of the year is set, figure out what it is
+        if (config._dayOfYear) {
+            yearToUse = dfl(config._a[YEAR], currentDate[YEAR]);
+
+            if (config._dayOfYear > daysInYear(yearToUse)) {
+                config._pf._overflowDayOfYear = true;
+            }
+
+            date = makeUTCDate(yearToUse, 0, config._dayOfYear);
+            config._a[MONTH] = date.getUTCMonth();
+            config._a[DATE] = date.getUTCDate();
+        }
+
+        // Default to current date.
+        // * if no year, month, day of month are given, default to today
+        // * if day of month is given, default month and year
+        // * if month is given, default only year
+        // * if year is given, don't default anything
+        for (i = 0; i < 3 && config._a[i] == null; ++i) {
+            config._a[i] = input[i] = currentDate[i];
+        }
+
+        // Zero out whatever was not defaulted, including time
+        for (; i < 7; i++) {
+            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
+        }
+
+        config._d = (config._useUTC ? makeUTCDate : makeDate).apply(null, input);
+        // Apply timezone offset from input. The actual zone can be changed
+        // with parseZone.
+        if (config._tzm != null) {
+            config._d.setUTCMinutes(config._d.getUTCMinutes() + config._tzm);
+        }
+    }
+
+    function dateFromObject(config) {
+        var normalizedInput;
+
+        if (config._d) {
+            return;
+        }
+
+        normalizedInput = normalizeObjectUnits(config._i);
+        config._a = [
+            normalizedInput.year,
+            normalizedInput.month,
+            normalizedInput.day,
+            normalizedInput.hour,
+            normalizedInput.minute,
+            normalizedInput.second,
+            normalizedInput.millisecond
+        ];
+
+        dateFromConfig(config);
+    }
+
+    function currentDateArray(config) {
+        var now = new Date();
+        if (config._useUTC) {
+            return [
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate()
+            ];
+        } else {
+            return [now.getFullYear(), now.getMonth(), now.getDate()];
+        }
+    }
+
+    // date from string and format string
+    function makeDateFromStringAndFormat(config) {
+        if (config._f === moment.ISO_8601) {
+            parseISO(config);
+            return;
+        }
+
+        config._a = [];
+        config._pf.empty = true;
+
+        // This array is used to make a Date, either with `new Date` or `Date.UTC`
+        var string = '' + config._i,
+            i, parsedInput, tokens, token, skipped,
+            stringLength = string.length,
+            totalParsedInputLength = 0;
+
+        tokens = expandFormat(config._f, config._locale).match(formattingTokens) || [];
+
+        for (i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            parsedInput = (string.match(getParseRegexForToken(token, config)) || [])[0];
+            if (parsedInput) {
+                skipped = string.substr(0, string.indexOf(parsedInput));
+                if (skipped.length > 0) {
+                    config._pf.unusedInput.push(skipped);
+                }
+                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+                totalParsedInputLength += parsedInput.length;
+            }
+            // don't parse if it's not a known token
+            if (formatTokenFunctions[token]) {
+                if (parsedInput) {
+                    config._pf.empty = false;
+                }
+                else {
+                    config._pf.unusedTokens.push(token);
+                }
+                addTimeToArrayFromToken(token, parsedInput, config);
+            }
+            else if (config._strict && !parsedInput) {
+                config._pf.unusedTokens.push(token);
+            }
+        }
+
+        // add remaining unparsed input length to the string
+        config._pf.charsLeftOver = stringLength - totalParsedInputLength;
+        if (string.length > 0) {
+            config._pf.unusedInput.push(string);
+        }
+
+        // handle am pm
+        if (config._isPm && config._a[HOUR] < 12) {
+            config._a[HOUR] += 12;
+        }
+        // if is 12 am, change hours to 0
+        if (config._isPm === false && config._a[HOUR] === 12) {
+            config._a[HOUR] = 0;
+        }
+
+        dateFromConfig(config);
+        checkOverflow(config);
+    }
+
+    function unescapeFormat(s) {
+        return s.replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (matched, p1, p2, p3, p4) {
+            return p1 || p2 || p3 || p4;
+        });
+    }
+
+    // Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+    function regexpEscape(s) {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    // date from string and array of format strings
+    function makeDateFromStringAndArray(config) {
+        var tempConfig,
+            bestMoment,
+
+            scoreToBeat,
+            i,
+            currentScore;
+
+        if (config._f.length === 0) {
+            config._pf.invalidFormat = true;
+            config._d = new Date(NaN);
+            return;
+        }
+
+        for (i = 0; i < config._f.length; i++) {
+            currentScore = 0;
+            tempConfig = copyConfig({}, config);
+            if (config._useUTC != null) {
+                tempConfig._useUTC = config._useUTC;
+            }
+            tempConfig._pf = defaultParsingFlags();
+            tempConfig._f = config._f[i];
+            makeDateFromStringAndFormat(tempConfig);
+
+            if (!isValid(tempConfig)) {
+                continue;
+            }
+
+            // if there is any input that was not parsed add a penalty for that format
+            currentScore += tempConfig._pf.charsLeftOver;
+
+            //or tokens
+            currentScore += tempConfig._pf.unusedTokens.length * 10;
+
+            tempConfig._pf.score = currentScore;
+
+            if (scoreToBeat == null || currentScore < scoreToBeat) {
+                scoreToBeat = currentScore;
+                bestMoment = tempConfig;
+            }
+        }
+
+        extend(config, bestMoment || tempConfig);
+    }
+
+    // date from iso format
+    function parseISO(config) {
+        var i, l,
+            string = config._i,
+            match = isoRegex.exec(string);
+
+        if (match) {
+            config._pf.iso = true;
+            for (i = 0, l = isoDates.length; i < l; i++) {
+                if (isoDates[i][1].exec(string)) {
+                    // match[5] should be 'T' or undefined
+                    config._f = isoDates[i][0] + (match[6] || ' ');
+                    break;
+                }
+            }
+            for (i = 0, l = isoTimes.length; i < l; i++) {
+                if (isoTimes[i][1].exec(string)) {
+                    config._f += isoTimes[i][0];
+                    break;
+                }
+            }
+            if (string.match(parseTokenTimezone)) {
+                config._f += 'Z';
+            }
+            makeDateFromStringAndFormat(config);
+        } else {
+            config._isValid = false;
+        }
+    }
+
+    // date from iso format or fallback
+    function makeDateFromString(config) {
+        parseISO(config);
+        if (config._isValid === false) {
+            delete config._isValid;
+            moment.createFromInputFallback(config);
+        }
+    }
+
+    function map(arr, fn) {
+        var res = [], i;
+        for (i = 0; i < arr.length; ++i) {
+            res.push(fn(arr[i], i));
+        }
+        return res;
+    }
+
+    function makeDateFromInput(config) {
+        var input = config._i, matched;
+        if (input === undefined) {
+            config._d = new Date();
+        } else if (isDate(input)) {
+            config._d = new Date(+input);
+        } else if ((matched = aspNetJsonRegex.exec(input)) !== null) {
+            config._d = new Date(+matched[1]);
+        } else if (typeof input === 'string') {
+            makeDateFromString(config);
+        } else if (isArray(input)) {
+            config._a = map(input.slice(0), function (obj) {
+                return parseInt(obj, 10);
+            });
+            dateFromConfig(config);
+        } else if (typeof(input) === 'object') {
+            dateFromObject(config);
+        } else if (typeof(input) === 'number') {
+            // from milliseconds
+            config._d = new Date(input);
+        } else {
+            moment.createFromInputFallback(config);
+        }
+    }
+
+    function makeDate(y, m, d, h, M, s, ms) {
+        //can't just apply() to create a date:
+        //http://stackoverflow.com/questions/181348/instantiating-a-javascript-object-by-calling-prototype-constructor-apply
+        var date = new Date(y, m, d, h, M, s, ms);
+
+        //the date constructor doesn't accept years < 1970
+        if (y < 1970) {
+            date.setFullYear(y);
+        }
+        return date;
+    }
+
+    function makeUTCDate(y) {
+        var date = new Date(Date.UTC.apply(null, arguments));
+        if (y < 1970) {
+            date.setUTCFullYear(y);
+        }
+        return date;
+    }
+
+    function parseWeekday(input, locale) {
+        if (typeof input === 'string') {
+            if (!isNaN(input)) {
+                input = parseInt(input, 10);
+            }
+            else {
+                input = locale.weekdaysParse(input);
+                if (typeof input !== 'number') {
+                    return null;
+                }
+            }
+        }
+        return input;
+    }
+
+    /************************************
+        Relative Time
+    ************************************/
+
+
+    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
+    function substituteTimeAgo(string, number, withoutSuffix, isFuture, locale) {
+        return locale.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
+    }
+
+    function relativeTime(posNegDuration, withoutSuffix, locale) {
+        var duration = moment.duration(posNegDuration).abs(),
+            seconds = round(duration.as('s')),
+            minutes = round(duration.as('m')),
+            hours = round(duration.as('h')),
+            days = round(duration.as('d')),
+            months = round(duration.as('M')),
+            years = round(duration.as('y')),
+
+            args = seconds < relativeTimeThresholds.s && ['s', seconds] ||
+                minutes === 1 && ['m'] ||
+                minutes < relativeTimeThresholds.m && ['mm', minutes] ||
+                hours === 1 && ['h'] ||
+                hours < relativeTimeThresholds.h && ['hh', hours] ||
+                days === 1 && ['d'] ||
+                days < relativeTimeThresholds.d && ['dd', days] ||
+                months === 1 && ['M'] ||
+                months < relativeTimeThresholds.M && ['MM', months] ||
+                years === 1 && ['y'] || ['yy', years];
+
+        args[2] = withoutSuffix;
+        args[3] = +posNegDuration > 0;
+        args[4] = locale;
+        return substituteTimeAgo.apply({}, args);
+    }
+
+
+    /************************************
+        Week of Year
+    ************************************/
+
+
+    // firstDayOfWeek       0 = sun, 6 = sat
+    //                      the day of the week that starts the week
+    //                      (usually sunday or monday)
+    // firstDayOfWeekOfYear 0 = sun, 6 = sat
+    //                      the first week is the week that contains the first
+    //                      of this day of the week
+    //                      (eg. ISO weeks use thursday (4))
+    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
+        var end = firstDayOfWeekOfYear - firstDayOfWeek,
+            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
+            adjustedMoment;
+
+
+        if (daysToDayOfWeek > end) {
+            daysToDayOfWeek -= 7;
+        }
+
+        if (daysToDayOfWeek < end - 7) {
+            daysToDayOfWeek += 7;
+        }
+
+        adjustedMoment = moment(mom).add(daysToDayOfWeek, 'd');
+        return {
+            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
+            year: adjustedMoment.year()
+        };
+    }
+
+    //http://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
+    function dayOfYearFromWeeks(year, week, weekday, firstDayOfWeekOfYear, firstDayOfWeek) {
+        var d = makeUTCDate(year, 0, 1).getUTCDay(), daysToAdd, dayOfYear;
+
+        d = d === 0 ? 7 : d;
+        weekday = weekday != null ? weekday : firstDayOfWeek;
+        daysToAdd = firstDayOfWeek - d + (d > firstDayOfWeekOfYear ? 7 : 0) - (d < firstDayOfWeek ? 7 : 0);
+        dayOfYear = 7 * (week - 1) + (weekday - firstDayOfWeek) + daysToAdd + 1;
+
+        return {
+            year: dayOfYear > 0 ? year : year - 1,
+            dayOfYear: dayOfYear > 0 ?  dayOfYear : daysInYear(year - 1) + dayOfYear
+        };
+    }
+
+    /************************************
+        Top Level Functions
+    ************************************/
+
+    function makeMoment(config) {
+        var input = config._i,
+            format = config._f;
+
+        config._locale = config._locale || moment.localeData(config._l);
+
+        if (input === null || (format === undefined && input === '')) {
+            return moment.invalid({nullInput: true});
+        }
+
+        if (typeof input === 'string') {
+            config._i = input = config._locale.preparse(input);
+        }
+
+        if (moment.isMoment(input)) {
+            return new Moment(input, true);
+        } else if (format) {
+            if (isArray(format)) {
+                makeDateFromStringAndArray(config);
+            } else {
+                makeDateFromStringAndFormat(config);
+            }
+        } else {
+            makeDateFromInput(config);
+        }
+
+        return new Moment(config);
+    }
+
+    moment = function (input, format, locale, strict) {
+        var c;
+
+        if (typeof(locale) === 'boolean') {
+            strict = locale;
+            locale = undefined;
+        }
+        // object construction must be done this way.
+        // https://github.com/moment/moment/issues/1423
+        c = {};
+        c._isAMomentObject = true;
+        c._i = input;
+        c._f = format;
+        c._l = locale;
+        c._strict = strict;
+        c._isUTC = false;
+        c._pf = defaultParsingFlags();
+
+        return makeMoment(c);
+    };
+
+    moment.suppressDeprecationWarnings = false;
+
+    moment.createFromInputFallback = deprecate(
+        'moment construction falls back to js Date. This is ' +
+        'discouraged and will be removed in upcoming major ' +
+        'release. Please refer to ' +
+        'https://github.com/moment/moment/issues/1407 for more info.',
+        function (config) {
+            config._d = new Date(config._i);
+        }
+    );
+
+    // Pick a moment m from moments so that m[fn](other) is true for all
+    // other. This relies on the function fn to be transitive.
+    //
+    // moments should either be an array of moment objects or an array, whose
+    // first element is an array of moment objects.
+    function pickBy(fn, moments) {
+        var res, i;
+        if (moments.length === 1 && isArray(moments[0])) {
+            moments = moments[0];
+        }
+        if (!moments.length) {
+            return moment();
+        }
+        res = moments[0];
+        for (i = 1; i < moments.length; ++i) {
+            if (moments[i][fn](res)) {
+                res = moments[i];
+            }
+        }
+        return res;
+    }
+
+    moment.min = function () {
+        var args = [].slice.call(arguments, 0);
+
+        return pickBy('isBefore', args);
+    };
+
+    moment.max = function () {
+        var args = [].slice.call(arguments, 0);
+
+        return pickBy('isAfter', args);
+    };
+
+    // creating with utc
+    moment.utc = function (input, format, locale, strict) {
+        var c;
+
+        if (typeof(locale) === 'boolean') {
+            strict = locale;
+            locale = undefined;
+        }
+        // object construction must be done this way.
+        // https://github.com/moment/moment/issues/1423
+        c = {};
+        c._isAMomentObject = true;
+        c._useUTC = true;
+        c._isUTC = true;
+        c._l = locale;
+        c._i = input;
+        c._f = format;
+        c._strict = strict;
+        c._pf = defaultParsingFlags();
+
+        return makeMoment(c).utc();
+    };
+
+    // creating with unix timestamp (in seconds)
+    moment.unix = function (input) {
+        return moment(input * 1000);
+    };
+
+    // duration
+    moment.duration = function (input, key) {
+        var duration = input,
+            // matching against regexp is expensive, do it on demand
+            match = null,
+            sign,
+            ret,
+            parseIso,
+            diffRes;
+
+        if (moment.isDuration(input)) {
+            duration = {
+                ms: input._milliseconds,
+                d: input._days,
+                M: input._months
+            };
+        } else if (typeof input === 'number') {
+            duration = {};
+            if (key) {
+                duration[key] = input;
+            } else {
+                duration.milliseconds = input;
+            }
+        } else if (!!(match = aspNetTimeSpanJsonRegex.exec(input))) {
+            sign = (match[1] === '-') ? -1 : 1;
+            duration = {
+                y: 0,
+                d: toInt(match[DATE]) * sign,
+                h: toInt(match[HOUR]) * sign,
+                m: toInt(match[MINUTE]) * sign,
+                s: toInt(match[SECOND]) * sign,
+                ms: toInt(match[MILLISECOND]) * sign
+            };
+        } else if (!!(match = isoDurationRegex.exec(input))) {
+            sign = (match[1] === '-') ? -1 : 1;
+            parseIso = function (inp) {
+                // We'd normally use ~~inp for this, but unfortunately it also
+                // converts floats to ints.
+                // inp may be undefined, so careful calling replace on it.
+                var res = inp && parseFloat(inp.replace(',', '.'));
+                // apply sign while we're at it
+                return (isNaN(res) ? 0 : res) * sign;
+            };
+            duration = {
+                y: parseIso(match[2]),
+                M: parseIso(match[3]),
+                d: parseIso(match[4]),
+                h: parseIso(match[5]),
+                m: parseIso(match[6]),
+                s: parseIso(match[7]),
+                w: parseIso(match[8])
+            };
+        } else if (typeof duration === 'object' &&
+                ('from' in duration || 'to' in duration)) {
+            diffRes = momentsDifference(moment(duration.from), moment(duration.to));
+
+            duration = {};
+            duration.ms = diffRes.milliseconds;
+            duration.M = diffRes.months;
+        }
+
+        ret = new Duration(duration);
+
+        if (moment.isDuration(input) && hasOwnProp(input, '_locale')) {
+            ret._locale = input._locale;
+        }
+
+        return ret;
+    };
+
+    // version number
+    moment.version = VERSION;
+
+    // default format
+    moment.defaultFormat = isoFormat;
+
+    // constant that refers to the ISO standard
+    moment.ISO_8601 = function () {};
+
+    // Plugins that add properties should also add the key here (null value),
+    // so we can properly clone ourselves.
+    moment.momentProperties = momentProperties;
+
+    // This function will be called whenever a moment is mutated.
+    // It is intended to keep the offset in sync with the timezone.
+    moment.updateOffset = function () {};
+
+    // This function allows you to set a threshold for relative time strings
+    moment.relativeTimeThreshold = function (threshold, limit) {
+        if (relativeTimeThresholds[threshold] === undefined) {
+            return false;
+        }
+        if (limit === undefined) {
+            return relativeTimeThresholds[threshold];
+        }
+        relativeTimeThresholds[threshold] = limit;
+        return true;
+    };
+
+    moment.lang = deprecate(
+        'moment.lang is deprecated. Use moment.locale instead.',
+        function (key, value) {
+            return moment.locale(key, value);
+        }
+    );
+
+    // This function will load locale and then set the global locale.  If
+    // no arguments are passed in, it will simply return the current global
+    // locale key.
+    moment.locale = function (key, values) {
+        var data;
+        if (key) {
+            if (typeof(values) !== 'undefined') {
+                data = moment.defineLocale(key, values);
+            }
+            else {
+                data = moment.localeData(key);
+            }
+
+            if (data) {
+                moment.duration._locale = moment._locale = data;
+            }
+        }
+
+        return moment._locale._abbr;
+    };
+
+    moment.defineLocale = function (name, values) {
+        if (values !== null) {
+            values.abbr = name;
+            if (!locales[name]) {
+                locales[name] = new Locale();
+            }
+            locales[name].set(values);
+
+            // backwards compat for now: also set the locale
+            moment.locale(name);
+
+            return locales[name];
+        } else {
+            // useful for testing
+            delete locales[name];
+            return null;
+        }
+    };
+
+    moment.langData = deprecate(
+        'moment.langData is deprecated. Use moment.localeData instead.',
+        function (key) {
+            return moment.localeData(key);
+        }
+    );
+
+    // returns locale data
+    moment.localeData = function (key) {
+        var locale;
+
+        if (key && key._locale && key._locale._abbr) {
+            key = key._locale._abbr;
+        }
+
+        if (!key) {
+            return moment._locale;
+        }
+
+        if (!isArray(key)) {
+            //short-circuit everything else
+            locale = loadLocale(key);
+            if (locale) {
+                return locale;
+            }
+            key = [key];
+        }
+
+        return chooseLocale(key);
+    };
+
+    // compare moment object
+    moment.isMoment = function (obj) {
+        return obj instanceof Moment ||
+            (obj != null && hasOwnProp(obj, '_isAMomentObject'));
+    };
+
+    // for typechecking Duration objects
+    moment.isDuration = function (obj) {
+        return obj instanceof Duration;
+    };
+
+    for (i = lists.length - 1; i >= 0; --i) {
+        makeList(lists[i]);
+    }
+
+    moment.normalizeUnits = function (units) {
+        return normalizeUnits(units);
+    };
+
+    moment.invalid = function (flags) {
+        var m = moment.utc(NaN);
+        if (flags != null) {
+            extend(m._pf, flags);
+        }
+        else {
+            m._pf.userInvalidated = true;
+        }
+
+        return m;
+    };
+
+    moment.parseZone = function () {
+        return moment.apply(null, arguments).parseZone();
+    };
+
+    moment.parseTwoDigitYear = function (input) {
+        return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
+    };
+
+    /************************************
+        Moment Prototype
+    ************************************/
+
+
+    extend(moment.fn = Moment.prototype, {
+
+        clone : function () {
+            return moment(this);
+        },
+
+        valueOf : function () {
+            return +this._d + ((this._offset || 0) * 60000);
+        },
+
+        unix : function () {
+            return Math.floor(+this / 1000);
+        },
+
+        toString : function () {
+            return this.clone().locale('en').format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
+        },
+
+        toDate : function () {
+            return this._offset ? new Date(+this) : this._d;
+        },
+
+        toISOString : function () {
+            var m = moment(this).utc();
+            if (0 < m.year() && m.year() <= 9999) {
+                return formatMoment(m, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+            } else {
+                return formatMoment(m, 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+            }
+        },
+
+        toArray : function () {
+            var m = this;
+            return [
+                m.year(),
+                m.month(),
+                m.date(),
+                m.hours(),
+                m.minutes(),
+                m.seconds(),
+                m.milliseconds()
+            ];
+        },
+
+        isValid : function () {
+            return isValid(this);
+        },
+
+        isDSTShifted : function () {
+            if (this._a) {
+                return this.isValid() && compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray()) > 0;
+            }
+
+            return false;
+        },
+
+        parsingFlags : function () {
+            return extend({}, this._pf);
+        },
+
+        invalidAt: function () {
+            return this._pf.overflow;
+        },
+
+        utc : function (keepLocalTime) {
+            return this.zone(0, keepLocalTime);
+        },
+
+        local : function (keepLocalTime) {
+            if (this._isUTC) {
+                this.zone(0, keepLocalTime);
+                this._isUTC = false;
+
+                if (keepLocalTime) {
+                    this.add(this._dateTzOffset(), 'm');
+                }
+            }
+            return this;
+        },
+
+        format : function (inputString) {
+            var output = formatMoment(this, inputString || moment.defaultFormat);
+            return this.localeData().postformat(output);
+        },
+
+        add : createAdder(1, 'add'),
+
+        subtract : createAdder(-1, 'subtract'),
+
+        diff : function (input, units, asFloat) {
+            var that = makeAs(input, this),
+                zoneDiff = (this.zone() - that.zone()) * 6e4,
+                diff, output, daysAdjust;
+
+            units = normalizeUnits(units);
+
+            if (units === 'year' || units === 'month') {
+                // average number of days in the months in the given dates
+                diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
+                // difference in months
+                output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
+                // adjust by taking difference in days, average number of days
+                // and dst in the given months.
+                daysAdjust = (this - moment(this).startOf('month')) -
+                    (that - moment(that).startOf('month'));
+                // same as above but with zones, to negate all dst
+                daysAdjust -= ((this.zone() - moment(this).startOf('month').zone()) -
+                        (that.zone() - moment(that).startOf('month').zone())) * 6e4;
+                output += daysAdjust / diff;
+                if (units === 'year') {
+                    output = output / 12;
+                }
+            } else {
+                diff = (this - that);
+                output = units === 'second' ? diff / 1e3 : // 1000
+                    units === 'minute' ? diff / 6e4 : // 1000 * 60
+                    units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
+                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
+                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
+                    diff;
+            }
+            return asFloat ? output : absRound(output);
+        },
+
+        from : function (time, withoutSuffix) {
+            return moment.duration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
+        },
+
+        fromNow : function (withoutSuffix) {
+            return this.from(moment(), withoutSuffix);
+        },
+
+        calendar : function (time) {
+            // We want to compare the start of today, vs this.
+            // Getting start-of-today depends on whether we're zone'd or not.
+            var now = time || moment(),
+                sod = makeAs(now, this).startOf('day'),
+                diff = this.diff(sod, 'days', true),
+                format = diff < -6 ? 'sameElse' :
+                    diff < -1 ? 'lastWeek' :
+                    diff < 0 ? 'lastDay' :
+                    diff < 1 ? 'sameDay' :
+                    diff < 2 ? 'nextDay' :
+                    diff < 7 ? 'nextWeek' : 'sameElse';
+            return this.format(this.localeData().calendar(format, this));
+        },
+
+        isLeapYear : function () {
+            return isLeapYear(this.year());
+        },
+
+        isDST : function () {
+            return (this.zone() < this.clone().month(0).zone() ||
+                this.zone() < this.clone().month(5).zone());
+        },
+
+        day : function (input) {
+            var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
+            if (input != null) {
+                input = parseWeekday(input, this.localeData());
+                return this.add(input - day, 'd');
+            } else {
+                return day;
+            }
+        },
+
+        month : makeAccessor('Month', true),
+
+        startOf : function (units) {
+            units = normalizeUnits(units);
+            // the following switch intentionally omits break keywords
+            // to utilize falling through the cases.
+            switch (units) {
+            case 'year':
+                this.month(0);
+                /* falls through */
+            case 'quarter':
+            case 'month':
+                this.date(1);
+                /* falls through */
+            case 'week':
+            case 'isoWeek':
+            case 'day':
+                this.hours(0);
+                /* falls through */
+            case 'hour':
+                this.minutes(0);
+                /* falls through */
+            case 'minute':
+                this.seconds(0);
+                /* falls through */
+            case 'second':
+                this.milliseconds(0);
+                /* falls through */
+            }
+
+            // weeks are a special case
+            if (units === 'week') {
+                this.weekday(0);
+            } else if (units === 'isoWeek') {
+                this.isoWeekday(1);
+            }
+
+            // quarters are also special
+            if (units === 'quarter') {
+                this.month(Math.floor(this.month() / 3) * 3);
+            }
+
+            return this;
+        },
+
+        endOf: function (units) {
+            units = normalizeUnits(units);
+            return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
+        },
+
+        isAfter: function (input, units) {
+            units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
+            if (units === 'millisecond') {
+                input = moment.isMoment(input) ? input : moment(input);
+                return +this > +input;
+            } else {
+                return +this.clone().startOf(units) > +moment(input).startOf(units);
+            }
+        },
+
+        isBefore: function (input, units) {
+            units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
+            if (units === 'millisecond') {
+                input = moment.isMoment(input) ? input : moment(input);
+                return +this < +input;
+            } else {
+                return +this.clone().startOf(units) < +moment(input).startOf(units);
+            }
+        },
+
+        isSame: function (input, units) {
+            units = normalizeUnits(units || 'millisecond');
+            if (units === 'millisecond') {
+                input = moment.isMoment(input) ? input : moment(input);
+                return +this === +input;
+            } else {
+                return +this.clone().startOf(units) === +makeAs(input, this).startOf(units);
+            }
+        },
+
+        min: deprecate(
+                 'moment().min is deprecated, use moment.min instead. https://github.com/moment/moment/issues/1548',
+                 function (other) {
+                     other = moment.apply(null, arguments);
+                     return other < this ? this : other;
+                 }
+         ),
+
+        max: deprecate(
+                'moment().max is deprecated, use moment.max instead. https://github.com/moment/moment/issues/1548',
+                function (other) {
+                    other = moment.apply(null, arguments);
+                    return other > this ? this : other;
+                }
+        ),
+
+        // keepLocalTime = true means only change the timezone, without
+        // affecting the local hour. So 5:31:26 +0300 --[zone(2, true)]-->
+        // 5:31:26 +0200 It is possible that 5:31:26 doesn't exist int zone
+        // +0200, so we adjust the time as needed, to be valid.
+        //
+        // Keeping the time actually adds/subtracts (one hour)
+        // from the actual represented time. That is why we call updateOffset
+        // a second time. In case it wants us to change the offset again
+        // _changeInProgress == true case, then we have to adjust, because
+        // there is no such time in the given timezone.
+        zone : function (input, keepLocalTime) {
+            var offset = this._offset || 0,
+                localAdjust;
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = timezoneMinutesFromString(input);
+                }
+                if (Math.abs(input) < 16) {
+                    input = input * 60;
+                }
+                if (!this._isUTC && keepLocalTime) {
+                    localAdjust = this._dateTzOffset();
+                }
+                this._offset = input;
+                this._isUTC = true;
+                if (localAdjust != null) {
+                    this.subtract(localAdjust, 'm');
+                }
+                if (offset !== input) {
+                    if (!keepLocalTime || this._changeInProgress) {
+                        addOrSubtractDurationFromMoment(this,
+                                moment.duration(offset - input, 'm'), 1, false);
+                    } else if (!this._changeInProgress) {
+                        this._changeInProgress = true;
+                        moment.updateOffset(this, true);
+                        this._changeInProgress = null;
+                    }
+                }
+            } else {
+                return this._isUTC ? offset : this._dateTzOffset();
+            }
+            return this;
+        },
+
+        zoneAbbr : function () {
+            return this._isUTC ? 'UTC' : '';
+        },
+
+        zoneName : function () {
+            return this._isUTC ? 'Coordinated Universal Time' : '';
+        },
+
+        parseZone : function () {
+            if (this._tzm) {
+                this.zone(this._tzm);
+            } else if (typeof this._i === 'string') {
+                this.zone(this._i);
+            }
+            return this;
+        },
+
+        hasAlignedHourOffset : function (input) {
+            if (!input) {
+                input = 0;
+            }
+            else {
+                input = moment(input).zone();
+            }
+
+            return (this.zone() - input) % 60 === 0;
+        },
+
+        daysInMonth : function () {
+            return daysInMonth(this.year(), this.month());
+        },
+
+        dayOfYear : function (input) {
+            var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
+            return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
+        },
+
+        quarter : function (input) {
+            return input == null ? Math.ceil((this.month() + 1) / 3) : this.month((input - 1) * 3 + this.month() % 3);
+        },
+
+        weekYear : function (input) {
+            var year = weekOfYear(this, this.localeData()._week.dow, this.localeData()._week.doy).year;
+            return input == null ? year : this.add((input - year), 'y');
+        },
+
+        isoWeekYear : function (input) {
+            var year = weekOfYear(this, 1, 4).year;
+            return input == null ? year : this.add((input - year), 'y');
+        },
+
+        week : function (input) {
+            var week = this.localeData().week(this);
+            return input == null ? week : this.add((input - week) * 7, 'd');
+        },
+
+        isoWeek : function (input) {
+            var week = weekOfYear(this, 1, 4).week;
+            return input == null ? week : this.add((input - week) * 7, 'd');
+        },
+
+        weekday : function (input) {
+            var weekday = (this.day() + 7 - this.localeData()._week.dow) % 7;
+            return input == null ? weekday : this.add(input - weekday, 'd');
+        },
+
+        isoWeekday : function (input) {
+            // behaves the same as moment#day except
+            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
+            // as a setter, sunday should belong to the previous week.
+            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
+        },
+
+        isoWeeksInYear : function () {
+            return weeksInYear(this.year(), 1, 4);
+        },
+
+        weeksInYear : function () {
+            var weekInfo = this.localeData()._week;
+            return weeksInYear(this.year(), weekInfo.dow, weekInfo.doy);
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units]();
+        },
+
+        set : function (units, value) {
+            units = normalizeUnits(units);
+            if (typeof this[units] === 'function') {
+                this[units](value);
+            }
+            return this;
+        },
+
+        // If passed a locale key, it will set the locale for this
+        // instance.  Otherwise, it will return the locale configuration
+        // variables for this instance.
+        locale : function (key) {
+            var newLocaleData;
+
+            if (key === undefined) {
+                return this._locale._abbr;
+            } else {
+                newLocaleData = moment.localeData(key);
+                if (newLocaleData != null) {
+                    this._locale = newLocaleData;
+                }
+                return this;
+            }
+        },
+
+        lang : deprecate(
+            'moment().lang() is deprecated. Use moment().localeData() instead.',
+            function (key) {
+                if (key === undefined) {
+                    return this.localeData();
+                } else {
+                    return this.locale(key);
+                }
+            }
+        ),
+
+        localeData : function () {
+            return this._locale;
+        },
+
+        _dateTzOffset : function () {
+            // On Firefox.24 Date#getTimezoneOffset returns a floating point.
+            // https://github.com/moment/moment/pull/1871
+            return Math.round(this._d.getTimezoneOffset() / 15) * 15;
+        }
+    });
+
+    function rawMonthSetter(mom, value) {
+        var dayOfMonth;
+
+        // TODO: Move this out of here!
+        if (typeof value === 'string') {
+            value = mom.localeData().monthsParse(value);
+            // TODO: Another silent failure?
+            if (typeof value !== 'number') {
+                return mom;
+            }
+        }
+
+        dayOfMonth = Math.min(mom.date(),
+                daysInMonth(mom.year(), value));
+        mom._d['set' + (mom._isUTC ? 'UTC' : '') + 'Month'](value, dayOfMonth);
+        return mom;
+    }
+
+    function rawGetter(mom, unit) {
+        return mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]();
+    }
+
+    function rawSetter(mom, unit, value) {
+        if (unit === 'Month') {
+            return rawMonthSetter(mom, value);
+        } else {
+            return mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+        }
+    }
+
+    function makeAccessor(unit, keepTime) {
+        return function (value) {
+            if (value != null) {
+                rawSetter(this, unit, value);
+                moment.updateOffset(this, keepTime);
+                return this;
+            } else {
+                return rawGetter(this, unit);
+            }
+        };
+    }
+
+    moment.fn.millisecond = moment.fn.milliseconds = makeAccessor('Milliseconds', false);
+    moment.fn.second = moment.fn.seconds = makeAccessor('Seconds', false);
+    moment.fn.minute = moment.fn.minutes = makeAccessor('Minutes', false);
+    // Setting the hour should keep the time, because the user explicitly
+    // specified which hour he wants. So trying to maintain the same hour (in
+    // a new timezone) makes sense. Adding/subtracting hours does not follow
+    // this rule.
+    moment.fn.hour = moment.fn.hours = makeAccessor('Hours', true);
+    // moment.fn.month is defined separately
+    moment.fn.date = makeAccessor('Date', true);
+    moment.fn.dates = deprecate('dates accessor is deprecated. Use date instead.', makeAccessor('Date', true));
+    moment.fn.year = makeAccessor('FullYear', true);
+    moment.fn.years = deprecate('years accessor is deprecated. Use year instead.', makeAccessor('FullYear', true));
+
+    // add plural methods
+    moment.fn.days = moment.fn.day;
+    moment.fn.months = moment.fn.month;
+    moment.fn.weeks = moment.fn.week;
+    moment.fn.isoWeeks = moment.fn.isoWeek;
+    moment.fn.quarters = moment.fn.quarter;
+
+    // add aliased format methods
+    moment.fn.toJSON = moment.fn.toISOString;
+
+    /************************************
+        Duration Prototype
+    ************************************/
+
+
+    function daysToYears (days) {
+        // 400 years have 146097 days (taking into account leap year rules)
+        return days * 400 / 146097;
+    }
+
+    function yearsToDays (years) {
+        // years * 365 + absRound(years / 4) -
+        //     absRound(years / 100) + absRound(years / 400);
+        return years * 146097 / 400;
+    }
+
+    extend(moment.duration.fn = Duration.prototype, {
+
+        _bubble : function () {
+            var milliseconds = this._milliseconds,
+                days = this._days,
+                months = this._months,
+                data = this._data,
+                seconds, minutes, hours, years = 0;
+
+            // The following code bubbles up values, see the tests for
+            // examples of what that means.
+            data.milliseconds = milliseconds % 1000;
+
+            seconds = absRound(milliseconds / 1000);
+            data.seconds = seconds % 60;
+
+            minutes = absRound(seconds / 60);
+            data.minutes = minutes % 60;
+
+            hours = absRound(minutes / 60);
+            data.hours = hours % 24;
+
+            days += absRound(hours / 24);
+
+            // Accurately convert days to years, assume start from year 0.
+            years = absRound(daysToYears(days));
+            days -= absRound(yearsToDays(years));
+
+            // 30 days to a month
+            // TODO (iskren): Use anchor date (like 1st Jan) to compute this.
+            months += absRound(days / 30);
+            days %= 30;
+
+            // 12 months -> 1 year
+            years += absRound(months / 12);
+            months %= 12;
+
+            data.days = days;
+            data.months = months;
+            data.years = years;
+        },
+
+        abs : function () {
+            this._milliseconds = Math.abs(this._milliseconds);
+            this._days = Math.abs(this._days);
+            this._months = Math.abs(this._months);
+
+            this._data.milliseconds = Math.abs(this._data.milliseconds);
+            this._data.seconds = Math.abs(this._data.seconds);
+            this._data.minutes = Math.abs(this._data.minutes);
+            this._data.hours = Math.abs(this._data.hours);
+            this._data.months = Math.abs(this._data.months);
+            this._data.years = Math.abs(this._data.years);
+
+            return this;
+        },
+
+        weeks : function () {
+            return absRound(this.days() / 7);
+        },
+
+        valueOf : function () {
+            return this._milliseconds +
+              this._days * 864e5 +
+              (this._months % 12) * 2592e6 +
+              toInt(this._months / 12) * 31536e6;
+        },
+
+        humanize : function (withSuffix) {
+            var output = relativeTime(this, !withSuffix, this.localeData());
+
+            if (withSuffix) {
+                output = this.localeData().pastFuture(+this, output);
+            }
+
+            return this.localeData().postformat(output);
+        },
+
+        add : function (input, val) {
+            // supports only 2.0-style add(1, 's') or add(moment)
+            var dur = moment.duration(input, val);
+
+            this._milliseconds += dur._milliseconds;
+            this._days += dur._days;
+            this._months += dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur = moment.duration(input, val);
+
+            this._milliseconds -= dur._milliseconds;
+            this._days -= dur._days;
+            this._months -= dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase() + 's']();
+        },
+
+        as : function (units) {
+            var days, months;
+            units = normalizeUnits(units);
+
+            if (units === 'month' || units === 'year') {
+                days = this._days + this._milliseconds / 864e5;
+                months = this._months + daysToYears(days) * 12;
+                return units === 'month' ? months : months / 12;
+            } else {
+                // handle milliseconds separately because of floating point math errors (issue #1867)
+                days = this._days + yearsToDays(this._months / 12);
+                switch (units) {
+                    case 'week': return days / 7 + this._milliseconds / 6048e5;
+                    case 'day': return days + this._milliseconds / 864e5;
+                    case 'hour': return days * 24 + this._milliseconds / 36e5;
+                    case 'minute': return days * 24 * 60 + this._milliseconds / 6e4;
+                    case 'second': return days * 24 * 60 * 60 + this._milliseconds / 1000;
+                    // Math.floor prevents floating point math errors here
+                    case 'millisecond': return Math.floor(days * 24 * 60 * 60 * 1000) + this._milliseconds;
+                    default: throw new Error('Unknown unit ' + units);
+                }
+            }
+        },
+
+        lang : moment.fn.lang,
+        locale : moment.fn.locale,
+
+        toIsoString : deprecate(
+            'toIsoString() is deprecated. Please use toISOString() instead ' +
+            '(notice the capitals)',
+            function () {
+                return this.toISOString();
+            }
+        ),
+
+        toISOString : function () {
+            // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
+            var years = Math.abs(this.years()),
+                months = Math.abs(this.months()),
+                days = Math.abs(this.days()),
+                hours = Math.abs(this.hours()),
+                minutes = Math.abs(this.minutes()),
+                seconds = Math.abs(this.seconds() + this.milliseconds() / 1000);
+
+            if (!this.asSeconds()) {
+                // this is the same as C#'s (Noda) and python (isodate)...
+                // but not other JS (goog.date)
+                return 'P0D';
+            }
+
+            return (this.asSeconds() < 0 ? '-' : '') +
+                'P' +
+                (years ? years + 'Y' : '') +
+                (months ? months + 'M' : '') +
+                (days ? days + 'D' : '') +
+                ((hours || minutes || seconds) ? 'T' : '') +
+                (hours ? hours + 'H' : '') +
+                (minutes ? minutes + 'M' : '') +
+                (seconds ? seconds + 'S' : '');
+        },
+
+        localeData : function () {
+            return this._locale;
+        }
+    });
+
+    moment.duration.fn.toString = moment.duration.fn.toISOString;
+
+    function makeDurationGetter(name) {
+        moment.duration.fn[name] = function () {
+            return this._data[name];
+        };
+    }
+
+    for (i in unitMillisecondFactors) {
+        if (hasOwnProp(unitMillisecondFactors, i)) {
+            makeDurationGetter(i.toLowerCase());
+        }
+    }
+
+    moment.duration.fn.asMilliseconds = function () {
+        return this.as('ms');
+    };
+    moment.duration.fn.asSeconds = function () {
+        return this.as('s');
+    };
+    moment.duration.fn.asMinutes = function () {
+        return this.as('m');
+    };
+    moment.duration.fn.asHours = function () {
+        return this.as('h');
+    };
+    moment.duration.fn.asDays = function () {
+        return this.as('d');
+    };
+    moment.duration.fn.asWeeks = function () {
+        return this.as('weeks');
+    };
+    moment.duration.fn.asMonths = function () {
+        return this.as('M');
+    };
+    moment.duration.fn.asYears = function () {
+        return this.as('y');
+    };
+
+    /************************************
+        Default Locale
+    ************************************/
+
+
+    // Set default locale, other locale will inherit from English.
+    moment.locale('en', {
+        ordinal : function (number) {
+            var b = number % 10,
+                output = (toInt(number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+            return number + output;
+        }
+    });
+
+    /* EMBED_LOCALES */
+
+    /************************************
+        Exposing Moment
+    ************************************/
+
+    function makeGlobal(shouldDeprecate) {
+        /*global ender:false */
+        if (typeof ender !== 'undefined') {
+            return;
+        }
+        oldGlobalMoment = globalScope.moment;
+        if (shouldDeprecate) {
+            globalScope.moment = deprecate(
+                    'Accessing Moment through the global scope is ' +
+                    'deprecated, and will be removed in an upcoming ' +
+                    'release.',
+                    moment);
+        } else {
+            globalScope.moment = moment;
+        }
+    }
+
+    // CommonJS module is defined
+    if (hasModule) {
+        module.exports = moment;
+    } else if (typeof define === 'function' && define.amd) {
+        define('moment', function (require, exports, module) {
+            if (module.config && module.config() && module.config().noGlobal === true) {
+                // release the global variable
+                globalScope.moment = oldGlobalMoment;
+            }
+
+            return moment;
+        });
+        makeGlobal(true);
+    } else {
+        makeGlobal();
+    }
+}).call(this);
+
+//! moment-timezone.js
+//! version : 0.2.1
+//! author : Tim Wood
+//! license : MIT
+//! github.com/moment/moment-timezone
+
+(function (root, factory) {
+	"use strict";
+
+	/*global define*/
+	if (typeof define === 'function' && define.amd) {
+		define(['moment'], factory);                 // AMD
+	} else if (typeof exports === 'object') {
+		module.exports = factory(require('moment')); // Node
+	} else {
+		factory(root.moment);                        // Browser
+	}
+}(this, function (moment) {
+	"use strict";
+
+	// Do not load moment-timezone a second time.
+	if (moment.tz !== undefined) { return moment; }
+
+	var VERSION = "0.2.1",
+		zones = {},
+		links = {};
+
+	/************************************
+		Unpacking
+	************************************/
+
+	function charCodeToInt(charCode) {
+		if (charCode > 96) {
+			return charCode - 87;
+		} else if (charCode > 64) {
+			return charCode - 29;
+		}
+		return charCode - 48;
+	}
+
+	function unpackBase60(string) {
+		var i = 0,
+			parts = string.split('.'),
+			whole = parts[0],
+			fractional = parts[1] || '',
+			multiplier = 1,
+			num,
+			out = 0,
+			sign = 1;
+
+		// handle negative numbers
+		if (string.charCodeAt(0) === 45) {
+			i = 1;
+			sign = -1;
+		}
+
+		// handle digits before the decimal
+		for (i; i < whole.length; i++) {
+			num = charCodeToInt(whole.charCodeAt(i));
+			out = 60 * out + num;
+		}
+
+		// handle digits after the decimal
+		for (i = 0; i < fractional.length; i++) {
+			multiplier = multiplier / 60;
+			num = charCodeToInt(fractional.charCodeAt(i));
+			out += num * multiplier;
+		}
+
+		return out * sign;
+	}
+
+	function arrayToInt (array) {
+		for (var i = 0; i < array.length; i++) {
+			array[i] = unpackBase60(array[i]);
+		}
+	}
+
+	function intToUntil (array, length) {
+		for (var i = 0; i < length; i++) {
+			array[i] = Math.round((array[i - 1] || 0) + (array[i] * 60000)); // minutes to milliseconds
+		}
+
+		array[length - 1] = Infinity;
+	}
+
+	function mapIndices (source, indices) {
+		var out = [], i;
+
+		for (i = 0; i < indices.length; i++) {
+			out[i] = source[indices[i]];
+		}
+
+		return out;
+	}
+
+	function unpack (string) {
+		var data = string.split('|'),
+			offsets = data[2].split(' '),
+			indices = data[3].split(''),
+			untils  = data[4].split(' ');
+
+		arrayToInt(offsets);
+		arrayToInt(indices);
+		arrayToInt(untils);
+
+		intToUntil(untils, indices.length);
+
+		return {
+			name    : data[0],
+			abbrs   : mapIndices(data[1].split(' '), indices),
+			offsets : mapIndices(offsets, indices),
+			untils  : untils
+		};
+	}
+
+	/************************************
+		Zone object
+	************************************/
+
+	function Zone (packedString) {
+		if (packedString) {
+			this._set(unpack(packedString));
+		}
+	}
+
+	Zone.prototype = {
+		_set : function (unpacked) {
+			this.name    = unpacked.name;
+			this.abbrs   = unpacked.abbrs;
+			this.untils  = unpacked.untils;
+			this.offsets = unpacked.offsets;
+		},
+
+		_index : function (timestamp) {
+			var target = +timestamp,
+				untils = this.untils,
+				i;
+
+			for (i = 0; i < untils.length; i++) {
+				if (target < untils[i]) {
+					return i;
+				}
+			}
+		},
+
+		parse : function (timestamp) {
+			var target  = +timestamp,
+				offsets = this.offsets,
+				untils  = this.untils,
+				max     = untils.length - 1,
+				offset, offsetNext, offsetPrev, i;
+
+			for (i = 0; i < max; i++) {
+				offset     = offsets[i];
+				offsetNext = offsets[i + 1];
+				offsetPrev = offsets[i ? i - 1 : i];
+
+				if (offset < offsetNext && tz.moveAmbiguousForward) {
+					offset = offsetNext;
+				} else if (offset > offsetPrev && tz.moveInvalidForward) {
+					offset = offsetPrev;
+				}
+
+				if (target < untils[i] - (offset * 60000)) {
+					return offsets[i];
+				}
+			}
+
+			return offsets[max];
+		},
+
+		abbr : function (mom) {
+			return this.abbrs[this._index(mom)];
+		},
+
+		offset : function (mom) {
+			return this.offsets[this._index(mom)];
+		}
+	};
+
+	/************************************
+		Global Methods
+	************************************/
+
+	function normalizeName (name) {
+		return (name || '').toLowerCase().replace(/\//g, '_');
+	}
+
+	function addZone (packed) {
+		var i, zone, zoneName;
+
+		if (typeof packed === "string") {
+			packed = [packed];
+		}
+
+		for (i = 0; i < packed.length; i++) {
+			zone = new Zone(packed[i]);
+			zoneName = normalizeName(zone.name);
+			zones[zoneName] = zone;
+			upgradeLinksToZones(zoneName);
+		}
+	}
+
+	function getZone (name) {
+		return zones[normalizeName(name)] || null;
+	}
+
+	function getNames () {
+		var i, out = [];
+
+		for (i in zones) {
+			if (zones.hasOwnProperty(i) && zones[i]) {
+				out.push(zones[i].name);
+			}
+		}
+
+		return out.sort();
+	}
+
+	function addLink (aliases) {
+		var i, alias;
+
+		if (typeof aliases === "string") {
+			aliases = [aliases];
+		}
+
+		for (i = 0; i < aliases.length; i++) {
+			alias = aliases[i].split('|');
+			pushLink(alias[0], alias[1]);
+			pushLink(alias[1], alias[0]);
+		}
+	}
+
+	function upgradeLinksToZones (zoneName) {
+		if (!links[zoneName]) {
+			return;
+		}
+
+		var i,
+			zone = zones[zoneName],
+			linkNames = links[zoneName];
+
+		for (i = 0; i < linkNames.length; i++) {
+			copyZoneWithName(zone, linkNames[i]);
+		}
+
+		links[zoneName] = null;
+	}
+
+	function copyZoneWithName (zone, name) {
+		var linkZone = zones[normalizeName(name)] = new Zone();
+		linkZone._set(zone);
+		linkZone.name = name;
+	}
+
+	function pushLink (zoneName, linkName) {
+		zoneName = normalizeName(zoneName);
+
+		if (zones[zoneName]) {
+			copyZoneWithName(zones[zoneName], linkName);
+		} else {
+			links[zoneName] = links[zoneName] || [];
+			links[zoneName].push(linkName);
+		}
+	}
+
+	function loadData (data) {
+		addZone(data.zones);
+		addLink(data.links);
+		tz.dataVersion = data.version;
+	}
+
+	function zoneExists (name) {
+		if (!zoneExists.didShowError) {
+			zoneExists.didShowError = true;
+			if (typeof console !== 'undefined' && typeof console.error === 'function') {
+				console.error("moment.tz.zoneExists('" + name + "') has been deprecated in favor of !moment.tz.zone('" + name + "')");
+			}
+		}
+		return !!getZone(name);
+	}
+
+	function needsOffset (m) {
+		return !!(m._a && (m._tzm === undefined));
+	}
+
+	function logError (message) {
+		if (typeof console !== 'undefined' && typeof console.error === 'function') {
+			console.error(message);
+		}
+	}
+
+	/************************************
+		moment.tz namespace
+	************************************/
+
+	function tz () {
+		var args = Array.prototype.slice.call(arguments, 0, -1),
+			name = arguments[arguments.length - 1],
+			zone = getZone(name),
+			out  = moment.utc.apply(null, args);
+
+		if (zone && needsOffset(out)) {
+			out.add(zone.parse(out), 'minutes');
+		}
+
+		out.tz(name);
+
+		return out;
+	}
+
+	tz.version      = VERSION;
+	tz.dataVersion  = '';
+	tz._zones       = zones;
+	tz._links       = links;
+	tz.add          = addZone;
+	tz.link         = addLink;
+	tz.load         = loadData;
+	tz.zone         = getZone;
+	tz.zoneExists   = zoneExists; // deprecated in 0.1.0
+	tz.names        = getNames;
+	tz.Zone         = Zone;
+	tz.unpack       = unpack;
+	tz.unpackBase60 = unpackBase60;
+	tz.needsOffset  = needsOffset;
+	tz.moveInvalidForward   = true;
+	tz.moveAmbiguousForward = false;
+
+	/************************************
+		Interface with Moment.js
+	************************************/
+
+	var fn = moment.fn;
+
+	moment.tz = tz;
+
+	moment.updateOffset = function (mom, keepTime) {
+		var offset;
+		if (mom._z) {
+			offset = mom._z.offset(mom);
+			if (Math.abs(offset) < 16) {
+				offset = offset / 60;
+			}
+			mom.zone(offset, keepTime);
+		}
+	};
+
+	fn.tz = function (name) {
+		if (name) {
+			this._z = getZone(name);
+			if (this._z) {
+				moment.updateOffset(this);
+			} else {
+				logError("Moment Timezone has no data for " + name + ". See http://momentjs.com/timezone/docs/#/data-loading/.");
+			}
+			return this;
+		}
+		if (this._z) { return this._z.name; }
+	};
+
+	function abbrWrap (old) {
+		return function () {
+			if (this._z) { return this._z.abbr(this); }
+			return old.call(this);
+		};
+	}
+
+	function resetZoneWrap (old) {
+		return function () {
+			this._z = null;
+			return old.apply(this, arguments);
+		};
+	}
+
+	fn.zoneName = abbrWrap(fn.zoneName);
+	fn.zoneAbbr = abbrWrap(fn.zoneAbbr);
+	fn.utc      = resetZoneWrap(fn.utc);
+
+	// Cloning a moment should include the _z property.
+	var momentProperties = moment.momentProperties;
+	if (Object.prototype.toString.call(momentProperties) === '[object Array]') {
+		// moment 2.8.1+
+		momentProperties.push('_z');
+		momentProperties.push('_a');
+	} else {
+		// moment 2.7.0
+		momentProperties._z = null;
+	}
+
+	loadData({
+		"version": "2014e",
+		"zones": [
+			"Africa/Abidjan|LMT GMT|g.8 0|01|-2ldXH.Q",
+			"Africa/Accra|LMT GMT GHST|.Q 0 -k|0121212121212121|-26BbX.8 JrbX.8 MnE 1BAk MnE 1BAk MnE 1BAk MnE 1C0k MnE 1BAk MnE 1BAk MnE",
+			"Africa/Addis_Ababa|ADMT EAT|-2z.k -30|01|-1lVCz.k",
+			"Africa/Algiers|PMT WET WEST CET CEST|-9.l 0 -10 -10 -20|0121212121212121343431312123431213|-2nco9.l cNb9.l HA0 19A0 1iM0 11c0 1oo0 Wo0 1rc0 QM0 1EM0 UM0 DA0 Imo0 rd0 De0 9Xz0 1fb0 1ap0 16K0 2yo0 mEp0 hwL0 jxA0 11A0 dDd0 17b0 11B0 1cN0 2Dy0 1cN0 1fB0 1cL0",
+			"Africa/Bamako|LMT GMT WAT|w 0 10|0121|-2ldXs RULs 144p0",
+			"Africa/Bangui|LMT WAT|-1e.k -10|01|-2le1e.k",
+			"Africa/Banjul|LMT BMT WAT GMT|16.A 16.A 10 0|0123|-2ldWR.o U0o0 1aALR.o",
+			"Africa/Bissau|LMT WAT GMT|12.k 10 0|012|-2mFWV.E 2yQnV.E",
+			"Africa/Blantyre|LMT CAT|-2k -20|01|-2GJek",
+			"Africa/Brazzaville|LMT WAT|-11.8 -10|01|-2le11.8",
+			"Africa/Bujumbura|CAT|-20|0|",
+			"Africa/Cairo|EET EEST|-20 -30|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-1bIO0 vb0 1ip0 11z0 1iN0 1nz0 12p0 1pz0 10N0 1pz0 16p0 1jz0 s3d0 Vz0 1oN0 11b0 1oO0 10N0 1pz0 10N0 1pb0 10N0 1pb0 10N0 1pb0 10N0 1pz0 10N0 1pb0 10N0 1pb0 11d0 1oL0 11d0 1pb0 11d0 1oL0 11d0 1oL0 11d0 1oL0 11d0 1pb0 11d0 1oL0 11d0 1oL0 11d0 1oL0 11d0 1pb0 11d0 1oL0 11d0 1oL0 11d0 1oL0 11d0 1pb0 11d0 1oL0 11d0 1WL0 rd0 1Rz0 wp0 1pb0 11d0 1oL0 11d0 1oL0 11d0 1oL0 11d0 1pb0 11d0 1qL0 Xd0 1oL0 11d0 1oL0 11d0 1pb0 11d0 1oL0 11d0 1oL0 11d0 1ny0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 WL0 1qN0 Rb0 1wp0 On0 1zd0 Lz0 1EN0 Fb0 c10 8n0 8Nd0 gL0 e10 mn0 1o10 jz0 gN0 pb0 1qN0 dX0 e10 xz0 1o10 bb0 e10 An0 1o10 5z0 e10 FX0 1o10 2L0 e10 IL0 1C10 Lz0 1wp0 TX0 1qN0 WL0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0",
+			"Africa/Casablanca|LMT WET WEST CET|u.k 0 -10 -10|012121212121212121312121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2gMnt.E 130Lt.E rb0 Dd0 dVb0 b6p0 TX0 EoB0 LL0 gnd0 rz0 43d0 AL0 1Nd0 XX0 1Cp0 pz0 dEp0 4mn0 SyN0 AL0 1Nd0 wn0 1FB0 Db0 1zd0 Lz0 1Nf0 wM0 co0 go0 1o00 s00 dA0 vc0 11A0 A00 e00 y00 11A0 uo0 e00 DA0 11A0 rA0 e00 Jc0 WM0 m00 gM0 M00 WM0 jc0 e00 RA0 11A0 dA0 e00 Uo0 11A0 800 gM0 Xc0 11A0 5c0 e00 17A0 WM0 2o0 e00 1ao0 19A0 1g00 16M0 1iM0 1400 1lA0 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qo0 1200 1kM0 14M0 1i00",
+			"Africa/Ceuta|WET WEST CET CEST|0 -10 -10 -20|010101010101010101010232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-25KN0 11z0 drd0 18o0 3I00 17c0 1fA0 1a00 1io0 1a00 1y7p0 LL0 gnd0 rz0 43d0 AL0 1Nd0 XX0 1Cp0 pz0 dEp0 4VB0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Africa/Conakry|LMT GMT WAT|S.Q 0 10|0121|-2ldX5.8 RUL5.8 12U10",
+			"Africa/Dakar|LMT WAT GMT|19.I 10 0|012|-2ldWO.g 1bBzO.g",
+			"Africa/Dar_es_Salaam|LMT EAT BEAUT|-2B.8 -30 -2J|0121|-1yW2B.8 FnzB.8 vDAf",
+			"Africa/Djibouti|LMT EAT|-2Q.A -30|01|-2mrCQ.A",
+			"Africa/Douala|LMT WAT|-C.M -10|01|-2le0C.M",
+			"Africa/El_Aaiun|LMT WAT WET WEST|Q.M 10 0 -10|0123232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-1rDz7.c 1GVA7.c 6L0 AL0 1Nd0 XX0 1Cp0 pz0 1cBB0 AL0 1Nd0 wn0 1FB0 Db0 1zd0 Lz0 1Nf0 wM0 co0 go0 1o00 s00 dA0 vc0 11A0 A00 e00 y00 11A0 uo0 e00 DA0 11A0 rA0 e00 Jc0 WM0 m00 gM0 M00 WM0 jc0 e00 RA0 11A0 dA0 e00 Uo0 11A0 800 gM0 Xc0 11A0 5c0 e00 17A0 WM0 2o0 e00 1ao0 19A0 1g00 16M0 1iM0 1400 1lA0 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qo0 1200 1kM0 14M0 1i00",
+			"Africa/Freetown|FMT WAT SLST WAT SLST GMT|R 10 k 0 -10 0|0121212121212121213454545454545|-2hLb7 Ry07 MLk 1BAE MLk 1BcE MLk 1BcE MLk 1BcE MLk 1BAE MLk 1BcE MLk 1BcE MLk yGoE 10n0 AL0 1Nd0 AL0 1Nd0 AL0 1NB0 AL0 1Nd0 AL0 1Nd0 AL0",
+			"Africa/Gaborone|SAST CAT CAST|-1u -20 -30|0121|-2GJdu 1CINu 1cL0",
+			"Africa/Harare|LMT CAT|-24.c -20|01|-2GJe4.c",
+			"Africa/Johannesburg|SAST SAST SAST|-1u -20 -30|012121|-2GJdu 1Ajdu 1cL0 1cN0 1cL0",
+			"Africa/Juba|LMT CAT CAST EAT|-2a.8 -20 -30 -30|01212121212121212121212121212121213|-1yW2a.8 1zK0a.8 16L0 1iN0 17b0 1jd0 17b0 1ip0 17z0 1i10 17X0 1hB0 18n0 1hd0 19b0 1gp0 19z0 1iN0 17b0 1ip0 17z0 1i10 18n0 1hd0 18L0 1gN0 19b0 1gp0 19z0 1iN0 17z0 1i10 17X0 yGd0",
+			"Africa/Kampala|LMT EAT BEAT BEAUT|-29.E -30 -2u -2J|01231|-1F3C9.E 3Dz9.E HNAu lTbJ",
+			"Africa/Kigali|LMT CAT|-20.g -20|01|-1ode0.g",
+			"Africa/Kinshasa|WAT|-10|0|",
+			"Africa/Lagos|LMT WAT|-d.A -10|01|-22y0d.A",
+			"Africa/Libreville|LMT WAT|-B.M -10|01|-2le0B.M",
+			"Africa/Lome|GMT|0|0|",
+			"Africa/Luanda|AOT WAT|-Q.4 -10|01|-2mG0Q.4",
+			"Africa/Lusaka|LMT CAT|-1R.8 -20|01|-2GJdR.8",
+			"Africa/Malabo|LMT GMT WAT|-z.8 0 -10|012|-2le0z.8 26uoz.8",
+			"Africa/Maputo|LMT CAT|-2a.k -20|01|-2GJea.k",
+			"Africa/Maseru|LMT SAST SAST|-1O -20 -30|0121|-2GJdO 1CINO 1cL0",
+			"Africa/Mbabane|LMT SAST|-24.o -20|01|-2GJe4.o",
+			"Africa/Mogadishu|EAT BEAT|-30 -2u|010|-1yW30 13iMu",
+			"Africa/Monrovia|MMT LRT GMT|H.8 I.u 0|012|-23Lzg.Q 29s01.m",
+			"Africa/Nairobi|LMT EAT BEAT BEAUT|-2r.g -30 -2u -2J|01231|-1F3Cr.g 3Dzr.g okMu MFXJ",
+			"Africa/Ndjamena|LMT WAT WAST|-10.c -10 -20|0121|-2le10.c 2J3c0.c Wn0",
+			"Africa/Niamey|LMT WAT GMT WAT|-8.s 10 0 -10|0123|-2le08.s RUN8.s 12TX0",
+			"Africa/Nouakchott|LMT GMT WAT|13.M 0 10|0121|-2ldWU.c RUKU.c 158N0",
+			"Africa/Ouagadougou|LMT GMT|6.4 0|01|-2ldXR.U",
+			"Africa/Porto-Novo|LMT GMT WAT|-a.s 0 -10|012|-2le0a.s RUMa.s",
+			"Africa/Sao_Tome|LMT GMT|A.w 0|01|-2ldXn.s",
+			"Africa/Tripoli|LMT CET CEST EET|-Q.I -10 -20 -20|012121213121212121212121213123123|-21JcQ.I 1hnBQ.I vx0 4iP0 xx0 4eN0 Bb0 7ip0 U0n0 A10 1db0 1cN0 1db0 1dd0 1db0 1eN0 1bb0 1e10 1cL0 1c10 1db0 1dd0 1db0 1cN0 1db0 1q10 fAn0 1ep0 1db0 AKq0 TA0 1o00",
+			"Africa/Tunis|PMT CET CEST|-9.l -10 -20|0121212121212121212121212121212121|-2nco9.l 18pa9.l 1qM0 DA0 3Tc0 11B0 1ze0 WM0 7z0 3d0 14L0 1cN0 1f90 1ar0 16J0 1gXB0 WM0 1rA0 11c0 nwo0 Ko0 1cM0 1cM0 1rA0 10M0 zuM0 10N0 1aN0 1qM0 WM0 1qM0 11A0 1o00",
+			"Africa/Windhoek|SWAT SAST SAST CAT WAT WAST|-1u -20 -30 -20 -10 -20|012134545454545454545454545454545454545454545454545454545454545454545454545454545454545454545|-2GJdu 1Ajdu 1cL0 1SqL0 9NA0 11D0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 11B0 1nX0 11B0",
+			"America/Adak|NST NWT NPT BST BDT AHST HAST HADT|b0 a0 a0 b0 a0 a0 a0 90|012034343434343434343434343434343456767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676|-17SX0 8wW0 iB0 Qlb0 52O0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 cm0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Anchorage|CAT CAWT CAPT AHST AHDT YST AKST AKDT|a0 90 90 a0 90 90 90 80|012034343434343434343434343434343456767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676|-17T00 8wX0 iA0 Qlb0 52O0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 cm0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Anguilla|LMT AST|46.4 40|01|-2kNvR.U",
+			"America/Antigua|LMT EST AST|47.c 50 40|012|-2kNvQ.M 1yxAQ.M",
+			"America/Araguaina|LMT BRT BRST|3c.M 30 20|0121212121212121212121212121212121212121212121212121|-2glwL.c HdKL.c 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 dMN0 Lz0 1zd0 Rb0 1wN0 Wn0 1tB0 Rb0 1tB0 WL0 1tB0 Rb0 1zd0 On0 1HB0 FX0 ny10 Lz0",
+			"America/Argentina/Buenos_Aires|CMT ART ARST ART ARST|4g.M 40 30 30 20|0121212121212121212121212121212121212121213434343434343234343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wp0 Rb0 1wp0 TX0 g0p0 10M0 j3c0 uL0 1qN0 WL0",
+			"America/Argentina/Catamarca|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|0121212121212121212121212121212121212121213434343454343235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wq0 Ra0 1wp0 TX0 g0p0 10M0 ako0 7B0 8zb0 uL0",
+			"America/Argentina/Cordoba|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|0121212121212121212121212121212121212121213434343454343234343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wq0 Ra0 1wp0 TX0 g0p0 10M0 j3c0 uL0 1qN0 WL0",
+			"America/Argentina/Jujuy|CMT ART ARST ART ARST WART WARST|4g.M 40 30 30 20 40 30|01212121212121212121212121212121212121212134343456543432343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1ze0 TX0 1ld0 WK0 1wp0 TX0 g0p0 10M0 j3c0 uL0",
+			"America/Argentina/La_Rioja|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|01212121212121212121212121212121212121212134343434534343235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Qn0 qO0 16n0 Rb0 1wp0 TX0 g0p0 10M0 ako0 7B0 8zb0 uL0",
+			"America/Argentina/Mendoza|CMT ART ARST ART ARST WART WARST|4g.M 40 30 30 20 40 30|0121212121212121212121212121212121212121213434345656543235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1u20 SL0 1vd0 Tb0 1wp0 TW0 g0p0 10M0 agM0 Op0 7TX0 uL0",
+			"America/Argentina/Rio_Gallegos|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|0121212121212121212121212121212121212121213434343434343235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wp0 Rb0 1wp0 TX0 g0p0 10M0 ako0 7B0 8zb0 uL0",
+			"America/Argentina/Salta|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|01212121212121212121212121212121212121212134343434543432343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wq0 Ra0 1wp0 TX0 g0p0 10M0 j3c0 uL0",
+			"America/Argentina/San_Juan|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|01212121212121212121212121212121212121212134343434534343235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Qn0 qO0 16n0 Rb0 1wp0 TX0 g0p0 10M0 ak00 m10 8lb0 uL0",
+			"America/Argentina/San_Luis|CMT ART ARST ART ARST WART WARST|4g.M 40 30 30 20 40 30|01212121212121212121212121212121212121212134343456536353465653|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 XX0 1q20 SL0 AN0 kin0 10M0 ak00 m10 8lb0 8L0 jd0 1qN0 WL0 1qN0",
+			"America/Argentina/Tucuman|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|012121212121212121212121212121212121212121343434345434323534343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wq0 Ra0 1wp0 TX0 g0p0 10M0 ako0 4N0 8BX0 uL0 1qN0 WL0",
+			"America/Argentina/Ushuaia|CMT ART ARST ART ARST WART|4g.M 40 30 30 20 40|0121212121212121212121212121212121212121213434343434343235343|-20UHH.c pKnH.c Mn0 1iN0 Tb0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 1C10 LX0 1C10 LX0 1C10 LX0 1C10 Mn0 MN0 2jz0 MN0 4lX0 u10 5Lb0 1pB0 Fnz0 u10 uL0 1vd0 SL0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 zvd0 Bz0 1tB0 TX0 1wp0 Rb0 1wp0 Rb0 1wp0 TX0 g0p0 10M0 ajA0 8p0 8zb0 uL0",
+			"America/Aruba|LMT ANT AST|4z.L 4u 40|012|-2kV7o.d 28KLS.d",
+			"America/Asuncion|AMT PYT PYT PYST|3O.E 40 30 30|012131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313|-1x589.k 1DKM9.k 3CL0 3Dd0 10L0 1pB0 10n0 1pB0 10n0 1pB0 1cL0 1dd0 1db0 1dd0 1cL0 1dd0 1cL0 1dd0 1cL0 1dd0 1db0 1dd0 1cL0 1dd0 1cL0 1dd0 1cL0 1dd0 1db0 1dd0 1cL0 1lB0 14n0 1dd0 1cL0 1fd0 WL0 1rd0 1aL0 1dB0 Xz0 1qp0 Xb0 1qN0 10L0 1rB0 TX0 1tB0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 1cL0 WN0 1qL0 11B0 1nX0 1ip0 WL0 1qN0 WL0 1qN0 WL0 1tB0 TX0 1tB0 TX0 1tB0 19X0 1a10 1fz0 1a10 1fz0 1cN0 17b0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1fB0 19X0 1fB0 19X0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1fB0 19X0 1fB0 19X0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1ip0 17b0 1ip0 17b0 1ip0",
+			"America/Atikokan|CST CDT CWT CPT EST|60 50 50 50 50|0101234|-25TQ0 1in0 Rnb0 3je0 8x30 iw0",
+			"America/Bahia|LMT BRT BRST|2y.4 30 20|01212121212121212121212121212121212121212121212121212121212121|-2glxp.U HdLp.U 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 1EN0 Lz0 1C10 IL0 1HB0 Db0 1HB0 On0 1zd0 On0 1zd0 Lz0 1zd0 Rb0 1wN0 Wn0 1tB0 Rb0 1tB0 WL0 1tB0 Rb0 1zd0 On0 1HB0 FX0 l5B0 Rb0",
+			"America/Bahia_Banderas|LMT MST CST PST MDT CDT|71 70 60 80 60 50|0121212131414141414141414141414141414152525252525252525252525252525252525252525252525252525252|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 otX0 gmN0 P2N0 13Vd0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nW0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Barbados|LMT BMT AST ADT|3W.t 3W.t 40 30|01232323232|-1Q0I1.v jsM0 1ODC1.v IL0 1ip0 17b0 1ip0 17b0 1ld0 13b0",
+			"America/Belem|LMT BRT BRST|3d.U 30 20|012121212121212121212121212121|-2glwK.4 HdKK.4 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0",
+			"America/Belize|LMT CST CHDT CDT|5Q.M 60 5u 50|01212121212121212121212121212121212121212121212121213131|-2kBu7.c fPA7.c Onu 1zcu Rbu 1wou Rbu 1wou Rbu 1zcu Onu 1zcu Onu 1zcu Rbu 1wou Rbu 1wou Rbu 1wou Rbu 1zcu Onu 1zcu Onu 1zcu Rbu 1wou Rbu 1wou Rbu 1zcu Onu 1zcu Onu 1zcu Onu 1zcu Rbu 1wou Rbu 1wou Rbu 1zcu Onu 1zcu Onu 1zcu Rbu 1wou Rbu 1f0Mu qn0 lxB0 mn0",
+			"America/Blanc-Sablon|AST ADT AWT APT|40 30 30 30|010230|-25TS0 1in0 UGp0 8x50 iu0",
+			"America/Boa_Vista|LMT AMT AMST|42.E 40 30|0121212121212121212121212121212121|-2glvV.k HdKV.k 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 smp0 WL0 1tB0 2L0",
+			"America/Bogota|BMT COT COST|4U.g 50 40|0121|-2eb73.I 38yo3.I 2en0",
+			"America/Boise|PST PDT MST MWT MPT MDT|80 70 70 60 60 60|0101023425252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252|-261q0 1nX0 11B0 1nX0 8C10 JCL0 8x20 ix0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 Dd0 1Kn0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Cambridge_Bay|zzz MST MWT MPT MDDT MDT CST CDT EST|0 70 60 60 50 60 60 50 50|0123141515151515151515151515151515151515151515678651515151515151515151515151515151515151515151515151515151515151515151515151|-21Jc0 RO90 8x20 ix0 LCL0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11A0 1nX0 2K0 WQ0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Campo_Grande|LMT AMT AMST|3C.s 40 30|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212|-2glwl.w HdLl.w 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 1EN0 Lz0 1C10 IL0 1HB0 Db0 1HB0 On0 1zd0 On0 1zd0 Lz0 1zd0 Rb0 1wN0 Wn0 1tB0 Rb0 1tB0 WL0 1tB0 Rb0 1zd0 On0 1HB0 FX0 1C10 Lz0 1Ip0 HX0 1zd0 On0 1HB0 IL0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1zd0 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0",
+			"America/Cancun|LMT CST EST EDT CDT|5L.4 60 50 40 50|0123232341414141414141414141414141414141414141414141414141414141414141414141414141414141|-1UQG0 2q2o0 yLB0 1lb0 14p0 1lb0 14p0 Lz0 xB0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Caracas|CMT VET VET|4r.E 4u 40|0121|-2kV7w.k 28KM2.k 1IwOu",
+			"America/Cayenne|LMT GFT GFT|3t.k 40 30|012|-2mrwu.E 2gWou.E",
+			"America/Cayman|KMT EST|57.b 50|01|-2l1uQ.N",
+			"America/Chicago|CST CDT EST CWT CPT|60 50 50 50 50|01010101010101010101010101010101010102010101010103401010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261s0 1nX0 11B0 1nX0 1wp0 TX0 WN0 1qL0 1cN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 11B0 1Hz0 14p0 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 RB0 8x30 iw0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Chihuahua|LMT MST CST CDT MDT|74.k 70 60 50 60|0121212323241414141414141414141414141414141414141414141414141414141414141414141414141414141|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 2zQN0 1lb0 14p0 1lb0 14q0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Costa_Rica|SJMT CST CDT|5A.d 60 50|0121212121|-1Xd6n.L 2lu0n.L Db0 1Kp0 Db0 pRB0 15b0 1kp0 mL0",
+			"America/Creston|MST PST|70 80|010|-29DR0 43B0",
+			"America/Cuiaba|LMT AMT AMST|3I.k 40 30|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212|-2glwf.E HdLf.E 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 1EN0 Lz0 1C10 IL0 1HB0 Db0 1HB0 On0 1zd0 On0 1zd0 Lz0 1zd0 Rb0 1wN0 Wn0 1tB0 Rb0 1tB0 WL0 1tB0 Rb0 1zd0 On0 1HB0 FX0 4a10 HX0 1zd0 On0 1HB0 IL0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1zd0 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0",
+			"America/Danmarkshavn|LMT WGT WGST GMT|1e.E 30 20 0|01212121212121212121212121212121213|-2a5WJ.k 2z5fJ.k 19U0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 DC0",
+			"America/Dawson|YST YDT YWT YPT YDDT PST PDT|90 80 80 80 70 80 70|0101023040565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565|-25TN0 1in0 1o10 13V0 Ser0 8x00 iz0 LCL0 1fA0 jrA0 fNd0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Dawson_Creek|PST PDT PWT PPT MST|80 70 70 70 70|0102301010101010101010101010101010101010101010101010101014|-25TO0 1in0 UGp0 8x10 iy0 3NB0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 ML0",
+			"America/Denver|MST MDT MWT MPT|70 60 60 60|01010101023010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261r0 1nX0 11B0 1nX0 11B0 1qL0 WN0 mn0 Ord0 8x20 ix0 LCN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Detroit|LMT CST EST EWT EPT EDT|5w.b 60 50 40 40 40|01234252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252|-2Cgir.N peqr.N 156L0 8x40 iv0 6fd0 11z0 Jy10 SL0 dnB0 1cL0 s10 1Vz0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Edmonton|LMT MST MDT MWT MPT|7x.Q 70 60 60 60|01212121212121341212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2yd4q.8 shdq.8 1in0 17d0 hz0 2dB0 1fz0 1a10 11z0 1qN0 WL0 1qN0 11z0 IGN0 8x20 ix0 3NB0 11z0 LFB0 1cL0 3Cp0 1cL0 66N0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Eirunepe|LMT ACT ACST AMT|4D.s 50 40 40|0121212121212121212121212121212131|-2glvk.w HdLk.w 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 dPB0 On0 yTd0 d5X0",
+			"America/El_Salvador|LMT CST CDT|5U.M 60 50|012121|-1XiG3.c 2Fvc3.c WL0 1qN0 WL0",
+			"America/Ensenada|LMT MST PST PDT PWT PPT|7M.4 70 80 70 70 70|012123245232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-1UQE0 4PX0 8mM0 8lc0 SN0 1cL0 pHB0 83r0 zI0 5O10 1Rz0 cOP0 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 BUp0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 U10 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Fort_Wayne|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|010101023010101010101010101040454545454545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 QI10 Db0 RB0 8x30 iw0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 5Tz0 1o10 qLb0 1cL0 1cN0 1cL0 1qhd0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Fortaleza|LMT BRT BRST|2y 30 20|0121212121212121212121212121212121212121|-2glxq HdLq 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 nsp0 WL0 1tB0 5z0 2mN0 On0",
+			"America/Glace_Bay|LMT AST ADT AWT APT|3X.M 40 30 30 30|012134121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2IsI0.c CwO0.c 1in0 UGp0 8x50 iu0 iq10 11z0 Jg10 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Godthab|LMT WGT WGST|3q.U 30 20|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2a5Ux.4 2z5dx.4 19U0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"America/Goose_Bay|NST NDT NST NDT NWT NPT AST ADT ADDT|3u.Q 2u.Q 3u 2u 2u 2u 40 30 20|010232323232323245232323232323232323232323232323232323232326767676767676767676767676767676767676767676768676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676|-25TSt.8 1in0 DXb0 2HbX.8 WL0 1qN0 WL0 1qN0 WL0 1tB0 TX0 1tB0 WL0 1qN0 WL0 1qN0 7UHu itu 1tB0 WL0 1qN0 WL0 1qN0 WL0 1qN0 WL0 1tB0 WL0 1ld0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 S10 g0u 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14n1 1lb0 14p0 1nW0 11C0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zcX Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Grand_Turk|KMT EST EDT|57.b 50 40|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2l1uQ.N 2HHBQ.N 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Guatemala|LMT CST CDT|62.4 60 50|0121212121|-24KhV.U 2efXV.U An0 mtd0 Nz0 ifB0 17b0 zDB0 11z0",
+			"America/Guayaquil|QMT ECT|5e 50|01|-1yVSK",
+			"America/Guyana|LMT GBGT GYT GYT GYT|3Q.E 3J 3J 30 40|01234|-2dvU7.k 24JzQ.k mlc0 Bxbf",
+			"America/Halifax|LMT AST ADT AWT APT|4e.o 40 30 30 30|0121212121212121212121212121212121212121212121212134121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2IsHJ.A xzzJ.A 1db0 3I30 1in0 3HX0 IL0 1E10 ML0 1yN0 Pb0 1Bd0 Mn0 1Bd0 Rz0 1w10 Xb0 1w10 LX0 1w10 Xb0 1w10 Lz0 1C10 Jz0 1E10 OL0 1yN0 Un0 1qp0 Xb0 1qp0 11X0 1w10 Lz0 1HB0 LX0 1C10 FX0 1w10 Xb0 1qp0 Xb0 1BB0 LX0 1td0 Xb0 1qp0 Xb0 Rf0 8x50 iu0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 3Qp0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 3Qp0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 6i10 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Havana|HMT CST CDT|5t.A 50 40|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1Meuu.o 72zu.o ML0 sld0 An0 1Nd0 Db0 1Nd0 An0 6Ep0 An0 1Nd0 An0 JDd0 Mn0 1Ap0 On0 1fd0 11X0 1qN0 WL0 1wp0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 14n0 1ld0 14L0 1kN0 15b0 1kp0 1cL0 1cN0 1fz0 1a10 1fz0 1fB0 11z0 14p0 1nX0 11B0 1nX0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 1a10 1in0 1a10 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 17c0 1o00 11A0 1qM0 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 11A0 6i00 Rc0 1wo0 U00 1tA0 Rc0 1wo0 U00 1wo0 U00 1zc0 U00 1qM0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0",
+			"America/Hermosillo|LMT MST CST PST MDT|7n.Q 70 60 80 60|0121212131414141|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 otX0 gmN0 P2N0 13Vd0 1lb0 14p0 1lb0 14p0 1lb0",
+			"America/Indiana/Knox|CST CDT CWT CPT EST|60 50 50 50 50|0101023010101010101010101010101010101040101010101010101010101010101010101010101010101010141010101010101010101010101010101010101010101010101010101010101010|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 3NB0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 11z0 1o10 11z0 1o10 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 3Cn0 8wp0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 z8o0 1o00 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Marengo|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|0101023010101010101010104545454545414545454545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 dyN0 11z0 6fd0 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 jrz0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1VA0 LA0 1BX0 1e6p0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Petersburg|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|01010230101010101010101010104010101010101010101010141014545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 njX0 WN0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 3Fb0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 19co0 1o00 Rd0 1zb0 Oo0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Tell_City|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|01010230101010101010101010101010454541010101010101010101010101010101010101010101010101010101010101010|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 1o10 11z0 g0p0 11z0 1o10 11z0 1qL0 WN0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 WL0 1qN0 1cL0 1cN0 1cL0 1cN0 caL0 1cL0 1cN0 1cL0 1qhd0 1o00 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Vevay|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|010102304545454545454545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 kPB0 Awn0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1lnd0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Vincennes|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|01010230101010101010101010101010454541014545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 1o10 11z0 g0p0 11z0 1o10 11z0 1qL0 WN0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 WL0 1qN0 1cL0 1cN0 1cL0 1cN0 caL0 1cL0 1cN0 1cL0 1qhd0 1o00 Rd0 1zb0 Oo0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Indiana/Winamac|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|01010230101010101010101010101010101010454541054545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 jrz0 1cL0 1cN0 1cL0 1qhd0 1o00 Rd0 1za0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Inuvik|zzz PST PDDT MST MDT|0 80 60 70 60|0121343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343|-FnA0 tWU0 1fA0 wPe0 2pz0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Iqaluit|zzz EWT EPT EST EDDT EDT CST CDT|0 40 40 50 30 40 60 50|01234353535353535353535353535353535353535353567353535353535353535353535353535353535353535353535353535353535353535353535353|-16K00 7nX0 iv0 LCL0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11C0 1nX0 11A0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Jamaica|KMT EST EDT|57.b 50 40|0121212121212121212121|-2l1uQ.N 2vwNQ.N 1cL0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0",
+			"America/Juneau|PST PWT PPT PDT YDT YST AKST AKDT|80 70 70 70 80 90 90 80|01203030303030303030303030403030356767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676|-17T20 8x10 iy0 Vo10 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cM0 1cM0 1cL0 1cN0 1fz0 1a10 1fz0 co0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Kentucky/Louisville|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|0101010102301010101010101010101010101454545454545414545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 3Fd0 Nb0 LPd0 11z0 RB0 8x30 iw0 Bb0 10N0 2bB0 8in0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 xz0 gso0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1VA0 LA0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Kentucky/Monticello|CST CDT CWT CPT EST EDT|60 50 50 50 50 40|0101023010101010101010101010101010101010101010101010101010101010101010101454545454545454545454545454545454545454545454545454545454545454545454545454|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 SWp0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11A0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/La_Paz|CMT BOST BOT|4w.A 3w.A 40|012|-1x37r.o 13b0",
+			"America/Lima|LMT PET PEST|58.A 50 40|0121212121212121|-2tyGP.o 1bDzP.o zX0 1aN0 1cL0 1cN0 1cL0 1PrB0 zX0 1O10 zX0 6Gp0 zX0 98p0 zX0",
+			"America/Los_Angeles|PST PDT PWT PPT|80 70 70 70|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261q0 1nX0 11B0 1nX0 SgN0 8x10 iy0 5Wp0 1Vb0 3dB0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Maceio|LMT BRT BRST|2m.Q 30 20|012121212121212121212121212121212121212121|-2glxB.8 HdLB.8 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 dMN0 Lz0 8Q10 WL0 1tB0 5z0 2mN0 On0",
+			"America/Managua|MMT CST EST CDT|5J.c 60 50 50|0121313121213131|-1quie.M 1yAMe.M 4mn0 9Up0 Dz0 1K10 Dz0 s3F0 1KH0 DB0 9In0 k8p0 19X0 1o30 11y0",
+			"America/Manaus|LMT AMT AMST|40.4 40 30|01212121212121212121212121212121|-2glvX.U HdKX.U 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 dPB0 On0",
+			"America/Martinique|FFMT AST ADT|44.k 40 30|0121|-2mPTT.E 2LPbT.E 19X0",
+			"America/Matamoros|LMT CST CDT|6E 60 50|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1UQG0 2FjC0 1nX0 i6p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 U10 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Mazatlan|LMT MST CST PST MDT|75.E 70 60 80 60|0121212131414141414141414141414141414141414141414141414141414141414141414141414141414141414141|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 otX0 gmN0 P2N0 13Vd0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Menominee|CST CDT CWT CPT EST|60 50 50 50 50|01010230101041010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 1o10 11z0 LCN0 1fz0 6410 9Jb0 1cM0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Merida|LMT CST EST CDT|5W.s 60 50 50|0121313131313131313131313131313131313131313131313131313131313131313131313131313131313131|-1UQG0 2q2o0 2hz0 wu30 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Metlakatla|PST PWT PPT PDT MeST|80 70 70 70 80|0120303030303030303030303030303034|-17T20 8x10 iy0 Vo10 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0",
+			"America/Mexico_City|LMT MST CST CDT CWT|6A.A 70 60 50 50|012121232324232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 gEn0 TX0 3xd0 Jb0 6zB0 SL0 e5d0 17b0 1Pff0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Miquelon|LMT AST PMST PMDT|3I.E 40 30 20|012323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-2mKkf.k 2LTAf.k gQ10 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Moncton|EST AST ADT AWT APT|50 40 30 30 30|012121212121212121212134121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2IsH0 CwN0 1in0 zAo0 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1K10 Lz0 1zB0 NX0 1u10 Wn0 S20 8x50 iu0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 3Cp0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14n1 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 ReX 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Monterrey|LMT CST CDT|6F.g 60 50|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1UQG0 2FjC0 1nX0 i6p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Montevideo|MMT UYT UYHST UYST UYT UYHST|3I.I 3u 30 20 30 2u|012121212121212121212121213434343434345454543453434343434343434343434343434343434343434343434343434343434343434343434343434343434343|-20UIf.g 8jzJ.g 1cLu 1dcu 1cLu 1dcu 1cLu ircu 11zu 1o0u 11zu 1o0u 11zu 1qMu WLu 1qMu WLu 1qMu WLu 1qMu 11zu 1o0u 11zu NAu 11bu 2iMu zWu Dq10 19X0 pd0 jz0 cm10 19X0 1fB0 1on0 11d0 1oL0 1nB0 1fzu 1aou 1fzu 1aou 1fzu 3nAu Jb0 3MN0 1SLu 4jzu 2PB0 Lb0 3Dd0 1pb0 ixd0 An0 1MN0 An0 1wp0 On0 1wp0 Rb0 1zd0 On0 1wp0 Rb0 s8p0 1fB0 1ip0 11z0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 1ld0 14n0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10 14n0 1ld0 14n0 1ld0 14n0 1ld0 14n0 1o10 11z0 1o10 11z0 1o10",
+			"America/Montreal|EST EDT EWT EPT|50 40 40 40|01010101010101010101010101010101010101010101012301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-28tR0 bV0 2m30 1in0 121u 1nb0 1g10 11z0 1o0u 11zu 1o0u 11zu 3VAu Rzu 1qMu WLu 1qMu WLu 1qKu WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 4kO0 8x40 iv0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Nassau|LMT EST EDT|59.u 50 40|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2kNuO.u 26XdO.u 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/New_York|EST EDT EWT EPT|50 40 40 40|01010101010101010101010101010101010101010101010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261t0 1nX0 11B0 1nX0 11B0 1qL0 1a10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 RB0 8x40 iv0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Nipigon|EST EDT EWT EPT|50 40 40 40|010123010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-25TR0 1in0 Rnb0 3je0 8x40 iv0 19yN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Nome|NST NWT NPT BST BDT YST AKST AKDT|b0 a0 a0 b0 a0 90 90 80|012034343434343434343434343434343456767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676|-17SX0 8wW0 iB0 Qlb0 52O0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 cl0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Noronha|LMT FNT FNST|29.E 20 10|0121212121212121212121212121212121212121|-2glxO.k HdKO.k 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 nsp0 WL0 1tB0 2L0 2pB0 On0",
+			"America/North_Dakota/Beulah|MST MDT MWT MPT CST CDT|70 60 60 60 60 50|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101014545454545454545454545454545454545454545454545454545454|-261r0 1nX0 11B0 1nX0 SgN0 8x20 ix0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Oo0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/North_Dakota/Center|MST MDT MWT MPT CST CDT|70 60 60 60 60 50|010102301010101010101010101010101010101010101010101010101014545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-261r0 1nX0 11B0 1nX0 SgN0 8x20 ix0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14o0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/North_Dakota/New_Salem|MST MDT MWT MPT CST CDT|70 60 60 60 60 50|010102301010101010101010101010101010101010101010101010101010101010101010101010101454545454545454545454545454545454545454545454545454545454545454545454|-261r0 1nX0 11B0 1nX0 SgN0 8x20 ix0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14o0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Ojinaga|LMT MST CST CDT MDT|6V.E 70 60 50 60|0121212323241414141414141414141414141414141414141414141414141414141414141414141414141414141|-1UQF0 deL0 8lc0 17c0 10M0 1dd0 2zQN0 1lb0 14p0 1lb0 14q0 1lb0 14p0 1nX0 11B0 1nX0 1fB0 WL0 1fB0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 U10 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Panama|CMT EST|5j.A 50|01|-2uduE.o",
+			"America/Pangnirtung|zzz AST AWT APT ADDT ADT EDT EST CST CDT|0 40 30 30 20 30 40 50 60 50|012314151515151515151515151515151515167676767689767676767676767676767676767676767676767676767676767676767676767676767676767|-1XiM0 PnG0 8x50 iu0 LCL0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1o00 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11C0 1nX0 11A0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Paramaribo|LMT PMT PMT NEGT SRT SRT|3E.E 3E.Q 3E.A 3u 3u 30|012345|-2nDUj.k Wqo0.c qanX.I 1dmLN.o lzc0",
+			"America/Phoenix|MST MDT MWT|70 60 60|01010202010|-261r0 1nX0 11B0 1nX0 SgN0 4Al1 Ap0 1db0 SWqX 1cL0",
+			"America/Port-au-Prince|PPMT EST EDT|4N 50 40|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-28RHb 2FnMb 19X0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14q0 1o00 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 14o0 1o00 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 i6n0 1nX0 11B0 1nX0 d430 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Porto_Acre|LMT ACT ACST AMT|4v.c 50 40 40|01212121212121212121212121212131|-2glvs.M HdLs.M 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 NBd0 d5X0",
+			"America/Porto_Velho|LMT AMT AMST|4f.A 40 30|012121212121212121212121212121|-2glvI.o HdKI.o 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0",
+			"America/Puerto_Rico|AST AWT APT|40 30 30|0120|-17lU0 7XT0 iu0",
+			"America/Rainy_River|CST CDT CWT CPT|60 50 50 50|010123010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-25TQ0 1in0 Rnb0 3je0 8x30 iw0 19yN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Rankin_Inlet|zzz CST CDDT CDT EST|0 60 40 50 50|012131313131313131313131313131313131313131313431313131313131313131313131313131313131313131313131313131313131313131313131|-vDc0 keu0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Recife|LMT BRT BRST|2j.A 30 20|0121212121212121212121212121212121212121|-2glxE.o HdLE.o 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 nsp0 WL0 1tB0 2L0 2pB0 On0",
+			"America/Regina|LMT MST MDT MWT MPT CST|6W.A 70 60 60 60 60|012121212121212121212121341212121212121212121212121215|-2AD51.o uHe1.o 1in0 s2L0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 66N0 1cL0 1cN0 19X0 1fB0 1cL0 1fB0 1cL0 1cN0 1cL0 M30 8x20 ix0 1ip0 1cL0 1ip0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 3NB0 1cL0 1cN0",
+			"America/Resolute|zzz CST CDDT CDT EST|0 60 40 50 50|012131313131313131313131313131313131313131313431313131313431313131313131313131313131313131313131313131313131313131313131|-SnA0 GWS0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Santa_Isabel|LMT MST PST PDT PWT PPT|7D.s 70 80 70 70 70|012123245232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-1UQE0 4PX0 8mM0 8lc0 SN0 1cL0 pHB0 83r0 zI0 5O10 1Rz0 cOP0 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 BUp0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0",
+			"America/Santarem|LMT AMT AMST BRT|3C.M 40 30 30|0121212121212121212121212121213|-2glwl.c HdLl.c 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 qe10 xb0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 NBd0",
+			"America/Santiago|SMT CLT CLT CLST CLST|4G.K 50 40 40 30|010203131313131313124242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424|-2q5Th.e fNch.e 5gLG.K 21bh.e jRAG.K 1pbh.e 11d0 1oL0 11d0 1oL0 11d0 1oL0 11d0 1pb0 11d0 nHX0 op0 9UK0 1Je0 Qen0 WL0 1zd0 On0 1ip0 11z0 1o10 11z0 1qN0 WL0 1ld0 14n0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 WL0 1qN0 1cL0 1cN0 11z0 1ld0 14n0 1qN0 11z0 1cN0 19X0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1ip0 1fz0 1fB0 11z0 1qN0 WL0 1qN0 WL0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1o10 19X0 1fB0 1nX0 G10 1EL0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0",
+			"America/Santo_Domingo|SDMT EST EDT EHDT AST|4E 50 40 4u 40|01213131313131414|-1ttjk 1lJMk Mn0 6sp0 Lbu 1Cou yLu 1RAu wLu 1QMu xzu 1Q0u xXu 1PAu 13jB0 e00",
+			"America/Sao_Paulo|LMT BRT BRST|36.s 30 20|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212|-2glwR.w HdKR.w 1cc0 1e10 1bX0 Ezd0 So0 1vA0 Mn0 1BB0 ML0 1BB0 zX0 pTd0 PX0 2ep0 nz0 1C10 zX0 1C10 LX0 1C10 Mn0 H210 Rb0 1tB0 IL0 1Fd0 FX0 1EN0 FX0 1HB0 Lz0 1EN0 Lz0 1C10 IL0 1HB0 Db0 1HB0 On0 1zd0 On0 1zd0 Lz0 1zd0 Rb0 1wN0 Wn0 1tB0 Rb0 1tB0 WL0 1tB0 Rb0 1zd0 On0 1HB0 FX0 1C10 Lz0 1Ip0 HX0 1zd0 On0 1HB0 IL0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1zd0 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0 On0 1zd0 On0 1zd0 On0 1C10 Lz0 1C10 Lz0 1C10 Lz0 1C10 On0 1zd0 Rb0 1wp0 On0 1C10 Lz0 1C10 On0 1zd0",
+			"America/Scoresbysund|LMT CGT CGST EGST EGT|1r.Q 20 10 0 10|0121343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434|-2a5Ww.8 2z5ew.8 1a00 1cK0 1cL0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"America/Sitka|PST PWT PPT PDT YST AKST AKDT|80 70 70 70 90 90 80|01203030303030303030303030303030345656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565|-17T20 8x10 iy0 Vo10 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 co0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/St_Johns|NST NDT NST NDT NWT NPT NDDT|3u.Q 2u.Q 3u 2u 2u 2u 1u|01010101010101010101010101010101010102323232323232324523232323232323232323232323232323232323232323232323232323232323232323232323232323232326232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-28oit.8 14L0 1nB0 1in0 1gm0 Dz0 1JB0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1fB0 19X0 1fB0 19X0 10O0 eKX.8 19X0 1iq0 WL0 1qN0 WL0 1qN0 WL0 1tB0 TX0 1tB0 WL0 1qN0 WL0 1qN0 7UHu itu 1tB0 WL0 1qN0 WL0 1qN0 WL0 1qN0 WL0 1tB0 WL0 1ld0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14n1 1lb0 14p0 1nW0 11C0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zcX Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Swift_Current|LMT MST MDT MWT MPT CST|7b.k 70 60 60 60 60|012134121212121212121215|-2AD4M.E uHdM.E 1in0 UGp0 8x20 ix0 1o10 17b0 1ip0 11z0 1o10 11z0 1o10 11z0 isN0 1cL0 3Cp0 1cL0 1cN0 11z0 1qN0 WL0 pMp0",
+			"America/Tegucigalpa|LMT CST CDT|5M.Q 60 50|01212121|-1WGGb.8 2ETcb.8 WL0 1qN0 WL0 GRd0 AL0",
+			"America/Thule|LMT AST ADT|4z.8 40 30|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2a5To.Q 31NBo.Q 1cL0 1cN0 1cL0 1fB0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Thunder_Bay|CST EST EWT EPT EDT|60 50 40 40 40|0123141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141|-2q5S0 1iaN0 8x40 iv0 XNB0 1cL0 1cN0 1fz0 1cN0 1cL0 3Cp0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Toronto|EST EDT EWT EPT|50 40 40 40|01010101010101010101010101010101010101010101012301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-25TR0 1in0 11Wu 1nzu 1fD0 WJ0 1wr0 Nb0 1Ap0 On0 1zd0 On0 1wp0 TX0 1tB0 TX0 1tB0 TX0 1tB0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 4kM0 8x40 iv0 1o10 11z0 1nX0 11z0 1o10 11z0 1o10 1qL0 11D0 1nX0 11B0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Vancouver|PST PDT PWT PPT|80 70 70 70|0102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-25TO0 1in0 UGp0 8x10 iy0 1o10 17b0 1ip0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Whitehorse|YST YDT YWT YPT YDDT PST PDT|90 80 80 80 70 80 70|0101023040565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565|-25TN0 1in0 1o10 13V0 Ser0 8x00 iz0 LCL0 1fA0 1Be0 xDz0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Winnipeg|CST CDT CWT CPT|60 50 50 50|010101023010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aIi0 WL0 3ND0 1in0 Jap0 Rb0 aCN0 8x30 iw0 1tB0 11z0 1ip0 11z0 1o10 11z0 1o10 11z0 1rd0 10L0 1op0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 1cL0 1cN0 11z0 6i10 WL0 6i10 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1a00 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1a00 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 14o0 1lc0 14o0 1o00 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 14o0 1o00 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1o00 11A0 1o00 11A0 1o00 14o0 1lc0 14o0 1lc0 14o0 1o00 11A0 1o00 11A0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Yakutat|YST YWT YPT YDT AKST AKDT|90 80 80 80 90 80|01203030303030303030303030303030304545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-17T10 8x00 iz0 Vo10 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 cn0 10q0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"America/Yellowknife|zzz MST MWT MPT MDDT MDT|0 70 60 60 50 60|012314151515151515151515151515151515151515151515151515151515151515151515151515151515151515151515151515151515151515151515151|-1pdA0 hix0 8x20 ix0 LCL0 1fA0 zgO0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"Antarctica/Casey|zzz WST CAST|0 -80 -b0|012121|-2q00 1DjS0 T90 40P0 KL0",
+			"Antarctica/Davis|zzz DAVT DAVT|0 -70 -50|01012121|-vyo0 iXt0 alj0 1D7v0 VB0 3Wn0 KN0",
+			"Antarctica/DumontDUrville|zzz PMT DDUT|0 -a0 -a0|0102|-U0o0 cfq0 bFm0",
+			"Antarctica/Macquarie|EST EST zzz MIST|-a0 -b0 0 -b0|0102010101010101010101010101010101010101010101010101010101010101010101010101010101010101013|-29E80 19X0 4SL0 1ayy0 Lvs0 1cM0 1o00 Rc0 1wo0 Rc0 1wo0 U00 1wo0 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 11A0 1qM0 WM0 1qM0 Oo0 1zc0 Oo0 1zc0 Oo0 1wo0 WM0 1tA0 WM0 1tA0 U00 1tA0 U00 1tA0 11A0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 11A0 1o00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1cM0 1cM0 1cM0",
+			"Antarctica/Mawson|zzz MAWT MAWT|0 -60 -50|012|-CEo0 2fyk0",
+			"Antarctica/McMurdo|NZMT NZST NZST NZDT|-bu -cu -c0 -d0|01020202020202020202020202023232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323|-1GCVu Lz0 1tB0 11zu 1o0u 11zu 1o0u 11zu 1o0u 14nu 1lcu 14nu 1lcu 1lbu 11Au 1nXu 11Au 1nXu 11Au 1nXu 11Au 1nXu 11Au 1qLu WMu 1qLu 11Au 1n1bu IM0 1C00 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1qM0 14o0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1io0 17c0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1io0 17c0 1io0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00",
+			"Antarctica/Palmer|zzz ARST ART ART ARST CLT CLST|0 30 40 30 20 40 30|012121212123435656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656|-cao0 nD0 1vd0 SL0 1vd0 17z0 1cN0 1fz0 1cN0 1cL0 1cN0 asn0 Db0 jsN0 14N0 11z0 1o10 11z0 1qN0 WL0 1qN0 WL0 1qN0 1cL0 1cN0 11z0 1ld0 14n0 1qN0 11z0 1cN0 19X0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1ip0 1fz0 1fB0 11z0 1qN0 WL0 1qN0 WL0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1o10 19X0 1fB0 1nX0 G10 1EL0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0",
+			"Antarctica/Rothera|zzz ROTT|0 30|01|gOo0",
+			"Antarctica/Syowa|zzz SYOT|0 -30|01|-vs00",
+			"Antarctica/Troll|zzz UTC CEST|0 0 -20|01212121212121212121212121212121212121212121212121212121212121212121|1puo0 hd0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Antarctica/Vostok|zzz VOST|0 -60|01|-tjA0",
+			"Arctic/Longyearbyen|CET CEST|-10 -20|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2awM0 Qm0 W6o0 5pf0 WM0 1fA0 1cM0 1cM0 1cM0 1cM0 wJc0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1qM0 WM0 zpc0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Asia/Aden|LMT AST|-2X.S -30|01|-MG2X.S",
+			"Asia/Almaty|LMT ALMT ALMT ALMST|-57.M -50 -60 -70|0123232323232323232323232323232323232323232323232|-1Pc57.M eUo7.M 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 3Cl0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0",
+			"Asia/Amman|LMT EET EEST|-2n.I -20 -30|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1yW2n.I 1HiMn.I KL0 1oN0 11b0 1oN0 11b0 1pd0 1dz0 1cp0 11b0 1op0 11b0 fO10 1db0 1e10 1cL0 1cN0 1cL0 1cN0 1fz0 1pd0 10n0 1ld0 14n0 1hB0 15b0 1ip0 19X0 1cN0 1cL0 1cN0 17b0 1ld0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1So0 y00 1fc0 1dc0 1co0 1dc0 1cM0 1cM0 1cM0 1o00 11A0 1lc0 17c0 1cM0 1cM0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 4bX0 Dd0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0",
+			"Asia/Anadyr|LMT ANAT ANAT ANAST ANAST ANAST ANAT|-bN.U -c0 -d0 -e0 -d0 -c0 -b0|01232414141414141414141561414141414141414141414141414141414141561|-1PcbN.U eUnN.U 23CL0 1db0 1cN0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qN0 WM0",
+			"Asia/Aqtau|LMT FORT FORT SHET SHET SHEST AQTT AQTST AQTST AQTT|-3l.4 -40 -50 -50 -60 -60 -50 -60 -50 -40|012345353535353535353536767676898989898989898989896|-1Pc3l.4 eUnl.4 1jcL0 JDc0 1cL0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 2UK0 Fz0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cN0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 RW0",
+			"Asia/Aqtobe|LMT AKTT AKTT AKTST AKTT AQTT AQTST|-3M.E -40 -50 -60 -60 -50 -60|01234323232323232323232565656565656565656565656565|-1Pc3M.E eUnM.E 23CL0 1db0 1cM0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 2UK0 Fz0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0",
+			"Asia/Ashgabat|LMT ASHT ASHT ASHST ASHST TMT TMT|-3R.w -40 -50 -60 -50 -40 -50|012323232323232323232324156|-1Pc3R.w eUnR.w 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 ba0 xC0",
+			"Asia/Baghdad|BMT AST ADT|-2V.A -30 -40|012121212121212121212121212121212121212121212121212121|-26BeV.A 2ACnV.A 11b0 1cp0 1dz0 1dd0 1db0 1cN0 1cp0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1de0 1dc0 1dc0 1dc0 1cM0 1dc0 1cM0 1dc0 1cM0 1dc0 1dc0 1dc0 1cM0 1dc0 1cM0 1dc0 1cM0 1dc0 1dc0 1dc0 1cM0 1dc0 1cM0 1dc0 1cM0 1dc0 1dc0 1dc0 1cM0 1dc0 1cM0 1dc0 1cM0 1dc0",
+			"Asia/Bahrain|LMT GST AST|-3m.k -40 -30|012|-21Jfm.k 27BXm.k",
+			"Asia/Baku|LMT BAKT BAKT BAKST BAKST AZST AZT AZT AZST|-3j.o -30 -40 -50 -40 -40 -30 -40 -50|0123232323232323232323245657878787878787878787878787878787878787878787878787878787878787878787878787878787878787|-1Pc3j.o 1jUoj.o WCL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 10K0 c30 1cJ0 1cL0 8wu0 1o00 11z0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Asia/Bangkok|BMT ICT|-6G.4 -70|01|-218SG.4",
+			"Asia/Beirut|EET EEST|-20 -30|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-21aq0 1on0 1410 1db0 19B0 1in0 1ip0 WL0 1lQp0 11b0 1oN0 11b0 1oN0 11b0 1pd0 11b0 1oN0 11b0 q6N0 En0 1oN0 11b0 1oN0 11b0 1oN0 11b0 1pd0 11b0 1oN0 11b0 1op0 11b0 dA10 17b0 1iN0 17b0 1iN0 17b0 1iN0 17b0 1vB0 SL0 1mp0 13z0 1iN0 17b0 1iN0 17b0 1jd0 12n0 1a10 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0",
+			"Asia/Bishkek|LMT FRUT FRUT FRUST FRUST KGT KGST KGT|-4W.o -50 -60 -70 -60 -50 -60 -60|01232323232323232323232456565656565656565656565656567|-1Pc4W.o eUnW.o 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 11c0 1tX0 17b0 1ip0 17b0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1cPu 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 T8u",
+			"Asia/Brunei|LMT BNT BNT|-7D.E -7u -80|012|-1KITD.E gDc9.E",
+			"Asia/Calcutta|HMT BURT IST IST|-5R.k -6u -5u -6u|01232|-18LFR.k 1unn.k HB0 7zX0",
+			"Asia/Choibalsan|LMT ULAT ULAT CHOST CHOT CHOT|-7C -70 -80 -a0 -90 -80|012343434343434343434343434343434343434343434345|-2APHC 2UkoC cKn0 1da0 1dd0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 6hD0 11z0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 3Db0",
+			"Asia/Chongqing|LMT LONT CST CDT|-76.k -70 -80 -90|012323232323232|-1Ggv6.k 27pA6.k eBz0 Rb0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0",
+			"Asia/Colombo|MMT IST IHST IST LKT LKT|-5j.w -5u -60 -6u -6u -60|01231451|-2zOtj.w 1rFbN.w 1zzu 7Apu 23dz0 11zu n3cu",
+			"Asia/Dacca|HMT BURT IST DACT BDT BDST|-5R.k -6u -5u -60 -60 -70|01213454|-18LFR.k 1unn.k HB0 m6n0 LqMu 1x6n0 1hXX",
+			"Asia/Damascus|LMT EET EEST|-2p.c -20 -30|01212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-21Jep.c Hep.c 17b0 1ip0 17b0 1ip0 17b0 1ip0 19X0 1xRB0 11X0 1oN0 10L0 1pB0 11b0 1oN0 10L0 1mp0 13X0 1oN0 11b0 1pd0 11b0 1oN0 11b0 1oN0 11b0 1oN0 11b0 1pd0 11b0 1oN0 11b0 1oN0 11b0 1oN0 11b0 1pd0 11b0 1oN0 Nb0 1AN0 Nb0 bcp0 19X0 1gp0 19X0 3ld0 1xX0 Vd0 1Bz0 Sp0 1vX0 10p0 1dz0 1cN0 1cL0 1db0 1db0 1g10 1an0 1ap0 1db0 1fd0 1db0 1cN0 1db0 1dd0 1db0 1cp0 1dz0 1c10 1dX0 1cN0 1db0 1dd0 1db0 1cN0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1db0 1cN0 1db0 1cN0 19z0 1fB0 1qL0 11B0 1on0 Wp0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 1qL0 WN0 1qL0",
+			"Asia/Dili|LMT TLT JST TLT WITA|-8m.k -80 -90 -90 -80|012343|-2le8m.k 1dnXm.k 8HA0 1ew00 Xld0",
+			"Asia/Dubai|LMT GST|-3F.c -40|01|-21JfF.c",
+			"Asia/Dushanbe|LMT DUST DUST DUSST DUSST TJT|-4z.c -50 -60 -70 -60 -50|0123232323232323232323245|-1Pc4z.c eUnz.c 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 14N0",
+			"Asia/Gaza|EET EET EEST IST IDT|-20 -30 -30 -20 -30|010101010102020202020202020202023434343434343434343434343430202020202020202020202020202020202020202020202020202020202020202020202020202020202020|-1c2q0 5Rb0 10r0 1px0 10N0 1pz0 16p0 1jB0 16p0 1jx0 pBd0 Vz0 1oN0 11b0 1oO0 10N0 1pz0 10N0 1pb0 10N0 1pb0 10N0 1pb0 10N0 1pz0 10N0 1pb0 10N0 1pb0 11d0 1oL0 dW0 hfB0 Db0 1fB0 Rb0 npB0 11z0 1C10 IL0 1s10 10n0 1o10 WL0 1zd0 On0 1ld0 11z0 1o10 14n0 1o10 14n0 1nd0 12n0 1nd0 Xz0 1q10 12n0 M10 C00 17c0 1io0 17c0 1io0 17c0 1o00 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 17c0 1io0 18N0 1bz0 19z0 1gp0 1610 1iL0 11z0 1o10 14o0 1lA1 SKX 1xd1 MKX 1AN0 1a00 1fA0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0",
+			"Asia/Harbin|LMT CHAT CST CHAT CDT|-8q.I -8u -80 -90 -90|012312424242424242|-1Ggwq.I a8nU.I j4Mu 146L0 y5Au eBAu Rb0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0",
+			"Asia/Hebron|EET EET EEST IST IDT|-20 -30 -30 -20 -30|01010101010202020202020202020202343434343434343434343434343020202020202020202020202020202020202020202020202020202020202020202020202020202020202020|-1c2q0 5Rb0 10r0 1px0 10N0 1pz0 16p0 1jB0 16p0 1jx0 pBd0 Vz0 1oN0 11b0 1oO0 10N0 1pz0 10N0 1pb0 10N0 1pb0 10N0 1pb0 10N0 1pz0 10N0 1pb0 10N0 1pb0 11d0 1oL0 dW0 hfB0 Db0 1fB0 Rb0 npB0 11z0 1C10 IL0 1s10 10n0 1o10 WL0 1zd0 On0 1ld0 11z0 1o10 14n0 1o10 14n0 1nd0 12n0 1nd0 Xz0 1q10 12n0 M10 C00 17c0 1io0 17c0 1io0 17c0 1o00 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 17c0 1io0 18N0 1bz0 19z0 1gp0 1610 1iL0 12L0 1mN0 14o0 1lc0 Tb0 1xd1 MKX bB0 cn0 1cN0 1a00 1fA0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 19X0 1fB0 19X0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0",
+			"Asia/Ho_Chi_Minh|LMT SMT ICT ICT|-76.E -76.k -70 -80|01232|-2yKT6.E byo1.k 2KM5.k Kfz0",
+			"Asia/Hong_Kong|LMT HKT HKST JST|-7A.G -80 -90 -90|0121312121212121212121212121212121212121212121212121212121212121212121|-2CFHA.G 1sEP6.G 1cL0 ylu 93X0 1qQu 1tX0 Rd0 1In0 NB0 1cL0 11B0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1kL0 14N0 1nX0 U10 1tz0 U10 1wn0 Rd0 1wn0 U10 1tz0 U10 1tz0 U10 1tz0 U10 1wn0 Rd0 1wn0 Rd0 1wn0 U10 1tz0 U10 1tz0 17d0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 s10 1Vz0 1cN0 1cL0 1cN0 1cL0 6fd0 14n0",
+			"Asia/Hovd|LMT HOVT HOVT HOVST|-66.A -60 -70 -80|01232323232323232323232323232323232323232323232|-2APG6.A 2Uko6.A cKn0 1db0 1dd0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 6hD0 11z0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0",
+			"Asia/Irkutsk|IMT IRKT IRKT IRKST IRKST IRKT|-6V.k -70 -80 -90 -80 -90|01232323232323232323232412323232323232323232323232323232323232325|-21zGV.k pjXV.k 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Istanbul|IMT EET EEST TRST TRT|-1U.U -20 -30 -40 -30|012121212121212121212121212121212121212121212121212121234343434342121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2ogNU.U dzzU.U 11b0 8tB0 1on0 1410 1db0 19B0 1in0 3Rd0 Un0 1oN0 11b0 zSp0 CL0 mN0 1Vz0 1gN0 1pz0 5Rd0 1fz0 1yp0 ML0 1kp0 17b0 1ip0 17b0 1fB0 19X0 1jB0 18L0 1ip0 17z0 qdd0 xX0 3S10 Tz0 dA10 11z0 1o10 11z0 1qN0 11z0 1ze0 11B0 WM0 1qO0 WI0 1nX0 1rB0 10L0 11B0 1in0 17d0 1in0 2pX0 19E0 1fU0 16Q0 1iI0 16Q0 1iI0 1Vd0 pb0 3Kp0 14o0 1df0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cL0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WO0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 Xc0 1qo0 WM0 1qM0 11A0 1o00 1200 1nA0 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Asia/Jakarta|BMT JAVT WIB JST WIB WIB|-77.c -7k -7u -90 -80 -70|01232425|-1Q0Tk luM0 mPzO 8vWu 6kpu 4PXu xhcu",
+			"Asia/Jayapura|LMT WIT CST|-9m.M -90 -9u|0121|-1uu9m.M sMMm.M L4nu",
+			"Asia/Jerusalem|JMT IST IDT IDDT|-2k.E -20 -30 -40|01212121212132121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-26Bek.E SyMk.E 5Rb0 10r0 1px0 10N0 1pz0 16p0 1jB0 16p0 1jx0 3LB0 Em0 or0 1cn0 1dB0 16n0 10O0 1ja0 1tC0 14o0 1cM0 1a00 11A0 1Na0 An0 1MP0 AJ0 1Kp0 LC0 1oo0 Wl0 EQN0 Db0 1fB0 Rb0 npB0 11z0 1C10 IL0 1s10 10n0 1o10 WL0 1zd0 On0 1ld0 11z0 1o10 14n0 1o10 14n0 1nd0 12n0 1nd0 Xz0 1q10 12n0 1hB0 1dX0 1ep0 1aL0 1eN0 17X0 1nf0 11z0 1tB0 19W0 1e10 17b0 1ep0 1gL0 18N0 1fz0 1eN0 17b0 1gq0 1gn0 19d0 1dz0 1c10 17X0 1hB0 1gn0 19d0 1dz0 1c10 17X0 1kp0 1dz0 1c10 1aL0 1eN0 1oL0 10N0 1oL0 10N0 1oL0 10N0 1rz0 W10 1rz0 W10 1rz0 10N0 1oL0 10N0 1oL0 10N0 1rz0 W10 1rz0 W10 1rz0 10N0 1oL0 10N0 1oL0 10N0 1oL0 10N0 1rz0 W10 1rz0 W10 1rz0 10N0 1oL0 10N0 1oL0 10N0 1rz0 W10 1rz0 W10 1rz0 W10 1rz0 10N0 1oL0 10N0 1oL0",
+			"Asia/Kabul|AFT AFT|-40 -4u|01|-10Qs0",
+			"Asia/Kamchatka|LMT PETT PETT PETST PETST|-ay.A -b0 -c0 -d0 -c0|01232323232323232323232412323232323232323232323232323232323232412|-1SLKy.A ivXy.A 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qN0 WM0",
+			"Asia/Karachi|LMT IST IST KART PKT PKST|-4s.c -5u -6u -50 -50 -60|012134545454|-2xoss.c 1qOKW.c 7zX0 eup0 LqMu 1fy01 1cL0 dK0X 11b0 1610 1jX0",
+			"Asia/Kashgar|LMT KAST KAST CST CDT|-53.U -5u -50 -80 -90|0123434343434343|-1Ggt3.U tdbx.U 1Ccou eBx0 Rb0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0",
+			"Asia/Kathmandu|LMT IST NPT|-5F.g -5u -5J|012|-21JhF.g 2EGMb.g",
+			"Asia/Khandyga|LMT YAKT YAKT YAKST YAKST VLAT VLAST VLAT YAKT|-92.d -80 -90 -a0 -90 -a0 -b0 -b0 -a0|0123232323232323232323241232323232323232323232323256565656565656578|-21Q92.d pAp2.d 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 qK0 yN0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 17V0",
+			"Asia/Krasnoyarsk|LMT KRAT KRAT KRAST KRAST KRAT|-6b.k -60 -70 -80 -70 -80|01232323232323232323232412323232323232323232323232323232323232325|-21Hib.k prAb.k 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Kuala_Lumpur|SMT MALT MALST MALT MALT JST MYT|-6T.p -70 -7k -7k -7u -90 -80|01234546|-2Bg6T.p 17anT.p 7hXE dM00 17bO 8Fyu 1so1u",
+			"Asia/Kuching|LMT BORT BORT BORTST JST MYT|-7l.k -7u -80 -8k -90 -80|01232323232323232425|-1KITl.k gDbP.k 6ynu AnE 1O0k AnE 1NAk AnE 1NAk AnE 1NAk AnE 1O0k AnE 1NAk AnE pAk 8Fz0 1so10",
+			"Asia/Kuwait|LMT AST|-3b.U -30|01|-MG3b.U",
+			"Asia/Macao|LMT MOT MOST CST|-7y.k -80 -90 -80|0121212121212121212121212121212121212121213|-2le7y.k 1XO34.k 1wn0 Rd0 1wn0 R9u 1wqu U10 1tz0 TVu 1tz0 17gu 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cJu 1cL0 1cN0 1fz0 1cN0 1cOu 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cJu 1cL0 1cN0 1fz0 1cN0 1cL0 KEp0",
+			"Asia/Magadan|LMT MAGT MAGT MAGST MAGST MAGT|-a3.c -a0 -b0 -c0 -b0 -c0|01232323232323232323232412323232323232323232323232323232323232325|-1Pca3.c eUo3.c 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Makassar|LMT MMT WITA JST|-7V.A -7V.A -80 -90|01232|-21JjV.A vfc0 myLV.A 8ML0",
+			"Asia/Manila|PHT PHST JST|-80 -90 -90|010201010|-1kJI0 AL0 cK10 65X0 mXB0 vX0 VK10 1db0",
+			"Asia/Muscat|LMT GST|-3S.o -40|01|-21JfS.o",
+			"Asia/Nicosia|LMT EET EEST|-2d.s -20 -30|01212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1Vc2d.s 2a3cd.s 1cL0 1qp0 Xz0 19B0 19X0 1fB0 1db0 1cp0 1cL0 1fB0 19X0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1o30 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Asia/Novokuznetsk|NMT KRAT KRAT KRAST KRAST NOVST NOVT NOVT|-5M.M -60 -70 -80 -70 -70 -60 -70|01232323232323232323232412323232323232323232323232323232323232567|-21HhM.M przM.M 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qN0 WM0",
+			"Asia/Novosibirsk|LMT NOVT NOVT NOVST NOVST|-5v.E -60 -70 -80 -70|012323232323232323232324123234141414141414141414141414141414141412|-21Qnv.E pAFv.E 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 ml0 Os0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Omsk|LMT OMST OMST OMSST OMSST OMST|-4R.A -50 -60 -70 -60 -70|01232323232323232323232412323232323232323232323232323232323232325|-224sR.A pMLR.A 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Oral|LMT URAT URAT URAST URAT URAST ORAT ORAST ORAT|-3p.o -40 -50 -60 -60 -50 -40 -50 -50|012343232323232323251516767676767676767676767676768|-1Pc3p.o eUnp.o 23CL0 1db0 1cM0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1fA0 2UK0 Fz0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 RW0",
+			"Asia/Phnom_Penh|LMT SMT ICT ICT|-6X.E -76.k -70 -80|01232|-2yKSX.E bynS.k 2KM5.k Kfz0",
+			"Asia/Pontianak|LMT PMT WIB JST WIB WITA WIB|-7h.k -7h.k -7u -90 -80 -80 -70|012324256|-2ua7h.k XE00 munL.k 8Rau 6kpu 4PXu xhcu Wqnu",
+			"Asia/Pyongyang|KST KST KST|-8u -90 -80|010121|-2CsUu Ucnu 9Iou S5Xu hXB0",
+			"Asia/Qatar|LMT GST AST|-3q.8 -40 -30|012|-21Jfq.8 27BXq.8",
+			"Asia/Qyzylorda|LMT KIZT KIZT KIZST KIZT QYZT QYZT QYZST|-4l.Q -40 -50 -60 -60 -50 -60 -70|012343232323232323232325676767676767676767676767676|-1Pc4l.Q eUol.Q 23CL0 1db0 1cM0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 2UK0 dC0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0",
+			"Asia/Rangoon|RMT BURT JST MMT|-6o.E -6u -90 -6u|0123|-21Jio.E SmnS.E 7j9u",
+			"Asia/Riyadh|LMT AST|-36.Q -30|01|-MG36.Q",
+			"Asia/Sakhalin|LMT CJT JST SAKT SAKST SAKST SAKT|-9u.M -90 -90 -b0 -c0 -b0 -a0|012343434343434343434343563434343434356565656565656565656565656563|-2AGVu.M 1iLAu.M iBc0 1qFa0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o10 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Samarkand|LMT SAMT SAMT SAMST TAST UZST UZT|-4r.c -40 -50 -60 -60 -60 -50|01234323232323232323232356|-1Pc4r.c eUor.c 23CL0 1db0 1cM0 1dc0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 11x0 bf0",
+			"Asia/Seoul|KST KST KST KDT KDT|-8u -90 -80 -90 -a0|0101232014141|-2CsUu Ucnu 9Iou S5Xu eWN0 Mn0 2cp0 hnzu JhXu 11z0 1o10 11z0",
+			"Asia/Shanghai|LMT CST CDT|-85.V -80 -90|012121212121212121|-1Ggw5.V ueM5.V LX0 16p0 1jz0 1Myp0 Rb0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0",
+			"Asia/Singapore|SMT MALT MALST MALT MALT JST SGT SGT|-6T.p -70 -7k -7k -7u -90 -7u -80|012345467|-2Bg6T.p 17anT.p 7hXE dM00 17bO 8Fyu Mspu DTA0",
+			"Asia/Taipei|CST CDT|-80 -90|01010101010101010101010101010101010101010|-104w0 11b0 1oN0 11b0 1oN0 11b0 1pd0 11b0 1oN0 11b0 1oN0 11b0 1oN0 11b0 10N0 1BX0 10p0 1pz0 10p0 1pz0 10p0 1db0 1dd0 1db0 1cN0 1db0 1cN0 1db0 1cN0 1db0 1BB0 ML0 1Bd0 ML0 uq10 1db0 1cN0 1db0 97d0 AL0",
+			"Asia/Tashkent|LMT TAST TAST TASST TASST UZST UZT|-4B.c -50 -60 -70 -60 -60 -50|01232323232323232323232456|-1Pc4B.c eUnB.c 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 11y0 bf0",
+			"Asia/Tbilisi|TBMT TBIT TBIT TBIST TBIST GEST GET GET GEST|-2X.g -30 -40 -50 -40 -40 -30 -40 -50|0123232323232323232323245656565787878787878787878567|-1Pc2X.g 1jUnX.g WCL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 3y0 19f0 1cK0 1cL0 1cN0 1cL0 1cN0 1cL0 1cM0 1cL0 1fB0 3Nz0 11B0 1nX0 11B0 1qL0 WN0 1qL0 WN0 1qL0 11B0 1nX0 11B0 1nX0 11B0 An0 Os0 WM0",
+			"Asia/Tehran|LMT TMT IRST IRST IRDT IRDT|-3p.I -3p.I -3u -40 -50 -4u|01234325252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252|-2btDp.I 1d3c0 1huLT.I TXu 1pz0 sN0 vAu 1cL0 1dB0 1en0 pNB0 UL0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 64p0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0 1cN0 1dz0 1cp0 1dz0 1cp0 1dz0 1cp0 1dz0",
+			"Asia/Thimbu|LMT IST BTT|-5W.A -5u -60|012|-Su5W.A 1BGMs.A",
+			"Asia/Tokyo|CJT JST JDT|-90 -90 -a0|0121212121|-1hTl0 p9C0 QL0 1lB0 13X0 1zB0 NX0 1zB0 NX0",
+			"Asia/Ulaanbaatar|LMT ULAT ULAT ULAST|-77.w -70 -80 -90|01232323232323232323232323232323232323232323232|-2APH7.w 2Uko7.w cKn0 1db0 1dd0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 6hD0 11z0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0",
+			"Asia/Urumqi|LMT URUT CST CDT|-5O.k -60 -80 -90|012323232323232|-1GgtO.k 27pzO.k eBy0 Rb0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0",
+			"Asia/Ust-Nera|LMT YAKT YAKT MAGST MAGT MAGST MAGT MAGT VLAT|-9w.S -80 -90 -c0 -b0 -b0 -a0 -c0 -b0|012343434343434343434345643434343434343434343434343434343434343478|-21Q9w.S pApw.S 23CL0 1d90 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 17V0",
+			"Asia/Vientiane|LMT SMT ICT ICT|-6O.o -76.k -70 -80|01232|-2yKSO.o bynJ.4 2KM5.k Kfz0",
+			"Asia/Vladivostok|LMT VLAT VLAT VLAST VLAST VLAT|-8L.I -90 -a0 -b0 -a0 -b0|01232323232323232323232412323232323232323232323232323232323232325|-1SJIL.I itXL.I 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Yakutsk|LMT YAKT YAKT YAKST YAKST YAKT|-8C.E -80 -90 -a0 -90 -a0|01232323232323232323232412323232323232323232323232323232323232325|-21Q8C.E pAoC.E 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Yekaterinburg|LMT SVET SVET SVEST SVEST YEKT YEKST YEKT|-42.o -40 -50 -60 -50 -50 -60 -60|01232323232323232323232415656565656565656565656565656565656565657|-22Rc2.o qBw2.o 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Asia/Yerevan|LMT YERT YERT YERST YERST AMST AMT AMT AMST|-2W -30 -40 -50 -40 -40 -30 -40 -50|0123232323232323232323245656565657878787878787878787878787878787|-1Pc2W 1jUnW WCL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1am0 2r0 1cJ0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 3Fb0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0",
+			"Atlantic/Azores|HMT AZOT AZOST AZOMT AZOT AZOST WET|1S.w 20 10 0 10 0 0|01212121212121212121212121212121212121212121232123212321232121212121212121212121212121212121212121454545454545454545454545454545456545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-2mGK5.s ckL5.s Sp0 LX0 1vc0 Tc0 1uM0 SM0 1vc0 Tc0 1vc0 SM0 1vc0 6600 1co0 3E00 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 3I00 17c0 1cM0 1cM0 3Fc0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Dc0 1tA0 1cM0 1dc0 1400 gL0 IM0 s10 U00 dX0 Rc0 pd0 Rc0 gL0 Oo0 pd0 Rc0 gL0 Oo0 pd0 14o0 1cM0 1cP0 1cM0 1cM0 1cM0 1cM0 1cM0 3Co0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 qIl0 1cM0 1fA0 1cM0 1cM0 1cN0 1cL0 1cN0 1cM0 1cM0 1cM0 1cM0 1cN0 1cL0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cL0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Atlantic/Bermuda|LMT AST ADT|4j.i 40 30|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1BnRE.G 1LTbE.G 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"Atlantic/Canary|LMT CANT WET WEST|11.A 10 0 -10|01232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-1UtaW.o XPAW.o 1lAK0 1a10 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Atlantic/Cape_Verde|LMT CVT CVST CVT|1y.4 20 10 10|01213|-2xomp.U 1qOMp.U 7zX0 1djf0",
+			"Atlantic/Faeroe|LMT WET WEST|r.4 0 -10|01212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2uSnw.U 2Wgow.U 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Atlantic/Madeira|FMT MADT MADST MADMT WET WEST|17.A 10 0 -10 0 -10|01212121212121212121212121212121212121212121232123212321232121212121212121212121212121212121212121454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-2mGKQ.o ckKQ.o Sp0 LX0 1vc0 Tc0 1uM0 SM0 1vc0 Tc0 1vc0 SM0 1vc0 6600 1co0 3E00 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 3I00 17c0 1cM0 1cM0 3Fc0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Dc0 1tA0 1cM0 1dc0 1400 gL0 IM0 s10 U00 dX0 Rc0 pd0 Rc0 gL0 Oo0 pd0 Rc0 gL0 Oo0 pd0 14o0 1cM0 1cP0 1cM0 1cM0 1cM0 1cM0 1cM0 3Co0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 qIl0 1cM0 1fA0 1cM0 1cM0 1cN0 1cL0 1cN0 1cM0 1cM0 1cM0 1cM0 1cN0 1cL0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Atlantic/Reykjavik|RMT IST ISST GMT|1r.M 10 0 0|01212121212121212121212121212121212121212121212121212121212121213|-2uWmw.c mfaw.c 1Bd0 ML0 1LB0 NLX0 1pe0 zd0 1EL0 LA0 1C00 Oo0 1wo0 Rc0 1wo0 Rc0 1wo0 Rc0 1zc0 Oo0 1zc0 14o0 1lc0 14o0 1lc0 14o0 1o00 11A0 1lc0 14o0 1o00 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1o00 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1o00 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1lc0 14o0 1o00 14o0",
+			"Atlantic/South_Georgia|GST|20|0|",
+			"Atlantic/St_Helena|JMT GMT|m.M 0|01|-KfXB.c",
+			"Atlantic/Stanley|SMT FKT FKST FKT FKST|3P.o 40 30 30 20|0121212121212134343212121212121212121212121212121212121212121212121212|-2kJw8.A 12bA8.A 19X0 1fB0 19X0 1ip0 19X0 1fB0 19X0 1fB0 19X0 1fB0 Cn0 1Cc10 WL0 1qL0 U10 1tz0 U10 1qM0 WN0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1tz0 U10 1tz0 WN0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1tz0 WN0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1qL0 WN0 1qN0 U10 1wn0 Rd0 1wn0 U10 1tz0 U10 1tz0 U10 1tz0 U10 1tz0 U10 1wn0 U10 1tz0 U10 1tz0 U10",
+			"Australia/ACT|EST EST|-a0 -b0|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-293lX xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 14o0 1o00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 U00 1qM0 WM0 1tA0 WM0 1tA0 U00 1tA0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 11A0 1o00 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 14o0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/Adelaide|CST CST|-9u -au|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-293lt xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 U00 1qM0 WM0 1tA0 WM0 1tA0 U00 1tA0 U00 1tA0 Oo0 1zc0 WM0 1qM0 Rc0 1zc0 U00 1tA0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 14o0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/Brisbane|EST EST|-a0 -b0|01010101010101010|-293lX xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 H1A0 Oo0 1zc0 Oo0 1zc0 Oo0",
+			"Australia/Broken_Hill|CST CST|-9u -au|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-293lt xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 14o0 1o00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 U00 1qM0 WM0 1tA0 WM0 1tA0 U00 1tA0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 14o0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/Currie|EST EST|-a0 -b0|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-29E80 19X0 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 11A0 1qM0 WM0 1qM0 Oo0 1zc0 Oo0 1zc0 Oo0 1wo0 WM0 1tA0 WM0 1tA0 U00 1tA0 U00 1tA0 11A0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 11A0 1o00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/Darwin|CST CST|-9u -au|010101010|-293lt xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0",
+			"Australia/Eucla|CWST CWST|-8J -9J|0101010101010101010|-293kI xcX 10jd0 yL0 1cN0 1cL0 1gSp0 Oo0 l5A0 Oo0 iJA0 G00 zU00 IM0 1qM0 11A0 1o00 11A0",
+			"Australia/Hobart|EST EST|-a0 -b0|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-29E80 19X0 10jd0 yL0 1cN0 1cL0 1fB0 19X0 VfB0 1cM0 1o00 Rc0 1wo0 Rc0 1wo0 U00 1wo0 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 11A0 1qM0 WM0 1qM0 Oo0 1zc0 Oo0 1zc0 Oo0 1wo0 WM0 1tA0 WM0 1tA0 U00 1tA0 U00 1tA0 11A0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 11A0 1o00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/LHI|EST LHST LHST LHST|-a0 -au -bu -b0|0121212121313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313|raC0 1zdu Rb0 1zd0 On0 1zd0 On0 1zd0 On0 1zd0 TXu 1qMu WLu 1tAu WLu 1tAu TXu 1tAu Onu 1zcu Onu 1zcu Onu 1zcu Rbu 1zcu Onu 1zcu Onu 1zcu 11zu 1o0u 11zu 1o0u 11zu 1o0u 11zu 1qMu WLu 11Au 1nXu 1qMu 11zu 1o0u 11zu 1o0u 11zu 1qMu WLu 1qMu 11zu 1o0u WLu 1qMu 14nu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1fAu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1fAu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1fzu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1fAu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1cMu 1cLu 1fAu 1cLu 1cMu 1cLu 1cMu",
+			"Australia/Lindeman|EST EST|-a0 -b0|010101010101010101010|-293lX xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 H1A0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0",
+			"Australia/Melbourne|EST EST|-a0 -b0|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101|-293lX xcX 10jd0 yL0 1cN0 1cL0 1fB0 19X0 17c10 LA0 1C00 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 U00 1qM0 WM0 1qM0 11A0 1tA0 U00 1tA0 U00 1tA0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 11A0 1o00 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 14o0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0",
+			"Australia/Perth|WST WST|-80 -90|0101010101010101010|-293jX xcX 10jd0 yL0 1cN0 1cL0 1gSp0 Oo0 l5A0 Oo0 iJA0 G00 zU00 IM0 1qM0 11A0 1o00 11A0",
+			"CET|CET CEST|-10 -20|01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 1cM0 1cM0 16M0 1gMM0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"CST6CDT|CST CDT CWT CPT|60 50 50 50|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261s0 1nX0 11B0 1nX0 SgN0 8x30 iw0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"Chile/EasterIsland|EMT EASST EAST EAST EASST|7h.s 60 70 60 50|012121212121212121212121212121213434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434|-1uSgG.w nHUG.w op0 9UK0 RXB0 WL0 1zd0 On0 1ip0 11z0 1o10 11z0 1qN0 WL0 1ld0 14n0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 WL0 1qN0 1cL0 1cN0 11z0 1ld0 14n0 1qN0 11z0 1cN0 19X0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1ip0 1fz0 1fB0 11z0 1qN0 WL0 1qN0 WL0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 17b0 1ip0 11z0 1o10 19X0 1fB0 1nX0 G10 1EL0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1wn0 Rd0 1zb0 Op0 1zb0 Rd0 1wn0 Rd0",
+			"EET|EET EEST|-20 -30|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|hDB0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"EST|EST|50|0|",
+			"EST5EDT|EST EDT EWT EPT|50 40 40 40|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261t0 1nX0 11B0 1nX0 SgN0 8x40 iv0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"Eire|DMT IST GMT BST IST|p.l -y.D 0 -10 -10|01232323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242|-2ax9y.D Rc0 1fzy.D 14M0 1fc0 1g00 1co0 1dc0 1co0 1oo0 1400 1dc0 19A0 1io0 1io0 WM0 1o00 14o0 1o00 17c0 1io0 17c0 1fA0 1a00 1lc0 17c0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1cM0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1a00 1io0 1qM0 Dc0 g5X0 14p0 1wn0 17d0 1io0 11A0 1o00 17c0 1fA0 1a00 1fA0 1cM0 1fA0 1a00 17c0 1fA0 1a00 1io0 17c0 1lc0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1a00 1a00 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1tA0 IM0 90o0 U00 1tA0 U00 1tA0 U00 1tA0 U00 1tA0 WM0 1qM0 WM0 1qM0 WM0 1tA0 U00 1tA0 U00 1tA0 11z0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 14o0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Etc/GMT+1|GMT+1|10|0|",
+			"Etc/GMT+10|GMT+10|a0|0|",
+			"Etc/GMT+11|GMT+11|b0|0|",
+			"Etc/GMT+12|GMT+12|c0|0|",
+			"Etc/GMT+2|GMT+2|20|0|",
+			"Etc/GMT+3|GMT+3|30|0|",
+			"Etc/GMT+4|GMT+4|40|0|",
+			"Etc/GMT+5|GMT+5|50|0|",
+			"Etc/GMT+6|GMT+6|60|0|",
+			"Etc/GMT+7|GMT+7|70|0|",
+			"Etc/GMT+8|GMT+8|80|0|",
+			"Etc/GMT+9|GMT+9|90|0|",
+			"Etc/GMT-1|GMT-1|-10|0|",
+			"Etc/GMT-10|GMT-10|-a0|0|",
+			"Etc/GMT-11|GMT-11|-b0|0|",
+			"Etc/GMT-12|GMT-12|-c0|0|",
+			"Etc/GMT-13|GMT-13|-d0|0|",
+			"Etc/GMT-14|GMT-14|-e0|0|",
+			"Etc/GMT-2|GMT-2|-20|0|",
+			"Etc/GMT-3|GMT-3|-30|0|",
+			"Etc/GMT-4|GMT-4|-40|0|",
+			"Etc/GMT-5|GMT-5|-50|0|",
+			"Etc/GMT-6|GMT-6|-60|0|",
+			"Etc/GMT-7|GMT-7|-70|0|",
+			"Etc/GMT-8|GMT-8|-80|0|",
+			"Etc/GMT-9|GMT-9|-90|0|",
+			"Etc/UCT|UCT|0|0|",
+			"Etc/UTC|UTC|0|0|",
+			"Europe/Amsterdam|AMT NST NEST NET CEST CET|-j.w -1j.w -1k -k -20 -10|010101010101010101010101010101010101010101012323234545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545|-2aFcj.w 11b0 1iP0 11A0 1io0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1co0 1io0 1yo0 Pc0 1a00 1fA0 1Bc0 Mo0 1tc0 Uo0 1tA0 U00 1uo0 W00 1s00 VA0 1so0 Vc0 1sM0 UM0 1wo0 Rc0 1u00 Wo0 1rA0 W00 1s00 VA0 1sM0 UM0 1w00 fV0 BCX.w 1tA0 U00 1u00 Wo0 1sm0 601k WM0 1fA0 1cM0 1cM0 1cM0 16M0 1gMM0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Andorra|WET CET CEST|0 -10 -20|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-UBA0 1xIN0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Athens|AMT EET EEST CEST CET|-1y.Q -20 -30 -20 -10|012123434121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2a61x.Q CNbx.Q mn0 kU10 9b0 3Es0 Xa0 1fb0 1dd0 k3X0 Nz0 SCp0 1vc0 SO0 1cM0 1a00 1ao0 1fc0 1a10 1fG0 1cg0 1dX0 1bX0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Belfast|GMT BST BDST|0 -10 -20|0101010101010101010101010101010101010101010101010121212121210101210101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2axa0 Rc0 1fA0 14M0 1fc0 1g00 1co0 1dc0 1co0 1oo0 1400 1dc0 19A0 1io0 1io0 WM0 1o00 14o0 1o00 17c0 1io0 17c0 1fA0 1a00 1lc0 17c0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1cM0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1a00 1io0 1qM0 Dc0 2Rz0 Dc0 1zc0 Oo0 1zc0 Rc0 1wo0 17c0 1iM0 FA0 xB0 1fA0 1a00 14o0 bb0 LA0 xB0 Rc0 1wo0 11A0 1o00 17c0 1fA0 1a00 1fA0 1cM0 1fA0 1a00 17c0 1fA0 1a00 1io0 17c0 1lc0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1a00 1a00 1qM0 WM0 1qM0 11A0 1o00 WM0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1tA0 IM0 90o0 U00 1tA0 U00 1tA0 U00 1tA0 U00 1tA0 WM0 1qM0 WM0 1qM0 WM0 1tA0 U00 1tA0 U00 1tA0 11z0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 14o0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Belgrade|CET CEST|-10 -20|01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-19RC0 3IP0 WM0 1fA0 1cM0 1cM0 1rc0 Qo0 1vmo0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Berlin|CET CEST CEMT|-10 -20 -30|01010101010101210101210101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 1cM0 1cM0 kL0 Nc0 m10 WM0 1ao0 1cp0 dX0 jz0 Dd0 1io0 17c0 1fA0 1a00 1ehA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Bratislava|CET CEST|-10 -20|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 16M0 1lc0 1tA0 17A0 11c0 1io0 17c0 1io0 17c0 1fc0 1ao0 1bNc0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Brussels|WET CET CEST WEST|0 -10 -20 -10|0121212103030303030303030303030303030303030303030303212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2ehc0 3zX0 11c0 1iO0 11A0 1o00 11A0 my0 Ic0 1qM0 Rc0 1EM0 UM0 1u00 10o0 1io0 1io0 17c0 1a00 1fA0 1cM0 1cM0 1io0 17c0 1fA0 1a00 1io0 1a30 1io0 17c0 1fA0 1a00 1io0 17c0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Dc0 y00 5Wn0 WM0 1fA0 1cM0 16M0 1iM0 16M0 1C00 Uo0 1eeo0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Bucharest|BMT EET EEST|-1I.o -20 -30|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1xApI.o 20LI.o RA0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1Axc0 On0 1fA0 1a10 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cK0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cL0 1cN0 1cL0 1fB0 1nX0 11E0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Budapest|CET CEST|-10 -20|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1ip0 1cn0 1jd0 11b0 1ld0 1bb0 NVc0 3O00 WM0 1fA0 1cM0 1cM0 1oJ0 1e00 Xf0 1fA0 1cM0 1cM0 1cM0 1cM0 1fA0 1a00 1iM0 1fA0 8Ha0 Rb0 1wN0 Rb0 1BB0 Lz0 1C20 LB0 SNX0 1a10 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Busingen|CET CEST|-10 -20|01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-19Lc0 11A0 1o00 11A0 1xG10 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Chisinau|CMT BMT EET EEST CEST CET MSK MSD|-1T -1I.o -20 -30 -20 -10 -30 -40|0123232323232323232345454676767676767676767623232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232|-26jdT wGMa.A 20LI.o RA0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 27A0 2en0 39g0 WM0 1fA0 1cM0 V90 1t7z0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1ty0 2bD0 1cM0 1cK0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1nX0 11E0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Copenhagen|CET CEST|-10 -20|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2azC0 Tz0 VuO0 60q0 WM0 1fA0 1cM0 1cM0 1cM0 S00 1HA0 Nc0 1C00 Dc0 1Nc0 Ao0 1h5A0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Gibraltar|GMT BST BDST CET CEST|0 -10 -20 -10 -20|010101010101010101010101010101010101010101010101012121212121010121010101010101010101034343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343|-2axa0 Rc0 1fA0 14M0 1fc0 1g00 1co0 1dc0 1co0 1oo0 1400 1dc0 19A0 1io0 1io0 WM0 1o00 14o0 1o00 17c0 1io0 17c0 1fA0 1a00 1lc0 17c0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1cM0 1io0 17c0 1fA0 1a00 1io0 17c0 1io0 17c0 1fA0 1a00 1io0 1qM0 Dc0 2Rz0 Dc0 1zc0 Oo0 1zc0 Rc0 1wo0 17c0 1iM0 FA0 xB0 1fA0 1a00 14o0 bb0 LA0 xB0 Rc0 1wo0 11A0 1o00 17c0 1fA0 1a00 1fA0 1cM0 1fA0 1a00 17c0 1fA0 1a00 1io0 17c0 1lc0 17c0 1fA0 10Jz0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Helsinki|HMT EET EEST|-1D.Q -20 -30|0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-1WuND.Q OULD.Q 1db0 1xGP0 1cM0 1cM0 1cM0 1cN0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Kaliningrad|CET CEST CET CEST MSK MSD EEST EET FET|-10 -20 -20 -30 -30 -40 -30 -20 -30|010101010101023245454545454545454545467676767676767676767676767676767676767678|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 1cM0 Am0 Lb0 1en0 op0 1pNz0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 1cJ0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Europe/Kiev|KMT EET MSK CEST CET MSD EEST|-22.4 -20 -30 -20 -10 -40 -30|0123434252525252525252525256161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161|-1Pc22.4 eUo2.4 rnz0 2Hg0 WM0 1fA0 da0 1v4m0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 Db0 3220 1cK0 1cL0 1cN0 1cL0 1cN0 1cL0 1cQ0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Lisbon|LMT WET WEST WEMT CET CEST|A.w 0 -10 -20 -10 -20|012121212121212121212121212121212121212121212321232123212321212121212121212121212121212121212121214121212121212121212121212121212124545454212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2ldXn.s aPWn.s Sp0 LX0 1vc0 Tc0 1uM0 SM0 1vc0 Tc0 1vc0 SM0 1vc0 6600 1co0 3E00 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 3I00 17c0 1cM0 1cM0 3Fc0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Dc0 1tA0 1cM0 1dc0 1400 gL0 IM0 s10 U00 dX0 Rc0 pd0 Rc0 gL0 Oo0 pd0 Rc0 gL0 Oo0 pd0 14o0 1cM0 1cP0 1cM0 1cM0 1cM0 1cM0 1cM0 3Co0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 pvy0 1cM0 1cM0 1fA0 1cM0 1cM0 1cN0 1cL0 1cN0 1cM0 1cM0 1cM0 1cM0 1cN0 1cL0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Luxembourg|LMT CET CEST WET WEST WEST WET|-o.A -10 -20 0 -10 -20 -10|0121212134343434343434343434343434343434343434343434565651212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2DG0o.A t6mo.A TB0 1nX0 Up0 1o20 11A0 rW0 CM0 1qP0 R90 1EO0 UK0 1u20 10m0 1ip0 1in0 17e0 19W0 1fB0 1db0 1cp0 1in0 17d0 1fz0 1a10 1in0 1a10 1in0 17f0 1fA0 1a00 1io0 17c0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Dc0 vA0 60L0 WM0 1fA0 1cM0 17c0 1io0 16M0 1C00 Uo0 1eeo0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Madrid|WET WEST WEMT CET CEST|0 -10 -20 -10 -20|01010101010101010101010121212121234343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343|-28dd0 11A0 1go0 19A0 1co0 1dA0 b1A0 18o0 3I00 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 iyo0 Rc0 18o0 1hc0 1io0 1a00 14o0 5aL0 MM0 1vc0 17A0 1i00 1bc0 1eo0 17d0 1in0 17A0 6hA0 10N0 XIL0 1a10 1in0 17d0 19X0 1cN0 1fz0 1a10 1fX0 1cp0 1cO0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Malta|CET CEST|-10 -20|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2as10 M00 1cM0 1cM0 14o0 1o00 WM0 1qM0 17c0 1cM0 M3A0 5M20 WM0 1fA0 1cM0 1cM0 1cM0 16m0 1de0 1lc0 14m0 1lc0 WO0 1qM0 GTW0 On0 1C10 Lz0 1C10 Lz0 1EN0 Lz0 1C10 Lz0 1zd0 Oo0 1C00 On0 1cp0 1cM0 1lA0 Xc0 1qq0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1iN0 19z0 1fB0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Minsk|MMT EET MSK CEST CET MSD EEST FET|-1O -20 -30 -20 -10 -40 -30 -30|01234343252525252525252525261616161616161616161616161616161616161617|-1Pc1O eUnO qNX0 3gQ0 WM0 1fA0 1cM0 Al0 1tsn0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 3Fc0 1cN0 1cK0 1cM0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Europe/Monaco|PMT WET WEST WEMT CET CEST|-9.l 0 -10 -20 -10 -20|01212121212121212121212121212121212121212121212121232323232345454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-2nco9.l cNb9.l HA0 19A0 1iM0 11c0 1oo0 Wo0 1rc0 QM0 1EM0 UM0 1u00 10o0 1io0 1wo0 Rc0 1a00 1fA0 1cM0 1cM0 1io0 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 1fA0 1a00 1io0 17c0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Df0 2RV0 11z0 11B0 1ze0 WM0 1fA0 1cM0 1fa0 1aq0 16M0 1ekn0 1cL0 1fC0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Moscow|MMT MMT MST MDST MSD MSK MSM EET EEST MSK|-2u -2u.M -3u.M -4u.M -40 -30 -50 -20 -30 -40|01213234546457545454545454545454545875454545454545454545454545454545454545459|-2ag2u 2pyX.c 1bA0 11X0 GN0 1Hb0 c20 imu.M 3DA0 dz0 15A0 c10 2q10 iM10 23CL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 IM0 rU0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Europe/Paris|PMT WET WEST CEST CET WEMT|-9.l 0 -10 -20 -10 -20|0121212121212121212121212121212121212121212121212123434352543434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434|-2nco8.l cNb8.l HA0 19A0 1iM0 11c0 1oo0 Wo0 1rc0 QM0 1EM0 UM0 1u00 10o0 1io0 1wo0 Rc0 1a00 1fA0 1cM0 1cM0 1io0 17c0 1fA0 1a00 1io0 1a00 1io0 17c0 1fA0 1a00 1io0 17c0 1cM0 1cM0 1a00 1io0 1cM0 1cM0 1a00 1fA0 1io0 17c0 1cM0 1cM0 1a00 1fA0 1io0 1qM0 Df0 Ik0 5M30 WM0 1fA0 1cM0 Vx0 hB0 1aq0 16M0 1ekn0 1cL0 1fC0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Riga|RMT LST EET MSK CEST CET MSD EEST|-1A.o -2A.o -20 -30 -20 -10 -40 -30|010102345454536363636363636363727272727272727272727272727272727272727272727272727272727272727272727272727272727272727272727272|-25TzA.o 11A0 1iM0 ko0 gWm0 yDXA.o 2bX0 3fE0 WM0 1fA0 1cM0 1cM0 4m0 1sLy0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 1o00 11A0 1o00 11A0 1qM0 3oo0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Rome|CET CEST|-10 -20|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2as10 M00 1cM0 1cM0 14o0 1o00 WM0 1qM0 17c0 1cM0 M3A0 5M20 WM0 1fA0 1cM0 16K0 1iO0 16m0 1de0 1lc0 14m0 1lc0 WO0 1qM0 GTW0 On0 1C10 Lz0 1C10 Lz0 1EN0 Lz0 1C10 Lz0 1zd0 Oo0 1C00 On0 1C10 Lz0 1zd0 On0 1C10 LA0 1C00 LA0 1zc0 Oo0 1C00 Oo0 1zc0 Oo0 1fC0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Samara|LMT SAMT SAMT KUYT KUYST KUYST KUYT KUYST SAMST SAMST|-3k.A -30 -40 -40 -50 -40 -30 -30 -50 -40|012343434343434343435656762828282828282828282828282828282828282912|-22WNk.A qHak.A bcn0 1Qqo0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1fA0 1cM0 1cN0 8o0 14j0 1cL0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qN0 WM0",
+			"Europe/Simferopol|SMT EET MSK CEST CET MSD EEST MSK|-2g -20 -30 -20 -10 -40 -30 -40|01234343252525252525252525216161652525261616161616161616161616161616161617|-1Pc2g eUog rEn0 2qs0 WM0 1fA0 1cM0 3V0 1u0L0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1Q00 4eL0 1cL0 1cN0 1cL0 1cN0 dX0 WL0 1cN0 1cL0 1fB0 1o30 11B0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11z0",
+			"Europe/Sofia|EET CET CEST EEST|-20 -10 -20 -30|01212103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030|-168L0 WM0 1fA0 1cM0 1cM0 1cN0 1mKH0 1dd0 1fb0 1ap0 1fb0 1a20 1fy0 1a30 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cK0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 1nX0 11E0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Stockholm|CET CEST|-10 -20|01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2azC0 TB0 2yDe0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Tallinn|TMT CET CEST EET MSK MSD EEST|-1D -10 -20 -20 -30 -40 -30|012103421212454545454545454546363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363|-26oND teD 11A0 1Ta0 4rXl KSLD 2FX0 2Jg0 WM0 1fA0 1cM0 18J0 1sTX0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o10 11A0 1qM0 5QM0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Tirane|LMT CET CEST|-1j.k -10 -20|01212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2glBj.k 14pcj.k 5LC0 WM0 4M0 1fCK0 10n0 1op0 11z0 1pd0 11z0 1qN0 WL0 1qp0 Xb0 1qp0 Xb0 1qp0 11z0 1lB0 11z0 1qN0 11z0 1iN0 16n0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Uzhgorod|CET CEST MSK MSD EET EEST|-10 -20 -30 -40 -20 -30|010101023232323232323232320454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454|-1cqL0 6i00 WM0 1fA0 1cM0 1ml0 1Cp0 1r3W0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1Q00 1Nf0 2pw0 1cL0 1cN0 1cL0 1cN0 1cL0 1cQ0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Vienna|CET CEST|-10 -20|0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 3KM0 14o0 LA00 6i00 WM0 1fA0 1cM0 1cM0 1cM0 400 2qM0 1a00 1cM0 1cM0 1io0 17c0 1gHa0 19X0 1cP0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Vilnius|WMT KMT CET EET MSK CEST MSD EEST|-1o -1z.A -10 -20 -30 -20 -40 -30|012324525254646464646464646464647373737373737352537373737373737373737373737373737373737373737373737373737373737373737373|-293do 6ILM.o 1Ooz.A zz0 Mfd0 29W0 3is0 WM0 1fA0 1cM0 LV0 1tgL0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cN0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11B0 1o00 11A0 1qM0 8io0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Volgograd|LMT TSAT STAT STAT VOLT VOLST VOLST VOLT|-2V.E -30 -30 -40 -40 -50 -40 -30|01234545454545454545467674676767676767676767676767676767676767674|-21IqV.E cLXV.E cEM0 1gqn0 Lco0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1fA0 1cM0 2pz0 1cJ0 1cQ0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0",
+			"Europe/Warsaw|WMT CET CEST EET EEST|-1o -10 -20 -20 -30|012121234312121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121|-2ctdo 1LXo 11d0 1iO0 11A0 1o00 11A0 1on0 11A0 6zy0 HWP0 5IM0 WM0 1fA0 1cM0 1dz0 1mL0 1en0 15B0 1aq0 1nA0 11A0 1io0 17c0 1fA0 1a00 iDX0 LA0 1cM0 1cM0 1C00 Oo0 1cM0 1cM0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1C00 LA0 uso0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cN0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"Europe/Zaporozhye|CUT EET MSK CEST CET MSD EEST|-2k -20 -30 -20 -10 -40 -30|01234342525252525252525252526161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161|-1Pc2k eUok rdb0 2RE0 WM0 1fA0 8m0 1v9a0 1db0 1cN0 1db0 1cN0 1db0 1dd0 1cO0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cK0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cQ0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"HST|HST|a0|0|",
+			"Indian/Antananarivo|LMT EAT EAST|-3a.4 -30 -40|0121|-2mrDa.4 1HRba.4 Ao0",
+			"Indian/Chagos|LMT IOT IOT|-4N.E -50 -60|012|-2xosN.E 3AGLN.E",
+			"Indian/Christmas|CXT|-70|0|",
+			"Indian/Cocos|CCT|-6u|0|",
+			"Indian/Comoro|LMT EAT|-2R.4 -30|01|-2mrCR.4",
+			"Indian/Kerguelen|zzz TFT|0 -50|01|-MG00",
+			"Indian/Mahe|LMT SCT|-3F.M -40|01|-2yO3F.M",
+			"Indian/Maldives|MMT MVT|-4S -50|01|-olgS",
+			"Indian/Mauritius|LMT MUT MUST|-3O -40 -50|012121|-2xorO 34unO 14L0 12kr0 11z0",
+			"Indian/Mayotte|LMT EAT|-30.U -30|01|-2mrD0.U",
+			"Indian/Reunion|LMT RET|-3F.Q -40|01|-2mDDF.Q",
+			"Kwajalein|MHT KWAT MHT|-b0 c0 -c0|012|-AX0 W9X0",
+			"MET|MET MEST|-10 -20|01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 1cM0 1cM0 16M0 1gMM0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00",
+			"MST|MST|70|0|",
+			"MST7MDT|MST MDT MWT MPT|70 60 60 60|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261r0 1nX0 11B0 1nX0 SgN0 8x20 ix0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"NZ-CHAT|LMT CHAST CHADT|-cd.M -cJ -dJ|012121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212|-vDod.M Hq2d.M IM0 1C00 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Oo0 1zc0 Rc0 1zc0 Oo0 1qM0 14o0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1io0 17c0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1lc0 14o0 1lc0 14o0 1lc0 17c0 1io0 17c0 1io0 17c0 1io0 17c0 1io0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00",
+			"PST8PDT|PST PDT PWT PPT|80 70 70 70|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261q0 1nX0 11B0 1nX0 SgN0 8x10 iy0 QwN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0",
+			"Pacific/Apia|LMT SAMT WST WSDT WSDT WST|bq.U bu b0 a0 -e0 -d0|01232345454545454545454545454545454545454545454545454545454|-2nDMx.4 1yW03.4 2rRbu 1ff0 1a00 CI0 AQ0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1io0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1a00 1fA0 1cM0 1fA0 1a00 1fA0 1a00",
+			"Pacific/Chuuk|CHUT|-a0|0|",
+			"Pacific/Efate|LMT VUT VUST|-bd.g -b0 -c0|0121212121212121212121|-2l9nd.g 2Szcd.g 1cL0 1oN0 10L0 1fB0 19X0 1fB0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1fB0 Lz0 1Nd0 An0",
+			"Pacific/Enderbury|PHOT PHOT PHOT|c0 b0 -d0|012|nIc0 B8n0",
+			"Pacific/Fakaofo|TKT TKT|b0 -d0|01|1Gfn0",
+			"Pacific/Fiji|LMT FJT FJST|-bT.I -c0 -d0|012121212121212121212121212121212121212121212121212121212121212|-2bUzT.I 3m8NT.I LA0 1EM0 IM0 nJc0 LA0 1o00 Rc0 1wo0 Ao0 1Nc0 Ao0 1Q00 xz0 1Q10 xz0 1Q10 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Q10 xz0 1Q10 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Q10 xz0 1Q10 xz0 1Q10 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Q10 xz0 1Q10 xz0 1Q10 An0 1Nd0 An0 1Nd0 An0 1Nd0 An0 1Q10 xz0 1Q10",
+			"Pacific/Funafuti|TVT|-c0|0|",
+			"Pacific/Galapagos|LMT ECT GALT|5W.o 50 60|012|-1yVS1.A 2dTz1.A",
+			"Pacific/Gambier|LMT GAMT|8X.M 90|01|-2jof0.c",
+			"Pacific/Guadalcanal|LMT SBT|-aD.M -b0|01|-2joyD.M",
+			"Pacific/Guam|GST ChST|-a0 -a0|01|1fpq0",
+			"Pacific/Honolulu|HST HDT HST|au 9u a0|010102|-1thLu 8x0 lef0 8Pz0 46p0",
+			"Pacific/Kiritimati|LINT LINT LINT|aE a0 -e0|012|nIaE B8nk",
+			"Pacific/Kosrae|KOST KOST|-b0 -c0|010|-AX0 1bdz0",
+			"Pacific/Majuro|MHT MHT|-b0 -c0|01|-AX0",
+			"Pacific/Marquesas|LMT MART|9i 9u|01|-2joeG",
+			"Pacific/Midway|NST NDT BST SST|b0 a0 b0 b0|01023|-x3N0 An0 pJd0 EyM0",
+			"Pacific/Nauru|LMT NRT JST NRT|-b7.E -bu -90 -c0|01213|-1Xdn7.E PvzB.E 5RCu 1ouJu",
+			"Pacific/Niue|NUT NUT NUT|bk bu b0|012|-KfME 17y0a",
+			"Pacific/Norfolk|NMT NFT|-bc -bu|01|-Kgbc",
+			"Pacific/Noumea|LMT NCT NCST|-b5.M -b0 -c0|01212121|-2l9n5.M 2EqM5.M xX0 1PB0 yn0 HeP0 Ao0",
+			"Pacific/Pago_Pago|LMT SAMT NST BST SST|bm.M bu b0 b0 b0|01234|-2nDMB.c 1yW07.c FXzu EyM0",
+			"Pacific/Palau|PWT|-90|0|",
+			"Pacific/Pitcairn|PNT PST|8u 80|01|18Vku",
+			"Pacific/Pohnpei|PONT|-b0|0|",
+			"Pacific/Port_Moresby|PGT|-a0|0|",
+			"Pacific/Rarotonga|CKT CKHST CKT|au 9u a0|012121212121212121212121212|lyWu IL0 1zcu Onu 1zcu Onu 1zcu Rbu 1zcu Onu 1zcu Onu 1zcu Onu 1zcu Onu 1zcu Onu 1zcu Rbu 1zcu Onu 1zcu Onu 1zcu Onu",
+			"Pacific/Saipan|MPT MPT ChST|-90 -a0 -a0|012|-AV0 1g2n0",
+			"Pacific/Tahiti|LMT TAHT|9W.g a0|01|-2joe1.I",
+			"Pacific/Tarawa|GILT|-c0|0|",
+			"Pacific/Tongatapu|TOT TOT TOST|-ck -d0 -e0|01212121|-1aB0k 2n5dk 15A0 1wo0 xz0 1Q10 xz0",
+			"Pacific/Wake|WAKT|-c0|0|",
+			"Pacific/Wallis|WFT|-c0|0|",
+			"WET|WET WEST|0 -10|010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|hDB0 1a00 1fA0 1cM0 1cM0 1cM0 1fA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00"
+		],
+		"links": [
+			"Africa/Addis_Ababa|Africa/Asmara",
+			"Africa/Addis_Ababa|Africa/Asmera",
+			"Africa/Bamako|Africa/Timbuktu",
+			"Africa/Bujumbura|Africa/Lubumbashi",
+			"Africa/Cairo|Egypt",
+			"Africa/Juba|Africa/Khartoum",
+			"Africa/Lome|Etc/GMT",
+			"Africa/Lome|Etc/GMT+0",
+			"Africa/Lome|Etc/GMT-0",
+			"Africa/Lome|Etc/GMT0",
+			"Africa/Lome|Etc/Greenwich",
+			"Africa/Lome|GMT",
+			"Africa/Lome|GMT+0",
+			"Africa/Lome|GMT-0",
+			"Africa/Lome|GMT0",
+			"Africa/Lome|Greenwich",
+			"Africa/Tripoli|Libya",
+			"America/Adak|America/Atka",
+			"America/Adak|US/Aleutian",
+			"America/Anchorage|US/Alaska",
+			"America/Anguilla|America/Dominica",
+			"America/Anguilla|America/Grenada",
+			"America/Anguilla|America/Guadeloupe",
+			"America/Anguilla|America/Marigot",
+			"America/Anguilla|America/Montserrat",
+			"America/Anguilla|America/Port_of_Spain",
+			"America/Anguilla|America/St_Barthelemy",
+			"America/Anguilla|America/St_Kitts",
+			"America/Anguilla|America/St_Lucia",
+			"America/Anguilla|America/St_Thomas",
+			"America/Anguilla|America/St_Vincent",
+			"America/Anguilla|America/Tortola",
+			"America/Anguilla|America/Virgin",
+			"America/Argentina/Buenos_Aires|America/Buenos_Aires",
+			"America/Argentina/Catamarca|America/Argentina/ComodRivadavia",
+			"America/Argentina/Catamarca|America/Catamarca",
+			"America/Argentina/Cordoba|America/Cordoba",
+			"America/Argentina/Cordoba|America/Rosario",
+			"America/Argentina/Jujuy|America/Jujuy",
+			"America/Argentina/Mendoza|America/Mendoza",
+			"America/Aruba|America/Curacao",
+			"America/Aruba|America/Kralendijk",
+			"America/Aruba|America/Lower_Princes",
+			"America/Atikokan|America/Coral_Harbour",
+			"America/Chicago|US/Central",
+			"America/Denver|America/Shiprock",
+			"America/Denver|Navajo",
+			"America/Denver|US/Mountain",
+			"America/Detroit|US/Michigan",
+			"America/Edmonton|Canada/Mountain",
+			"America/Ensenada|America/Tijuana",
+			"America/Ensenada|Mexico/BajaNorte",
+			"America/Fort_Wayne|America/Indiana/Indianapolis",
+			"America/Fort_Wayne|America/Indianapolis",
+			"America/Fort_Wayne|US/East-Indiana",
+			"America/Halifax|Canada/Atlantic",
+			"America/Havana|Cuba",
+			"America/Indiana/Knox|America/Knox_IN",
+			"America/Indiana/Knox|US/Indiana-Starke",
+			"America/Jamaica|Jamaica",
+			"America/Kentucky/Louisville|America/Louisville",
+			"America/Los_Angeles|US/Pacific",
+			"America/Los_Angeles|US/Pacific-New",
+			"America/Manaus|Brazil/West",
+			"America/Mazatlan|Mexico/BajaSur",
+			"America/Mexico_City|Mexico/General",
+			"America/New_York|US/Eastern",
+			"America/Noronha|Brazil/DeNoronha",
+			"America/Phoenix|US/Arizona",
+			"America/Porto_Acre|America/Rio_Branco",
+			"America/Porto_Acre|Brazil/Acre",
+			"America/Regina|Canada/East-Saskatchewan",
+			"America/Regina|Canada/Saskatchewan",
+			"America/Santiago|Chile/Continental",
+			"America/Sao_Paulo|Brazil/East",
+			"America/St_Johns|Canada/Newfoundland",
+			"America/Toronto|Canada/Eastern",
+			"America/Vancouver|Canada/Pacific",
+			"America/Whitehorse|Canada/Yukon",
+			"America/Winnipeg|Canada/Central",
+			"Antarctica/McMurdo|Antarctica/South_Pole",
+			"Antarctica/McMurdo|NZ",
+			"Antarctica/McMurdo|Pacific/Auckland",
+			"Arctic/Longyearbyen|Atlantic/Jan_Mayen",
+			"Arctic/Longyearbyen|Europe/Oslo",
+			"Asia/Ashgabat|Asia/Ashkhabad",
+			"Asia/Calcutta|Asia/Kolkata",
+			"Asia/Chongqing|Asia/Chungking",
+			"Asia/Dacca|Asia/Dhaka",
+			"Asia/Ho_Chi_Minh|Asia/Saigon",
+			"Asia/Hong_Kong|Hongkong",
+			"Asia/Istanbul|Europe/Istanbul",
+			"Asia/Istanbul|Turkey",
+			"Asia/Jerusalem|Asia/Tel_Aviv",
+			"Asia/Jerusalem|Israel",
+			"Asia/Kathmandu|Asia/Katmandu",
+			"Asia/Macao|Asia/Macau",
+			"Asia/Makassar|Asia/Ujung_Pandang",
+			"Asia/Nicosia|Europe/Nicosia",
+			"Asia/Seoul|ROK",
+			"Asia/Shanghai|PRC",
+			"Asia/Singapore|Singapore",
+			"Asia/Taipei|ROC",
+			"Asia/Tehran|Iran",
+			"Asia/Thimbu|Asia/Thimphu",
+			"Asia/Tokyo|Japan",
+			"Asia/Ulaanbaatar|Asia/Ulan_Bator",
+			"Atlantic/Faeroe|Atlantic/Faroe",
+			"Atlantic/Reykjavik|Iceland",
+			"Australia/ACT|Australia/Canberra",
+			"Australia/ACT|Australia/NSW",
+			"Australia/ACT|Australia/Sydney",
+			"Australia/Adelaide|Australia/South",
+			"Australia/Brisbane|Australia/Queensland",
+			"Australia/Broken_Hill|Australia/Yancowinna",
+			"Australia/Darwin|Australia/North",
+			"Australia/Hobart|Australia/Tasmania",
+			"Australia/LHI|Australia/Lord_Howe",
+			"Australia/Melbourne|Australia/Victoria",
+			"Australia/Perth|Australia/West",
+			"Chile/EasterIsland|Pacific/Easter",
+			"Eire|Europe/Dublin",
+			"Etc/UCT|UCT",
+			"Etc/UTC|Etc/Universal",
+			"Etc/UTC|Etc/Zulu",
+			"Etc/UTC|UTC",
+			"Etc/UTC|Universal",
+			"Etc/UTC|Zulu",
+			"Europe/Belfast|Europe/Guernsey",
+			"Europe/Belfast|Europe/Isle_of_Man",
+			"Europe/Belfast|Europe/Jersey",
+			"Europe/Belfast|Europe/London",
+			"Europe/Belfast|GB",
+			"Europe/Belfast|GB-Eire",
+			"Europe/Belgrade|Europe/Ljubljana",
+			"Europe/Belgrade|Europe/Podgorica",
+			"Europe/Belgrade|Europe/Sarajevo",
+			"Europe/Belgrade|Europe/Skopje",
+			"Europe/Belgrade|Europe/Zagreb",
+			"Europe/Bratislava|Europe/Prague",
+			"Europe/Busingen|Europe/Vaduz",
+			"Europe/Busingen|Europe/Zurich",
+			"Europe/Chisinau|Europe/Tiraspol",
+			"Europe/Helsinki|Europe/Mariehamn",
+			"Europe/Lisbon|Portugal",
+			"Europe/Moscow|W-SU",
+			"Europe/Rome|Europe/San_Marino",
+			"Europe/Rome|Europe/Vatican",
+			"Europe/Warsaw|Poland",
+			"Kwajalein|Pacific/Kwajalein",
+			"NZ-CHAT|Pacific/Chatham",
+			"Pacific/Chuuk|Pacific/Truk",
+			"Pacific/Chuuk|Pacific/Yap",
+			"Pacific/Honolulu|Pacific/Johnston",
+			"Pacific/Honolulu|US/Hawaii",
+			"Pacific/Pago_Pago|Pacific/Samoa",
+			"Pacific/Pago_Pago|US/Samoa",
+			"Pacific/Pohnpei|Pacific/Ponape"
+		]
+	});
+
+
+	return moment;
+}));
+
+/*!
+ * FullCalendar v2.1.1
+ * Docs & License: http://arshaw.com/fullcalendar/
+ * (c) 2013 Adam Shaw
+ */
+(function(t){"function"==typeof define&&define.amd?define(["jquery","moment"],t):t(jQuery,moment)})(function(t,e){function i(t,e){return e.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"t")}function n(t,e){var i=e.longDateFormat("L");return i=i.replace(/^Y+[^\w\s]*|[^\w\s]*Y+$/g,""),t.isRTL?i+=" ddd":i="ddd "+i,i}function r(t){o(De,t)}function o(e){function i(i,n){t.isPlainObject(n)&&t.isPlainObject(e[i])&&!s(i)?e[i]=o({},e[i],n):void 0!==n&&(e[i]=n)}for(var n=1;arguments.length>n;n++)t.each(arguments[n],i);return e}function s(t){return/(Time|Duration)$/.test(t)}function l(i,n){function r(t){var i=e.localeData||e.langData;return i.call(e,t)||i.call(e,"en")}function s(t){ie?h()&&(p(),f(t)):l()}function l(){ne=K.theme?"ui":"fc",i.addClass("fc"),K.isRTL?i.addClass("fc-rtl"):i.addClass("fc-ltr"),K.theme?i.addClass("ui-widget"):i.addClass("fc-unthemed"),ie=t("<div class='fc-view-container'/>").prependTo(i),te=new a(q,K),ee=te.render(),ee&&i.prepend(ee),u(K.defaultView),K.handleWindowResize&&(se=L(v,K.windowResizeDelay),t(window).resize(se))}function d(){re&&re.destroy(),te.destroy(),ie.remove(),i.removeClass("fc fc-ltr fc-rtl fc-unthemed ui-widget"),t(window).unbind("resize",se)}function h(){return i.is(":visible")}function u(t){f(0,t)}function f(e,i){he++,re&&i&&re.name!==i&&(te.deactivateButton(re.name),I(),re.start&&re.destroy(),re.el.remove(),re=null),!re&&i&&(re=new xe[i](q),re.el=t("<div class='fc-view fc-"+i+"-view' />").appendTo(ie),te.activateButton(i)),re&&(e&&(le=re.incrementDate(le,e)),re.start&&!e&&le.isWithin(re.intervalStart,re.intervalEnd)||h()&&(I(),re.start&&re.destroy(),re.render(le),Z(),C(),x(),b())),Z(),he--}function g(t){return h()?(t&&m(),he++,re.updateSize(!0),he--,!0):void 0}function p(){h()&&m()}function m(){oe="number"==typeof K.contentHeight?K.contentHeight:"number"==typeof K.height?K.height-(ee?ee.outerHeight(!0):0):Math.round(ie.width()/Math.max(K.aspectRatio,.5))}function v(t){!he&&t.target===window&&re.start&&g(!0)&&re.trigger("windowResize",de)}function y(){E(),S()}function w(){h()&&(I(),re.destroyEvents(),re.renderEvents(ue),Z())}function E(){I(),re.destroyEvents(),Z()}function b(){!K.lazyFetching||ae(re.start,re.end)?S():w()}function S(){ce(re.start,re.end)}function D(t){ue=t,w()}function T(){w()}function C(){te.updateTitle(re.title)}function x(){var t=q.getNow();t.isWithin(re.intervalStart,re.intervalEnd)?te.disableButton("today"):te.enableButton("today")}function k(t,e){t=q.moment(t),e=e?q.moment(e):t.hasTime()?t.clone().add(q.defaultTimedEventDuration):t.clone().add(q.defaultAllDayEventDuration),re.select(t,e)}function M(){re&&re.unselect()}function R(){f(-1)}function P(){f(1)}function G(){le.add(-1,"years"),f()}function N(){le.add(1,"years"),f()}function Y(){le=q.getNow(),f()}function A(t){le=q.moment(t),f()}function _(t){le.add(e.duration(t)),f()}function O(t,e){var i,n;e&&void 0!==xe[e]||(e=e||"day",i=te.getViewsWithButtons().join(" "),n=i.match(RegExp("\\w+"+z(e))),n||(n=i.match(/\w+Day/)),e=n?n[0]:"agendaDay"),le=t,u(e)}function F(){return le.clone()}function I(){ie.css({width:"100%",height:ie.height(),overflow:"hidden"})}function Z(){ie.css({width:"",height:"",overflow:""})}function B(){return q}function j(){return re}function X(t,e){return void 0===e?K[t]:(("height"==t||"contentHeight"==t||"aspectRatio"==t)&&(K[t]=e,g(!0)),void 0)}function $(t,e){return K[t]?K[t].apply(e||de,Array.prototype.slice.call(arguments,2)):void 0}var q=this;n=n||{};var U,K=o({},De,n);U=K.lang in Te?Te[K.lang]:Te[De.lang],U&&(K=o({},De,U,n)),K.isRTL&&(K=o({},De,Ce,U||{},n)),q.options=K,q.render=s,q.destroy=d,q.refetchEvents=y,q.reportEvents=D,q.reportEventChange=T,q.rerenderEvents=w,q.changeView=u,q.select=k,q.unselect=M,q.prev=R,q.next=P,q.prevYear=G,q.nextYear=N,q.today=Y,q.gotoDate=A,q.incrementDate=_,q.zoomTo=O,q.getDate=F,q.getCalendar=B,q.getView=j,q.option=X,q.trigger=$;var Q=H(r(K.lang));if(K.monthNames&&(Q._months=K.monthNames),K.monthNamesShort&&(Q._monthsShort=K.monthNamesShort),K.dayNames&&(Q._weekdays=K.dayNames),K.dayNamesShort&&(Q._weekdaysShort=K.dayNamesShort),null!=K.firstDay){var J=H(Q._week);J.dow=K.firstDay,Q._week=J}q.defaultAllDayEventDuration=e.duration(K.defaultAllDayEventDuration),q.defaultTimedEventDuration=e.duration(K.defaultTimedEventDuration),q.moment=function(){var t;return"local"===K.timezone?(t=He.moment.apply(null,arguments),t.hasTime()&&t.local()):t="UTC"===K.timezone?He.moment.utc.apply(null,arguments):He.moment.parseZone.apply(null,arguments),"_locale"in t?t._locale=Q:t._lang=Q,t},q.getIsAmbigTimezone=function(){return"local"!==K.timezone&&"UTC"!==K.timezone},q.rezoneDate=function(t){return q.moment(t.toArray())},q.getNow=function(){var t=K.now;return"function"==typeof t&&(t=t()),q.moment(t)},q.calculateWeekNumber=function(t){var e=K.weekNumberCalculation;return"function"==typeof e?e(t):"local"===e?t.week():"ISO"===e.toUpperCase()?t.isoWeek():void 0},q.getEventEnd=function(t){return t.end?t.end.clone():q.getDefaultEventEnd(t.allDay,t.start)},q.getDefaultEventEnd=function(t,e){var i=e.clone();return t?i.stripTime().add(q.defaultAllDayEventDuration):i.add(q.defaultTimedEventDuration),q.getIsAmbigTimezone()&&i.stripZone(),i},q.formatRange=function(t,e,i){return"function"==typeof i&&(i=i.call(q,K,Q)),W(t,e,i,null,K.isRTL)},q.formatDate=function(t,e){return"function"==typeof e&&(e=e.call(q,K,Q)),V(t,e)},c.call(q,K);var te,ee,ie,ne,re,oe,se,le,ae=q.isFetchNeeded,ce=q.fetchEvents,de=i[0],he=0,ue=[];le=null!=K.defaultDate?q.moment(K.defaultDate):q.getNow(),q.getSuggestedViewHeight=function(){return void 0===oe&&p(),oe},q.isHeightAuto=function(){return"auto"===K.contentHeight||"auto"===K.height}}function a(e,i){function n(){var e=i.header;return f=i.theme?"ui":"fc",e?g=t("<div class='fc-toolbar'/>").append(o("left")).append(o("right")).append(o("center")).append('<div class="fc-clear"/>'):void 0}function r(){g.remove()}function o(n){var r=t('<div class="fc-'+n+'"/>'),o=i.header[n];return o&&t.each(o.split(" "),function(){var n,o=t(),s=!0;t.each(this.split(","),function(n,r){var l,a,c,d,h,u,g,m;"title"==r?(o=o.add(t("<h2>&nbsp;</h2>")),s=!1):(e[r]?l=function(){e[r]()}:xe[r]&&(l=function(){e.changeView(r)},p.push(r)),l&&(a=S(i.themeButtonIcons,r),c=S(i.buttonIcons,r),d=S(i.defaultButtonText,r),h=S(i.buttonText,r),u=h?R(h):a&&i.theme?"<span class='ui-icon ui-icon-"+a+"'></span>":c&&!i.theme?"<span class='fc-icon fc-icon-"+c+"'></span>":R(d||r),g=["fc-"+r+"-button",f+"-button",f+"-state-default"],m=t('<button type="button" class="'+g.join(" ")+'">'+u+"</button>").click(function(){m.hasClass(f+"-state-disabled")||(l(),(m.hasClass(f+"-state-active")||m.hasClass(f+"-state-disabled"))&&m.removeClass(f+"-state-hover"))}).mousedown(function(){m.not("."+f+"-state-active").not("."+f+"-state-disabled").addClass(f+"-state-down")}).mouseup(function(){m.removeClass(f+"-state-down")}).hover(function(){m.not("."+f+"-state-active").not("."+f+"-state-disabled").addClass(f+"-state-hover")},function(){m.removeClass(f+"-state-hover").removeClass(f+"-state-down")}),o=o.add(m)))}),s&&o.first().addClass(f+"-corner-left").end().last().addClass(f+"-corner-right").end(),o.length>1?(n=t("<div/>"),s&&n.addClass("fc-button-group"),n.append(o),r.append(n)):r.append(o)}),r}function s(t){g.find("h2").text(t)}function l(t){g.find(".fc-"+t+"-button").addClass(f+"-state-active")}function a(t){g.find(".fc-"+t+"-button").removeClass(f+"-state-active")}function c(t){g.find(".fc-"+t+"-button").attr("disabled","disabled").addClass(f+"-state-disabled")}function d(t){g.find(".fc-"+t+"-button").removeAttr("disabled").removeClass(f+"-state-disabled")}function h(){return p}var u=this;u.render=n,u.destroy=r,u.updateTitle=s,u.activateButton=l,u.deactivateButton=a,u.disableButton=c,u.enableButton=d,u.getViewsWithButtons=h;var f,g=t(),p=[]}function c(e){function i(t,e){return!T||t.clone().stripZone()<T.clone().stripZone()||e.clone().stripZone()>C.clone().stripZone()}function n(t,e){T=t,C=e,A=[];var i=++G,n=L.length;N=n;for(var o=0;n>o;o++)r(L[o],i)}function r(e,i){o(e,function(n){var r,o,s=t.isArray(e.events);if(i==G){if(n)for(r=0;n.length>r;r++)o=n[r],s||(o=w(o,e)),o&&A.push(o);N--,N||R(A)}})}function o(i,n){var r,s,l=He.sourceFetchers;for(r=0;l.length>r;r++){if(s=l[r].call(S,i,T.clone(),C.clone(),e.timezone,n),s===!0)return;if("object"==typeof s)return o(s,n),void 0}var a=i.events;if(a)t.isFunction(a)?(v(),a.call(S,T.clone(),C.clone(),e.timezone,function(t){n(t),y()})):t.isArray(a)?n(a):n();else{var c=i.url;if(c){var d,h=i.success,u=i.error,f=i.complete;d=t.isFunction(i.data)?i.data():i.data;var g=t.extend({},d||{}),p=M(i.startParam,e.startParam),m=M(i.endParam,e.endParam),w=M(i.timezoneParam,e.timezoneParam);p&&(g[p]=T.format()),m&&(g[m]=C.format()),e.timezone&&"local"!=e.timezone&&(g[w]=e.timezone),v(),t.ajax(t.extend({},ke,i,{data:g,success:function(e){e=e||[];var i=k(h,this,arguments);t.isArray(i)&&(e=i),n(e)},error:function(){k(u,this,arguments),n()},complete:function(){k(f,this,arguments),y()}}))}else n()}}function s(t){var e=l(t);e&&(L.push(e),N++,r(e,G))}function l(e){var i,n,r=He.sourceNormalizers;if(t.isFunction(e)||t.isArray(e)?i={events:e}:"string"==typeof e?i={url:e}:"object"==typeof e&&(i=t.extend({},e)),i){for(i.className?"string"==typeof i.className&&(i.className=i.className.split(/\s+/)):i.className=[],t.isArray(i.events)&&(i.origArray=i.events,i.events=t.map(i.events,function(t){return w(t,i)})),n=0;r.length>n;n++)r[n].call(S,i);return i}}function a(e){L=t.grep(L,function(t){return!c(t,e)}),A=t.grep(A,function(t){return!c(t.source,e)}),R(A)}function c(t,e){return t&&e&&h(t)==h(e)}function h(t){return("object"==typeof t?t.origArray||t.url||t.events:null)||t}function u(t){t.start=S.moment(t.start),t.end&&(t.end=S.moment(t.end)),E(t),f(t),R(A)}function f(t){var e,i,n,r;for(e=0;A.length>e;e++)if(i=A[e],i._id==t._id&&i!==t)for(n=0;V.length>n;n++)r=V[n],void 0!==t[r]&&(i[r]=t[r])}function g(t,e){var i=w(t);i&&(i.source||(e&&(z.events.push(i),i.source=z),A.push(i)),R(A))}function p(e){var i,n;for(null==e?e=function(){return!0}:t.isFunction(e)||(i=e+"",e=function(t){return t._id==i}),A=t.grep(A,e,!0),n=0;L.length>n;n++)t.isArray(L[n].events)&&(L[n].events=t.grep(L[n].events,e,!0));R(A)}function m(e){return t.isFunction(e)?t.grep(A,e):null!=e?(e+="",t.grep(A,function(t){return t._id==e})):A}function v(){Y++||H("loading",null,!0,x())}function y(){--Y||H("loading",null,!1,x())}function w(i,n){var r,o,s,l,a={};return e.eventDataTransform&&(i=e.eventDataTransform(i)),n&&n.eventDataTransform&&(i=n.eventDataTransform(i)),r=S.moment(i.start||i.date),r.isValid()&&(o=null,!i.end||(o=S.moment(i.end),o.isValid()))?(s=i.allDay,void 0===s&&(l=M(n?n.allDayDefault:void 0,e.allDayDefault),s=void 0!==l?l:!(r.hasTime()||o&&o.hasTime())),s?(r.hasTime()&&r.stripTime(),o&&o.hasTime()&&o.stripTime()):(r.hasTime()||(r=S.rezoneDate(r)),o&&!o.hasTime()&&(o=S.rezoneDate(o))),t.extend(a,i),n&&(a.source=n),a._id=i._id||(void 0===i.id?"_fc"+Me++:i.id+""),a.className=i.className?"string"==typeof i.className?i.className.split(/\s+/):i.className:[],a.allDay=s,a.start=r,a.end=o,e.forceEventDuration&&!a.end&&(a.end=P(a)),d(a),a):void 0}function E(t,e,i){var n,r,o,s,l=t._allDay,a=t._start,c=t._end,d=!1;return e||i||(e=t.start,i=t.end),n=t.allDay!=l?t.allDay:!(e||i).hasTime(),n&&(e&&(e=e.clone().stripTime()),i&&(i=i.clone().stripTime())),e&&(r=n?D(e,a.clone().stripTime()):D(e,a)),n!=l?d=!0:i&&(o=D(i||S.getDefaultEventEnd(n,e||a),e||a).subtract(D(c||S.getDefaultEventEnd(l,a),a))),s=b(m(t._id),d,n,r,o),{dateDelta:r,durationDelta:o,undo:s}}function b(i,n,r,o,s){var l=S.getIsAmbigTimezone(),a=[];return t.each(i,function(t,i){var c=i._allDay,h=i._start,u=i._end,f=null!=r?r:c,g=h.clone(),p=!n&&u?u.clone():null;f?(g.stripTime(),p&&p.stripTime()):(g.hasTime()||(g=S.rezoneDate(g)),p&&!p.hasTime()&&(p=S.rezoneDate(p))),p||!e.forceEventDuration&&!+s||(p=S.getDefaultEventEnd(f,g)),g.add(o),p&&p.add(o).add(s),l&&(+o||+s)&&(g.stripZone(),p&&p.stripZone()),i.allDay=f,i.start=g,i.end=p,d(i),a.push(function(){i.allDay=c,i.start=h,i.end=u,d(i)})}),function(){for(var t=0;a.length>t;t++)a[t]()}}var S=this;S.isFetchNeeded=i,S.fetchEvents=n,S.addEventSource=s,S.removeEventSource=a,S.updateEvent=u,S.renderEvent=g,S.removeEvents=p,S.clientEvents=m,S.mutateEvent=E;var T,C,H=S.trigger,x=S.getView,R=S.reportEvents,P=S.getEventEnd,z={events:[]},L=[z],G=0,N=0,Y=0,A=[];t.each((e.events?[e.events]:[]).concat(e.eventSources||[]),function(t,e){var i=l(e);i&&L.push(i)});var V=["title","url","allDay","className","editable","color","backgroundColor","borderColor","textColor"]}function d(t){t._allDay=t.allDay,t._start=t.start.clone(),t._end=t.end?t.end.clone():null}function h(t,e){e.left&&t.css({"border-left-width":1,"margin-left":e.left-1}),e.right&&t.css({"border-right-width":1,"margin-right":e.right-1})}function u(t){t.css({"margin-left":"","margin-right":"","border-left-width":"","border-right-width":""})}function f(e,i,n){var r=Math.floor(i/e.length),o=Math.floor(i-r*(e.length-1)),s=[],l=[],a=[],c=0;g(e),e.each(function(i,n){var d=i===e.length-1?o:r,h=t(n).outerHeight(!0);d>h?(s.push(n),l.push(h),a.push(t(n).height())):c+=h}),n&&(i-=c,r=Math.floor(i/s.length),o=Math.floor(i-r*(s.length-1))),t(s).each(function(e,i){var n=e===s.length-1?o:r,c=l[e],d=a[e],h=n-(c-d);n>c&&t(i).height(h)})}function g(t){t.height("")}function p(e){var i=0;return e.find("> *").each(function(e,n){var r=t(n).outerWidth();r>i&&(i=r)}),i++,e.width(i),i}function m(t,e){return t.height(e).addClass("fc-scroller"),t[0].scrollHeight-1>t[0].clientHeight?!0:(v(t),!1)}function v(t){t.height("").removeClass("fc-scroller")}function y(e){var i=e.css("position"),n=e.parents().filter(function(){var e=t(this);return/(auto|scroll)/.test(e.css("overflow")+e.css("overflow-y")+e.css("overflow-x"))}).eq(0);return"fixed"!==i&&n.length?n:t(e[0].ownerDocument||document)}function w(t){var e=t.offset().left,i=e+t.width(),n=t.children(),r=n.offset().left,o=r+n.outerWidth();return{left:r-e,right:i-o}}function E(t){return 1==t.which&&!t.ctrlKey}function b(t,e,i,n){var r,o,s,l;return e>i&&n>t?(t>=i?(r=t.clone(),s=!0):(r=i.clone(),s=!1),n>=e?(o=e.clone(),l=!0):(o=n.clone(),l=!1),{start:r,end:o,isStart:s,isEnd:l}):void 0}function S(t,e){if(t=t||{},void 0!==t[e])return t[e];for(var i,n=e.split(/(?=[A-Z])/),r=n.length-1;r>=0;r--)if(i=t[n[r].toLowerCase()],void 0!==i)return i;return t["default"]}function D(t,i){return e.duration({days:t.clone().stripTime().diff(i.clone().stripTime(),"days"),ms:t.time()-i.time()})}function T(t){return"[object Date]"===Object.prototype.toString.call(t)||t instanceof Date}function C(t,e){return t-e}function H(t){var e=function(){};return e.prototype=t,new e}function x(t,e){for(var i in e)e.hasOwnProperty(i)&&(t[i]=e[i])}function k(e,i,n){if(t.isFunction(e)&&(e=[e]),e){var r,o;for(r=0;e.length>r;r++)o=e[r].apply(i,n)||o;return o}}function M(){for(var t=0;arguments.length>t;t++)if(void 0!==arguments[t])return arguments[t]}function R(t){return(t+"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/'/g,"&#039;").replace(/"/g,"&quot;").replace(/\n/g,"<br />")}function P(t){return t.replace(/&.*?;/g,"")}function z(t){return t.charAt(0).toUpperCase()+t.slice(1)}function L(t,e){var i,n,r,o,s=function(){var l=+new Date-o;e>l&&l>0?i=setTimeout(s,e-l):(i=null,t.apply(r,n),i||(r=n=null))};return function(){r=this,n=arguments,o=+new Date,i||(i=setTimeout(s,e))}}function G(i,n,r){var o,s,l,a,c=i[0],d=1==i.length&&"string"==typeof c;return e.isMoment(c)?(a=e.apply(null,i),c._ambigTime&&(a._ambigTime=!0),c._ambigZone&&(a._ambigZone=!0)):T(c)||void 0===c?a=e.apply(null,i):(o=!1,s=!1,d?Pe.test(c)?(c+="-01",i=[c],o=!0,s=!0):(l=ze.exec(c))&&(o=!l[5],s=!0):t.isArray(c)&&(s=!0),a=n?e.utc.apply(e,i):e.apply(null,i),o?(a._ambigTime=!0,a._ambigZone=!0):r&&(s?a._ambigZone=!0:d&&a.zone(c))),new N(a)}function N(t){x(this,t)}function Y(t,e){var i,n=[],r=!1,o=!1;for(i=0;t.length>i;i++)n.push(He.moment.parseZone(t[i])),r=r||n[i]._ambigTime,o=o||n[i]._ambigZone;for(i=0;n.length>i;i++)r&&!e?n[i].stripTime():o&&n[i].stripZone();return n}function A(t,i){return e.fn.format.call(t,i)}function V(t,e){return _(t,Z(e))}function _(t,e){var i,n="";for(i=0;e.length>i;i++)n+=O(t,e[i]);return n}function O(t,e){var i,n;return"string"==typeof e?e:(i=e.token)?Le[i]?Le[i](t):A(t,i):e.maybe&&(n=_(t,e.maybe),n.match(/[1-9]/))?n:""}function W(t,e,i,n,r){var o;return t=He.moment.parseZone(t),e=He.moment.parseZone(e),o=(t.localeData||t.lang).call(t),i=o.longDateFormat(i)||i,n=n||" - ",F(t,e,Z(i),n,r)}function F(t,e,i,n,r){var o,s,l,a,c="",d="",h="",u="",f="";for(s=0;i.length>s&&(o=I(t,e,i[s]),o!==!1);s++)c+=o;for(l=i.length-1;l>s&&(o=I(t,e,i[l]),o!==!1);l--)d=o+d;for(a=s;l>=a;a++)h+=O(t,i[a]),u+=O(e,i[a]);return(h||u)&&(f=r?u+n+h:h+n+u),c+f+d}function I(t,e,i){var n,r;return"string"==typeof i?i:(n=i.token)&&(r=Ge[n.charAt(0)],r&&t.isSame(e,r))?A(t,n):!1}function Z(t){return t in Ne?Ne[t]:Ne[t]=B(t)}function B(t){for(var e,i=[],n=/\[([^\]]*)\]|\(([^\)]*)\)|(LT|(\w)\4*o?)|([^\w\[\(]+)/g;e=n.exec(t);)e[1]?i.push(e[1]):e[2]?i.push({maybe:B(e[2])}):e[3]?i.push({token:e[3]}):e[5]&&i.push(e[5]);return i}function j(t){this.options=t||{}}function X(t){this.grid=t}function $(t){this.coordMaps=t}function q(t,e){this.coordMap=t,this.options=e||{}}function U(t,e){return t||e?t&&e?t.grid===e.grid&&t.row===e.row&&t.col===e.col:!1:!0}function K(e,i){this.options=i=i||{},this.sourceEl=e,this.parentEl=i.parentEl?t(i.parentEl):e.parent()}function Q(t){this.view=t}function J(t){Q.call(this,t),this.coordMap=new X(this)}function te(t,e){return t.eventStartMS-e.eventStartMS||e.eventDurationMS-t.eventDurationMS||e.event.allDay-t.event.allDay||(t.event.title||"").localeCompare(e.event.title)}function ee(t){J.call(this,t)}function ie(t,e){var i,n;for(i=0;e.length>i;i++)if(n=e[i],n.leftCol<=t.rightCol&&n.rightCol>=t.leftCol)return!0;return!1}function ne(t,e){return t.leftCol-e.leftCol}function re(t){J.call(this,t)}function oe(t){var e,i,n;if(t.sort(te),e=se(t),le(e),i=e[0]){for(n=0;i.length>n;n++)ae(i[n]);for(n=0;i.length>n;n++)ce(i[n],0,0)}}function se(t){var e,i,n,r=[];for(e=0;t.length>e;e++){for(i=t[e],n=0;r.length>n&&de(i,r[n]).length;n++);i.level=n,(r[n]||(r[n]=[])).push(i)}return r}function le(t){var e,i,n,r,o;for(e=0;t.length>e;e++)for(i=t[e],n=0;i.length>n;n++)for(r=i[n],r.forwardSegs=[],o=e+1;t.length>o;o++)de(r,t[o],r.forwardSegs)}function ae(t){var e,i,n=t.forwardSegs,r=0;if(void 0===t.forwardPressure){for(e=0;n.length>e;e++)i=n[e],ae(i),r=Math.max(r,1+i.forwardPressure);t.forwardPressure=r}}function ce(t,e,i){var n,r=t.forwardSegs;if(void 0===t.forwardCoord)for(r.length?(r.sort(ue),ce(r[0],e+1,i),t.forwardCoord=r[0].backwardCoord):t.forwardCoord=1,t.backwardCoord=t.forwardCoord-(t.forwardCoord-i)/(e+1),n=0;r.length>n;n++)ce(r[n],0,t.forwardCoord)}function de(t,e,i){i=i||[];for(var n=0;e.length>n;n++)he(t,e[n])&&i.push(e[n]);return i}function he(t,e){return t.bottom>e.top&&t.top<e.bottom}function ue(t,e){return e.forwardPressure-t.forwardPressure||(t.backwardCoord||0)-(e.backwardCoord||0)||te(t,e)}function fe(i){function n(e){var i=x[e];return t.isPlainObject(i)&&!s(e)?S(i,C.name):i}function r(t,e){return i.trigger.apply(i,[t,e||C].concat(Array.prototype.slice.call(arguments,2),[C]))}function o(t){var e=t.source||{};return M(t.startEditable,e.startEditable,n("eventStartEditable"),t.editable,e.editable,n("editable"))}function l(t){var e=t.source||{};return M(t.durationEditable,e.durationEditable,n("eventDurationEditable"),t.editable,e.editable,n("editable"))}function a(t,e,n,o){var s=i.mutateEvent(e,n,null);r("eventDrop",t,e,s.dateDelta,function(){s.undo(),H()},o,{}),H()}function c(t,e,n,o){var s=i.mutateEvent(e,null,n);r("eventResize",t,e,s.durationDelta,function(){s.undo(),H()},o,{}),H()}function d(t){return e.isMoment(t)&&(t=t.day()),z[t]}function h(){return R}function u(t,e,i){var n=t.clone();for(e=e||1;z[(n.day()+(i?e:0)+7)%7];)n.add(e,"days");return n}function f(){var t=g.apply(null,arguments),e=p(t),i=m(e);return i}function g(t,e){var i=C.colCnt,n=N?-1:1,r=N?i-1:0;"object"==typeof t&&(e=t.col,t=t.row);var o=t*i+(e*n+r);return o}function p(t){var e=C.start.day();return t+=L[e],7*Math.floor(t/R)+G[(t%R+R)%R]-e}function m(t){return C.start.clone().add(t,"days")}function v(t){var e=y(t),i=w(e),n=E(i);return n}function y(t){return t.clone().stripTime().diff(C.start,"days")}function w(t){var e=C.start.day();return t+=e,Math.floor(t/7)*R+L[(t%7+7)%7]-L[e]}function E(t){var e=C.colCnt,i=N?-1:1,n=N?e-1:0,r=Math.floor(t/e),o=(t%e+e)%e*i+n;return{row:r,col:o}}function b(t,e){for(var i=C.rowCnt,n=C.colCnt,r=[],o=D(t,e),s=y(o.start),l=y(o.end),a=w(s),c=w(l)-1,d=0;i>d;d++){var h=d*n,u=h+n-1,f=Math.max(a,h),g=Math.min(c,u);if(g>=f){var m=E(f),v=E(g),b=[m.col,v.col].sort(),S=p(f)==s,T=p(g)+1==l;r.push({row:d,leftCol:b[0],rightCol:b[1],isStart:S,isEnd:T})}}return r}function D(t,e){var i,n,r=t.clone().stripTime();return e&&(i=e.clone().stripTime(),n=+e.time(),n&&n>=k&&i.add(1,"days")),(!e||r>=i)&&(i=r.clone().add(1,"days")),{start:r,end:i}}function T(t){var e=D(t.start,t.end);return e.end.diff(e.start,"days")>1}var C=this;C.calendar=i,C.opt=n,C.trigger=r,C.isEventDraggable=o,C.isEventResizable=l,C.eventDrop=a,C.eventResize=c;var H=i.reportEventChange,x=i.options,k=e.duration(x.nextDayThreshold);C.init(),C.getEventTimeText=function(t,e){var r,o;return"object"==typeof t&&"object"==typeof e?(r=t,o=e,e=arguments[2]):(r=t.start,o=t.end),e=e||n("timeFormat"),o&&n("displayEventEnd")?i.formatRange(r,o,e):i.formatDate(r,e)},C.isHiddenDay=d,C.skipHiddenDays=u,C.getCellsPerWeek=h,C.dateToCell=v,C.dateToDayOffset=y,C.dayOffsetToCellOffset=w,C.cellOffsetToCell=E,C.cellToDate=f,C.cellToCellOffset=g,C.cellOffsetToDayOffset=p,C.dayOffsetToDate=m,C.rangeToSegments=b,C.isMultiDayEvent=T;var R,P=n("hiddenDays")||[],z=[],L=[],G=[],N=n("isRTL");(function(){n("weekends")===!1&&P.push(0,6);for(var e=0,i=0;7>e;e++)L[e]=i,z[e]=-1!=t.inArray(e,P),z[e]||(G[i]=e,i++);if(R=i,!R)throw"invalid hiddenDays"})()}function ge(t){fe.call(this,t),this.dayGrid=new ee(this),this.coordMap=this.dayGrid.coordMap}function pe(t){ge.call(this,t)}function me(t){ge.call(this,t)}function ve(t){ge.call(this,t)}function ye(t,e){return e.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"a")}function we(t,e){return e.longDateFormat("LT").replace(/\s*a$/i,"")}function Ee(t){fe.call(this,t),this.timeGrid=new re(this),this.opt("allDaySlot")?(this.dayGrid=new ee(this),this.coordMap=new $([this.dayGrid.coordMap,this.timeGrid.coordMap])):this.coordMap=this.timeGrid.coordMap}function be(t){Ee.call(this,t)}function Se(t){Ee.call(this,t)}var De={lang:"en",defaultTimedEventDuration:"02:00:00",defaultAllDayEventDuration:{days:1},forceEventDuration:!1,nextDayThreshold:"09:00:00",defaultView:"month",aspectRatio:1.35,header:{left:"title",center:"",right:"today prev,next"},weekends:!0,weekNumbers:!1,weekNumberTitle:"W",weekNumberCalculation:"local",lazyFetching:!0,startParam:"start",endParam:"end",timezoneParam:"timezone",timezone:!1,titleFormat:{month:"MMMM YYYY",week:"ll",day:"LL"},columnFormat:{month:"ddd",week:n,day:"dddd"},timeFormat:{"default":i},displayEventEnd:{month:!1,basicWeek:!1,"default":!0},isRTL:!1,defaultButtonText:{prev:"prev",next:"next",prevYear:"prev year",nextYear:"next year",today:"today",month:"month",week:"week",day:"day"},buttonIcons:{prev:"left-single-arrow",next:"right-single-arrow",prevYear:"left-double-arrow",nextYear:"right-double-arrow"},theme:!1,themeButtonIcons:{prev:"circle-triangle-w",next:"circle-triangle-e",prevYear:"seek-prev",nextYear:"seek-next"},dragOpacity:.75,dragRevertDuration:500,dragScroll:!0,unselectAuto:!0,dropAccept:"*",eventLimit:!1,eventLimitText:"more",eventLimitClick:"popover",dayPopoverFormat:"LL",handleWindowResize:!0,windowResizeDelay:200},Te={en:{columnFormat:{week:"ddd M/D"},dayPopoverFormat:"dddd, MMMM D"}},Ce={header:{left:"next,prev today",center:"",right:"title"},buttonIcons:{prev:"right-single-arrow",next:"left-single-arrow",prevYear:"right-double-arrow",nextYear:"left-double-arrow"},themeButtonIcons:{prev:"circle-triangle-e",next:"circle-triangle-w",nextYear:"seek-prev",prevYear:"seek-next"}},He=t.fullCalendar={version:"2.1.1"},xe=He.views={};t.fn.fullCalendar=function(e){var i=Array.prototype.slice.call(arguments,1),n=this;return this.each(function(r,o){var s,a=t(o),c=a.data("fullCalendar");"string"==typeof e?c&&t.isFunction(c[e])&&(s=c[e].apply(c,i),r||(n=s),"destroy"===e&&a.removeData("fullCalendar")):c||(c=new l(a,e),a.data("fullCalendar",c),c.render())}),n},He.langs=Te,He.datepickerLang=function(e,i,n){var r=Te[e];r||(r=Te[e]={}),o(r,{isRTL:n.isRTL,weekNumberTitle:n.weekHeader,titleFormat:{month:n.showMonthAfterYear?"YYYY["+n.yearSuffix+"] MMMM":"MMMM YYYY["+n.yearSuffix+"]"},defaultButtonText:{prev:P(n.prevText),next:P(n.nextText),today:P(n.currentText)}}),t.datepicker&&(t.datepicker.regional[i]=t.datepicker.regional[e]=n,t.datepicker.regional.en=t.datepicker.regional[""],t.datepicker.setDefaults(n))},He.lang=function(t,e){var i;e&&(i=Te[t],i||(i=Te[t]={}),o(i,e||{})),De.lang=t},He.sourceNormalizers=[],He.sourceFetchers=[];var ke={dataType:"json",cache:!1},Me=1,Re=["sun","mon","tue","wed","thu","fri","sat"];He.applyAll=k;var Pe=/^\s*\d{4}-\d\d$/,ze=/^\s*\d{4}-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?)?$/;He.moment=function(){return G(arguments)},He.moment.utc=function(){var t=G(arguments,!0);return t.hasTime()&&t.utc(),t},He.moment.parseZone=function(){return G(arguments,!0,!0)},N.prototype=H(e.fn),N.prototype.clone=function(){return G([this])},N.prototype.time=function(t){if(null==t)return e.duration({hours:this.hours(),minutes:this.minutes(),seconds:this.seconds(),milliseconds:this.milliseconds()});delete this._ambigTime,e.isDuration(t)||e.isMoment(t)||(t=e.duration(t));var i=0;return e.isDuration(t)&&(i=24*Math.floor(t.asDays())),this.hours(i+t.hours()).minutes(t.minutes()).seconds(t.seconds()).milliseconds(t.milliseconds())},N.prototype.stripTime=function(){var t=this.toArray();return e.fn.utc.call(this),this.year(t[0]).month(t[1]).date(t[2]).hours(0).minutes(0).seconds(0).milliseconds(0),this._ambigTime=!0,this._ambigZone=!0,this},N.prototype.hasTime=function(){return!this._ambigTime},N.prototype.stripZone=function(){var t=this.toArray(),i=this._ambigTime;return e.fn.utc.call(this),this.year(t[0]).month(t[1]).date(t[2]).hours(t[3]).minutes(t[4]).seconds(t[5]).milliseconds(t[6]),i&&(this._ambigTime=!0),this._ambigZone=!0,this},N.prototype.hasZone=function(){return!this._ambigZone},N.prototype.zone=function(t){return null!=t&&(delete this._ambigTime,delete this._ambigZone),e.fn.zone.apply(this,arguments)},N.prototype.local=function(){var t=this.toArray(),i=this._ambigZone;return delete this._ambigTime,delete this._ambigZone,e.fn.local.apply(this,arguments),i&&this.year(t[0]).month(t[1]).date(t[2]).hours(t[3]).minutes(t[4]).seconds(t[5]).milliseconds(t[6]),this},N.prototype.utc=function(){return delete this._ambigTime,delete this._ambigZone,e.fn.utc.apply(this,arguments)},N.prototype.format=function(){return arguments[0]?V(this,arguments[0]):this._ambigTime?A(this,"YYYY-MM-DD"):this._ambigZone?A(this,"YYYY-MM-DD[T]HH:mm:ss"):A(this)},N.prototype.toISOString=function(){return this._ambigTime?A(this,"YYYY-MM-DD"):this._ambigZone?A(this,"YYYY-MM-DD[T]HH:mm:ss"):e.fn.toISOString.apply(this,arguments)},N.prototype.isWithin=function(t,e){var i=Y([this,t,e]);return i[0]>=i[1]&&i[0]<i[2]},N.prototype.isSame=function(t,i){var n;return i?(n=Y([this,t],!0),e.fn.isSame.call(n[0],n[1],i)):(t=He.moment.parseZone(t),e.fn.isSame.call(this,t)&&Boolean(this._ambigTime)===Boolean(t._ambigTime)&&Boolean(this._ambigZone)===Boolean(t._ambigZone))},t.each(["isBefore","isAfter"],function(t,i){N.prototype[i]=function(t,n){var r=Y([this,t]);return e.fn[i].call(r[0],r[1],n)}});var Le={t:function(t){return A(t,"a").charAt(0)},T:function(t){return A(t,"A").charAt(0)}};He.formatRange=W;var Ge={Y:"year",M:"month",D:"day",d:"day",A:"second",a:"second",T:"second",t:"second",H:"second",h:"second",m:"second",s:"second"},Ne={};j.prototype={isHidden:!0,options:null,el:null,documentMousedownProxy:null,margin:10,show:function(){this.isHidden&&(this.el||this.render(),this.el.show(),this.position(),this.isHidden=!1,this.trigger("show"))},hide:function(){this.isHidden||(this.el.hide(),this.isHidden=!0,this.trigger("hide"))},render:function(){var e=this,i=this.options;this.el=t('<div class="fc-popover"/>').addClass(i.className||"").css({top:0,left:0}).append(i.content).appendTo(i.parentEl),this.el.on("click",".fc-close",function(){e.hide()}),i.autoHide&&t(document).on("mousedown",this.documentMousedownProxy=t.proxy(this,"documentMousedown"))},documentMousedown:function(e){this.el&&!t(e.target).closest(this.el).length&&this.hide()},destroy:function(){this.hide(),this.el&&(this.el.remove(),this.el=null),t(document).off("mousedown",this.documentMousedownProxy)},position:function(){var e,i,n,r,o,s=this.options,l=this.el.offsetParent().offset(),a=this.el.outerWidth(),c=this.el.outerHeight(),d=t(window),h=y(this.el);r=s.top||0,o=void 0!==s.left?s.left:void 0!==s.right?s.right-a:0,h.is(window)||h.is(document)?(h=d,e=0,i=0):(n=h.offset(),e=n.top,i=n.left),e+=d.scrollTop(),i+=d.scrollLeft(),s.viewportConstrain!==!1&&(r=Math.min(r,e+h.outerHeight()-c-this.margin),r=Math.max(r,e+this.margin),o=Math.min(o,i+h.outerWidth()-a-this.margin),o=Math.max(o,i+this.margin)),this.el.css({top:r-l.top,left:o-l.left})},trigger:function(t){this.options[t]&&this.options[t].apply(this,Array.prototype.slice.call(arguments,1))}},X.prototype={grid:null,rows:null,cols:null,containerEl:null,minX:null,maxX:null,minY:null,maxY:null,build:function(){this.grid.buildCoords(this.rows=[],this.cols=[]),this.computeBounds()},getCell:function(t,e){var i,n=null,r=this.rows,o=this.cols,s=-1,l=-1;if(this.inBounds(t,e)){for(i=0;r.length>i;i++)if(e>=r[i][0]&&r[i][1]>e){s=i;break}for(i=0;o.length>i;i++)if(t>=o[i][0]&&o[i][1]>t){l=i;break}s>=0&&l>=0&&(n={row:s,col:l},n.grid=this.grid,n.date=this.grid.getCellDate(n))}return n},computeBounds:function(){var t;this.containerEl&&(t=this.containerEl.offset(),this.minX=t.left,this.maxX=t.left+this.containerEl.outerWidth(),this.minY=t.top,this.maxY=t.top+this.containerEl.outerHeight())},inBounds:function(t,e){return this.containerEl?t>=this.minX&&this.maxX>t&&e>=this.minY&&this.maxY>e:!0}},$.prototype={coordMaps:null,build:function(){var t,e=this.coordMaps;for(t=0;e.length>t;t++)e[t].build()},getCell:function(t,e){var i,n=this.coordMaps,r=null;for(i=0;n.length>i&&!r;i++)r=n[i].getCell(t,e);return r}},q.prototype={coordMap:null,options:null,isListening:!1,isDragging:!1,origCell:null,origDate:null,cell:null,date:null,mouseX0:null,mouseY0:null,mousemoveProxy:null,mouseupProxy:null,scrollEl:null,scrollBounds:null,scrollTopVel:null,scrollLeftVel:null,scrollIntervalId:null,scrollHandlerProxy:null,scrollSensitivity:30,scrollSpeed:200,scrollIntervalMs:50,mousedown:function(t){E(t)&&(t.preventDefault(),this.startListening(t),this.options.distance||this.startDrag(t))},startListening:function(e){var i,n;this.isListening||(e&&this.options.scroll&&(i=y(t(e.target)),i.is(window)||i.is(document)||(this.scrollEl=i,this.scrollHandlerProxy=L(t.proxy(this,"scrollHandler"),100),this.scrollEl.on("scroll",this.scrollHandlerProxy))),this.computeCoords(),e&&(n=this.getCell(e),this.origCell=n,this.origDate=n?n.date:null,this.mouseX0=e.pageX,this.mouseY0=e.pageY),t(document).on("mousemove",this.mousemoveProxy=t.proxy(this,"mousemove")).on("mouseup",this.mouseupProxy=t.proxy(this,"mouseup")).on("selectstart",this.preventDefault),this.isListening=!0,this.trigger("listenStart",e))},computeCoords:function(){this.coordMap.build(),this.computeScrollBounds()},mousemove:function(t){var e,i;this.isDragging||(e=this.options.distance||1,i=Math.pow(t.pageX-this.mouseX0,2)+Math.pow(t.pageY-this.mouseY0,2),i>=e*e&&this.startDrag(t)),this.isDragging&&this.drag(t)},startDrag:function(t){var e;this.isListening||this.startListening(),this.isDragging||(this.isDragging=!0,this.trigger("dragStart",t),e=this.getCell(t),e&&this.cellOver(e,!0))
+},drag:function(t){var e;this.isDragging&&(e=this.getCell(t),U(e,this.cell)||(this.cell&&this.cellOut(),e&&this.cellOver(e)),this.dragScroll(t))},cellOver:function(t){this.cell=t,this.date=t.date,this.trigger("cellOver",t,t.date)},cellOut:function(){this.cell&&(this.trigger("cellOut",this.cell),this.cell=null,this.date=null)},mouseup:function(t){this.stopDrag(t),this.stopListening(t)},stopDrag:function(t){this.isDragging&&(this.stopScrolling(),this.trigger("dragStop",t),this.isDragging=!1)},stopListening:function(e){this.isListening&&(this.scrollEl&&(this.scrollEl.off("scroll",this.scrollHandlerProxy),this.scrollHandlerProxy=null),t(document).off("mousemove",this.mousemoveProxy).off("mouseup",this.mouseupProxy).off("selectstart",this.preventDefault),this.mousemoveProxy=null,this.mouseupProxy=null,this.isListening=!1,this.trigger("listenStop",e),this.origCell=this.cell=null,this.origDate=this.date=null)},getCell:function(t){return this.coordMap.getCell(t.pageX,t.pageY)},trigger:function(t){this.options[t]&&this.options[t].apply(this,Array.prototype.slice.call(arguments,1))},preventDefault:function(t){t.preventDefault()},computeScrollBounds:function(){var t,e=this.scrollEl;e&&(t=e.offset(),this.scrollBounds={top:t.top,left:t.left,bottom:t.top+e.outerHeight(),right:t.left+e.outerWidth()})},dragScroll:function(t){var e,i,n,r,o=this.scrollSensitivity,s=this.scrollBounds,l=0,a=0;s&&(e=(o-(t.pageY-s.top))/o,i=(o-(s.bottom-t.pageY))/o,n=(o-(t.pageX-s.left))/o,r=(o-(s.right-t.pageX))/o,e>=0&&1>=e?l=-1*e*this.scrollSpeed:i>=0&&1>=i&&(l=i*this.scrollSpeed),n>=0&&1>=n?a=-1*n*this.scrollSpeed:r>=0&&1>=r&&(a=r*this.scrollSpeed)),this.setScrollVel(l,a)},setScrollVel:function(e,i){this.scrollTopVel=e,this.scrollLeftVel=i,this.constrainScrollVel(),!this.scrollTopVel&&!this.scrollLeftVel||this.scrollIntervalId||(this.scrollIntervalId=setInterval(t.proxy(this,"scrollIntervalFunc"),this.scrollIntervalMs))},constrainScrollVel:function(){var t=this.scrollEl;0>this.scrollTopVel?0>=t.scrollTop()&&(this.scrollTopVel=0):this.scrollTopVel>0&&t.scrollTop()+t[0].clientHeight>=t[0].scrollHeight&&(this.scrollTopVel=0),0>this.scrollLeftVel?0>=t.scrollLeft()&&(this.scrollLeftVel=0):this.scrollLeftVel>0&&t.scrollLeft()+t[0].clientWidth>=t[0].scrollWidth&&(this.scrollLeftVel=0)},scrollIntervalFunc:function(){var t=this.scrollEl,e=this.scrollIntervalMs/1e3;this.scrollTopVel&&t.scrollTop(t.scrollTop()+this.scrollTopVel*e),this.scrollLeftVel&&t.scrollLeft(t.scrollLeft()+this.scrollLeftVel*e),this.constrainScrollVel(),this.scrollTopVel||this.scrollLeftVel||this.stopScrolling()},stopScrolling:function(){this.scrollIntervalId&&(clearInterval(this.scrollIntervalId),this.scrollIntervalId=null,this.computeCoords())},scrollHandler:function(){this.scrollIntervalId||this.computeCoords()}},K.prototype={options:null,sourceEl:null,el:null,parentEl:null,top0:null,left0:null,mouseY0:null,mouseX0:null,topDelta:null,leftDelta:null,mousemoveProxy:null,isFollowing:!1,isHidden:!1,isAnimating:!1,start:function(e){this.isFollowing||(this.isFollowing=!0,this.mouseY0=e.pageY,this.mouseX0=e.pageX,this.topDelta=0,this.leftDelta=0,this.isHidden||this.updatePosition(),t(document).on("mousemove",this.mousemoveProxy=t.proxy(this,"mousemove")))},stop:function(e,i){function n(){this.isAnimating=!1,r.destroyEl(),this.top0=this.left0=null,i&&i()}var r=this,o=this.options.revertDuration;this.isFollowing&&!this.isAnimating&&(this.isFollowing=!1,t(document).off("mousemove",this.mousemoveProxy),e&&o&&!this.isHidden?(this.isAnimating=!0,this.el.animate({top:this.top0,left:this.left0},{duration:o,complete:n})):n())},getEl:function(){var t=this.el;return t||(this.sourceEl.width(),t=this.el=this.sourceEl.clone().css({position:"absolute",visibility:"",display:this.isHidden?"none":"",margin:0,right:"auto",bottom:"auto",width:this.sourceEl.width(),height:this.sourceEl.height(),opacity:this.options.opacity||"",zIndex:this.options.zIndex}).appendTo(this.parentEl)),t},destroyEl:function(){this.el&&(this.el.remove(),this.el=null)},updatePosition:function(){var t,e;this.getEl(),null===this.top0&&(this.sourceEl.width(),t=this.sourceEl.offset(),e=this.el.offsetParent().offset(),this.top0=t.top-e.top,this.left0=t.left-e.left),this.el.css({top:this.top0+this.topDelta,left:this.left0+this.leftDelta})},mousemove:function(t){this.topDelta=t.pageY-this.mouseY0,this.leftDelta=t.pageX-this.mouseX0,this.isHidden||this.updatePosition()},hide:function(){this.isHidden||(this.isHidden=!0,this.el&&this.el.hide())},show:function(){this.isHidden&&(this.isHidden=!1,this.updatePosition(),this.getEl().show())}},Q.prototype={view:null,cellHtml:"<td/>",rowHtml:function(t,e){var i,n,r=this.view,o=this.getHtmlRenderer("cell",t),s="";for(e=e||0,i=0;r.colCnt>i;i++)n=r.cellToDate(e,i),s+=o(e,i,n);return s=this.bookendCells(s,t,e),"<tr>"+s+"</tr>"},bookendCells:function(t,e,i){var n=this.view,r=this.getHtmlRenderer("intro",e)(i||0),o=this.getHtmlRenderer("outro",e)(i||0),s=n.opt("isRTL"),l=s?o:r,a=s?r:o;return"string"==typeof t?l+t+a:t.prepend(l).append(a)},getHtmlRenderer:function(t,e){var i,n,r,o,s=this.view;return i=t+"Html",e&&(n=e+z(t)+"Html"),n&&(o=s[n])?r=s:n&&(o=this[n])?r=this:(o=s[i])?r=s:(o=this[i])&&(r=this),"function"==typeof o?function(){return o.apply(r,arguments)||""}:function(){return o||""}}},J.prototype=H(Q.prototype),t.extend(J.prototype,{el:null,coordMap:null,cellDuration:null,render:function(){this.bindHandlers()},destroy:function(){},buildCoords:function(){},getCellDate:function(){},getCellDayEl:function(){},rangeToSegs:function(){},bindHandlers:function(){var e=this;this.el.on("mousedown",function(i){t(i.target).is(".fc-event-container *, .fc-more")||t(i.target).closest(".fc-popover").length||e.dayMousedown(i)}),this.bindSegHandlers()},dayMousedown:function(t){var e,i,n,r=this,o=this.view,s=o.opt("selectable"),l=null,a=new q(this.coordMap,{scroll:o.opt("dragScroll"),dragStart:function(){o.unselect()},cellOver:function(t,o){a.origDate&&(n=r.getCellDayEl(t),l=[o,a.origDate].sort(C),e=l[0],i=l[1].clone().add(r.cellDuration),s&&r.renderSelection(e,i))},cellOut:function(){l=null,r.destroySelection()},listenStop:function(t){l&&(l[0].isSame(l[1])&&o.trigger("dayClick",n[0],e,t),s&&o.reportSelection(e,i,t))}});a.mousedown(t)},renderDrag:function(){},destroyDrag:function(){},renderResize:function(){},destroyResize:function(){},renderRangeHelper:function(t,e,i){var n,r=this.view;!e&&r.opt("forceEventDuration")&&(e=r.calendar.getDefaultEventEnd(!t.hasTime(),t)),n=i?H(i.event):{},n.start=t,n.end=e,n.allDay=!(t.hasTime()||e&&e.hasTime()),n.className=(n.className||[]).concat("fc-helper"),i||(n.editable=!1),this.renderHelper(n,i)},renderHelper:function(){},destroyHelper:function(){},renderSelection:function(t,e){this.renderHighlight(t,e)},destroySelection:function(){this.destroyHighlight()},renderHighlight:function(){},destroyHighlight:function(){},headHtml:function(){return'<div class="fc-row '+this.view.widgetHeaderClass+'">'+"<table>"+"<thead>"+this.rowHtml("head")+"</thead>"+"</table>"+"</div>"},headCellHtml:function(t,e,i){var n=this.view,r=n.calendar,o=n.opt("columnFormat");return'<th class="fc-day-header '+n.widgetHeaderClass+" fc-"+Re[i.day()]+'">'+R(r.formatDate(i,o))+"</th>"},bgCellHtml:function(t,e,i){var n=this.view,r=this.getDayClasses(i);return r.unshift("fc-day",n.widgetContentClass),'<td class="'+r.join(" ")+'" data-date="'+i.format()+'"></td>'},getDayClasses:function(t){var e=this.view,i=e.calendar.getNow().stripTime(),n=["fc-"+Re[t.day()]];return"month"===e.name&&t.month()!=e.intervalStart.month()&&n.push("fc-other-month"),t.isSame(i,"day")?n.push("fc-today",e.highlightStateClass):i>t?n.push("fc-past"):n.push("fc-future"),n}}),t.extend(J.prototype,{mousedOverSeg:null,isDraggingSeg:!1,isResizingSeg:!1,renderEvents:function(){},getSegs:function(){},destroyEvents:function(){this.triggerSegMouseout()},renderSegs:function(e,i){var n,r=this.view,o="",s=[];for(n=0;e.length>n;n++)o+=this.renderSegHtml(e[n],i);return t(o).each(function(i,n){var o=e[i],l=r.resolveEventEl(o.event,t(n));l&&(l.data("fc-seg",o),o.el=l,s.push(o))}),s},renderSegHtml:function(){},eventsToSegs:function(e,i,n){var r=this;return t.map(e,function(t){return r.eventToSegs(t,i,n)})},eventToSegs:function(t,e,i){var n,r,o,s=t.start.clone().stripZone(),l=this.view.calendar.getEventEnd(t).stripZone();for(e&&i?(o=b(s,l,e,i),n=o?[o]:[]):n=this.rangeToSegs(s,l),r=0;n.length>r;r++)o=n[r],o.event=t,o.eventStartMS=+s,o.eventDurationMS=l-s;return n},bindSegHandlers:function(){var e=this,i=this.view;t.each({mouseenter:function(t,i){e.triggerSegMouseover(t,i)},mouseleave:function(t,i){e.triggerSegMouseout(t,i)},click:function(t,e){return i.trigger("eventClick",this,t.event,e)},mousedown:function(n,r){t(r.target).is(".fc-resizer")&&i.isEventResizable(n.event)?e.segResizeMousedown(n,r):i.isEventDraggable(n.event)&&e.segDragMousedown(n,r)}},function(i,n){e.el.on(i,".fc-event-container > *",function(i){var r=t(this).data("fc-seg");return!r||e.isDraggingSeg||e.isResizingSeg?void 0:n.call(this,r,i)})})},triggerSegMouseover:function(t,e){this.mousedOverSeg||(this.mousedOverSeg=t,this.view.trigger("eventMouseover",t.el[0],t.event,e))},triggerSegMouseout:function(t,e){e=e||{},this.mousedOverSeg&&(t=t||this.mousedOverSeg,this.mousedOverSeg=null,this.view.trigger("eventMouseout",t.el[0],t.event,e))},segDragMousedown:function(t,e){var i,n,r=this,o=this.view,s=t.el,l=t.event,a=new K(t.el,{parentEl:o.el,opacity:o.opt("dragOpacity"),revertDuration:o.opt("dragRevertDuration"),zIndex:2}),c=new q(o.coordMap,{distance:5,scroll:o.opt("dragScroll"),listenStart:function(t){a.hide(),a.start(t)},dragStart:function(e){r.triggerSegMouseout(t,e),r.isDraggingSeg=!0,o.hideEvent(l),o.trigger("eventDragStart",s[0],l,e,{})},cellOver:function(e,s){var l=t.cellDate||c.origDate,d=r.computeDraggedEventDates(t,l,s);i=d.start,n=d.end,o.renderDrag(i,n,t)?a.hide():a.show()},cellOut:function(){i=null,o.destroyDrag(),a.show()},dragStop:function(t){var e=i&&!i.isSame(l.start);a.stop(!e,function(){r.isDraggingSeg=!1,o.destroyDrag(),o.showEvent(l),o.trigger("eventDragStop",s[0],l,t,{}),e&&o.eventDrop(s[0],l,i,t)})},listenStop:function(){a.stop()}});c.mousedown(e)},computeDraggedEventDates:function(t,e,i){var n,r,o,s=this.view,l=t.event,a=l.start,c=s.calendar.getEventEnd(l);return i.hasTime()===e.hasTime()?(n=D(i,e),r=a.clone().add(n),o=null===l.end?null:c.clone().add(n)):(r=i,o=null),{start:r,end:o}},segResizeMousedown:function(t,e){function i(){r.destroyResize(),o.showEvent(l)}var n,r=this,o=this.view,s=t.el,l=t.event,a=l.start,c=o.calendar.getEventEnd(l),d=null;n=new q(this.coordMap,{distance:5,scroll:o.opt("dragScroll"),dragStart:function(e){r.triggerSegMouseout(t,e),r.isResizingSeg=!0,o.trigger("eventResizeStart",s[0],l,e,{})},cellOver:function(e,n){n.isBefore(a)&&(n=a),d=n.clone().add(r.cellDuration),d.isSame(c)?(d=null,i()):(r.renderResize(a,d,t),o.hideEvent(l))},cellOut:function(){d=null,i()},dragStop:function(t){r.isResizingSeg=!1,i(),o.trigger("eventResizeStop",s[0],l,t,{}),d&&o.eventResize(s[0],l,d,t)}}),n.mousedown(e)},getSegClasses:function(t,e,i){var n=t.event,r=["fc-event",t.isStart?"fc-start":"fc-not-start",t.isEnd?"fc-end":"fc-not-end"].concat(n.className,n.source?n.source.className:[]);return e&&r.push("fc-draggable"),i&&r.push("fc-resizable"),r},getEventSkinCss:function(t){var e=this.view,i=t.source||{},n=t.color,r=i.color,o=e.opt("eventColor"),s=t.backgroundColor||n||i.backgroundColor||r||e.opt("eventBackgroundColor")||o,l=t.borderColor||n||i.borderColor||r||e.opt("eventBorderColor")||o,a=t.textColor||i.textColor||e.opt("eventTextColor"),c=[];return s&&c.push("background-color:"+s),l&&c.push("border-color:"+l),a&&c.push("color:"+a),c.join(";")}}),ee.prototype=H(J.prototype),t.extend(ee.prototype,{numbersVisible:!1,cellDuration:e.duration({days:1}),bottomCoordPadding:0,rowEls:null,dayEls:null,helperEls:null,highlightEls:null,render:function(e){var i,n=this.view,r="";for(i=0;n.rowCnt>i;i++)r+=this.dayRowHtml(i,e);this.el.html(r),this.rowEls=this.el.find(".fc-row"),this.dayEls=this.el.find(".fc-day"),this.dayEls.each(function(e,i){var r=n.cellToDate(Math.floor(e/n.colCnt),e%n.colCnt);n.trigger("dayRender",null,r,t(i))}),J.prototype.render.call(this)},destroy:function(){this.destroySegPopover()},dayRowHtml:function(t,e){var i=this.view,n=["fc-row","fc-week",i.widgetContentClass];return e&&n.push("fc-rigid"),'<div class="'+n.join(" ")+'">'+'<div class="fc-bg">'+"<table>"+this.rowHtml("day",t)+"</table>"+"</div>"+'<div class="fc-content-skeleton">'+"<table>"+(this.numbersVisible?"<thead>"+this.rowHtml("number",t)+"</thead>":"")+"</table>"+"</div>"+"</div>"},dayCellHtml:function(t,e,i){return this.bgCellHtml(t,e,i)},buildCoords:function(e,i){var n,r,o,s=this.view.colCnt;this.dayEls.slice(0,s).each(function(e,s){n=t(s),r=n.offset().left,e&&(o[1]=r),o=[r],i[e]=o}),o[1]=r+n.outerWidth(),this.rowEls.each(function(i,s){n=t(s),r=n.offset().top,i&&(o[1]=r),o=[r],e[i]=o}),o[1]=r+n.outerHeight()+this.bottomCoordPadding},getCellDate:function(t){return this.view.cellToDate(t)},getCellDayEl:function(t){return this.dayEls.eq(t.row*this.view.colCnt+t.col)},rangeToSegs:function(t,e){return this.view.rangeToSegments(t,e)},renderDrag:function(t,e,i){var n;return this.renderHighlight(t,e||this.view.calendar.getDefaultEventEnd(!0,t)),i&&!i.el.closest(this.el).length?(this.renderRangeHelper(t,e,i),n=this.view.opt("dragOpacity"),void 0!==n&&this.helperEls.css("opacity",n),!0):void 0},destroyDrag:function(){this.destroyHighlight(),this.destroyHelper()},renderResize:function(t,e,i){this.renderHighlight(t,e),this.renderRangeHelper(t,e,i)},destroyResize:function(){this.destroyHighlight(),this.destroyHelper()},renderHelper:function(e,i){var n=[],r=this.renderEventRows([e]);this.rowEls.each(function(e,o){var s,l=t(o),a=t('<div class="fc-helper-skeleton"><table/></div>');s=i&&i.row===e?i.el.position().top:l.find(".fc-content-skeleton tbody").position().top,a.css("top",s).find("table").append(r[e].tbodyEl),l.append(a),n.push(a[0])}),this.helperEls=t(n)},destroyHelper:function(){this.helperEls&&(this.helperEls.remove(),this.helperEls=null)},renderHighlight:function(e,i){var n,r,o,s=this.rangeToSegs(e,i),l=[];for(n=0;s.length>n;n++)r=s[n],o=t(this.highlightSkeletonHtml(r.leftCol,r.rightCol+1)),o.appendTo(this.rowEls[r.row]),l.push(o[0]);this.highlightEls=t(l)},destroyHighlight:function(){this.highlightEls&&(this.highlightEls.remove(),this.highlightEls=null)},highlightSkeletonHtml:function(t,e){var i=this.view.colCnt,n="";return t>0&&(n+='<td colspan="'+t+'"/>'),e>t&&(n+='<td colspan="'+(e-t)+'" class="fc-highlight" />'),i>e&&(n+='<td colspan="'+(i-e)+'"/>'),n=this.bookendCells(n,"highlight"),'<div class="fc-highlight-skeleton"><table><tr>'+n+"</tr>"+"</table>"+"</div>"}}),t.extend(ee.prototype,{segs:null,rowStructs:null,renderEvents:function(e){var i=this.rowStructs=this.renderEventRows(e),n=[];this.rowEls.each(function(e,r){t(r).find(".fc-content-skeleton > table").append(i[e].tbodyEl),n.push.apply(n,i[e].segs)}),this.segs=n},getSegs:function(){return(this.segs||[]).concat(this.popoverSegs||[])},destroyEvents:function(){var t,e;for(J.prototype.destroyEvents.call(this),t=this.rowStructs||[];e=t.pop();)e.tbodyEl.remove();this.segs=null,this.destroySegPopover()},renderEventRows:function(t){var e,i,n=this.eventsToSegs(t),r=[];for(n=this.renderSegs(n),e=this.groupSegRows(n),i=0;e.length>i;i++)r.push(this.renderEventRow(i,e[i]));return r},renderSegHtml:function(t,e){var i,n=this.view,r=n.opt("isRTL"),o=t.event,s=n.isEventDraggable(o),l=!e&&o.allDay&&t.isEnd&&n.isEventResizable(o),a=this.getSegClasses(t,s,l),c=this.getEventSkinCss(o),d="";return a.unshift("fc-day-grid-event"),!o.allDay&&t.isStart&&(d='<span class="fc-time">'+R(n.getEventTimeText(o))+"</span>"),i='<span class="fc-title">'+(R(o.title||"")||"&nbsp;")+"</span>",'<a class="'+a.join(" ")+'"'+(o.url?' href="'+R(o.url)+'"':"")+(c?' style="'+c+'"':"")+">"+'<div class="fc-content">'+(r?i+" "+d:d+" "+i)+"</div>"+(l?'<div class="fc-resizer"/>':"")+"</a>"},renderEventRow:function(e,i){function n(e){for(;e>s;)d=(y[r-1]||[])[s],d?d.attr("rowspan",parseInt(d.attr("rowspan")||1,10)+1):(d=t("<td/>"),l.append(d)),v[r][s]=d,y[r][s]=d,s++}var r,o,s,l,a,c,d,h=this.view,u=h.colCnt,f=this.buildSegLevels(i),g=Math.max(1,f.length),p=t("<tbody/>"),m=[],v=[],y=[];for(r=0;g>r;r++){if(o=f[r],s=0,l=t("<tr/>"),m.push([]),v.push([]),y.push([]),o)for(a=0;o.length>a;a++){for(c=o[a],n(c.leftCol),d=t('<td class="fc-event-container"/>').append(c.el),c.leftCol!=c.rightCol?d.attr("colspan",c.rightCol-c.leftCol+1):y[r][s]=d;c.rightCol>=s;)v[r][s]=d,m[r][s]=c,s++;l.append(d)}n(u),this.bookendCells(l,"eventSkeleton"),p.append(l)}return{row:e,tbodyEl:p,cellMatrix:v,segMatrix:m,segLevels:f,segs:i}},buildSegLevels:function(t){var e,i,n,r=[];for(t.sort(te),e=0;t.length>e;e++){for(i=t[e],n=0;r.length>n&&ie(i,r[n]);n++);i.level=n,(r[n]||(r[n]=[])).push(i)}for(n=0;r.length>n;n++)r[n].sort(ne);return r},groupSegRows:function(t){var e,i=this.view,n=[];for(e=0;i.rowCnt>e;e++)n.push([]);for(e=0;t.length>e;e++)n[t[e].row].push(t[e]);return n}}),t.extend(ee.prototype,{segPopover:null,popoverSegs:null,destroySegPopover:function(){this.segPopover&&this.segPopover.hide()},limitRows:function(t){var e,i,n=this.rowStructs||[];for(e=0;n.length>e;e++)this.unlimitRow(e),i=t?"number"==typeof t?t:this.computeRowLevelLimit(e):!1,i!==!1&&this.limitRow(e,i)},computeRowLevelLimit:function(t){var e,i,n=this.rowEls.eq(t),r=n.height(),o=this.rowStructs[t].tbodyEl.children();for(e=0;o.length>e;e++)if(i=o.eq(e).removeClass("fc-limited"),i.position().top+i.outerHeight()>r)return e;return!1},limitRow:function(e,i){function n(n){for(;n>T;)r={row:e,col:T},d=E.getCellSegs(r,i),d.length&&(f=s[i-1][T],w=E.renderMoreLink(r,d),y=t("<div/>").append(w),f.append(y),D.push(y[0])),T++}var r,o,s,l,a,c,d,h,u,f,g,p,m,v,y,w,E=this,b=this.view,S=this.rowStructs[e],D=[],T=0;if(i&&S.segLevels.length>i){for(o=S.segLevels[i-1],s=S.cellMatrix,l=S.tbodyEl.children().slice(i).addClass("fc-limited").get(),a=0;o.length>a;a++){for(c=o[a],n(c.leftCol),u=[],h=0;c.rightCol>=T;)r={row:e,col:T},d=this.getCellSegs(r,i),u.push(d),h+=d.length,T++;if(h){for(f=s[i-1][c.leftCol],g=f.attr("rowspan")||1,p=[],m=0;u.length>m;m++)v=t('<td class="fc-more-cell"/>').attr("rowspan",g),d=u[m],r={row:e,col:c.leftCol+m},w=this.renderMoreLink(r,[c].concat(d)),y=t("<div/>").append(w),v.append(y),p.push(v[0]),D.push(v[0]);f.addClass("fc-limited").after(t(p)),l.push(f[0])}}n(b.colCnt),S.moreEls=t(D),S.limitedEls=t(l)}},unlimitRow:function(t){var e=this.rowStructs[t];e.moreEls&&(e.moreEls.remove(),e.moreEls=null),e.limitedEls&&(e.limitedEls.removeClass("fc-limited"),e.limitedEls=null)},renderMoreLink:function(e,i){var n=this,r=this.view;return t('<a class="fc-more"/>').text(this.getMoreLinkText(i.length)).on("click",function(o){var s=r.opt("eventLimitClick"),l=r.cellToDate(e),a=t(this),c=n.getCellDayEl(e),d=n.getCellSegs(e),h=n.resliceDaySegs(d,l),u=n.resliceDaySegs(i,l);"function"==typeof s&&(s=r.trigger("eventLimitClick",null,{date:l,dayEl:c,moreEl:a,segs:h,hiddenSegs:u},o)),"popover"===s?n.showSegPopover(l,e,a,h):"string"==typeof s&&r.calendar.zoomTo(l,s)})},showSegPopover:function(t,e,i,n){var r,o,s=this,l=this.view,a=i.parent();r=1==l.rowCnt?this.view.el:this.rowEls.eq(e.row),o={className:"fc-more-popover",content:this.renderSegPopoverContent(t,n),parentEl:this.el,top:r.offset().top,autoHide:!0,viewportConstrain:l.opt("popoverViewportConstrain"),hide:function(){s.segPopover.destroy(),s.segPopover=null,s.popoverSegs=null}},l.opt("isRTL")?o.right=a.offset().left+a.outerWidth()+1:o.left=a.offset().left-1,this.segPopover=new j(o),this.segPopover.show()},renderSegPopoverContent:function(e,i){var n,r=this.view,o=r.opt("theme"),s=e.format(r.opt("dayPopoverFormat")),l=t('<div class="fc-header '+r.widgetHeaderClass+'">'+'<span class="fc-close '+(o?"ui-icon ui-icon-closethick":"fc-icon fc-icon-x")+'"></span>'+'<span class="fc-title">'+R(s)+"</span>"+'<div class="fc-clear"/>'+"</div>"+'<div class="fc-body '+r.widgetContentClass+'">'+'<div class="fc-event-container"></div>'+"</div>"),a=l.find(".fc-event-container");for(i=this.renderSegs(i,!0),this.popoverSegs=i,n=0;i.length>n;n++)i[n].cellDate=e,a.append(i[n].el);return l},resliceDaySegs:function(e,i){var n=t.map(e,function(t){return t.event}),r=i.clone().stripTime(),o=r.clone().add(1,"days");return this.eventsToSegs(n,r,o)},getMoreLinkText:function(t){var e=this.view,i=e.opt("eventLimitText");return"function"==typeof i?i(t):"+"+t+" "+i},getCellSegs:function(t,e){for(var i,n=this.rowStructs[t.row].segMatrix,r=e||0,o=[];n.length>r;)i=n[r][t.col],i&&o.push(i),r++;return o}}),re.prototype=H(J.prototype),t.extend(re.prototype,{slotDuration:null,snapDuration:null,minTime:null,maxTime:null,dayEls:null,slatEls:null,slatTops:null,highlightEl:null,helperEl:null,render:function(){this.processOptions(),this.el.html(this.renderHtml()),this.dayEls=this.el.find(".fc-day"),this.slatEls=this.el.find(".fc-slats tr"),this.computeSlatTops(),J.prototype.render.call(this)},renderHtml:function(){return'<div class="fc-bg"><table>'+this.rowHtml("slotBg")+"</table>"+"</div>"+'<div class="fc-slats">'+"<table>"+this.slatRowHtml()+"</table>"+"</div>"},slotBgCellHtml:function(t,e,i){return this.bgCellHtml(t,e,i)},slatRowHtml:function(){for(var t,i,n,r=this.view,o=r.calendar,s=r.opt("isRTL"),l="",a=0===this.slotDuration.asMinutes()%15,c=e.duration(+this.minTime);this.maxTime>c;)t=r.start.clone().time(c),i=t.minutes(),n='<td class="fc-axis fc-time '+r.widgetContentClass+'" '+r.axisStyleAttr()+">"+(a&&i?"":"<span>"+R(o.formatDate(t,r.opt("axisFormat")))+"</span>")+"</td>",l+="<tr "+(i?'class="fc-minor"':"")+">"+(s?"":n)+'<td class="'+r.widgetContentClass+'"/>'+(s?n:"")+"</tr>",c.add(this.slotDuration);return l},processOptions:function(){var t=this.view,i=t.opt("slotDuration"),n=t.opt("snapDuration");i=e.duration(i),n=n?e.duration(n):i,this.slotDuration=i,this.snapDuration=n,this.cellDuration=n,this.minTime=e.duration(t.opt("minTime")),this.maxTime=e.duration(t.opt("maxTime"))},rangeToSegs:function(t,e){var i,n,r,o,s,l=this.view,a=[];for(t=t.clone().stripZone(),e=e.clone().stripZone(),n=0;l.colCnt>n;n++)r=l.cellToDate(0,n),o=r.clone().time(this.minTime),s=r.clone().time(this.maxTime),i=b(t,e,o,s),i&&(i.col=n,a.push(i));return a},resize:function(){this.computeSlatTops(),this.updateSegVerticals()},buildCoords:function(i,n){var r,o,s=this.view.colCnt,l=this.el.offset().top,a=e.duration(+this.minTime),c=null;for(this.dayEls.slice(0,s).each(function(e,i){r=t(i),o=r.offset().left,c&&(c[1]=o),c=[o],n[e]=c}),c[1]=o+r.outerWidth(),c=null;this.maxTime>a;)o=l+this.computeTimeTop(a),c&&(c[1]=o),c=[o],i.push(c),a.add(this.snapDuration);c[1]=l+this.computeTimeTop(a)},getCellDate:function(t){var e=this.view,i=e.calendar;return i.rezoneDate(e.cellToDate(0,t.col).time(this.minTime+this.snapDuration*t.row))},getCellDayEl:function(t){return this.dayEls.eq(t.col)},computeDateTop:function(t,i){return this.computeTimeTop(e.duration(t.clone().stripZone()-i.clone().stripTime()))},computeTimeTop:function(t){var e,i,n,r,o=(t-this.minTime)/this.slotDuration;return o=Math.max(0,o),o=Math.min(this.slatEls.length,o),e=Math.floor(o),i=o-e,n=this.slatTops[e],i?(r=this.slatTops[e+1],n+(r-n)*i):n},computeSlatTops:function(){var e,i=[];this.slatEls.each(function(n,r){e=t(r).position().top,i.push(e)}),i.push(e+this.slatEls.last().outerHeight()),this.slatTops=i},renderDrag:function(t,e,i){var n;return i?(this.renderRangeHelper(t,e,i),n=this.view.opt("dragOpacity"),void 0!==n&&this.helperEl.css("opacity",n),!0):(this.renderHighlight(t,e||this.view.calendar.getDefaultEventEnd(!1,t)),void 0)},destroyDrag:function(){this.destroyHelper(),this.destroyHighlight()},renderResize:function(t,e,i){this.renderRangeHelper(t,e,i)},destroyResize:function(){this.destroyHelper()},renderHelper:function(e,i){var n,r,o,s=this.renderEventTable([e]),l=s.tableEl,a=s.segs;for(n=0;a.length>n;n++)r=a[n],i&&i.col===r.col&&(o=i.el,r.el.css({left:o.css("left"),right:o.css("right"),"margin-left":o.css("margin-left"),"margin-right":o.css("margin-right")}));this.helperEl=t('<div class="fc-helper-skeleton"/>').append(l).appendTo(this.el)},destroyHelper:function(){this.helperEl&&(this.helperEl.remove(),this.helperEl=null)},renderSelection:function(t,e){this.view.opt("selectHelper")?this.renderRangeHelper(t,e):this.renderHighlight(t,e)},destroySelection:function(){this.destroyHelper(),this.destroyHighlight()},renderHighlight:function(e,i){this.highlightEl=t(this.highlightSkeletonHtml(e,i)).appendTo(this.el)},destroyHighlight:function(){this.highlightEl&&(this.highlightEl.remove(),this.highlightEl=null)},highlightSkeletonHtml:function(t,e){var i,n,r,o,s,l=this.view,a=this.rangeToSegs(t,e),c="",d=0;for(i=0;a.length>i;i++)n=a[i],n.col>d&&(c+='<td colspan="'+(n.col-d)+'"/>',d=n.col),r=l.cellToDate(0,d),o=this.computeDateTop(n.start,r),s=this.computeDateTop(n.end,r),c+='<td><div class="fc-highlight-container"><div class="fc-highlight" style="top:'+o+"px;bottom:-"+s+'px"/>'+"</div>"+"</td>",d++;return l.colCnt>d&&(c+='<td colspan="'+(l.colCnt-d)+'"/>'),c=this.bookendCells(c,"highlight"),'<div class="fc-highlight-skeleton"><table><tr>'+c+"</tr>"+"</table>"+"</div>"}}),t.extend(re.prototype,{segs:null,eventSkeletonEl:null,renderEvents:function(e){var i=this.renderEventTable(e);this.eventSkeletonEl=t('<div class="fc-content-skeleton"/>').append(i.tableEl),this.el.append(this.eventSkeletonEl),this.segs=i.segs},getSegs:function(){return this.segs||[]},destroyEvents:function(){J.prototype.destroyEvents.call(this),this.eventSkeletonEl&&(this.eventSkeletonEl.remove(),this.eventSkeletonEl=null),this.segs=null},renderEventTable:function(e){var i,n,r,o,s,l,a=t("<table><tr/></table>"),c=a.find("tr"),d=this.eventsToSegs(e);for(d=this.renderSegs(d),i=this.groupSegCols(d),this.computeSegVerticals(d),o=0;i.length>o;o++){for(s=i[o],oe(s),l=t('<div class="fc-event-container"/>'),n=0;s.length>n;n++)r=s[n],r.el.css(this.generateSegPositionCss(r)),30>r.bottom-r.top&&r.el.addClass("fc-short"),l.append(r.el);c.append(t("<td/>").append(l))}return this.bookendCells(c,"eventSkeleton"),{tableEl:a,segs:d}},updateSegVerticals:function(){var t,e=this.segs;if(e)for(this.computeSegVerticals(e),t=0;e.length>t;t++)e[t].el.css(this.generateSegVerticalCss(e[t]))},computeSegVerticals:function(t){var e,i;for(e=0;t.length>e;e++)i=t[e],i.top=this.computeDateTop(i.start,i.start),i.bottom=this.computeDateTop(i.end,i.start)},renderSegHtml:function(t,e){var i,n,r,o=this.view,s=t.event,l=o.isEventDraggable(s),a=!e&&t.isEnd&&o.isEventResizable(s),c=this.getSegClasses(t,l,a),d=this.getEventSkinCss(s);return c.unshift("fc-time-grid-event"),o.isMultiDayEvent(s)?(t.isStart||t.isEnd)&&(i=o.getEventTimeText(t.start,t.end),n=o.getEventTimeText(t.start,t.end,"LT"),r=o.getEventTimeText(t.start,null)):(i=o.getEventTimeText(s),n=o.getEventTimeText(s,"LT"),r=o.getEventTimeText(s.start,null)),'<a class="'+c.join(" ")+'"'+(s.url?' href="'+R(s.url)+'"':"")+(d?' style="'+d+'"':"")+">"+'<div class="fc-content">'+(i?'<div class="fc-time" data-start="'+R(r)+'"'+' data-full="'+R(n)+'"'+">"+"<span>"+R(i)+"</span>"+"</div>":"")+(s.title?'<div class="fc-title">'+R(s.title)+"</div>":"")+"</div>"+'<div class="fc-bg"/>'+(a?'<div class="fc-resizer"/>':"")+"</a>"},generateSegPositionCss:function(t){var e,i,n=this.view,r=n.opt("isRTL"),o=n.opt("slotEventOverlap"),s=t.backwardCoord,l=t.forwardCoord,a=this.generateSegVerticalCss(t);return o&&(l=Math.min(1,s+2*(l-s))),r?(e=1-l,i=s):(e=s,i=1-l),a.zIndex=t.level+1,a.left=100*e+"%",a.right=100*i+"%",o&&t.forwardPressure&&(a[r?"marginLeft":"marginRight"]=20),a},generateSegVerticalCss:function(t){return{top:t.top,bottom:-t.bottom}},groupSegCols:function(t){var e,i=this.view,n=[];for(e=0;i.colCnt>e;e++)n.push([]);for(e=0;t.length>e;e++)n[t[e].col].push(t[e]);return n}}),fe.prototype={calendar:null,coordMap:null,el:null,start:null,end:null,intervalStart:null,intervalEnd:null,rowCnt:null,colCnt:null,isSelected:!1,scrollerEl:null,scrollTop:null,widgetHeaderClass:null,widgetContentClass:null,highlightStateClass:null,documentMousedownProxy:null,documentDragStartProxy:null,init:function(){var e=this.opt("theme")?"ui":"fc";this.widgetHeaderClass=e+"-widget-header",this.widgetContentClass=e+"-widget-content",this.highlightStateClass=e+"-state-highlight",this.documentMousedownProxy=t.proxy(this,"documentMousedown"),this.documentDragStartProxy=t.proxy(this,"documentDragStart")},render:function(){this.updateSize(),this.trigger("viewRender",this,this,this.el),t(document).on("mousedown",this.documentMousedownProxy).on("dragstart",this.documentDragStartProxy)},destroy:function(){this.unselect(),this.trigger("viewDestroy",this,this,this.el),this.destroyEvents(),this.el.empty(),t(document).off("mousedown",this.documentMousedownProxy).off("dragstart",this.documentDragStartProxy)},incrementDate:function(){},updateSize:function(t){t&&this.recordScroll(),this.updateHeight(),this.updateWidth()},updateWidth:function(){},updateHeight:function(){var t=this.calendar;this.setHeight(t.getSuggestedViewHeight(),t.isHeightAuto())},setHeight:function(){},computeScrollerHeight:function(t){var e,i=this.el.add(this.scrollerEl);return i.css({position:"relative",left:-1}),e=this.el.outerHeight()-this.scrollerEl.height(),i.css({position:"",left:""}),t-e},recordScroll:function(){this.scrollerEl&&(this.scrollTop=this.scrollerEl.scrollTop())},restoreScroll:function(){null!==this.scrollTop&&this.scrollerEl.scrollTop(this.scrollTop)},renderEvents:function(){this.segEach(function(t){this.trigger("eventAfterRender",t.event,t.event,t.el)}),this.trigger("eventAfterAllRender")},destroyEvents:function(){this.segEach(function(t){this.trigger("eventDestroy",t.event,t.event,t.el)})},resolveEventEl:function(e,i){var n=this.trigger("eventRender",e,e,i);return n===!1?i=null:n&&n!==!0&&(i=t(n)),i},showEvent:function(t){this.segEach(function(t){t.el.css("visibility","")},t)},hideEvent:function(t){this.segEach(function(t){t.el.css("visibility","hidden")},t)},segEach:function(t,e){var i,n=this.getSegs();for(i=0;n.length>i;i++)e&&n[i].event._id!==e._id||t.call(this,n[i])},getSegs:function(){},renderDrag:function(){},destroyDrag:function(){},documentDragStart:function(e){var i,n=this,r=null;this.opt("droppable")&&(i=new q(this.coordMap,{cellOver:function(t,e){r=e,n.renderDrag(e)},cellOut:function(){r=null,n.destroyDrag()}}),t(document).one("dragstop",function(t,e){n.destroyDrag(),r&&n.trigger("drop",t.target,r,t,e)}),i.startDrag(e))},select:function(t,e,i){this.unselect(i),this.renderSelection(t,e),this.reportSelection(t,e,i)},renderSelection:function(){},reportSelection:function(t,e,i){this.isSelected=!0,this.trigger("select",null,t,e,i)},unselect:function(t){this.isSelected&&(this.isSelected=!1,this.destroySelection(),this.trigger("unselect",null,t))},destroySelection:function(){},documentMousedown:function(e){var i;this.isSelected&&this.opt("unselectAuto")&&E(e)&&(i=this.opt("unselectCancel"),i&&t(e.target).closest(i).length||this.unselect(e))}},ge.prototype=H(fe.prototype),t.extend(ge.prototype,{dayGrid:null,dayNumbersVisible:!1,weekNumbersVisible:!1,weekNumberWidth:null,headRowEl:null,render:function(t,e,i){this.rowCnt=t,this.colCnt=e,this.dayNumbersVisible=i,this.weekNumbersVisible=this.opt("weekNumbers"),this.dayGrid.numbersVisible=this.dayNumbersVisible||this.weekNumbersVisible,this.el.addClass("fc-basic-view").html(this.renderHtml()),this.headRowEl=this.el.find("thead .fc-row"),this.scrollerEl=this.el.find(".fc-day-grid-container"),this.dayGrid.coordMap.containerEl=this.scrollerEl,this.dayGrid.el=this.el.find(".fc-day-grid"),this.dayGrid.render(this.hasRigidRows()),fe.prototype.render.call(this)},destroy:function(){this.dayGrid.destroy(),fe.prototype.destroy.call(this)},renderHtml:function(){return'<table><thead><tr><td class="'+this.widgetHeaderClass+'">'+this.dayGrid.headHtml()+"</td>"+"</tr>"+"</thead>"+"<tbody>"+"<tr>"+'<td class="'+this.widgetContentClass+'">'+'<div class="fc-day-grid-container">'+'<div class="fc-day-grid"/>'+"</div>"+"</td>"+"</tr>"+"</tbody>"+"</table>"
+},headIntroHtml:function(){return this.weekNumbersVisible?'<th class="fc-week-number '+this.widgetHeaderClass+'" '+this.weekNumberStyleAttr()+">"+"<span>"+R(this.opt("weekNumberTitle"))+"</span>"+"</th>":void 0},numberIntroHtml:function(t){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+">"+"<span>"+this.calendar.calculateWeekNumber(this.cellToDate(t,0))+"</span>"+"</td>":void 0},dayIntroHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number '+this.widgetContentClass+'" '+this.weekNumberStyleAttr()+"></td>":void 0},introHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+"></td>":void 0},numberCellHtml:function(t,e,i){var n;return this.dayNumbersVisible?(n=this.dayGrid.getDayClasses(i),n.unshift("fc-day-number"),'<td class="'+n.join(" ")+'" data-date="'+i.format()+'">'+i.date()+"</td>"):"<td/>"},weekNumberStyleAttr:function(){return null!==this.weekNumberWidth?'style="width:'+this.weekNumberWidth+'px"':""},hasRigidRows:function(){var t=this.opt("eventLimit");return t&&"number"!=typeof t},updateWidth:function(){this.weekNumbersVisible&&(this.weekNumberWidth=p(this.el.find(".fc-week-number")))},setHeight:function(t,e){var i,n=this.opt("eventLimit");v(this.scrollerEl),u(this.headRowEl),this.dayGrid.destroySegPopover(),n&&"number"==typeof n&&this.dayGrid.limitRows(n),i=this.computeScrollerHeight(t),this.setGridHeight(i,e),n&&"number"!=typeof n&&this.dayGrid.limitRows(n),!e&&m(this.scrollerEl,i)&&(h(this.headRowEl,w(this.scrollerEl)),i=this.computeScrollerHeight(t),this.scrollerEl.height(i),this.restoreScroll())},setGridHeight:function(t,e){e?g(this.dayGrid.rowEls):f(this.dayGrid.rowEls,t,!0)},renderEvents:function(t){this.dayGrid.renderEvents(t),this.updateHeight(),fe.prototype.renderEvents.call(this,t)},getSegs:function(){return this.dayGrid.getSegs()},destroyEvents:function(){fe.prototype.destroyEvents.call(this),this.recordScroll(),this.dayGrid.destroyEvents()},renderDrag:function(t,e,i){return this.dayGrid.renderDrag(t,e,i)},destroyDrag:function(){this.dayGrid.destroyDrag()},renderSelection:function(t,e){this.dayGrid.renderSelection(t,e)},destroySelection:function(){this.dayGrid.destroySelection()}}),r({fixedWeekCount:!0}),xe.month=pe,pe.prototype=H(ge.prototype),t.extend(pe.prototype,{name:"month",incrementDate:function(t,e){return t.clone().stripTime().add(e,"months").startOf("month")},render:function(t){var e;this.intervalStart=t.clone().stripTime().startOf("month"),this.intervalEnd=this.intervalStart.clone().add(1,"months"),this.start=this.intervalStart.clone(),this.start=this.skipHiddenDays(this.start),this.start.startOf("week"),this.start=this.skipHiddenDays(this.start),this.end=this.intervalEnd.clone(),this.end=this.skipHiddenDays(this.end,-1,!0),this.end.add((7-this.end.weekday())%7,"days"),this.end=this.skipHiddenDays(this.end,-1,!0),e=Math.ceil(this.end.diff(this.start,"weeks",!0)),this.isFixedWeeks()&&(this.end.add(6-e,"weeks"),e=6),this.title=this.calendar.formatDate(this.intervalStart,this.opt("titleFormat")),ge.prototype.render.call(this,e,this.getCellsPerWeek(),!0)},setGridHeight:function(t,e){e=e||"variable"===this.opt("weekMode"),e&&(t*=this.rowCnt/6),f(this.dayGrid.rowEls,t,!e)},isFixedWeeks:function(){var t=this.opt("weekMode");return t?"fixed"===t:this.opt("fixedWeekCount")}}),xe.basicWeek=me,me.prototype=H(ge.prototype),t.extend(me.prototype,{name:"basicWeek",incrementDate:function(t,e){return t.clone().stripTime().add(e,"weeks").startOf("week")},render:function(t){this.intervalStart=t.clone().stripTime().startOf("week"),this.intervalEnd=this.intervalStart.clone().add(1,"weeks"),this.start=this.skipHiddenDays(this.intervalStart),this.end=this.skipHiddenDays(this.intervalEnd,-1,!0),this.title=this.calendar.formatRange(this.start,this.end.clone().subtract(1),this.opt("titleFormat")," — "),ge.prototype.render.call(this,1,this.getCellsPerWeek(),!1)}}),xe.basicDay=ve,ve.prototype=H(ge.prototype),t.extend(ve.prototype,{name:"basicDay",incrementDate:function(t,e){var i=t.clone().stripTime().add(e,"days");return i=this.skipHiddenDays(i,0>e?-1:1)},render:function(t){this.start=this.intervalStart=t.clone().stripTime(),this.end=this.intervalEnd=this.start.clone().add(1,"days"),this.title=this.calendar.formatDate(this.start,this.opt("titleFormat")),ge.prototype.render.call(this,1,1,!1)}}),r({allDaySlot:!0,allDayText:"all-day",scrollTime:"06:00:00",slotDuration:"00:30:00",axisFormat:ye,timeFormat:{agenda:we},minTime:"00:00:00",maxTime:"24:00:00",slotEventOverlap:!0});var Ye=5;Ee.prototype=H(fe.prototype),t.extend(Ee.prototype,{timeGrid:null,dayGrid:null,axisWidth:null,noScrollRowEls:null,bottomRuleEl:null,bottomRuleHeight:null,render:function(e){this.rowCnt=1,this.colCnt=e,this.el.addClass("fc-agenda-view").html(this.renderHtml()),this.scrollerEl=this.el.find(".fc-time-grid-container"),this.timeGrid.coordMap.containerEl=this.scrollerEl,this.timeGrid.el=this.el.find(".fc-time-grid"),this.timeGrid.render(),this.bottomRuleEl=t('<hr class="'+this.widgetHeaderClass+'"/>').appendTo(this.timeGrid.el),this.dayGrid&&(this.dayGrid.el=this.el.find(".fc-day-grid"),this.dayGrid.render(),this.dayGrid.bottomCoordPadding=this.dayGrid.el.next("hr").outerHeight()),this.noScrollRowEls=this.el.find(".fc-row:not(.fc-scroller *)"),fe.prototype.render.call(this),this.resetScroll()},destroy:function(){this.timeGrid.destroy(),this.dayGrid&&this.dayGrid.destroy(),fe.prototype.destroy.call(this)},renderHtml:function(){return'<table><thead><tr><td class="'+this.widgetHeaderClass+'">'+this.timeGrid.headHtml()+"</td>"+"</tr>"+"</thead>"+"<tbody>"+"<tr>"+'<td class="'+this.widgetContentClass+'">'+(this.dayGrid?'<div class="fc-day-grid"/><hr class="'+this.widgetHeaderClass+'"/>':"")+'<div class="fc-time-grid-container">'+'<div class="fc-time-grid"/>'+"</div>"+"</td>"+"</tr>"+"</tbody>"+"</table>"},headIntroHtml:function(){var t,e,i,n;return this.opt("weekNumbers")?(t=this.cellToDate(0,0),e=this.calendar.calculateWeekNumber(t),i=this.opt("weekNumberTitle"),n=this.opt("isRTL")?e+i:i+e,'<th class="fc-axis fc-week-number '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+">"+"<span>"+R(n)+"</span>"+"</th>"):'<th class="fc-axis '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+"></th>"},dayIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+">"+"<span>"+(this.opt("allDayHtml")||R(this.opt("allDayText")))+"</span>"+"</td>"},slotBgIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+"></td>"},introHtml:function(){return'<td class="fc-axis" '+this.axisStyleAttr()+"></td>"},axisStyleAttr:function(){return null!==this.axisWidth?'style="width:'+this.axisWidth+'px"':""},updateSize:function(t){t&&this.timeGrid.resize(),fe.prototype.updateSize.call(this,t)},updateWidth:function(){this.axisWidth=p(this.el.find(".fc-axis"))},setHeight:function(t,e){var i,n;null===this.bottomRuleHeight&&(this.bottomRuleHeight=this.bottomRuleEl.outerHeight()),this.bottomRuleEl.hide(),this.scrollerEl.css("overflow",""),v(this.scrollerEl),u(this.noScrollRowEls),this.dayGrid&&(this.dayGrid.destroySegPopover(),i=this.opt("eventLimit"),i&&"number"!=typeof i&&(i=Ye),i&&this.dayGrid.limitRows(i)),e||(n=this.computeScrollerHeight(t),m(this.scrollerEl,n)?(h(this.noScrollRowEls,w(this.scrollerEl)),n=this.computeScrollerHeight(t),this.scrollerEl.height(n),this.restoreScroll()):(this.scrollerEl.height(n).css("overflow","hidden"),this.bottomRuleEl.show()))},resetScroll:function(){function t(){i.scrollerEl.scrollTop(r)}var i=this,n=e.duration(this.opt("scrollTime")),r=this.timeGrid.computeTimeTop(n);r=Math.ceil(r),r&&r++,t(),setTimeout(t,0)},renderEvents:function(t){var e,i,n=[],r=[],o=[];for(i=0;t.length>i;i++)t[i].allDay?n.push(t[i]):r.push(t[i]);e=this.timeGrid.renderEvents(r),this.dayGrid&&(o=this.dayGrid.renderEvents(n)),this.updateHeight(),fe.prototype.renderEvents.call(this,t)},getSegs:function(){return this.timeGrid.getSegs().concat(this.dayGrid?this.dayGrid.getSegs():[])},destroyEvents:function(){fe.prototype.destroyEvents.call(this),this.recordScroll(),this.timeGrid.destroyEvents(),this.dayGrid&&this.dayGrid.destroyEvents()},renderDrag:function(t,e,i){return t.hasTime()?this.timeGrid.renderDrag(t,e,i):this.dayGrid?this.dayGrid.renderDrag(t,e,i):void 0},destroyDrag:function(){this.timeGrid.destroyDrag(),this.dayGrid&&this.dayGrid.destroyDrag()},renderSelection:function(t,e){t.hasTime()||e.hasTime()?this.timeGrid.renderSelection(t,e):this.dayGrid&&this.dayGrid.renderSelection(t,e)},destroySelection:function(){this.timeGrid.destroySelection(),this.dayGrid&&this.dayGrid.destroySelection()}}),xe.agendaWeek=be,be.prototype=H(Ee.prototype),t.extend(be.prototype,{name:"agendaWeek",incrementDate:function(t,e){return t.clone().stripTime().add(e,"weeks").startOf("week")},render:function(t){this.intervalStart=t.clone().stripTime().startOf("week"),this.intervalEnd=this.intervalStart.clone().add(1,"weeks"),this.start=this.skipHiddenDays(this.intervalStart),this.end=this.skipHiddenDays(this.intervalEnd,-1,!0),this.title=this.calendar.formatRange(this.start,this.end.clone().subtract(1),this.opt("titleFormat")," — "),Ee.prototype.render.call(this,this.getCellsPerWeek())}}),xe.agendaDay=Se,Se.prototype=H(Ee.prototype),t.extend(Se.prototype,{name:"agendaDay",incrementDate:function(t,e){var i=t.clone().stripTime().add(e,"days");return i=this.skipHiddenDays(i,0>e?-1:1)},render:function(t){this.start=this.intervalStart=t.clone().stripTime(),this.end=this.intervalEnd=this.start.clone().add(1,"days"),this.title=this.calendar.formatDate(this.start,this.opt("titleFormat")),Ee.prototype.render.call(this,1)}})});
+/**
  * |-------------------|
  * | Backbone-Mediator |
  * |-------------------|
@@ -29035,7 +27504,7 @@ if (typeof define === "function" && define.amd) {
 
 });
 
-;﻿/* =========================================================
+﻿/* =========================================================
  * bootstrap-datetimepicker.js
  * =========================================================
  * Copyright 2012 Stefan Petre
@@ -30742,7 +29211,129 @@ if (typeof define === "function" && define.amd) {
 
 }(window.jQuery);
 
-;//     (c) 2012 Airbnb, Inc.
+(function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){(t.defineLocale||t.lang).call(t,"fr",{months:"janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre".split("_"),monthsShort:"janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.".split("_"),weekdays:"dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi".split("_"),weekdaysShort:"dim._lun._mar._mer._jeu._ven._sam.".split("_"),weekdaysMin:"Di_Lu_Ma_Me_Je_Ve_Sa".split("_"),longDateFormat:{LT:"HH:mm",L:"DD/MM/YYYY",LL:"D MMMM YYYY",LLL:"D MMMM YYYY LT",LLLL:"dddd D MMMM YYYY LT"},calendar:{sameDay:"[Aujourd'hui à] LT",nextDay:"[Demain à] LT",nextWeek:"dddd [à] LT",lastDay:"[Hier à] LT",lastWeek:"dddd [dernier à] LT",sameElse:"L"},relativeTime:{future:"dans %s",past:"il y a %s",s:"quelques secondes",m:"une minute",mm:"%d minutes",h:"une heure",hh:"%d heures",d:"un jour",dd:"%d jours",M:"un mois",MM:"%d mois",y:"un an",yy:"%d ans"},ordinal:function(e){return e+(1===e?"er":"")},week:{dow:1,doy:4}}),e.fullCalendar.datepickerLang("fr","fr",{closeText:"Fermer",prevText:"Précédent",nextText:"Suivant",currentText:"Aujourd'hui",monthNames:["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"],monthNamesShort:["janv.","févr.","mars","avril","mai","juin","juil.","août","sept.","oct.","nov.","déc."],dayNames:["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"],dayNamesShort:["dim.","lun.","mar.","mer.","jeu.","ven.","sam."],dayNamesMin:["D","L","M","M","J","V","S"],weekHeader:"Sem.",dateFormat:"dd/mm/yy",firstDay:1,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("fr",{defaultButtonText:{month:"Mois",week:"Semaine",day:"Jour",list:"Mon planning"},allDayHtml:"Toute la<br/>journée",eventLimitText:"en plus"})});
+(function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){(t.defineLocale||t.lang).call(t,"pt",{months:"janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro".split("_"),monthsShort:"jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez".split("_"),weekdays:"domingo_segunda-feira_terça-feira_quarta-feira_quinta-feira_sexta-feira_sábado".split("_"),weekdaysShort:"dom_seg_ter_qua_qui_sex_sáb".split("_"),weekdaysMin:"dom_2ª_3ª_4ª_5ª_6ª_sáb".split("_"),longDateFormat:{LT:"HH:mm",L:"DD/MM/YYYY",LL:"D [de] MMMM [de] YYYY",LLL:"D [de] MMMM [de] YYYY LT",LLLL:"dddd, D [de] MMMM [de] YYYY LT"},calendar:{sameDay:"[Hoje às] LT",nextDay:"[Amanhã às] LT",nextWeek:"dddd [às] LT",lastDay:"[Ontem às] LT",lastWeek:function(){return 0===this.day()||6===this.day()?"[Último] dddd [às] LT":"[Última] dddd [às] LT"},sameElse:"L"},relativeTime:{future:"em %s",past:"há %s",s:"segundos",m:"um minuto",mm:"%d minutos",h:"uma hora",hh:"%d horas",d:"um dia",dd:"%d dias",M:"um mês",MM:"%d meses",y:"um ano",yy:"%d anos"},ordinal:"%dº",week:{dow:1,doy:4}}),e.fullCalendar.datepickerLang("pt","pt",{closeText:"Fechar",prevText:"Anterior",nextText:"Seguinte",currentText:"Hoje",monthNames:["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],monthNamesShort:["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],dayNames:["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"],dayNamesShort:["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],dayNamesMin:["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],weekHeader:"Sem",dateFormat:"dd/mm/yy",firstDay:0,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("pt",{defaultButtonText:{month:"Mês",week:"Semana",day:"Dia",list:"Agenda"},allDayText:"Todo o dia",eventLimitText:"mais"})});
+// moment.js locale configuration
+// locale : french (fr)
+// author : John Fischer : https://github.com/jfroffice
+
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['moment'], factory); // AMD
+    } else if (typeof exports === 'object') {
+        module.exports = factory(require('../moment')); // Node
+    } else {
+        factory(window.moment); // Browser global
+    }
+}(function (moment) {
+    return moment.defineLocale('fr', {
+        months : 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split('_'),
+        monthsShort : 'janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.'.split('_'),
+        weekdays : 'dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi'.split('_'),
+        weekdaysShort : 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
+        weekdaysMin : 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY LT',
+            LLLL : 'dddd D MMMM YYYY LT'
+        },
+        calendar : {
+            sameDay: '[Aujourd\'hui à] LT',
+            nextDay: '[Demain à] LT',
+            nextWeek: 'dddd [à] LT',
+            lastDay: '[Hier à] LT',
+            lastWeek: 'dddd [dernier à] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'dans %s',
+            past : 'il y a %s',
+            s : 'quelques secondes',
+            m : 'une minute',
+            mm : '%d minutes',
+            h : 'une heure',
+            hh : '%d heures',
+            d : 'un jour',
+            dd : '%d jours',
+            M : 'un mois',
+            MM : '%d mois',
+            y : 'un an',
+            yy : '%d ans'
+        },
+        ordinal : function (number) {
+            return number + (number === 1 ? 'er' : '');
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+}));
+
+// moment.js locale configuration
+// locale : portuguese (pt)
+// author : Jefferson : https://github.com/jalex79
+
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['moment'], factory); // AMD
+    } else if (typeof exports === 'object') {
+        module.exports = factory(require('../moment')); // Node
+    } else {
+        factory(window.moment); // Browser global
+    }
+}(function (moment) {
+    return moment.defineLocale('pt', {
+        months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
+        monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+        weekdays : 'domingo_segunda-feira_terça-feira_quarta-feira_quinta-feira_sexta-feira_sábado'.split('_'),
+        weekdaysShort : 'dom_seg_ter_qua_qui_sex_sáb'.split('_'),
+        weekdaysMin : 'dom_2ª_3ª_4ª_5ª_6ª_sáb'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            L : 'DD/MM/YYYY',
+            LL : 'D [de] MMMM [de] YYYY',
+            LLL : 'D [de] MMMM [de] YYYY LT',
+            LLLL : 'dddd, D [de] MMMM [de] YYYY LT'
+        },
+        calendar : {
+            sameDay: '[Hoje às] LT',
+            nextDay: '[Amanhã às] LT',
+            nextWeek: 'dddd [às] LT',
+            lastDay: '[Ontem às] LT',
+            lastWeek: function () {
+                return (this.day() === 0 || this.day() === 6) ?
+                    '[Último] dddd [às] LT' : // Saturday + Sunday
+                    '[Última] dddd [às] LT'; // Monday - Friday
+            },
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'em %s',
+            past : 'há %s',
+            s : 'segundos',
+            m : 'um minuto',
+            mm : '%d minutos',
+            h : 'uma hora',
+            hh : '%d horas',
+            d : 'um dia',
+            dd : '%d dias',
+            M : 'um mês',
+            MM : '%d meses',
+            y : 'um ano',
+            yy : '%d anos'
+        },
+        ordinal : '%dº',
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+}));
+
+//     (c) 2012 Airbnb, Inc.
 //
 //     polyglot.js may be freely distributed under the terms of the BSD
 //     license. For all licensing information, details, and documention:
@@ -30996,7 +29587,7 @@ if (typeof define === "function" && define.amd) {
 }(this);
 
 
-;/*!
+/*!
  * rrule.js - Library for working with recurrence rules for calendar dates.
  * https://github.com/jkbr/rrule
  *
@@ -32055,7 +30646,7 @@ if (typeof define === "function" && define.amd) {
 
 })(this);
 
-;// Generated by CoffeeScript 1.4.0
+// Generated by CoffeeScript 1.4.0
 (function() {
   var CozySocketListener, global,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -32281,4562 +30872,7 @@ if (typeof define === "function" && define.amd) {
 
 }).call(this);
 
-;/*
- *  Sugar Library v1.3.9
- *
- *  Freely distributable and licensed under the MIT-style license.
- *  Copyright (c) 2013 Andrew Plummer
- *  http://sugarjs.com/
- *
- * ---------------------------- */
-(function(){
-  /***
-   * @package Core
-   * @description Internal utility and common methods.
-   ***/
-
-
-  // A few optimizations for Google Closure Compiler will save us a couple kb in the release script.
-  var object = Object, array = Array, regexp = RegExp, date = Date, string = String, number = Number, math = Math, Undefined;
-
-  // Internal toString
-  var internalToString = object.prototype.toString;
-
-  // The global context
-  var globalContext = typeof global !== 'undefined' ? global : this;
-
-  // Type check methods need a way to be accessed dynamically outside global context.
-  var typeChecks = {};
-
-  // defineProperty exists in IE8 but will error when trying to define a property on
-  // native objects. IE8 does not have defineProperies, however, so this check saves a try/catch block.
-  var definePropertySupport = object.defineProperty && object.defineProperties;
-
-
-  // Class initializers and class helpers
-
-  var ClassNames = 'Array,Boolean,Date,Function,Number,String,RegExp'.split(',');
-
-  var isArray    = buildClassCheck(ClassNames[0]);
-  var isBoolean  = buildClassCheck(ClassNames[1]);
-  var isDate     = buildClassCheck(ClassNames[2]);
-  var isFunction = buildClassCheck(ClassNames[3]);
-  var isNumber   = buildClassCheck(ClassNames[4]);
-  var isString   = buildClassCheck(ClassNames[5]);
-  var isRegExp   = buildClassCheck(ClassNames[6]);
-
-  function buildClassCheck(name) {
-    var type, fn;
-    if(/String|Number|Boolean/.test(name)) {
-      type = name.toLowerCase();
-    }
-    fn = (name === 'Array' && array.isArray) || function(obj) {
-      if(type && typeof obj === type) {
-        return true;
-      }
-      return className(obj) === '[object '+name+']';
-    }
-    typeChecks[name] = fn;
-    return fn;
-  }
-
-  function className(obj) {
-    return internalToString.call(obj);
-  }
-
-  function initializeClasses() {
-    initializeClass(object);
-    iterateOverObject(ClassNames, function(i,name) {
-      initializeClass(globalContext[name]);
-    });
-  }
-
-  function initializeClass(klass) {
-    if(klass['SugarMethods']) return;
-    defineProperty(klass, 'SugarMethods', {});
-    extend(klass, false, false, {
-      'extend': function(methods, override, instance) {
-        extend(klass, instance !== false, override, methods);
-      },
-      'sugarRestore': function() {
-        return batchMethodExecute(klass, arguments, function(target, name, m) {
-          defineProperty(target, name, m.method);
-        });
-      },
-      'sugarRevert': function() {
-        return batchMethodExecute(klass, arguments, function(target, name, m) {
-          if(m.existed) {
-            defineProperty(target, name, m.original);
-          } else {
-            delete target[name];
-          }
-        });
-      }
-    });
-  }
-
-  // Class extending methods
-
-  function extend(klass, instance, override, methods) {
-    var extendee = instance ? klass.prototype : klass;
-    initializeClass(klass);
-    iterateOverObject(methods, function(name, method) {
-      var original = extendee[name];
-      var existed  = hasOwnProperty(extendee, name);
-      if(typeof override === 'function') {
-        method = wrapNative(extendee[name], method, override);
-      }
-      if(override !== false || !extendee[name]) {
-        defineProperty(extendee, name, method);
-      }
-      // If the method is internal to Sugar, then store a reference so it can be restored later.
-      klass['SugarMethods'][name] = { instance: instance, method: method, original: original, existed: existed };
-    });
-  }
-
-  function extendSimilar(klass, instance, override, set, fn) {
-    var methods = {};
-    set = isString(set) ? set.split(',') : set;
-    set.forEach(function(name, i) {
-      fn(methods, name, i);
-    });
-    extend(klass, instance, override, methods);
-  }
-
-  function batchMethodExecute(klass, args, fn) {
-    var all = args.length === 0, methods = multiArgs(args), changed = false;
-    iterateOverObject(klass['SugarMethods'], function(name, m) {
-      if(all || methods.indexOf(name) > -1) {
-        changed = true;
-        fn(m.instance ? klass.prototype : klass, name, m);
-      }
-    });
-    return changed;
-  }
-
-  function wrapNative(nativeFn, extendedFn, condition) {
-    return function() {
-      var fn;
-      if(nativeFn && (condition === true || !condition.apply(this, arguments))) {
-        fn = nativeFn;
-      } else {
-        fn = extendedFn;
-      }
-      return fn.apply(this, arguments);
-    }
-  }
-
-  function defineProperty(target, name, method) {
-    if(definePropertySupport) {
-      object.defineProperty(target, name, { 'value': method, 'configurable': true, 'enumerable': false, 'writable': true });
-    } else {
-      target[name] = method;
-    }
-  }
-
-
-  // Argument helpers
-
-  function multiArgs(args, fn) {
-    var result = [], i, len;
-    for(i = 0, len = args.length; i < len; i++) {
-      result.push(args[i]);
-      if(fn) fn.call(args, args[i], i);
-    }
-    return result;
-  }
-
-  function flattenedArgs(obj, fn, from) {
-    multiArgs(array.prototype.concat.apply([], array.prototype.slice.call(obj, from || 0)), fn);
-  }
-
-  function checkCallback(fn) {
-    if(!fn || !fn.call) {
-      throw new TypeError('Callback is not callable');
-    }
-  }
-
-
-  // General helpers
-
-  function isDefined(o) {
-    return o !== Undefined;
-  }
-
-  function isUndefined(o) {
-    return o === Undefined;
-  }
-
-
-  // Object helpers
-
-  function isObjectPrimitive(obj) {
-    // Check for null
-    return obj && typeof obj === 'object';
-  }
-
-  function isObject(obj) {
-    // === on the constructor is not safe across iframes
-    // 'hasOwnProperty' ensures that the object also inherits
-    // from Object, which is false for DOMElements in IE.
-    return !!obj && className(obj) === '[object Object]' && 'hasOwnProperty' in obj;
-  }
-
-  function hasOwnProperty(obj, key) {
-    return object['hasOwnProperty'].call(obj, key);
-  }
-
-  function iterateOverObject(obj, fn) {
-    var key;
-    for(key in obj) {
-      if(!hasOwnProperty(obj, key)) continue;
-      if(fn.call(obj, key, obj[key], obj) === false) break;
-    }
-  }
-
-  function simpleMerge(target, source) {
-    iterateOverObject(source, function(key) {
-      target[key] = source[key];
-    });
-    return target;
-  }
-
-  // Hash definition
-
-  function Hash(obj) {
-    simpleMerge(this, obj);
-  };
-
-  Hash.prototype.constructor = object;
-
-  // Number helpers
-
-  function getRange(start, stop, fn, step) {
-    var arr = [], i = parseInt(start), down = step < 0;
-    while((!down && i <= stop) || (down && i >= stop)) {
-      arr.push(i);
-      if(fn) fn.call(this, i);
-      i += step || 1;
-    }
-    return arr;
-  }
-
-  function round(val, precision, method) {
-    var fn = math[method || 'round'];
-    var multiplier = math.pow(10, math.abs(precision || 0));
-    if(precision < 0) multiplier = 1 / multiplier;
-    return fn(val * multiplier) / multiplier;
-  }
-
-  function ceil(val, precision) {
-    return round(val, precision, 'ceil');
-  }
-
-  function floor(val, precision) {
-    return round(val, precision, 'floor');
-  }
-
-  function padNumber(num, place, sign, base) {
-    var str = math.abs(num).toString(base || 10);
-    str = repeatString(place - str.replace(/\.\d+/, '').length, '0') + str;
-    if(sign || num < 0) {
-      str = (num < 0 ? '-' : '+') + str;
-    }
-    return str;
-  }
-
-  function getOrdinalizedSuffix(num) {
-    if(num >= 11 && num <= 13) {
-      return 'th';
-    } else {
-      switch(num % 10) {
-        case 1:  return 'st';
-        case 2:  return 'nd';
-        case 3:  return 'rd';
-        default: return 'th';
-      }
-    }
-  }
-
-
-  // String helpers
-
-  // WhiteSpace/LineTerminator as defined in ES5.1 plus Unicode characters in the Space, Separator category.
-  function getTrimmableCharacters() {
-    return '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u2028\u2029\u3000\uFEFF';
-  }
-
-  function repeatString(times, str) {
-    return array(math.max(0, isDefined(times) ? times : 1) + 1).join(str || '');
-  }
-
-
-  // RegExp helpers
-
-  function getRegExpFlags(reg, add) {
-    var flags = reg.toString().match(/[^/]*$/)[0];
-    if(add) {
-      flags = (flags + add).split('').sort().join('').replace(/([gimy])\1+/g, '$1');
-    }
-    return flags;
-  }
-
-  function escapeRegExp(str) {
-    if(!isString(str)) str = string(str);
-    return str.replace(/([\\/'*+?|()\[\]{}.^$])/g,'\\$1');
-  }
-
-
-  // Specialized helpers
-
-
-  // Used by Array#unique and Object.equal
-
-  function stringify(thing, stack) {
-    var type = typeof thing,
-        thingIsObject,
-        thingIsArray,
-        klass, value,
-        arr, key, i, len;
-
-    // Return quickly if string to save cycles
-    if(type === 'string') return thing;
-
-    klass         = internalToString.call(thing)
-    thingIsObject = isObject(thing);
-    thingIsArray  = klass === '[object Array]';
-
-    if(thing != null && thingIsObject || thingIsArray) {
-      // This method for checking for cyclic structures was egregiously stolen from
-      // the ingenious method by @kitcambridge from the Underscore script:
-      // https://github.com/documentcloud/underscore/issues/240
-      if(!stack) stack = [];
-      // Allowing a step into the structure before triggering this
-      // script to save cycles on standard JSON structures and also to
-      // try as hard as possible to catch basic properties that may have
-      // been modified.
-      if(stack.length > 1) {
-        i = stack.length;
-        while (i--) {
-          if (stack[i] === thing) {
-            return 'CYC';
-          }
-        }
-      }
-      stack.push(thing);
-      value = string(thing.constructor);
-      arr = thingIsArray ? thing : object.keys(thing).sort();
-      for(i = 0, len = arr.length; i < len; i++) {
-        key = thingIsArray ? i : arr[i];
-        value += key + stringify(thing[key], stack);
-      }
-      stack.pop();
-    } else if(1 / thing === -Infinity) {
-      value = '-0';
-    } else {
-      value = string(thing && thing.valueOf ? thing.valueOf() : thing);
-    }
-    return type + klass + value;
-  }
-
-  function isEqual(a, b) {
-    if(objectIsMatchedByValue(a) && objectIsMatchedByValue(b)) {
-      return stringify(a) === stringify(b);
-    } else {
-      return a === b;
-    }
-  }
-
-  function objectIsMatchedByValue(obj) {
-    var klass = className(obj);
-    return /^\[object Date|Array|String|Number|RegExp|Boolean|Arguments\]$/.test(klass) ||
-           isObject(obj);
-  }
-
-
-  // Used by Array#at and String#at
-
-  function entryAtIndex(arr, args, str) {
-    var result = [], length = arr.length, loop = args[args.length - 1] !== false, r;
-    multiArgs(args, function(index) {
-      if(isBoolean(index)) return false;
-      if(loop) {
-        index = index % length;
-        if(index < 0) index = length + index;
-      }
-      r = str ? arr.charAt(index) || '' : arr[index];
-      result.push(r);
-    });
-    return result.length < 2 ? result[0] : result;
-  }
-
-
-  // Object class methods implemented as instance methods
-
-  function buildObjectInstanceMethods(set, target) {
-    extendSimilar(target, true, false, set, function(methods, name) {
-      methods[name + (name === 'equal' ? 's' : '')] = function() {
-        return object[name].apply(null, [this].concat(multiArgs(arguments)));
-      }
-    });
-  }
-
-  initializeClasses();
-
-
-
-  /***
-   * @package ES5
-   * @description Shim methods that provide ES5 compatible functionality. This package can be excluded if you do not require legacy browser support (IE8 and below).
-   *
-   ***/
-
-
-  /***
-   * Object module
-   *
-   ***/
-
-  extend(object, false, false, {
-
-    'keys': function(obj) {
-      var keys = [];
-      if(!isObjectPrimitive(obj) && !isRegExp(obj) && !isFunction(obj)) {
-        throw new TypeError('Object required');
-      }
-      iterateOverObject(obj, function(key, value) {
-        keys.push(key);
-      });
-      return keys;
-    }
-
-  });
-
-
-  /***
-   * Array module
-   *
-   ***/
-
-  // ECMA5 methods
-
-  function arrayIndexOf(arr, search, fromIndex, increment) {
-    var length = arr.length,
-        fromRight = increment == -1,
-        start = fromRight ? length - 1 : 0,
-        index = toIntegerWithDefault(fromIndex, start);
-    if(index < 0) {
-      index = length + index;
-    }
-    if((!fromRight && index < 0) || (fromRight && index >= length)) {
-      index = start;
-    }
-    while((fromRight && index >= 0) || (!fromRight && index < length)) {
-      if(arr[index] === search) {
-        return index;
-      }
-      index += increment;
-    }
-    return -1;
-  }
-
-  function arrayReduce(arr, fn, initialValue, fromRight) {
-    var length = arr.length, count = 0, defined = isDefined(initialValue), result, index;
-    checkCallback(fn);
-    if(length == 0 && !defined) {
-      throw new TypeError('Reduce called on empty array with no initial value');
-    } else if(defined) {
-      result = initialValue;
-    } else {
-      result = arr[fromRight ? length - 1 : count];
-      count++;
-    }
-    while(count < length) {
-      index = fromRight ? length - count - 1 : count;
-      if(index in arr) {
-        result = fn(result, arr[index], index, arr);
-      }
-      count++;
-    }
-    return result;
-  }
-
-  function toIntegerWithDefault(i, d) {
-    if(isNaN(i)) {
-      return d;
-    } else {
-      return parseInt(i >> 0);
-    }
-  }
-
-  function checkFirstArgumentExists(args) {
-    if(args.length === 0) {
-      throw new TypeError('First argument must be defined');
-    }
-  }
-
-
-
-
-  extend(array, false, false, {
-
-    /***
-     *
-     * @method Array.isArray(<obj>)
-     * @returns Boolean
-     * @short Returns true if <obj> is an Array.
-     * @extra This method is provided for browsers that don't support it internally.
-     * @example
-     *
-     *   Array.isArray(3)        -> false
-     *   Array.isArray(true)     -> false
-     *   Array.isArray('wasabi') -> false
-     *   Array.isArray([1,2,3])  -> true
-     *
-     ***/
-    'isArray': function(obj) {
-      return isArray(obj);
-    }
-
-  });
-
-
-  extend(array, true, false, {
-
-    /***
-     * @method every(<f>, [scope])
-     * @returns Boolean
-     * @short Returns true if all elements in the array match <f>.
-     * @extra [scope] is the %this% object. %all% is provided an alias. In addition to providing this method for browsers that don't support it natively, this method also implements @array_matching.
-     * @example
-     *
-     +   ['a','a','a'].every(function(n) {
-     *     return n == 'a';
-     *   });
-     *   ['a','a','a'].every('a')   -> true
-     *   [{a:2},{a:2}].every({a:2}) -> true
-     ***/
-    'every': function(fn, scope) {
-      var length = this.length, index = 0;
-      checkFirstArgumentExists(arguments);
-      while(index < length) {
-        if(index in this && !fn.call(scope, this[index], index, this)) {
-          return false;
-        }
-        index++;
-      }
-      return true;
-    },
-
-    /***
-     * @method some(<f>, [scope])
-     * @returns Boolean
-     * @short Returns true if any element in the array matches <f>.
-     * @extra [scope] is the %this% object. %any% is provided as an alias. In addition to providing this method for browsers that don't support it natively, this method also implements @array_matching.
-     * @example
-     *
-     +   ['a','b','c'].some(function(n) {
-     *     return n == 'a';
-     *   });
-     +   ['a','b','c'].some(function(n) {
-     *     return n == 'd';
-     *   });
-     *   ['a','b','c'].some('a')   -> true
-     *   [{a:2},{b:5}].some({a:2}) -> true
-     ***/
-    'some': function(fn, scope) {
-      var length = this.length, index = 0;
-      checkFirstArgumentExists(arguments);
-      while(index < length) {
-        if(index in this && fn.call(scope, this[index], index, this)) {
-          return true;
-        }
-        index++;
-      }
-      return false;
-    },
-
-    /***
-     * @method map(<map>, [scope])
-     * @returns Array
-     * @short Maps the array to another array containing the values that are the result of calling <map> on each element.
-     * @extra [scope] is the %this% object. In addition to providing this method for browsers that don't support it natively, this enhanced method also directly accepts a string, which is a shortcut for a function that gets that property (or invokes a function) on each element.
-     * @example
-     *
-     +   [1,2,3].map(function(n) {
-     *     return n * 3;
-     *   });                                  -> [3,6,9]
-     *   ['one','two','three'].map(function(n) {
-     *     return n.length;
-     *   });                                  -> [3,3,5]
-     *   ['one','two','three'].map('length')  -> [3,3,5]
-     ***/
-    'map': function(fn, scope) {
-      var length = this.length, index = 0, result = new Array(length);
-      checkFirstArgumentExists(arguments);
-      while(index < length) {
-        if(index in this) {
-          result[index] = fn.call(scope, this[index], index, this);
-        }
-        index++;
-      }
-      return result;
-    },
-
-    /***
-     * @method filter(<f>, [scope])
-     * @returns Array
-     * @short Returns any elements in the array that match <f>.
-     * @extra [scope] is the %this% object. In addition to providing this method for browsers that don't support it natively, this method also implements @array_matching.
-     * @example
-     *
-     +   [1,2,3].filter(function(n) {
-     *     return n > 1;
-     *   });
-     *   [1,2,2,4].filter(2) -> 2
-     *
-     ***/
-    'filter': function(fn, scope) {
-      var length = this.length, index = 0, result = [];
-      checkFirstArgumentExists(arguments);
-      while(index < length) {
-        if(index in this && fn.call(scope, this[index], index, this)) {
-          result.push(this[index]);
-        }
-        index++;
-      }
-      return result;
-    },
-
-    /***
-     * @method indexOf(<search>, [fromIndex])
-     * @returns Number
-     * @short Searches the array and returns the first index where <search> occurs, or -1 if the element is not found.
-     * @extra [fromIndex] is the index from which to begin the search. This method performs a simple strict equality comparison on <search>. It does not support enhanced functionality such as searching the contents against a regex, callback, or deep comparison of objects. For such functionality, use the %findIndex% method instead.
-     * @example
-     *
-     *   [1,2,3].indexOf(3)           -> 1
-     *   [1,2,3].indexOf(7)           -> -1
-     *
-     ***/
-    'indexOf': function(search, fromIndex) {
-      if(isString(this)) return this.indexOf(search, fromIndex);
-      return arrayIndexOf(this, search, fromIndex, 1);
-    },
-
-    /***
-     * @method lastIndexOf(<search>, [fromIndex])
-     * @returns Number
-     * @short Searches the array and returns the last index where <search> occurs, or -1 if the element is not found.
-     * @extra [fromIndex] is the index from which to begin the search. This method performs a simple strict equality comparison on <search>.
-     * @example
-     *
-     *   [1,2,1].lastIndexOf(1)                 -> 2
-     *   [1,2,1].lastIndexOf(7)                 -> -1
-     *
-     ***/
-    'lastIndexOf': function(search, fromIndex) {
-      if(isString(this)) return this.lastIndexOf(search, fromIndex);
-      return arrayIndexOf(this, search, fromIndex, -1);
-    },
-
-    /***
-     * @method forEach([fn], [scope])
-     * @returns Nothing
-     * @short Iterates over the array, calling [fn] on each loop.
-     * @extra This method is only provided for those browsers that do not support it natively. [scope] becomes the %this% object.
-     * @example
-     *
-     *   ['a','b','c'].forEach(function(a) {
-     *     // Called 3 times: 'a','b','c'
-     *   });
-     *
-     ***/
-    'forEach': function(fn, scope) {
-      var length = this.length, index = 0;
-      checkCallback(fn);
-      while(index < length) {
-        if(index in this) {
-          fn.call(scope, this[index], index, this);
-        }
-        index++;
-      }
-    },
-
-    /***
-     * @method reduce(<fn>, [init])
-     * @returns Mixed
-     * @short Reduces the array to a single result.
-     * @extra If [init] is passed as a starting value, that value will be passed as the first argument to the callback. The second argument will be the first element in the array. From that point, the result of the callback will then be used as the first argument of the next iteration. This is often refered to as "accumulation", and [init] is often called an "accumulator". If [init] is not passed, then <fn> will be called n - 1 times, where n is the length of the array. In this case, on the first iteration only, the first argument will be the first element of the array, and the second argument will be the second. After that callbacks work as normal, using the result of the previous callback as the first argument of the next. This method is only provided for those browsers that do not support it natively.
-     *
-     * @example
-     *
-     +   [1,2,3,4].reduce(function(a, b) {
-     *     return a - b;
-     *   });
-     +   [1,2,3,4].reduce(function(a, b) {
-     *     return a - b;
-     *   }, 100);
-     *
-     ***/
-    'reduce': function(fn, init) {
-      return arrayReduce(this, fn, init);
-    },
-
-    /***
-     * @method reduceRight([fn], [init])
-     * @returns Mixed
-     * @short Identical to %Array#reduce%, but operates on the elements in reverse order.
-     * @extra This method is only provided for those browsers that do not support it natively.
-     *
-     *
-     *
-     *
-     * @example
-     *
-     +   [1,2,3,4].reduceRight(function(a, b) {
-     *     return a - b;
-     *   });
-     *
-     ***/
-    'reduceRight': function(fn, init) {
-      return arrayReduce(this, fn, init, true);
-    }
-
-
-  });
-
-
-
-
-  /***
-   * String module
-   *
-   ***/
-
-
-  function buildTrim() {
-    var support = getTrimmableCharacters().match(/^\s+$/);
-    try { string.prototype.trim.call([1]); } catch(e) { support = false; }
-    extend(string, true, !support, {
-
-      /***
-       * @method trim[Side]()
-       * @returns String
-       * @short Removes leading and/or trailing whitespace from the string.
-       * @extra Whitespace is defined as line breaks, tabs, and any character in the "Space, Separator" Unicode category, conforming to the the ES5 spec. The standard %trim% method is only added when not fully supported natively.
-       *
-       * @set
-       *   trim
-       *   trimLeft
-       *   trimRight
-       *
-       * @example
-       *
-       *   '   wasabi   '.trim()      -> 'wasabi'
-       *   '   wasabi   '.trimLeft()  -> 'wasabi   '
-       *   '   wasabi   '.trimRight() -> '   wasabi'
-       *
-       ***/
-      'trim': function() {
-        return this.toString().trimLeft().trimRight();
-      },
-
-      'trimLeft': function() {
-        return this.replace(regexp('^['+getTrimmableCharacters()+']+'), '');
-      },
-
-      'trimRight': function() {
-        return this.replace(regexp('['+getTrimmableCharacters()+']+$'), '');
-      }
-    });
-  }
-
-
-
-  /***
-   * Function module
-   *
-   ***/
-
-
-  extend(Function, true, false, {
-
-     /***
-     * @method bind(<scope>, [arg1], ...)
-     * @returns Function
-     * @short Binds <scope> as the %this% object for the function when it is called. Also allows currying an unlimited number of parameters.
-     * @extra "currying" means setting parameters ([arg1], [arg2], etc.) ahead of time so that they are passed when the function is called later. If you pass additional parameters when the function is actually called, they will be added will be added to the end of the curried parameters. This method is provided for browsers that don't support it internally.
-     * @example
-     *
-     +   (function() {
-     *     return this;
-     *   }).bind('woof')(); -> returns 'woof'; function is bound with 'woof' as the this object.
-     *   (function(a) {
-     *     return a;
-     *   }).bind(1, 2)();   -> returns 2; function is bound with 1 as the this object and 2 curried as the first parameter
-     *   (function(a, b) {
-     *     return a + b;
-     *   }).bind(1, 2)(3);  -> returns 5; function is bound with 1 as the this object, 2 curied as the first parameter and 3 passed as the second when calling the function
-     *
-     ***/
-    'bind': function(scope) {
-      var fn = this, args = multiArgs(arguments).slice(1), nop, bound;
-      if(!isFunction(this)) {
-        throw new TypeError('Function.prototype.bind called on a non-function');
-      }
-      bound = function() {
-        return fn.apply(fn.prototype && this instanceof fn ? this : scope, args.concat(multiArgs(arguments)));
-      }
-      bound.prototype = this.prototype;
-      return bound;
-    }
-
-  });
-
-  /***
-   * Date module
-   *
-   ***/
-
-   /***
-   * @method toISOString()
-   * @returns String
-   * @short Formats the string to ISO8601 format.
-   * @extra This will always format as UTC time. Provided for browsers that do not support this method.
-   * @example
-   *
-   *   Date.create().toISOString() -> ex. 2011-07-05 12:24:55.528Z
-   *
-   ***
-   * @method toJSON()
-   * @returns String
-   * @short Returns a JSON representation of the date.
-   * @extra This is effectively an alias for %toISOString%. Will always return the date in UTC time. Provided for browsers that do not support this method.
-   * @example
-   *
-   *   Date.create().toJSON() -> ex. 2011-07-05 12:24:55.528Z
-   *
-   ***/
-
-  extend(date, false, false, {
-
-     /***
-     * @method Date.now()
-     * @returns String
-     * @short Returns the number of milliseconds since January 1st, 1970 00:00:00 (UTC time).
-     * @extra Provided for browsers that do not support this method.
-     * @example
-     *
-     *   Date.now() -> ex. 1311938296231
-     *
-     ***/
-    'now': function() {
-      return new date().getTime();
-    }
-
-  });
-
-   function buildISOString() {
-    var d = new date(date.UTC(1999, 11, 31)), target = '1999-12-31T00:00:00.000Z';
-    var support = d.toISOString && d.toISOString() === target;
-    extendSimilar(date, true, !support, 'toISOString,toJSON', function(methods, name) {
-      methods[name] = function() {
-        return padNumber(this.getUTCFullYear(), 4) + '-' +
-               padNumber(this.getUTCMonth() + 1, 2) + '-' +
-               padNumber(this.getUTCDate(), 2) + 'T' +
-               padNumber(this.getUTCHours(), 2) + ':' +
-               padNumber(this.getUTCMinutes(), 2) + ':' +
-               padNumber(this.getUTCSeconds(), 2) + '.' +
-               padNumber(this.getUTCMilliseconds(), 3) + 'Z';
-      }
-    });
-   }
-
-  // Initialize
-  buildTrim();
-  buildISOString();
-
-
-  /***
-   * @package Date
-   * @dependency core
-   * @description Date parsing and formatting, relative formats like "1 minute ago", Number methods like "daysAgo", localization support with default English locale definition.
-   *
-   ***/
-
-  var English;
-  var CurrentLocalization;
-
-  var TimeFormat = ['ampm','hour','minute','second','ampm','utc','offset_sign','offset_hours','offset_minutes','ampm']
-  var DecimalReg = '(?:[,.]\\d+)?';
-  var HoursReg   = '\\d{1,2}' + DecimalReg;
-  var SixtyReg   = '[0-5]\\d' + DecimalReg;
-  var RequiredTime = '({t})?\\s*('+HoursReg+')(?:{h}('+SixtyReg+')?{m}(?::?('+SixtyReg+'){s})?\\s*(?:({t})|(Z)|(?:([+-])(\\d{2,2})(?::?(\\d{2,2}))?)?)?|\\s*({t}))';
-
-  var KanjiDigits     = '〇一二三四五六七八九十百千万';
-  var FullWidthDigits = '０１２３４５６７８９';
-  var AsianDigitMap = {};
-  var AsianDigitReg;
-
-  var DateArgumentUnits;
-  var DateUnitsReversed;
-  var CoreDateFormats = [];
-
-  var DateOutputFormats = [
-    {
-      token: 'f{1,4}|ms|milliseconds',
-      format: function(d) {
-        return callDateGet(d, 'Milliseconds');
-      }
-    },
-    {
-      token: 'ss?|seconds',
-      format: function(d, len) {
-        return callDateGet(d, 'Seconds');
-      }
-    },
-    {
-      token: 'mm?|minutes',
-      format: function(d, len) {
-        return callDateGet(d, 'Minutes');
-      }
-    },
-    {
-      token: 'hh?|hours|12hr',
-      format: function(d) {
-        return getShortHour(d);
-      }
-    },
-    {
-      token: 'HH?|24hr',
-      format: function(d) {
-        return callDateGet(d, 'Hours');
-      }
-    },
-    {
-      token: 'dd?|date|day',
-      format: function(d) {
-        return callDateGet(d, 'Date');
-      }
-    },
-    {
-      token: 'dow|weekday',
-      word: true,
-      format: function(d, loc, n, t) {
-        var dow = callDateGet(d, 'Day');
-        return loc['weekdays'][dow + (n - 1) * 7];
-      }
-    },
-    {
-      token: 'MM?',
-      format: function(d) {
-        return callDateGet(d, 'Month') + 1;
-      }
-    },
-    {
-      token: 'mon|month',
-      word: true,
-      format: function(d, loc, n, len) {
-        var month = callDateGet(d, 'Month');
-        return loc['months'][month + (n - 1) * 12];
-      }
-    },
-    {
-      token: 'y{2,4}|year',
-      format: function(d) {
-        return callDateGet(d, 'FullYear');
-      }
-    },
-    {
-      token: '[Tt]{1,2}',
-      format: function(d, loc, n, format) {
-        if(loc['ampm'].length == 0) return '';
-        var hours = callDateGet(d, 'Hours');
-        var str = loc['ampm'][floor(hours / 12)];
-        if(format.length === 1) str = str.slice(0,1);
-        if(format.slice(0,1) === 'T') str = str.toUpperCase();
-        return str;
-      }
-    },
-    {
-      token: 'z{1,4}|tz|timezone',
-      text: true,
-      format: function(d, loc, n, format) {
-        var tz = d.getUTCOffset();
-        if(format == 'z' || format == 'zz') {
-          tz = tz.replace(/(\d{2})(\d{2})/, function(f,h,m) {
-            return padNumber(h, format.length);
-          });
-        }
-        return tz;
-      }
-    },
-    {
-      token: 'iso(tz|timezone)',
-      format: function(d) {
-        return d.getUTCOffset(true);
-      }
-    },
-    {
-      token: 'ord',
-      format: function(d) {
-        var date = callDateGet(d, 'Date');
-        return date + getOrdinalizedSuffix(date);
-      }
-    }
-  ];
-
-  var DateUnits = [
-    {
-      unit: 'year',
-      method: 'FullYear',
-      ambiguous: true,
-      multiplier: function(d) {
-        var adjust = d ? (d.isLeapYear() ? 1 : 0) : 0.25;
-        return (365 + adjust) * 24 * 60 * 60 * 1000;
-      }
-    },
-    {
-      unit: 'month',
-      method: 'Month',
-      ambiguous: true,
-      multiplier: function(d, ms) {
-        var days = 30.4375, inMonth;
-        if(d) {
-          inMonth = d.daysInMonth();
-          if(ms <= inMonth.days()) {
-            days = inMonth;
-          }
-        }
-        return days * 24 * 60 * 60 * 1000;
-      },
-      error: 0.919
-    },
-    {
-      unit: 'week',
-      method: 'ISOWeek',
-      multiplier: function() {
-        return 7 * 24 * 60 * 60 * 1000;
-      }
-    },
-    {
-      unit: 'day',
-      method: 'Date',
-      ambiguous: true,
-      multiplier: function() {
-        return 24 * 60 * 60 * 1000;
-      }
-    },
-    {
-      unit: 'hour',
-      method: 'Hours',
-      multiplier: function() {
-        return 60 * 60 * 1000;
-      }
-    },
-    {
-      unit: 'minute',
-      method: 'Minutes',
-      multiplier: function() {
-        return 60 * 1000;
-      }
-    },
-    {
-      unit: 'second',
-      method: 'Seconds',
-      multiplier: function() {
-        return 1000;
-      }
-    },
-    {
-      unit: 'millisecond',
-      method: 'Milliseconds',
-      multiplier: function() {
-        return 1;
-      }
-    }
-  ];
-
-
-
-
-  // Date Localization
-
-  var Localizations = {};
-
-  // Localization object
-
-  function Localization(l) {
-    simpleMerge(this, l);
-    this.compiledFormats = CoreDateFormats.concat();
-  }
-
-  Localization.prototype = {
-
-    getMonth: function(n) {
-      if(isNumber(n)) {
-        return n - 1;
-      } else {
-        return this['months'].indexOf(n) % 12;
-      }
-    },
-
-    getWeekday: function(n) {
-      return this['weekdays'].indexOf(n) % 7;
-    },
-
-    getNumber: function(n) {
-      var i;
-      if(isNumber(n)) {
-        return n;
-      } else if(n && (i = this['numbers'].indexOf(n)) !== -1) {
-        return (i + 1) % 10;
-      } else {
-        return 1;
-      }
-    },
-
-    getNumericDate: function(n) {
-      var self = this;
-      return n.replace(regexp(this['num'], 'g'), function(d) {
-        var num = self.getNumber(d);
-        return num || '';
-      });
-    },
-
-    getEnglishUnit: function(n) {
-      return English['units'][this['units'].indexOf(n) % 8];
-    },
-
-    getRelativeFormat: function(adu) {
-      return this.convertAdjustedToFormat(adu, adu[2] > 0 ? 'future' : 'past');
-    },
-
-    getDuration: function(ms) {
-      return this.convertAdjustedToFormat(getAdjustedUnit(ms), 'duration');
-    },
-
-    hasVariant: function(code) {
-      code = code || this.code;
-      return code === 'en' || code === 'en-US' ? true : this['variant'];
-    },
-
-    matchAM: function(str) {
-      return str === this['ampm'][0];
-    },
-
-    matchPM: function(str) {
-      return str && str === this['ampm'][1];
-    },
-
-    convertAdjustedToFormat: function(adu, mode) {
-      var sign, unit, mult,
-          num    = adu[0],
-          u      = adu[1],
-          ms     = adu[2],
-          format = this[mode] || this['relative'];
-      if(isFunction(format)) {
-        return format.call(this, num, u, ms, mode);
-      }
-      mult = this['plural'] && num > 1 ? 1 : 0;
-      unit = this['units'][mult * 8 + u] || this['units'][u];
-      if(this['capitalizeUnit']) unit = simpleCapitalize(unit);
-      sign = this['modifiers'].filter(function(m) { return m.name == 'sign' && m.value == (ms > 0 ? 1 : -1); })[0];
-      return format.replace(/\{(.*?)\}/g, function(full, match) {
-        switch(match) {
-          case 'num': return num;
-          case 'unit': return unit;
-          case 'sign': return sign.src;
-        }
-      });
-    },
-
-    getFormats: function() {
-      return this.cachedFormat ? [this.cachedFormat].concat(this.compiledFormats) : this.compiledFormats;
-    },
-
-    addFormat: function(src, allowsTime, match, variant, iso) {
-      var to = match || [], loc = this, time, timeMarkers, lastIsNumeral;
-
-      src = src.replace(/\s+/g, '[-,. ]*');
-      src = src.replace(/\{([^,]+?)\}/g, function(all, k) {
-        var value, arr, result,
-            opt   = k.match(/\?$/),
-            nc    = k.match(/^(\d+)\??$/),
-            slice = k.match(/(\d)(?:-(\d))?/),
-            key   = k.replace(/[^a-z]+$/, '');
-        if(nc) {
-          value = loc['tokens'][nc[1]];
-        } else if(loc[key]) {
-          value = loc[key];
-        } else if(loc[key + 's']) {
-          value = loc[key + 's'];
-          if(slice) {
-            // Can't use filter here as Prototype hijacks the method and doesn't
-            // pass an index, so use a simple loop instead!
-            arr = [];
-            value.forEach(function(m, i) {
-              var mod = i % (loc['units'] ? 8 : value.length);
-              if(mod >= slice[1] && mod <= (slice[2] || slice[1])) {
-                arr.push(m);
-              }
-            });
-            value = arr;
-          }
-          value = arrayToAlternates(value);
-        }
-        if(nc) {
-          result = '(?:' + value + ')';
-        } else {
-          if(!match) {
-            to.push(key);
-          }
-          result = '(' + value + ')';
-        }
-        if(opt) {
-          result += '?';
-        }
-        return result;
-      });
-      if(allowsTime) {
-        time = prepareTime(RequiredTime, loc, iso);
-        timeMarkers = ['t','[\\s\\u3000]'].concat(loc['timeMarker']);
-        lastIsNumeral = src.match(/\\d\{\d,\d\}\)+\??$/);
-        addDateInputFormat(loc, '(?:' + time + ')[,\\s\\u3000]+?' + src, TimeFormat.concat(to), variant);
-        addDateInputFormat(loc, src + '(?:[,\\s]*(?:' + timeMarkers.join('|') + (lastIsNumeral ? '+' : '*') +')' + time + ')?', to.concat(TimeFormat), variant);
-      } else {
-        addDateInputFormat(loc, src, to, variant);
-      }
-    }
-
-  };
-
-
-  // Localization helpers
-
-  function getLocalization(localeCode, fallback) {
-    var loc;
-    if(!isString(localeCode)) localeCode = '';
-    loc = Localizations[localeCode] || Localizations[localeCode.slice(0,2)];
-    if(fallback === false && !loc) {
-      throw new Error('Invalid locale.');
-    }
-    return loc || CurrentLocalization;
-  }
-
-  function setLocalization(localeCode, set) {
-    var loc, canAbbreviate;
-
-    function initializeField(name) {
-      var val = loc[name];
-      if(isString(val)) {
-        loc[name] = val.split(',');
-      } else if(!val) {
-        loc[name] = [];
-      }
-    }
-
-    function eachAlternate(str, fn) {
-      str = str.split('+').map(function(split) {
-        return split.replace(/(.+):(.+)$/, function(full, base, suffixes) {
-          return suffixes.split('|').map(function(suffix) {
-            return base + suffix;
-          }).join('|');
-        });
-      }).join('|');
-      return str.split('|').forEach(fn);
-    }
-
-    function setArray(name, abbreviate, multiple) {
-      var arr = [];
-      loc[name].forEach(function(full, i) {
-        if(abbreviate) {
-          full += '+' + full.slice(0,3);
-        }
-        eachAlternate(full, function(day, j) {
-          arr[j * multiple + i] = day.toLowerCase();
-        });
-      });
-      loc[name] = arr;
-    }
-
-    function getDigit(start, stop, allowNumbers) {
-      var str = '\\d{' + start + ',' + stop + '}';
-      if(allowNumbers) str += '|(?:' + arrayToAlternates(loc['numbers']) + ')+';
-      return str;
-    }
-
-    function getNum() {
-      var arr = ['\\d+'].concat(loc['articles']);
-      if(loc['numbers']) arr = arr.concat(loc['numbers']);
-      return arrayToAlternates(arr);
-    }
-
-    function setDefault(name, value) {
-      loc[name] = loc[name] || value;
-    }
-
-    function setModifiers() {
-      var arr = [];
-      loc.modifiersByName = {};
-      loc['modifiers'].push({ 'name': 'day', 'src': 'yesterday', 'value': -1 });
-      loc['modifiers'].push({ 'name': 'day', 'src': 'today', 'value': 0 });
-      loc['modifiers'].push({ 'name': 'day', 'src': 'tomorrow', 'value': 1 });
-      loc['modifiers'].forEach(function(modifier) {
-        var name = modifier.name;
-        eachAlternate(modifier.src, function(t) {
-          var locEntry = loc[name];
-          loc.modifiersByName[t] = modifier;
-          arr.push({ name: name, src: t, value: modifier.value });
-          loc[name] = locEntry ? locEntry + '|' + t : t;
-        });
-      });
-      loc['day'] += '|' + arrayToAlternates(loc['weekdays']);
-      loc['modifiers'] = arr;
-    }
-
-    // Initialize the locale
-    loc = new Localization(set);
-    initializeField('modifiers');
-    'months,weekdays,units,numbers,articles,tokens,timeMarker,ampm,timeSuffixes,dateParse,timeParse'.split(',').forEach(initializeField);
-
-    canAbbreviate = !loc['monthSuffix'];
-
-    setArray('months',   canAbbreviate, 12);
-    setArray('weekdays', canAbbreviate, 7);
-    setArray('units', false, 8);
-    setArray('numbers', false, 10);
-
-    setDefault('code', localeCode);
-    setDefault('date', getDigit(1,2, loc['digitDate']));
-    setDefault('year', "'\\d{2}|" + getDigit(4,4));
-    setDefault('num', getNum());
-
-    setModifiers();
-
-    if(loc['monthSuffix']) {
-      loc['month'] = getDigit(1,2);
-      loc['months'] = getRange(1, 12).map(function(n) { return n + loc['monthSuffix']; });
-    }
-    loc['full_month'] = getDigit(1,2) + '|' + arrayToAlternates(loc['months']);
-
-    // The order of these formats is very important. Order is reversed so formats that come
-    // later will take precedence over formats that come before. This generally means that
-    // more specific formats should come later, however, the {year} format should come before
-    // {day}, as 2011 needs to be parsed as a year (2011) and not date (20) + hours (11)
-
-    // If the locale has time suffixes then add a time only format for that locale
-    // that is separate from the core English-based one.
-    if(loc['timeSuffixes'].length > 0) {
-      loc.addFormat(prepareTime(RequiredTime, loc), false, TimeFormat)
-    }
-
-    loc.addFormat('{day}', true);
-    loc.addFormat('{month}' + (loc['monthSuffix'] || ''));
-    loc.addFormat('{year}' + (loc['yearSuffix'] || ''));
-
-    loc['timeParse'].forEach(function(src) {
-      loc.addFormat(src, true);
-    });
-
-    loc['dateParse'].forEach(function(src) {
-      loc.addFormat(src);
-    });
-
-    return Localizations[localeCode] = loc;
-  }
-
-
-  // General helpers
-
-  function addDateInputFormat(locale, format, match, variant) {
-    locale.compiledFormats.unshift({
-      variant: variant,
-      locale: locale,
-      reg: regexp('^' + format + '$', 'i'),
-      to: match
-    });
-  }
-
-  function simpleCapitalize(str) {
-    return str.slice(0,1).toUpperCase() + str.slice(1);
-  }
-
-  function arrayToAlternates(arr) {
-    return arr.filter(function(el) {
-      return !!el;
-    }).join('|');
-  }
-
-  // Date argument helpers
-
-  function collectDateArguments(args, allowDuration) {
-    var obj, arr;
-    if(isObject(args[0])) {
-      return args;
-    } else if (isNumber(args[0]) && !isNumber(args[1])) {
-      return [args[0]];
-    } else if (isString(args[0]) && allowDuration) {
-      return [getDateParamsFromString(args[0]), args[1]];
-    }
-    obj = {};
-    DateArgumentUnits.forEach(function(u,i) {
-      obj[u.unit] = args[i];
-    });
-    return [obj];
-  }
-
-  function getDateParamsFromString(str, num) {
-    var params = {};
-    match = str.match(/^(\d+)?\s?(\w+?)s?$/i);
-    if(match) {
-      if(isUndefined(num)) {
-        num = parseInt(match[1]) || 1;
-      }
-      params[match[2].toLowerCase()] = num;
-    }
-    return params;
-  }
-
-  // Date parsing helpers
-
-  function getFormatMatch(match, arr) {
-    var obj = {}, value, num;
-    arr.forEach(function(key, i) {
-      value = match[i + 1];
-      if(isUndefined(value) || value === '') return;
-      if(key === 'year') {
-        obj.yearAsString = value.replace(/'/, '');
-      }
-      num = parseFloat(value.replace(/'/, '').replace(/,/, '.'));
-      obj[key] = !isNaN(num) ? num : value.toLowerCase();
-    });
-    return obj;
-  }
-
-  function cleanDateInput(str) {
-    str = str.trim().replace(/^just (?=now)|\.+$/i, '');
-    return convertAsianDigits(str);
-  }
-
-  function convertAsianDigits(str) {
-    return str.replace(AsianDigitReg, function(full, disallowed, match) {
-      var sum = 0, place = 1, lastWasHolder, lastHolder;
-      if(disallowed) return full;
-      match.split('').reverse().forEach(function(letter) {
-        var value = AsianDigitMap[letter], holder = value > 9;
-        if(holder) {
-          if(lastWasHolder) sum += place;
-          place *= value / (lastHolder || 1);
-          lastHolder = value;
-        } else {
-          if(lastWasHolder === false) {
-            place *= 10;
-          }
-          sum += place * value;
-        }
-        lastWasHolder = holder;
-      });
-      if(lastWasHolder) sum += place;
-      return sum;
-    });
-  }
-
-  function getExtendedDate(f, localeCode, prefer, forceUTC) {
-    var d = new date(), relative = false, baseLocalization, loc, format, set, unit, weekday, num, tmp, after;
-
-    d.utc(forceUTC);
-
-    if(isDate(f)) {
-      // If the source here is already a date object, then the operation
-      // is the same as cloning the date, which preserves the UTC flag.
-      d.utc(f.isUTC()).setTime(f.getTime());
-    } else if(isNumber(f)) {
-      d.setTime(f);
-    } else if(isObject(f)) {
-      d.set(f, true);
-      set = f;
-    } else if(isString(f)) {
-
-      // The act of getting the localization will pre-initialize
-      // if it is missing and add the required formats.
-      baseLocalization = getLocalization(localeCode);
-
-      // Clean the input and convert Kanji based numerals if they exist.
-      f = cleanDateInput(f);
-
-      if(baseLocalization) {
-        iterateOverObject(baseLocalization.getFormats(), function(i, dif) {
-          var match = f.match(dif.reg);
-          if(match) {
-            format = dif;
-            loc = format.locale;
-            set = getFormatMatch(match, format.to, loc);
-
-            if(set['utc']) {
-              d.utc();
-            }
-
-            loc.cachedFormat = format;
-
-            if(set.timestamp) {
-              set = set.timestamp;
-              return false;
-            }
-
-            // If there's a variant (crazy Endian American format), swap the month and day.
-            if(format.variant && !isString(set['month']) && (isString(set['date']) || baseLocalization.hasVariant(localeCode))) {
-              tmp = set['month'];
-              set['month'] = set['date'];
-              set['date']  = tmp;
-            }
-
-            // If the year is 2 digits then get the implied century.
-            if(set['year'] && set.yearAsString.length === 2) {
-              set['year'] = getYearFromAbbreviation(set['year']);
-            }
-
-            // Set the month which may be localized.
-            if(set['month']) {
-              set['month'] = loc.getMonth(set['month']);
-              if(set['shift'] && !set['unit']) set['unit'] = loc['units'][7];
-            }
-
-            // If there is both a weekday and a date, the date takes precedence.
-            if(set['weekday'] && set['date']) {
-              delete set['weekday'];
-            // Otherwise set a localized weekday.
-            } else if(set['weekday']) {
-              set['weekday'] = loc.getWeekday(set['weekday']);
-              if(set['shift'] && !set['unit']) set['unit'] = loc['units'][5];
-            }
-
-            // Relative day localizations such as "today" and "tomorrow".
-            if(set['day'] && (tmp = loc.modifiersByName[set['day']])) {
-              set['day'] = tmp.value;
-              d.reset();
-              relative = true;
-            // If the day is a weekday, then set that instead.
-            } else if(set['day'] && (weekday = loc.getWeekday(set['day'])) > -1) {
-              delete set['day'];
-              if(set['num'] && set['month']) {
-                // If we have "the 2nd tuesday of June", set the day to the beginning of the month, then
-                // look ahead to set the weekday after all other properties have been set. The weekday needs
-                // to be set after the actual set because it requires overriding the "prefer" argument which
-                // could unintentionally send the year into the future, past, etc.
-                after = function() {
-                  var w = d.getWeekday();
-                  d.setWeekday((7 * (set['num'] - 1)) + (w > weekday ? weekday + 7 : weekday));
-                }
-                set['day'] = 1;
-              } else {
-                set['weekday'] = weekday;
-              }
-            }
-
-            if(set['date'] && !isNumber(set['date'])) {
-              set['date'] = loc.getNumericDate(set['date']);
-            }
-
-            // If the time is 1pm-11pm advance the time by 12 hours.
-            if(loc.matchPM(set['ampm']) && set['hour'] < 12) {
-              set['hour'] += 12;
-            } else if(loc.matchAM(set['ampm']) && set['hour'] === 12) {
-              set['hour'] = 0;
-            }
-
-            // Adjust for timezone offset
-            if('offset_hours' in set || 'offset_minutes' in set) {
-              d.utc();
-              set['offset_minutes'] = set['offset_minutes'] || 0;
-              set['offset_minutes'] += set['offset_hours'] * 60;
-              if(set['offset_sign'] === '-') {
-                set['offset_minutes'] *= -1;
-              }
-              set['minute'] -= set['offset_minutes'];
-            }
-
-            // Date has a unit like "days", "months", etc. are all relative to the current date.
-            if(set['unit']) {
-              relative = true;
-              num = loc.getNumber(set['num']);
-              unit = loc.getEnglishUnit(set['unit']);
-
-              // Shift and unit, ie "next month", "last week", etc.
-              if(set['shift'] || set['edge']) {
-                num *= (tmp = loc.modifiersByName[set['shift']]) ? tmp.value : 0;
-
-                // Relative month and static date: "the 15th of last month"
-                if(unit === 'month' && isDefined(set['date'])) {
-                  d.set({ 'day': set['date'] }, true);
-                  delete set['date'];
-                }
-
-                // Relative year and static month/date: "June 15th of last year"
-                if(unit === 'year' && isDefined(set['month'])) {
-                  d.set({ 'month': set['month'], 'day': set['date'] }, true);
-                  delete set['month'];
-                  delete set['date'];
-                }
-              }
-              // Unit and sign, ie "months ago", "weeks from now", etc.
-              if(set['sign'] && (tmp = loc.modifiersByName[set['sign']])) {
-                num *= tmp.value;
-              }
-
-              // Units can be with non-relative dates, set here. ie "the day after monday"
-              if(isDefined(set['weekday'])) {
-                d.set({'weekday': set['weekday'] }, true);
-                delete set['weekday'];
-              }
-
-              // Finally shift the unit.
-              set[unit] = (set[unit] || 0) + num;
-            }
-
-            if(set['year_sign'] === '-') {
-              set['year'] *= -1;
-            }
-
-            DateUnitsReversed.slice(1,4).forEach(function(u, i) {
-              var value = set[u.unit], fraction = value % 1;
-              if(fraction) {
-                set[DateUnitsReversed[i].unit] = round(fraction * (u.unit === 'second' ? 1000 : 60));
-                set[u.unit] = floor(value);
-              }
-            });
-            return false;
-          }
-        });
-      }
-      if(!format) {
-        // The Date constructor does something tricky like checking the number
-        // of arguments so simply passing in undefined won't work.
-        if(f !== 'now') {
-          d = new date(f);
-        }
-        if(forceUTC) {
-          // Falling back to system date here which cannot be parsed as UTC,
-          // so if we're forcing UTC then simply add the offset.
-          d.addMinutes(-d.getTimezoneOffset());
-        }
-      } else if(relative) {
-        d.advance(set);
-      } else {
-        if(d._utc) {
-          // UTC times can traverse into other days or even months,
-          // so preemtively reset the time here to prevent this.
-          d.reset();
-        }
-        updateDate(d, set, true, false, prefer);
-      }
-
-      // If there is an "edge" it needs to be set after the
-      // other fields are set. ie "the end of February"
-      if(set && set['edge']) {
-        tmp = loc.modifiersByName[set['edge']];
-        iterateOverObject(DateUnitsReversed.slice(4), function(i, u) {
-          if(isDefined(set[u.unit])) {
-            unit = u.unit;
-            return false;
-          }
-        });
-        if(unit === 'year') set.specificity = 'month';
-        else if(unit === 'month' || unit === 'week') set.specificity = 'day';
-        d[(tmp.value < 0 ? 'endOf' : 'beginningOf') + simpleCapitalize(unit)]();
-        // This value of -2 is arbitrary but it's a nice clean way to hook into this system.
-        if(tmp.value === -2) d.reset();
-      }
-      if(after) {
-        after();
-      }
-      // A date created by parsing a string presumes that the format *itself* is UTC, but
-      // not that the date, once created, should be manipulated as such. In other words,
-      // if you are creating a date object from a server time "2012-11-15T12:00:00Z",
-      // in the majority of cases you are using it to create a date that will, after creation,
-      // be manipulated as local, so reset the utc flag here.
-      d.utc(false);
-    }
-    return {
-      date: d,
-      set: set
-    }
-  }
-
-  // If the year is two digits, add the most appropriate century prefix.
-  function getYearFromAbbreviation(year) {
-    return round(callDateGet(new date(), 'FullYear') / 100) * 100 - round(year / 100) * 100 + year;
-  }
-
-  function getShortHour(d) {
-    var hours = callDateGet(d, 'Hours');
-    return hours === 0 ? 12 : hours - (floor(hours / 13) * 12);
-  }
-
-  // weeksSince won't work here as the result needs to be floored, not rounded.
-  function getWeekNumber(date) {
-    date = date.clone();
-    var dow = callDateGet(date, 'Day') || 7;
-    date.addDays(4 - dow).reset();
-    return 1 + floor(date.daysSince(date.clone().beginningOfYear()) / 7);
-  }
-
-  function getAdjustedUnit(ms) {
-    var next, ams = math.abs(ms), value = ams, unit = 0;
-    DateUnitsReversed.slice(1).forEach(function(u, i) {
-      next = floor(round(ams / u.multiplier() * 10) / 10);
-      if(next >= 1) {
-        value = next;
-        unit = i + 1;
-      }
-    });
-    return [value, unit, ms];
-  }
-
-  function getAdjustedUnitWithMonthFallback(date) {
-    var adu = getAdjustedUnit(date.millisecondsFromNow());
-    if(adu[1] === 6) {
-      // If the adjusted unit is in months, then better to use
-      // the "monthsfromNow" which applies a special error margin
-      // for edge cases such as Jan-09 - Mar-09 being less than
-      // 2 months apart (when using a strict numeric definition).
-      // The third "ms" element in the array will handle the sign
-      // (past or future), so simply take the absolute value here.
-      adu[0] = math.abs(date.monthsFromNow());
-    }
-    return adu;
-  }
-
-
-  // Date formatting helpers
-
-  function formatDate(date, format, relative, localeCode) {
-    var adu, loc = getLocalization(localeCode), caps = regexp(/^[A-Z]/), value, shortcut;
-    if(!date.isValid()) {
-      return 'Invalid Date';
-    } else if(Date[format]) {
-      format = Date[format];
-    } else if(isFunction(format)) {
-      adu = getAdjustedUnitWithMonthFallback(date);
-      format = format.apply(date, adu.concat(loc));
-    }
-    if(!format && relative) {
-      adu = adu || getAdjustedUnitWithMonthFallback(date);
-      // Adjust up if time is in ms, as this doesn't
-      // look very good for a standard relative date.
-      if(adu[1] === 0) {
-        adu[1] = 1;
-        adu[0] = 1;
-      }
-      return loc.getRelativeFormat(adu);
-    }
-
-    format = format || 'long';
-    format = loc[format] || format;
-
-    DateOutputFormats.forEach(function(dof) {
-      format = format.replace(regexp('\\{('+dof.token+')(\\d)?\\}', dof.word ? 'i' : ''), function(m,t,d) {
-        var val = dof.format(date, loc, d || 1, t), l = t.length, one = t.match(/^(.)\1+$/);
-        if(dof.word) {
-          if(l === 3) val = val.slice(0,3);
-          if(one || t.match(caps)) val = simpleCapitalize(val);
-        } else if(one && !dof.text) {
-          val = (isNumber(val) ? padNumber(val, l) : val.toString()).slice(-l);
-        }
-        return val;
-      });
-    });
-    return format;
-  }
-
-  // Date comparison helpers
-
-  function compareDate(d, find, buffer, forceUTC) {
-    var p, t, min, max, minOffset, maxOffset, override, capitalized, accuracy = 0, loBuffer = 0, hiBuffer = 0;
-    p = getExtendedDate(find, null, null, forceUTC);
-    if(buffer > 0) {
-      loBuffer = hiBuffer = buffer;
-      override = true;
-    }
-    if(!p.date.isValid()) return false;
-    if(p.set && p.set.specificity) {
-      DateUnits.forEach(function(u, i) {
-        if(u.unit === p.set.specificity) {
-          accuracy = u.multiplier(p.date, d - p.date) - 1;
-        }
-      });
-      capitalized = simpleCapitalize(p.set.specificity);
-      if(p.set['edge'] || p.set['shift']) {
-        p.date['beginningOf' + capitalized]();
-      }
-      if(p.set.specificity === 'month') {
-        max = p.date.clone()['endOf' + capitalized]().getTime();
-      }
-      if(!override && p.set['sign'] && p.set.specificity != 'millisecond') {
-        // If the time is relative, there can occasionally be an disparity between the relative date
-        // and "now", which it is being compared to, so set an extra buffer to account for this.
-        loBuffer = 50;
-        hiBuffer = -50;
-      }
-    }
-    t   = d.getTime();
-    min = p.date.getTime();
-    max = max || (min + accuracy);
-    max = compensateForTimezoneTraversal(d, min, max);
-    return t >= (min - loBuffer) && t <= (max + hiBuffer);
-  }
-
-  function compensateForTimezoneTraversal(d, min, max) {
-    var dMin, dMax, minOffset, maxOffset;
-    dMin = new Date(min);
-    dMax = new Date(max).utc(d.isUTC());
-    if(callDateGet(dMax, 'Hours') !== 23) {
-      minOffset = dMin.getTimezoneOffset();
-      maxOffset = dMax.getTimezoneOffset();
-      if(minOffset !== maxOffset) {
-        max += (maxOffset - minOffset).minutes();
-      }
-    }
-    return max;
-  }
-
-  function updateDate(d, params, reset, advance, prefer) {
-    var weekday, specificityIndex;
-
-    function getParam(key) {
-      return isDefined(params[key]) ? params[key] : params[key + 's'];
-    }
-
-    function paramExists(key) {
-      return isDefined(getParam(key));
-    }
-
-    function uniqueParamExists(key, isDay) {
-      return paramExists(key) || (isDay && paramExists('weekday'));
-    }
-
-    function canDisambiguate() {
-      var now = new date;
-      return (prefer === -1 && d > now) || (prefer === 1 && d < now);
-    }
-
-    if(isNumber(params) && advance) {
-      // If param is a number and we're advancing, the number is presumed to be milliseconds.
-      params = { 'milliseconds': params };
-    } else if(isNumber(params)) {
-      // Otherwise just set the timestamp and return.
-      d.setTime(params);
-      return d;
-    }
-
-    // "date" can also be passed for the day
-    if(isDefined(params['date'])) {
-      params['day'] = params['date'];
-    }
-
-    // Reset any unit lower than the least specific unit set. Do not do this for weeks
-    // or for years. This needs to be performed before the acutal setting of the date
-    // because the order needs to be reversed in order to get the lowest specificity,
-    // also because higher order units can be overwritten by lower order units, such
-    // as setting hour: 3, minute: 345, etc.
-    iterateOverObject(DateUnitsReversed, function(i,u) {
-      var isDay = u.unit === 'day';
-      if(uniqueParamExists(u.unit, isDay)) {
-        params.specificity = u.unit;
-        specificityIndex = +i;
-        return false;
-      } else if(reset && u.unit !== 'week' && (!isDay || !paramExists('week'))) {
-        // Days are relative to months, not weeks, so don't reset if a week exists.
-        callDateSet(d, u.method, (isDay ? 1 : 0));
-      }
-    });
-
-
-    // Now actually set or advance the date in order, higher units first.
-    DateUnits.forEach(function(u,i) {
-      var unit = u.unit, method = u.method, higherUnit = DateUnits[i - 1], value;
-      value = getParam(unit)
-      if(isUndefined(value)) return;
-      if(advance) {
-        if(unit === 'week') {
-          value  = (params['day'] || 0) + (value * 7);
-          method = 'Date';
-        }
-        value = (value * advance) + callDateGet(d, method);
-      } else if(unit === 'month' && paramExists('day')) {
-        // When setting the month, there is a chance that we will traverse into a new month.
-        // This happens in DST shifts, for example June 1st DST jumping to January 1st
-        // (non-DST) will have a shift of -1:00 which will traverse into the previous year.
-        // Prevent this by proactively setting the day when we know it will be set again anyway.
-        // It can also happen when there are not enough days in the target month. This second
-        // situation is identical to checkMonthTraversal below, however when we are advancing
-        // we want to reset the date to "the last date in the target month". In the case of
-        // DST shifts, however, we want to avoid the "edges" of months as that is where this
-        // unintended traversal can happen. This is the reason for the different handling of
-        // two similar but slightly different situations.
-        //
-        // TL;DR This method avoids the edges of a month IF not advancing and the date is going
-        // to be set anyway, while checkMonthTraversal resets the date to the last day if advancing.
-        //
-        callDateSet(d, 'Date', 15);
-      }
-      callDateSet(d, method, value);
-      if(advance && unit === 'month') {
-        checkMonthTraversal(d, value);
-      }
-    });
-
-
-    // If a weekday is included in the params, set it ahead of time and set the params
-    // to reflect the updated date so that resetting works properly.
-    if(!advance && !paramExists('day') && paramExists('weekday')) {
-      var weekday = getParam('weekday'), isAhead, futurePreferred;
-      d.setWeekday(weekday);
-    }
-
-    if(canDisambiguate()) {
-      iterateOverObject(DateUnitsReversed.slice(specificityIndex + 1), function(i,u) {
-        var ambiguous = u.ambiguous || (u.unit === 'week' && paramExists('weekday'));
-        if(ambiguous && !uniqueParamExists(u.unit, u.unit === 'day')) {
-          d[u.addMethod](prefer);
-          return false;
-        }
-      });
-    }
-    return d;
-  }
-
-  function callDateGet(d, method) {
-    return d['get' + (d._utc ? 'UTC' : '') + method]();
-  }
-
-  function callDateSet(d, method, value) {
-    return d['set' + (d._utc && method != 'ISOWeek' ? 'UTC' : '') + method](value);
-  }
-
-  // The ISO format allows times strung together without a demarcating ":", so make sure
-  // that these markers are now optional.
-  function prepareTime(format, loc, iso) {
-    var timeSuffixMapping = {'h':0,'m':1,'s':2}, add;
-    loc = loc || English;
-    return format.replace(/{([a-z])}/g, function(full, token) {
-      var separators = [],
-          isHours = token === 'h',
-          tokenIsRequired = isHours && !iso;
-      if(token === 't') {
-        return loc['ampm'].join('|');
-      } else {
-        if(isHours) {
-          separators.push(':');
-        }
-        if(add = loc['timeSuffixes'][timeSuffixMapping[token]]) {
-          separators.push(add + '\\s*');
-        }
-        return separators.length === 0 ? '' : '(?:' + separators.join('|') + ')' + (tokenIsRequired ? '' : '?');
-      }
-    });
-  }
-
-
-  // If the month is being set, then we don't want to accidentally
-  // traverse into a new month just because the target month doesn't have enough
-  // days. In other words, "5 months ago" from July 30th is still February, even
-  // though there is no February 30th, so it will of necessity be February 28th
-  // (or 29th in the case of a leap year).
-
-  function checkMonthTraversal(date, targetMonth) {
-    if(targetMonth < 0) {
-      targetMonth = targetMonth % 12 + 12;
-    }
-    if(targetMonth % 12 != callDateGet(date, 'Month')) {
-      callDateSet(date, 'Date', 0);
-    }
-  }
-
-  function createDate(args, prefer, forceUTC) {
-    var f, localeCode;
-    if(isNumber(args[1])) {
-      // If the second argument is a number, then we have an enumerated constructor type as in "new Date(2003, 2, 12);"
-      f = collectDateArguments(args)[0];
-    } else {
-      f          = args[0];
-      localeCode = args[1];
-    }
-    return getExtendedDate(f, localeCode, prefer, forceUTC).date;
-  }
-
-  function buildDateUnits() {
-    DateUnitsReversed = DateUnits.concat().reverse();
-    DateArgumentUnits = DateUnits.concat();
-    DateArgumentUnits.splice(2,1);
-  }
-
-
-  /***
-   * @method [units]Since([d], [locale] = currentLocale)
-   * @returns Number
-   * @short Returns the time since [d] in the appropriate unit.
-   * @extra [d] will accept a date object, timestamp, or text format. If not specified, [d] is assumed to be now. [locale] can be passed to specify the locale that the date is in. %[unit]Ago% is provided as an alias to make this more readable when [d] is assumed to be the current date. For more see @date_format.
-   *
-   * @set
-   *   millisecondsSince
-   *   secondsSince
-   *   minutesSince
-   *   hoursSince
-   *   daysSince
-   *   weeksSince
-   *   monthsSince
-   *   yearsSince
-   *
-   * @example
-   *
-   *   Date.create().millisecondsSince('1 hour ago') -> 3,600,000
-   *   Date.create().daysSince('1 week ago')         -> 7
-   *   Date.create().yearsSince('15 years ago')      -> 15
-   *   Date.create('15 years ago').yearsAgo()        -> 15
-   *
-   ***
-   * @method [units]Ago()
-   * @returns Number
-   * @short Returns the time ago in the appropriate unit.
-   *
-   * @set
-   *   millisecondsAgo
-   *   secondsAgo
-   *   minutesAgo
-   *   hoursAgo
-   *   daysAgo
-   *   weeksAgo
-   *   monthsAgo
-   *   yearsAgo
-   *
-   * @example
-   *
-   *   Date.create('last year').millisecondsAgo() -> 3,600,000
-   *   Date.create('last year').daysAgo()         -> 7
-   *   Date.create('last year').yearsAgo()        -> 15
-   *
-   ***
-   * @method [units]Until([d], [locale] = currentLocale)
-   * @returns Number
-   * @short Returns the time until [d] in the appropriate unit.
-   * @extra [d] will accept a date object, timestamp, or text format. If not specified, [d] is assumed to be now. [locale] can be passed to specify the locale that the date is in. %[unit]FromNow% is provided as an alias to make this more readable when [d] is assumed to be the current date. For more see @date_format.
-   *
-   * @set
-   *   millisecondsUntil
-   *   secondsUntil
-   *   minutesUntil
-   *   hoursUntil
-   *   daysUntil
-   *   weeksUntil
-   *   monthsUntil
-   *   yearsUntil
-   *
-   * @example
-   *
-   *   Date.create().millisecondsUntil('1 hour from now') -> 3,600,000
-   *   Date.create().daysUntil('1 week from now')         -> 7
-   *   Date.create().yearsUntil('15 years from now')      -> 15
-   *   Date.create('15 years from now').yearsFromNow()    -> 15
-   *
-   ***
-   * @method [units]FromNow()
-   * @returns Number
-   * @short Returns the time from now in the appropriate unit.
-   *
-   * @set
-   *   millisecondsFromNow
-   *   secondsFromNow
-   *   minutesFromNow
-   *   hoursFromNow
-   *   daysFromNow
-   *   weeksFromNow
-   *   monthsFromNow
-   *   yearsFromNow
-   *
-   * @example
-   *
-   *   Date.create('next year').millisecondsFromNow() -> 3,600,000
-   *   Date.create('next year').daysFromNow()         -> 7
-   *   Date.create('next year').yearsFromNow()        -> 15
-   *
-   ***
-   * @method add[Units](<num>, [reset] = false)
-   * @returns Date
-   * @short Adds <num> of the unit to the date. If [reset] is true, all lower units will be reset.
-   * @extra Note that "months" is ambiguous as a unit of time. If the target date falls on a day that does not exist (ie. August 31 -> February 31), the date will be shifted to the last day of the month. Don't use %addMonths% if you need precision.
-   *
-   * @set
-   *   addMilliseconds
-   *   addSeconds
-   *   addMinutes
-   *   addHours
-   *   addDays
-   *   addWeeks
-   *   addMonths
-   *   addYears
-   *
-   * @example
-   *
-   *   Date.create().addMilliseconds(5) -> current time + 5 milliseconds
-   *   Date.create().addDays(5)         -> current time + 5 days
-   *   Date.create().addYears(5)        -> current time + 5 years
-   *
-   ***
-   * @method isLast[Unit]()
-   * @returns Boolean
-   * @short Returns true if the date is last week/month/year.
-   *
-   * @set
-   *   isLastWeek
-   *   isLastMonth
-   *   isLastYear
-   *
-   * @example
-   *
-   *   Date.create('yesterday').isLastWeek()  -> true or false?
-   *   Date.create('yesterday').isLastMonth() -> probably not...
-   *   Date.create('yesterday').isLastYear()  -> even less likely...
-   *
-   ***
-   * @method isThis[Unit]()
-   * @returns Boolean
-   * @short Returns true if the date is this week/month/year.
-   *
-   * @set
-   *   isThisWeek
-   *   isThisMonth
-   *   isThisYear
-   *
-   * @example
-   *
-   *   Date.create('tomorrow').isThisWeek()  -> true or false?
-   *   Date.create('tomorrow').isThisMonth() -> probably...
-   *   Date.create('tomorrow').isThisYear()  -> signs point to yes...
-   *
-   ***
-   * @method isNext[Unit]()
-   * @returns Boolean
-   * @short Returns true if the date is next week/month/year.
-   *
-   * @set
-   *   isNextWeek
-   *   isNextMonth
-   *   isNextYear
-   *
-   * @example
-   *
-   *   Date.create('tomorrow').isNextWeek()  -> true or false?
-   *   Date.create('tomorrow').isNextMonth() -> probably not...
-   *   Date.create('tomorrow').isNextYear()  -> even less likely...
-   *
-   ***
-   * @method beginningOf[Unit]()
-   * @returns Date
-   * @short Sets the date to the beginning of the appropriate unit.
-   *
-   * @set
-   *   beginningOfDay
-   *   beginningOfWeek
-   *   beginningOfMonth
-   *   beginningOfYear
-   *
-   * @example
-   *
-   *   Date.create().beginningOfDay()   -> the beginning of today (resets the time)
-   *   Date.create().beginningOfWeek()  -> the beginning of the week
-   *   Date.create().beginningOfMonth() -> the beginning of the month
-   *   Date.create().beginningOfYear()  -> the beginning of the year
-   *
-   ***
-   * @method endOf[Unit]()
-   * @returns Date
-   * @short Sets the date to the end of the appropriate unit.
-   *
-   * @set
-   *   endOfDay
-   *   endOfWeek
-   *   endOfMonth
-   *   endOfYear
-   *
-   * @example
-   *
-   *   Date.create().endOfDay()   -> the end of today (sets the time to 23:59:59.999)
-   *   Date.create().endOfWeek()  -> the end of the week
-   *   Date.create().endOfMonth() -> the end of the month
-   *   Date.create().endOfYear()  -> the end of the year
-   *
-   ***/
-
-  function buildDateMethods() {
-    extendSimilar(date, true, false, DateUnits, function(methods, u, i) {
-      var unit = u.unit, caps = simpleCapitalize(unit), multiplier = u.multiplier(), since, until;
-      u.addMethod = 'add' + caps + 's';
-      // "since/until now" only count "past" an integer, i.e. "2 days ago" is
-      // anything between 2 - 2.999 days. The default margin of error is 0.999,
-      // but "months" have an inherently larger margin, as the number of days
-      // in a given month may be significantly less than the number of days in
-      // the average month, so for example "30 days" before March 15 may in fact
-      // be 1 month ago. Years also have a margin of error due to leap years,
-      // but this is roughly 0.999 anyway (365 / 365.25). Other units do not
-      // technically need the error margin applied to them but this accounts
-      // for discrepancies like (15).hoursAgo() which technically creates the
-      // current date first, then creates a date 15 hours before and compares
-      // them, the discrepancy between the creation of the 2 dates means that
-      // they may actually be 15.0001 hours apart. Milliseconds don't have
-      // fractions, so they won't be subject to this error margin.
-      function applyErrorMargin(ms) {
-        var num      = ms / multiplier,
-            fraction = num % 1,
-            error    = u.error || 0.999;
-        if(fraction && math.abs(fraction % 1) > error) {
-          num = round(num);
-        }
-        return parseInt(num);
-      }
-      since = function(f, localeCode) {
-        return applyErrorMargin(this.getTime() - date.create(f, localeCode).getTime());
-      };
-      until = function(f, localeCode) {
-        return applyErrorMargin(date.create(f, localeCode).getTime() - this.getTime());
-      };
-      methods[unit+'sAgo']     = until;
-      methods[unit+'sUntil']   = until;
-      methods[unit+'sSince']   = since;
-      methods[unit+'sFromNow'] = since;
-      methods[u.addMethod] = function(num, reset) {
-        var set = {};
-        set[unit] = num;
-        return this.advance(set, reset);
-      };
-      buildNumberToDateAlias(u, multiplier);
-      if(i < 3) {
-        ['Last','This','Next'].forEach(function(shift) {
-          methods['is' + shift + caps] = function() {
-            return this.is(shift + ' ' + unit);
-          };
-        });
-      }
-      if(i < 4) {
-        methods['beginningOf' + caps] = function() {
-          var set = {};
-          switch(unit) {
-            case 'year':  set['year']    = callDateGet(this, 'FullYear'); break;
-            case 'month': set['month']   = callDateGet(this, 'Month');    break;
-            case 'day':   set['day']     = callDateGet(this, 'Date');     break;
-            case 'week':  set['weekday'] = 0; break;
-          }
-          return this.set(set, true);
-        };
-        methods['endOf' + caps] = function() {
-          var set = { 'hours': 23, 'minutes': 59, 'seconds': 59, 'milliseconds': 999 };
-          switch(unit) {
-            case 'year':  set['month']   = 11; set['day'] = 31; break;
-            case 'month': set['day']     = this.daysInMonth();  break;
-            case 'week':  set['weekday'] = 6;                   break;
-          }
-          return this.set(set, true);
-        };
-      }
-    });
-  }
-
-  function buildCoreInputFormats() {
-    English.addFormat('([+-])?(\\d{4,4})[-.]?{full_month}[-.]?(\\d{1,2})?', true, ['year_sign','year','month','date'], false, true);
-    English.addFormat('(\\d{1,2})[-.\\/]{full_month}(?:[-.\\/](\\d{2,4}))?', true, ['date','month','year'], true);
-    English.addFormat('{full_month}[-.](\\d{4,4})', false, ['month','year']);
-    English.addFormat('\\/Date\\((\\d+(?:\\+\\d{4,4})?)\\)\\/', false, ['timestamp'])
-    English.addFormat(prepareTime(RequiredTime, English), false, TimeFormat)
-
-    // When a new locale is initialized it will have the CoreDateFormats initialized by default.
-    // From there, adding new formats will push them in front of the previous ones, so the core
-    // formats will be the last to be reached. However, the core formats themselves have English
-    // months in them, which means that English needs to first be initialized and creates a race
-    // condition. I'm getting around this here by adding these generalized formats in the order
-    // specific -> general, which will mean they will be added to the English localization in
-    // general -> specific order, then chopping them off the front and reversing to get the correct
-    // order. Note that there are 7 formats as 2 have times which adds a front and a back format.
-    CoreDateFormats = English.compiledFormats.slice(0,7).reverse();
-    English.compiledFormats = English.compiledFormats.slice(7).concat(CoreDateFormats);
-  }
-
-  function buildDateOutputShortcuts() {
-    extendSimilar(date, true, false, 'short,long,full', function(methods, name) {
-      methods[name] = function(localeCode) {
-        return formatDate(this, name, false, localeCode);
-      }
-    });
-  }
-
-  function buildAsianDigits() {
-    KanjiDigits.split('').forEach(function(digit, value) {
-      var holder;
-      if(value > 9) {
-        value = math.pow(10, value - 9);
-      }
-      AsianDigitMap[digit] = value;
-    });
-    FullWidthDigits.split('').forEach(function(digit, value) {
-      AsianDigitMap[digit] = value;
-    });
-    // Kanji numerals may also be included in phrases which are text-based rather
-    // than actual numbers such as Chinese weekdays (上周三), and "the day before
-    // yesterday" (一昨日) in Japanese, so don't match these.
-    AsianDigitReg = regexp('([期週周])?([' + KanjiDigits + FullWidthDigits + ']+)(?!昨)', 'g');
-  }
-
-   /***
-   * @method is[Day]()
-   * @returns Boolean
-   * @short Returns true if the date falls on that day.
-   * @extra Also available: %isYesterday%, %isToday%, %isTomorrow%, %isWeekday%, and %isWeekend%.
-   *
-   * @set
-   *   isToday
-   *   isYesterday
-   *   isTomorrow
-   *   isWeekday
-   *   isWeekend
-   *   isSunday
-   *   isMonday
-   *   isTuesday
-   *   isWednesday
-   *   isThursday
-   *   isFriday
-   *   isSaturday
-   *
-   * @example
-   *
-   *   Date.create('tomorrow').isToday() -> false
-   *   Date.create('thursday').isTomorrow() -> ?
-   *   Date.create('yesterday').isWednesday() -> ?
-   *   Date.create('today').isWeekend() -> ?
-   *
-   ***
-   * @method isFuture()
-   * @returns Boolean
-   * @short Returns true if the date is in the future.
-   * @example
-   *
-   *   Date.create('next week').isFuture() -> true
-   *   Date.create('last week').isFuture() -> false
-   *
-   ***
-   * @method isPast()
-   * @returns Boolean
-   * @short Returns true if the date is in the past.
-   * @example
-   *
-   *   Date.create('last week').isPast() -> true
-   *   Date.create('next week').isPast() -> false
-   *
-   ***/
-  function buildRelativeAliases() {
-    var special  = 'today,yesterday,tomorrow,weekday,weekend,future,past'.split(',');
-    var weekdays = English['weekdays'].slice(0,7);
-    var months   = English['months'].slice(0,12);
-    extendSimilar(date, true, false, special.concat(weekdays).concat(months), function(methods, name) {
-      methods['is'+ simpleCapitalize(name)] = function(utc) {
-       return this.is(name, 0, utc);
-      };
-    });
-  }
-
-  function buildUTCAliases() {
-    date.extend({
-      'utc': {
-
-        'create': function() {
-          return createDate(arguments, 0, true);
-        },
-
-        'past': function() {
-          return createDate(arguments, -1, true);
-        },
-
-        'future': function() {
-          return createDate(arguments, 1, true);
-        }
-
-      }
-    }, false, false);
-  }
-
-  function setDateProperties() {
-    date.extend({
-      'RFC1123': '{Dow}, {dd} {Mon} {yyyy} {HH}:{mm}:{ss} {tz}',
-      'RFC1036': '{Weekday}, {dd}-{Mon}-{yy} {HH}:{mm}:{ss} {tz}',
-      'ISO8601_DATE': '{yyyy}-{MM}-{dd}',
-      'ISO8601_DATETIME': '{yyyy}-{MM}-{dd}T{HH}:{mm}:{ss}.{fff}{isotz}'
-    }, false, false);
-  }
-
-
-  date.extend({
-
-     /***
-     * @method Date.create(<d>, [locale] = currentLocale)
-     * @returns Date
-     * @short Alternate Date constructor which understands many different text formats, a timestamp, or another date.
-     * @extra If no argument is given, date is assumed to be now. %Date.create% additionally can accept enumerated parameters as with the standard date constructor. [locale] can be passed to specify the locale that the date is in. When unspecified, the current locale (default is English) is assumed. UTC-based dates can be created through the %utc% object. For more see @date_format.
-     * @set
-     *   Date.utc.create
-     *
-     * @example
-     *
-     *   Date.create('July')          -> July of this year
-     *   Date.create('1776')          -> 1776
-     *   Date.create('today')         -> today
-     *   Date.create('wednesday')     -> This wednesday
-     *   Date.create('next friday')   -> Next friday
-     *   Date.create('July 4, 1776')  -> July 4, 1776
-     *   Date.create(-446806800000)   -> November 5, 1955
-     *   Date.create(1776, 6, 4)      -> July 4, 1776
-     *   Date.create('1776年07月04日', 'ja') -> July 4, 1776
-     *   Date.utc.create('July 4, 1776', 'en')  -> July 4, 1776
-     *
-     ***/
-    'create': function() {
-      return createDate(arguments);
-    },
-
-     /***
-     * @method Date.past(<d>, [locale] = currentLocale)
-     * @returns Date
-     * @short Alternate form of %Date.create% with any ambiguity assumed to be the past.
-     * @extra For example %"Sunday"% can be either "the Sunday coming up" or "the Sunday last" depending on context. Note that dates explicitly in the future ("next Sunday") will remain in the future. This method simply provides a hint when ambiguity exists. UTC-based dates can be created through the %utc% object. For more, see @date_format.
-     * @set
-     *   Date.utc.past
-     * @example
-     *
-     *   Date.past('July')          -> July of this year or last depending on the current month
-     *   Date.past('Wednesday')     -> This wednesday or last depending on the current weekday
-     *
-     ***/
-    'past': function() {
-      return createDate(arguments, -1);
-    },
-
-     /***
-     * @method Date.future(<d>, [locale] = currentLocale)
-     * @returns Date
-     * @short Alternate form of %Date.create% with any ambiguity assumed to be the future.
-     * @extra For example %"Sunday"% can be either "the Sunday coming up" or "the Sunday last" depending on context. Note that dates explicitly in the past ("last Sunday") will remain in the past. This method simply provides a hint when ambiguity exists. UTC-based dates can be created through the %utc% object. For more, see @date_format.
-     * @set
-     *   Date.utc.future
-     *
-     * @example
-     *
-     *   Date.future('July')          -> July of this year or next depending on the current month
-     *   Date.future('Wednesday')     -> This wednesday or next depending on the current weekday
-     *
-     ***/
-    'future': function() {
-      return createDate(arguments, 1);
-    },
-
-     /***
-     * @method Date.addLocale(<code>, <set>)
-     * @returns Locale
-     * @short Adds a locale <set> to the locales understood by Sugar.
-     * @extra For more see @date_format.
-     *
-     ***/
-    'addLocale': function(localeCode, set) {
-      return setLocalization(localeCode, set);
-    },
-
-     /***
-     * @method Date.setLocale(<code>)
-     * @returns Locale
-     * @short Sets the current locale to be used with dates.
-     * @extra Sugar has support for 13 locales that are available through the "Date Locales" package. In addition you can define a new locale with %Date.addLocale%. For more see @date_format.
-     *
-     ***/
-    'setLocale': function(localeCode, set) {
-      var loc = getLocalization(localeCode, false);
-      CurrentLocalization = loc;
-      // The code is allowed to be more specific than the codes which are required:
-      // i.e. zh-CN or en-US. Currently this only affects US date variants such as 8/10/2000.
-      if(localeCode && localeCode != loc['code']) {
-        loc['code'] = localeCode;
-      }
-      return loc;
-    },
-
-     /***
-     * @method Date.getLocale([code] = current)
-     * @returns Locale
-     * @short Gets the locale for the given code, or the current locale.
-     * @extra The resulting locale object can be manipulated to provide more control over date localizations. For more about locales, see @date_format.
-     *
-     ***/
-    'getLocale': function(localeCode) {
-      return !localeCode ? CurrentLocalization : getLocalization(localeCode, false);
-    },
-
-     /**
-     * @method Date.addFormat(<format>, <match>, [code] = null)
-     * @returns Nothing
-     * @short Manually adds a new date input format.
-     * @extra This method allows fine grained control for alternate formats. <format> is a string that can have regex tokens inside. <match> is an array of the tokens that each regex capturing group will map to, for example %year%, %date%, etc. For more, see @date_format.
-     *
-     **/
-    'addFormat': function(format, match, localeCode) {
-      addDateInputFormat(getLocalization(localeCode), format, match);
-    }
-
-  }, false, false);
-
-  date.extend({
-
-     /***
-     * @method set(<set>, [reset] = false)
-     * @returns Date
-     * @short Sets the date object.
-     * @extra This method can accept multiple formats including a single number as a timestamp, an object, or enumerated parameters (as with the Date constructor). If [reset] is %true%, any units more specific than those passed will be reset.
-     *
-     * @example
-     *
-     *   new Date().set({ year: 2011, month: 11, day: 31 }) -> December 31, 2011
-     *   new Date().set(2011, 11, 31)                       -> December 31, 2011
-     *   new Date().set(86400000)                           -> 1 day after Jan 1, 1970
-     *   new Date().set({ year: 2004, month: 6 }, true)     -> June 1, 2004, 00:00:00.000
-     *
-     ***/
-    'set': function() {
-      var args = collectDateArguments(arguments);
-      return updateDate(this, args[0], args[1])
-    },
-
-     /***
-     * @method setWeekday()
-     * @returns Nothing
-     * @short Sets the weekday of the date.
-     * @extra In order to maintain a parallel with %getWeekday% (which itself is an alias for Javascript native %getDay%), Sunday is considered day %0%. This contrasts with ISO-8601 standard (used in %getISOWeek% and %setISOWeek%) which places Sunday at the end of the week (day 7). This effectively means that passing %0% to this method while in the middle of a week will rewind the date, where passing %7% will advance it.
-     *
-     * @example
-     *
-     *   d = new Date(); d.setWeekday(1); d; -> Monday of this week
-     *   d = new Date(); d.setWeekday(6); d; -> Saturday of this week
-     *
-     ***/
-    'setWeekday': function(dow) {
-      if(isUndefined(dow)) return;
-      return callDateSet(this, 'Date', callDateGet(this, 'Date') + dow - callDateGet(this, 'Day'));
-    },
-
-     /***
-     * @method setISOWeek()
-     * @returns Nothing
-     * @short Sets the week (of the year) as defined by the ISO-8601 standard.
-     * @extra Note that this standard places Sunday at the end of the week (day 7).
-     *
-     * @example
-     *
-     *   d = new Date(); d.setISOWeek(15); d; -> 15th week of the year
-     *
-     ***/
-    'setISOWeek': function(week) {
-      var weekday = callDateGet(this, 'Day') || 7;
-      if(isUndefined(week)) return;
-      this.set({ 'month': 0, 'date': 4 });
-      this.set({ 'weekday': 1 });
-      if(week > 1) {
-        this.addWeeks(week - 1);
-      }
-      if(weekday !== 1) {
-        this.advance({ 'days': weekday - 1 });
-      }
-      return this.getTime();
-    },
-
-     /***
-     * @method getISOWeek()
-     * @returns Number
-     * @short Gets the date's week (of the year) as defined by the ISO-8601 standard.
-     * @extra Note that this standard places Sunday at the end of the week (day 7). If %utc% is set on the date, the week will be according to UTC time.
-     *
-     * @example
-     *
-     *   new Date().getISOWeek()    -> today's week of the year
-     *
-     ***/
-    'getISOWeek': function() {
-      return getWeekNumber(this);
-    },
-
-     /***
-     * @method getUTCOffset([iso])
-     * @returns String
-     * @short Returns a string representation of the offset from UTC time. If [iso] is true the offset will be in ISO8601 format.
-     * @example
-     *
-     *   new Date().getUTCOffset()     -> "+0900"
-     *   new Date().getUTCOffset(true) -> "+09:00"
-     *
-     ***/
-    'getUTCOffset': function(iso) {
-      var offset = this._utc ? 0 : this.getTimezoneOffset();
-      var colon  = iso === true ? ':' : '';
-      if(!offset && iso) return 'Z';
-      return padNumber(floor(-offset / 60), 2, true) + colon + padNumber(math.abs(offset % 60), 2);
-    },
-
-     /***
-     * @method utc([on] = true)
-     * @returns Date
-     * @short Sets the internal utc flag for the date. When on, UTC-based methods will be called internally.
-     * @extra For more see @date_format.
-     * @example
-     *
-     *   new Date().utc(true)
-     *   new Date().utc(false)
-     *
-     ***/
-    'utc': function(set) {
-      defineProperty(this, '_utc', set === true || arguments.length === 0);
-      return this;
-    },
-
-     /***
-     * @method isUTC()
-     * @returns Boolean
-     * @short Returns true if the date has no timezone offset.
-     * @extra This will also return true for utc-based dates (dates that have the %utc% method set true). Note that even if the utc flag is set, %getTimezoneOffset% will always report the same thing as Javascript always reports that based on the environment's locale.
-     * @example
-     *
-     *   new Date().isUTC()           -> true or false?
-     *   new Date().utc(true).isUTC() -> true
-     *
-     ***/
-    'isUTC': function() {
-      return !!this._utc || this.getTimezoneOffset() === 0;
-    },
-
-     /***
-     * @method advance(<set>, [reset] = false)
-     * @returns Date
-     * @short Sets the date forward.
-     * @extra This method can accept multiple formats including an object, a string in the format %3 days%, a single number as milliseconds, or enumerated parameters (as with the Date constructor). If [reset] is %true%, any units more specific than those passed will be reset. For more see @date_format.
-     * @example
-     *
-     *   new Date().advance({ year: 2 }) -> 2 years in the future
-     *   new Date().advance('2 days')    -> 2 days in the future
-     *   new Date().advance(0, 2, 3)     -> 2 months 3 days in the future
-     *   new Date().advance(86400000)    -> 1 day in the future
-     *
-     ***/
-    'advance': function() {
-      var args = collectDateArguments(arguments, true);
-      return updateDate(this, args[0], args[1], 1);
-    },
-
-     /***
-     * @method rewind(<set>, [reset] = false)
-     * @returns Date
-     * @short Sets the date back.
-     * @extra This method can accept multiple formats including a single number as a timestamp, an object, or enumerated parameters (as with the Date constructor). If [reset] is %true%, any units more specific than those passed will be reset. For more see @date_format.
-     * @example
-     *
-     *   new Date().rewind({ year: 2 }) -> 2 years in the past
-     *   new Date().rewind(0, 2, 3)     -> 2 months 3 days in the past
-     *   new Date().rewind(86400000)    -> 1 day in the past
-     *
-     ***/
-    'rewind': function() {
-      var args = collectDateArguments(arguments, true);
-      return updateDate(this, args[0], args[1], -1);
-    },
-
-     /***
-     * @method isValid()
-     * @returns Boolean
-     * @short Returns true if the date is valid.
-     * @example
-     *
-     *   new Date().isValid()         -> true
-     *   new Date('flexor').isValid() -> false
-     *
-     ***/
-    'isValid': function() {
-      return !isNaN(this.getTime());
-    },
-
-     /***
-     * @method isAfter(<d>, [margin] = 0)
-     * @returns Boolean
-     * @short Returns true if the date is after the <d>.
-     * @extra [margin] is to allow extra margin of error (in ms). <d> will accept a date object, timestamp, or text format. If not specified, <d> is assumed to be now. See @date_format for more.
-     * @example
-     *
-     *   new Date().isAfter('tomorrow')  -> false
-     *   new Date().isAfter('yesterday') -> true
-     *
-     ***/
-    'isAfter': function(d, margin, utc) {
-      return this.getTime() > date.create(d).getTime() - (margin || 0);
-    },
-
-     /***
-     * @method isBefore(<d>, [margin] = 0)
-     * @returns Boolean
-     * @short Returns true if the date is before <d>.
-     * @extra [margin] is to allow extra margin of error (in ms). <d> will accept a date object, timestamp, or text format. If not specified, <d> is assumed to be now. See @date_format for more.
-     * @example
-     *
-     *   new Date().isBefore('tomorrow')  -> true
-     *   new Date().isBefore('yesterday') -> false
-     *
-     ***/
-    'isBefore': function(d, margin) {
-      return this.getTime() < date.create(d).getTime() + (margin || 0);
-    },
-
-     /***
-     * @method isBetween(<d1>, <d2>, [margin] = 0)
-     * @returns Boolean
-     * @short Returns true if the date falls between <d1> and <d2>.
-     * @extra [margin] is to allow extra margin of error (in ms). <d1> and <d2> will accept a date object, timestamp, or text format. If not specified, they are assumed to be now. See @date_format for more.
-     * @example
-     *
-     *   new Date().isBetween('yesterday', 'tomorrow')    -> true
-     *   new Date().isBetween('last year', '2 years ago') -> false
-     *
-     ***/
-    'isBetween': function(d1, d2, margin) {
-      var t  = this.getTime();
-      var t1 = date.create(d1).getTime();
-      var t2 = date.create(d2).getTime();
-      var lo = math.min(t1, t2);
-      var hi = math.max(t1, t2);
-      margin = margin || 0;
-      return (lo - margin < t) && (hi + margin > t);
-    },
-
-     /***
-     * @method isLeapYear()
-     * @returns Boolean
-     * @short Returns true if the date is a leap year.
-     * @example
-     *
-     *   Date.create('2000').isLeapYear() -> true
-     *
-     ***/
-    'isLeapYear': function() {
-      var year = callDateGet(this, 'FullYear');
-      return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-    },
-
-     /***
-     * @method daysInMonth()
-     * @returns Number
-     * @short Returns the number of days in the date's month.
-     * @example
-     *
-     *   Date.create('May').daysInMonth()            -> 31
-     *   Date.create('February, 2000').daysInMonth() -> 29
-     *
-     ***/
-    'daysInMonth': function() {
-      return 32 - callDateGet(new date(callDateGet(this, 'FullYear'), callDateGet(this, 'Month'), 32), 'Date');
-    },
-
-     /***
-     * @method format(<format>, [locale] = currentLocale)
-     * @returns String
-     * @short Formats and outputs the date.
-     * @extra <format> can be a number of pre-determined formats or a string of tokens. Locale-specific formats are %short%, %long%, and %full% which have their own aliases and can be called with %date.short()%, etc. If <format> is not specified the %long% format is assumed. [locale] specifies a locale code to use (if not specified the current locale is used). See @date_format for more details.
-     *
-     * @set
-     *   short
-     *   long
-     *   full
-     *
-     * @example
-     *
-     *   Date.create().format()                                   -> ex. July 4, 2003
-     *   Date.create().format('{Weekday} {d} {Month}, {yyyy}')    -> ex. Monday July 4, 2003
-     *   Date.create().format('{hh}:{mm}')                        -> ex. 15:57
-     *   Date.create().format('{12hr}:{mm}{tt}')                  -> ex. 3:57pm
-     *   Date.create().format(Date.ISO8601_DATETIME)              -> ex. 2011-07-05 12:24:55.528Z
-     *   Date.create('last week').format('short', 'ja')                -> ex. 先週
-     *   Date.create('yesterday').format(function(value,unit,ms,loc) {
-     *     // value = 1, unit = 3, ms = -86400000, loc = [current locale object]
-     *   });                                                      -> ex. 1 day ago
-     *
-     ***/
-    'format': function(f, localeCode) {
-      return formatDate(this, f, false, localeCode);
-    },
-
-     /***
-     * @method relative([fn], [locale] = currentLocale)
-     * @returns String
-     * @short Returns a relative date string offset to the current time.
-     * @extra [fn] can be passed to provide for more granular control over the resulting string. [fn] is passed 4 arguments: the adjusted value, unit, offset in milliseconds, and a localization object. As an alternate syntax, [locale] can also be passed as the first (and only) parameter. For more, see @date_format.
-     * @example
-     *
-     *   Date.create('90 seconds ago').relative() -> 1 minute ago
-     *   Date.create('January').relative()        -> ex. 5 months ago
-     *   Date.create('January').relative('ja')    -> 3ヶ月前
-     *   Date.create('120 minutes ago').relative(function(val,unit,ms,loc) {
-     *     // value = 2, unit = 3, ms = -7200, loc = [current locale object]
-     *   });                                      -> ex. 5 months ago
-     *
-     ***/
-    'relative': function(f, localeCode) {
-      if(isString(f)) {
-        localeCode = f;
-        f = null;
-      }
-      return formatDate(this, f, true, localeCode);
-    },
-
-     /***
-     * @method is(<d>, [margin] = 0)
-     * @returns Boolean
-     * @short Returns true if the date is <d>.
-     * @extra <d> will accept a date object, timestamp, or text format. %is% additionally understands more generalized expressions like month/weekday names, 'today', etc, and compares to the precision implied in <d>. [margin] allows an extra margin of error in milliseconds.  For more, see @date_format.
-     * @example
-     *
-     *   Date.create().is('July')               -> true or false?
-     *   Date.create().is('1776')               -> false
-     *   Date.create().is('today')              -> true
-     *   Date.create().is('weekday')            -> true or false?
-     *   Date.create().is('July 4, 1776')       -> false
-     *   Date.create().is(-6106093200000)       -> false
-     *   Date.create().is(new Date(1776, 6, 4)) -> false
-     *
-     ***/
-    'is': function(d, margin, utc) {
-      var tmp, comp;
-      if(!this.isValid()) return;
-      if(isString(d)) {
-        d = d.trim().toLowerCase();
-        comp = this.clone().utc(utc);
-        switch(true) {
-          case d === 'future':  return this.getTime() > new date().getTime();
-          case d === 'past':    return this.getTime() < new date().getTime();
-          case d === 'weekday': return callDateGet(comp, 'Day') > 0 && callDateGet(comp, 'Day') < 6;
-          case d === 'weekend': return callDateGet(comp, 'Day') === 0 || callDateGet(comp, 'Day') === 6;
-          case (tmp = English['weekdays'].indexOf(d) % 7) > -1: return callDateGet(comp, 'Day') === tmp;
-          case (tmp = English['months'].indexOf(d) % 12) > -1:  return callDateGet(comp, 'Month') === tmp;
-        }
-      }
-      return compareDate(this, d, margin, utc);
-    },
-
-     /***
-     * @method reset([unit] = 'hours')
-     * @returns Date
-     * @short Resets the unit passed and all smaller units. Default is "hours", effectively resetting the time.
-     * @example
-     *
-     *   Date.create().reset('day')   -> Beginning of today
-     *   Date.create().reset('month') -> 1st of the month
-     *
-     ***/
-    'reset': function(unit) {
-      var params = {}, recognized;
-      unit = unit || 'hours';
-      if(unit === 'date') unit = 'days';
-      recognized = DateUnits.some(function(u) {
-        return unit === u.unit || unit === u.unit + 's';
-      });
-      params[unit] = unit.match(/^days?/) ? 1 : 0;
-      return recognized ? this.set(params, true) : this;
-    },
-
-     /***
-     * @method clone()
-     * @returns Date
-     * @short Clones the date.
-     * @example
-     *
-     *   Date.create().clone() -> Copy of now
-     *
-     ***/
-    'clone': function() {
-      var d = new date(this.getTime());
-      d.utc(!!this._utc);
-      return d;
-    }
-
-  });
-
-
-  // Instance aliases
-  date.extend({
-
-     /***
-     * @method iso()
-     * @alias toISOString
-     *
-     ***/
-    'iso': function() {
-      return this.toISOString();
-    },
-
-     /***
-     * @method getWeekday()
-     * @returns Number
-     * @short Alias for %getDay%.
-     * @set
-     *   getUTCWeekday
-     *
-     * @example
-     *
-     +   Date.create().getWeekday();    -> (ex.) 3
-     +   Date.create().getUTCWeekday();    -> (ex.) 3
-     *
-     ***/
-    'getWeekday':    date.prototype.getDay,
-    'getUTCWeekday':    date.prototype.getUTCDay
-
-  });
-
-
-
-  /***
-   * Number module
-   *
-   ***/
-
-  /***
-   * @method [unit]()
-   * @returns Number
-   * @short Takes the number as a corresponding unit of time and converts to milliseconds.
-   * @extra Method names can be both singular and plural.  Note that as "a month" is ambiguous as a unit of time, %months% will be equivalent to 30.4375 days, the average number in a month. Be careful using %months% if you need exact precision.
-   *
-   * @set
-   *   millisecond
-   *   milliseconds
-   *   second
-   *   seconds
-   *   minute
-   *   minutes
-   *   hour
-   *   hours
-   *   day
-   *   days
-   *   week
-   *   weeks
-   *   month
-   *   months
-   *   year
-   *   years
-   *
-   * @example
-   *
-   *   (5).milliseconds() -> 5
-   *   (10).hours()       -> 36000000
-   *   (1).day()          -> 86400000
-   *
-   ***
-   * @method [unit]Before([d], [locale] = currentLocale)
-   * @returns Date
-   * @short Returns a date that is <n> units before [d], where <n> is the number.
-   * @extra [d] will accept a date object, timestamp, or text format. Note that "months" is ambiguous as a unit of time. If the target date falls on a day that does not exist (ie. August 31 -> February 31), the date will be shifted to the last day of the month. Be careful using %monthsBefore% if you need exact precision. See @date_format for more.
-   *
-   * @set
-   *   millisecondBefore
-   *   millisecondsBefore
-   *   secondBefore
-   *   secondsBefore
-   *   minuteBefore
-   *   minutesBefore
-   *   hourBefore
-   *   hoursBefore
-   *   dayBefore
-   *   daysBefore
-   *   weekBefore
-   *   weeksBefore
-   *   monthBefore
-   *   monthsBefore
-   *   yearBefore
-   *   yearsBefore
-   *
-   * @example
-   *
-   *   (5).daysBefore('tuesday')          -> 5 days before tuesday of this week
-   *   (1).yearBefore('January 23, 1997') -> January 23, 1996
-   *
-   ***
-   * @method [unit]Ago()
-   * @returns Date
-   * @short Returns a date that is <n> units ago.
-   * @extra Note that "months" is ambiguous as a unit of time. If the target date falls on a day that does not exist (ie. August 31 -> February 31), the date will be shifted to the last day of the month. Be careful using %monthsAgo% if you need exact precision.
-   *
-   * @set
-   *   millisecondAgo
-   *   millisecondsAgo
-   *   secondAgo
-   *   secondsAgo
-   *   minuteAgo
-   *   minutesAgo
-   *   hourAgo
-   *   hoursAgo
-   *   dayAgo
-   *   daysAgo
-   *   weekAgo
-   *   weeksAgo
-   *   monthAgo
-   *   monthsAgo
-   *   yearAgo
-   *   yearsAgo
-   *
-   * @example
-   *
-   *   (5).weeksAgo() -> 5 weeks ago
-   *   (1).yearAgo()  -> January 23, 1996
-   *
-   ***
-   * @method [unit]After([d], [locale] = currentLocale)
-   * @returns Date
-   * @short Returns a date <n> units after [d], where <n> is the number.
-   * @extra [d] will accept a date object, timestamp, or text format. Note that "months" is ambiguous as a unit of time. If the target date falls on a day that does not exist (ie. August 31 -> February 31), the date will be shifted to the last day of the month. Be careful using %monthsAfter% if you need exact precision. See @date_format for more.
-   *
-   * @set
-   *   millisecondAfter
-   *   millisecondsAfter
-   *   secondAfter
-   *   secondsAfter
-   *   minuteAfter
-   *   minutesAfter
-   *   hourAfter
-   *   hoursAfter
-   *   dayAfter
-   *   daysAfter
-   *   weekAfter
-   *   weeksAfter
-   *   monthAfter
-   *   monthsAfter
-   *   yearAfter
-   *   yearsAfter
-   *
-   * @example
-   *
-   *   (5).daysAfter('tuesday')          -> 5 days after tuesday of this week
-   *   (1).yearAfter('January 23, 1997') -> January 23, 1998
-   *
-   ***
-   * @method [unit]FromNow()
-   * @returns Date
-   * @short Returns a date <n> units from now.
-   * @extra Note that "months" is ambiguous as a unit of time. If the target date falls on a day that does not exist (ie. August 31 -> February 31), the date will be shifted to the last day of the month. Be careful using %monthsFromNow% if you need exact precision.
-   *
-   * @set
-   *   millisecondFromNow
-   *   millisecondsFromNow
-   *   secondFromNow
-   *   secondsFromNow
-   *   minuteFromNow
-   *   minutesFromNow
-   *   hourFromNow
-   *   hoursFromNow
-   *   dayFromNow
-   *   daysFromNow
-   *   weekFromNow
-   *   weeksFromNow
-   *   monthFromNow
-   *   monthsFromNow
-   *   yearFromNow
-   *   yearsFromNow
-   *
-   * @example
-   *
-   *   (5).weeksFromNow() -> 5 weeks ago
-   *   (1).yearFromNow()  -> January 23, 1998
-   *
-   ***/
-  function buildNumberToDateAlias(u, multiplier) {
-    var unit = u.unit, methods = {};
-    function base() { return round(this * multiplier); }
-    function after() { return createDate(arguments)[u.addMethod](this);  }
-    function before() { return createDate(arguments)[u.addMethod](-this); }
-    methods[unit] = base;
-    methods[unit + 's'] = base;
-    methods[unit + 'Before'] = before;
-    methods[unit + 'sBefore'] = before;
-    methods[unit + 'Ago'] = before;
-    methods[unit + 'sAgo'] = before;
-    methods[unit + 'After'] = after;
-    methods[unit + 'sAfter'] = after;
-    methods[unit + 'FromNow'] = after;
-    methods[unit + 'sFromNow'] = after;
-    number.extend(methods);
-  }
-
-  number.extend({
-
-     /***
-     * @method duration([locale] = currentLocale)
-     * @returns String
-     * @short Takes the number as milliseconds and returns a unit-adjusted localized string.
-     * @extra This method is the same as %Date#relative% without the localized equivalent of "from now" or "ago". [locale] can be passed as the first (and only) parameter. Note that this method is only available when the dates package is included.
-     * @example
-     *
-     *   (500).duration() -> '500 milliseconds'
-     *   (1200).duration() -> '1 second'
-     *   (75).minutes().duration() -> '1 hour'
-     *   (75).minutes().duration('es') -> '1 hora'
-     *
-     ***/
-    'duration': function(localeCode) {
-      return getLocalization(localeCode).getDuration(this);
-    }
-
-  });
-
-
-  English = CurrentLocalization = date.addLocale('en', {
-    'plural':     true,
-    'timeMarker': 'at',
-    'ampm':       'am,pm',
-    'months':     'January,February,March,April,May,June,July,August,September,October,November,December',
-    'weekdays':   'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
-    'units':      'millisecond:|s,second:|s,minute:|s,hour:|s,day:|s,week:|s,month:|s,year:|s',
-    'numbers':    'one,two,three,four,five,six,seven,eight,nine,ten',
-    'articles':   'a,an,the',
-    'tokens':     'the,st|nd|rd|th,of',
-    'short':      '{Month} {d}, {yyyy}',
-    'long':       '{Month} {d}, {yyyy} {h}:{mm}{tt}',
-    'full':       '{Weekday} {Month} {d}, {yyyy} {h}:{mm}:{ss}{tt}',
-    'past':       '{num} {unit} {sign}',
-    'future':     '{num} {unit} {sign}',
-    'duration':   '{num} {unit}',
-    'modifiers': [
-      { 'name': 'sign',  'src': 'ago|before', 'value': -1 },
-      { 'name': 'sign',  'src': 'from now|after|from|in|later', 'value': 1 },
-      { 'name': 'edge',  'src': 'last day', 'value': -2 },
-      { 'name': 'edge',  'src': 'end', 'value': -1 },
-      { 'name': 'edge',  'src': 'first day|beginning', 'value': 1 },
-      { 'name': 'shift', 'src': 'last', 'value': -1 },
-      { 'name': 'shift', 'src': 'the|this', 'value': 0 },
-      { 'name': 'shift', 'src': 'next', 'value': 1 }
-    ],
-    'dateParse': [
-      '{num} {unit} {sign}',
-      '{sign} {num} {unit}',
-      '{month} {year}',
-      '{shift} {unit=5-7}',
-      '{0?} {date}{1}',
-      '{0?} {edge} of {shift?} {unit=4-7?}{month?}{year?}'
-    ],
-    'timeParse': [
-      '{0} {num}{1} {day} of {month} {year?}',
-      '{weekday?} {month} {date}{1?} {year?}',
-      '{date} {month} {year}',
-      '{date} {month}',
-      '{shift} {weekday}',
-      '{shift} week {weekday}',
-      '{weekday} {2?} {shift} week',
-      '{num} {unit=4-5} {sign} {day}',
-      '{0?} {date}{1} of {month}',
-      '{0?}{month?} {date?}{1?} of {shift} {unit=6-7}'
-    ]
-  });
-
-  buildDateUnits();
-  buildDateMethods();
-  buildCoreInputFormats();
-  buildDateOutputShortcuts();
-  buildAsianDigits();
-  buildRelativeAliases();
-  buildUTCAliases();
-  setDateProperties();
-
 /*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('da');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('da', {
-  'plural': true,
-  'months': 'januar,februar,marts,april,maj,juni,juli,august,september,oktober,november,december',
-  'weekdays': 'søndag|sondag,mandag,tirsdag,onsdag,torsdag,fredag,lørdag|lordag',
-  'units': 'millisekund:|er,sekund:|er,minut:|ter,tim:e|er,dag:|e,ug:e|er|en,måned:|er|en+maaned:|er|en,år:||et+aar:||et',
-  'numbers': 'en|et,to,tre,fire,fem,seks,syv,otte,ni,ti',
-  'tokens': 'den,for',
-  'articles': 'den',
-  'short':'d. {d}. {month} {yyyy}',
-  'long': 'den {d}. {month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} den {d}. {month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{num} {unit} {sign}',
-  'future': '{sign} {num} {unit}',
-  'duration': '{num} {unit}',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'forgårs|i forgårs|forgaars|i forgaars', 'value': -2 },
-    { 'name': 'day', 'src': 'i går|igår|i gaar|igaar', 'value': -1 },
-    { 'name': 'day', 'src': 'i dag|idag', 'value': 0 },
-    { 'name': 'day', 'src': 'i morgen|imorgen', 'value': 1 },
-    { 'name': 'day', 'src': 'over morgon|overmorgen|i over morgen|i overmorgen|iovermorgen', 'value': 2 },
-    { 'name': 'sign', 'src': 'siden', 'value': -1 },
-    { 'name': 'sign', 'src': 'om', 'value':  1 },
-    { 'name': 'shift', 'src': 'i sidste|sidste', 'value': -1 },
-    { 'name': 'shift', 'src': 'denne', 'value': 0 },
-    { 'name': 'shift', 'src': 'næste|naeste', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{sign} {num} {unit}',
-    '{1?} {num} {unit} {sign}',
-    '{shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{0?} {weekday?} {date?} {month} {year}',
-    '{date} {month}',
-    '{shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('de');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('de', {
-  'plural': true,
-   'capitalizeUnit': true,
-  'months': 'Januar,Februar,März|Marz,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember',
-  'weekdays': 'Sonntag,Montag,Dienstag,Mittwoch,Donnerstag,Freitag,Samstag',
-  'units': 'Millisekunde:|n,Sekunde:|n,Minute:|n,Stunde:|n,Tag:|en,Woche:|n,Monat:|en,Jahr:|en',
-  'numbers': 'ein:|e|er|en|em,zwei,drei,vier,fuenf,sechs,sieben,acht,neun,zehn',
-  'tokens': 'der',
-  'short':'{d}. {Month} {yyyy}',
-  'long': '{d}. {Month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} {d}. {Month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{sign} {num} {unit}',
-  'future': '{sign} {num} {unit}',
-  'duration': '{num} {unit}',
-  'timeMarker': 'um',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'vorgestern', 'value': -2 },
-    { 'name': 'day', 'src': 'gestern', 'value': -1 },
-    { 'name': 'day', 'src': 'heute', 'value': 0 },
-    { 'name': 'day', 'src': 'morgen', 'value': 1 },
-    { 'name': 'day', 'src': 'übermorgen|ubermorgen|uebermorgen', 'value': 2 },
-    { 'name': 'sign', 'src': 'vor:|her', 'value': -1 },
-    { 'name': 'sign', 'src': 'in', 'value': 1 },
-    { 'name': 'shift', 'src': 'letzte:|r|n|s', 'value': -1 },
-    { 'name': 'shift', 'src': 'nächste:|r|n|s+nachste:|r|n|s+naechste:|r|n|s+kommende:n|r', 'value': 1 }
-  ],
-  'dateParse': [
-    '{sign} {num} {unit}',
-    '{num} {unit} {sign}',
-    '{shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{weekday?} {date?} {month} {year?}',
-    '{shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('es');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('es', {
-  'plural': true,
-  'months': 'enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
-  'weekdays': 'domingo,lunes,martes,miércoles|miercoles,jueves,viernes,sábado|sabado',
-  'units': 'milisegundo:|s,segundo:|s,minuto:|s,hora:|s,día|días|dia|dias,semana:|s,mes:|es,año|años|ano|anos',
-  'numbers': 'uno,dos,tres,cuatro,cinco,seis,siete,ocho,nueve,diez',
-  'tokens': 'el,de',
-  'short':'{d} {month} {yyyy}',
-  'long': '{d} {month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} {d} {month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{sign} {num} {unit}',
-  'future': '{num} {unit} {sign}',
-  'duration': '{num} {unit}',
-  'timeMarker': 'a las',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'anteayer', 'value': -2 },
-    { 'name': 'day', 'src': 'ayer', 'value': -1 },
-    { 'name': 'day', 'src': 'hoy', 'value': 0 },
-    { 'name': 'day', 'src': 'mañana|manana', 'value': 1 },
-    { 'name': 'sign', 'src': 'hace', 'value': -1 },
-    { 'name': 'sign', 'src': 'de ahora', 'value': 1 },
-    { 'name': 'shift', 'src': 'pasad:o|a', 'value': -1 },
-    { 'name': 'shift', 'src': 'próximo|próxima|proximo|proxima', 'value': 1 }
-  ],
-  'dateParse': [
-    '{sign} {num} {unit}',
-    '{num} {unit} {sign}',
-    '{0?} {unit=5-7} {shift}',
-    '{0?} {shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{shift} {weekday}',
-    '{weekday} {shift}',
-    '{date?} {1?} {month} {1?} {year?}'
-  ]
-});
-Date.addLocale('fi', {
-    'plural':     true,
-    'timeMarker': 'kello',
-    'ampm':       ',',
-    'months':     'tammikuu,helmikuu,maaliskuu,huhtikuu,toukokuu,kesäkuu,heinäkuu,elokuu,syyskuu,lokakuu,marraskuu,joulukuu',
-    'weekdays':   'sunnuntai,maanantai,tiistai,keskiviikko,torstai,perjantai,lauantai',
-    'units':      'millisekun:ti|tia|teja|tina|nin,sekun:ti|tia|teja|tina|nin,minuut:ti|tia|teja|tina|in,tun:ti|tia|teja|tina|nin,päiv:ä|ää|iä|änä|än,viik:ko|koa|koja|on|kona,kuukau:si|sia|tta|den|tena,vuo:si|sia|tta|den|tena',
-    'numbers':    'yksi|ensimmäinen,kaksi|toinen,kolm:e|as,neljä:s,vii:si|des,kuu:si|des,seitsemä:n|s,kahdeksa:n|s,yhdeksä:n|s,kymmene:n|s',
-    'articles':   '',
-    'optionals':  '',
-    'short':      '{d}. {month}ta {yyyy}',
-    'long':       '{d}. {month}ta {yyyy} kello {H}.{mm}',
-    'full':       '{Weekday}na {d}. {month}ta {yyyy} kello {H}.{mm}',
-    'relative':       function(num, unit, ms, format) {
-      var units = this['units'];
-      function numberWithUnit(mult) {
-        return (num === 1 ? '' : num + ' ') + units[(8 * mult) + unit];
-      }
-      switch(format) {
-        case 'duration':  return numberWithUnit(0);
-        case 'past':      return numberWithUnit(num > 1 ? 1 : 0) + ' sitten';
-        case 'future':    return numberWithUnit(4) + ' päästä';
-      }
-    },
-    'modifiers': [
-        { 'name': 'day',   'src': 'toissa päivänä|toissa päiväistä', 'value': -2 },
-        { 'name': 'day',   'src': 'eilen|eilistä', 'value': -1 },
-        { 'name': 'day',   'src': 'tänään', 'value': 0 },
-        { 'name': 'day',   'src': 'huomenna|huomista', 'value': 1 },
-        { 'name': 'day',   'src': 'ylihuomenna|ylihuomista', 'value': 2 },
-        { 'name': 'sign',  'src': 'sitten|aiemmin', 'value': -1 },
-        { 'name': 'sign',  'src': 'päästä|kuluttua|myöhemmin', 'value': 1 },
-        { 'name': 'edge',  'src': 'viimeinen|viimeisenä', 'value': -2 },
-        { 'name': 'edge',  'src': 'lopussa', 'value': -1 },
-        { 'name': 'edge',  'src': 'ensimmäinen|ensimmäisenä', 'value': 1 },
-        { 'name': 'shift', 'src': 'edellinen|edellisenä|edeltävä|edeltävänä|viime|toissa', 'value': -1 },
-        { 'name': 'shift', 'src': 'tänä|tämän', 'value': 0 },
-        { 'name': 'shift', 'src': 'seuraava|seuraavana|tuleva|tulevana|ensi', 'value': 1 }
-    ],
-    'dateParse': [
-        '{num} {unit} {sign}',
-        '{sign} {num} {unit}',
-        '{num} {unit=4-5} {sign} {day}',
-        '{month} {year}',
-        '{shift} {unit=5-7}'
-    ],
-    'timeParse': [
-        '{0} {num}{1} {day} of {month} {year?}',
-        '{weekday?} {month} {date}{1} {year?}',
-        '{date} {month} {year}',
-        '{shift} {weekday}',
-        '{shift} week {weekday}',
-        '{weekday} {2} {shift} week',
-        '{0} {date}{1} of {month}',
-        '{0}{month?} {date?}{1} of {shift} {unit=6-7}'
-    ]
-});
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('fr');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('fr', {
-  'plural': true,
-  'months': 'janvier,février|fevrier,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre|decembre',
-  'weekdays': 'dimanche,lundi,mardi,mercredi,jeudi,vendredi,samedi',
-  'units': 'milliseconde:|s,seconde:|s,minute:|s,heure:|s,jour:|s,semaine:|s,mois,an:|s|née|nee',
-  'numbers': 'un:|e,deux,trois,quatre,cinq,six,sept,huit,neuf,dix',
-  'tokens': ["l'|la|le"],
-  'short':'{d} {month} {yyyy}',
-  'long': '{d} {month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} {d} {month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{sign} {num} {unit}',
-  'future': '{sign} {num} {unit}',
-  'duration': '{num} {unit}',
-  'timeMarker': 'à',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'hier', 'value': -1 },
-    { 'name': 'day', 'src': "aujourd'hui", 'value': 0 },
-    { 'name': 'day', 'src': 'demain', 'value': 1 },
-    { 'name': 'sign', 'src': 'il y a', 'value': -1 },
-    { 'name': 'sign', 'src': "dans|d'ici", 'value': 1 },
-    { 'name': 'shift', 'src': 'derni:èr|er|ère|ere', 'value': -1 },
-    { 'name': 'shift', 'src': 'prochain:|e', 'value': 1 }
-  ],
-  'dateParse': [
-    '{sign} {num} {unit}',
-    '{sign} {num} {unit}',
-    '{0?} {unit=5-7} {shift}'
-  ],
-  'timeParse': [
-    '{weekday?} {0?} {date?} {month} {year?}',
-    '{0?} {weekday} {shift}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('it');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('it', {
-  'plural': true,
-  'months': 'Gennaio,Febbraio,Marzo,Aprile,Maggio,Giugno,Luglio,Agosto,Settembre,Ottobre,Novembre,Dicembre',
-  'weekdays': 'Domenica,Luned:ì|i,Marted:ì|i,Mercoled:ì|i,Gioved:ì|i,Venerd:ì|i,Sabato',
-  'units': 'millisecond:o|i,second:o|i,minut:o|i,or:a|e,giorn:o|i,settiman:a|e,mes:e|i,ann:o|i',
-  'numbers': "un:|a|o|',due,tre,quattro,cinque,sei,sette,otto,nove,dieci",
-  'tokens': "l'|la|il",
-  'short':'{d} {Month} {yyyy}',
-  'long': '{d} {Month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} {d} {Month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{num} {unit} {sign}',
-  'future': '{num} {unit} {sign}',
-  'duration': '{num} {unit}',
-  'timeMarker': 'alle',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'ieri', 'value': -1 },
-    { 'name': 'day', 'src': 'oggi', 'value': 0 },
-    { 'name': 'day', 'src': 'domani', 'value': 1 },
-    { 'name': 'day', 'src': 'dopodomani', 'value': 2 },
-    { 'name': 'sign', 'src': 'fa', 'value': -1 },
-    { 'name': 'sign', 'src': 'da adesso', 'value': 1 },
-    { 'name': 'shift', 'src': 'scors:o|a', 'value': -1 },
-    { 'name': 'shift', 'src': 'prossim:o|a', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{0?} {unit=5-7} {shift}',
-    '{0?} {shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{weekday?} {date?} {month} {year?}',
-    '{shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('ja');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('ja', {
-  'monthSuffix': '月',
-  'weekdays': '日曜日,月曜日,火曜日,水曜日,木曜日,金曜日,土曜日',
-  'units': 'ミリ秒,秒,分,時間,日,週間|週,ヶ月|ヵ月|月,年',
-  'short': '{yyyy}年{M}月{d}日',
-  'long': '{yyyy}年{M}月{d}日 {H}時{mm}分',
-  'full': '{yyyy}年{M}月{d}日 {Weekday} {H}時{mm}分{ss}秒',
-  'past': '{num}{unit}{sign}',
-  'future': '{num}{unit}{sign}',
-  'duration': '{num}{unit}',
-  'timeSuffixes': '時,分,秒',
-  'ampm': '午前,午後',
-  'modifiers': [
-    { 'name': 'day', 'src': '一昨日', 'value': -2 },
-    { 'name': 'day', 'src': '昨日', 'value': -1 },
-    { 'name': 'day', 'src': '今日', 'value': 0 },
-    { 'name': 'day', 'src': '明日', 'value': 1 },
-    { 'name': 'day', 'src': '明後日', 'value': 2 },
-    { 'name': 'sign', 'src': '前', 'value': -1 },
-    { 'name': 'sign', 'src': '後', 'value':  1 },
-    { 'name': 'shift', 'src': '去|先', 'value': -1 },
-    { 'name': 'shift', 'src': '来', 'value':  1 }
-  ],
-  'dateParse': [
-    '{num}{unit}{sign}'
-  ],
-  'timeParse': [
-    '{shift}{unit=5-7}{weekday?}',
-    '{year}年{month?}月?{date?}日?',
-    '{month}月{date?}日?',
-    '{date}日'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('ko');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('ko', {
-  'digitDate': true,
-  'monthSuffix': '월',
-  'weekdays': '일요일,월요일,화요일,수요일,목요일,금요일,토요일',
-  'units': '밀리초,초,분,시간,일,주,개월|달,년',
-  'numbers': '일|한,이,삼,사,오,육,칠,팔,구,십',
-  'short': '{yyyy}년{M}월{d}일',
-  'long': '{yyyy}년{M}월{d}일 {H}시{mm}분',
-  'full': '{yyyy}년{M}월{d}일 {Weekday} {H}시{mm}분{ss}초',
-  'past': '{num}{unit} {sign}',
-  'future': '{num}{unit} {sign}',
-  'duration': '{num}{unit}',
-  'timeSuffixes': '시,분,초',
-  'ampm': '오전,오후',
-  'modifiers': [
-    { 'name': 'day', 'src': '그저께', 'value': -2 },
-    { 'name': 'day', 'src': '어제', 'value': -1 },
-    { 'name': 'day', 'src': '오늘', 'value': 0 },
-    { 'name': 'day', 'src': '내일', 'value': 1 },
-    { 'name': 'day', 'src': '모레', 'value': 2 },
-    { 'name': 'sign', 'src': '전', 'value': -1 },
-    { 'name': 'sign', 'src': '후', 'value':  1 },
-    { 'name': 'shift', 'src': '지난|작', 'value': -1 },
-    { 'name': 'shift', 'src': '이번', 'value': 0 },
-    { 'name': 'shift', 'src': '다음|내', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num}{unit} {sign}',
-    '{shift?} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{shift} {unit=5?} {weekday}',
-    '{year}년{month?}월?{date?}일?',
-    '{month}월{date?}일?',
-    '{date}일'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('nl');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('nl', {
-  'plural': true,
-  'months': 'januari,februari,maart,april,mei,juni,juli,augustus,september,oktober,november,december',
-  'weekdays': 'zondag|zo,maandag|ma,dinsdag|di,woensdag|woe|wo,donderdag|do,vrijdag|vrij|vr,zaterdag|za',
-  'units': 'milliseconde:|n,seconde:|n,minu:ut|ten,uur,dag:|en,we:ek|ken,maand:|en,jaar',
-  'numbers': 'een,twee,drie,vier,vijf,zes,zeven,acht,negen',
-  'tokens': '',
-  'short':'{d} {Month} {yyyy}',
-  'long': '{d} {Month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} {d} {Month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{num} {unit} {sign}',
-  'future': '{num} {unit} {sign}',
-  'duration': '{num} {unit}',
-  'timeMarker': "'s|om",
-  'modifiers': [
-    { 'name': 'day', 'src': 'gisteren', 'value': -1 },
-    { 'name': 'day', 'src': 'vandaag', 'value': 0 },
-    { 'name': 'day', 'src': 'morgen', 'value': 1 },
-    { 'name': 'day', 'src': 'overmorgen', 'value': 2 },
-    { 'name': 'sign', 'src': 'geleden', 'value': -1 },
-    { 'name': 'sign', 'src': 'vanaf nu', 'value': 1 },
-    { 'name': 'shift', 'src': 'laatste|vorige|afgelopen', 'value': -1 },
-    { 'name': 'shift', 'src': 'volgend:|e', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{0?} {unit=5-7} {shift}',
-    '{0?} {shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{weekday?} {date?} {month} {year?}',
-    '{shift} {weekday}'
-  ]
-});
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('pl');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.optionals. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('pl', {
-  'plural':    true,
-  'months':    'Styczeń|Stycznia,Luty|Lutego,Marzec|Marca,Kwiecień|Kwietnia,Maj|Maja,Czerwiec|Czerwca,Lipiec|Lipca,Sierpień|Sierpnia,Wrzesień|Września,Październik|Października,Listopad|Listopada,Grudzień|Grudnia',
-  'weekdays':  'Niedziela|Niedzielę,Poniedziałek,Wtorek,Środ:a|ę,Czwartek,Piątek,Sobota|Sobotę',
-  'units':     'milisekund:a|y|,sekund:a|y|,minut:a|y|,godzin:a|y|,dzień|dni,tydzień|tygodnie|tygodni,miesiące|miesiące|miesięcy,rok|lata|lat',
-  'numbers':   'jeden|jedną,dwa|dwie,trzy,cztery,pięć,sześć,siedem,osiem,dziewięć,dziesięć',
-  'optionals': 'w|we,roku',
-  'short':     '{d} {Month} {yyyy}',
-  'long':      '{d} {Month} {yyyy} {H}:{mm}',
-  'full' :     '{Weekday}, {d} {Month} {yyyy} {H}:{mm}:{ss}',
-  'past':      '{num} {unit} {sign}',
-  'future':    '{sign} {num} {unit}',
-  'duration':  '{num} {unit}',
-  'timeMarker':'o',
-  'ampm':      'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'przedwczoraj', 'value': -2 },
-    { 'name': 'day', 'src': 'wczoraj', 'value': -1 },
-    { 'name': 'day', 'src': 'dzisiaj|dziś', 'value': 0 },
-    { 'name': 'day', 'src': 'jutro', 'value': 1 },
-    { 'name': 'day', 'src': 'pojutrze', 'value': 2 },
-    { 'name': 'sign', 'src': 'temu|przed', 'value': -1 },
-    { 'name': 'sign', 'src': 'za', 'value': 1 },
-    { 'name': 'shift', 'src': 'zeszły|zeszła|ostatni|ostatnia', 'value': -1 },
-    { 'name': 'shift', 'src': 'następny|następna|następnego|przyszły|przyszła|przyszłego', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{sign} {num} {unit}',
-    '{month} {year}',
-    '{shift} {unit=5-7}',
-    '{0} {shift?} {weekday}'
-  ],
-  'timeParse': [
-    '{date} {month} {year?} {1}',
-    '{0} {shift?} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('pt');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('pt', {
-  'plural': true,
-  'months': 'janeiro,fevereiro,março,abril,maio,junho,julho,agosto,setembro,outubro,novembro,dezembro',
-  'weekdays': 'domingo,segunda-feira,terça-feira,quarta-feira,quinta-feira,sexta-feira,sábado|sabado',
-  'units': 'milisegundo:|s,segundo:|s,minuto:|s,hora:|s,dia:|s,semana:|s,mês|mêses|mes|meses,ano:|s',
-  'numbers': 'um,dois,três|tres,quatro,cinco,seis,sete,oito,nove,dez,uma,duas',
-  'tokens': 'a,de',
-  'short':'{d} de {month} de {yyyy}',
-  'long': '{d} de {month} de {yyyy} {H}:{mm}',
-  'full': '{Weekday}, {d} de {month} de {yyyy} {H}:{mm}:{ss}',
-  'past': '{num} {unit} {sign}',
-  'future': '{sign} {num} {unit}',
-  'duration': '{num} {unit}',
-  'timeMarker': 'às',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'anteontem', 'value': -2 },
-    { 'name': 'day', 'src': 'ontem', 'value': -1 },
-    { 'name': 'day', 'src': 'hoje', 'value': 0 },
-    { 'name': 'day', 'src': 'amanh:ã|a', 'value': 1 },
-    { 'name': 'sign', 'src': 'atrás|atras|há|ha', 'value': -1 },
-    { 'name': 'sign', 'src': 'daqui a', 'value': 1 },
-    { 'name': 'shift', 'src': 'passad:o|a', 'value': -1 },
-    { 'name': 'shift', 'src': 'próximo|próxima|proximo|proxima', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{sign} {num} {unit}',
-    '{0?} {unit=5-7} {shift}',
-    '{0?} {shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{date?} {1?} {month} {1?} {year?}',
-    '{0?} {shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('ru');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('ru', {
-  'months': 'Январ:я|ь,Феврал:я|ь,Март:а|,Апрел:я|ь,Ма:я|й,Июн:я|ь,Июл:я|ь,Август:а|,Сентябр:я|ь,Октябр:я|ь,Ноябр:я|ь,Декабр:я|ь',
-  'weekdays': 'Воскресенье,Понедельник,Вторник,Среда,Четверг,Пятница,Суббота',
-  'units': 'миллисекунд:а|у|ы|,секунд:а|у|ы|,минут:а|у|ы|,час:||а|ов,день|день|дня|дней,недел:я|ю|и|ь|е,месяц:||а|ев|е,год|год|года|лет|году',
-  'numbers': 'од:ин|ну,дв:а|е,три,четыре,пять,шесть,семь,восемь,девять,десять',
-  'tokens': 'в|на,года',
-  'short':'{d} {month} {yyyy} года',
-  'long': '{d} {month} {yyyy} года {H}:{mm}',
-  'full': '{Weekday} {d} {month} {yyyy} года {H}:{mm}:{ss}',
-  'relative': function(num, unit, ms, format) {
-    var numberWithUnit, last = num.toString().slice(-1);
-    switch(true) {
-      case num >= 11 && num <= 15: mult = 3; break;
-      case last == 1: mult = 1; break;
-      case last >= 2 && last <= 4: mult = 2; break;
-      default: mult = 3;
-    }
-    numberWithUnit = num + ' ' + this['units'][(mult * 8) + unit];
-    switch(format) {
-      case 'duration':  return numberWithUnit;
-      case 'past':      return numberWithUnit + ' назад';
-      case 'future':    return 'через ' + numberWithUnit;
-    }
-  },
-  'timeMarker': 'в',
-  'ampm': ' утра, вечера',
-  'modifiers': [
-    { 'name': 'day', 'src': 'позавчера', 'value': -2 },
-    { 'name': 'day', 'src': 'вчера', 'value': -1 },
-    { 'name': 'day', 'src': 'сегодня', 'value': 0 },
-    { 'name': 'day', 'src': 'завтра', 'value': 1 },
-    { 'name': 'day', 'src': 'послезавтра', 'value': 2 },
-    { 'name': 'sign', 'src': 'назад', 'value': -1 },
-    { 'name': 'sign', 'src': 'через', 'value': 1 },
-    { 'name': 'shift', 'src': 'прошл:ый|ой|ом', 'value': -1 },
-    { 'name': 'shift', 'src': 'следующ:ий|ей|ем', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{sign} {num} {unit}',
-    '{month} {year}',
-    '{0?} {shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{date} {month} {year?} {1?}',
-    '{0?} {shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('sv');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('sv', {
-  'plural': true,
-  'months': 'januari,februari,mars,april,maj,juni,juli,augusti,september,oktober,november,december',
-  'weekdays': 'söndag|sondag,måndag:|en+mandag:|en,tisdag,onsdag,torsdag,fredag,lördag|lordag',
-  'units': 'millisekund:|er,sekund:|er,minut:|er,timm:e|ar,dag:|ar,veck:a|or|an,månad:|er|en+manad:|er|en,år:||et+ar:||et',
-  'numbers': 'en|ett,två|tva,tre,fyra,fem,sex,sju,åtta|atta,nio,tio',
-  'tokens': 'den,för|for',
-  'articles': 'den',
-  'short':'den {d} {month} {yyyy}',
-  'long': 'den {d} {month} {yyyy} {H}:{mm}',
-  'full': '{Weekday} den {d} {month} {yyyy} {H}:{mm}:{ss}',
-  'past': '{num} {unit} {sign}',
-  'future': '{sign} {num} {unit}',
-  'duration': '{num} {unit}',
-  'ampm': 'am,pm',
-  'modifiers': [
-    { 'name': 'day', 'src': 'förrgår|i förrgår|iförrgår|forrgar|i forrgar|iforrgar', 'value': -2 },
-    { 'name': 'day', 'src': 'går|i går|igår|gar|i gar|igar', 'value': -1 },
-    { 'name': 'day', 'src': 'dag|i dag|idag', 'value': 0 },
-    { 'name': 'day', 'src': 'morgon|i morgon|imorgon', 'value': 1 },
-    { 'name': 'day', 'src': 'över morgon|övermorgon|i över morgon|i övermorgon|iövermorgon|over morgon|overmorgon|i over morgon|i overmorgon|iovermorgon', 'value': 2 },
-    { 'name': 'sign', 'src': 'sedan|sen', 'value': -1 },
-    { 'name': 'sign', 'src': 'om', 'value':  1 },
-    { 'name': 'shift', 'src': 'i förra|förra|i forra|forra', 'value': -1 },
-    { 'name': 'shift', 'src': 'denna', 'value': 0 },
-    { 'name': 'shift', 'src': 'nästa|nasta', 'value': 1 }
-  ],
-  'dateParse': [
-    '{num} {unit} {sign}',
-    '{sign} {num} {unit}',
-    '{1?} {num} {unit} {sign}',
-    '{shift} {unit=5-7}'
-  ],
-  'timeParse': [
-    '{0?} {weekday?} {date?} {month} {year}',
-    '{date} {month}',
-    '{shift} {weekday}'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('zh-CN');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-Date.addLocale('zh-CN', {
-  'variant': true,
-  'monthSuffix': '月',
-  'weekdays': '星期日|周日,星期一|周一,星期二|周二,星期三|周三,星期四|周四,星期五|周五,星期六|周六',
-  'units': '毫秒,秒钟,分钟,小时,天,个星期|周,个月,年',
-  'tokens': '日|号',
-  'short':'{yyyy}年{M}月{d}日',
-  'long': '{yyyy}年{M}月{d}日 {tt}{h}:{mm}',
-  'full': '{yyyy}年{M}月{d}日 {weekday} {tt}{h}:{mm}:{ss}',
-  'past': '{num}{unit}{sign}',
-  'future': '{num}{unit}{sign}',
-  'duration': '{num}{unit}',
-  'timeSuffixes': '点|时,分钟?,秒',
-  'ampm': '上午,下午',
-  'modifiers': [
-    { 'name': 'day', 'src': '前天', 'value': -2 },
-    { 'name': 'day', 'src': '昨天', 'value': -1 },
-    { 'name': 'day', 'src': '今天', 'value': 0 },
-    { 'name': 'day', 'src': '明天', 'value': 1 },
-    { 'name': 'day', 'src': '后天', 'value': 2 },
-    { 'name': 'sign', 'src': '前', 'value': -1 },
-    { 'name': 'sign', 'src': '后', 'value':  1 },
-    { 'name': 'shift', 'src': '上|去', 'value': -1 },
-    { 'name': 'shift', 'src': '这', 'value':  0 },
-    { 'name': 'shift', 'src': '下|明', 'value':  1 }
-  ],
-  'dateParse': [
-    '{num}{unit}{sign}',
-    '{shift}{unit=5-7}'
-  ],
-  'timeParse': [
-    '{shift}{weekday}',
-    '{year}年{month?}月?{date?}{0?}',
-    '{month}月{date?}{0?}',
-    '{date}[日号]'
-  ]
-});
-
-/*
- *
- * Date.addLocale(<code>) adds this locale to Sugar.
- * To set the locale globally, simply call:
- *
- * Date.setLocale('zh-TW');
- *
- * var locale = Date.getLocale(<code>) will return this object, which
- * can be tweaked to change the behavior of parsing/formatting in the locales.
- *
- * locale.addFormat adds a date format (see this file for examples).
- * Special tokens in the date format will be parsed out into regex tokens:
- *
- * {0} is a reference to an entry in locale.tokens. Output: (?:the)?
- * {unit} is a reference to all units. Output: (day|week|month|...)
- * {unit3} is a reference to a specific unit. Output: (hour)
- * {unit3-5} is a reference to a subset of the units array. Output: (hour|day|week)
- * {unit?} "?" makes that token optional. Output: (day|week|month)?
- *
- * {day} Any reference to tokens in the modifiers array will include all with the same name. Output: (yesterday|today|tomorrow)
- *
- * All spaces are optional and will be converted to "\s*"
- *
- * Locale arrays months, weekdays, units, numbers, as well as the "src" field for
- * all entries in the modifiers array follow a special format indicated by a colon:
- *
- * minute:|s  = minute|minutes
- * thicke:n|r = thicken|thicker
- *
- * Additionally in the months, weekdays, units, and numbers array these will be added at indexes that are multiples
- * of the relevant number for retrieval. For example having "sunday:|s" in the units array will result in:
- *
- * units: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sundays']
- *
- * When matched, the index will be found using:
- *
- * units.indexOf(match) % 7;
- *
- * Resulting in the correct index with any number of alternates for that entry.
- *
- */
-
-  //'zh-TW': '1;月;年;;星期日|週日,星期一|週一,星期二|週二,星期三|週三,星期四|週四,星期五|週五,星期六|週六;毫秒,秒鐘,分鐘,小時,天,個星期|週,個月,年;;;日|號;;上午,下午;點|時,分鐘?,秒;{num}{unit}{sign},{shift}{unit=5-7};{shift}{weekday},{year}年{month?}月?{date?}{0},{month}月{date?}{0},{date}{0};{yyyy}年{M}月{d}日 {Weekday};{tt}{h}:{mm}:{ss};前天,昨天,今天,明天,後天;,前,,後;,上|去,這,下|明',
-
-Date.addLocale('zh-TW', {
-  'monthSuffix': '月',
-  'weekdays': '星期日|週日,星期一|週一,星期二|週二,星期三|週三,星期四|週四,星期五|週五,星期六|週六',
-  'units': '毫秒,秒鐘,分鐘,小時,天,個星期|週,個月,年',
-  'tokens': '日|號',
-  'short':'{yyyy}年{M}月{d}日',
-  'long': '{yyyy}年{M}月{d}日 {tt}{h}:{mm}',
-  'full': '{yyyy}年{M}月{d}日 {Weekday} {tt}{h}:{mm}:{ss}',
-  'past': '{num}{unit}{sign}',
-  'future': '{num}{unit}{sign}',
-  'duration': '{num}{unit}',
-  'timeSuffixes': '點|時,分鐘?,秒',
-  'ampm': '上午,下午',
-  'modifiers': [
-    { 'name': 'day', 'src': '前天', 'value': -2 },
-    { 'name': 'day', 'src': '昨天', 'value': -1 },
-    { 'name': 'day', 'src': '今天', 'value': 0 },
-    { 'name': 'day', 'src': '明天', 'value': 1 },
-    { 'name': 'day', 'src': '後天', 'value': 2 },
-    { 'name': 'sign', 'src': '前', 'value': -1 },
-    { 'name': 'sign', 'src': '後', 'value': 1 },
-    { 'name': 'shift', 'src': '上|去', 'value': -1 },
-    { 'name': 'shift', 'src': '這', 'value':  0 },
-    { 'name': 'shift', 'src': '下|明', 'value':  1 }
-  ],
-  'dateParse': [
-    '{num}{unit}{sign}',
-    '{shift}{unit=5-7}'
-  ],
-  'timeParse': [
-    '{shift}{weekday}',
-    '{year}年{month?}月?{date?}{0?}',
-    '{month}月{date?}{0?}',
-    '{date}[日號]'
-  ]
-});
-
-
-  /***
-   * @package DateRange
-   * @dependency date
-   * @description Date Ranges define a range of time. They can enumerate over specific points within that range, and be manipulated and compared.
-   *
-   ***/
-
-  var DateRange = function(start, end) {
-    this.start = date.create(start);
-    this.end   = date.create(end);
-  };
-
-  // 'toString' doesn't appear in a for..in loop in IE even though
-  // hasOwnProperty reports true, so extend() can't be used here.
-  // Also tried simply setting the prototype = {} up front for all
-  // methods but GCC very oddly started dropping properties in the
-  // object randomly (maybe because of the global scope?) hence
-  // the need for the split logic here.
-  DateRange.prototype.toString = function() {
-    /***
-     * @method toString()
-     * @returns String
-     * @short Returns a string representation of the DateRange.
-     * @example
-     *
-     *   Date.range('2003', '2005').toString() -> January 1, 2003..January 1, 2005
-     *
-     ***/
-    return this.isValid() ? this.start.full() + '..' + this.end.full() : 'Invalid DateRange';
-  };
-
-  extend(DateRange, true, false, {
-
-    /***
-     * @method isValid()
-     * @returns Boolean
-     * @short Returns true if the DateRange is valid, false otherwise.
-     * @example
-     *
-     *   Date.range('2003', '2005').isValid() -> true
-     *   Date.range('2005', '2003').isValid() -> false
-     *
-     ***/
-    'isValid': function() {
-      return this.start < this.end;
-    },
-
-    /***
-     * @method duration()
-     * @returns Number
-     * @short Return the duration of the DateRange in milliseconds.
-     * @example
-     *
-     *   Date.range('2003', '2005').duration() -> 94694400000
-     *
-     ***/
-    'duration': function() {
-      return this.isValid() ? this.end.getTime() - this.start.getTime() : NaN;
-    },
-
-    /***
-     * @method contains(<d>)
-     * @returns Boolean
-     * @short Returns true if <d> is contained inside the DateRange. <d> may be a date or another DateRange.
-     * @example
-     *
-     *   Date.range('2003', '2005').contains(Date.create('2004')) -> true
-     *
-     ***/
-    'contains': function(obj) {
-      var self = this, arr = obj.start && obj.end ? [obj.start, obj.end] : [obj];
-      return arr.every(function(d) {
-        return d >= self.start && d <= self.end;
-      });
-    },
-
-    /***
-     * @method every(<increment>, [fn])
-     * @returns Array
-     * @short Iterates through the DateRange for every <increment>, calling [fn] if it is passed. Returns an array of each increment visited.
-     * @extra When <increment> is a number, increments will be to the exact millisecond. <increment> can also be a string in the format %{number} {unit}s%, in which case it will increment in the unit specified. Note that a discrepancy exists in the case of months, as %(2).months()% is an approximation. Stepping through the actual months by passing %"2 months"% is usually preferable in this case.
-     * @example
-     *
-     *   Date.range('2003-01', '2003-03').every("2 months") -> [...]
-     *
-     ***/
-    'every': function(increment, fn) {
-      var current = this.start.clone(), result = [], index = 0, params, isDay;
-      if(isString(increment)) {
-        current.advance(getDateParamsFromString(increment, 0), true);
-        params = getDateParamsFromString(increment);
-        isDay = increment.toLowerCase() === 'day';
-      } else {
-        params = { 'milliseconds': increment };
-      }
-      while(current <= this.end) {
-        result.push(current);
-        if(fn) fn(current, index);
-        if(isDay && callDateGet(current, 'Hours') === 23) {
-          // When DST traversal happens at 00:00 hours, the time is effectively
-          // pushed back to 23:00, meaning 1) 00:00 for that day does not exist,
-          // and 2) there is no difference between 23:00 and 00:00, as you are
-          // "jumping" around in time. Hours here will be reset before the date
-          // is advanced and the date will never in fact advance, so set the hours
-          // directly ahead to the next day to avoid this problem.
-          current = current.clone();
-          callDateSet(current, 'Hours', 48);
-        } else {
-          current = current.clone().advance(params, true);
-        }
-        index++;
-      }
-      return result;
-    },
-
-    /***
-     * @method union(<range>)
-     * @returns DateRange
-     * @short Returns a new DateRange with the earliest starting point as its start, and the latest ending point as its end. If the two ranges do not intersect this will effectively remove the "gap" between them.
-     * @example
-     *
-     *   Date.range('2003=01', '2005-01').union(Date.range('2004-01', '2006-01')) -> Jan 1, 2003..Jan 1, 2006
-     *
-     ***/
-    'union': function(range) {
-      return new DateRange(
-        this.start < range.start ? this.start : range.start,
-        this.end   > range.end   ? this.end   : range.end
-      );
-    },
-
-    /***
-     * @method intersect(<range>)
-     * @returns DateRange
-     * @short Returns a new DateRange with the latest starting point as its start, and the earliest ending point as its end. If the two ranges do not intersect this will effectively produce an invalid range.
-     * @example
-     *
-     *   Date.range('2003-01', '2005-01').intersect(Date.range('2004-01', '2006-01')) -> Jan 1, 2004..Jan 1, 2005
-     *
-     ***/
-    'intersect': function(range) {
-      return new DateRange(
-        this.start > range.start ? this.start : range.start,
-        this.end   < range.end   ? this.end   : range.end
-      );
-    },
-
-    /***
-     * @method clone()
-     * @returns DateRange
-     * @short Clones the DateRange.
-     * @example
-     *
-     *   Date.range('2003-01', '2005-01').intersect(Date.range('2004-01', '2006-01')) -> Jan 1, 2004..Jan 1, 2005
-     *
-     ***/
-    'clone': function(range) {
-      return new DateRange(this.start, this.end);
-    }
-
-  });
-
-  /***
-   * @method each[Unit]([fn])
-   * @returns Date
-   * @short Increments through the date range for each [unit], calling [fn] if it is passed. Returns an array of each increment visited.
-   *
-   * @set
-   *   eachMillisecond
-   *   eachSecond
-   *   eachMinute
-   *   eachHour
-   *   eachDay
-   *   eachWeek
-   *   eachMonth
-   *   eachYear
-   *
-   * @example
-   *
-   *   Date.range('2003-01', '2003-02').eachMonth()     -> [...]
-   *   Date.range('2003-01-15', '2003-01-16').eachDay() -> [...]
-   *
-   ***/
-  extendSimilar(DateRange, true, false, 'Millisecond,Second,Minute,Hour,Day,Week,Month,Year', function(methods, name) {
-    methods['each' + name] = function(fn) { return this.every(name, fn); }
-  });
-
-
-  /***
-   * Date module
-   ***/
-
-  extend(date, false, false, {
-
-     /***
-     * @method Date.range([start], [end])
-     * @returns DateRange
-     * @short Creates a new date range.
-     * @extra If either [start] or [end] are null, they will default to the current date.
-     *
-     ***/
-    'range': function(start, end) {
-      return new DateRange(start, end);
-    }
-
-  });
-
-})();
-;/*
 * jQuery UI Tag-it!
 *
 * @version v2.0 (06/2011)
@@ -37424,7 +31460,7 @@ Date.addLocale('zh-TW', {
 })(jQuery);
 
 
-;!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.jade=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.jade=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 /**
@@ -37634,5 +31670,5 @@ exports.rethrow = function rethrow(err, filename, lineno, str){
 },{}]},{},[1])
 (1)
 });
-;
+
 //# sourceMappingURL=vendor.js.map

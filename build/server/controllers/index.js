@@ -43,45 +43,7 @@ module.exports.index = function(req, res) {
           return cb(null, contacts);
         });
       };
-    })(this), (function(_this) {
-      return function(cb) {
-        return Alarm.all(function(err, alarms) {
-          var alarm, index, _i, _len;
-          if (err) {
-            return cb(err);
-          }
-          try {
-            for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
-              alarm = alarms[index];
-              alarms[index] = alarm.timezoned();
-            }
-          } catch (_error) {
-            err = _error;
-            cb(err);
-          }
-          return cb(null, alarms);
-        });
-      };
-    })(this), (function(_this) {
-      return function(cb) {
-        return Event.all(function(err, events) {
-          var evt, index, _i, _len;
-          if (err) {
-            return cb(err);
-          }
-          try {
-            for (index = _i = 0, _len = events.length; _i < _len; index = ++_i) {
-              evt = events[index];
-              events[index] = evt.timezoned();
-            }
-          } catch (_error) {
-            err = _error;
-            cb(err);
-          }
-          return cb(null, events);
-        });
-      };
-    })(this), (function(_this) {
+    })(this), Alarm.all, Event.all, (function(_this) {
       return function(cb) {
         return CozyInstance.getLocale(function(err, locale) {
           if (err) {
@@ -107,4 +69,12 @@ module.exports.index = function(req, res) {
       }
     };
   })(this));
+};
+
+module.exports.userTimezone = function(req, res) {
+  if (req.query.keys !== "timezone") {
+    return res.send("keys not exposed", 403);
+  } else {
+    return res.send(User.timezone);
+  }
 };

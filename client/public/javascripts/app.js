@@ -4286,8 +4286,8 @@ module.exports = EventView = (function(_super) {
 
   EventView.prototype.getRenderData = function() {
     return _.extend(this.model.toJSON(), {
-      start: this.model.getFormattedStartDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
-      end: this.model.getFormattedEndDate('{yyyy}/{MM}/{dd} {HH}:{mm}')
+      start: this.model.getFormattedStartDate('YYYY/MM/DD HH:mm'),
+      end: this.model.getFormattedEndDate('YYYY/MM/DD HH:mm')
     });
   };
 

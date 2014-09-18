@@ -18,10 +18,9 @@ module.exports.export = (req, res) ->
                 else
                     if alarms.length > 0
                         for alarm in alarms
-                            calendar.add alarm.timezoneToIcal()
                             calendar.add alarm.toIcal()
                     if events.length > 0
-                        calendar.add event.toIcal() for event in events
+                            calendar.add event.toIcal() for event in events
 
                     res.header 'Content-Type': 'text/calendar'
                     res.send calendar.toString()

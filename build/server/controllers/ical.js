@@ -35,7 +35,6 @@ module.exports["export"] = function(req, res) {
             if (alarms.length > 0) {
               for (_i = 0, _len = alarms.length; _i < _len; _i++) {
                 alarm = alarms[_i];
-                calendar.add(alarm.timezoneToIcal());
                 calendar.add(alarm.toIcal());
               }
             }

@@ -18,6 +18,9 @@ module.exports = {
   'tags': {
     get: index.tags
   },
+  'users/current': {
+    get: index.userTimezone
+  },
   'alarms': {
     get: alarms.all,
     post: alarms.create

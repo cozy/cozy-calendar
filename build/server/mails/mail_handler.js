@@ -83,7 +83,7 @@ module.exports = MailHandler = (function() {
             return cb();
           }
           dateFormat = 'MMMM Do YYYY, h:mm a';
-          date = moment(event.start).format(dateFormat);
+          date = event.formatStart(dateFormat);
           url = "https://" + domain + "/public/calendar/events/" + event.id;
           mailOptions = {
             to: guest.email,
@@ -129,7 +129,7 @@ module.exports = MailHandler = (function() {
           return cb(null);
         }
         dateFormat = 'MMMM Do YYYY, h:mm a';
-        date = moment(event.start).format(dateFormat);
+        date = event.formatStart(dateFormat);
         mailOptions = {
           to: guest.email,
           subject: "This event has been canceled: " + event.description,
