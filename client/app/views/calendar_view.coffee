@@ -76,14 +76,18 @@ module.exports = class CalendarView extends BaseView
             #ignoreTimezone: true # 20140904 TODO : what's behaviour of this indead ? http://arshaw.com/fullcalendar/docs1/event_data/ignoreTimezone/
             
             timeFormat: ''
-                #'' : '' # do not display times on event
-                #'agendaWeek': ''
+                # 'month': 'H:mm'
+                # 'week': 'H:mm'
+                # 'default': 'H:mm'
+                # #'' : '' # do not display times on event
+                # 'agendaWeek': 'H:mm'
+                # # 'agendaMonth': 'h:mm'
             columnFormat:
                 'week': 'ddd D'
                 'month': 'dddd'
 
             axisFormat: "H:mm"
-            allDaySlot: false
+            allDaySlot: true
             selectable: true
             selectHelper: false
             unselectAuto: false
@@ -206,13 +210,13 @@ module.exports = class CalendarView extends BaseView
             when 'agendaWeek' then 'calendarweek'
 
     onSelect: (startDate, endDate, jsEvent, view) =>
-        start = Event.ambiguousToTimezoned(startDate)
-        end = Event.ambiguousToTimezoned(endDate)
-
-        # In month view, default to 10:00 - 18:00 instead of fullday event.
+         # In month view, default to 10:00 - 18:00 instead of fullday event.
         if @view is 'month'
-            start.set('hour', 10)
-            end.set('hour', 18)
+            start = Event.ambiguousToTimezoned("#{startDate.format()}T10:00:00.000")
+            end = Event.ambiguousToTimezoned("#{endDate.add('day', -1).format()}T18:00:00.000")
+        else
+            start = Event.ambiguousToTimezoned(startDate)
+            end = Event.ambiguousToTimezoned(endDate)
 
         @showPopover
             type: 'event'

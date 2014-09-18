@@ -184,7 +184,6 @@ module.exports = class EventPopOver extends PopoverView
     onAddClicked: () =>
         return if @$('.btn.add').hasClass 'disabled'
         @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        # @addButton.children().hide()
         @addButton.spin 'small'
         errors = @model.validate(@model.attributes)
         if errors

@@ -114,6 +114,7 @@ module.exports = class EventModal extends ViewCollection
             description: @model.get('details')
             start: @model.getStartDateObject().format @inputDateTimeFormat
             end: @model.getEndDateObject().format @inputDateTimeFormat
+            allDay: @model.allDay
             exportdate: @model.getStartDateObject().format @exportDateFormat
 
         data.calendar = data.tags?[0] or ''
@@ -133,23 +134,31 @@ module.exports = class EventModal extends ViewCollection
             #     .format Event.dateFormat, 'en'
             # end: Date.create(@endField.val(), 'fr')
             #     .format Event.dateFormat, 'en'
+        data.rrule = if @rruleForm.hasRRule() then @rruleForm.getRRule().toString() else ''
 
-        if @rruleForm.hasRRule()
-            data.rrule = @rruleForm.getRRule().toString()
 
-            # Save timezoned DT : no timezone in start and end, and timezone field.
-            data.timezone = window.app.timezone # TODO: view things ??
-            data.start = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss") 
-            data.end = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss") 
-        else
-            data.rrule = ''
-            # Save UTC for punctual event.
-            data.start = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone).toISOString()
-            data.end = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone).toISOString()
+        dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
+        dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
+
+        
+        if @$('#allday').val() == 'checked'
+            data.start = dtS.format('YYYY-MM-DD')
+            data.end = dtE.format('YYYY-MM-DD')
+        else 
+            if @rruleForm.hasRRule()
+                # Save timezoned DT : no timezone in start and end, and timezone field.
+                data.timezone = window.app.timezone # TODO: view things ??
+                data.start =  dtS.format("YYYY-MM-DD[T]HH:mm:ss") 
+                data.end = dtE.format("YYYY-MM-DD[T]HH:mm:ss") 
+            else
+                # Save UTC for punctual event.
+                data.start = dtS.toISOString()
+                data.end = dtE.toISOString()
 
         validModel = @model.save data,
             wait: true
             success: =>
+                console.log @model
                 @close()
             error: =>
                 alert('server error')

@@ -1634,13 +1634,16 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.endDateField = false;
 
-  ScheduleItem.dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00";
+  ScheduleItem.prototype.allDay = false;
 
   ScheduleItem.prototype.initialize = function() {
-    var _ref;
+    var _ref, _ref1;
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
-      return this.set('tags', ['my calendar']);
+      this.set('tags', ['my calendar']);
     }
+    console.log('init');
+    console.log(this.get(this.startDateField));
+    return this.allDay = ((_ref1 = this.get(this.startDateField)) != null ? _ref1.length : void 0) === 10;
   };
 
   ScheduleItem.prototype.getCalendar = function() {
@@ -1741,7 +1744,11 @@ module.exports = ScheduleItem = (function(_super) {
     }
     jsDateBoundS = start.toDate();
     jsDateBoundE = end.toDate();
-    eventTimezone = this.get('timezone');
+    if (this.allDay) {
+      eventTimezone = window.app.timezone;
+    } else {
+      eventTimezone = this.get('timezone');
+    }
     mDateEventS = moment.tz(this.get(this.startDateField), eventTimezone);
     mDateEventE = moment.tz(this.get(this.endDateField), eventTimezone);
     jsDateEventS = new Date(mDateEventS.toISOString());
@@ -1792,14 +1799,13 @@ module.exports = ScheduleItem = (function(_super) {
     var fcEvent;
     return fcEvent = {
       id: this.cid,
-      title: "" + (start.format("HH:mm")) + " " + (this.get("description")),
+      title: (!this.allDay ? start.format("H:mm[ ]") : '') + this.get("description"),
       start: start,
       end: end,
-      allDay: false,
+      allDay: this.allDay,
       diff: this.get("diff"),
       place: this.get('place'),
       timezone: this.get('timezone'),
-      timezoneHour: this.get('timezoneHour'),
       type: this.fcEventType,
       backgroundColor: this.getColor(),
       borderColor: this.getColor()
@@ -3340,7 +3346,7 @@ module.exports = CalendarView = (function(_super) {
         'month': 'dddd'
       },
       axisFormat: "H:mm",
-      allDaySlot: false,
+      allDaySlot: true,
       selectable: true,
       selectHelper: false,
       unselectAuto: false,
@@ -3494,11 +3500,12 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
     var end, start;
-    start = Event.ambiguousToTimezoned(startDate);
-    end = Event.ambiguousToTimezoned(endDate);
     if (this.view === 'month') {
-      start.set('hour', 10);
-      end.set('hour', 18);
+      start = Event.ambiguousToTimezoned("" + (startDate.format()) + "T10:00:00.000");
+      end = Event.ambiguousToTimezoned("" + (endDate.add('day', -1).format()) + "T18:00:00.000");
+    } else {
+      start = Event.ambiguousToTimezoned(startDate);
+      end = Event.ambiguousToTimezoned(endDate);
     }
     return this.showPopover({
       type: 'event',
@@ -3811,6 +3818,7 @@ module.exports = EventModal = (function(_super) {
       description: this.model.get('details'),
       start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
       end: this.model.getEndDateObject().format(this.inputDateTimeFormat),
+      allDay: this.model.allDay,
       exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
     });
     data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
@@ -3819,27 +3827,34 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var data, error, validModel, _i, _len, _ref, _results;
+    var data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
     data = {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
       place: this.$('#basic-place').val(),
       tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags())
     };
-    if (this.rruleForm.hasRRule()) {
-      data.rrule = this.rruleForm.getRRule().toString();
-      data.timezone = window.app.timezone;
-      data.start = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss");
-      data.end = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone).format("YYYY-MM-DD[T]HH:mm:ss");
+    data.rrule = this.rruleForm.hasRRule() ? this.rruleForm.getRRule().toString() : '';
+    dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
+    dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
+    if (this.$('#allday').val() === 'checked') {
+      data.start = dtS.format('YYYY-MM-DD');
+      data.end = dtE.format('YYYY-MM-DD');
     } else {
-      data.rrule = '';
-      data.start = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone).toISOString();
-      data.end = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone).toISOString();
+      if (this.rruleForm.hasRRule()) {
+        data.timezone = window.app.timezone;
+        data.start = dtS.format("YYYY-MM-DD[T]HH:mm:ss");
+        data.end = dtE.format("YYYY-MM-DD[T]HH:mm:ss");
+      } else {
+        data.start = dtS.toISOString();
+        data.end = dtE.toISOString();
+      }
     }
     validModel = this.model.save(data, {
       wait: true,
       success: (function(_this) {
         return function() {
+          console.log(_this.model);
           return _this.close();
         };
       })(this),
@@ -5000,13 +5015,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),id = locals_.id,exportdate = locals_.exportdate,summary = locals_.summary,start = locals_.start,end = locals_.end,place = locals_.place,calendar = locals_.calendar,tags = locals_.tags,description = locals_.description;
+var locals_ = (locals || {}),id = locals_.id,exportdate = locals_.exportdate,summary = locals_.summary,start = locals_.start,end = locals_.end,allDay = locals_.allDay,place = locals_.place,calendar = locals_.calendar,tags = locals_.tags,description = locals_.description;
 buf.push("<div class=\"modal-header\"><span>" + (jade.escape(null == (jade_interp = t('edit event')) ? "" : jade_interp)) + "</span>&nbsp;");
 if ( typeof id != "undefined")
 {
 buf.push("<a" + (jade.attr("href", "events/" + (id) + "/" + (exportdate) + ".ics", true, false)) + "><i class=\"fa fa-download fa-1\"></i></a>");
 }
-buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span6 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span6 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span5 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span5 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span2\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

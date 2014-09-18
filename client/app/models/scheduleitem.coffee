@@ -5,11 +5,15 @@ module.exports = class ScheduleItem extends Backbone.Model
     fcEventType: 'unknown'
     startDateField: ''
     endDateField: false
-    @dateFormat = "{Dow} {Mon} {dd} {yyyy} {HH}:{mm}:00"
+    allDay : false
 
     initialize: ->
         # console.log "initialize"
         @set 'tags', ['my calendar'] unless @get('tags')?.length
+
+        console.log 'init'
+        console.log @get @startDateField
+        @allDay = @get(@startDateField)?.length == 10
 
         # #@startDateObject = Date.create @get @startDateField
         #@startDateObject = @_toTimezonedMoment @get @startDateField
@@ -94,14 +98,12 @@ module.exports = class ScheduleItem extends Backbone.Model
         jsDateBoundS = start.toDate()
         jsDateBoundE = end.toDate()
 
-        # event start :
+        if @allDay
+            # For allday event, we expect that event occur on the good day in local time.
+            eventTimezone = window.app.timezone
+        else
+            eventTimezone = @get 'timezone'
 
-        # mDateEventS = moment.tz(@get @startDateField, @get "timezone")
-        # TODO stub for tests ! DTSTART;TZID=Europe/Paris:20111003T103000
-        # eventTimezone = "America/New_York" # "Europe/Paris"
-        eventTimezone = @get 'timezone'
-        # mDateEventS = moment.tz("20131210T233000", "YYYYMMDD[T]HHmmss", eventTimezone)
-        # mDateEventE = moment.tz("20131211T023000", "YYYYMMDD[T]HHmmss", eventTimezone)
         mDateEventS = moment.tz(@get(@startDateField), eventTimezone)
         mDateEventE = moment.tz(@get(@endDateField), eventTimezone)
 
@@ -120,12 +122,6 @@ module.exports = class ScheduleItem extends Backbone.Model
 
             mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone)
 
-            # console.log mDateRecurrentS
-
-            # console.log mDateRecurrentS.hour()
-            # console.log mDateRecurrentS.dayOfYear()
-            # console.log mDateEventS.hour()
-
             # Fix DST troubles :
             # Correction is -1, 1 or 0.
             diff = mDateEventS.hour() - mDateRecurrentS.hour()
@@ -135,9 +131,6 @@ module.exports = class ScheduleItem extends Backbone.Model
                 diff = 1
 
             mDateRecurrentS.add('hour', diff)
-
-            # console.log mDateRecurrentS.hour()
-            # console.log mDateRecurrentS.dayOfYear()
             return mDateRecurrentS
 
 
@@ -167,7 +160,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         return ((sdo.isAfter(start) and sdo.isBefore(end)) or (edo.isAfter(start) and edo.isBefore(end)) or (sdo.isBefore(start) and edo.isAfter(end)))
 
     # transform a SI into a FC event
-    # allow overriding the startDate for reccurence management
+    # allow overriding the startDate for recurrence management
 
     toPunctualFullCalendarEvent : ->
         return @_toFullCalendarEvent(@getStartDateObject(), @getEndDateObject())
@@ -190,18 +183,18 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         return fcEvent =
             id: @cid
-            title: "#{start.format "HH:mm"} #{@get("description")}"
-            # title: @get("description")
+            # title: "#{start.format "HH:mm"} #{@get("description")}"
+            title:  (if not @allDay then start.format "H:mm[ ]" else '') + @get("description")
             # start: @get @startDateField
             start: start
             # start: start.format Date.ISO8601_DATETIME
             end: end
             # end: end.format Date.ISO8601_DATETIME
-            allDay: false
+            allDay: @allDay
             diff: @get "diff"
             place: @get 'place'
             timezone: @get 'timezone'
-            timezoneHour: @get 'timezoneHour'
+            # timezoneHour: @get 'timezoneHour'
             # timeFormat: ''
             type: @fcEventType
             backgroundColor: @getColor()
