@@ -135,6 +135,9 @@ module.exports =
     "install the webdav module"         : "Installer le module WebDAV depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un événement a échoué."
+    "imported events and alarms": "Nombre d'alarmes et événements importés"
+    "import finished": "Votre import est terminé !"
+    "import error occured for": "Une erreur est survenue pour un de ces éléments "
 
     "January"                           : "Janvier"
     "February"                          : "Février"

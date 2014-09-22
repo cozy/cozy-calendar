@@ -1,6 +1,6 @@
 {
   "name": "Calendar",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "displayName": "Calendar",
   "description": "Manage your events and alarms with your Cozy.",
   "author": "Cozy Cloud <contact@cozycloud.cc> (http://cozycloud.cc)",
@@ -26,8 +26,9 @@
     "cozy-realtime-adapter": "0.11.3",
     "time": "0.11.0",
     "moment": "2.7.0",
-    "cozy-ical": "0.2.0",
-    "printit": "0.1.3"
+    "cozy-ical": "0.2.8",
+    "printit": "0.1.3",
+    "moment-timezone": "^0.2.2"
   },
   "devDependencies": {
     "should": "= 1.2.0",

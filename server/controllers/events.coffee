@@ -1,5 +1,8 @@
 time = require 'time'
 moment = require 'moment'
+log = require('printit')
+    prefix: 'events'
+
 User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
@@ -35,18 +38,38 @@ module.exports.read = (req, res) ->
     res.send req.event.timezoned()
 
 
+# Create a new event. In case of import, it doesn't create the event if
+# it already exists.
 module.exports.create = (req, res) ->
-    data = Event.toUTC(req.body)
-    Event.create data, (err, event) =>
-        return res.error "Server error while creating event." if err
+    data = Event.toUTC req.body
 
-        # Recover dates with user timezone
-        res.send event.timezoned(), 201
+    create = ->
+        Event.create data, (err, event) =>
+            return res.error "Server error while creating event." if err
+            res.send event.timezoned(), 201
+
+    if data.import
+        event = new Event data
+        start = event.getCouchStartDate()
+        Event.request 'byDate', key: start, (err, events) ->
+            if err
+                console.log err
+                create()
+            else if events.length is 0
+                create()
+            else if data.description is events[0].description
+                log.warn 'Event already exists, it was not created.'
+                res.send events[0].timezoned(), 201
+            else
+                create()
+
+    else
+        create()
 
 
 module.exports.update = (req, res) ->
     start = req.event.start
-    data = Event.toUTC(req.body)
+    data = Event.toUTC req.body
 
     req.event.updateAttributes data, (err, event) =>
 

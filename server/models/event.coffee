@@ -1,5 +1,7 @@
 americano = require 'americano-cozy'
 time = require 'time'
+momentTz = require 'moment-timezone'
+
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
@@ -29,19 +31,28 @@ Event.tags = (callback) ->
             out[type].push tag
         callback null, out
 
+Event::getCouchStartDate = ->
+    @timezone ?= User.timezone
+
+    momentTz(@start)
+        .tz(@timezone)
+        .tz('UTC')
+        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
+
 # before sending to the client
 # set the start/end in TZ time
 Event::timezoned = (timezone) ->
     timezone ?= User.timezone
 
-    timezonedDate = new time.Date(@start, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @start = timezonedDate.toString().slice(0, 24)
+    timezonedDate = new time.Date @start, 'UTC'
+    timezonedDate.setTimezone timezone
+    @start = timezonedDate.toString().slice 0, 24
 
-    timezonedDate = new time.Date(@end, 'UTC')
-    timezonedDate.setTimezone(timezone)
-    @end = timezonedDate.toString().slice(0, 24)
+    timezonedDate = new time.Date @end, 'UTC'
+    timezonedDate.setTimezone timezone
+    @end = timezonedDate.toString().slice 0, 24
 
+    @timezone ?= timezone
     return @
 
 # @TODO : this doesn't handle merge correctly

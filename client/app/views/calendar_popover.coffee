@@ -52,6 +52,12 @@ module.exports = class PopOver extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
         ).popover('show')
+
+        # Manage responsive (for smartphones)
+        if $(window).width() <= 500
+            $('.popover').css 'top', 0
+            $('.popover').css 'left', 0
+
         @setElement $('#view-container .popover')
         @afterRender()
 
