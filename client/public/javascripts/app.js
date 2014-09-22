@@ -1323,7 +1323,7 @@ module.exports = {
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un événement a échoué.",
   "imported events and alarms": "Nombre d'alarmes et événements importés",
-  "import finished": "Votre import est téminé !",
+  "import finished": "Votre import est terminé !",
   "import error occured for": "Une erreur est survenue pour un de ces éléments ",
   "January": "Janvier",
   "February": "Février",
@@ -3713,7 +3713,7 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var addAlarmError, addEventError, alarms, calendar, counter, finalizeImport, importAlarm, importEvent, total, updateCounter;
+    var addError, alarms, calendar, counter, finalizeImport, importAlarm, importEvent, total, updateCounter;
     calendar = this.calendarCombo.value();
     if ((calendar == null) || calendar === '') {
       calendar = 'my calendar';
@@ -3725,14 +3725,11 @@ module.exports = ImportView = (function(_super) {
       counter++;
       return $('.import-counter').html(counter);
     };
-    addAlarmError = function(alarm) {
+    addError = function(element, templatePath) {
       if ($('.import-errors').html().length === 0) {
         $('.import-errors').html("<p>" + (t('import error occured for')) + ":</p>");
       }
-      return $('.import-errors').append(require('./templates/import_alarm')(alarm.attributes));
-    };
-    addEventError = function(event) {
-      return $('.import-errors').append(require('./templates/import_event')(event.attributes));
+      return $('.import-errors').append(require(templatePath)(element.attributes));
     };
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
@@ -3747,7 +3744,7 @@ module.exports = ImportView = (function(_super) {
           return callback();
         },
         error: function() {
-          addAlarmError(alarm);
+          addAlarmError(alarm, './templates/import_alarm');
           updateCounter();
           return callback();
         }
@@ -3764,7 +3761,7 @@ module.exports = ImportView = (function(_super) {
           return callback();
         },
         error: function() {
-          addEventError(event);
+          addEventError(event, './templates/import_event');
           updateCounter();
           return callback();
         }
