@@ -136,7 +136,7 @@ module.exports =
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un événement a échoué."
     "imported events and alarms": "Nombre d'alarmes et événements importés"
-    "import finished": "Votre import est téminé !"
+    "import finished": "Votre import est terminé !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
 
     "January"                           : "Janvier"
