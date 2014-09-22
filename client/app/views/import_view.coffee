@@ -48,7 +48,7 @@ module.exports = class ImportView extends BaseView
         @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @importButton.spin 'tiny'
 
-        # Reset alarm and event to import lists.
+        # Empty alarm and event collection before importing new lists.
         @alarmList.collection.reset()
         @eventList.collection.reset()
         @$('.import-progress').html null
@@ -106,6 +106,7 @@ module.exports = class ImportView extends BaseView
         <p>#{t 'imported events and alarms'}:
             <span class="import-counter">0</span>/#{total}</p>
         """
+
         updateCounter = ->
             counter++
             $('.import-counter').html counter
