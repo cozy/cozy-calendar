@@ -58,6 +58,8 @@ module.exports = class Event extends ScheduleItem
         # Improvement : handle other add format.
         @set @endDateField, @getEndDateObject().add(duration).toISOString()
 
+
+        
     validate: (attrs, options) ->
 
         errors = []

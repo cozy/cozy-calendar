@@ -43,6 +43,9 @@ module.exports = Event = americano.getModel('Event', {
   },
   timezone: {
     type: String
+  },
+  alarms: {
+    type: [Object]
   }
 });
 

@@ -9,16 +9,17 @@ module.exports = Event = americano.getModel 'Event',
     # @TODO : rename those to follow ical (NEED PATCH)
     details     : type : String # = ical DESCRIPTION
     description : type : String # = ical SUMMARY
-    diff        : type : Number
+    diff        : type : Number # Deprecated !?
     rrule       : type : String
     tags        : type : (x) -> x # DAMN IT JUGGLING
     attendees   : type : [Object]
     related: type: String, default: null
     timezone: type: String
+    alarms: type : [Object] # triggers.
 
 require('cozy-ical').decorateEvent Event
 
-# TODO : pigration script.
+# TODO : migration script.
 # insinuatingUTCToISO8601 = (dateStr) ->
 #     # Skip buggy or empty values.
 #     if not dateStr

@@ -26,7 +26,7 @@ module.exports = class AlarmPopOver extends PopoverView
         if not @model
             @model = new Alarm
                 trigg: options.start.toISOString()
-                timezone: 'Europe/Paris'
+                #timezone: 'Europe/Paris'
                 description: ''
                 action: 'DISPLAY'
 
@@ -143,21 +143,17 @@ module.exports = class AlarmPopOver extends PopoverView
             return setObj
 
     getModelAttributes: =>
-        
-
         action = if @actionNotif.value and @actionMail.value then 'BOTH'
         else if @actionMail.value then 'EMAIL'
         else 'DISPLAY'
 
         trigg = @model.getStartDateObject()
-        console.log trigg
         for unit, value of @formatDateTime($('#input-time').val())
             trigg.set(unit, value)
 
-        console.log trigg
         data =
             # timezone: @$('#input-timezone').val()
-            timezone: window.app.timezone
+            #timezone: window.app.timezone
             trigg: trigg
             # timezoneHour: @$('#input-time').val()
             description: @$('#input-desc').val()

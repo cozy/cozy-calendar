@@ -1,4 +1,5 @@
 ViewCollection = require 'lib/view_collection'
+ReminderView   = require 'views/event_modal_reminder'
 RRuleFormView  = require 'views/event_modal_rrule'
 TagsView       = require 'views/tags'
 ComboBox       = require 'views/widgets/combobox'
@@ -34,6 +35,7 @@ module.exports = class EventModal extends ViewCollection
         'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
+        'click .addreminder': =>  @addReminder(@addReminderView.getModelAttributes())
 
     afterRender: ->
         super
@@ -53,6 +55,13 @@ module.exports = class EventModal extends ViewCollection
 
         @descriptionField = @$('#basic-description')
 
+        divReminders = @$('#reminder-container')
+        @addReminderView = new ReminderView(model: isNew: true)
+        divReminders.append @addReminderView.render().$el
+
+        @reminders = []
+        @model.get('alarms').forEach @addReminder
+            
         @rruleForm = new RRuleFormView model: @model
         @rruleForm.render()
         @$('#rrule-container').append @rruleForm.$el
@@ -98,8 +107,16 @@ module.exports = class EventModal extends ViewCollection
         @addGuestField.val ''
         return ""
 
+
     refreshGuestList: =>
         @collection.reset @model.get('attendees')
+
+    addReminder: (reminderM) =>
+        reminder = new ReminderView(model: reminderM)
+        @reminders.push(reminder)
+        reminder.render()
+        @addReminderView.$el.before(reminder.$el)
+
 
     resizeDescription: =>
         notes = @descriptionField.val()
@@ -134,6 +151,9 @@ module.exports = class EventModal extends ViewCollection
             #     .format Event.dateFormat, 'en'
             # end: Date.create(@endField.val(), 'fr')
             #     .format Event.dateFormat, 'en'
+        
+        data.alarms = @reminders.map (v) -> return v.getModelAttributes()
+
         data.rrule = if @rruleForm.hasRRule() then @rruleForm.getRRule().toString() else ''
 
 

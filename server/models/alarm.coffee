@@ -9,7 +9,7 @@ module.exports = Alarm = americano.getModel 'Alarm',
     trigg        : type : String # DT to trigger at. As UTC if ponctual. If recurent, to interpret in @timezone.
     description  : type : String
     timezone     : type : String # Timezone of trig time (if recurent)
-    timezoneHour : type : String # deprecated.
+    # timezoneHour : type : String # deprecated.
     rrule        : type : String # recurence rules.
     tags         : type : (x) -> x # DAMN IT JUGGLING
     related      : type : String, default: null

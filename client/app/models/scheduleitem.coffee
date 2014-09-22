@@ -11,8 +11,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         # console.log "initialize"
         @set 'tags', ['my calendar'] unless @get('tags')?.length
 
-        console.log 'init'
-        console.log @get @startDateField
         @allDay = @get(@startDateField)?.length == 10
 
         # #@startDateObject = Date.create @get @startDateField
@@ -206,3 +204,33 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # TODO checks ?
         return moment.tz(ambigM, window.app.timezone)
+
+    @unitValuesToiCalDuration: (unitsValues) ->
+        # Transform the unit/value object to a iCal duration string.
+        # @unitsValues : { 'M': 15, 'H': 1 ...}
+        s = '-P'
+        for u in ['W', 'D']
+            if u of unitsValues
+                s += unitsValues[u] + u
+
+        t = ''
+        for u in ['H', 'M', 'S']
+            if u of unitsValues
+                t += unitsValues[u] + u
+        
+
+        if t
+            s += 'T' + t
+
+        console.log s
+        return s
+
+    @iCalDurationToUnitValue: (s) ->
+        console.log s
+        # Handle only unique units strings.
+        m = s.match(/(\d+)(W|D|H|M|S)/)
+        o = {}
+        o[m[2]] = m[1]
+        console.log o
+
+        return o

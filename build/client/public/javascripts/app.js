@@ -1641,8 +1641,6 @@ module.exports = ScheduleItem = (function(_super) {
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
       this.set('tags', ['my calendar']);
     }
-    console.log('init');
-    console.log(this.get(this.startDateField));
     return this.allDay = ((_ref1 = this.get(this.startDateField)) != null ? _ref1.length : void 0) === 10;
   };
 
@@ -1814,6 +1812,41 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.ambiguousToTimezoned = function(ambigM) {
     return moment.tz(ambigM, window.app.timezone);
+  };
+
+  ScheduleItem.unitValuesToiCalDuration = function(unitsValues) {
+    var s, t, u, _i, _j, _len, _len1, _ref, _ref1;
+    s = '-P';
+    _ref = ['W', 'D'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      u = _ref[_i];
+      if (u in unitsValues) {
+        s += unitsValues[u] + u;
+      }
+    }
+    t = '';
+    _ref1 = ['H', 'M', 'S'];
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      u = _ref1[_j];
+      if (u in unitsValues) {
+        t += unitsValues[u] + u;
+      }
+    }
+    if (t) {
+      s += 'T' + t;
+    }
+    console.log(s);
+    return s;
+  };
+
+  ScheduleItem.iCalDurationToUnitValue = function(s) {
+    var m, o;
+    console.log(s);
+    m = s.match(/(\d+)(W|D|H|M|S)/);
+    o = {};
+    o[m[2]] = m[1];
+    console.log(o);
+    return o;
   };
 
   return ScheduleItem;
@@ -2680,7 +2713,6 @@ module.exports = AlarmPopOver = (function(_super) {
     if (!this.model) {
       this.model = new Alarm({
         trigg: options.start.toISOString(),
-        timezone: 'Europe/Paris',
         description: '',
         action: 'DISPLAY'
       });
@@ -2797,15 +2829,12 @@ module.exports = AlarmPopOver = (function(_super) {
     var action, data, trigg, unit, value, _ref;
     action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
     trigg = this.model.getStartDateObject();
-    console.log(trigg);
     _ref = this.formatDateTime($('#input-time').val());
     for (unit in _ref) {
       value = _ref[unit];
       trigg.set(unit, value);
     }
-    console.log(trigg);
     data = {
-      timezone: window.app.timezone,
       trigg: trigg,
       description: this.$('#input-desc').val(),
       action: action
@@ -3645,12 +3674,14 @@ module.exports = CalendarView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var ComboBox, Event, EventModal, RRuleFormView, TagsView, ViewCollection, app, random,
+var ComboBox, Event, EventModal, RRuleFormView, ReminderView, TagsView, ViewCollection, app, random,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('lib/view_collection');
+
+ReminderView = require('views/event_modal_reminder');
 
 RRuleFormView = require('views/event_modal_rrule');
 
@@ -3674,6 +3705,7 @@ module.exports = EventModal = (function(_super) {
     this.handleError = __bind(this.handleError, this);
     this.save = __bind(this.save, this);
     this.resizeDescription = __bind(this.resizeDescription, this);
+    this.addReminder = __bind(this.addReminder, this);
     this.refreshGuestList = __bind(this.refreshGuestList, this);
     this.onGuestAdded = __bind(this.onGuestAdded, this);
     this.hideOnEscape = __bind(this.hideOnEscape, this);
@@ -3717,11 +3749,17 @@ module.exports = EventModal = (function(_super) {
         };
       })(this),
       'keydown #basic-description': 'resizeDescription',
-      'keypress #basic-description': 'resizeDescription'
+      'keypress #basic-description': 'resizeDescription',
+      'click .addreminder': (function(_this) {
+        return function() {
+          return _this.addReminder(_this.addReminderView.getModelAttributes());
+        };
+      })(this)
     };
   };
 
   EventModal.prototype.afterRender = function() {
+    var divReminders;
     EventModal.__super__.afterRender.apply(this, arguments);
     this.addGuestField = this.configureGuestTypeahead();
     this.startField = this.$('#basic-start').attr('type', 'text');
@@ -3739,6 +3777,15 @@ module.exports = EventModal = (function(_super) {
       viewSelect: 4
     });
     this.descriptionField = this.$('#basic-description');
+    divReminders = this.$('#reminder-container');
+    this.addReminderView = new ReminderView({
+      model: {
+        isNew: true
+      }
+    });
+    divReminders.append(this.addReminderView.render().$el);
+    this.reminders = [];
+    this.model.get('alarms').forEach(this.addReminder);
     this.rruleForm = new RRuleFormView({
       model: this.model
     });
@@ -3801,6 +3848,16 @@ module.exports = EventModal = (function(_super) {
     return this.collection.reset(this.model.get('attendees'));
   };
 
+  EventModal.prototype.addReminder = function(reminderM) {
+    var reminder;
+    reminder = new ReminderView({
+      model: reminderM
+    });
+    this.reminders.push(reminder);
+    reminder.render();
+    return this.addReminderView.$el.before(reminder.$el);
+  };
+
   EventModal.prototype.resizeDescription = function() {
     var loc, notes, rows;
     notes = this.descriptionField.val();
@@ -3834,6 +3891,9 @@ module.exports = EventModal = (function(_super) {
       place: this.$('#basic-place').val(),
       tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags())
     };
+    data.alarms = this.reminders.map(function(v) {
+      return v.getModelAttributes();
+    });
     data.rrule = this.rruleForm.hasRRule() ? this.rruleForm.getRRule().toString() : '';
     dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
     dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
@@ -3966,6 +4026,107 @@ module.exports = GuestView = (function(_super) {
   GuestView.prototype.template = require('./templates/event_modal_guest');
 
   return GuestView;
+
+})(BaseView);
+});
+
+;require.register("views/event_modal_reminder", function(exports, require, module) {
+var BaseView, Event, ReminderView, Toggle,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+Toggle = require('views/toggle');
+
+Event = require('../models/event');
+
+module.exports = ReminderView = (function(_super) {
+  __extends(ReminderView, _super);
+
+  function ReminderView() {
+    this.getRenderData = __bind(this.getRenderData, this);
+    return ReminderView.__super__.constructor.apply(this, arguments);
+  }
+
+  ReminderView.prototype.className = 'reminder';
+
+  ReminderView.prototype.template = require('./templates/event_modal_reminder');
+
+  ReminderView.prototype.events = function() {
+    return {
+      'click .removereminder': 'remove'
+    };
+  };
+
+  ReminderView.prototype.afterRender = function() {
+    var inputDuration, _ref, _ref1;
+    this.actionMail = new Toggle({
+      icon: 'envelope',
+      label: 'email notification',
+      value: (_ref = this.model.action) === 'EMAIL' || _ref === 'BOTH'
+    });
+    this.actionNotif = new Toggle({
+      icon: 'exclamation-sign',
+      label: 'home notification',
+      value: (_ref1 = this.model.action) === 'DISPLAY' || _ref1 === 'BOTH'
+    });
+    this.actionMail.on('toggle', (function(_this) {
+      return function(mailIsOn) {
+        if (!mailIsOn) {
+          return _this.actionNotif.toggle(true);
+        }
+      };
+    })(this));
+    this.actionNotif.on('toggle', (function(_this) {
+      return function(notifIsOn) {
+        if (!notifIsOn) {
+          return _this.actionMail.toggle(true);
+        }
+      };
+    })(this));
+    inputDuration = this.$('.triggervalue');
+    inputDuration.before(this.actionMail.$el);
+    return inputDuration.before(this.actionNotif.$el);
+  };
+
+  ReminderView.prototype.getRenderData = function() {
+    var data, unit, uv, value;
+    if (!this.model.isNew) {
+      uv = Event.iCalDurationToUnitValue(this.model.trigg);
+      unit = Object.keys(uv)[0];
+      value = uv[unit];
+    } else {
+      unit = 'M';
+      value = 10;
+    }
+    data = {
+      isNew: this.model.isNew,
+      isSelectedUnit: (function(_this) {
+        return function(u) {
+          return u === unit;
+        };
+      })(this),
+      durationValue: value,
+      model: this.model
+    };
+    return data;
+  };
+
+  ReminderView.prototype.getModelAttributes = function() {
+    var action, data, uv;
+    action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
+    uv = {};
+    uv[this.$('.triggerunit').val()] = this.$('.triggervalue').val();
+    data = {
+      action: action,
+      trigg: Event.unitValuesToiCalDuration(uv)
+    };
+    return data;
+  };
+
+  return ReminderView;
 
 })(BaseView);
 });
@@ -5021,7 +5182,7 @@ if ( typeof id != "undefined")
 {
 buf.push("<a" + (jade.attr("href", "events/" + (id) + "/" + (exportdate) + ".ics", true, false)) + "><i class=\"fa fa-download fa-1\"></i></a>");
 }
-buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span5 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span5 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span2\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span5 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span5 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span2\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder')) ? "" : jade_interp)) + "</h4><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5054,6 +5215,34 @@ else if ( model.status == 'NEED-ACTION')
 buf.push("<i class=\"icon-time blue\"></i>");
 }
 buf.push("&nbsp;" + (jade.escape((jade_interp = model.email) == null ? '' : jade_interp)) + "</p>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/event_modal_reminder", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),durationValue = locals_.durationValue,isSelectedUnit = locals_.isSelectedUnit,isNew = locals_.isNew;
+buf.push("<form class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input type=\"number\" min=\"1\"" + (jade.attr("value", durationValue, true, false)) + " class=\"input-mini triggervalue\"/><select class=\"triggerunit\">           <option value=\"M\"" + (jade.attr("selected", isSelectedUnit('M'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('minute')) ? "" : jade_interp)) + "</option><option value=\"H\"" + (jade.attr("selected", isSelectedUnit('H'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('hour')) ? "" : jade_interp)) + "</option><option value=\"D\"" + (jade.attr("selected", isSelectedUnit('D'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option value=\"W\"" + (jade.attr("selected", isSelectedUnit('W'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option></select>");
+if ( isNew)
+{
+buf.push("<a class=\"btn addreminder\">" + (jade.escape(null == (jade_interp = t('+')) ? "" : jade_interp)) + "</a>");
+}
+else
+{
+buf.push("<a class=\"btn removereminder\">" + (jade.escape(null == (jade_interp = t('x')) ? "" : jade_interp)) + "</a>");
+}
+buf.push("</div></div></form>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
