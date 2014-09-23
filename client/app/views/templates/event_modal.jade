@@ -55,7 +55,10 @@
                     a.btn#addguest= t('invite')
         #guests-list
 
-        h4= t('reminder')
+        h4= t('reminder') 
+          | &nbsp;
+          a.btn.addreminder +
+
         #reminder-container
 
         h4= t('recurrence')

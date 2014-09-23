@@ -35,7 +35,7 @@ module.exports = class EventModal extends ViewCollection
         'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
-        'click .addreminder': =>  @addReminder(@addReminderView.getModelAttributes())
+        'click .addreminder': =>  @addReminder(action: 'DISPLAY', trigg: '-PT10M')
 
     afterRender: ->
         super
@@ -54,10 +54,6 @@ module.exports = class EventModal extends ViewCollection
                 viewSelect: 4
 
         @descriptionField = @$('#basic-description')
-
-        divReminders = @$('#reminder-container')
-        @addReminderView = new ReminderView(model: isNew: true)
-        divReminders.append @addReminderView.render().$el
 
         @reminders = []
         @model.get('alarms')?.forEach @addReminder
@@ -115,8 +111,8 @@ module.exports = class EventModal extends ViewCollection
         reminder = new ReminderView(model: reminderM)
         @reminders.push(reminder)
         reminder.render()
-        @addReminderView.$el.before(reminder.$el)
-
+        # @addReminderView.$el.before(reminder.$el)
+        @$('#reminder-container').append(reminder.$el)
 
     resizeDescription: =>
         notes = @descriptionField.val()
