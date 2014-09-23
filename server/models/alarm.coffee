@@ -110,10 +110,10 @@ Alarm.createOrGetIfImport = (data, callback) ->
 #     return attrs
 
 # TODO 20140923 from #119 : usage ?
-Alarm::getCouchDate = ->
-    @timezone ?= User.timezone
+# Alarm::getCouchDate = ->
+#     @timezone ?= User.timezone
 
-    momentTz(@trigg)
-        .tz(@timezone)
-        .tz('UTC')
-        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
+#     momentTz(@trigg)
+#         .tz(@timezone)
+#         .tz('UTC')
+#         .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'

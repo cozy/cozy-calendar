@@ -1576,11 +1576,15 @@ module.exports = Event = (function(_super) {
   };
 
   Event.prototype.addToStart = function(duration) {
-    return this.set(this.startDateField, this.getStartDateObject().add(duration).toISOString());
+    var dtS;
+    dtS = this.getStartDateObject().add(duration);
+    return this.set(this.startDateField, this.isRecurrent() ? Event.momentToAmbiguousString(dtS) : dtS.toISOString());
   };
 
   Event.prototype.addToEnd = function(duration) {
-    return this.set(this.endDateField, this.getEndDateObject().add(duration).toISOString());
+    var dtE;
+    dtE = this.getEndDateObject().add(duration);
+    return this.set(this.endDateField, this.isRecurrent() ? Event.momentToAmbiguousString(dtE) : dtE.toISOString());
   };
 
   Event.prototype.validate = function(attrs, options) {
@@ -1677,7 +1681,7 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.getDateObject = function() {
-    return this._toTimezonedMoment(this.get(this.startDateField));
+    return ScheduleItem.ambiguousToTimezoned(this.get(this.startDateField));
   };
 
   ScheduleItem.prototype.getStartDateObject = function() {
@@ -1686,7 +1690,7 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.getEndDateObject = function() {
     if (this.endDateField) {
-      return this._toTimezonedMoment(this.get(this.endDateField));
+      return ScheduleItem.ambiguousToTimezoned(this.get(this.endDateField));
     } else {
       return this.getDateObject().add('m', 30);
     }
@@ -1822,6 +1826,10 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.ambiguousToTimezoned = function(ambigM) {
     return moment.tz(ambigM, window.app.timezone);
+  };
+
+  ScheduleItem.momentToAmbiguousString = function(m) {
+    return m.format("YYYY-MM-DD[T]HH:mm:ss");
   };
 
   ScheduleItem.unitValuesToiCalDuration = function(unitsValues) {
@@ -3785,7 +3793,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.afterRender = function() {
-    var divReminders;
+    var divReminders, _ref;
     EventModal.__super__.afterRender.apply(this, arguments);
     this.addGuestField = this.configureGuestTypeahead();
     this.startField = this.$('#basic-start').attr('type', 'text');
@@ -3811,7 +3819,9 @@ module.exports = EventModal = (function(_super) {
     });
     divReminders.append(this.addReminderView.render().$el);
     this.reminders = [];
-    this.model.get('alarms').forEach(this.addReminder);
+    if ((_ref = this.model.get('alarms')) != null) {
+      _ref.forEach(this.addReminder);
+    }
     this.rruleForm = new RRuleFormView({
       model: this.model
     });
@@ -3923,7 +3933,7 @@ module.exports = EventModal = (function(_super) {
     data.rrule = this.rruleForm.hasRRule() ? this.rruleForm.getRRule().toString() : '';
     dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
     dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
-    if (this.$('#allday').val() === 'checked') {
+    if (this.$('#allday').is(':checked')) {
       data.start = dtS.format('YYYY-MM-DD');
       data.end = dtE.format('YYYY-MM-DD');
     } else {

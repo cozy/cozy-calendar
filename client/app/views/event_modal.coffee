@@ -60,7 +60,7 @@ module.exports = class EventModal extends ViewCollection
         divReminders.append @addReminderView.render().$el
 
         @reminders = []
-        @model.get('alarms').forEach @addReminder
+        @model.get('alarms')?.forEach @addReminder
             
         @rruleForm = new RRuleFormView model: @model
         @rruleForm.render()
@@ -160,8 +160,7 @@ module.exports = class EventModal extends ViewCollection
         dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
         dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
 
-        
-        if @$('#allday').val() == 'checked'
+        if @$('#allday').is(':checked')
             data.start = dtS.format('YYYY-MM-DD')
             data.end = dtE.format('YYYY-MM-DD')
         else 

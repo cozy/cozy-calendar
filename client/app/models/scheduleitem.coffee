@@ -45,15 +45,16 @@ module.exports = class ScheduleItem extends Backbone.Model
         return @getDefaultColor() if not tag
         return colorHash tag
 
+    #Deprecated, to remove.
     _toTimezonedMoment: (utcDateStr) -> moment.tz utcDateStr, window.app.timezone
 
 
     getDateObject: -> #@startDateObject
-        return @_toTimezonedMoment @get @startDateField
+        ScheduleItem.ambiguousToTimezoned @get @startDateField
     getStartDateObject: -> @getDateObject()
     getEndDateObject: -> 
         if @endDateField
-             @_toTimezonedMoment @get @endDateField
+             ScheduleItem.ambiguousToTimezoned @get @endDateField
         else
             @getDateObject().add('m', 30)
              
@@ -204,6 +205,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # TODO checks ?
         return moment.tz(ambigM, window.app.timezone)
+
+    @momentToAmbiguousString: (m) ->
+        m.format("YYYY-MM-DD[T]HH:mm:ss")
 
     @unitValuesToiCalDuration: (unitsValues) ->
         # Transform the unit/value object to a iCal duration string.

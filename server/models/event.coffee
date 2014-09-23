@@ -76,22 +76,22 @@ Event.createOrGetIfImport = (data, callback) ->
 
 Event::formatStart = (dateFormat) ->        
     if @rrule
-        date = moment.tz(@start, @timezone).format dateFormat
+        date = momentTz.tz(@start, @timezone).format dateFormat
         date += ' ' + @timezone
     
     else
-        date = moment.tz(@start, User.timezone).format dateFormat
+        date = momentTz.tz(@start, User.timezone).format dateFormat
 
     return date
 
 # TODO 20140923 from #119 : usage ?
-Event::getCouchStartDate = ->
-    @timezone ?= User.timezone
+# Event::getCouchStartDate = ->
+#     @timezone ?= User.timezone
 
-    momentTz(@start)
-        .tz(@timezone)
-        .tz('UTC')
-        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
+#     momentTz(@start)
+#         .tz(@timezone)
+#         .tz('UTC')
+#         .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
 
 
 # @TODO : this doesn't handle merge correctly

@@ -52,11 +52,14 @@ module.exports = class Event extends ScheduleItem
 
 
     addToStart: (duration) ->
-        @set @startDateField, @getStartDateObject().add(duration).toISOString()
+        dtS = @getStartDateObject().add(duration)
+
+        @set @startDateField, if @isRecurrent() then Event.momentToAmbiguousString(dtS) else dtS.toISOString()
         
     addToEnd: (duration) ->
-        # Improvement : handle other add format.
-        @set @endDateField, @getEndDateObject().add(duration).toISOString()
+        dtE = @getEndDateObject().add(duration)
+        
+        @set @endDateField, if @isRecurrent() then Event.momentToAmbiguousString(dtE) else dtE.toISOString()
 
 
         

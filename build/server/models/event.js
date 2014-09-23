@@ -101,19 +101,12 @@ Event.createOrGetIfImport = function(data, callback) {
 Event.prototype.formatStart = function(dateFormat) {
   var date;
   if (this.rrule) {
-    date = moment.tz(this.start, this.timezone).format(dateFormat);
+    date = momentTz.tz(this.start, this.timezone).format(dateFormat);
     date += ' ' + this.timezone;
   } else {
-    date = moment.tz(this.start, User.timezone).format(dateFormat);
+    date = momentTz.tz(this.start, User.timezone).format(dateFormat);
   }
   return date;
-};
-
-Event.prototype.getCouchStartDate = function() {
-  if (this.timezone == null) {
-    this.timezone = User.timezone;
-  }
-  return momentTz(this.start).tz(this.timezone).tz('UTC').format('YYYY-MM-DDTHH:mm:ss.000') + 'Z';
 };
 
 Event.prototype.getGuest = function(key) {

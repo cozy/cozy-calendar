@@ -83,10 +83,3 @@ Alarm.createOrGetIfImport = function(data, callback) {
     return Alarm.create(data, callback);
   }
 };
-
-Alarm.prototype.getCouchDate = function() {
-  if (this.timezone == null) {
-    this.timezone = User.timezone;
-  }
-  return momentTz(this.trigg).tz(this.timezone).tz('UTC').format('YYYY-MM-DDTHH:mm:ss.000') + 'Z';
-};
