@@ -246,45 +246,24 @@ module.exports = class CalendarView extends BaseView
 
     onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
         # Update new dates of event
-        ## 20140909 TODO.
+        evt = null
         if fcEvent.type is 'alarm'
-            alarm = @alarmCollection.get fcEvent.id
+            evt = @alarmCollection.get fcEvent.id
+            evt.addToStart(delta)
 
-            # if alarm.get('timezoneHour')?
-            #     # Hour should correspond to alarm timezone
-            #     startRaw = alarm.get('timezoneHour')
-            #     alarm.getDateObject().setHours(startRaw.substring(0, 2))
-            #     alarm.getDateObject().setMinutes(startRaw.substring(3, 5))
-
-            trigg = alarm.getDateObject().clone().advance
-                days: dayDelta
-                minutes: minuteDelta
-
-            alarm.save
-                trigg: trigg.format Alarm.dateFormat, 'en-en'
-                timezoneHour: false
-            ,
-                wait: true
-                success: =>
-                    fcEvent.isSaving = false
-                    @cal.fullCalendar 'renderEvent', fcEvent
-                error: =>
-                    fcEvent.isSaving = false
-                    revertFunc()
-        else
+        else # event
             evt = @eventCollection.get fcEvent.id
-
             evt.addToStart(delta)
             evt.addToEnd(delta)
 
-            evt.save {},
-                wait: true
-                success: =>
-                    fcEvent.isSaving = false
-                    #@cal.fullCalendar 'renderEvent', fcEvent
-                error: =>
-                    fcEvent.isSaving = false
-                    revertFunc()
+        evt.save {},
+            wait: true
+            success: =>
+                fcEvent.isSaving = false
+                #@cal.fullCalendar 'renderEvent', fcEvent
+            error: =>
+                fcEvent.isSaving = false
+                revertFunc()
 
     onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
         fcEvent.isSaving = true

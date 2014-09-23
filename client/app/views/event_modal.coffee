@@ -161,14 +161,14 @@ module.exports = class EventModal extends ViewCollection
         dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
 
         if @$('#allday').is(':checked')
-            data.start = dtS.format('YYYY-MM-DD')
-            data.end = dtE.format('YYYY-MM-DD')
+            data.start = Event.momentToDateString(dtS)
+            data.end = Event.momentToDateString(dtE)
         else 
             if @rruleForm.hasRRule()
                 # Save timezoned DT : no timezone in start and end, and timezone field.
                 data.timezone = window.app.timezone # TODO: view things ??
-                data.start =  dtS.format("YYYY-MM-DD[T]HH:mm:ss") 
-                data.end = dtE.format("YYYY-MM-DD[T]HH:mm:ss") 
+                data.start =  Event.momentToAmbiguousString(dtS)
+                data.end = Event.momentToAmbiguousString(dtE)
             else
                 # Save UTC for punctual event.
                 data.start = dtS.toISOString()

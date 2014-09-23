@@ -13,12 +13,6 @@ module.exports = class Event extends ScheduleItem
         place: ''
         tags: ['my calendar']
 
-    # initialize: ->
-    #     super()
-
-    #     if @get('start').length == 10
-    #         @fullDay = true
-
     setStart: (setObj) ->
         sdo = @getStartDateObject()
         edo = @getEndDateObject()
@@ -51,18 +45,7 @@ module.exports = class Event extends ScheduleItem
         @set dateField, dateObj.toISOString()
 
 
-    addToStart: (duration) ->
-        dtS = @getStartDateObject().add(duration)
 
-        @set @startDateField, if @isRecurrent() then Event.momentToAmbiguousString(dtS) else dtS.toISOString()
-        
-    addToEnd: (duration) ->
-        dtE = @getEndDateObject().add(duration)
-        
-        @set @endDateField, if @isRecurrent() then Event.momentToAmbiguousString(dtE) else dtE.toISOString()
-
-
-        
     validate: (attrs, options) ->
 
         errors = []

@@ -1575,18 +1575,6 @@ module.exports = Event = (function(_super) {
     return this.set(dateField, dateObj.toISOString());
   };
 
-  Event.prototype.addToStart = function(duration) {
-    var dtS;
-    dtS = this.getStartDateObject().add(duration);
-    return this.set(this.startDateField, this.isRecurrent() ? Event.momentToAmbiguousString(dtS) : dtS.toISOString());
-  };
-
-  Event.prototype.addToEnd = function(duration) {
-    var dtE;
-    dtE = this.getEndDateObject().add(duration);
-    return this.set(this.endDateField, this.isRecurrent() ? Event.momentToAmbiguousString(dtE) : dtE.toISOString());
-  };
-
   Event.prototype.validate = function(attrs, options) {
     var end, errors, start;
     errors = [];
@@ -1694,6 +1682,26 @@ module.exports = ScheduleItem = (function(_super) {
     } else {
       return this.getDateObject().add('m', 30);
     }
+  };
+
+  ScheduleItem.prototype._formatMoment = function(m) {
+    var s;
+    if (this.allDay) {
+      s = ScheduleItem.momentToDateString(m);
+    } else if (this.isRecurrent()) {
+      s = ScheduleItem.momentToAmbiguousString(m);
+    } else {
+      s = m.toISOString();
+    }
+    return s;
+  };
+
+  ScheduleItem.prototype.addToStart = function(duration) {
+    return this.set(this.startDateField, this._formatMoment(this.getStartDateObject().add(duration)));
+  };
+
+  ScheduleItem.prototype.addToEnd = function(duration) {
+    return this.set(this.endDateField, this._formatMoment(this.getEndDateObject().add(duration)));
   };
 
   ScheduleItem.prototype.getFormattedDate = function(formatter) {
@@ -1830,6 +1838,10 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.momentToAmbiguousString = function(m) {
     return m.format("YYYY-MM-DD[T]HH:mm:ss");
+  };
+
+  ScheduleItem.momentToDateString = function(m) {
+    return m.format('YYYY-MM-DD');
   };
 
   ScheduleItem.unitValuesToiCalDuration = function(unitsValues) {
@@ -3605,50 +3617,30 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventDrop = function(fcEvent, delta, revertFunc, jsEvent, ui, view) {
-    var alarm, evt, trigg;
+    var evt;
+    evt = null;
     if (fcEvent.type === 'alarm') {
-      alarm = this.alarmCollection.get(fcEvent.id);
-      trigg = alarm.getDateObject().clone().advance({
-        days: dayDelta,
-        minutes: minuteDelta
-      });
-      return alarm.save({
-        trigg: trigg.format(Alarm.dateFormat, 'en-en'),
-        timezoneHour: false
-      }, {
-        wait: true,
-        success: (function(_this) {
-          return function() {
-            fcEvent.isSaving = false;
-            return _this.cal.fullCalendar('renderEvent', fcEvent);
-          };
-        })(this),
-        error: (function(_this) {
-          return function() {
-            fcEvent.isSaving = false;
-            return revertFunc();
-          };
-        })(this)
-      });
+      evt = this.alarmCollection.get(fcEvent.id);
+      evt.addToStart(delta);
     } else {
       evt = this.eventCollection.get(fcEvent.id);
       evt.addToStart(delta);
       evt.addToEnd(delta);
-      return evt.save({}, {
-        wait: true,
-        success: (function(_this) {
-          return function() {
-            return fcEvent.isSaving = false;
-          };
-        })(this),
-        error: (function(_this) {
-          return function() {
-            fcEvent.isSaving = false;
-            return revertFunc();
-          };
-        })(this)
-      });
     }
+    return evt.save({}, {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          return fcEvent.isSaving = false;
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          fcEvent.isSaving = false;
+          return revertFunc();
+        };
+      })(this)
+    });
   };
 
   CalendarView.prototype.onEventResizeStop = function(fcEvent, jsEvent, ui, view) {
@@ -3934,13 +3926,13 @@ module.exports = EventModal = (function(_super) {
     dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
     dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
     if (this.$('#allday').is(':checked')) {
-      data.start = dtS.format('YYYY-MM-DD');
-      data.end = dtE.format('YYYY-MM-DD');
+      data.start = Event.momentToDateString(dtS);
+      data.end = Event.momentToDateString(dtE);
     } else {
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
-        data.start = dtS.format("YYYY-MM-DD[T]HH:mm:ss");
-        data.end = dtE.format("YYYY-MM-DD[T]HH:mm:ss");
+        data.start = Event.momentToAmbiguousString(dtS);
+        data.end = Event.momentToAmbiguousString(dtE);
       } else {
         data.start = dtS.toISOString();
         data.end = dtE.toISOString();

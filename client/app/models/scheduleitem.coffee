@@ -57,7 +57,24 @@ module.exports = class ScheduleItem extends Backbone.Model
              ScheduleItem.ambiguousToTimezoned @get @endDateField
         else
             @getDateObject().add('m', 30)
-             
+    
+    _formatMoment: (m) ->
+        if @allDay
+            s = ScheduleItem.momentToDateString(m)
+
+        else if @isRecurrent()
+            s = ScheduleItem.momentToAmbiguousString(m)
+
+        else
+            s = m.toISOString()
+
+        return s
+
+    addToStart: (duration) ->
+        @set @startDateField, @_formatMoment(@getStartDateObject().add(duration))
+        
+    addToEnd: (duration) ->
+        @set @endDateField, @_formatMoment(@getEndDateObject().add(duration))
 
 
     getFormattedDate: (formatter) -> @getDateObject().format formatter
@@ -208,6 +225,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     @momentToAmbiguousString: (m) ->
         m.format("YYYY-MM-DD[T]HH:mm:ss")
+
+    @momentToDateString: (m) ->
+        m.format('YYYY-MM-DD')
 
     @unitValuesToiCalDuration: (unitsValues) ->
         # Transform the unit/value object to a iCal duration string.
