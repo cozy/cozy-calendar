@@ -170,19 +170,15 @@ module.exports = class CalendarView extends BaseView
             @popover.close()
 
             # click on same case
-            console.log @popover.options.start
-            console.log options.start
-            if @popover.options.model? and @popover.options.model is options.model or(
-                    @popover.options.start.isSame(options.start) and
-                    @popover.options.end.isSame(options.end) and
-                    @popover.options.type is options.type)
+            if @popover.options?
+                if @popover.options.model? and @popover.options.model is options.model or(
+                        @popover.options.start?.isSame(options.start) and
+                        @popover.options.end?.isSame(options.end) and
+                        @popover.options.type is options.type)
 
-            # if @popover.options.target.is(options.target) and @popover.options.type is options.type
-                @cal.fullCalendar 'unselect'
-                @popover = null
-                return
-
-        # @popover = new Popover options
+                    @cal.fullCalendar 'unselect'
+                    @popover = null
+                    return
 
         @popover = if options.type == 'event' then new EventPopover options else new AlarmPopover options
         @popover.render()
@@ -202,7 +198,6 @@ module.exports = class CalendarView extends BaseView
             start.format('[week]/YYYY/M/D')
 
         app.router.navigate hash
-
 
     getUrlHash: =>
         switch @cal.fullCalendar('getView').name
@@ -225,6 +220,7 @@ module.exports = class CalendarView extends BaseView
             target: $(jsEvent.target)
 
     onPopoverClose: ->
+        console.log 'yeeeeeee'
         @cal.fullCalendar 'unselect'
         @popover = null
 

@@ -849,6 +849,10 @@ module.exports = PopoverView = (function(_super) {
       content: this.template(this.getRenderData()),
       container: this.container
     }).popover('show');
+    if ($(window).width() <= 500) {
+      $('.popover').css('top', 0);
+      $('.popover').css('left', 0);
+    }
     this.setElement($('#' + this.parentView.id + ' .popover'));
     this.afterRender();
     return this;
@@ -1141,7 +1145,7 @@ module.exports = {
   "Description": "Description",
   "days after": "days after",
   "days later": "days later",
-  "Week": "Semaine",
+  "Week": "Week",
   "Alarms": "Alarms",
   "Display": "Notification",
   "DISPLAY": "Notification",
@@ -1221,6 +1225,9 @@ module.exports = {
   "install the webdav module": "Install the webdav module from the Cozy App Store",
   "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
   "some event fail to save": "An event was not saved (an error occured).",
+  "imported events and alarms": "Amount of imported alarms and events",
+  "import finished": "Your import is now finished",
+  "import error occured for": "Import error occured for following elements",
   "January": "January",
   "February": "February",
   "March": "March",
@@ -1261,7 +1268,7 @@ module.exports = {
   "edit event": "Modification d'un évènement",
   "edit": "Enregistrer",
   "create": "Enregistrer",
-  "creation": "Creation",
+  "creation": "Création",
   "invite": "Inviter",
   "close": "Fermer",
   "delete": "Supprimer",
@@ -1278,10 +1285,10 @@ module.exports = {
   "Calendar": "Calendrier",
   "calendar": "Calendrier",
   "Sync": "Sync",
-  "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacque",
+  "ie: 9:00 important meeting": "exemple: 9:00 appeler Jacques",
   "Month": "Mois",
   "Popup": "Popup",
-  "Switch to List": "Basculer en mode List",
+  "Switch to List": "Basculer en mode Liste",
   "Switch to Calendar": "Basculer en mode Calendrier",
   "time": "Heure",
   "Today": "Aujourd'hui",
@@ -1293,10 +1300,10 @@ module.exports = {
   "cancel": "Annuler",
   "Create": "Créer",
   "Alarms to import": "Alarmes à importer",
-  "Events to import": "Evenements à importer",
+  "Events to import": "Évènements à importer",
   "Create Event": "Créer un évènement",
   "From hours:minutes": "De heures:minutes",
-  "To hours:minutes+days": "A heures:minutes+jours",
+  "To hours:minutes+days": "À heures:minutes+jours",
   "Description": "Description",
   "days after": "jours plus tard",
   "days later": "jours plus tard",
@@ -1307,13 +1314,13 @@ module.exports = {
   "EMAIL": "E-mail",
   "BOTH": "E-mail & Notification",
   "display previous events": "Montrer les évènements précédents",
-  "are you sure": "Etes-vous sur ?",
+  "are you sure": "Êtes-vous sûr(e) ?",
   "advanced": "Détails",
-  "enter email": "Entrer l'addresse email",
+  "enter email": "Entrer l'adresse email",
   "ON": "activée",
   "OFF": "désactivée",
-  "recurrence": "Recurrence",
-  "recurrence rule": "Règle de recurrence",
+  "recurrence": "Récurrence",
+  "recurrence rule": "Règle de récurrence",
   "make reccurent": "Rendre réccurent",
   "repeat every": "Répéter tous les",
   "no recurrence": "Pas de répétition",
@@ -1375,10 +1382,13 @@ module.exports = {
   "download a copy of your calendar": "Pour télécharger une copie de votre calendrier sur votre ordinateur comme un fichier iCal, cliquez sur ce bouton :",
   "icalendar export": "Export ICalendar",
   "icalendar import": "Import ICalendar",
-  "to sync your cal with": "Pour synchronisez votre calendrier avec votre mobile vous devez :",
+  "to sync your cal with": "Pour synchroniser votre calendrier avec votre mobile vous devez :",
   "install the webdav module": "Installer le module WebDAV depuis l'applithèque.",
-  "connect to it and follow": "Vous connectez et suivre les instructions relatives à CalDAV.",
-  "some event fail to save": "La sauvegarde d'un événement a échouée.",
+  "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
+  "some event fail to save": "La sauvegarde d'un événement a échoué.",
+  "imported events and alarms": "Nombre d'alarmes et événements importés",
+  "import finished": "Votre import est terminé !",
+  "import error occured for": "Une erreur est survenue pour un de ces éléments ",
   "January": "Janvier",
   "February": "Février",
   "March": "Mars",
@@ -2207,7 +2217,8 @@ module.exports = PopOver = (function(_super) {
     }
     this.target = options.target;
     this.container = options.container;
-    return this.parentView = options.parentView;
+    this.parentView = options.parentView;
+    return this.options = options;
   };
 
   PopOver.prototype.selfclose = function() {
@@ -2233,6 +2244,10 @@ module.exports = PopOver = (function(_super) {
       placement: this.getDirection(),
       content: this.template(this.getRenderData())
     }).popover('show');
+    if ($(window).width() <= 500) {
+      $('.popover').css('top', 0);
+      $('.popover').css('left', 0);
+    }
     this.setElement($('#view-container .popover'));
     return this.afterRender();
   };
@@ -2401,6 +2416,15 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.makeNewModel = function(options) {
+    if (options.start == null) {
+      options.start = '10:00';
+    }
+    if (options.end == null) {
+      options.end = '18:00';
+    }
+    if (options.diff == null) {
+      options.diff = 0;
+    }
     switch (this.type) {
       case 'event':
         return new Event({
@@ -3488,16 +3512,17 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
+    var _ref, _ref1;
     options.container = this.cal;
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      console.log(this.popover.options.start);
-      console.log(options.start);
-      if ((this.popover.options.model != null) && this.popover.options.model === options.model || (this.popover.options.start.isSame(options.start) && this.popover.options.end.isSame(options.end) && this.popover.options.type === options.type)) {
-        this.cal.fullCalendar('unselect');
-        this.popover = null;
-        return;
+      if (this.popover.options != null) {
+        if ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.isSame(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type)) {
+          this.cal.fullCalendar('unselect');
+          this.popover = null;
+          return;
+        }
       }
     }
     this.popover = options.type === 'event' ? new EventPopover(options) : new AlarmPopover(options);
@@ -3545,6 +3570,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onPopoverClose = function() {
+    console.log('yeeeeeee');
     this.cal.fullCalendar('unselect');
     this.popover = null;
     return this.refresh();
@@ -4543,6 +4569,10 @@ module.exports = ImportView = (function(_super) {
     form.append("file", file);
     this.importButton.find('span').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.importButton.spin('tiny');
+    this.alarmList.collection.reset();
+    this.eventList.collection.reset();
+    this.$('.import-progress').html(null);
+    this.$('.import-errors').html(null);
     return $.ajax({
       url: "import/ical",
       type: "POST",
@@ -4596,64 +4626,81 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var calendar, counter, finish, onFaillure, onSuccess;
+    var addError, alarms, calendar, counter, finalizeImport, importAlarm, importEvent, total, updateCounter;
     calendar = this.calendarCombo.value();
     if ((calendar == null) || calendar === '') {
       calendar = 'my calendar';
     }
-    counter = this.alarmList.collection.length + this.eventList.collection.length;
-    onFaillure = (function(_this) {
-      return function(model) {
-        counter = counter - 1;
-        alert(t('some event fail to save'));
-        if (counter === 0) {
-          return finish();
-        }
-      };
-    })(this);
-    onSuccess = (function(_this) {
-      return function(model) {
-        switch (model.constructor) {
-          case Event:
-            app.events.add(model);
-            break;
-          case Alarm:
-            app.alarms.add(model);
-        }
-        counter = counter - 1;
-        if (counter === 0) {
-          return finish();
-        }
-      };
-    })(this);
-    finish = (function(_this) {
-      return function() {
-        _this.$(".confirmation").fadeOut();
-        _this.$(".results").slideUp(function() {
-          _this.$(".import-form").fadeIn();
-          return _this.confirmButton.html(t('confirm import'));
-        });
-        _this.alarmList.collection.reset();
-        _this.eventList.collection.reset();
-        return app.router.navigate("calendar", true);
-      };
-    })(this);
+    total = this.alarmList.collection.length + this.eventList.collection.length;
+    counter = 0;
+    $('.import-progress').html("<p>" + (t('imported events and alarms')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
+    updateCounter = function() {
+      counter++;
+      return $('.import-counter').html(counter);
+    };
+    addError = function(element, templatePath) {
+      if ($('.import-errors').html().length === 0) {
+        $('.import-errors').html("<p>" + (t('import error occured for')) + ":</p>");
+      }
+      return $('.import-errors').append(require(templatePath)(element.attributes));
+    };
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
-    this.alarmList.collection.each(function(alarm) {
+    importAlarm = function(alarm, callback) {
       alarm.set('tags', [calendar]);
+      alarm.set('id', null);
+      alarm.set('import', true);
       return alarm.save(null, {
-        success: onSuccess,
-        error: onFaillure
+        success: function(model) {
+          app.alarms.add(model);
+          updateCounter();
+          return callback();
+        },
+        error: function() {
+          addAlarmError(alarm, './templates/import_alarm');
+          updateCounter();
+          return callback();
+        }
       });
-    });
-    return this.eventList.collection.each(function(event) {
+    };
+    importEvent = function(event, callback) {
       event.set('tags', [calendar]);
+      event.set('id', null);
+      event.set('import', true);
       return event.save(null, {
-        success: onSuccess,
-        error: onFaillure
+        success: function(model) {
+          app.events.add(model);
+          updateCounter();
+          return callback();
+        },
+        error: function() {
+          addEventError(event, './templates/import_event');
+          updateCounter();
+          return callback();
+        }
       });
-    });
+    };
+    finalizeImport = (function(_this) {
+      return function(err) {
+        alert(t('import finished'));
+        _this.$(".confirmation").fadeOut();
+        return _this.$(".results").slideUp(function() {
+          _this.$(".import-form").fadeIn();
+          _this.confirmButton.html(t('confirm import'));
+          if ($('.import-errors').html().length === 0) {
+            return app.router.navigate("calendar", true);
+          }
+        });
+      };
+    })(this);
+    alarms = this.alarmList.collection.models;
+    return async.eachSeries(alarms, importAlarm, (function(_this) {
+      return function(err) {
+        var events;
+        events = _this.eventList.collection.models;
+        return async.eachSeries(events, importEvent, finalizeImport);
+      };
+    })(this));
   };
 
   ImportView.prototype.onCancelImportClicked = function() {
@@ -5318,7 +5365,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><p>" + (jade.escape(null == (jade_interp = t('import an ical file') ) ? "" : jade_interp)) + "</p><div class=\"import-form\"><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Alarms to import')) ? "" : jade_interp)) + "</h4><div id=\"import-alarm-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
+buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><p>" + (jade.escape(null == (jade_interp = t('import an ical file') ) ? "" : jade_interp)) + "</p><div class=\"import-form\"><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"import-progress mt3\"></div><div class=\"import-errors mt3\"></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Alarms to import')) ? "" : jade_interp)) + "</h4><div id=\"import-alarm-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

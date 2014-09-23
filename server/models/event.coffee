@@ -1,5 +1,6 @@
 americano = require 'americano-cozy'
-moment = require 'moment-timezone'
+momentTz = require 'moment-timezone'
+
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
@@ -56,6 +57,23 @@ Event.tags = (callback) ->
             out[type].push tag
         callback null, out
 
+Event.createOrGetIfImport = (data, callback) ->
+
+    if data.import
+        Event.request 'byDate', key: data.start, (err, events) ->
+            if err
+                console.log err
+                Event.create data, callback
+            else if events.length is 0
+                Event.create data, callback
+            else if data.description is events[0].description
+                log.warn 'Event already exists, it was not created.'
+                callback(null, events[0])
+            else
+                Event.create data, callback
+    else
+        Event.create data, callback
+
 Event::formatStart = (dateFormat) ->        
     if @rrule
         date = moment.tz(@start, @timezone).format dateFormat
@@ -65,6 +83,15 @@ Event::formatStart = (dateFormat) ->
         date = moment.tz(@start, User.timezone).format dateFormat
 
     return date
+
+# TODO 20140923 from #119 : usage ?
+Event::getCouchStartDate = ->
+    @timezone ?= User.timezone
+
+    momentTz(@start)
+        .tz(@timezone)
+        .tz('UTC')
+        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'
 
 
 # @TODO : this doesn't handle merge correctly

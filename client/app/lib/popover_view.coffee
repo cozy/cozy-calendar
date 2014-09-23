@@ -35,6 +35,12 @@ module.exports = class PopoverView extends BaseView
             content: @template @getRenderData()
             container: @container
         ).popover('show')
+
+        # Manage responsive (for smartphones)
+        if $(window).width() <= 500
+            $('.popover').css 'top', 0
+            $('.popover').css 'left', 0
+
         #@setElement $('#view-container .popover') 
         @setElement $('#' + @parentView.id + ' .popover')
         

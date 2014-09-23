@@ -1,5 +1,8 @@
 time = require 'time'
-moment = require 'moment-timezone'
+momentTz = require 'moment-timezone'
+log = require('printit')
+    prefix: 'events'
+
 User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
@@ -34,13 +37,13 @@ module.exports.read = (req, res) ->
     res.send req.event
 
 
+# Create a new event. In case of import, it doesn't create the event if
+# it already exists.
 module.exports.create = (req, res) ->
     data = req.body
-    Event.create data, (err, event) =>
+    Event.createOrGetIfImport data, (err, event) =>
         return res.error "Server error while creating event." if err
-
         res.send event, 201
-
 
 module.exports.update = (req, res) ->
     start = req.event.start

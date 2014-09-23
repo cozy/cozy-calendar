@@ -9264,7 +9264,7 @@ ul.tagit input[type="text"] {
 }
 @font-face {
   font-family: main;
-  src: url("../fonts/signika-regular.ttf");
+  src: url("../fonts/source-sans-pro.ttf");
 }
 @font-face {
   font-family: fontawesome;
@@ -9403,7 +9403,7 @@ input[type="time"] {
 }
 @font-face {
   font-family: main;
-  src: url("/fonts/signika-regular.ttf");
+  src: url("/fonts/source-sans-pro.ttf");
 }
 a {
   color: #34a6ff;
@@ -9769,7 +9769,7 @@ ul#menu ul#menuitems li.tagmenuitem .badge {
 }
 @font-face {
   font-family: main;
-  src: url("../fonts/signika-regular.ttf");
+  src: url("../fonts/source-sans-pro.ttf");
 }
 @font-face {
   font-family: fontawesome;
@@ -10450,6 +10450,12 @@ input[type="time"] {
   border-radius: 0;
   color: #fff;
   font-family: main;
+  font-weight: bold;
+  padding: 1px;
+}
+.fc-content i {
+  margin-top: 2px;
+  margin-right: 5px;
 }
 .fc-day:hover {
   background: #ffe7cc;
@@ -10686,6 +10692,10 @@ cursor not-allowed {
   -ms-transition: color 0.2s linear, border-color 0.2s linear;
   transition: color 0.2s linear, border-color 0.2s linear;
 }
+h2,
+h3 {
+  font-weight: normal;
+}
 .mt1 {
   margin-top: 10px;
 }
@@ -10863,7 +10873,7 @@ cursor not-allowed {
     margin-top: 40px;
   }
   #alarms .fc-day-header {
-    font-size: 10px;
+    font-size: 12px;
   }
   #alarms .fc-button-today {
     display: none;
@@ -10877,16 +10887,30 @@ cursor not-allowed {
   #alarms .fc-border-separate {
     width: 100%;
   }
+  #alarms .fc-day-number {
+    font-size: 12px;
+  }
 }
 @media( max-width: 500px) {
+  #alarms .fc-day-header {
+    font-size: 10px;
+  }
   #alarms .popover {
-    width: 310px;
+    width: auto;
+    position: absolute;
+    min-width: 320px;
+    top: 0;
+    left: 0;
   }
   #alarms .popover input {
-    width: 260px;
+    width: 90%;
   }
   #alarms .popover button {
     display: block;
+  }
+  #alarms .popover .arrow,
+  #alarms .popover .icon-map-marker {
+    display: none;
   }
 }
 

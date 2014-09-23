@@ -1,9 +1,12 @@
-time = require 'time'
+log = require('printit')
+    prefix: 'alarms'
+
 User = require '../models/user'
 Alarm = require '../models/alarm'
 
+
 module.exports.fetch = (req, res, next, id) ->
-    Alarm.find id, (err, alarm) =>
+    Alarm.find id, (err, alarm) ->
         if err or not alarm
             res.send error: true, msg: "Alarm not found", 404
         else
@@ -11,7 +14,7 @@ module.exports.fetch = (req, res, next, id) ->
             next()
 
 module.exports.all = (req, res) ->
-    Alarm.all (err, alarms) =>
+    Alarm.all (err, alarms) ->
         if err
             res.send error: 'Server error occurred while retrieving data'
         else
@@ -20,9 +23,11 @@ module.exports.all = (req, res) ->
 module.exports.read = (req, res) ->
     res.send req.alarm
 
+# Create a new alarm. In case of import, it doesn't create the alarm if
+# it already exists.
 module.exports.create = (req, res) ->
     data = req.body
-    Alarm.create data, (err, alarm) =>
+    Alarm.createorGetIfImport data, (err, alarm) =>
         if err
             res.send error: "Server error while creating alarm.", 500
         else

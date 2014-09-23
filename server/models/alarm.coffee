@@ -1,5 +1,5 @@
 americano = require 'americano-cozy'
-time = require 'time'
+momentTz = require 'moment-timezone'
 User = require './user'
 
 # Alarm should be interpreted as VTODO + VALARM iCal objects.
@@ -53,6 +53,23 @@ Alarm.tags = (callback) ->
             out[type].push tag
         callback null, out
 
+Alarm.createOrGetIfImport = (data, callback) ->
+
+    if data.import
+        Alarm.request 'byDate', key: data.trigg, (err, alarms) ->
+            if err
+                console.log err
+                Alarm.create data, callback
+            else if alarms.length is 0
+                Alarm.create data, callback
+            else if data.description is alarms[0].description
+                log.warn 'Alarm already exists, it was not created.'
+                callback(null, alarms[0])
+            else
+                Alarm.create data, callback
+    else
+        Alarm.create data, callback
+
 # # before sending to the client
 # # set the trigg in TZ time
 # Alarm::timezoned = (timezone) ->
@@ -91,3 +108,12 @@ Alarm.tags = (callback) ->
 #     trigg.setTimezone('UTC')
 #     attrs.trigg = trigg.toString().slice(0, 24)
 #     return attrs
+
+# TODO 20140923 from #119 : usage ?
+Alarm::getCouchDate = ->
+    @timezone ?= User.timezone
+
+    momentTz(@trigg)
+        .tz(@timezone)
+        .tz('UTC')
+        .format('YYYY-MM-DDTHH:mm:ss.000') + 'Z'

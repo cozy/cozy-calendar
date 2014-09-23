@@ -93,6 +93,46 @@ describe "Events management", ->
 
                 done()
 
+        it "should do nothing in import mode when an event with " + \
+           "same start data already exists", (done) ->
+            @event =
+                description: 'Title'
+                start: "Tue Apr 15 2013 15:30:00"
+                end:"Tue Apr 15 2013 16:30:00"
+                place: "place"
+                diff: 0
+                import: true
+
+            client.post "events/", @event, (error, response, body) =>
+
+                helpers.getAllEvents (err, events) =>
+
+                    should.not.exist err
+                    should.exist events
+                    events.length.should.equal 1
+
+                    done()
+
+        it "should create an event when not in import mode and when an " + \
+           "event with same start data already exists", (done) ->
+            @event =
+                description: 'Title'
+                start: "Tue Apr 15 2013 15:30:00"
+                end:"Tue Apr 15 2013 16:30:00"
+                place: "place"
+                diff: 0
+
+            client.post "events/", @event, (error, response, body) =>
+
+                helpers.getAllEvents (err, events) =>
+
+                    should.not.exist err
+                    should.exist events
+                    events.length.should.equal 2
+
+                    done()
+
+
     describe "PUT events/:id", ->
 
         before helpers.cleanDb
