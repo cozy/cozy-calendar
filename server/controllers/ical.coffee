@@ -1,4 +1,6 @@
-ical = require 'cozy-ical'
+# ical = require 'cozy-ical'
+ical = require '/home/jacquarg/workspace/cozy/jacquarg-ical/src/index'
+
 Event = require '../models/event'
 Alarm = require '../models/alarm'
 User = require  '../models/user'

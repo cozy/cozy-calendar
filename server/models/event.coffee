@@ -18,7 +18,17 @@ module.exports = Event = americano.getModel 'Event',
     timezone: type: String
     alarms: type : [Object] # triggers.
 
-require('cozy-ical').decorateEvent Event
+# 'start' and 'end' use those format, 
+# According to allDay or rrules.
+Event.dateFormat = 'YYYY-MM-DD'
+Event.ambiguousDTFormat = 'YYYY-MM-DDTHH:mm:00.000'
+Event.utcDTFormat = 'YYYY-MM-DDTHH:mm:00.000Z'
+
+# Handle only unique units strings.
+Event.alarmTriggRegex = /(\+?|-)P(\d+)(W|D|H|M|S)/
+
+# require('cozy-ical').decorateEvent Event
+require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateEvent Event
 
 # TODO : migration script.
 # insinuatingUTCToISO8601 = (dateStr) ->

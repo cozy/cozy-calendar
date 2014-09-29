@@ -4427,7 +4427,7 @@ module.exports = AlarmView = (function(_super) {
 
   AlarmView.prototype.getRenderData = function() {
     return _.extend(this.model.toJSON(), {
-      time: this.model.getFormattedDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
+      time: this.model.getFormattedDate('YYYY/MM/DD HH:mm'),
       description: this.model.get('description')
     });
   };
