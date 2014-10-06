@@ -27,7 +27,7 @@ module.exports.read = (req, res) ->
 # it already exists.
 module.exports.create = (req, res) ->
     data = req.body
-    Alarm.createorGetIfImport data, (err, alarm) =>
+    Alarm.createOrGetIfImport data, (err, alarm) =>
         if err
             res.send error: "Server error while creating alarm.", 500
         else

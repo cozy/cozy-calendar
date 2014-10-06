@@ -2105,7 +2105,7 @@ module.exports = CalendarHeader = (function(_super) {
     }
     view = this.cal.fullCalendar('getView');
     if (view.name === 'month') {
-      res = view.start.format('MMMM YYYY');
+      res = view.intervalStart.format('MMMM YYYY');
     } else {
       res = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
     }
@@ -3558,7 +3558,7 @@ module.exports = CalendarView = (function(_super) {
       this.handleWindowResize();
     }
     this.view = view.name;
-    start = view.start;
+    start = view.intervalStart;
     hash = this.view === 'month' ? start.format('[month]/YYYY/M') : start.format('[week]/YYYY/M/D');
     return app.router.navigate(hash);
   };

@@ -190,7 +190,7 @@ module.exports = class CalendarView extends BaseView
 
         @view = view.name
 
-        start = view.start
+        start = view.intervalStart
         hash = if @view is 'month'
             start.format('[month]/YYYY/M')
 
