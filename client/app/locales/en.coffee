@@ -140,7 +140,7 @@ module.exports =
     "imported events and alarms": "Amount of imported alarms and events"
     "import finished": "Your import is now finished"
     "import error occured for": "Import error occured for following elements"
-
+    "export your calendar": "Export your calendar"
 
 # DATE
     "January"                           : "January"
