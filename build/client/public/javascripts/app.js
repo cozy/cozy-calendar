@@ -1164,6 +1164,7 @@ module.exports = {
   "imported events and alarms": "Amount of imported alarms and events",
   "import finished": "Your import is now finished",
   "import error occured for": "Import error occured for following elements",
+  "export your calendar": "Export your calendar",
   "January": "January",
   "February": "February",
   "March": "March",
@@ -1231,7 +1232,8 @@ module.exports = {
   "What should I remind you ?": "Que dois-je vous rappeler ?",
   "alarm description placeholder": "Que voulez-vous vous rappeler ?",
   "ICalendar importer": "Importateur ICalendar",
-  "import your icalendar file": "Importer votre fichier icalendar",
+  "import your icalendar file": "Importer votre fichier iCalendar",
+  "select an icalendar file": "Sélectionner un fichier iCalendar",
   "confirm import": "Confirmer l'import",
   "cancel": "Annuler",
   "Create": "Créer",
@@ -1325,6 +1327,7 @@ module.exports = {
   "imported events and alarms": "Nombre d'alarmes et événements importés",
   "import finished": "Votre import est terminé !",
   "import error occured for": "Une erreur est survenue pour un de ces éléments ",
+  "export your calendar": "Exportez votre calendrier",
   "January": "Janvier",
   "February": "Février",
   "March": "Mars",
@@ -1392,13 +1395,13 @@ module.exports = Alarm = (function(_super) {
   Alarm.prototype.validate = function(attrs, options) {
     var errors, _ref;
     errors = [];
-    if (!attrs.description || attrs.description === "") {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
       });
     }
-    if ((_ref = !attrs.action) === 'DISPLAY' || _ref === 'EMAIL' || _ref === 'BOTH') {
+    if ((_ref = attrs.action) !== 'DISPLAY' && _ref !== 'EMAIL' && _ref !== 'BOTH') {
       errors.push({
         field: 'action',
         value: "invalid action"
@@ -1483,7 +1486,7 @@ module.exports = Event = (function(_super) {
   Event.prototype.validate = function(attrs, options) {
     var end, errors, start;
     errors = [];
-    if (!attrs.description) {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
@@ -4629,7 +4632,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with') ) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the webdav module') ) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow') ) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar') ) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">Export your calendar</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
+buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the webdav module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

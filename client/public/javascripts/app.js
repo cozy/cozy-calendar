@@ -1233,7 +1233,7 @@ module.exports = {
   "alarm description placeholder": "Que voulez-vous vous rappeler ?",
   "ICalendar importer": "Importateur ICalendar",
   "import your icalendar file": "Importer votre fichier iCalendar",
-  "select an icalendar file": "Séléctionner un fichier iCalendar",
+  "select an icalendar file": "Sélectionner un fichier iCalendar",
   "confirm import": "Confirmer l'import",
   "cancel": "Annuler",
   "Create": "Créer",
@@ -1395,13 +1395,13 @@ module.exports = Alarm = (function(_super) {
   Alarm.prototype.validate = function(attrs, options) {
     var errors, _ref;
     errors = [];
-    if (!attrs.description || attrs.description === "") {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
       });
     }
-    if ((_ref = !attrs.action) === 'DISPLAY' || _ref === 'EMAIL' || _ref === 'BOTH') {
+    if ((_ref = attrs.action) !== 'DISPLAY' && _ref !== 'EMAIL' && _ref !== 'BOTH') {
       errors.push({
         field: 'action',
         value: "invalid action"
