@@ -35,7 +35,7 @@ module.exports = Alarm = americano.getModel('Alarm', {
   }
 });
 
-require('cozy-ical').decorateAlarm(Alarm);
+require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateAlarm(Alarm);
 
 Alarm.all = function(params, callback) {
   return Alarm.request("all", params, callback);

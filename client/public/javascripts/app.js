@@ -3908,7 +3908,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
+    var allDay, data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
     data = {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
@@ -3924,6 +3924,7 @@ module.exports = EventModal = (function(_super) {
     if (this.$('#allday').is(':checked')) {
       data.start = Event.momentToDateString(dtS);
       data.end = Event.momentToDateString(dtE);
+      allDay = true;
     } else {
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
@@ -3939,6 +3940,7 @@ module.exports = EventModal = (function(_super) {
       success: (function(_this) {
         return function() {
           console.log(_this.model);
+          _this.model.allDay = allDay;
           return _this.close();
         };
       })(this),

@@ -42,7 +42,7 @@ module.exports.read = function(req, res) {
 module.exports.create = function(req, res) {
   var data;
   data = req.body;
-  return Alarm.createorGetIfImport(data, (function(_this) {
+  return Alarm.createOrGetIfImport(data, (function(_this) {
     return function(err, alarm) {
       if (err) {
         return res.send({

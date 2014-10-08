@@ -2105,7 +2105,7 @@ module.exports = CalendarHeader = (function(_super) {
     }
     view = this.cal.fullCalendar('getView');
     if (view.name === 'month') {
-      res = view.start.format('MMMM YYYY');
+      res = view.intervalStart.format('MMMM YYYY');
     } else {
       res = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
     }
@@ -3558,7 +3558,7 @@ module.exports = CalendarView = (function(_super) {
       this.handleWindowResize();
     }
     this.view = view.name;
-    start = view.start;
+    start = view.intervalStart;
     hash = this.view === 'month' ? start.format('[month]/YYYY/M') : start.format('[week]/YYYY/M/D');
     return app.router.navigate(hash);
   };
@@ -3908,7 +3908,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
+    var allDay, data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
     data = {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
@@ -3924,6 +3924,7 @@ module.exports = EventModal = (function(_super) {
     if (this.$('#allday').is(':checked')) {
       data.start = Event.momentToDateString(dtS);
       data.end = Event.momentToDateString(dtE);
+      allDay = true;
     } else {
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
@@ -3939,6 +3940,7 @@ module.exports = EventModal = (function(_super) {
       success: (function(_this) {
         return function() {
           console.log(_this.model);
+          _this.model.allDay = allDay;
           return _this.close();
         };
       })(this),
@@ -4427,7 +4429,7 @@ module.exports = AlarmView = (function(_super) {
 
   AlarmView.prototype.getRenderData = function() {
     return _.extend(this.model.toJSON(), {
-      time: this.model.getFormattedDate('{yyyy}/{MM}/{dd} {HH}:{mm}'),
+      time: this.model.getFormattedDate('YYYY/MM/DD HH:mm'),
       description: this.model.get('description')
     });
   };

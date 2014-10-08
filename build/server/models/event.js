@@ -49,7 +49,15 @@ module.exports = Event = americano.getModel('Event', {
   }
 });
 
-require('cozy-ical').decorateEvent(Event);
+Event.dateFormat = 'YYYY-MM-DD';
+
+Event.ambiguousDTFormat = 'YYYY-MM-DDTHH:mm:00.000';
+
+Event.utcDTFormat = 'YYYY-MM-DDTHH:mm:00.000Z';
+
+Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/;
+
+require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateEvent(Event);
 
 Event.all = function(params, callback) {
   return Event.request("all", params, callback);

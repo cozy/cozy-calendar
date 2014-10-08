@@ -25,7 +25,7 @@ Event.ambiguousDTFormat = 'YYYY-MM-DDTHH:mm:00.000'
 Event.utcDTFormat = 'YYYY-MM-DDTHH:mm:00.000Z'
 
 # Handle only unique units strings.
-Event.alarmTriggRegex = /(\+?|-)P(\d+)(W|D|H|M|S)/
+Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
 # require('cozy-ical').decorateEvent Event
 require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateEvent Event
