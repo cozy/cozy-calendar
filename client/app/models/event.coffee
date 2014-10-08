@@ -17,7 +17,7 @@ module.exports = class Event extends ScheduleItem
 
         errors = []
 
-        if not attrs.description
+        unless attrs.description?
             errors.push
                 field: 'description'
                 value: "no summary"
