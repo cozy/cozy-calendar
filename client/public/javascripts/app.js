@@ -1483,7 +1483,7 @@ module.exports = Event = (function(_super) {
   Event.prototype.validate = function(attrs, options) {
     var end, errors, start;
     errors = [];
-    if (!attrs.description) {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
