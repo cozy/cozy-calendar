@@ -1292,7 +1292,6 @@ module.exports = {
   "times": "fois",
   "weekday": "jours de la semaine",
   "summary": "Titre",
-  "Summary": "Titre",
   "place": "Endroit",
   "start": "Début",
   "end": "Fin",
@@ -2232,7 +2231,7 @@ module.exports = PopOver = (function(_super) {
   };
 
   PopOver.prototype.getRenderData = function() {
-    var data, diff, endDate, startDate, _ref;
+    var data, diff, endDate, endDateBeginning, startDate, startDateBeginning, _ref;
     data = _.extend({
       type: this.type
     }, this.model.attributes, {
@@ -2245,8 +2244,10 @@ module.exports = PopOver = (function(_super) {
       endDate = this.model.getEndDateObject();
       startDate = this.model.getStartDateObject();
       if (!this.model.isOneDay()) {
-        diff = endDate - startDate;
-        diff = Math.round(diff / 1000 / 3600 / 24);
+        endDateBeginning = endDate.clone().beginningOfDay();
+        startDateBeginning = startDate.clone().beginningOfDay();
+        diff = endDateBeginning - startDateBeginning;
+        diff = diff / (1000 * 3600 * 24);
       }
       data.start = startDate.format('{HH}:{mm}');
       data.end = endDate.format('{HH}:{mm}');
@@ -2460,6 +2461,7 @@ module.exports = PopOver = (function(_super) {
 
   PopOver.prototype.adjustTimePickers = function(changed, newvalue) {
     var bde, bds, date, diff, end, endDate, newEnd, newStart, oneday, start, startDate;
+    return;
     date = this.model.getStartDateObject();
     start = this.$('#input-start').val();
     end = this.$('#input-end').val();
@@ -2497,7 +2499,6 @@ module.exports = PopOver = (function(_super) {
       oneday = 1000 * 3600 * 24;
       bde = newEnd.clone().beginningOfDay();
       bds = newStart.clone().beginningOfDay();
-      console.log("HERE", diff, (bde - bds) / oneday);
       diff = Math.round((bde - bds) / oneday);
     }
     this.$('#input-start').val(newStart.format('{HH}:{mm}'));
@@ -4588,7 +4589,7 @@ buf.push("</select></div><div class=\"line\"><input id=\"input-desc\" type=\"tex
 }
 else if ( type = 'event')
 {
-buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
+buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
 };return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
