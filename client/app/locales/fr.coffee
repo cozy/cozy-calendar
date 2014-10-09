@@ -100,7 +100,6 @@ module.exports =
 
 # MODAL
     "summary"                           : "Titre"
-    "Summary"                           : "Titre"
     "place"                             : "Endroit"
     "start"                             : "Début"
     "end"                               : "Fin"
