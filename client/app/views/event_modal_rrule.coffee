@@ -36,6 +36,7 @@ module.exports = class RRuleView extends BaseView
 
 
         options = RRule.fromString(@model.get('rrule')).options
+    
         rrule =
             freq: options.freq
             interval: options.interval

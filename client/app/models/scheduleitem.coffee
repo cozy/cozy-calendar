@@ -90,13 +90,14 @@ module.exports = class ScheduleItem extends Backbone.Model
         previous = @getPreviousDateObject()
         if previous then previous.format('YYYYMMDD') else false
 
-    # TODO:  Hide RRule object as it send wrong dates.
-    getRRuleObject: ->
-        try
-            options = RRule.parseString @get 'rrule'
-            options.dtstart = @getStartDateObject()
-            return new RRule options
-        catch e then return false
+    # Deprecated
+    # # TODO:  Hide RRule object as it send wrong dates.
+    # getRRuleObject: ->
+    #     try
+    #         options = RRule.parseString @get 'rrule'
+    #         options.dtstart = @getStartDateObject()
+    #         return new RRule options
+    #     catch e then return false
 
     isRecurrent: ->
         return @has('rrule') and @get('rrule') != ''
@@ -126,9 +127,21 @@ module.exports = class ScheduleItem extends Backbone.Model
         jsDateEventS = new Date(mDateEventS.toISOString())
     
 
+        # rruleStr = RRule.parseString @get 'rrule'
+        # rruleStr += ';DTSTART=' + mDateEventS.format('YYYYMMDD[T]HHmmss[Z]')
+        # options = RRule.parseString rruleStr
         options = RRule.parseString @get 'rrule'
-        #options = RRule.parseString "FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE"
+
+        # options = RRule.parseString "FREQ=WEEKLY;DTSTART=20140910T080000Z;INTERVAL=1;BYDAY=WE"
         options.dtstart = jsDateEventS
+
+        # RRule lib needs explicit Weekday with weekly interval.
+        # if options.freq == RRule.WEEKLY and not options.byweekday
+        #     options.byweekday = [[RRule.SU, RRule.MO, RRule.TU, RRule.WE,
+        #     RRule.TH, RRule.FR, RRule.SA][mDateEventS.day()]]
+
+        console.log options
+
         rrule = new RRule options
 
 
@@ -195,27 +208,23 @@ module.exports = class ScheduleItem extends Backbone.Model
         # console.log @_toTimezonedMoment @get @startDateField
 
     _toFullCalendarEvent: (start, end) ->
-
-
         return fcEvent =
             id: @cid
             # title: "#{start.format "HH:mm"} #{@get("description")}"
-            title:  (if not @allDay then start.format "H:mm[ ]" else '') + @get("description")
-            # start: @get @startDateField
+            title:  (if not @allDay then start.format 'H:mm[ ]' else '') + @get('description')
             start: start
-            # start: start.format Date.ISO8601_DATETIME
             end: end
-            # end: end.format Date.ISO8601_DATETIME
             allDay: @allDay
-            diff: @get "diff"
+            diff: @get 'diff'
             place: @get 'place'
             timezone: @get 'timezone'
-            # timezoneHour: @get 'timezoneHour'
-            # timeFormat: ''
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()
 
+    # # #
+    # Class methods
+    # # #
     @ambiguousToTimezoned: (ambigM) ->
         # Convert an ambiguously fullcalendar moment, to a timezoned moment.
         # Use Cozy's timezone as reference. Fullcalendar should use timezone = "Cozy's timezone" to be coherent.

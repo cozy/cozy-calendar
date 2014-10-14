@@ -1740,18 +1740,6 @@ module.exports = ScheduleItem = (function(_super) {
     }
   };
 
-  ScheduleItem.prototype.getRRuleObject = function() {
-    var e, options;
-    try {
-      options = RRule.parseString(this.get('rrule'));
-      options.dtstart = this.getStartDateObject();
-      return new RRule(options);
-    } catch (_error) {
-      e = _error;
-      return false;
-    }
-  };
-
   ScheduleItem.prototype.isRecurrent = function() {
     return this.has('rrule') && this.get('rrule') !== '';
   };
@@ -1774,6 +1762,7 @@ module.exports = ScheduleItem = (function(_super) {
     jsDateEventS = new Date(mDateEventS.toISOString());
     options = RRule.parseString(this.get('rrule'));
     options.dtstart = jsDateEventS;
+    console.log(options);
     rrule = new RRule(options);
     fixDSTTroubles = function(jsDateRecurrentS) {
       var diff, mDateRecurrentS;
@@ -1819,11 +1808,11 @@ module.exports = ScheduleItem = (function(_super) {
     var fcEvent;
     return fcEvent = {
       id: this.cid,
-      title: (!this.allDay ? start.format("H:mm[ ]") : '') + this.get("description"),
+      title: (!this.allDay ? start.format('H:mm[ ]') : '') + this.get('description'),
       start: start,
       end: end,
       allDay: this.allDay,
-      diff: this.get("diff"),
+      diff: this.get('diff'),
       place: this.get('place'),
       timezone: this.get('timezone'),
       type: this.fcEventType,
@@ -3908,7 +3897,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var allDay, data, dtE, dtS, error, validModel, _i, _len, _ref, _results;
+    var data, dtE, dtS, error, rruleStr, validModel, _i, _len, _ref, _results;
     data = {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
@@ -3918,13 +3907,14 @@ module.exports = EventModal = (function(_super) {
     data.alarms = this.reminders.map(function(v) {
       return v.getModelAttributes();
     });
-    data.rrule = this.rruleForm.hasRRule() ? this.rruleForm.getRRule().toString() : '';
+    data.rrule = this.rruleForm.hasRRule() ? (rruleStr = this.rruleForm.getRRule().toString(), data.rrule = rruleStr.split(';').filter(function(s) {
+      return s.indexOf('DTSTART') !== 0;
+    }).join(';')) : void 0;
     dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
     dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
     if (this.$('#allday').is(':checked')) {
       data.start = Event.momentToDateString(dtS);
       data.end = Event.momentToDateString(dtE);
-      allDay = true;
     } else {
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
@@ -3940,7 +3930,6 @@ module.exports = EventModal = (function(_super) {
       success: (function(_this) {
         return function() {
           console.log(_this.model);
-          _this.model.allDay = allDay;
           return _this.close();
         };
       })(this),

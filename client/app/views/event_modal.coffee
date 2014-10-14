@@ -150,9 +150,12 @@ module.exports = class EventModal extends ViewCollection
         
         data.alarms = @reminders.map (v) -> return v.getModelAttributes()
 
-        data.rrule = if @rruleForm.hasRRule() then @rruleForm.getRRule().toString() else ''
-
-
+        data.rrule = 
+        if @rruleForm.hasRRule()
+            rruleStr = @rruleForm.getRRule().toString()
+            # Remove DTSTART field
+            data.rrule = rruleStr.split(';').filter((s) -> s.indexOf('DTSTART') != 0).join(';')
+            
         dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
         dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
 
@@ -163,7 +166,7 @@ module.exports = class EventModal extends ViewCollection
             if @rruleForm.hasRRule()
                 # Save timezoned DT : no timezone in start and end, and timezone field.
                 data.timezone = window.app.timezone # TODO: view things ??
-                data.start =  Event.momentToAmbiguousString(dtS)
+                data.start = Event.momentToAmbiguousString(dtS)
                 data.end = Event.momentToAmbiguousString(dtE)
             else
                 # Save UTC for punctual event.
