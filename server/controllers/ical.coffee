@@ -1,10 +1,7 @@
-# ical = require 'cozy-ical'
-ical = require '/home/jacquarg/workspace/cozy/jacquarg-ical/src/index'
-
+ical = require 'cozy-ical'
 Event = require '../models/event'
 Alarm = require '../models/alarm'
 User = require  '../models/user'
-
 
 module.exports.export = (req, res) ->
     calendar = Alarm.getICalCalendar()

@@ -5,8 +5,7 @@ log = require('printit')
 
 User = require '../models/user'
 Event = require '../models/event'
-# {VCalendar} = require 'cozy-ical'
-{VCalendar} = require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index')
+{VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
 mails = new MailHandler()
 

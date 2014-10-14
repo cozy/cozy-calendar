@@ -27,8 +27,7 @@ Event.utcDTFormat = 'YYYY-MM-DDTHH:mm:00.000Z'
 # Handle only unique units strings.
 Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
-# require('cozy-ical').decorateEvent Event
-require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateEvent Event
+require('cozy-ical').decorateEvent Event
 
 # TODO : migration script.
 # insinuatingUTCToISO8601 = (dateStr) ->

@@ -13,7 +13,7 @@ User = require('../models/user');
 
 Event = require('../models/event');
 
-VCalendar = require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').VCalendar;
+VCalendar = require('cozy-ical').VCalendar;
 
 MailHandler = require('../mails/mail_handler');
 

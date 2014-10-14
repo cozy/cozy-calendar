@@ -14,8 +14,7 @@ module.exports = Alarm = americano.getModel 'Alarm',
     related      : type : String, default: null
 
 
-# require('cozy-ical').decorateAlarm Alarm
-require('/home/jacquarg/workspace/cozy/jacquarg-ical/src/index').decorateAlarm Alarm
+require('cozy-ical').decorateAlarm Alarm
 
 # TODO: migration script.
 # # TODO: avoid duplication (Event and Alarm models.)
