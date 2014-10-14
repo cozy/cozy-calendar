@@ -92,7 +92,7 @@ module.exports.public = (req, res) ->
 
 module.exports.ical = (req, res) ->
     key = req.query.key
-    calendar = new VCalendar 'Cozy Cloud', 'Cozy Agenda'
+    calendar = new VCalendar organization:'Cozy Cloud', title:'Cozy Agenda'
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()

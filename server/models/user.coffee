@@ -16,7 +16,7 @@ User.getUser = (callback) ->
         if err
             callback err
         else if users.length is 0
-            callback new Error('no user')
+            callback new Error 'no user'
         else
             callback null, users[0]
 

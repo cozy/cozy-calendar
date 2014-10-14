@@ -1,23 +1,22 @@
 americano = require 'americano-cozy'
-momentTz = require 'moment-timezone'
 User = require './user'
 
 # Alarm should be interpreted as VTODO + VALARM iCal objects.
 # with DTSTART <-> trigg ; DURATION = 0 ; TRIGGER = 0 .
 module.exports = Alarm = americano.getModel 'Alarm',
-    action       : type : String, default: 'DISPLAY' # One of DISPLAY, EMAIL, BOTH.
-    trigg        : type : String # DT to trigger at. As UTC if ponctual. If recurent, to interpret in @timezone.
-    description  : type : String
-    timezone     : type : String # Timezone of trig time (if recurent)
-    rrule        : type : String # recurence rules.
-    tags         : type : (x) -> x # DAMN IT JUGGLING
-    related      : type : String, default: null
+    action : type : String, default: 'DISPLAY' # One of DISPLAY, EMAIL, BOTH.
+    trigg : type : String # DT to trigger at. 
+        # As UTC if ponctual. If recurent, to interpret in @timezone.
+    description : type : String
+    timezone : type : String # Timezone of trigg time (if recurent)
+    rrule : type : String # recurring rule.
+    tags : type : (x) -> x # DAMN IT JUGGLING
+    related : type : String, default: null
 
 
 require('cozy-ical').decorateAlarm Alarm
 
-# TODO: migration script.
-# # TODO: avoid duplication (Event and Alarm models.)
+# @TODO: migration script.
 # insinuatingUTCToISO8601 = (dateStr) ->
 #     # Skip buggy or empty values.
 #     if not dateStr
@@ -31,15 +30,10 @@ require('cozy-ical').decorateAlarm Alarm
 #     # Check for a timezone
 #     if "GMT" not in dateStr
 #         d = d + " GMT+0000"
-
 #     return new Date(d).toISOString()
 
 # Alarm.afterInitialize = () ->
 #     # @trigg = insinuatingUTCToISO8601(@trigg)
-#     if User.email
-#         @attendees = ['email': User.email]
-#     @
-
 
 Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
