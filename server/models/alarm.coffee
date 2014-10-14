@@ -68,3 +68,6 @@ Alarm.createOrGetIfImport = (data, callback) ->
                 Alarm.create data, callback
     else
         Alarm.create data, callback
+
+Alarm::attendee = () ->
+    return ["mailto:#{User.email}"]

@@ -21,25 +21,27 @@ User.destroyAll = function(callback) {
   return User.requestDestroy("all", callback);
 };
 
-User.getTimezone = function(callback) {
+User.getUser = function(callback) {
   return User.all(function(err, users) {
     if (err) {
       return callback(err);
     } else if (users.length === 0) {
       return callback(new Error('no user'));
     } else {
-      return callback(null, users[0].timezone);
+      return callback(null, users[0]);
     }
   });
 };
 
-User.updateTimezone = function(callback) {
-  return User.getTimezone(function(err, timezone) {
+User.updateUser = function(callback) {
+  return User.getUser(function(err, user) {
     if (err) {
       console.log(err);
-      User.timezone = "Europe/Paris";
+      User.timezone = 'Europe/Paris';
+      User.email = '';
     } else {
-      User.timezone = timezone || "Europe/Paris";
+      User.timezone = user.timezone || "Europe/Paris";
+      User.email = user.email;
     }
     return typeof callback === "function" ? callback() : void 0;
   });

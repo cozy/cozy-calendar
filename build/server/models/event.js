@@ -134,6 +134,10 @@ Event.prototype.getGuest = function(key) {
     })(this);
   }
   return currentguest;
+};
+
+Event.prototype.alarmAttendee = function() {
+  return ["mailto:" + User.email];
 
   /* Constraints an alarm of alarms
       * All types

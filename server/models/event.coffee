@@ -114,6 +114,8 @@ Event::getGuest = (key) ->
 
     return currentguest
 
+Event::alarmAttendee = () ->
+    return ["mailto:#{User.email}"]
 
 
 # # before sending to the client

@@ -10,8 +10,8 @@ start = (port, callback) ->
         User = require './server/models/user'
         Realtimer = require('cozy-realtime-adapter')
         realtime = Realtimer server : server, ['alarm.*', 'event.*']
-        realtime.on 'user.*', -> User.updateTimezone()
-        User.updateTimezone (err) ->
+        realtime.on 'user.*', -> User.updateUser()
+        User.updateUser (err) ->
             callback err, app, server
 
 if not module.parent

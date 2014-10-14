@@ -11,20 +11,22 @@ User.all = (callback) ->
 User.destroyAll = (callback) ->
     User.requestDestroy "all", callback
 
-User.getTimezone = (callback) ->
+User.getUser = (callback) ->
     User.all (err, users) ->
         if err
             callback err
         else if users.length is 0
             callback new Error('no user')
         else
-            callback null, users[0].timezone
+            callback null, users[0]
 
-User.updateTimezone = (callback) ->
-    User.getTimezone (err, timezone) ->
+User.updateUser = (callback) ->
+    User.getUser (err, user) ->
         if err
             console.log err
-            User.timezone = "Europe/Paris"
+            User.timezone = 'Europe/Paris'
+            User.email = ''
         else
-            User.timezone = timezone or "Europe/Paris"
+            User.timezone = user.timezone or "Europe/Paris"
+            User.email = user.email
         callback?()

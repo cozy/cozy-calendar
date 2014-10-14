@@ -83,3 +83,7 @@ Alarm.createOrGetIfImport = function(data, callback) {
     return Alarm.create(data, callback);
   }
 };
+
+Alarm.prototype.attendee = function() {
+  return ["mailto:" + User.email];
+};

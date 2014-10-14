@@ -15,9 +15,9 @@ start = function(port, callback) {
       server: server
     }, ['alarm.*', 'event.*']);
     realtime.on('user.*', function() {
-      return User.updateTimezone();
+      return User.updateUser();
     });
-    return User.updateTimezone(function(err) {
+    return User.updateUser(function(err) {
       return callback(err, app, server);
     });
   });
