@@ -63,5 +63,7 @@ Alarm.createOrGetIfImport = (data, callback) ->
     else
         Alarm.create data, callback
 
-Alarm::attendee = () ->
-    return ["mailto:#{User.email}"]
+# Return the emails to alert if action is EMAIL, or BOTH.
+# Actualy the attendee is the cozy's user.
+Alarm::getAttendeesEmail = () ->
+    return [User.email]

@@ -101,8 +101,10 @@ Event::getGuest = (key) ->
 
     return currentguest
 
-Event::alarmAttendee = () ->
-    return ["mailto:#{User.email}"]
+# Return the emails to alert if action is EMAIL, or BOTH on the alarms.
+# Actualy the attendee is the cozy's user.
+Event::getAlarmAttendeesEmail = () ->
+    return [User.email]
 
 
     # Further work to make the doctype iCal compliant
