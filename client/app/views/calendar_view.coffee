@@ -14,7 +14,7 @@ Event = require 'models/event'
 module.exports = class CalendarView extends BaseView
 
     id: 'view-container'
-    template: require('./templates/calendarview')
+    template: require './templates/calendarview'
 
     initialize: (@options) ->
         @alarmCollection = @model.alarms
@@ -149,13 +149,13 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'removeEvents', model.cid
 
     refreshOne: (model) =>
-        # Skip if Popover is open, to avoid autoclosing.
         console.log "refreshOne"
-        if @popover
-            return 
 
-        # return @refresh() if model.getRRuleObject() #@TODO: may be smarter
         return @refresh() if model.isRecurrent()
+
+        # fullCalendar('updateEvent') eat end of allDay events!(?), 
+        # perform a full refresh as a workaround.
+        return @refresh() if model.allDay
 
         data = model.toPunctualFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
@@ -223,9 +223,6 @@ module.exports = class CalendarView extends BaseView
         console.log 'yeeeeeee'
         @cal.fullCalendar 'unselect'
         @popover = null
-
-        # Force a refresh, as refresh was deactivated while popover was open.
-        @refresh()
 
     onEventRender: (event, element) ->
         if event.isSaving? and event.isSaving

@@ -1618,6 +1618,7 @@ module.exports = Event = (function(_super) {
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
 var ScheduleItem, colorHash,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1627,6 +1628,7 @@ module.exports = ScheduleItem = (function(_super) {
   __extends(ScheduleItem, _super);
 
   function ScheduleItem() {
+    this.updateAttributes = __bind(this.updateAttributes, this);
     return ScheduleItem.__super__.constructor.apply(this, arguments);
   }
 
@@ -1639,11 +1641,17 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.allDay = false;
 
   ScheduleItem.prototype.initialize = function() {
-    var _ref, _ref1;
+    var _ref;
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
       this.set('tags', ['my calendar']);
     }
-    return this.allDay = ((_ref1 = this.get(this.startDateField)) != null ? _ref1.length : void 0) === 10;
+    this.updateAttributes();
+    return this.on('change', this.updateAttributes, this);
+  };
+
+  ScheduleItem.prototype.updateAttributes = function() {
+    var _ref;
+    return this.allDay = ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
   };
 
   ScheduleItem.prototype.getCalendar = function() {
@@ -1801,6 +1809,7 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.toPunctualFullCalendarEvent = function() {
+    console.log(this.getEndDateObject());
     return this._toFullCalendarEvent(this.getStartDateObject(), this.getEndDateObject());
   };
 
@@ -3052,42 +3061,35 @@ module.exports = EventPopOver = (function(_super) {
       showMeridian: false
     });
     this.$('.focused').focus();
-    inputEnd = this.$('#input-end');
-    inputStart = this.$('#input-start');
-    inputDiff = this.$('#input-diff');
-    inputStart.on('timepicker.next', (function(_this) {
-      return function() {
-        return inputEnd.focus();
-      };
-    })(this));
-    inputEnd.on('timepicker.next', (function(_this) {
-      return function() {
-        return inputDiff.focus();
-      };
-    })(this));
-    inputEnd.on('timepicker.prev', (function(_this) {
-      return function() {
-        return inputStart.focus().timepicker('highlightMinute');
-      };
-    })(this));
-    inputDiff.on('keydown', (function(_this) {
-      return function(ev) {
-        if (ev.keyCode === 37) {
-          inputEnd.focus().timepicker('highlightMinute');
-        }
-        if (ev.keyCode === 39) {
-          return _this.$('#input-desc').focus();
-        }
-      };
-    })(this));
-    if (this.model.get('rrule')) {
-      this.rruleForm = new RRuleFormView({
-        model: this.model
-      });
-      this.rruleForm.render();
-      this.$('#rrule-container').append(this.rruleForm.$el);
-      this.$('#rrule-action').hide();
-      this.$('#rrule-short i.icon-arrow-right').hide();
+    if (!this.model.allDay) {
+      inputEnd = this.$('#input-end');
+      inputStart = this.$('#input-start');
+      inputDiff = this.$('#input-diff');
+      inputStart.on('timepicker.next', (function(_this) {
+        return function() {
+          return inputEnd.focus();
+        };
+      })(this));
+      inputEnd.on('timepicker.next', (function(_this) {
+        return function() {
+          return inputDiff.focus();
+        };
+      })(this));
+      inputEnd.on('timepicker.prev', (function(_this) {
+        return function() {
+          return inputStart.focus().timepicker('highlightMinute');
+        };
+      })(this));
+      inputDiff.on('keydown', (function(_this) {
+        return function(ev) {
+          if (ev.keyCode === 37) {
+            inputEnd.focus().timepicker('highlightMinute');
+          }
+          if (ev.keyCode === 39) {
+            return _this.$('#input-desc').focus();
+          }
+        };
+      })(this));
     }
     this.calendar = new ComboBox({
       el: this.$('#calendarcombo'),
@@ -3111,7 +3113,8 @@ module.exports = EventPopOver = (function(_super) {
       dtFormat: this.dtFormat,
       editionMode: !this.model.isNew(),
       advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id,
-      calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || ''
+      calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || '',
+      allDay: this.model.allDay
     };
     return data;
   };
@@ -3508,10 +3511,10 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.refreshOne = function(model) {
     var data, fcEvent;
     console.log("refreshOne");
-    if (this.popover) {
-      return;
-    }
     if (model.isRecurrent()) {
+      return this.refresh();
+    }
+    if (model.allDay) {
       return this.refresh();
     }
     data = model.toPunctualFullCalendarEvent();
@@ -3581,8 +3584,7 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.onPopoverClose = function() {
     console.log('yeeeeeee');
     this.cal.fullCalendar('unselect');
-    this.popover = null;
-    return this.refresh();
+    return this.popover = null;
   };
 
   CalendarView.prototype.onEventRender = function(event, element) {
@@ -3723,6 +3725,7 @@ module.exports = EventModal = (function(_super) {
     this.addReminder = __bind(this.addReminder, this);
     this.refreshGuestList = __bind(this.refreshGuestList, this);
     this.onGuestAdded = __bind(this.onGuestAdded, this);
+    this.toggleAllDay = __bind(this.toggleAllDay, this);
     this.hideOnEscape = __bind(this.hideOnEscape, this);
     return EventModal.__super__.constructor.apply(this, arguments);
   }
@@ -3738,6 +3741,8 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.inputDateTimeFormat = 'DD/MM/YYYY H:mm';
+
+  EventModal.prototype.inputDateFormat = 'DD/MM/YYYY';
 
   EventModal.prototype.exportDateFormat = 'YYYY-MM-DD-HH-mm';
 
@@ -3772,7 +3777,8 @@ module.exports = EventModal = (function(_super) {
             trigg: '-PT10M'
           });
         };
-      })(this)
+      })(this),
+      'click #allday': 'toggleAllDay'
     };
   };
 
@@ -3781,19 +3787,8 @@ module.exports = EventModal = (function(_super) {
     EventModal.__super__.afterRender.apply(this, arguments);
     this.addGuestField = this.configureGuestTypeahead();
     this.startField = this.$('#basic-start').attr('type', 'text');
-    this.startField.datetimepicker({
-      autoclose: true,
-      format: 'dd/mm/yyyy hh:ii',
-      pickerPosition: 'bottom-left',
-      viewSelect: 4
-    });
     this.endField = this.$('#basic-end').attr('type', 'text');
-    this.endField.datetimepicker({
-      autoclose: true,
-      format: 'dd/mm/yyyy hh:ii',
-      pickerPosition: 'bottom-left',
-      viewSelect: 4
-    });
+    this.toggleAllDay();
     this.descriptionField = this.$('#basic-description');
     this.reminders = [];
     if ((_ref = this.model.get('alarms')) != null) {
@@ -3831,6 +3826,34 @@ module.exports = EventModal = (function(_super) {
     if (e.which === 27 && !e.isDefaultPrevented()) {
       return this.close();
     }
+  };
+
+  EventModal.prototype.toggleAllDay = function() {
+    var dtFormat, options;
+    this.startField.datetimepicker('remove');
+    this.endField.datetimepicker('remove');
+    options = {
+      autoclose: true,
+      pickerPosition: 'bottom-right'
+    };
+    if (this.$('#allday').is(':checked')) {
+      dtFormat = this.inputDateFormat;
+      _.extend(options, {
+        format: 'dd/mm/yyyy',
+        startView: 2,
+        minView: 2
+      });
+    } else {
+      dtFormat = this.inputDateTimeFormat;
+      _.extend(options, {
+        format: 'dd/mm/yyyy hh:ii',
+        viewSelect: 4
+      });
+    }
+    this.startField.val(this.model.getStartDateObject().format(dtFormat));
+    this.endField.val(this.model.getEndDateObject().format(dtFormat));
+    this.startField.datetimepicker(options);
+    return this.endField.datetimepicker(options);
   };
 
   EventModal.prototype.onGuestAdded = function(info) {
@@ -3882,15 +3905,16 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.getRenderData = function() {
-    var data, _ref, _ref1;
+    var data, format, _ref, _ref1;
     data = _.extend({}, this.model.toJSON(), {
       summary: this.model.get('description'),
       description: this.model.get('details'),
-      start: this.model.getStartDateObject().format(this.inputDateTimeFormat),
-      end: this.model.getEndDateObject().format(this.inputDateTimeFormat),
       allDay: this.model.allDay,
       exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
     });
+    format = this.model.allDay ? this.inputDateFormat : this.inputDateTimeFormat;
+    data.start = this.model.getStartDateObject().format(format);
+    data.end = this.model.getEndDateObject().format(format);
     data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
     data.tags = ((_ref1 = data.tags) != null ? _ref1.slice(1) : void 0) || [];
     return data;
@@ -3908,14 +3932,16 @@ module.exports = EventModal = (function(_super) {
       return v.getModelAttributes();
     });
     data.rrule = this.rruleForm.hasRRule() ? (rruleStr = this.rruleForm.getRRule().toString(), data.rrule = rruleStr.split(';').filter(function(s) {
-      return s.indexOf('DTSTART') !== 0;
+      return s.indexOf('DTSTART' !== 0);
     }).join(';')) : void 0;
-    dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
-    dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
     if (this.$('#allday').is(':checked')) {
+      dtS = moment.tz(this.startField.val(), this.inputDateFormat, window.app.timezone);
+      dtE = moment.tz(this.endField.val(), this.inputDateFormat, window.app.timezone);
       data.start = Event.momentToDateString(dtS);
       data.end = Event.momentToDateString(dtE);
     } else {
+      dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
+      dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
         data.start = Event.momentToAmbiguousString(dtS);
@@ -5218,7 +5244,7 @@ if ( typeof id != "undefined")
 {
 buf.push("<a" + (jade.attr("href", "events/" + (id) + "/" + (exportdate) + ".ics", true, false)) + "><i class=\"fa fa-download fa-1\"></i></a>");
 }
-buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span5 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span5 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span2\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder') ) ? "" : jade_interp)) + "&nbsp;<a class=\"btn addreminder\">+</a></h4><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span5 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span5 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span2\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder') ) ? "" : jade_interp)) + "&nbsp;<a class=\"btn addreminder\">+</a></h4><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5553,8 +5579,17 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),model = locals_.model,dtFormat = locals_.dtFormat,advancedUrl = locals_.advancedUrl;
-buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+var locals_ = (locals || {}),allDay = locals_.allDay,model = locals_.model,dtFormat = locals_.dtFormat,advancedUrl = locals_.advancedUrl;
+buf.push("<div class=\"line\">");
+if ( allDay)
+{
+buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("All day")) ? "" : jade_interp)) + "</span>");
+}
+else
+{
+buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span>");
+}
+buf.push("</div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

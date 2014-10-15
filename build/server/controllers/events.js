@@ -143,7 +143,10 @@ module.exports["public"] = function(req, res) {
 module.exports.ical = function(req, res) {
   var calendar, key;
   key = req.query.key;
-  calendar = new VCalendar('Cozy Cloud', 'Cozy Agenda');
+  calendar = new VCalendar({
+    organization: 'Cozy Cloud',
+    title: 'Cozy Agenda'
+  });
   calendar.add(req.event.toIcal());
   res.header({
     'Content-Type': 'text/calendar'

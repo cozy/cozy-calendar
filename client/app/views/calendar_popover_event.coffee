@@ -56,25 +56,26 @@ module.exports = class EventPopOver extends PopoverView
             showMeridian: false
         @$('.focused').focus()
 
-        # 20140904 : Put them with backbone events ?
-        inputEnd = @$('#input-end')
-        inputStart = @$('#input-start')
-        inputDiff = @$('#input-diff')
-        inputStart.on 'timepicker.next', => inputEnd.focus()
-        inputEnd.on 'timepicker.next', => inputDiff.focus()
-        inputEnd.on 'timepicker.prev', => inputStart.focus().timepicker 'highlightMinute'
-        inputDiff.on 'keydown', (ev) =>
-            if ev.keyCode is 37 # left
-                inputEnd.focus().timepicker 'highlightMinute'
-            if ev.keyCode is 39 # right
-                @$('#input-desc').focus()
+        if not @model.allDay
+            inputEnd = @$('#input-end')
+            inputStart = @$('#input-start')
+            inputDiff = @$('#input-diff')
+            inputStart.on 'timepicker.next', => inputEnd.focus()
+            inputEnd.on 'timepicker.next', => inputDiff.focus()
+            inputEnd.on 'timepicker.prev', => inputStart.focus().timepicker 'highlightMinute'
+            inputDiff.on 'keydown', (ev) =>
+                if ev.keyCode is 37 # left
+                    inputEnd.focus().timepicker 'highlightMinute'
+                if ev.keyCode is 39 # right
+                    @$('#input-desc').focus()
 
-        if @model.get 'rrule'
-            @rruleForm = new RRuleFormView model: @model
-            @rruleForm.render()
-            @$('#rrule-container').append @rruleForm.$el
-            @$('#rrule-action').hide()
-            @$('#rrule-short i.icon-arrow-right').hide()
+        # @TODO: remove ?
+        # if @model.get 'rrule'
+        #     @rruleForm = new RRuleFormView model: @model
+        #     @rruleForm.render()
+        #     @$('#rrule-container').append @rruleForm.$el
+        #     @$('#rrule-action').hide()
+        #     @$('#rrule-short i.icon-arrow-right').hide()
 
         @calendar = new ComboBox
             el: @$('#calendarcombo')
@@ -82,7 +83,6 @@ module.exports = class EventPopOver extends PopoverView
             source: app.tags.calendars()
 
         @updateMapLink()
-
         @refresh()
 
 
@@ -90,8 +90,6 @@ module.exports = class EventPopOver extends PopoverView
         title = if @model.isNew() then @type + ' creation'
         else 'edit ' + @type
         t(title)
-
-   
 
     getRenderData: ->
         data =
@@ -102,24 +100,15 @@ module.exports = class EventPopOver extends PopoverView
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
             calendar: @model.attributes.tags?[0] or ''
+            allDay: @model.allDay
 
         return data
-        # return _.extend data, @model.attributes
         
-
     onSetStart: (ev) -> @model.setStart @formatDateTime ev.time.value
+    
     onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
-    onSetDesc: (ev) -> @model.set('description', ev.target.value)
-
-    # onInputs: (ev) ->
-    #     @model.set('description', @$('#input-desc').val())
-    #     @model.plac
-    #     place: @$('#input-place').val()
-    #         description: 
-
-    #     data.tags = [@calendar.value()]
-
-
+    
+    onSetDesc: (ev) -> @model.set 'description', ev.target.value
 
     makeNewModel: (options) ->
         return new Event
@@ -130,14 +119,13 @@ module.exports = class EventPopOver extends PopoverView
 
     onTabClicked: (event) ->
         @parentView.showPopover
-            type: 'alarm' #if @type is 'event' then 'alarm' else 'event'
+            type: 'alarm'
             target: @options.target
             start:  @options.start
             end:    @options.end
 
     onAdvancedClicked: (event) =>
-        if @model.isNew()
-            # @model.set @getModelAttributes()
+        if @model.isNew()            
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash
@@ -158,9 +146,7 @@ module.exports = class EventPopOver extends PopoverView
 
     formatDateTime: (dtStr) ->
         splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
-        # splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})/
         if splitted and splitted[0]
-            # [all, hours, minutes, diff] = splitted
             setObj = 
                 hour: splitted[1]
                 minute: splitted[2]
@@ -185,15 +171,15 @@ module.exports = class EventPopOver extends PopoverView
         return if @$('.btn.add').hasClass 'disabled'
         @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @addButton.spin 'small'
-        errors = @model.validate(@model.attributes)
+        errors = @model.validate @model.attributes
         if errors
             @addButton.html @getButtonText()
             @addButton.children().show()
 
             @addButton.spin()
             @$('.alert').remove()
-            @$('input').css('border-color', '')
-            @handleError(err) for err in errors
+            @$('input').css 'border-color', ''
+            @handleError err for err in errors
 
         else #no errors.
             @model.save {},
@@ -212,7 +198,7 @@ module.exports = class EventPopOver extends PopoverView
         
     selfclose: =>
         # Revert if not just saved with addButton.
-        @model.fetch( complete: super )
+        @model.fetch complete: super
 
     updateMapLink: =>
         value = encodeURIComponent @$('#input-place').val()

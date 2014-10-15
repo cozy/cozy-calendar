@@ -16,7 +16,8 @@ module.exports = class EventModal extends ViewCollection
     attributes:
         'data-keyboard': 'false'
 
-    inputDateTimeFormat: 'DD/MM/YYYY H:mm' # use locale ?
+    inputDateTimeFormat: 'DD/MM/YYYY H:mm' # @TODO use locale ?
+    inputDateFormat: 'DD/MM/YYYY' # @TODO use locale ?
     exportDateFormat: 'YYYY-MM-DD-HH-mm'
 
     collectionEl: '#guests-list'
@@ -35,23 +36,16 @@ module.exports = class EventModal extends ViewCollection
         'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
-        'click .addreminder': =>  @addReminder(action: 'DISPLAY', trigg: '-PT10M')
+        'click .addreminder': =>  @addReminder action: 'DISPLAY', trigg: '-PT10M'
+        'click #allday' : 'toggleAllDay'
 
     afterRender: ->
         super
         @addGuestField = @configureGuestTypeahead()
-        @startField = @$('#basic-start').attr('type', 'text')
-        @startField.datetimepicker
-                autoclose: true
-                format: 'dd/mm/yyyy hh:ii'
-                pickerPosition: 'bottom-left'
-                viewSelect: 4
-        @endField = @$('#basic-end').attr('type', 'text')
-        @endField.datetimepicker
-                autoclose: true
-                format: 'dd/mm/yyyy hh:ii'
-                pickerPosition: 'bottom-left'
-                viewSelect: 4
+
+        @startField = @$('#basic-start').attr 'type', 'text'
+        @endField = @$('#basic-end').attr 'type', 'text'
+        @toggleAllDay()
 
         @descriptionField = @$('#basic-description')
 
@@ -85,6 +79,33 @@ module.exports = class EventModal extends ViewCollection
         # escape from outside a datetimepicker
         @close() if e.which is 27 and not e.isDefaultPrevented()
 
+    toggleAllDay: =>
+
+        @startField.datetimepicker 'remove'
+        @endField.datetimepicker 'remove'
+
+        options =
+            autoclose: true
+            pickerPosition: 'bottom-right'
+
+        if @$('#allday').is ':checked'
+            dtFormat = @inputDateFormat
+            _.extend options,
+                format: 'dd/mm/yyyy'
+                startView: 2
+                minView: 2
+
+        else
+            dtFormat = @inputDateTimeFormat
+            _.extend options, 
+                format: 'dd/mm/yyyy hh:ii'
+                viewSelect: 4
+
+        @startField.val(@model.getStartDateObject().format dtFormat)
+        @endField.val(@model.getEndDateObject().format dtFormat)
+
+        @startField.datetimepicker options
+        @endField.datetimepicker options
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'
@@ -102,7 +123,6 @@ module.exports = class EventModal extends ViewCollection
 
         @addGuestField.val ''
         return ""
-
 
     refreshGuestList: =>
         @collection.reset @model.get('attendees')
@@ -125,16 +145,19 @@ module.exports = class EventModal extends ViewCollection
         data = _.extend {}, @model.toJSON(),
             summary: @model.get('description')
             description: @model.get('details')
-            start: @model.getStartDateObject().format @inputDateTimeFormat
-            end: @model.getEndDateObject().format @inputDateTimeFormat
+            
             allDay: @model.allDay
             exportdate: @model.getStartDateObject().format @exportDateFormat
+
+        format = if @model.allDay then @inputDateFormat else @inputDateTimeFormat
+
+        data.start = @model.getStartDateObject().format format
+        data.end = @model.getEndDateObject().format format
 
         data.calendar = data.tags?[0] or ''
         data.tags = data.tags?[1..] or []
 
         return data
-
 
     save: =>
         data =
@@ -142,11 +165,6 @@ module.exports = class EventModal extends ViewCollection
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
             tags: [@$('#basic-calendar').val()].concat @tags.getTags()
-            
-            # start: Date.create(@startField.val(), 'fr')
-            #     .format Event.dateFormat, 'en'
-            # end: Date.create(@endField.val(), 'fr')
-            #     .format Event.dateFormat, 'en'
         
         data.alarms = @reminders.map (v) -> return v.getModelAttributes()
 
@@ -154,18 +172,22 @@ module.exports = class EventModal extends ViewCollection
         if @rruleForm.hasRRule()
             rruleStr = @rruleForm.getRRule().toString()
             # Remove DTSTART field
-            data.rrule = rruleStr.split(';').filter((s) -> s.indexOf('DTSTART') != 0).join(';')
-            
-        dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
-        dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
-
+            data.rrule = rruleStr.split ';'
+                    .filter (s) -> s.indexOf 'DTSTART' isnt 0
+                    .join ';'
+        
         if @$('#allday').is(':checked')
+            dtS = moment.tz(@startField.val(), @inputDateFormat, window.app.timezone)
+            dtE = moment.tz(@endField.val(), @inputDateFormat, window.app.timezone)
             data.start = Event.momentToDateString(dtS)
             data.end = Event.momentToDateString(dtE)
-        else 
+
+        else
+            dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
+            dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
             if @rruleForm.hasRRule()
                 # Save timezoned DT : no timezone in start and end, and timezone field.
-                data.timezone = window.app.timezone # TODO: view things ??
+                data.timezone = window.app.timezone # @TODO: display timezone somewhere ?
                 data.start = Event.momentToAmbiguousString(dtS)
                 data.end = Event.momentToAmbiguousString(dtE)
             else

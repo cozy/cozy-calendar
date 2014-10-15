@@ -23,9 +23,6 @@ module.exports = Event = americano.getModel('Event', {
   description: {
     type: String
   },
-  diff: {
-    type: Number
-  },
   rrule: {
     type: String
   },

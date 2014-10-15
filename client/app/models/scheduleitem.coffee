@@ -11,7 +11,11 @@ module.exports = class ScheduleItem extends Backbone.Model
         # console.log "initialize"
         @set 'tags', ['my calendar'] unless @get('tags')?.length
 
-        @allDay = @get(@startDateField)?.length == 10
+        @updateAttributes()
+
+        # @TODO : actualy luckily do the job, how to be sure that @updateAttributes is called before
+        # others listeners, which may depend on updaetAttributes work ?
+        @on 'change', @updateAttributes, @
 
         # #@startDateObject = Date.create @get @startDateField
         #@startDateObject = @_toTimezonedMoment @get @startDateField
@@ -36,6 +40,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         #     # @endDateObject.advance minutes: 30
         #     @endDateObject.add('m', 30)
 
+    # Update compute instance attribute such as allDay
+    updateAttributes: =>
+        @allDay = @get(@startDateField)?.length is 10
 
     getCalendar: -> @get('tags')?[0]
 
@@ -48,9 +55,10 @@ module.exports = class ScheduleItem extends Backbone.Model
     #Deprecated, to remove.
     _toTimezonedMoment: (utcDateStr) -> moment.tz utcDateStr, window.app.timezone
 
-
+    # @TODO : to check, seems wrong : why ambiguous, why cozy timezone, ...
     getDateObject: -> #@startDateObject
         ScheduleItem.ambiguousToTimezoned @get @startDateField
+
     getStartDateObject: -> @getDateObject()
     getEndDateObject: -> 
         if @endDateField
@@ -192,7 +200,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     # allow overriding the startDate for recurrence management
 
     toPunctualFullCalendarEvent : ->
-        return @_toFullCalendarEvent(@getStartDateObject(), @getEndDateObject())
+        console.log @getEndDateObject()
+        return @_toFullCalendarEvent @getStartDateObject(), @getEndDateObject()
 
         # if rstart
         #     duration = end - start
