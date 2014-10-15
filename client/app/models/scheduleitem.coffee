@@ -90,13 +90,21 @@ module.exports = class ScheduleItem extends Backbone.Model
     getFormattedEndDate: (formatter) -> @getEndDateObject().format formatter
 
 
-    getDateHash: () -> @getDateObject().format('YYYYMMDD')
+    getDateHash: -> @getDateObject().format('YYYYMMDD')
+
     getPreviousDateObject: ->
-        previous = @previous(@startDateField)?
-        if previous then @_toTimezonedMoment(previous) else false
+        previous = @previous @startDateField
+        if previous?
+            return @_toTimezonedMoment(previous) 
+        else 
+            return false
+    
     getPreviousDateHash: ->
         previous = @getPreviousDateObject()
-        if previous then previous.format('YYYYMMDD') else false
+        if previous?
+            return previous.format('YYYYMMDD') 
+        else 
+            return false
 
     # Deprecated
     # # TODO:  Hide RRule object as it send wrong dates.

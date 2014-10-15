@@ -133,8 +133,8 @@ Event.prototype.getGuest = function(key) {
   return currentguest;
 };
 
-Event.prototype.alarmAttendee = function() {
-  return ["mailto:" + User.email];
+Event.prototype.getAlarmAttendeesEmail = function() {
+  return [User.email];
 
   /* Constraints an alarm of alarms
       * All types

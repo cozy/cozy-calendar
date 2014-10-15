@@ -1730,8 +1730,8 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.getPreviousDateObject = function() {
     var previous;
-    previous = this.previous(this.startDateField) != null;
-    if (previous) {
+    previous = this.previous(this.startDateField);
+    if (previous != null) {
       return this._toTimezonedMoment(previous);
     } else {
       return false;
@@ -1741,7 +1741,7 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.getPreviousDateHash = function() {
     var previous;
     previous = this.getPreviousDateObject();
-    if (previous) {
+    if (previous != null) {
       return previous.format('YYYYMMDD');
     } else {
       return false;
@@ -4986,7 +4986,8 @@ module.exports = AlarmView = (function(_super) {
       _.extend(data, {
         type: 'event',
         start: this.model.getFormattedStartDate('HH:mm'),
-        end: this.model.getFormattedEndDate('HH:mm')
+        end: this.model.getFormattedEndDate('HH:mm'),
+        allDay: this.model.allDay
       });
     } else {
       _.extend(data, {
@@ -5436,7 +5437,7 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),type = locals_.type,color = locals_.color,timezoneHour = locals_.timezoneHour,timezone = locals_.timezone,time = locals_.time,description = locals_.description,action = locals_.action,start = locals_.start,end = locals_.end;
+var locals_ = (locals || {}),type = locals_.type,color = locals_.color,timezoneHour = locals_.timezoneHour,timezone = locals_.timezone,time = locals_.time,description = locals_.description,action = locals_.action,allDay = locals_.allDay,start = locals_.start,end = locals_.end;
 if ( type == 'alarm')
 {
 buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>");
@@ -5452,7 +5453,12 @@ buf.push(" " + (jade.escape((jade_interp = description) == null ? '' : jade_inte
 }
 else if ( type == 'event')
 {
-buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "\n" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");
+buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>");
+if ( !allDay)
+{
+buf.push("" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "");
+}
+buf.push("" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");
 };return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {

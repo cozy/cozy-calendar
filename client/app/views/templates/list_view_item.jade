@@ -12,6 +12,7 @@ else if type == 'event'
 
     p
         span.badge(style="background-color:"+color+";") &nbsp;
-        | #{start} - #{end}
+        if !allDay
+            | #{start} - #{end}
         | #{description}
         i.icon-trash

@@ -82,6 +82,6 @@ Alarm.createOrGetIfImport = function(data, callback) {
   }
 };
 
-Alarm.prototype.attendee = function() {
-  return ["mailto:" + User.email];
+Alarm.prototype.getAttendeesEmail = function() {
+  return [User.email];
 };
