@@ -4,9 +4,10 @@ $ ->
     require 'lib/app_helpers'
 
     moment.locale(window.locale)
-    # Add new ones from : https://github.com/moment/moment/tree/develop/locale
+    # If needed, add locales to client/vendor/scripts/lang 
+    # from : https://github.com/moment/moment/tree/develop/locale
     locale = moment.localeData()
-    # TODO : why "en" default ,...
+    # @TODO : why "en" default
     $.fn.datetimepicker.dates['en'] = { # as default
         days: locale._weekdays
         daysShort: locale._weekdaysShort
@@ -17,14 +18,15 @@ $ ->
         suffix: [], # ?
         meridiem: locale.meridiem()
         weekStart: locale._week["dow"]
+        # datetimepicker and moment use different convention for short naming 
+        # of datetime components
         format: locale._longDateFormat.L
-                    .replace(/D/g, 'd')
-                    .replace(/M/g, 'm')
-                    .replace(/Y/g, 'y')
-                    .replace(/H/g, 'h')
-                    .replace(/h/g, 'H')
-                    .replace(/m/g, 'i') #     "dd/mm/yyyy" #? locale._longDateFormat() /# format standard is different... 
-
+                    .replace /D/g, 'd'
+                    .replace /M/g, 'm'
+                    .replace /Y/g, 'y'
+                    .replace /H/g, 'h'
+                    .replace /h/g, 'H'
+                    .replace /m/g, 'i'
     };
 
     app.initialize()
