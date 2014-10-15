@@ -156,8 +156,10 @@ module.exports = class PopOver extends BaseView
             endDate = @model.getEndDateObject()
             startDate = @model.getStartDateObject()
             unless @model.isOneDay()
-                diff = endDate - startDate
-                diff = Math.round(diff / 1000 / 3600 / 24)
+                endDateBeginning = endDate.clone().beginningOfDay()
+                startDateBeginning = startDate.clone().beginningOfDay()
+                diff = endDateBeginning - startDateBeginning
+                diff = diff / (1000 * 3600 * 24)
             data.start = startDate.format '{HH}:{mm}'
             data.end = endDate.format '{HH}:{mm}'
             data.start = '10:00' if data.start is '00:00'
@@ -165,7 +167,7 @@ module.exports = class PopOver extends BaseView
             data.diff = diff or 0
 
         else
-            data.time = @model.get('timezoneHour')
+            data.time = @model.get 'timezoneHour'
             # data.time = @model.getDateObject().format '{HH}:{mm}'
             data.timezones = require('helpers/timezone').timezones
 
@@ -315,6 +317,7 @@ module.exports = class PopOver extends BaseView
 
     # @TODO : refactor this
     adjustTimePickers: (changed, newvalue) =>
+        return;
         date = @model.getStartDateObject()
 
         start = @$('#input-start').val()
@@ -354,7 +357,6 @@ module.exports = class PopOver extends BaseView
             oneday = 1000 * 3600 * 24
             bde = newEnd.clone().beginningOfDay()
             bds = newStart.clone().beginningOfDay()
-            console.log "HERE", diff, (bde - bds) / oneday
             diff = Math.round (bde - bds) / oneday
 
         @$('#input-start').val newStart.format '{HH}:{mm}'
