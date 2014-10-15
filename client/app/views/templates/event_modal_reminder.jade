@@ -1,14 +1,10 @@
 form.form-inline
   .control-group
-    .controls
-      input.input-mini.triggervalue(type="number", min=1, value=durationValue)
-      select.triggerunit            
-        option(value='M', selected=isSelectedUnit('M'))= t('minute')
-        option(value='H', selected=isSelectedUnit('H'))= t('hour')
-        option(value='D', selected=isSelectedUnit('D'))= t('day')
-        option(value='W', selected=isSelectedUnit('W'))= t('week')
+    input.input-mini.triggervalue(type="number", min=1, value=durationValue)
+    select.triggerunit            
+      option(value='M', selected=isSelectedUnit('M'))= t('minute')
+      option(value='H', selected=isSelectedUnit('H'))= t('hour')
+      option(value='D', selected=isSelectedUnit('D'))= t('day')
+      option(value='W', selected=isSelectedUnit('W'))= t('week')
 
-      if isNew
-        a.btn.addreminder= t('+')
-      else
-        a.btn.removereminder= t('x')
+    i.removereminder.icon-trash(title=t('delete'))

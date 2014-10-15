@@ -255,9 +255,9 @@ module.exports = class ScheduleItem extends Backbone.Model
     @momentToDateString: (m) ->
         m.format('YYYY-MM-DD')
 
+    # Transform the unit/value object to a iCal duration string.
+    # @param unitsValues { 'M': 15, 'H': 1 ...}
     @unitValuesToiCalDuration: (unitsValues) ->
-        # Transform the unit/value object to a iCal duration string.
-        # @unitsValues : { 'M': 15, 'H': 1 ...}
         s = '-P'
         for u in ['W', 'D']
             if u of unitsValues
@@ -268,19 +268,15 @@ module.exports = class ScheduleItem extends Backbone.Model
             if u of unitsValues
                 t += unitsValues[u] + u
         
-
         if t
             s += 'T' + t
 
-        console.log s
         return s
-
+    
+    # Handle only unique units strings.
     @iCalDurationToUnitValue: (s) ->
-        console.log s
-        # Handle only unique units strings.
         m = s.match(/(\d+)(W|D|H|M|S)/)
         o = {}
         o[m[2]] = m[1]
-        console.log o
 
         return o

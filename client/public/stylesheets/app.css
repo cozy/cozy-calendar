@@ -9572,6 +9572,28 @@ textarea:active {
   display: inline;
   color: inherit;
 }
+#event-modal .modal-body #reminder-container .reminder .triggervalue,
+#event-modal .modal-body #reminder-container .reminder .triggerunit {
+  margin: 0px 5px;
+}
+#event-modal .modal-body #reminder-container .reminder .triggervalue {
+  width: 35px;
+}
+#event-modal .modal-body #reminder-container .reminder .triggerunit {
+  width: 100px;
+}
+#event-modal .modal-body #reminder-container .reminder .badge {
+  margin-left: 5px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+#event-modal .modal-body #reminder-container .reminder .removereminder {
+  margin-left: 5px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
 #event-modal .modal-body #rrule-short {
   font-size: 14px;
 }
@@ -9965,6 +9987,28 @@ input[type="time"] {
   display: inline;
   color: inherit;
 }
+#event-modal .modal-body #reminder-container .reminder .triggervalue,
+#event-modal .modal-body #reminder-container .reminder .triggerunit {
+  margin: 0px 5px;
+}
+#event-modal .modal-body #reminder-container .reminder .triggervalue {
+  width: 35px;
+}
+#event-modal .modal-body #reminder-container .reminder .triggerunit {
+  width: 100px;
+}
+#event-modal .modal-body #reminder-container .reminder .badge {
+  margin-left: 5px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+#event-modal .modal-body #reminder-container .reminder .removereminder {
+  margin-left: 5px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
 #event-modal .modal-body #rrule-short {
   font-size: 14px;
 }
@@ -10104,6 +10148,7 @@ input[type="time"] {
 }
 .popover .popover-title button {
   margin-top: -4px;
+  height: 20px;
 }
 .popover .popover-title a {
   font-weight: normal;

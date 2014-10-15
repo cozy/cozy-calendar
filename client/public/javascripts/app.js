@@ -1863,17 +1863,14 @@ module.exports = ScheduleItem = (function(_super) {
     if (t) {
       s += 'T' + t;
     }
-    console.log(s);
     return s;
   };
 
   ScheduleItem.iCalDurationToUnitValue = function(s) {
     var m, o;
-    console.log(s);
     m = s.match(/(\d+)(W|D|H|M|S)/);
     o = {};
     o[m[2]] = m[1];
-    console.log(o);
     return o;
   };
 
@@ -5295,17 +5292,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),durationValue = locals_.durationValue,isSelectedUnit = locals_.isSelectedUnit,isNew = locals_.isNew;
-buf.push("<form class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input type=\"number\" min=\"1\"" + (jade.attr("value", durationValue, true, false)) + " class=\"input-mini triggervalue\"/><select class=\"triggerunit\">           <option value=\"M\"" + (jade.attr("selected", isSelectedUnit('M'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('minute')) ? "" : jade_interp)) + "</option><option value=\"H\"" + (jade.attr("selected", isSelectedUnit('H'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('hour')) ? "" : jade_interp)) + "</option><option value=\"D\"" + (jade.attr("selected", isSelectedUnit('D'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option value=\"W\"" + (jade.attr("selected", isSelectedUnit('W'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option></select>");
-if ( isNew)
-{
-buf.push("<a class=\"btn addreminder\">" + (jade.escape(null == (jade_interp = t('+')) ? "" : jade_interp)) + "</a>");
-}
-else
-{
-buf.push("<a class=\"btn removereminder\">" + (jade.escape(null == (jade_interp = t('x')) ? "" : jade_interp)) + "</a>");
-}
-buf.push("</div></div></form>");;return buf.join("");
+var locals_ = (locals || {}),durationValue = locals_.durationValue,isSelectedUnit = locals_.isSelectedUnit;
+buf.push("<form class=\"form-inline\"><div class=\"control-group\"><input type=\"number\" min=\"1\"" + (jade.attr("value", durationValue, true, false)) + " class=\"input-mini triggervalue\"/><select class=\"triggerunit\">           <option value=\"M\"" + (jade.attr("selected", isSelectedUnit('M'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('minute')) ? "" : jade_interp)) + "</option><option value=\"H\"" + (jade.attr("selected", isSelectedUnit('H'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('hour')) ? "" : jade_interp)) + "</option><option value=\"D\"" + (jade.attr("selected", isSelectedUnit('D'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option value=\"W\"" + (jade.attr("selected", isSelectedUnit('W'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option></select><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"removereminder icon-trash\"></i></div></form>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
