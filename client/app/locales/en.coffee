@@ -14,6 +14,7 @@ module.exports =
     "close"                             : "Close"
     "delete"                            : "Delete"
     "Place"                             : "Place"
+    'all day'                           : 'all day'
     "description"                       : "Description"
     "date"                              : "date"
     "Day"                               : "Day"
@@ -33,6 +34,7 @@ module.exports =
     "Switch to Calendar"                : "Switch to Calendar"
     "time"                              : "time"
     "Today"                             : "Today"
+    'today'                             : 'aujourd\'hui'
     "What should I remind you ?"        : "What should I remind you?"
     "alarm description placeholder"     : "What do you want to be reminded?"
     "ICalendar import"                  : "ICalendar import"
@@ -79,6 +81,10 @@ module.exports =
     "forever"                           : "Forever"
     "occurences"                        : "occurences"
     "every"                             : "Every"
+    'minutes'                           : 'minutes'
+    'minute '                           : 'minute'
+    'hours'                             : 'hours'
+    'hour'                              : 'hour'
     "days"                              : "days"
     "day"                               : "day"
     "weeks"                             : "weeks"
@@ -115,6 +121,7 @@ module.exports =
     "guests"                            : "Guests"
     "from"                              : "From"
     "to"                                : "to"
+    'Reminders before the event'        : 'Reminders before the event'
 
 # ERRORS
     "no description"                    : "A title must be set."

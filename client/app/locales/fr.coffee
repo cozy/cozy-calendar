@@ -14,6 +14,7 @@ module.exports =
     "close"                             : "Fermer"
     "delete"                            : "Supprimer"
     "Place"                             : "Lieu"
+    'all day'                           : 'journée entière'
     "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"
@@ -33,6 +34,7 @@ module.exports =
     "Switch to Calendar"                : "Basculer en mode Calendrier"
     "time"                              : "Heure"
     "Today"                             : "Aujourd'hui"
+    'today'                             : 'aujourd\'hui'
     "What should I remind you ?"        : "Que dois-je vous rappeler ?"
     "alarm description placeholder"     : "Que voulez-vous vous rappeler ?"
     "ICalendar importer"                : "Importateur ICalendar"
@@ -76,6 +78,10 @@ module.exports =
     "forever"                           : "Pour toujours"
     "occurences"                        : "occasions"
     "every"                             : "tous les"
+    'minutes'                           : 'minutes'
+    'minute '                           : 'minute'
+    'hours'                             : 'heures'
+    'hour'                              : 'heure'
     "days"                              : "jours"
     "day"                               : "jour"
     "weeks"                             : "semaines"
@@ -113,6 +119,7 @@ module.exports =
     "guests"                            : "Invités"
     "from"                              : "De"
     "to"                                : "à"
+    'Reminders before the event'        : 'Rappels avant l\'évènement'
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"

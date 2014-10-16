@@ -10396,10 +10396,6 @@ input[type="time"] {
 .fc-view-container {
   clear: none;
 }
-.fc-view-container thead {
-  background: #34a6ff;
-  color: #fff;
-}
 .fc-view-container thead tr th {
   height: 30px;
   line-height: 30px;
@@ -10469,7 +10465,6 @@ input[type="time"] {
 .fc-title .fc-widget-header,
 .fc-view-container .fc-widget-header {
   font-family: styled;
-  background: #fff;
   -webkit-border-radius: 0;
   border-radius: 0;
   color: #000;
@@ -10524,10 +10519,8 @@ input[type="time"] {
 #view-container .fc-view-container tbody .fc-state-highlight {
   background: #ccf0cc;
 }
-#view-container .fc-content:hover {
-  color: #fff;
-  background: #fe8800;
-  border: 0;
+.fc-event:hover {
+  background: #fe8800 !important;
 }
 td.fc-widget-header {
   border-style: none;
