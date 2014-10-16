@@ -128,6 +128,7 @@ module.exports = class EventModal extends ViewCollection
         @collection.reset @model.get('attendees')
 
     addReminder: (reminderM) =>
+        @$('#reminder-explanation').removeClass 'hide'
         reminder = new ReminderView(model: reminderM)
         @reminders.push(reminder)
         reminder.render()
