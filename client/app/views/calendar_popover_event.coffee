@@ -56,7 +56,7 @@ module.exports = class EventPopOver extends PopoverView
             showMeridian: false
         @$('.focused').focus()
 
-        if not @model.allDay
+        if not @model.isAllDay()
             inputEnd = @$('#input-end')
             inputStart = @$('#input-start')
             inputDiff = @$('#input-diff')
@@ -100,7 +100,7 @@ module.exports = class EventPopOver extends PopoverView
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
 
             calendar: @model.attributes.tags?[0] or ''
-            allDay: @model.allDay
+            allDay: @model.isAllDay()
 
         return data
         

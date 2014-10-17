@@ -11,6 +11,7 @@ Alarm = require 'models/alarm'
 Event = require 'models/event'
 
 
+
 module.exports = class CalendarView extends BaseView
 
     id: 'view-container'
@@ -155,7 +156,7 @@ module.exports = class CalendarView extends BaseView
 
         # fullCalendar('updateEvent') eat end of allDay events!(?), 
         # perform a full refresh as a workaround.
-        return @refresh() if model.allDay
+        return @refresh() if model.isAllDay()
 
         data = model.toPunctualFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
@@ -207,11 +208,11 @@ module.exports = class CalendarView extends BaseView
     onSelect: (startDate, endDate, jsEvent, view) =>
          # In month view, default to 10:00 - 18:00 instead of fullday event.
         if @view is 'month'
-            start = Event.ambiguousToTimezoned("#{startDate.format()}T10:00:00.000")
-            end = Event.ambiguousToTimezoned("#{endDate.add('day', -1).format()}T18:00:00.000")
+            start = helpers.ambiguousToTimezoned("#{startDate.format()}T10:00:00.000")
+            end = helpers.ambiguousToTimezoned("#{endDate.add('day', -1).format()}T18:00:00.000")
         else
-            start = Event.ambiguousToTimezoned(startDate)
-            end = Event.ambiguousToTimezoned(endDate)
+            start = helpers.ambiguousToTimezoned(startDate)
+            end = helpers.ambiguousToTimezoned(endDate)
 
         @showPopover
             type: 'event'
@@ -220,7 +221,6 @@ module.exports = class CalendarView extends BaseView
             target: $(jsEvent.target)
 
     onPopoverClose: ->
-        console.log 'yeeeeeee'
         @cal.fullCalendar 'unselect'
         @popover = null
 

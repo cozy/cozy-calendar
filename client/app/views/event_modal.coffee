@@ -6,6 +6,7 @@ ComboBox       = require 'views/widgets/combobox'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
+H = require '../../helpers'
 
 module.exports = class EventModal extends ViewCollection
 
@@ -147,10 +148,10 @@ module.exports = class EventModal extends ViewCollection
             summary: @model.get('description')
             description: @model.get('details')
             
-            allDay: @model.allDay
+            allDay: @model.isAllDay()
             exportdate: @model.getStartDateObject().format @exportDateFormat
 
-        format = if @model.allDay then @inputDateFormat else @inputDateTimeFormat
+        format = if @model.isAllDay() then @inputDateFormat else @inputDateTimeFormat
 
         data.start = @model.getStartDateObject().format format
         data.end = @model.getEndDateObject().format format
@@ -180,8 +181,8 @@ module.exports = class EventModal extends ViewCollection
         if @$('#allday').is(':checked')
             dtS = moment.tz(@startField.val(), @inputDateFormat, window.app.timezone)
             dtE = moment.tz(@endField.val(), @inputDateFormat, window.app.timezone)
-            data.start = Event.momentToDateString(dtS)
-            data.end = Event.momentToDateString(dtE)
+            data.start = H.momentToDateString(dtS)
+            data.end = H.momentToDateString(dtE)
 
         else
             dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
@@ -189,8 +190,8 @@ module.exports = class EventModal extends ViewCollection
             if @rruleForm.hasRRule()
                 # Save timezoned DT : no timezone in start and end, and timezone field.
                 data.timezone = window.app.timezone # @TODO: display timezone somewhere ?
-                data.start = Event.momentToAmbiguousString(dtS)
-                data.end = Event.momentToAmbiguousString(dtE)
+                data.start = H.momentToAmbiguousString(dtS)
+                data.end = H.momentToAmbiguousString(dtE)
             else
                 # Save UTC for punctual event.
                 data.start = dtS.toISOString()

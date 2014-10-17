@@ -1,6 +1,6 @@
 BaseView = require '../lib/base_view'
 Toggle = require 'views/toggle'
-Event = require '../models/event'
+H = require '../../helpers'
 
 module.exports = class ReminderView extends BaseView
 
@@ -34,7 +34,7 @@ module.exports = class ReminderView extends BaseView
 
     getRenderData: =>
         if not @model.isNew
-            uv = Event.iCalDurationToUnitValue(@model.trigg)
+            uv = H.iCalDurationToUnitValue @model.trigg
             unit = Object.keys(uv)[0]
             value = uv[unit]
         else
@@ -59,6 +59,6 @@ module.exports = class ReminderView extends BaseView
         uv[@$('.triggerunit').val()] = @$('.triggervalue').val() 
         data =
             action: action
-            trigg: Event.unitValuesToiCalDuration(uv)
+            trigg: H.unitValuesToiCalDuration uv
 
         return data

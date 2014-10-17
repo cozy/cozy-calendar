@@ -598,6 +598,54 @@ exports.isEvent = function(start, end) {
     return true;
   }
 };
+
+exports.ambiguousToTimezoned = function(ambigM) {
+  return moment.tz(ambigM, window.app.timezone);
+};
+
+exports.momentToAmbiguousString = function(m) {
+  return m.format('YYYY-MM-DD[T]HH:mm:ss');
+};
+
+exports.momentToDateString = function(m) {
+  return m.format('YYYY-MM-DD');
+};
+
+exports.unitValuesToiCalDuration = function(unitsValues) {
+  var s, t, u, _i, _j, _len, _len1, _ref, _ref1;
+  s = '-P';
+  _ref = ['W', 'D'];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    u = _ref[_i];
+    if (u in unitsValues) {
+      s += unitsValues[u] + u;
+    }
+  }
+  t = '';
+  _ref1 = ['H', 'M', 'S'];
+  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+    u = _ref1[_j];
+    if (u in unitsValues) {
+      t += unitsValues[u] + u;
+    }
+  }
+  if (t) {
+    s += 'T' + t;
+  }
+  return s;
+};
+
+exports.iCalDurationToUnitValue = function(s) {
+  var m, o;
+  m = s.match(/(\d+)(W|D|H|M|S)/);
+  o = {};
+  o[m[2]] = m[1];
+  return o;
+};
+
+exports.toTimezonedMoment = function(d) {
+  return moment.tz(d, window.app.timezone);
+};
 });
 
 ;require.register("helpers/timezone", function(exports, require, module) {
@@ -1631,18 +1679,18 @@ module.exports = Event = (function(_super) {
 });
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
-var ScheduleItem, colorHash,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+var H, ScheduleItem, colorHash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 colorHash = require('lib/colorhash');
 
+H = require('../helpers');
+
 module.exports = ScheduleItem = (function(_super) {
   __extends(ScheduleItem, _super);
 
   function ScheduleItem() {
-    this.updateAttributes = __bind(this.updateAttributes, this);
     return ScheduleItem.__super__.constructor.apply(this, arguments);
   }
 
@@ -1652,20 +1700,11 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.endDateField = false;
 
-  ScheduleItem.prototype.allDay = false;
-
   ScheduleItem.prototype.initialize = function() {
     var _ref;
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
-      this.set('tags', ['my calendar']);
+      return this.set('tags', ['my calendar']);
     }
-    this.updateAttributes();
-    return this.on('change', this.updateAttributes, this);
-  };
-
-  ScheduleItem.prototype.updateAttributes = function() {
-    var _ref;
-    return this.allDay = ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
   };
 
   ScheduleItem.prototype.getCalendar = function() {
@@ -1686,12 +1725,20 @@ module.exports = ScheduleItem = (function(_super) {
     return colorHash(tag);
   };
 
-  ScheduleItem.prototype._toTimezonedMoment = function(utcDateStr) {
-    return moment.tz(utcDateStr, window.app.timezone);
+  ScheduleItem.prototype.isAllDay = function() {
+    var _ref;
+    return ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
+  };
+
+  ScheduleItem.prototype._toDateObject = function(modelDateStr) {
+    if (this.isRecurrent()) {
+      modelDateStr = moment.tz(modelDateStr, this.get('timezone'));
+    }
+    return H.toTimezonedMoment(modelDateStr);
   };
 
   ScheduleItem.prototype.getDateObject = function() {
-    return ScheduleItem.ambiguousToTimezoned(this.get(this.startDateField));
+    return this._toDateObject(this.get(this.startDateField));
   };
 
   ScheduleItem.prototype.getStartDateObject = function() {
@@ -1700,7 +1747,7 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.getEndDateObject = function() {
     if (this.endDateField) {
-      return ScheduleItem.ambiguousToTimezoned(this.get(this.endDateField));
+      return this._toDateObject(this.get(this.endDateField));
     } else {
       return this.getDateObject().add('m', 30);
     }
@@ -1708,10 +1755,10 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype._formatMoment = function(m) {
     var s;
-    if (this.allDay) {
-      s = ScheduleItem.momentToDateString(m);
+    if (this.isAllDay()) {
+      s = H.momentToDateString(m);
     } else if (this.isRecurrent()) {
-      s = ScheduleItem.momentToAmbiguousString(m);
+      s = H.momentToAmbiguousString(m);
     } else {
       s = m.toISOString();
     }
@@ -1746,7 +1793,7 @@ module.exports = ScheduleItem = (function(_super) {
     var previous;
     previous = this.previous(this.startDateField);
     if (previous != null) {
-      return this._toTimezonedMoment(previous);
+      return this._toDateObject(previous);
     } else {
       return false;
     }
@@ -1774,7 +1821,7 @@ module.exports = ScheduleItem = (function(_super) {
     }
     jsDateBoundS = start.toDate();
     jsDateBoundE = end.toDate();
-    if (this.allDay) {
+    if (this.isAllDay()) {
       eventTimezone = window.app.timezone;
     } else {
       eventTimezone = this.get('timezone');
@@ -1784,7 +1831,6 @@ module.exports = ScheduleItem = (function(_super) {
     jsDateEventS = new Date(mDateEventS.toISOString());
     options = RRule.parseString(this.get('rrule'));
     options.dtstart = jsDateEventS;
-    console.log(options);
     rrule = new RRule(options);
     fixDSTTroubles = function(jsDateRecurrentS) {
       var diff, mDateRecurrentS;
@@ -1801,18 +1847,13 @@ module.exports = ScheduleItem = (function(_super) {
     fces = rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
       return function(jsDateRecurrentS) {
         var fce, mDateRecurrentE, mDateRecurrentS;
-        mDateRecurrentS = fixDSTTroubles(jsDateRecurrentS);
-        mDateRecurrentS = _this._toTimezonedMoment(mDateRecurrentS);
+        mDateRecurrentS = H.toTimezonedMoment(fixDSTTroubles(jsDateRecurrentS));
         mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
         fce = _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
         return fce;
       };
     })(this));
     return fces;
-  };
-
-  ScheduleItem.prototype.isOneDay = function() {
-    return false;
   };
 
   ScheduleItem.prototype.isInRange = function(start, end) {
@@ -1823,7 +1864,6 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.toPunctualFullCalendarEvent = function() {
-    console.log(this.getEndDateObject());
     return this._toFullCalendarEvent(this.getStartDateObject(), this.getEndDateObject());
   };
 
@@ -1831,10 +1871,10 @@ module.exports = ScheduleItem = (function(_super) {
     var fcEvent;
     return fcEvent = {
       id: this.cid,
-      title: (!this.allDay ? start.format('H:mm[ ]') : '') + this.get('description'),
+      title: (!this.isAllDay() ? start.format('H:mm[ ]') : '') + this.get('description'),
       start: start,
       end: end,
-      allDay: this.allDay,
+      allDay: this.isAllDay(),
       diff: this.get('diff'),
       place: this.get('place'),
       timezone: this.get('timezone'),
@@ -1842,50 +1882,6 @@ module.exports = ScheduleItem = (function(_super) {
       backgroundColor: this.getColor(),
       borderColor: this.getColor()
     };
-  };
-
-  ScheduleItem.ambiguousToTimezoned = function(ambigM) {
-    return moment.tz(ambigM, window.app.timezone);
-  };
-
-  ScheduleItem.momentToAmbiguousString = function(m) {
-    return m.format("YYYY-MM-DD[T]HH:mm:ss");
-  };
-
-  ScheduleItem.momentToDateString = function(m) {
-    return m.format('YYYY-MM-DD');
-  };
-
-  ScheduleItem.unitValuesToiCalDuration = function(unitsValues) {
-    var s, t, u, _i, _j, _len, _len1, _ref, _ref1;
-    s = '-P';
-    _ref = ['W', 'D'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      u = _ref[_i];
-      if (u in unitsValues) {
-        s += unitsValues[u] + u;
-      }
-    }
-    t = '';
-    _ref1 = ['H', 'M', 'S'];
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      u = _ref1[_j];
-      if (u in unitsValues) {
-        t += unitsValues[u] + u;
-      }
-    }
-    if (t) {
-      s += 'T' + t;
-    }
-    return s;
-  };
-
-  ScheduleItem.iCalDurationToUnitValue = function(s) {
-    var m, o;
-    m = s.match(/(\d+)(W|D|H|M|S)/);
-    o = {};
-    o[m[2]] = m[1];
-    return o;
   };
 
   return ScheduleItem;
@@ -3072,7 +3068,7 @@ module.exports = EventPopOver = (function(_super) {
       showMeridian: false
     });
     this.$('.focused').focus();
-    if (!this.model.allDay) {
+    if (!this.model.isAllDay()) {
       inputEnd = this.$('#input-end');
       inputStart = this.$('#input-start');
       inputDiff = this.$('#input-diff');
@@ -3125,7 +3121,7 @@ module.exports = EventPopOver = (function(_super) {
       editionMode: !this.model.isNew(),
       advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id,
       calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || '',
-      allDay: this.model.allDay
+      allDay: this.model.isAllDay()
     };
     return data;
   };
@@ -3525,7 +3521,7 @@ module.exports = CalendarView = (function(_super) {
     if (model.isRecurrent()) {
       return this.refresh();
     }
-    if (model.allDay) {
+    if (model.isAllDay()) {
       return this.refresh();
     }
     data = model.toPunctualFullCalendarEvent();
@@ -3578,11 +3574,11 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
     var end, start;
     if (this.view === 'month') {
-      start = Event.ambiguousToTimezoned("" + (startDate.format()) + "T10:00:00.000");
-      end = Event.ambiguousToTimezoned("" + (endDate.add('day', -1).format()) + "T18:00:00.000");
+      start = helpers.ambiguousToTimezoned("" + (startDate.format()) + "T10:00:00.000");
+      end = helpers.ambiguousToTimezoned("" + (endDate.add('day', -1).format()) + "T18:00:00.000");
     } else {
-      start = Event.ambiguousToTimezoned(startDate);
-      end = Event.ambiguousToTimezoned(endDate);
+      start = helpers.ambiguousToTimezoned(startDate);
+      end = helpers.ambiguousToTimezoned(endDate);
     }
     return this.showPopover({
       type: 'event',
@@ -3593,7 +3589,6 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onPopoverClose = function() {
-    console.log('yeeeeeee');
     this.cal.fullCalendar('unselect');
     return this.popover = null;
   };
@@ -3702,7 +3697,7 @@ module.exports = CalendarView = (function(_super) {
 });
 
 ;require.register("views/event_modal", function(exports, require, module) {
-var ComboBox, Event, EventModal, RRuleFormView, ReminderView, TagsView, ViewCollection, app, random,
+var ComboBox, Event, EventModal, H, RRuleFormView, ReminderView, TagsView, ViewCollection, app, random,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3722,6 +3717,8 @@ Event = require('models/event');
 random = require('lib/random');
 
 app = require('application');
+
+H = require('../../helpers');
 
 module.exports = EventModal = (function(_super) {
   __extends(EventModal, _super);
@@ -3921,10 +3918,10 @@ module.exports = EventModal = (function(_super) {
     data = _.extend({}, this.model.toJSON(), {
       summary: this.model.get('description'),
       description: this.model.get('details'),
-      allDay: this.model.allDay,
+      allDay: this.model.isAllDay(),
       exportdate: this.model.getStartDateObject().format(this.exportDateFormat)
     });
-    format = this.model.allDay ? this.inputDateFormat : this.inputDateTimeFormat;
+    format = this.model.isAllDay() ? this.inputDateFormat : this.inputDateTimeFormat;
     data.start = this.model.getStartDateObject().format(format);
     data.end = this.model.getEndDateObject().format(format);
     data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
@@ -3949,15 +3946,15 @@ module.exports = EventModal = (function(_super) {
     if (this.$('#allday').is(':checked')) {
       dtS = moment.tz(this.startField.val(), this.inputDateFormat, window.app.timezone);
       dtE = moment.tz(this.endField.val(), this.inputDateFormat, window.app.timezone);
-      data.start = Event.momentToDateString(dtS);
-      data.end = Event.momentToDateString(dtE);
+      data.start = H.momentToDateString(dtS);
+      data.end = H.momentToDateString(dtE);
     } else {
       dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
       dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
       if (this.rruleForm.hasRRule()) {
         data.timezone = window.app.timezone;
-        data.start = Event.momentToAmbiguousString(dtS);
-        data.end = Event.momentToAmbiguousString(dtE);
+        data.start = H.momentToAmbiguousString(dtS);
+        data.end = H.momentToAmbiguousString(dtE);
       } else {
         data.start = dtS.toISOString();
         data.end = dtE.toISOString();
@@ -4084,7 +4081,7 @@ module.exports = GuestView = (function(_super) {
 });
 
 ;require.register("views/event_modal_reminder", function(exports, require, module) {
-var BaseView, Event, ReminderView, Toggle,
+var BaseView, H, ReminderView, Toggle,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4093,7 +4090,7 @@ BaseView = require('../lib/base_view');
 
 Toggle = require('views/toggle');
 
-Event = require('../models/event');
+H = require('../../helpers');
 
 module.exports = ReminderView = (function(_super) {
   __extends(ReminderView, _super);
@@ -4147,7 +4144,7 @@ module.exports = ReminderView = (function(_super) {
   ReminderView.prototype.getRenderData = function() {
     var data, unit, uv, value;
     if (!this.model.isNew) {
-      uv = Event.iCalDurationToUnitValue(this.model.trigg);
+      uv = H.iCalDurationToUnitValue(this.model.trigg);
       unit = Object.keys(uv)[0];
       value = uv[unit];
     } else {
@@ -4174,7 +4171,7 @@ module.exports = ReminderView = (function(_super) {
     uv[this.$('.triggerunit').val()] = this.$('.triggervalue').val();
     data = {
       action: action,
-      trigg: Event.unitValuesToiCalDuration(uv)
+      trigg: H.unitValuesToiCalDuration(uv)
     };
     return data;
   };
@@ -4999,7 +4996,7 @@ module.exports = AlarmView = (function(_super) {
         type: 'event',
         start: this.model.getFormattedStartDate('HH:mm'),
         end: this.model.getFormattedEndDate('HH:mm'),
-        allDay: this.model.allDay
+        allDay: this.model.isAllDay()
       });
     } else {
       _.extend(data, {

@@ -3,7 +3,7 @@ module.exports =
 
     initialize: ->
         # Initialize timezone with the Cozy User's one. 
-        # Need page refresh to realod it ; not that nice ...
+        # Need page refresh to realod it.
         $.get "users/current?keys=timezone", (data) =>
             @timezone = data
             @_initialize()
@@ -12,10 +12,8 @@ module.exports =
 
         window.app = @
 
-
         @locale = window.locale
         delete window.locale
-
 
         @polyglot = new Polyglot()
         try
