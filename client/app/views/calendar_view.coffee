@@ -242,6 +242,7 @@ module.exports = class CalendarView extends BaseView
         event.isSaving = true
 
     onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
+        console.log delta
         # Update new dates of event
         evt = null
         if fcEvent.type is 'alarm'

@@ -58,6 +58,10 @@ module.exports = class ScheduleItem extends Backbone.Model
         return s
 
     addToStart: (duration) ->
+        console.log @get @startDateField
+        console.log @getStartDateObject
+        console.log @getStartDateObject().add(duration)
+        console.log @_formatMoment(@getStartDateObject().add(duration))
         @set @startDateField, @_formatMoment(@getStartDateObject().add(duration))
         
     addToEnd: (duration) ->

@@ -644,7 +644,10 @@ exports.iCalDurationToUnitValue = function(s) {
 };
 
 exports.toTimezonedMoment = function(d) {
-  return moment.tz(d, window.app.timezone);
+  var m;
+  m = moment(d);
+  m.tz(window.app.timezone);
+  return m;
 };
 });
 
@@ -1766,6 +1769,10 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.addToStart = function(duration) {
+    console.log(this.get(this.startDateField));
+    console.log(this.getStartDateObject);
+    console.log(this.getStartDateObject().add(duration));
+    console.log(this._formatMoment(this.getStartDateObject().add(duration)));
     return this.set(this.startDateField, this._formatMoment(this.getStartDateObject().add(duration)));
   };
 
@@ -3615,6 +3622,7 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.onEventDrop = function(fcEvent, delta, revertFunc, jsEvent, ui, view) {
     var evt;
+    console.log(delta);
     evt = null;
     if (fcEvent.type === 'alarm') {
       evt = this.alarmCollection.get(fcEvent.id);

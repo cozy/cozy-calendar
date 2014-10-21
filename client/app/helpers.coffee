@@ -90,4 +90,9 @@ exports.iCalDurationToUnitValue = (s) ->
 
 # Convert any date parsable by moment to a moment with cozy's timezone.
 # CAUTION depend on
-exports.toTimezonedMoment = (d) -> moment.tz d, window.app.timezone
+exports.toTimezonedMoment = (d) -> 
+    # moment.tz d, window.app.timezone
+    m = moment d
+    m.tz window.app.timezone
+    
+    return m
