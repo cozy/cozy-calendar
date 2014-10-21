@@ -41,10 +41,9 @@ module.exports = class ReminderView extends BaseView
             unit = 'M'
             value = 10
 
-
         data = 
             isNew: @model.isNew
-            isSelectedUnit: (u) => u == unit
+            isSelectedUnit: (u) => u is unit
             durationValue: value
             model: @model
 

@@ -2,8 +2,9 @@ BaseView = require '../lib/base_view'
 
 module.exports = class RRuleView extends BaseView
 
-    template: require('./templates/event_modal_rrule')
-    inputDateFormat: moment.localeData()._longDateFormat.L #'{year}-{MM}-{dd}'
+    template: require './templates/event_modal_rrule'
+    inputDateFormat: 'DD/MM/YYYY'
+    inputDateDTPickerFormat: 'dd/mm/yyyy'
 
     events: ->
         'click  .rrule-show': 'showRRule'
@@ -17,14 +18,13 @@ module.exports = class RRuleView extends BaseView
         @updateHelp()
 
         @$('#rrule-until').attr('type','text').datetimepicker(
-            format: 'dd/mm/yyyy'
+            format: @inputDateDTPickerFormat
             minView: 2 # datepicker only
         ).on 'changeDate', @updateHelp
 
     getRenderData: ->
         data =
             weekDays: moment.localeData()._weekdays
-            # units: Date.getLocale().units
 
         unless @model.has 'rrule'
             return _.extend data,
@@ -42,16 +42,15 @@ module.exports = class RRuleView extends BaseView
             interval: options.interval
 
         if options.until
-            console.log "options.until"
-            console.log options.until
             rrule.endMode = 'until'
-            rrule.until = moment(options.until).format(@inputDateFormat) #Date.create(options.until).format @inputDateFormat
+            rrule.until = moment(options.until).format @inputDateFormat
+            rrule.count = ''
 
-            rrule.count = ""
         else if options.count
             rrule.endMode = 'count'
             rrule.count = options.count
-            rrule.until = ""
+            rrule.until = ''
+
         else
             rrule.endMode = 'forever'
             rrule.count = ''
@@ -76,7 +75,7 @@ module.exports = class RRuleView extends BaseView
         @$('#rrule-freq').val() isnt 'NOREPEAT'
 
     getRRule: =>
-        start = @model.getStartDateObject() # TODO : use dat in form ?
+        start = @model.getStartDateObject()
         RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE,
             RRule.TH, RRule.FR, RRule.SA]
 
@@ -97,13 +96,8 @@ module.exports = class RRuleView extends BaseView
                 options.bymonthday = start.date()
             else if monthmode is 'weekdate'
                 day = RRuleWdays[start.day()]
-                # endOfMonth = start.clone().endOfMonth()
-                # if start.getDate() > endOfMonth.getDate() - 7
-                # if start.date() > start.daysOfMonth - 7
-                #     wk = -1
-                # else
-                #     wk = Math.ceil start.date() / 7
-                #TODO : test !
+
+                # Compute the week number in the month.
                 wk = Math.ceil start.date() / 7
                 wk = -1 if wk > 4
 
@@ -114,9 +108,8 @@ module.exports = class RRuleView extends BaseView
             when 'count'
                 options.count = +@$('#rrule-count').val()
             when 'until'
-                console.log @$('#rrule-until').val()
-                options.until = moment(@$('#rrule-until').val(), @inputDateFormat).toDate() #.format('YYYY-MM-DD')
-                # options.until = Date.create @$('#rrule-until').val(), 'fr'
+                options.until = moment @$('#rrule-until').val(), @inputDateFormat
+                    .toDate()
 
         new RRule options
 
@@ -132,12 +125,12 @@ module.exports = class RRuleView extends BaseView
 
         radio = @$('input:radio[name=endMode]')
 
-        if event.target.id is "rrule-count"
-            @$('#rrule-until').val('')
+        if event.target.id is 'rrule-count'
+            @$('#rrule-until').val ''
             radio[1].checked = true
 
-        else if event.target.id is "rrule-until"
-            @$('#rrule-count').val('')
+        else if event.target.id is 'rrule-until'
+            @$('#rrule-count').val ''
             radio[2].checked = true
 
         @updateHelp()
@@ -145,11 +138,18 @@ module.exports = class RRuleView extends BaseView
     updateHelp: =>
         freq = @$('#rrule-freq').val()
         if freq is 'NOREPEAT'
-            @$('#rrule').hide()
+            # @$('#rrule').hide()
             @$('#rrule-action').show()
             @$('#rrule-help').html t 'no recurrence'
+            @$('#rrule-interval').toggle false
+            @$('#rrule-monthdays').toggle false
+            @$('#rrule-weekdays').toggle false
+            @$('#rrule-repeat').toggle false
             return
         else freq = +freq
+
+        @$('#rrule-interval').toggle true
+        @$('#rrule-repeat').toggle true
 
         @$('#rrule-monthdays').toggle freq is RRule.MONTHLY
         @$('#rrule-weekdays').toggle  freq is RRule.WEEKLY

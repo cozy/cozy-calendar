@@ -1,5 +1,4 @@
 PopoverView = require '../lib/popover_view'
-RRuleFormView = require 'views/event_modal_rrule'
 ComboBox = require 'views/widgets/combobox'
 Toggle = require 'views/toggle'
 Alarm = require 'models/alarm'
@@ -26,7 +25,6 @@ module.exports = class AlarmPopOver extends PopoverView
         if not @model
             @model = new Alarm
                 trigg: options.start.toISOString()
-                #timezone: 'Europe/Paris'
                 description: ''
                 action: 'DISPLAY'
 
@@ -45,8 +43,6 @@ module.exports = class AlarmPopOver extends PopoverView
             showMeridian: false
         @$('.focused').focus()
 
-        # if @type is 'alarm'
-        #tzInput = @$('#input-timezone')
         @actionMail = new Toggle
             icon: 'envelope'
             label: 'email notification'
@@ -66,16 +62,6 @@ module.exports = class AlarmPopOver extends PopoverView
         inputTime = @$('#input-time')
         inputTime.after @actionMail.$el
         inputTime.after @actionNotif.$el
-        # tzInput.after @actionMail.$el
-        # tzInput.after @actionNotif.$el
-
-        # 20140911 TODO : unused ?
-        # if @model.get 'rrule'
-        #     @rruleForm = new RRuleFormView model: @model
-        #     @rruleForm.render()
-        #     @$('#rrule-container').append @rruleForm.$el
-        #     @$('#rrule-action').hide()
-        #     @$('#rrule-short i.icon-arrow-right').hide()
 
         @calendar = new ComboBox
             el: @$('#calendarcombo')
@@ -100,26 +86,10 @@ module.exports = class AlarmPopOver extends PopoverView
             calendar: @model.attributes.tags?[0] or ''
 
         return data
-    # getRenderData: ->
-    #     data = _.extend type: @type,
-    #         @model.attributes,
-    #         title: @getTitle()
-    #         editionMode: not @model.isNew()
-    #         advancedUrl: @parentView.getUrlHash() + '/' + @model.id
-
-    #     data.calendar = data.tags?[0] or ''
-
  
-    #     # else # if alarm
-    #     data.time = @model.get('timezoneHour')
-    #     # data.time = @model.getDateObject().format '{HH}:{mm}'
-    #     ## data.timezones = require('helpers/timezone').timezones
-
-        return data
-
     onTabClicked: (event) ->
         @parentView.showPopover
-            type: 'event' #if @type is 'event' then 'alarm' else 'event'
+            type: 'event'
             target: @options.target
             start:  @options.start
             end:    @options.end
@@ -148,23 +118,13 @@ module.exports = class AlarmPopOver extends PopoverView
         else 'DISPLAY'
 
         trigg = @model.getStartDateObject()
-        for unit, value of @formatDateTime($('#input-time').val())
-            trigg.set(unit, value)
+        for unit, value of @formatDateTime $('#input-time').val()
+            trigg.set unit, value
 
         data =
-            # timezone: @$('#input-timezone').val()
-            #timezone: window.app.timezone
             trigg: trigg
-            # timezoneHour: @$('#input-time').val()
             description: @$('#input-desc').val()
             action: action
-
-        # 20140911 TODO : unused ?
-
-        # if @rruleForm?.hasRRule()
-        #     data.rrule = @rruleForm.getRRule().toString()
-        # else
-        #     data.rrule = ""
 
         data.tags = [@calendar.value()]
 
@@ -204,7 +164,7 @@ module.exports = class AlarmPopOver extends PopoverView
             @addButton.html @getButtonText()
             @addButton.spin()
             @$('.alert').remove()
-            @$('input').css('border-color', '')
+            @$('input').css 'border-color', ''
             @handleError(err) for err in @model.validationError
 
 
@@ -225,7 +185,7 @@ module.exports = class AlarmPopOver extends PopoverView
             when 'date'
                 guiltyFields = '#input-start, #input-end'
 
-        @$(guiltyFields).css('border-color', 'red')
+        @$(guiltyFields).css 'border-color', 'red'
         @$(guiltyFields).focus()
-        alertMsg = $('<div class="alert"></div>').text(t(error.value))
+        alertMsg = $('<div class="alert"></div>').text t(error.value)
         @$('.popover-content').before alertMsg

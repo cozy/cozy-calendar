@@ -4,15 +4,12 @@ module.exports = class PopoverView extends BaseView
     
     titleTemplate: ->
 
-    initialize: (options) ->
-        # options { 
-        #    target: # elem on which attach the popover.
-        #    
-        # }
-        
+    initialize: (options) ->        
         @target = options.target
         @container = options.container
         @parentView = options.parentView
+
+        return @
 
     selfclose: () ->
         @parentView.onPopoverClose?()
@@ -41,11 +38,10 @@ module.exports = class PopoverView extends BaseView
             $('.popover').css 'top', 0
             $('.popover').css 'left', 0
 
-        #@setElement $('#view-container .popover') 
         @setElement $('#' + @parentView.id + ' .popover')
         
         @afterRender()
-        @
+        return @
 
 
 
@@ -57,8 +53,12 @@ module.exports = class PopoverView extends BaseView
 
         fitBottom = pos.top + @target.height() + @popoverHeight < ctnOfs.top + @container.height()
 
-        if not fitLeft and not fitRight
-            if fitBottom then 'bottom' else 'top'
-        else if fitRight then 'right'
-        else 'left'
+        if fitRight
+            return 'right'
+        else if fitLeft
+            return 'left'
+        else if fitBottom
+            return 'bottom'
+        else
+            return 'top'
 

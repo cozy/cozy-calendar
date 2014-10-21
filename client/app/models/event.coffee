@@ -13,6 +13,10 @@ module.exports = class Event extends ScheduleItem
         place: ''
         tags: ['my calendar']
 
+    # Update start, with values in setObj, 
+    # while ensuring that end stays after start.
+    # @param setObj a object, with hour, minute, ... as key, and corrresponding
+    # values, in the cozy's user timezone.
     setStart: (setObj) ->
         sdo = @getStartDateObject()
         edo = @getEndDateObject()
@@ -26,6 +30,7 @@ module.exports = class Event extends ScheduleItem
 
             @set @endDateField, edo.toISOString()
 
+    # Same as update start, for end field.
     setEnd: (setObj) ->
         sdo = @getStartDateObject()
         edo = @getEndDateObject()
@@ -43,7 +48,6 @@ module.exports = class Event extends ScheduleItem
             dateObj.set(unit, value)
 
         @set dateField, dateObj.toISOString()
-
 
 
     validate: (attrs, options) ->
@@ -74,5 +78,3 @@ module.exports = class Event extends ScheduleItem
 
     #@TODO tags = color
     getDefaultColor: -> '#008AF6'
-
-

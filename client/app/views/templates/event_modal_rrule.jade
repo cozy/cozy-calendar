@@ -42,19 +42,20 @@ form.form-inline#rrule
                 input(type="radio", checked=yearModeIs('weekdate'), name="rrule-month-option", value="weekdate")
                 = t('repeat on weekday')
 
-    label(for="rrule-until")= t('repeat')
-    .control-group
-        label.radio
-            input(type="radio", name="endMode", value='forever', checked=endModeSelected('forever'))
-            = t('forever')
-    .control-group
-        label.radio
-            input(type="radio", name="endMode", value='count', checked=endModeSelected('count'))
-            label(for="rrule-count")= t('after')
-            input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
-            label(for="rrule-count")=t('occurences')
-    .control-group
-        label.radio
-            input(type="radio", name="endMode", value='until', checked=endModeSelected('until'))
-            label(for="rrule-count")= t('until')
-            input#rrule-until(type="date", value=rrule.until)
+    #rrule-repeat
+        label(for="rrule-until")= t('repeat')
+        .control-group
+            label.radio
+                input(type="radio", name="endMode", value='forever', checked=endModeSelected('forever'))
+                = t('forever')
+        .control-group
+            label.radio
+                input(type="radio", name="endMode", value='count', checked=endModeSelected('count'))
+                label(for="rrule-count")= t('after')
+                input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
+                label(for="rrule-count")=t('occurences')
+        .control-group
+            label.radio
+                input(type="radio", name="endMode", value='until', checked=endModeSelected('until'))
+                label(for="rrule-count")= t('until')
+                input#rrule-until(type="date", value=rrule.until)

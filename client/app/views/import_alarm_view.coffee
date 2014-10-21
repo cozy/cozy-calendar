@@ -8,6 +8,6 @@ module.exports = class AlarmView extends BaseView
 
     getRenderData: ->
         _.extend @model.toJSON(),
-            time: @model.getFormattedDate 'YYYY/MM/DD HH:mm' #'L LT'
+            time: @model.getFormattedDate 'YYYY/MM/DD HH:mm'
             description: @model.get 'description'
 

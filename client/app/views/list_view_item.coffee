@@ -10,11 +10,11 @@ module.exports = class AlarmView extends BaseView
     template: require './templates/list_view_item'
 
     events:
-        'click .icon-pencil':'editMode'
-        'click .icon-trash':'deleteModel'
+        'click .icon-pencil': 'editMode'
+        'click .icon-trash': 'deleteModel'
 
     initialize: ->
-        @listenTo @model, "change", @render
+        @listenTo @model, 'change', @render
         @listenTo app.tags, 'change:visible', @render
 
     deleteModel: ->
@@ -25,7 +25,8 @@ module.exports = class AlarmView extends BaseView
                 alert('server error')
                 @$el.spin()
 
-    editMode: -> #@TODO
+    # @TODO : unused, but also outdated (see calendar_view for popover api).
+    editMode: -> 
         @popover.close() if @popover
         @popover = new Popover
             model: @model,

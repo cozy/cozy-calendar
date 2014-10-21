@@ -8,5 +8,5 @@ module.exports = class EventView extends BaseView
 
     getRenderData: ->
         _.extend @model.toJSON(),
-            start: @model.getFormattedStartDate 'YYYY/MM/DD HH:mm' # Localized format ? L ? 'L LT' ?
+            start: @model.getFormattedStartDate 'YYYY/MM/DD HH:mm'
             end: @model.getFormattedEndDate 'YYYY/MM/DD HH:mm'

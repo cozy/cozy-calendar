@@ -6,7 +6,7 @@ ComboBox       = require 'views/widgets/combobox'
 Event          = require 'models/event'
 random         = require 'lib/random'
 app            = require 'application'
-H = require '../../helpers'
+H              = require 'helpers'
 
 module.exports = class EventModal extends ViewCollection
 
@@ -17,8 +17,10 @@ module.exports = class EventModal extends ViewCollection
     attributes:
         'data-keyboard': 'false'
 
-    inputDateTimeFormat: 'DD/MM/YYYY H:mm' # @TODO use locale ?
-    inputDateFormat: 'DD/MM/YYYY' # @TODO use locale ?
+    inputDateTimeFormat: 'DD/MM/YYYY H:mm'
+    inputDateTimeDTPickerFormat: 'dd/mm/yyyy hh:ii'
+    inputDateFormat: 'DD/MM/YYYY'
+    inputDateDTPickerFormat: 'dd/mm/yyyy'
     exportDateFormat: 'YYYY-MM-DD-HH-mm'
 
     collectionEl: '#guests-list'
@@ -92,18 +94,18 @@ module.exports = class EventModal extends ViewCollection
         if @$('#allday').is ':checked'
             dtFormat = @inputDateFormat
             _.extend options,
-                format: 'dd/mm/yyyy'
+                format: @inputDateDTPickerFormat
                 startView: 2
                 minView: 2
 
         else
             dtFormat = @inputDateTimeFormat
             _.extend options, 
-                format: 'dd/mm/yyyy hh:ii'
+                format: @inputDateTimeDTPickerFormat
                 viewSelect: 4
 
-        @startField.val(@model.getStartDateObject().format dtFormat)
-        @endField.val(@model.getEndDateObject().format dtFormat)
+        @startField.val @model.getStartDateObject().format dtFormat
+        @endField.val @model.getEndDateObject().format dtFormat
 
         @startField.datetimepicker options
         @endField.datetimepicker options
@@ -126,15 +128,14 @@ module.exports = class EventModal extends ViewCollection
         return ""
 
     refreshGuestList: =>
-        @collection.reset @model.get('attendees')
+        @collection.reset @model.get 'attendees'
 
     addReminder: (reminderM) =>
         @$('#reminder-explanation').removeClass 'hide'
         reminder = new ReminderView(model: reminderM)
-        @reminders.push(reminder)
+        @reminders.push reminder
         reminder.render()
-        # @addReminderView.$el.before(reminder.$el)
-        @$('#reminder-container').append(reminder.$el)
+        @$('#reminder-container').append reminder.$el
 
     resizeDescription: =>
         notes = @descriptionField.val()
@@ -145,16 +146,16 @@ module.exports = class EventModal extends ViewCollection
 
     getRenderData: ->
         data = _.extend {}, @model.toJSON(),
-            summary: @model.get('description')
-            description: @model.get('details')
+            summary: @model.get 'description'
+            description: @model.get 'details'
             
             allDay: @model.isAllDay()
             exportdate: @model.getStartDateObject().format @exportDateFormat
 
-        format = if @model.isAllDay() then @inputDateFormat else @inputDateTimeFormat
+        f = if @model.isAllDay() then @inputDateFormat else @inputDateTimeFormat
 
-        data.start = @model.getStartDateObject().format format
-        data.end = @model.getEndDateObject().format format
+        data.start = @model.getStartDateObject().format f
+        data.end = @model.getEndDateObject().format f
 
         data.calendar = data.tags?[0] or ''
         data.tags = data.tags?[1..] or []
@@ -173,23 +174,33 @@ module.exports = class EventModal extends ViewCollection
         data.rrule = 
         if @rruleForm.hasRRule()
             rruleStr = @rruleForm.getRRule().toString()
+
             # Remove DTSTART field
             data.rrule = rruleStr.split ';'
                     .filter (s) -> s.indexOf 'DTSTART' isnt 0
                     .join ';'
-        
-        if @$('#allday').is(':checked')
-            dtS = moment.tz(@startField.val(), @inputDateFormat, window.app.timezone)
-            dtE = moment.tz(@endField.val(), @inputDateFormat, window.app.timezone)
+
+        # start and end :
+        if @$('#allday').is ':checked'
+            dtS = moment.tz @startField.val(), @inputDateFormat, 
+                    window.app.timezone
+            dtE = moment.tz @endField.val(), @inputDateFormat, 
+                    window.app.timezone
+
             data.start = H.momentToDateString(dtS)
             data.end = H.momentToDateString(dtE)
 
         else
-            dtS = moment.tz(@startField.val(), @inputDateTimeFormat, window.app.timezone)
-            dtE = moment.tz(@endField.val(), @inputDateTimeFormat, window.app.timezone)
+            dtS = moment.tz @startField.val(), @inputDateTimeFormat, 
+                    window.app.timezone
+            dtE = moment.tz @endField.val(), @inputDateTimeFormat, 
+                    window.app.timezone
+
             if @rruleForm.hasRRule()
-                # Save timezoned DT : no timezone in start and end, and timezone field.
-                data.timezone = window.app.timezone # @TODO: display timezone somewhere ?
+                # Recurring event, save ambiguous datetime, and the timezone.
+                
+                # Reset timezone to the cozy's user one.
+                data.timezone = window.app.timezone
                 data.start = H.momentToAmbiguousString(dtS)
                 data.end = H.momentToAmbiguousString(dtE)
             else
@@ -200,7 +211,6 @@ module.exports = class EventModal extends ViewCollection
         validModel = @model.save data,
             wait: true
             success: =>
-                console.log @model
                 @close()
             error: =>
                 alert('server error')

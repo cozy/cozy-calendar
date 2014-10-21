@@ -160,7 +160,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         return fces
 
-    # @TODO Deprecated and usued ?
+    # @TODO Deprecated and unsued ? <-- in calendar popover.. ?
     # isOneDay: -> 
     #     # 20140904 TODO !
     #     # @startDateObject.short() is @endDateObject.short()

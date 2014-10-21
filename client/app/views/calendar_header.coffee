@@ -13,7 +13,7 @@ module.exports = class CalendarHeader extends BaseView
 
     getViewName: ->
         return 'list' unless @cal?
-        view = @cal.fullCalendar('getView')
+        view = @cal.fullCalendar 'getView'
         return 'week' if view.name is 'agendaWeek'
         return 'month'
 
@@ -23,26 +23,22 @@ module.exports = class CalendarHeader extends BaseView
         view = @cal.fullCalendar 'getView'
 
         if view.name is 'month'
-            res = view.intervalStart.format('MMMM YYYY')
+            res = view.intervalStart.format 'MMMM YYYY'
           
         else
-            res = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY')
+            res = $.fullCalendar.formatRange view.start, view.end, 'MMM D YYYY'
 
-        res
+        return res
 
     getDates: ->
-        view = @cal.fullCalendar('getView')
+        view = @cal.fullCalendar 'getView'
         return [view.start, view.end]
 
     isToday: ->
         [start, end] = @getDates()
-        start < moment() < end
-        # (new Date()).isBetween start, end
+        return start < moment() < end
 
     getRenderData: ->
-
-        # locale = Date.getLocale()
-
         return data =
             title: @getTitle()
             todaytxt: t('today')

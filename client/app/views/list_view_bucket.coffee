@@ -19,6 +19,7 @@ module.exports = class BucketView extends ViewCollection
     getRenderData: ->
         date: @model.get('date').format 'LL'
 
+    # @TODO : seems unplugged.
     makeNew: ->
         @showPopover
             type: 'event'
@@ -26,7 +27,8 @@ module.exports = class BucketView extends ViewCollection
             end: @model.get('date').clone().set hour: 10, minute: 0
             target: @$('.add')
 
-    showPopover: (options) -> #@TODO
+    # @TODO : unused, but also outdated (see calendar_view for popover api).
+    showPopover: (options) ->
         options.parentView = this
         options.container = $('body')
         @popover.close() if @popover

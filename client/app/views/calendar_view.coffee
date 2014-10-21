@@ -44,16 +44,12 @@ module.exports = class CalendarView extends BaseView
             header: false
             editable: true
             firstDay: 1 # first day of the week is monday
-            # weekMode: 'liquid' deprecated --> http://fullcalendar.io/docs/display/weekMode/
-            # height: @handleWindowResize('initial') # initial ratio
+            height: "auto"
             defaultView: @view
             year: @options.year
             month: @options.month
             date: @options.date
-            # viewDisplay: @onChangeView # beware, deprected in next FC --> # viewRender 
             viewRender: @onChangeView
-
-
             #i18n with momentjs.
             monthNames: locale._months
             monthNamesShort: locale._monthsShort
@@ -65,29 +61,17 @@ module.exports = class CalendarView extends BaseView
                 week:  t('week')
                 day:   t('day')
 
+            # Display time in the cozy's user timezone.
+            # time given by Fullcalendar are ambiguous moments, 
+            # with cozy's user timezone values.
+            # Cf http://fullcalendar.io/docs/timezone/timezone/
             timezone: window.app.timezone
-            # timezone: "UTC"
-
-            # timezone: "UTC"  --> selectEvent : view : browser locale time ; event : UTC. Ex with Europe/Paris TZ, 2014/09/02, 5:00 --> 2014-09-02T03:30:00.000Z || America/NewYork --> 2014-09-02T09:00:00.000Z
-            # timezone: false <-- idem. || 
-            # timezone: window.app.timezone
-            # timezone: "local"
-
-            # "In other parts of the API, moments will be represented in UTC." http://arshaw.com/fullcalendar/docs/timezone/timezone/ 
-            #ignoreTimezone: true # 20140904 TODO : what's behaviour of this indead ? http://arshaw.com/fullcalendar/docs1/event_data/ignoreTimezone/
-            
-            timeFormat: ''
-                # 'month': 'H:mm'
-                # 'week': 'H:mm'
-                # 'default': 'H:mm'
-                # #'' : '' # do not display times on event
-                # 'agendaWeek': 'H:mm'
-                # # 'agendaMonth': 'h:mm'
+            timeFormat: '' # Setted in scheduleitem title.
             columnFormat:
                 'week': 'ddd D'
                 'month': 'dddd'
 
-            axisFormat: "H:mm"
+            axisFormat: 'H:mm'
             allDaySlot: true
             selectable: true
             selectHelper: false
@@ -139,22 +123,17 @@ module.exports = class CalendarView extends BaseView
 
         @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
         @cal.height @$('.fc-header').height() + @$('.fc-view-container').height()
-        # @cal.height @$('.fc-header').height() + @$('.fc-content').height()
-
 
     refresh: (collection) ->
-        console.log "refresh"
         @cal.fullCalendar 'refetchEvents'
 
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
 
     refreshOne: (model) =>
-        console.log "refreshOne"
-
         return @refresh() if model.isRecurrent()
 
-        # fullCalendar('updateEvent') eat end of allDay events!(?), 
+        # fullCalendar('updateEvent') eats end of allDay events!(?), 
         # perform a full refresh as a workaround.
         return @refresh() if model.isAllDay()
 
@@ -171,15 +150,15 @@ module.exports = class CalendarView extends BaseView
             @popover.close()
 
             # click on same case
-            if @popover.options?
-                if @popover.options.model? and @popover.options.model is options.model or(
+            if @popover.options? and (
+                @popover.options.model? and @popover.options.model is options.model or(
                         @popover.options.start?.isSame(options.start) and
                         @popover.options.end?.isSame(options.end) and
-                        @popover.options.type is options.type)
+                        @popover.options.type is options.type))
 
-                    @cal.fullCalendar 'unselect'
-                    @popover = null
-                    return
+                @cal.fullCalendar 'unselect'
+                @popover = null
+                return
 
         @popover = if options.type == 'event' then new EventPopover options else new AlarmPopover options
         @popover.render()
@@ -191,12 +170,8 @@ module.exports = class CalendarView extends BaseView
 
         @view = view.name
 
-        start = view.intervalStart
-        hash = if @view is 'month'
-            start.format('[month]/YYYY/M')
-
-        else
-            start.format('[week]/YYYY/M/D')
+        f = if @view is 'month' then '[month]/YYYY/M' else '[week]/YYYY/M/D'
+        hash = view.intervalStart.format f
 
         app.router.navigate hash
 
@@ -206,13 +181,18 @@ module.exports = class CalendarView extends BaseView
             when 'agendaWeek' then 'calendarweek'
 
     onSelect: (startDate, endDate, jsEvent, view) =>
-         # In month view, default to 10:00 - 18:00 instead of fullday event.
-        if @view is 'month'
-            start = helpers.ambiguousToTimezoned("#{startDate.format()}T10:00:00.000")
-            end = helpers.ambiguousToTimezoned("#{endDate.add('day', -1).format()}T18:00:00.000")
-        else
-            start = helpers.ambiguousToTimezoned(startDate)
-            end = helpers.ambiguousToTimezoned(endDate)
+        # In month view, default to 10:00 - 18:00 instead of fullday event.
+        if @view is 'month'            
+            # startDate and endDate are dates, we add time part to create an
+            # ambiguous date string.
+
+            # endDate is the next day, it's the startDate date that we need.
+            endDate = startDate.format() + 'T18:00:00.000'
+            startDate = startDate.format() + 'T10:00:00.000'
+
+        
+        start = helpers.ambiguousToTimezoned(startDate)
+        end = helpers.ambiguousToTimezoned(endDate)
 
         @showPopover
             type: 'event'
@@ -226,7 +206,7 @@ module.exports = class CalendarView extends BaseView
 
     onEventRender: (event, element) ->
         if event.isSaving? and event.isSaving
-            spinTarget = $(element).find('.fc-event-time')
+            spinTarget = $(element).find '.fc-event-time'
             spinTarget.addClass 'spinning'
             spinTarget.html "&nbsp;"
             spinTarget.spin "tiny"
@@ -242,8 +222,6 @@ module.exports = class CalendarView extends BaseView
         event.isSaving = true
 
     onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
-        console.log delta
-        # Update new dates of event
         evt = null
         if fcEvent.type is 'alarm'
             evt = @alarmCollection.get fcEvent.id
@@ -258,7 +236,6 @@ module.exports = class CalendarView extends BaseView
             wait: true
             success: =>
                 fcEvent.isSaving = false
-                #@cal.fullCalendar 'renderEvent', fcEvent
             error: =>
                 fcEvent.isSaving = false
                 revertFunc()
@@ -282,7 +259,6 @@ module.exports = class CalendarView extends BaseView
             wait: true
             success: =>
                 fcEvent.isSaving = false
-                # @cal.fullCalendar 'renderEvent', fcEvent
 
             error: =>
                 fcEvent.isSaving = false

@@ -1,5 +1,4 @@
 PopoverView = require '../lib/popover_view'
-RRuleFormView = require 'views/event_modal_rrule'
 EventModal = require 'views/event_modal'
 ComboBox = require 'views/widgets/combobox'
 Toggle = require 'views/toggle'
@@ -24,18 +23,17 @@ module.exports = class EventPopOver extends PopoverView
         'click .remove': 'onRemoveClicked'
         'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
-
-                # keep the endDate after the startDate
         'changeTime.timepicker #input-start': 'onSetStart'
         'changeTime.timepicker #input-end': 'onSetEnd'
         'input #input-desc': 'onSetDesc' 
 
-
-
     initialize: (options) ->
-
         if not @model
-            @model = @makeNewModel options
+            @model = new Event
+                start: options.start.toISOString()
+                end: options.end.toISOString()
+                description: ''
+                place: ''
 
         super options
 
@@ -45,7 +43,6 @@ module.exports = class EventPopOver extends PopoverView
 
 
     afterRender: ->
-        # @addButton = @$('.btn.add').text @getButtonText()
         @addButton = @$('.btn.add')
         @removeButton = @$('.remove')
 
@@ -62,20 +59,14 @@ module.exports = class EventPopOver extends PopoverView
             inputDiff = @$('#input-diff')
             inputStart.on 'timepicker.next', => inputEnd.focus()
             inputEnd.on 'timepicker.next', => inputDiff.focus()
-            inputEnd.on 'timepicker.prev', => inputStart.focus().timepicker 'highlightMinute'
+            inputEnd.on 'timepicker.prev', => 
+                inputStart.focus().timepicker 'highlightMinute'
+
             inputDiff.on 'keydown', (ev) =>
                 if ev.keyCode is 37 # left
                     inputEnd.focus().timepicker 'highlightMinute'
                 if ev.keyCode is 39 # right
                     @$('#input-desc').focus()
-
-        # @TODO: remove ?
-        # if @model.get 'rrule'
-        #     @rruleForm = new RRuleFormView model: @model
-        #     @rruleForm.render()
-        #     @$('#rrule-container').append @rruleForm.$el
-        #     @$('#rrule-action').hide()
-        #     @$('#rrule-short i.icon-arrow-right').hide()
 
         @calendar = new ComboBox
             el: @$('#calendarcombo')
@@ -87,18 +78,19 @@ module.exports = class EventPopOver extends PopoverView
 
 
     getTitle: ->
-        title = if @model.isNew() then @type + ' creation'
-        else 'edit ' + @type
-        t(title)
+        if @model.isNew()
+            title = @type + ' creation'
+        else 
+            title = 'edit ' + @type
+
+        return t(title)
 
     getRenderData: ->
         data =
             model: @model
             dtFormat: @dtFormat
             editionMode: not @model.isNew()
-
             advancedUrl: @parentView.getUrlHash() + '/' + @model.id
-
             calendar: @model.attributes.tags?[0] or ''
             allDay: @model.isAllDay()
 
@@ -109,13 +101,6 @@ module.exports = class EventPopOver extends PopoverView
     onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
     
     onSetDesc: (ev) -> @model.set 'description', ev.target.value
-
-    makeNewModel: (options) ->
-        return new Event
-            start: options.start.toISOString()
-            end: options.end.toISOString()
-            description: ''
-            place: ''
 
     onTabClicked: (event) ->
         @parentView.showPopover
@@ -155,11 +140,11 @@ module.exports = class EventPopOver extends PopoverView
     onRemoveClicked: =>
         @removeButton.css 'width', '42px'
         @removeButton.spin 'tiny'
-        if confirm 'Are you sure ?'
+        if confirm t('are you sure')
             @model.destroy
                 wait: true
                 error: ->
-                    alert 'server error occured'
+                    alert t('server error occured')
                 complete: =>
                     @removeButton.spin()
                     @removeButton.css 'width', '14px'
@@ -211,7 +196,6 @@ module.exports = class EventPopOver extends PopoverView
 
 
     refresh: =>
-        console.log  "fraicheur de vivre"
         @$('#input-start').val @model.getStartDateObject().format(@dtFormat)
         @$('#input-end').val @model.getEndDateObject().format(@dtFormat)
         # @$('#input-diff').val diff

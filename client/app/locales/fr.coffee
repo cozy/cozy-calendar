@@ -129,6 +129,8 @@ module.exports =
     "invalid end date"                  : "La fin est invalide."
     "invalid trigg date"                : "Le moment est invalide."
     "invalid action"                    : "L'action est invalide."
+    "server error occured"              : "Une erreure est survenue sur le serveur."
+
 
 # SYNC
     "synchronization"                   : "Synchronisation"

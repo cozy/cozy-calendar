@@ -1,14 +1,7 @@
 module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
     model: require '../models/scheduleitem'
-    comparator: (si1, si2) -> si1.getDateObject().diff(si2.getDateObject()) # moment.
-
-        # t1 = si1.getDateObject().getTime()
-        # t2 = si2.getDateObject().getTime()
-
-        # if t1 < t2 then return -1
-        # else if t1 is t2 then return 0
-        # else return 1
+    comparator: (si1, si2) -> si1.getDateObject().diff si2.getDateObject()
 
     getFCEventSource: (tags) =>
         return (start, end, timezone, callback) =>
@@ -24,12 +17,9 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 return null if tag and tag.get('visible') is false
 
                 if item.isRecurrent()
-                    eventsInRange = eventsInRange.concat item.getRecurrentFCEventBetween(start, end)
-                # if rrule = item.getRRuleObject()
-                    # 20140904 TODO !
-                    # for rdate in rrule.between Date.create(start - duration), end
-                    #     eventsInRange.push item.toFullCalendarEvent rdate
-
+                    eventsInRange = eventsInRange.concat(
+                        item.getRecurrentFCEventBetween start, end)
+               
                 else if item.isInRange start, end
                     eventsInRange.push item.toPunctualFullCalendarEvent()
 
