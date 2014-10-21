@@ -1,5 +1,5 @@
 ViewCollection = require '../lib/view_collection'
-Popover = require './calendar_popover'
+PopoverEvent = require './calendar_popover_event'
 
 module.exports = class BucketView extends ViewCollection
 
@@ -32,7 +32,7 @@ module.exports = class BucketView extends ViewCollection
         options.parentView = this
         options.container = $('body')
         @popover.close() if @popover
-        @popover = new Popover options
+        @popover = new PopoverEvent options
         @popover.render()
 
     getUrlHash: -> 'list'

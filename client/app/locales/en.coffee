@@ -15,6 +15,7 @@ module.exports =
     "delete"                            : "Delete"
     "Place"                             : "Place"
     'all day'                           : 'all day'
+    'All day'                           : 'All day'
     "description"                       : "Description"
     "date"                              : "date"
     "Day"                               : "Day"

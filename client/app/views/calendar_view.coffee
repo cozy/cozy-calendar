@@ -1,6 +1,5 @@
 app = require 'application'
-BaseView = require '../lib/base_view'
-Popover = require './calendar_popover'
+BaseView = require 'lib/base_view'
 EventPopover = require './calendar_popover_event'
 AlarmPopover = require './calendar_popover_alarm'
 Header = require './calendar_header'

@@ -25,6 +25,7 @@ module.exports = class EventPopOver extends PopoverView
         'click .close' : 'selfclose'
         'changeTime.timepicker #input-start': 'onSetStart'
         'changeTime.timepicker #input-end': 'onSetEnd'
+        'input #input-diff': 'onSetDiff'
         'input #input-desc': 'onSetDesc' 
 
     initialize: (options) ->
@@ -100,6 +101,11 @@ module.exports = class EventPopOver extends PopoverView
     
     onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
     
+    onSetDiff: (ev) ->
+        diff = parseInt ev.target.value
+        @model.setDiff diff
+
+
     onSetDesc: (ev) -> @model.set 'description', ev.target.value
 
     onTabClicked: (event) ->
@@ -198,7 +204,7 @@ module.exports = class EventPopOver extends PopoverView
     refresh: =>
         @$('#input-start').val @model.getStartDateObject().format(@dtFormat)
         @$('#input-end').val @model.getEndDateObject().format(@dtFormat)
-        # @$('#input-diff').val diff
+        @$('#input-diff').val @model.getDiff()
 
 
 

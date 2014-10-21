@@ -1161,6 +1161,7 @@ module.exports = {
   "delete": "Delete",
   "Place": "Place",
   'all day': 'all day',
+  'All day': 'All day',
   "description": "Description",
   "date": "date",
   "Day": "Day",
@@ -1332,6 +1333,7 @@ module.exports = {
   "delete": "Supprimer",
   "Place": "Lieu",
   'all day': 'journée entière',
+  'All day': 'Journée entière',
   "description": "Description",
   "date": "Date",
   "Day": "Jour",
@@ -1610,14 +1612,18 @@ module.exports = Event = (function(_super) {
     };
   };
 
+  Event.prototype.getDiff = function() {
+    return this.getEndDateObject().diff(this.getStartDateObject(), 'days');
+  };
+
   Event.prototype.setStart = function(setObj) {
     var edo, sdo;
     sdo = this.getStartDateObject();
     edo = this.getEndDateObject();
     this._setDate(setObj, sdo, this.startDateField);
     if (sdo >= edo) {
-      edo = sdo.clone().add('hour', 1);
-      return this.set(this.endDateField, edo.toISOString());
+      edo = sdo.clone().add(1, 'hour');
+      return this.set(this.endDateField, this._formatMoment(edo));
     }
   };
 
@@ -1627,8 +1633,8 @@ module.exports = Event = (function(_super) {
     edo = this.getEndDateObject();
     this._setDate(setObj, edo, this.endDateField);
     if (sdo >= edo) {
-      sdo = edo.clone().add('hour', -1);
-      return this.set(this.startDateField, sdo.toISOString());
+      sdo = edo.clone().add(-1, 'hour');
+      return this.set(this.startDateField, this._formatMoment(sdo));
     }
   };
 
@@ -1638,7 +1644,23 @@ module.exports = Event = (function(_super) {
       value = setObj[unit];
       dateObj.set(unit, value);
     }
-    return this.set(dateField, dateObj.toISOString());
+    return this.set(dateField, this._formatMoment(dateObj));
+  };
+
+  Event.prototype.setDiff = function(days) {
+    var edo, oldEnd, sdo;
+    edo = this.getStartDateObject().startOf('day');
+    edo.add(days, 'day');
+    if (!this.isAllDay()) {
+      oldEnd = this.getEndDateObject();
+      edo.set('hour', oldEnd.hour());
+      edo.set('minute', oldEnd.minute());
+      sdo = this.getStartDateObject();
+      if (sdo >= edo) {
+        edo = sdo.clone().add(1, 'hour');
+      }
+    }
+    return this.set(this.endDateField, this._formatMoment(edo));
   };
 
   Event.prototype.validate = function(attrs, options) {
@@ -1735,6 +1757,9 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype._toDateObject = function(modelDateStr) {
+    if (this.isAllDay()) {
+      return moment.tz(modelDateStr, 'UTC');
+    }
     if (this.isRecurrent()) {
       modelDateStr = moment.tz(modelDateStr, this.get('timezone'));
     }
@@ -1770,10 +1795,6 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.addToStart = function(duration) {
-    console.log(this.get(this.startDateField));
-    console.log(this.getStartDateObject);
-    console.log(this.getStartDateObject().add(duration));
-    console.log(this._formatMoment(this.getStartDateObject().add(duration)));
     return this.set(this.startDateField, this._formatMoment(this.getStartDateObject().add(duration)));
   };
 
@@ -2193,532 +2214,6 @@ module.exports = CalendarHeader = (function(_super) {
 })(BaseView);
 });
 
-;require.register("views/calendar_popover", function(exports, require, module) {
-var Alarm, BaseView, ComboBox, Event, EventModal, PopOver, RRuleFormView, Toggle,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-RRuleFormView = require('views/event_modal_rrule');
-
-EventModal = require('views/event_modal');
-
-ComboBox = require('views/widgets/combobox');
-
-Toggle = require('views/toggle');
-
-Alarm = require('models/alarm');
-
-Event = require('models/event');
-
-module.exports = PopOver = (function(_super) {
-  __extends(PopOver, _super);
-
-  function PopOver() {
-    this.handleError = __bind(this.handleError, this);
-    this.adjustTimePickers = __bind(this.adjustTimePickers, this);
-    this.updateMapLink = __bind(this.updateMapLink, this);
-    this.onAddClicked = __bind(this.onAddClicked, this);
-    this.onRemoveClicked = __bind(this.onRemoveClicked, this);
-    this.getModelAttributes = __bind(this.getModelAttributes, this);
-    this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
-    return PopOver.__super__.constructor.apply(this, arguments);
-  }
-
-  PopOver.prototype.template = require('./templates/popover_content');
-
-  PopOver.prototype.events = {
-    'keyup input': 'onKeyUp',
-    'change select': 'onKeyUp',
-    'change input': 'onKeyUp',
-    'change #input-place': 'updateMapLink',
-    'click .add': 'onAddClicked',
-    'click .advanced-link': 'onAdvancedClicked',
-    'click .remove': 'onRemoveClicked',
-    'click #toggle-type': 'onTabClicked',
-    'click .close': 'selfclose'
-  };
-
-  PopOver.prototype.initialize = function(options) {
-    if (options.type) {
-      this.type = options.type;
-      this.model = this.makeNewModel(options);
-    } else if (this.model) {
-      this.type = this.model instanceof Event ? 'event' : 'alarm';
-    }
-    this.target = options.target;
-    this.container = options.container;
-    this.parentView = options.parentView;
-    return this.options = options;
-  };
-
-  PopOver.prototype.selfclose = function() {
-    var _base;
-    if (typeof (_base = this.parentView).onPopoverClose === "function") {
-      _base.onPopoverClose();
-    }
-    return this.close();
-  };
-
-  PopOver.prototype.close = function() {
-    this.target.popover('destroy');
-    this.target.data('popover', void 0);
-    return this.remove();
-  };
-
-  PopOver.prototype.render = function() {
-    this.target.popover({
-      selector: true,
-      trigger: 'manual',
-      title: require('./templates/popover_title')(this.getRenderData()),
-      html: true,
-      placement: this.getDirection(),
-      content: this.template(this.getRenderData())
-    }).popover('show');
-    if ($(window).width() <= 500) {
-      $('.popover').css('top', 0);
-      $('.popover').css('left', 0);
-    }
-    this.setElement($('#view-container .popover'));
-    return this.afterRender();
-  };
-
-  PopOver.prototype.afterRender = function() {
-    var inputDiff, inputEnd, inputStart, tzInput, _ref, _ref1;
-    this.addButton = this.$('.btn.add').text(this.getButtonText());
-    this.removeButton = this.$('.remove');
-    if (this.model.isNew()) {
-      this.removeButton.hide();
-    }
-    this.$('input[type="time"]').attr('type', 'text').timepicker({
-      template: false,
-      minuteStep: 5,
-      showMeridian: false
-    });
-    this.$('.focused').focus();
-    inputEnd = this.$('#input-end');
-    inputStart = this.$('#input-start');
-    inputDiff = this.$('#input-diff');
-    inputStart.on('timepicker.next', (function(_this) {
-      return function() {
-        return inputEnd.focus();
-      };
-    })(this));
-    inputEnd.on('timepicker.next', (function(_this) {
-      return function() {
-        return inputDiff.focus();
-      };
-    })(this));
-    inputEnd.on('timepicker.prev', (function(_this) {
-      return function() {
-        return inputStart.focus().timepicker('highlightMinute');
-      };
-    })(this));
-    inputDiff.on('keydown', (function(_this) {
-      return function(ev) {
-        if (ev.keyCode === 37) {
-          inputEnd.focus().timepicker('highlightMinute');
-        }
-        if (ev.keyCode === 39) {
-          return _this.$('#input-desc').focus();
-        }
-      };
-    })(this));
-    inputStart.on('changeTime.timepicker', (function(_this) {
-      return function(ev) {
-        return _this.adjustTimePickers('start', ev.time.value);
-      };
-    })(this));
-    inputEnd.on('changeTime.timepicker', (function(_this) {
-      return function(ev) {
-        return _this.adjustTimePickers('end', ev.time.value);
-      };
-    })(this));
-    if (this.type === 'alarm') {
-      tzInput = this.$('#input-timezone');
-      this.actionMail = new Toggle({
-        icon: 'envelope',
-        label: 'email notification',
-        value: (_ref = this.model.get('action')) === 'EMAIL' || _ref === 'BOTH'
-      });
-      this.actionNotif = new Toggle({
-        icon: 'exclamation-sign',
-        label: 'home notification',
-        value: (_ref1 = this.model.get('action')) === 'DISPLAY' || _ref1 === 'BOTH'
-      });
-      this.actionMail.on('toggle', (function(_this) {
-        return function(mailIsOn) {
-          if (!mailIsOn) {
-            return _this.actionNotif.toggle(true);
-          }
-        };
-      })(this));
-      this.actionNotif.on('toggle', (function(_this) {
-        return function(notifIsOn) {
-          if (!notifIsOn) {
-            return _this.actionMail.toggle(true);
-          }
-        };
-      })(this));
-      tzInput.after(this.actionMail.$el);
-      tzInput.after(this.actionNotif.$el);
-    }
-    if (this.model.get('rrule')) {
-      this.rruleForm = new RRuleFormView({
-        model: this.model
-      });
-      this.rruleForm.render();
-      this.$('#rrule-container').append(this.rruleForm.$el);
-      this.$('#rrule-action').hide();
-      this.$('#rrule-short i.icon-arrow-right').hide();
-    }
-    this.calendar = new ComboBox({
-      el: this.$('#calendarcombo'),
-      small: true,
-      source: app.tags.calendars()
-    });
-    return this.updateMapLink();
-  };
-
-  PopOver.prototype.getTitle = function() {
-    var title;
-    title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
-    return t(title);
-  };
-
-  PopOver.prototype.getDirection = function() {
-    var fitBottom, fitLeft, fitRight, pos;
-    pos = this.target.position();
-    fitRight = pos.left + this.target.width() + 411 < this.container.width();
-    fitLeft = pos.left - 411 > 0;
-    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
-    if (!fitLeft && !fitRight) {
-      if (fitBottom) {
-        return 'bottom';
-      } else {
-        return 'top';
-      }
-    } else if (fitRight) {
-      return 'right';
-    } else {
-      return 'left';
-    }
-  };
-
-  PopOver.prototype.getButtonText = function() {
-    if (this.model.isNew()) {
-      return t('create');
-    } else {
-      return t('edit');
-    }
-  };
-
-  PopOver.prototype.getRenderData = function() {
-    var data, diff, endDate, startDate, _ref;
-    data = _.extend({
-      type: this.type
-    }, this.model.attributes, {
-      title: this.getTitle(),
-      editionMode: !this.model.isNew(),
-      advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id
-    });
-    data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
-    if (this.model instanceof Event) {
-      endDate = this.model.getEndDateObject();
-      startDate = this.model.getStartDateObject();
-      if (!this.model.isOneDay()) {
-        diff = endDate - startDate;
-        diff = Math.round(diff / 1000 / 3600 / 24);
-      }
-      data.start = startDate.format('{HH}:{mm}');
-      data.end = endDate.format('{HH}:{mm}');
-      if (data.start === '00:00') {
-        data.start = '10:00';
-      }
-      if (data.end === '00:00') {
-        data.end = '18:00';
-      }
-      data.diff = diff || 0;
-    } else {
-      data.time = this.model.get('timezoneHour');
-      data.timezones = require('helpers/timezone').timezones;
-    }
-    return data;
-  };
-
-  PopOver.prototype.makeNewModel = function(options) {
-    if (options.start == null) {
-      options.start = '10:00';
-    }
-    if (options.end == null) {
-      options.end = '18:00';
-    }
-    if (options.diff == null) {
-      options.diff = 0;
-    }
-    switch (this.type) {
-      case 'event':
-        return new Event({
-          start: options.start.format(Event.dateFormat, 'en-en'),
-          end: options.end.format(Event.dateFormat, 'en-en'),
-          description: '',
-          place: ''
-        });
-      case 'alarm':
-        return new Alarm({
-          trigg: options.start.format(Alarm.dateFormat, 'en-en'),
-          timezone: 'Europe/Paris',
-          description: '',
-          action: 'DISPLAY'
-        });
-      default:
-        throw new Error('wrong type');
-    }
-  };
-
-  PopOver.prototype.onTabClicked = function(event) {
-    return this.parentView.showPopover({
-      type: this.type === 'event' ? 'alarm' : 'event',
-      target: this.options.target,
-      start: this.options.start,
-      end: this.options.end
-    });
-  };
-
-  PopOver.prototype.onAdvancedClicked = function(event) {
-    var modal;
-    if (this.model.isNew()) {
-      this.model.set(this.getModelAttributes());
-      modal = new EventModal({
-        model: this.model,
-        backurl: window.location.hash
-      });
-      $('body').append(modal.$el);
-      modal.render();
-    } else {
-      window.location.hash += "/" + this.model.id;
-    }
-    event.preventDefault();
-    return this.selfclose();
-  };
-
-  PopOver.prototype.onKeyUp = function(event) {
-    if (event.keyCode === 13 || event.which === 13) {
-      return this.addButton.click();
-    } else if (event.keyCode === 27) {
-      return this.selfclose();
-    } else {
-      return this.addButton.removeClass('disabled');
-    }
-  };
-
-  PopOver.prototype.formatDate = function(relativeTo, value) {
-    var all, date, diff, hours, minutes, splitted;
-    date = Date.create(relativeTo);
-    splitted = value.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
-    if (splitted && splitted[0]) {
-      all = splitted[0], hours = splitted[1], minutes = splitted[2], diff = splitted[3];
-      date.set({
-        hours: +hours,
-        minutes: +minutes
-      });
-      if (diff) {
-        date.advance({
-          days: +diff
-        });
-      }
-    }
-    return date;
-  };
-
-  PopOver.prototype.getModelAttributes = function() {
-    var action, data, date, end, endDate, startDate, _ref;
-    if (this.model instanceof Event) {
-      date = this.model.getStartDateObject();
-      startDate = this.formatDate(date, this.$('#input-start').val());
-      end = this.$('#input-end').val() + '+' + this.$('#input-diff').val();
-      endDate = this.formatDate(date, end);
-      data = {
-        start: startDate.format(Event.dateFormat, 'en-en'),
-        end: endDate.format(Event.dateFormat, 'en-en'),
-        place: this.$('#input-place').val(),
-        description: this.$('#input-desc').val()
-      };
-    } else {
-      action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
-      data = {
-        timezone: this.$('#input-timezone').val(),
-        timezoneHour: this.$('#input-time').val(),
-        description: this.$('#input-desc').val(),
-        action: action
-      };
-      if ((_ref = this.rruleForm) != null ? _ref.hasRRule() : void 0) {
-        data.rrule = this.rruleForm.getRRule().toString();
-      } else {
-        data.rrule = "";
-      }
-    }
-    data.tags = [this.calendar.value()];
-    return data;
-  };
-
-  PopOver.prototype.onRemoveClicked = function() {
-    this.removeButton.css('width', '42px');
-    this.removeButton.spin('tiny');
-    if (confirm('Are you sure ?')) {
-      return this.model.destroy({
-        wait: true,
-        error: function() {
-          return alert('server error occured');
-        },
-        complete: (function(_this) {
-          return function() {
-            _this.removeButton.spin();
-            _this.removeButton.css('width', '14px');
-            return _this.selfclose();
-          };
-        })(this)
-      });
-    } else {
-      return this.removeButton.spin();
-    }
-  };
-
-  PopOver.prototype.onAddClicked = function() {
-    var err, validModel, _i, _len, _ref, _results;
-    if (this.$('.btn.add').hasClass('disabled')) {
-      return;
-    }
-    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-    this.addButton.spin('small');
-    validModel = this.model.save(this.getModelAttributes(), {
-      wait: true,
-      success: (function(_this) {
-        return function() {
-          var collection;
-          collection = app[_this.type + 's'];
-          return collection.add(_this.model);
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          return alert('server error occured');
-        };
-      })(this),
-      complete: (function(_this) {
-        return function() {
-          _this.addButton.spin(false);
-          _this.addButton.html(_this.getButtonText());
-          return _this.selfclose();
-        };
-      })(this)
-    });
-    if (!validModel) {
-      this.addButton.html(this.getButtonText());
-      this.addButton.spin();
-      this.$('.alert').remove();
-      this.$('input').css('border-color', '');
-      _ref = this.model.validationError;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        err = _ref[_i];
-        _results.push(this.handleError(err));
-      }
-      return _results;
-    }
-  };
-
-  PopOver.prototype.updateMapLink = function() {
-    var btn, url, value;
-    value = encodeURIComponent(this.$('#input-place').val());
-    btn = this.$('#showmap');
-    if (value) {
-      url = "http://www.openstreetmap.org/search?query=" + value;
-      return btn.show().attr('href', url);
-    } else {
-      return btn.hide();
-    }
-  };
-
-  PopOver.prototype.adjustTimePickers = function(changed, newvalue) {
-    var bde, bds, date, diff, end, endDate, newEnd, newStart, oneday, start, startDate;
-    date = this.model.getStartDateObject();
-    start = this.$('#input-start').val();
-    end = this.$('#input-end').val();
-    diff = parseInt(this.$('#input-diff').val());
-    startDate = this.formatDate(date, start);
-    endDate = this.formatDate(date, end + '+' + diff);
-    if (changed === 'start') {
-      newStart = this.formatDate(date, newvalue);
-      newEnd = endDate.clone();
-      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
-        newEnd = newStart.clone().addHours(1);
-      }
-    } else if (changed === 'end') {
-      newStart = startDate.clone();
-      newEnd = this.formatDate(date, newvalue + '+' + diff);
-      if (endDate.getHours() === 23 && newEnd.getHours() === 0) {
-        newEnd.addDays(1);
-      } else if (endDate.getHours() === 0 && newEnd.getHours() === 23) {
-        newEnd.addDays(-1);
-      }
-      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
-        newStart = newEnd.clone().addHours(-1);
-        if (newStart.getHours() === 0) {
-          newStart.beginningOfDay();
-        }
-      }
-    } else if (changed === 'diff') {
-      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
-        newEnd = newStart.clone().addHours(1);
-      }
-    }
-    if (newEnd.short() === newStart.short()) {
-      diff = 0;
-    } else {
-      oneday = 1000 * 3600 * 24;
-      bde = newEnd.clone().beginningOfDay();
-      bds = newStart.clone().beginningOfDay();
-      console.log("HERE", diff, (bde - bds) / oneday);
-      diff = Math.round((bde - bds) / oneday);
-    }
-    this.$('#input-start').val(newStart.format('{HH}:{mm}'));
-    this.$('#input-end').val(newEnd.format('{HH}:{mm}'));
-    this.$('#input-diff').val(diff);
-    return true;
-  };
-
-  PopOver.prototype.handleError = function(error) {
-    var alertMsg, guiltyFields;
-    switch (error.field) {
-      case 'description':
-        guiltyFields = '#input-desc';
-        break;
-      case 'startdate':
-        guiltyFields = '#input-start';
-        break;
-      case 'enddate':
-        guiltyFields = '#input-end';
-        break;
-      case 'triggdate':
-        guiltyFields = '#input-time';
-        break;
-      case 'date':
-        guiltyFields = '#input-start, #input-end';
-    }
-    this.$(guiltyFields).css('border-color', 'red');
-    this.$(guiltyFields).focus();
-    alertMsg = $('<div class="alert"></div>').text(t(error.value));
-    return this.$('.popover-content').before(alertMsg);
-  };
-
-  return PopOver;
-
-})(BaseView);
-});
-
 ;require.register("views/calendar_popover_alarm", function(exports, require, module) {
 var Alarm, AlarmPopOver, ComboBox, PopoverView, Toggle,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -3046,6 +2541,7 @@ module.exports = EventPopOver = (function(_super) {
     'click .close': 'selfclose',
     'changeTime.timepicker #input-start': 'onSetStart',
     'changeTime.timepicker #input-end': 'onSetEnd',
+    'input #input-diff': 'onSetDiff',
     'input #input-desc': 'onSetDesc'
   };
 
@@ -3144,6 +2640,12 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.onSetEnd = function(ev) {
     return this.model.setEnd(this.formatDateTime(ev.time.value));
+  };
+
+  EventPopOver.prototype.onSetDiff = function(ev) {
+    var diff;
+    diff = parseInt(ev.target.value);
+    return this.model.setDiff(diff);
   };
 
   EventPopOver.prototype.onSetDesc = function(ev) {
@@ -3286,7 +2788,8 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.refresh = function() {
     this.$('#input-start').val(this.model.getStartDateObject().format(this.dtFormat));
-    return this.$('#input-end').val(this.model.getEndDateObject().format(this.dtFormat));
+    this.$('#input-end').val(this.model.getEndDateObject().format(this.dtFormat));
+    return this.$('#input-diff').val(this.model.getDiff());
   };
 
   EventPopOver.prototype.handleError = function(error) {
@@ -3327,16 +2830,14 @@ module.exports = EventPopOver = (function(_super) {
 });
 
 ;require.register("views/calendar_view", function(exports, require, module) {
-var Alarm, AlarmPopover, BaseView, CalendarView, Event, EventPopover, Header, Popover, app, helpers, timezones,
+var Alarm, AlarmPopover, BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 app = require('application');
 
-BaseView = require('../lib/base_view');
-
-Popover = require('./calendar_popover');
+BaseView = require('lib/base_view');
 
 EventPopover = require('./calendar_popover_event');
 
@@ -4841,13 +4342,13 @@ module.exports = ListView = (function(_super) {
 });
 
 ;require.register("views/list_view_bucket", function(exports, require, module) {
-var BucketView, Popover, ViewCollection,
+var BucketView, PopoverEvent, ViewCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('../lib/view_collection');
 
-Popover = require('./calendar_popover');
+PopoverEvent = require('./calendar_popover_event');
 
 module.exports = BucketView = (function(_super) {
   __extends(BucketView, _super);
@@ -4902,7 +4403,7 @@ module.exports = BucketView = (function(_super) {
     if (this.popover) {
       this.popover.close();
     }
-    this.popover = new Popover(options);
+    this.popover = new PopoverEvent(options);
     return this.popover.render();
   };
 
@@ -4928,15 +4429,15 @@ module.exports = BucketView = (function(_super) {
 });
 
 ;require.register("views/list_view_item", function(exports, require, module) {
-var AlarmView, BaseView, Event, Popover, colorHash,
+var AlarmView, BaseView, Event, PopoverEvent, colorHash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-BaseView = require('../lib/base_view');
+BaseView = require('lib/base_view');
 
-Popover = require('./calendar_popover');
+PopoverEvent = require('./calendar_popover_event');
 
-Event = require('../models/event');
+Event = require('models/event');
 
 colorHash = require('lib/colorhash');
 
@@ -4978,7 +4479,7 @@ module.exports = AlarmView = (function(_super) {
     if (this.popover) {
       this.popover.close();
     }
-    this.popover = new Popover({
+    this.popover = new PopoverEvent({
       model: this.model,
       target: this.$el,
       parentView: this,
@@ -5071,15 +4572,11 @@ module.exports = MenuView = (function(_super) {
 });
 
 ;require.register("views/menu_item", function(exports, require, module) {
-var BaseView, Event, MenuItemView, Popover, colorhash,
+var BaseView, MenuItemView, colorhash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
-
-Popover = require('./calendar_popover');
-
-Event = require('../models/event');
 
 colorhash = require('lib/colorhash');
 
@@ -5600,7 +5097,7 @@ else
 {
 buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span>");
 }
-buf.push("</div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

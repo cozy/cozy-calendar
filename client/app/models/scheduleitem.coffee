@@ -24,6 +24,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     # Convert the date string from cozy, to moment with cozy's timezone.
     _toDateObject: (modelDateStr) ->
+        if @isAllDay()
+            return moment.tz modelDateStr, 'UTC'
+
         if @isRecurrent()
             # Parse with the event timezone
             modelDateStr = moment.tz modelDateStr, @get 'timezone'
@@ -31,9 +34,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         # convert to the cozy's timezone
         return H.toTimezonedMoment modelDateStr
 
-        # if @isAllDay @TODO : is it necessary ?
-            # return moment.tz @get fieldName, 'UTC'
-
+        
     getDateObject: ->
         return @_toDateObject @get @startDateField
         
@@ -58,14 +59,10 @@ module.exports = class ScheduleItem extends Backbone.Model
         return s
 
     addToStart: (duration) ->
-        console.log @get @startDateField
-        console.log @getStartDateObject
-        console.log @getStartDateObject().add(duration)
-        console.log @_formatMoment(@getStartDateObject().add(duration))
-        @set @startDateField, @_formatMoment(@getStartDateObject().add(duration))
+        @set @startDateField, @_formatMoment @getStartDateObject().add duration
         
     addToEnd: (duration) ->
-        @set @endDateField, @_formatMoment(@getEndDateObject().add(duration))
+        @set @endDateField, @_formatMoment @getEndDateObject().add duration
 
 
     getFormattedDate: (formatter) -> @getDateObject().format formatter

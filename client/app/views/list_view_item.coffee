@@ -1,6 +1,6 @@
-BaseView = require '../lib/base_view'
-Popover = require './calendar_popover'
-Event = require '../models/event'
+BaseView = require 'lib/base_view'
+PopoverEvent = require './calendar_popover_event'
+Event = require 'models/event'
 colorHash = require 'lib/colorhash'
 
 
@@ -28,7 +28,7 @@ module.exports = class AlarmView extends BaseView
     # @TODO : unused, but also outdated (see calendar_view for popover api).
     editMode: -> 
         @popover.close() if @popover
-        @popover = new Popover
+        @popover = new PopoverEvent
             model: @model,
             target: @$el
             parentView: this

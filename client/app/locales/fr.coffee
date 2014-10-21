@@ -15,6 +15,7 @@ module.exports =
     "delete"                            : "Supprimer"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
+    'All day'                           : 'Journée entière'
     "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"

@@ -9,10 +9,10 @@
         span.timeseparator=t("to")
         input#input-end.input-mini(type="time", placeholder=t("To hours:minutes+days"), value=model.getEndDateObject().format(dtFormat))
         span &nbsp;
-    //-input#input-diff.col-xs2.input-mini(type="number", value=diff,''
-    //-    placeholder=0, min=0)
-    //-span &nbsp;
-    //-span.timeseparator= ' ' + t('days later')
+    input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
+        placeholder=0, min=0)
+    span &nbsp;
+    span.timeseparator= ' ' + t('days later')
 
 .line
     input#input-desc.input(type="text", value=model.get("description"),

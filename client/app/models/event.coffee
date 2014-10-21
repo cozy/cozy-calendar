@@ -13,6 +13,9 @@ module.exports = class Event extends ScheduleItem
         place: ''
         tags: ['my calendar']
 
+    getDiff: ->
+        return @getEndDateObject().diff @getStartDateObject(), 'days'
+
     # Update start, with values in setObj, 
     # while ensuring that end stays after start.
     # @param setObj a object, with hour, minute, ... as key, and corrresponding
@@ -21,14 +24,13 @@ module.exports = class Event extends ScheduleItem
         sdo = @getStartDateObject()
         edo = @getEndDateObject()
 
-
         @_setDate(setObj, sdo, @startDateField)
 
         # Check and put end after start.
         if sdo >= edo
-            edo = sdo.clone().add('hour', 1)
+            edo = sdo.clone().add 1, 'hour'
 
-            @set @endDateField, edo.toISOString()
+            @set @endDateField, @_formatMoment edo
 
     # Same as update start, for end field.
     setEnd: (setObj) ->
@@ -37,18 +39,33 @@ module.exports = class Event extends ScheduleItem
 
         @_setDate(setObj, edo, @endDateField)
 
-         # Check start is before end, and move start.
+        # Check start is before end, and move start.
         if sdo >= edo
-            sdo = edo.clone().add('hour', -1)
+            sdo = edo.clone().add -1, 'hour'
 
-            @set @startDateField, sdo.toISOString()
+            @set @startDateField, @_formatMoment sdo
 
     _setDate: (setObj, dateObj, dateField) ->
         for unit, value of setObj
-            dateObj.set(unit, value)
+            dateObj.set unit, value
 
-        @set dateField, dateObj.toISOString()
+        @set dateField, @_formatMoment dateObj
 
+    setDiff: (days) ->
+        edo = @getStartDateObject().startOf 'day'
+        edo.add days, 'day'
+        
+        if not @isAllDay()
+            oldEnd = @getEndDateObject()
+            edo.set 'hour', oldEnd.hour()
+            edo.set 'minute', oldEnd.minute()
+
+            # Check and put end after start.
+            sdo = @getStartDateObject()
+            if sdo >= edo
+                edo = sdo.clone().add 1, 'hour'
+
+        @set @endDateField, @_formatMoment edo
 
     validate: (attrs, options) ->
 
