@@ -17,20 +17,22 @@ module.exports = Alarm = americano.getModel 'Alarm',
 require('cozy-ical').decorateAlarm Alarm
 
 # @TODO: migration script.
-# insinuatingUTCToISO8601 = (dateStr) ->
-#     # Skip buggy or empty values.
-#     if not dateStr
-#         return dateStr
+# Add a doctype version somewhere ?
+Alarm::migrateDoctype = () ->
+    # Skip buggy or empty values.
+    if not @trigg
+        return @
 
-#     # Check if it's already ISO8601
-#     if (dateStr.charAt 10) == 'T'
-#         return dateStr
+    # Check if it's already ISO8601
+    if (@trigg.charAt 10) is 'T'
+        return @
 
-#     d = dateStr
-#     # Check for a timezone
-#     if "GMT" not in dateStr
-#         d = d + " GMT+0000"
-#     return new Date(d).toISOString()
+    d = @trigg
+    # Check for a timezone
+    if "GMT" not in d
+        d = d + " GMT+0000"
+    @trigg = new Date(d).toISOString()
+    return @
 
 # Alarm.afterInitialize = () ->
 #     # @trigg = insinuatingUTCToISO8601(@trigg)

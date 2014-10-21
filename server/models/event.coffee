@@ -19,30 +19,51 @@ module.exports = Event = americano.getModel 'Event',
 # 'start' and 'end' use those format, 
 # According to allDay or rrules.
 Event.dateFormat = 'YYYY-MM-DD'
-Event.ambiguousDTFormat = 'YYYY-MM-DDTHH:mm:00.000'
-Event.utcDTFormat = 'YYYY-MM-DDTHH:mm:00.000Z'
+Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000'
+Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000Z'
 
 # Handle only unique units strings.
 Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
 require('cozy-ical').decorateEvent Event
 
-# @TODO : migration script.
-# insinuatingUTCToISO8601 = (dateStr) ->
-#     # Skip buggy or empty values.
-#     if not dateStr
-#         return dateStr
+# @TODO: migration script.
+# Add a doctype version somewhere ?
+Event::migrateDoctype = () ->
+    @start = @migrateDateTime @start
+    @end = @migrateDateTime @end
 
-#     # Check if it's already ISO8601
-#     if (dateStr.charAt 10) == 'T'
-#         return dateStr
+    if @rrule
+        @timezone = User.timezone
 
-#     d = dateStr
-#     # Check for a timezone
-#     if "GMT" not in dateStr
-#         d = d + " GMT+0000"
+    else
+        @timezone = undefined
 
-#     return new Date(d).toISOString()
+    return @
+
+Event::migrateDateTime = (dateStr) ->
+    # Skip buggy or empty values.
+    if not dateStr
+        return dateStr
+
+    # Check if it's already ISO8601
+    # Skip allDay event (leght is 10), because they didn't exist.
+    if dateStr.length is 10 or dateStr.charAt(10) is 'T'
+        return dateStr
+
+    d = dateStr
+    # Check for a timezone
+    if "GMT" not in dateStr
+        d = d + " GMT+0000"
+
+    m = momentTz.tz d, 'UTC'
+
+    if @rrule
+        return m.tz User.timezone
+            .format Event.ambiguousDTFormat
+
+    else
+        return m.format Event.utcDTFormat
 
 
 # Event.afterInitialize = () ->
