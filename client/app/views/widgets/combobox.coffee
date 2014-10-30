@@ -22,7 +22,7 @@ module.exports = class ComboBox extends BaseView
         @$el.addClass 'combobox'
         @small = options.small
 
-        @autocompleteWidget = @$el.data('ui-autocomplete')
+        @autocompleteWidget = @$el.data 'ui-autocomplete'
         @autocompleteWidget._renderItem = @renderItem
 
         isInput = @$el[0].nodeName.toLowerCase() is 'input'
@@ -30,8 +30,8 @@ module.exports = class ComboBox extends BaseView
         @value = => method.apply @$el, arguments
 
         unless @small
-            caret = $('<a class="combobox-caret">')
-            caret.append $('<span class="caret"></span>')
+            caret = $ '<a class="combobox-caret">'
+            caret.append $ '<span class="caret"></span>'
             caret.click @openMenu
             @$el.after caret
 
@@ -39,11 +39,10 @@ module.exports = class ComboBox extends BaseView
 
     openMenu: =>
         @menuOpen = true
-        @$el.addClass('expanded')
+        @$el.addClass 'expanded'
         @$el.focus().val(@value()).autocomplete 'search', ''
 
-    onOpen: =>
-        @menuOpen = true
+    onOpen: => @menuOpen = true
 
     onClose: =>
         @menuOpen = false
@@ -54,7 +53,7 @@ module.exports = class ComboBox extends BaseView
 
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
-        @updateBadge(ev, ui)
+        @updateBadge ev, ui
 
     updateBadge: (ev, ui) =>
         @badge?.remove()
@@ -69,10 +68,10 @@ module.exports = class ComboBox extends BaseView
         ul.append $('<li>').append(link).data 'ui-autocomplete-item', item
 
     makeBadge: (color) ->
-        badge = $('<span class="badge combobox-badge">')
-        .html('&nbsp;')
-        .css('backgroundColor', color)
-        .css('cursor', 'pointer')
+        badge = $ '<span class="badge combobox-badge">'
+        .html '&nbsp;'
+        .css 'backgroundColor', color
+        .css 'cursor', 'pointer'
         .click @openMenu
 
         if @small

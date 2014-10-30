@@ -1287,6 +1287,7 @@ module.exports = {
   "imported events and alarms": "Amount of imported alarms and events",
   "import finished": "Your import is now finished",
   "import error occured for": "Import error occured for following elements",
+  "export your calendar": "Export your calendar",
   "January": "January",
   "February": "February",
   "March": "March",
@@ -1357,7 +1358,8 @@ module.exports = {
   "What should I remind you ?": "Que dois-je vous rappeler ?",
   "alarm description placeholder": "Que voulez-vous vous rappeler ?",
   "ICalendar importer": "Importateur ICalendar",
-  "import your icalendar file": "Importer votre fichier icalendar",
+  "import your icalendar file": "Importer votre fichier iCalendar",
+  "select an icalendar file": "Sélectionner un fichier iCalendar",
   "confirm import": "Confirmer l'import",
   "cancel": "Annuler",
   "Create": "Créer",
@@ -1420,7 +1422,6 @@ module.exports = {
   "times": "fois",
   "weekday": "jours de la semaine",
   "summary": "Titre",
-  "Summary": "Titre",
   "place": "Endroit",
   "start": "Début",
   "end": "Fin",
@@ -1457,6 +1458,7 @@ module.exports = {
   "imported events and alarms": "Nombre d'alarmes et événements importés",
   "import finished": "Votre import est terminé !",
   "import error occured for": "Une erreur est survenue pour un de ces éléments ",
+  "export your calendar": "Exportez votre calendrier",
   "January": "Janvier",
   "February": "Février",
   "March": "Mars",
@@ -1524,13 +1526,13 @@ module.exports = Alarm = (function(_super) {
   Alarm.prototype.validate = function(attrs, options) {
     var errors, _ref;
     errors = [];
-    if (!attrs.description || attrs.description === "") {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
       });
     }
-    if ((_ref = !attrs.action) === 'DISPLAY' || _ref === 'EMAIL' || _ref === 'BOTH') {
+    if ((_ref = attrs.action) !== 'DISPLAY' && _ref !== 'EMAIL' && _ref !== 'BOTH') {
       errors.push({
         field: 'action',
         value: "invalid action"
@@ -1666,7 +1668,7 @@ module.exports = Event = (function(_super) {
   Event.prototype.validate = function(attrs, options) {
     var end, errors, start;
     errors = [];
-    if (!attrs.description) {
+    if (attrs.description == null) {
       errors.push({
         field: 'description',
         value: "no summary"
@@ -2210,6 +2212,534 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   return CalendarHeader;
+
+})(BaseView);
+});
+
+;require.register("views/calendar_popover", function(exports, require, module) {
+var Alarm, BaseView, ComboBox, Event, EventModal, PopOver, RRuleFormView, Toggle,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+RRuleFormView = require('views/event_modal_rrule');
+
+EventModal = require('views/event_modal');
+
+ComboBox = require('views/widgets/combobox');
+
+Toggle = require('views/toggle');
+
+Alarm = require('models/alarm');
+
+Event = require('models/event');
+
+module.exports = PopOver = (function(_super) {
+  __extends(PopOver, _super);
+
+  function PopOver() {
+    this.handleError = __bind(this.handleError, this);
+    this.adjustTimePickers = __bind(this.adjustTimePickers, this);
+    this.updateMapLink = __bind(this.updateMapLink, this);
+    this.onAddClicked = __bind(this.onAddClicked, this);
+    this.onRemoveClicked = __bind(this.onRemoveClicked, this);
+    this.getModelAttributes = __bind(this.getModelAttributes, this);
+    this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
+    return PopOver.__super__.constructor.apply(this, arguments);
+  }
+
+  PopOver.prototype.template = require('./templates/popover_content');
+
+  PopOver.prototype.events = {
+    'keyup input': 'onKeyUp',
+    'change select': 'onKeyUp',
+    'change input': 'onKeyUp',
+    'change #input-place': 'updateMapLink',
+    'click .add': 'onAddClicked',
+    'click .advanced-link': 'onAdvancedClicked',
+    'click .remove': 'onRemoveClicked',
+    'click #toggle-type': 'onTabClicked',
+    'click .close': 'selfclose'
+  };
+
+  PopOver.prototype.initialize = function(options) {
+    if (options.type) {
+      this.type = options.type;
+      this.model = this.makeNewModel(options);
+    } else if (this.model) {
+      this.type = this.model instanceof Event ? 'event' : 'alarm';
+    }
+    this.target = options.target;
+    this.container = options.container;
+    this.parentView = options.parentView;
+    return this.options = options;
+  };
+
+  PopOver.prototype.selfclose = function() {
+    var _base;
+    if (typeof (_base = this.parentView).onPopoverClose === "function") {
+      _base.onPopoverClose();
+    }
+    return this.close();
+  };
+
+  PopOver.prototype.close = function() {
+    this.target.popover('destroy');
+    this.target.data('popover', void 0);
+    return this.remove();
+  };
+
+  PopOver.prototype.render = function() {
+    this.target.popover({
+      selector: true,
+      trigger: 'manual',
+      title: require('./templates/popover_title')(this.getRenderData()),
+      html: true,
+      placement: this.getDirection(),
+      content: this.template(this.getRenderData())
+    }).popover('show');
+    if ($(window).width() <= 500) {
+      $('.popover').css('top', 0);
+      $('.popover').css('left', 0);
+    }
+    this.setElement($('#view-container .popover'));
+    return this.afterRender();
+  };
+
+  PopOver.prototype.afterRender = function() {
+    var inputDiff, inputEnd, inputStart, tzInput, _ref, _ref1;
+    this.addButton = this.$('.btn.add').text(this.getButtonText());
+    this.removeButton = this.$('.remove');
+    if (this.model.isNew()) {
+      this.removeButton.hide();
+    }
+    this.$('input[type="time"]').attr('type', 'text').timepicker({
+      template: false,
+      minuteStep: 5,
+      showMeridian: false
+    });
+    this.$('.focused').focus();
+    inputEnd = this.$('#input-end');
+    inputStart = this.$('#input-start');
+    inputDiff = this.$('#input-diff');
+    inputStart.on('timepicker.next', (function(_this) {
+      return function() {
+        return inputEnd.focus();
+      };
+    })(this));
+    inputEnd.on('timepicker.next', (function(_this) {
+      return function() {
+        return inputDiff.focus();
+      };
+    })(this));
+    inputEnd.on('timepicker.prev', (function(_this) {
+      return function() {
+        return inputStart.focus().timepicker('highlightMinute');
+      };
+    })(this));
+    inputDiff.on('keydown', (function(_this) {
+      return function(ev) {
+        if (ev.keyCode === 37) {
+          inputEnd.focus().timepicker('highlightMinute');
+        }
+        if (ev.keyCode === 39) {
+          return _this.$('#input-desc').focus();
+        }
+      };
+    })(this));
+    inputStart.on('changeTime.timepicker', (function(_this) {
+      return function(ev) {
+        return _this.adjustTimePickers('start', ev.time.value);
+      };
+    })(this));
+    inputEnd.on('changeTime.timepicker', (function(_this) {
+      return function(ev) {
+        return _this.adjustTimePickers('end', ev.time.value);
+      };
+    })(this));
+    if (this.type === 'alarm') {
+      tzInput = this.$('#input-timezone');
+      this.actionMail = new Toggle({
+        icon: 'envelope',
+        label: 'email notification',
+        value: (_ref = this.model.get('action')) === 'EMAIL' || _ref === 'BOTH'
+      });
+      this.actionNotif = new Toggle({
+        icon: 'exclamation-sign',
+        label: 'home notification',
+        value: (_ref1 = this.model.get('action')) === 'DISPLAY' || _ref1 === 'BOTH'
+      });
+      this.actionMail.on('toggle', (function(_this) {
+        return function(mailIsOn) {
+          if (!mailIsOn) {
+            return _this.actionNotif.toggle(true);
+          }
+        };
+      })(this));
+      this.actionNotif.on('toggle', (function(_this) {
+        return function(notifIsOn) {
+          if (!notifIsOn) {
+            return _this.actionMail.toggle(true);
+          }
+        };
+      })(this));
+      tzInput.after(this.actionMail.$el);
+      tzInput.after(this.actionNotif.$el);
+    }
+    if (this.model.get('rrule')) {
+      this.rruleForm = new RRuleFormView({
+        model: this.model
+      });
+      this.rruleForm.render();
+      this.$('#rrule-container').append(this.rruleForm.$el);
+      this.$('#rrule-action').hide();
+      this.$('#rrule-short i.icon-arrow-right').hide();
+    }
+    this.calendar = new ComboBox({
+      el: this.$('#calendarcombo'),
+      small: true,
+      source: app.tags.calendars()
+    });
+    return this.updateMapLink();
+  };
+
+  PopOver.prototype.getTitle = function() {
+    var title;
+    title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
+    return t(title);
+  };
+
+  PopOver.prototype.getDirection = function() {
+    var fitBottom, fitLeft, fitRight, pos;
+    pos = this.target.position();
+    fitRight = pos.left + this.target.width() + 411 < this.container.width();
+    fitLeft = pos.left - 411 > 0;
+    fitBottom = pos.top + this.target.height() + 200 < this.container.height();
+    if (!fitLeft && !fitRight) {
+      if (fitBottom) {
+        return 'bottom';
+      } else {
+        return 'top';
+      }
+    } else if (fitRight) {
+      return 'right';
+    } else {
+      return 'left';
+    }
+  };
+
+  PopOver.prototype.getButtonText = function() {
+    if (this.model.isNew()) {
+      return t('create');
+    } else {
+      return t('edit');
+    }
+  };
+
+  PopOver.prototype.getRenderData = function() {
+    var data, diff, endDate, endDateBeginning, startDate, startDateBeginning, _ref;
+    data = _.extend({
+      type: this.type
+    }, this.model.attributes, {
+      title: this.getTitle(),
+      editionMode: !this.model.isNew(),
+      advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id
+    });
+    data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
+    if (this.model instanceof Event) {
+      endDate = this.model.getEndDateObject();
+      startDate = this.model.getStartDateObject();
+      if (!this.model.isOneDay()) {
+        endDateBeginning = endDate.clone().beginningOfDay();
+        startDateBeginning = startDate.clone().beginningOfDay();
+        diff = endDateBeginning - startDateBeginning;
+        diff = diff / (1000 * 3600 * 24);
+      }
+      data.start = startDate.format('{HH}:{mm}');
+      data.end = endDate.format('{HH}:{mm}');
+      if (data.start === '00:00') {
+        data.start = '10:00';
+      }
+      if (data.end === '00:00') {
+        data.end = '18:00';
+      }
+      data.diff = diff || 0;
+    } else {
+      data.time = this.model.get('timezoneHour');
+      data.timezones = require('helpers/timezone').timezones;
+    }
+    return data;
+  };
+
+  PopOver.prototype.makeNewModel = function(options) {
+    if (options.start == null) {
+      options.start = '10:00';
+    }
+    if (options.end == null) {
+      options.end = '18:00';
+    }
+    if (options.diff == null) {
+      options.diff = 0;
+    }
+    switch (this.type) {
+      case 'event':
+        return new Event({
+          start: options.start.format(Event.dateFormat, 'en-en'),
+          end: options.end.format(Event.dateFormat, 'en-en'),
+          description: '',
+          place: ''
+        });
+      case 'alarm':
+        return new Alarm({
+          trigg: options.start.format(Alarm.dateFormat, 'en-en'),
+          timezone: 'Europe/Paris',
+          description: '',
+          action: 'DISPLAY'
+        });
+      default:
+        throw new Error('wrong type');
+    }
+  };
+
+  PopOver.prototype.onTabClicked = function(event) {
+    return this.parentView.showPopover({
+      type: this.type === 'event' ? 'alarm' : 'event',
+      target: this.options.target,
+      start: this.options.start,
+      end: this.options.end
+    });
+  };
+
+  PopOver.prototype.onAdvancedClicked = function(event) {
+    var modal;
+    if (this.model.isNew()) {
+      this.model.set(this.getModelAttributes());
+      modal = new EventModal({
+        model: this.model,
+        backurl: window.location.hash
+      });
+      $('body').append(modal.$el);
+      modal.render();
+    } else {
+      window.location.hash += "/" + this.model.id;
+    }
+    event.preventDefault();
+    return this.selfclose();
+  };
+
+  PopOver.prototype.onKeyUp = function(event) {
+    if (event.keyCode === 13 || event.which === 13) {
+      return this.addButton.click();
+    } else if (event.keyCode === 27) {
+      return this.selfclose();
+    } else {
+      return this.addButton.removeClass('disabled');
+    }
+  };
+
+  PopOver.prototype.formatDate = function(relativeTo, value) {
+    var all, date, diff, hours, minutes, splitted;
+    date = Date.create(relativeTo);
+    splitted = value.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
+    if (splitted && splitted[0]) {
+      all = splitted[0], hours = splitted[1], minutes = splitted[2], diff = splitted[3];
+      date.set({
+        hours: +hours,
+        minutes: +minutes
+      });
+      if (diff) {
+        date.advance({
+          days: +diff
+        });
+      }
+    }
+    return date;
+  };
+
+  PopOver.prototype.getModelAttributes = function() {
+    var action, data, date, end, endDate, startDate, _ref;
+    if (this.model instanceof Event) {
+      date = this.model.getStartDateObject();
+      startDate = this.formatDate(date, this.$('#input-start').val());
+      end = this.$('#input-end').val() + '+' + this.$('#input-diff').val();
+      endDate = this.formatDate(date, end);
+      data = {
+        start: startDate.format(Event.dateFormat, 'en-en'),
+        end: endDate.format(Event.dateFormat, 'en-en'),
+        place: this.$('#input-place').val(),
+        description: this.$('#input-desc').val()
+      };
+    } else {
+      action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
+      data = {
+        timezone: this.$('#input-timezone').val(),
+        timezoneHour: this.$('#input-time').val(),
+        description: this.$('#input-desc').val(),
+        action: action
+      };
+      if ((_ref = this.rruleForm) != null ? _ref.hasRRule() : void 0) {
+        data.rrule = this.rruleForm.getRRule().toString();
+      } else {
+        data.rrule = "";
+      }
+    }
+    data.tags = [this.calendar.value()];
+    return data;
+  };
+
+  PopOver.prototype.onRemoveClicked = function() {
+    this.removeButton.css('width', '42px');
+    this.removeButton.spin('tiny');
+    if (confirm('Are you sure ?')) {
+      return this.model.destroy({
+        wait: true,
+        error: function() {
+          return alert('server error occured');
+        },
+        complete: (function(_this) {
+          return function() {
+            _this.removeButton.spin();
+            _this.removeButton.css('width', '14px');
+            return _this.selfclose();
+          };
+        })(this)
+      });
+    } else {
+      return this.removeButton.spin();
+    }
+  };
+
+  PopOver.prototype.onAddClicked = function() {
+    var err, validModel, _i, _len, _ref, _results;
+    if (this.$('.btn.add').hasClass('disabled')) {
+      return;
+    }
+    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+    this.addButton.spin('small');
+    validModel = this.model.save(this.getModelAttributes(), {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          var collection;
+          collection = app[_this.type + 's'];
+          return collection.add(_this.model);
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          return alert('server error occured');
+        };
+      })(this),
+      complete: (function(_this) {
+        return function() {
+          _this.addButton.spin(false);
+          _this.addButton.html(_this.getButtonText());
+          return _this.selfclose();
+        };
+      })(this)
+    });
+    if (!validModel) {
+      this.addButton.html(this.getButtonText());
+      this.addButton.spin();
+      this.$('.alert').remove();
+      this.$('input').css('border-color', '');
+      _ref = this.model.validationError;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        err = _ref[_i];
+        _results.push(this.handleError(err));
+      }
+      return _results;
+    }
+  };
+
+  PopOver.prototype.updateMapLink = function() {
+    var btn, url, value;
+    value = encodeURIComponent(this.$('#input-place').val());
+    btn = this.$('#showmap');
+    if (value) {
+      url = "http://www.openstreetmap.org/search?query=" + value;
+      return btn.show().attr('href', url);
+    } else {
+      return btn.hide();
+    }
+  };
+
+  PopOver.prototype.adjustTimePickers = function(changed, newvalue) {
+    var bde, bds, date, diff, end, endDate, newEnd, newStart, oneday, start, startDate;
+    return;
+    date = this.model.getStartDateObject();
+    start = this.$('#input-start').val();
+    end = this.$('#input-end').val();
+    diff = parseInt(this.$('#input-diff').val());
+    startDate = this.formatDate(date, start);
+    endDate = this.formatDate(date, end + '+' + diff);
+    if (changed === 'start') {
+      newStart = this.formatDate(date, newvalue);
+      newEnd = endDate.clone();
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newEnd = newStart.clone().addHours(1);
+      }
+    } else if (changed === 'end') {
+      newStart = startDate.clone();
+      newEnd = this.formatDate(date, newvalue + '+' + diff);
+      if (endDate.getHours() === 23 && newEnd.getHours() === 0) {
+        newEnd.addDays(1);
+      } else if (endDate.getHours() === 0 && newEnd.getHours() === 23) {
+        newEnd.addDays(-1);
+      }
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newStart = newEnd.clone().addHours(-1);
+        if (newStart.getHours() === 0) {
+          newStart.beginningOfDay();
+        }
+      }
+    } else if (changed === 'diff') {
+      if (newStart.is(newEnd) || newStart.isAfter(newEnd)) {
+        newEnd = newStart.clone().addHours(1);
+      }
+    }
+    if (newEnd.short() === newStart.short()) {
+      diff = 0;
+    } else {
+      oneday = 1000 * 3600 * 24;
+      bde = newEnd.clone().beginningOfDay();
+      bds = newStart.clone().beginningOfDay();
+      diff = Math.round((bde - bds) / oneday);
+    }
+    this.$('#input-start').val(newStart.format('{HH}:{mm}'));
+    this.$('#input-end').val(newEnd.format('{HH}:{mm}'));
+    this.$('#input-diff').val(diff);
+    return true;
+  };
+
+  PopOver.prototype.handleError = function(error) {
+    var alertMsg, guiltyFields;
+    switch (error.field) {
+      case 'description':
+        guiltyFields = '#input-desc';
+        break;
+      case 'startdate':
+        guiltyFields = '#input-start';
+        break;
+      case 'enddate':
+        guiltyFields = '#input-end';
+        break;
+      case 'triggdate':
+        guiltyFields = '#input-time';
+        break;
+      case 'date':
+        guiltyFields = '#input-start, #input-end';
+    }
+    this.$(guiltyFields).css('border-color', 'red');
+    this.$(guiltyFields).focus();
+    alertMsg = $('<div class="alert"></div>').text(t(error.value));
+    return this.$('.popover-content').before(alertMsg);
+  };
+
+  return PopOver;
 
 })(BaseView);
 });
@@ -5068,7 +5598,7 @@ buf.push("</select></div><div class=\"line\"><input id=\"input-desc\" type=\"tex
 }
 else if ( type = 'event')
 {
-buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("Summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
+buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
 };return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
@@ -5140,7 +5670,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with') ) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the webdav module') ) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow') ) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar') ) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">Export your calendar</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
+buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the webdav module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

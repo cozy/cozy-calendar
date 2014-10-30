@@ -39,7 +39,8 @@ module.exports =
     "What should I remind you ?"        : "Que dois-je vous rappeler ?"
     "alarm description placeholder"     : "Que voulez-vous vous rappeler ?"
     "ICalendar importer"                : "Importateur ICalendar"
-    "import your icalendar file"        : "Importer votre fichier icalendar"
+    "import your icalendar file"        : "Importer votre fichier iCalendar"
+    "select an icalendar file"          : "Sélectionner un fichier iCalendar"
     "confirm import"                    : "Confirmer l'import"
     "cancel"                            : "Annuler"
     "Create"                            : "Créer"
@@ -106,7 +107,6 @@ module.exports =
 
 # MODAL
     "summary"                           : "Titre"
-    "Summary"                           : "Titre"
     "place"                             : "Endroit"
     "start"                             : "Début"
     "end"                               : "Fin"
@@ -148,6 +148,7 @@ module.exports =
     "imported events and alarms": "Nombre d'alarmes et événements importés"
     "import finished": "Votre import est terminé !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
+    "export your calendar": "Exportez votre calendrier"
 
     "January"                           : "Janvier"
     "February"                          : "Février"

@@ -21,12 +21,12 @@ module.exports = class Alarm extends ScheduleItem
 
         errors = []
 
-        if not attrs.description or attrs.description is ""
+        unless attrs.description?
             errors.push
                 field: 'description'
                 value: "no summary"
 
-        if not attrs.action in ['DISPLAY', 'EMAIL', 'BOTH']
+        unless attrs.action in ['DISPLAY', 'EMAIL', 'BOTH']
             errors.push
                 field: 'action'
                 value: "invalid action"
