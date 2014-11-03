@@ -1,7 +1,6 @@
 async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
-moment = require 'moment'
 log = require('printit')
     prefix: 'MailHandler'
     date: true
