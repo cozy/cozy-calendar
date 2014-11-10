@@ -1,4 +1,3 @@
-time = require 'time'
 momentTz = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'

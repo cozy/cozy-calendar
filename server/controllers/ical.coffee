@@ -15,10 +15,10 @@ module.exports.export = (req, res) ->
                         msg: 'Server error occurred while retrieving data'
                 else
                     if alarms.length > 0
-                        for alarm in alarms
-                            calendar.add alarm.toIcal()
+                        calendar.add alarm.toIcal() for alarm in alarms
+
                     if events.length > 0
-                            calendar.add event.toIcal() for event in events
+                        calendar.add event.toIcal() for event in events
 
                     res.header 'Content-Type': 'text/calendar'
                     res.send calendar.toString()

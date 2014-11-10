@@ -1,5 +1,7 @@
 americano = require 'americano-cozy'
 momentTz = require 'moment-timezone'
+log = require('printit')
+    prefix: 'event:model'
 
 User = require './user'
 
@@ -16,10 +18,10 @@ module.exports = Event = americano.getModel 'Event',
     timezone    : type : String
     alarms      : type : [Object]
 
-# 'start' and 'end' use those format, 
+# 'start' and 'end' use those format,
 # According to allDay or rrules.
 Event.dateFormat = 'YYYY-MM-DD'
-Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000'
+Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00'
 Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000Z'
 
 # Handle only unique units strings.
@@ -89,7 +91,7 @@ Event.createOrGetIfImport = (data, callback) ->
     if data.import
         Event.request 'byDate', key: data.start, (err, events) ->
             if err
-                console.log err
+                log.error err
                 Event.create data, callback
             else if events.length is 0
                 Event.create data, callback
@@ -101,11 +103,11 @@ Event.createOrGetIfImport = (data, callback) ->
     else
         Event.create data, callback
 
-Event::formatStart = (dateFormat) ->        
+Event::formatStart = (dateFormat) ->
     if @rrule
         date = momentTz.tz(@start, @timezone).format dateFormat
         date += ' ' + @timezone
-    
+
     else
         date = momentTz.tz(@start, User.timezone).format dateFormat
 
@@ -124,51 +126,5 @@ Event::getGuest = (key) ->
 
 # Return the emails to alert if action is EMAIL, or BOTH on the alarms.
 # Actualy the attendee is the cozy's user.
-Event::getAlarmAttendeesEmail = () ->
+Event::getAlarmAttendeesEmail = ->
     return [User.email]
-
-
-    # Further work to make the doctype iCal compliant
-    # email properties
-    #property 'summary', String, default: null
-    #property 'attendee', String, default: null
-
-    # display properties
-    #property 'duration', String
-    #property 'repeat', String
-
-    ### Constraints an alarm of alarms
-        * All types
-            action{1} : in [AUDIO, DISPLAY, EMAIL, PROCEDURE]
-            trigger{1} : when the alarm is triggered
-
-
-        * Display
-            description{1} : text to display when alarm is triggered
-            (
-                duration
-                repeat
-            )?
-
-        * Email
-            summary{1} : email title
-            description{1} : email content
-            attendee+ : email addresses the message should be sent to
-            attach* : message attachments
-
-        * Audio
-            (
-                duration
-                repeat
-            )?
-
-            attach? : sound resource (base-64 encoded binary or URL)
-
-        * Proc
-            attach{1} : procedure resource to be invoked
-            (
-                duration
-                repeat
-            )?
-            description?
-    ###

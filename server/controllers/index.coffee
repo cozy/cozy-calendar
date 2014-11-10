@@ -1,5 +1,4 @@
-time = require('time')
-async = require('async')
+async = require 'async'
 CozyInstance = require '../models/cozy_instance'
 Alarm = require '../models/alarm'
 Event = require '../models/event'
@@ -13,7 +12,7 @@ module.exports.tags = (req, res, next) ->
     ], (err, results) ->
         return next err if err
         res.send
-        
+
             calendars: results[0].calendar.concat results[1].calendar
             tags: results[0].tag.concat results[1].tag
 
@@ -53,6 +52,6 @@ module.exports.userTimezone = (req, res) ->
 
     if req.query.keys != "timezone"
         res.send "keys not exposed", 403
-    
+
     else
         res.send User.timezone

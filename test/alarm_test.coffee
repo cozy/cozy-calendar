@@ -1,6 +1,6 @@
-should = require('should')
-async = require('async')
-time = require 'time'
+should = require 'should'
+async = require 'async'
+moment = require 'moment-timezone'
 Client = require('request-json').JsonClient
 
 client = new Client "http://localhost:8888/"
@@ -15,9 +15,9 @@ describe "Alarms management", ->
 
         before helpers.cleanDb
         before helpers.createAlarm("DISPLAY", "Something to remind",
-                                    "Tue Apr 23 2013 14:40:00 ", "Europe/Paris")
+                                    "2013-04-23T14:40:00.000Z", "Europe/Paris")
         before helpers.createAlarm("EMAIL", "Something else to remind",
-                                    "Tue Apr 24 2013 13:30:00")
+                                    "2013-04-23T13:30:00.000Z")
 
         it "should return all the alarms in database", (done) ->
             client.get "alarms/", (error, response, body) ->
@@ -37,26 +37,24 @@ describe "Alarms management", ->
         after ->
             delete @alarm
 
-        describe "Create alarm with the timezone of user", ->
+        describe "Create alarm", ->
 
             it "When I create an alarm", (done) ->
                 @alarm =
                     action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
+                    trigg: "2013-04-23T14:25:00.000Z"
                     description: 'Something to remind'
-                    timezone: 'Europe/Paris'
 
                 client.post "alarms/", @alarm, (error, response, body) =>
                     should.not.exist error
                     should.exist response
-                    response.should.have.status 201
+                    response.should.have.property 'statusCode', 201
                     should.exist body
 
                     body.should.have.property 'id'
                     @alarm.id = body.id
                     body.should.have.property 'action', @alarm.action
                     body.should.have.property 'trigg'
-                    body.should.have.property 'timezone', 'Europe/Paris'
                     body.trigg.should.equal @alarm.trigg
                     body.should.have.property 'description', @alarm.description
                     done()
@@ -67,9 +65,9 @@ describe "Alarms management", ->
                     should.not.exist err
                     should.exist alarm
                     alarm.should.have.property 'action', @alarm.action
-                    exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
-                    exepectedDate.setTimezone('UTC')
-                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    exepectedDate = moment.tz @alarm.trigg, 'UTC'
+                    alarm.should.have.property 'trigg'
+                    moment.tz(alarm.trigg, 'UTC').format().should.equal exepectedDate.format()
                     alarm.should.have.property 'description', @alarm.description
 
                     done()
@@ -87,15 +85,14 @@ describe "Alarms management", ->
             it "When I create the same alarm in import mode", (done) ->
                 @alarm =
                     action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
+                    trigg: "2013-04-23T14:25:00.000Z"
                     description: 'Something to remind'
-                    timezone: 'Europe/Paris'
                     import: true
 
                 client.post "alarms/", @alarm, (error, response, body) =>
                     should.not.exist error
                     should.exist response
-                    response.should.have.status 201
+                    response.should.have.property 'statusCode', 201
                     should.exist body
 
                     done()
@@ -113,14 +110,13 @@ describe "Alarms management", ->
             it "When I create the same alarm not in import mode", (done) ->
                 @alarm =
                     action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
+                    trigg: "2013-04-23T14:25:00.000Z"
                     description: 'Something to remind'
-                    timezone: 'Europe/Paris'
 
                 client.post "alarms/", @alarm, (error, response, body) =>
                     should.not.exist error
                     should.exist response
-                    response.should.have.status 201
+                    response.should.have.property 'statusCode', 201
                     should.exist body
 
                     done()
@@ -135,57 +131,6 @@ describe "Alarms management", ->
 
                     done()
 
-
-        describe "Create alarm with a timezone different than user timezone", ->
-
-            it "When I post an alarm with America/Chicago as timezone", (done) ->
-                @alarm =
-                    action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 00:00:00"
-                    timezoneHour: "14:25"
-                    timezone: 'America/Chicago'
-                    description: 'Something to remind'
-
-                client.post "alarms/", @alarm, (error, response, body) =>
-
-                    should.not.exist error
-                    should.exist response
-                    response.should.have.status 201
-                    should.exist body
-                    body.should.have.property 'id'
-                    @alarm.id = body.id
-                    body.should.have.property 'action', @alarm.action
-                    body.should.have.property 'trigg'
-                    body.should.have.property 'timezone', 'America/Chicago'
-                    trigg = new time.Date("Tue Apr 23 2013 14:25:00", 'America/Chicago')
-                    trigg.setTimezone 'Europe/Paris'
-                    body.trigg.should.equal trigg.toString().slice(0, 24)
-                    body.should.have.property 'description', @alarm.description
-                    done()
-
-            it "Then should have persisted the alarm into database", (done) ->
-
-                helpers.getAlarmByID @alarm.id, (err, alarm) =>
-                    should.not.exist err
-                    should.exist alarm
-                    alarm.should.have.property 'action', @alarm.action
-                    exepectedDate = new time.Date("Tue Apr 23 2013 14:25:00", 'America/Chicago')
-                    exepectedDate.setTimezone('UTC')
-                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
-                    alarm.should.have.property 'description', @alarm.description
-
-                    done()
-
-            it "And should have two items in the database", (done) ->
-
-                helpers.getAllAlarms (err, alarms) =>
-
-                    should.not.exist err
-                    should.exist alarms
-                    alarms.length.should.equal 3
-
-                    done()
-
     describe "PUT alarms/:id", ->
 
         before helpers.cleanDb
@@ -193,31 +138,28 @@ describe "Alarms management", ->
         after ->
             delete @alarm
 
-        describe "Update alarm with same timezone", ->
+        describe "Update alarm", ->
 
             it "When I create an alarm", (done) ->
                 @alarm =
                     action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
+                    trigg: "2013-04-23T14:25:00.000Z"
                     description: 'Something to remind'
-                    timezone: 'Europe/Paris'
                 helpers.createAlarmFromObject @alarm, (err, alarm) =>
                     @alarm.id = alarm.id
                     done()
 
-
             it "Then should return the alarm with the updated value", (done) ->
 
                 @alarm.action = 'EMAIL'
-                @alarm.trigg = "Tue Apr 23 2013 14:30:00"
+                @alarm.trigg = "2013-04-23T14:30:00.000Z"
                 @alarm.description = 'Something updated to remind'
-                @alarm.timezone = 'Europe/Paris'
 
                 client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
 
                     should.not.exist err
                     should.exist resp
-                    resp.should.have.status 200
+                    resp.should.have.property 'statusCode', 200
                     should.exist body
                     body.should.have.property 'action', @alarm.action
                     body.should.have.property 'trigg', @alarm.trigg
@@ -230,57 +172,9 @@ describe "Alarms management", ->
                     should.not.exist err
                     should.exist alarm
                     alarm.should.have.property 'action', @alarm.action
-                    exepectedDate = new time.Date(@alarm.trigg, 'Europe/Paris')
-                    exepectedDate.setTimezone('UTC')
-                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
-                    alarm.should.have.property 'description', @alarm.description
-
-                    done()
-
-        describe "Update an alarm with an other timezone", ->
-
-            it "When I create an alarm", (done) ->
-                @alarm =
-                    action: 'DISPLAY'
-                    trigg: "Tue Apr 23 2013 14:25:00"
-                    description: 'Something to remind'
-                    timezone: 'America/Chicago'
-                helpers.createAlarmFromObject @alarm, (err, alarm) =>
-                    @alarm.id = alarm.id
-                    done()
-
-
-            it "Then should return the alarm with the updated value", (done) ->
-
-                @alarm.action = 'EMAIL'
-                @alarm.trigg = "Tue Apr 23 2013 14:30:00"
-                @alarm.timezoneHour = "14:30"
-                @alarm.description = 'Something updated to remind'
-                @alarm.timezone = 'Africa/Abidjan'
-
-                client.put "alarms/#{@alarm.id}", @alarm, (err, resp, body) =>
-
-                    should.not.exist err
-                    should.exist resp
-                    resp.should.have.status 200
-                    should.exist body
-                    body.should.have.property 'action', @alarm.action
-                    trigg = new time.Date(@alarm.trigg, 'Africa/Abidjan')
-                    trigg.setTimezone 'Europe/Paris'
-                    body.should.have.property 'trigg', trigg.toString().slice(0, 24)
-                    body.should.have.property 'description', @alarm.description
-                    body.should.have.property 'timezone', @alarm.timezone
-                    done()
-
-            it "And should have persisted the alarm into database", (done) ->
-
-                helpers.getAlarmByID @alarm.id, (err, alarm) =>
-                    should.not.exist err
-                    should.exist alarm
-                    alarm.should.have.property 'action', @alarm.action
-                    exepectedDate = new time.Date(@alarm.trigg, 'Africa/Abidjan')
-                    exepectedDate.setTimezone('UTC')
-                    alarm.should.have.property 'trigg', exepectedDate.toString().slice(0, 24)
+                    exepectedDate = moment.tz @alarm.trigg, 'UTC'
+                    alarm.should.have.property 'trigg'
+                    moment.tz(alarm.trigg, 'UTC').format().should.equal exepectedDate.format()
                     alarm.should.have.property 'description', @alarm.description
 
                     done()
@@ -293,9 +187,9 @@ describe "Alarms management", ->
         it "When I create an alarm", (done) ->
             @alarm =
                 action: 'DISPLAY'
-                trigg: "Tue Apr 23 2013 14:25:00"
+                trigg: "2013-04-23T14:25:00.000Z"
                 description: 'Something to remind'
-                timezone: 'Europe/Paris'
+
             helpers.createAlarmFromObject @alarm, (err, alarm) =>
                 @alarm.id = alarm.id
                 done()
@@ -305,7 +199,7 @@ describe "Alarms management", ->
             client.del "alarms/#{@alarm.id}", (err, resp, body) =>
                 should.not.exist err
                 should.exist resp
-                resp.should.have.status 200
+                resp.should.have.property 'statusCode', 200
 
                 done()
 

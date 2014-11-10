@@ -1,11 +1,14 @@
 americano = require 'americano-cozy'
+log = require('printit')
+    prefix: 'alarm:model'
+
 User = require './user'
 
 # Alarm should be interpreted as VTODO + VALARM iCal objects.
 # with DTSTART <-> trigg ; DURATION = 0 ; TRIGGER = 0 .
 module.exports = Alarm = americano.getModel 'Alarm',
     action : type : String, default: 'DISPLAY' # One of DISPLAY, EMAIL, BOTH.
-    trigg : type : String # DT to trigger at. 
+    trigg : type : String # DT to trigger at.
         # As UTC if ponctual. If recurent, to interpret in @timezone.
     description : type : String
     timezone : type : String # Timezone of trigg time (if recurent)
@@ -34,9 +37,6 @@ Alarm::migrateDoctype = () ->
     @trigg = new Date(d).toISOString()
     return @
 
-# Alarm.afterInitialize = () ->
-#     # @trigg = insinuatingUTCToISO8601(@trigg)
-
 Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
 
@@ -53,7 +53,7 @@ Alarm.createOrGetIfImport = (data, callback) ->
     if data.import
         Alarm.request 'byDate', key: data.trigg, (err, alarms) ->
             if err
-                console.log err
+                log.error err
                 Alarm.create data, callback
             else if alarms.length is 0
                 Alarm.create data, callback
@@ -66,6 +66,6 @@ Alarm.createOrGetIfImport = (data, callback) ->
         Alarm.create data, callback
 
 # Return the emails to alert if action is EMAIL, or BOTH.
-# Actualy the attendee is the cozy's user.
-Alarm::getAttendeesEmail = () ->
+# Actually the attendee is the cozy's user.
+Alarm::getAttendeesEmail = ->
     return [User.email]
