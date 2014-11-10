@@ -36,14 +36,14 @@ module.exports = class RRuleView extends BaseView
 
 
         options = RRule.fromString(@model.get('rrule')).options
-    
+
         rrule =
             freq: options.freq
             interval: options.interval
 
         if options.until
             rrule.endMode = 'until'
-            rrule.until = moment(options.until).format @inputDateFormat
+            rrule.until = moment.tz(options.until, 'UTC').format @inputDateFormat
             rrule.count = ''
 
         else if options.count
@@ -80,7 +80,6 @@ module.exports = class RRuleView extends BaseView
             RRule.TH, RRule.FR, RRule.SA]
 
         options =
-            dtstart: start.toDate()
             freq: +@$('#rrule-freq').val()
             interval: +@$('#rrule-interval').val()
 
@@ -108,7 +107,7 @@ module.exports = class RRuleView extends BaseView
             when 'count'
                 options.count = +@$('#rrule-count').val()
             when 'until'
-                options.until = moment @$('#rrule-until').val(), @inputDateFormat
+                options.until = moment.tz @$('#rrule-until').val(), @inputDateFormat, 'UTC'
                     .toDate()
 
         new RRule options
