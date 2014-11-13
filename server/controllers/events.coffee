@@ -1,4 +1,4 @@
-momentTz = require 'moment-timezone'
+moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
 
