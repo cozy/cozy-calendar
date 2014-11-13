@@ -21,58 +21,13 @@ module.exports = Event = americano.getModel 'Event',
 # 'start' and 'end' use those format,
 # According to allDay or rrules.
 Event.dateFormat = 'YYYY-MM-DD'
-Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00'
-Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000Z'
+Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000'
+Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000[Z]'
 
 # Handle only unique units strings.
 Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
 require('cozy-ical').decorateEvent Event
-
-# @TODO: migration script.
-# Add a doctype version somewhere ?
-Event::migrateDoctype = () ->
-    @start = @migrateDateTime @start
-    @end = @migrateDateTime @end
-
-    if @rrule
-        @timezone = User.timezone
-
-    else
-        @timezone = undefined
-
-    return @
-
-Event::migrateDateTime = (dateStr) ->
-    # Skip buggy or empty values.
-    if not dateStr
-        return dateStr
-
-    # Check if it's already ISO8601
-    # Skip allDay event (leght is 10), because they didn't exist.
-    if dateStr.length is 10 or dateStr.charAt(10) is 'T'
-        return dateStr
-
-    d = dateStr
-    # Check for a timezone
-    if "GMT" not in dateStr
-        d = d + " GMT+0000"
-
-    m = momentTz.tz d, 'UTC'
-
-    if @rrule
-        return m.tz User.timezone
-            .format Event.ambiguousDTFormat
-
-    else
-        return m.format Event.utcDTFormat
-
-
-# Event.afterInitialize = () ->
-#     @start = insinuatingUTCToISO8601(@start)
-#     @end = insinuatingUTCToISO8601(@end)
-
-#     @
 
 
 Event.all = (params, callback) ->
@@ -128,3 +83,64 @@ Event::getGuest = (key) ->
 # Actualy the attendee is the cozy's user.
 Event::getAlarmAttendeesEmail = ->
     return [User.email]
+
+# November 2014 Migration :
+# Migrate from v1.0.4 to next-gen doctypes.
+# Use date format as key to detect doctype version.
+Event::migrateDoctype = () ->
+
+    hasMigrate = @migrateDateTime 'start'
+    # Quick quit if no migration.
+    return @ if not hasMigrate
+
+    @migrateDateTime 'end'
+
+    if @rrule
+        @timezone = User.timezone
+
+    else
+        @timezone = undefined
+
+    @save (err) =>
+        if err
+            console.log err
+
+        return @
+
+Event::migrateDateTime = (dateField) ->
+    dateStr = @[dateField]
+
+    # Skip buggy or empty values.
+    if not dateStr
+        return false
+
+    # Check if it's already ISO8601
+    # Skip allDay event (leght is 10), because they didn't exist.
+    if dateStr.length is 10 or dateStr.charAt(10) is 'T'
+        return false
+
+    d = dateStr
+    # Check for a timezone
+    if "GMT" not in dateStr
+        d = d + " GMT+0000"
+
+    m = momentTz.tz d, 'UTC'
+
+    if @rrule
+        timezone = User.timezone or "Europe/Paris"
+        @[dateField] = m.tz(timezone).format Event.ambiguousDTFormat
+
+    else
+        @[dateField] = m.format Event.utcDTFormat
+
+    return true
+
+Event.migrateAll = ->
+    Event.all {}, (err, events) ->
+        if err
+            console.log err
+            return
+
+        for event in events
+            event.migrateDoctype()
+

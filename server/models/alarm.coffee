@@ -66,6 +66,42 @@ Alarm.createOrGetIfImport = (data, callback) ->
         Alarm.create data, callback
 
 # Return the emails to alert if action is EMAIL, or BOTH.
-# Actually the attendee is the cozy's user.
+
+# Actualy the attendee is the cozy's user.
 Alarm::getAttendeesEmail = ->
     return [User.email]
+
+# November 2014 Migration :
+# Migrate from v1.0.4 to next-gen doctypes.
+# Use date format as key to detect doctype version.
+Alarm::migrateDoctype = ->
+    # Skip buggy or empty values.
+    if not @trigg
+        return @
+
+    # Check if it's already ISO8601
+    if (@trigg.charAt 10) is 'T'
+        return @
+
+    d = @trigg
+    # Check for a timezone
+    if "GMT" not in d
+        d = d + " GMT+0000"
+    @trigg = new Date(d).toISOString()
+
+    @timezone = undefined
+    @rrule = undefined
+    @save (err) =>
+        if err
+            console.log err
+
+        return @
+
+Alarm.migrateAll = ->
+    Alarm.all {}, (err, alarms) ->
+        if err
+            console.log err
+            return
+
+        for alarm in alarms
+            alarm.migrateDoctype()

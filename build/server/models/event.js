@@ -53,44 +53,13 @@ module.exports = Event = americano.getModel('Event', {
 
 Event.dateFormat = 'YYYY-MM-DD';
 
-Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00';
+Event.ambiguousDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000';
 
-Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000Z';
+Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000[Z]';
 
 Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/;
 
 require('cozy-ical').decorateEvent(Event);
-
-Event.prototype.migrateDoctype = function() {
-  this.start = this.migrateDateTime(this.start);
-  this.end = this.migrateDateTime(this.end);
-  if (this.rrule) {
-    this.timezone = User.timezone;
-  } else {
-    this.timezone = void 0;
-  }
-  return this;
-};
-
-Event.prototype.migrateDateTime = function(dateStr) {
-  var d, m;
-  if (!dateStr) {
-    return dateStr;
-  }
-  if (dateStr.length === 10 || dateStr.charAt(10) === 'T') {
-    return dateStr;
-  }
-  d = dateStr;
-  if (__indexOf.call(dateStr, "GMT") < 0) {
-    d = d + " GMT+0000";
-  }
-  m = momentTz.tz(d, 'UTC');
-  if (this.rrule) {
-    return m.tz(User.timezone).format(Event.ambiguousDTFormat);
-  } else {
-    return m.format(Event.utcDTFormat);
-  }
-};
 
 Event.all = function(params, callback) {
   return Event.request("all", params, callback);
@@ -171,4 +140,65 @@ Event.prototype.getGuest = function(key) {
 
 Event.prototype.getAlarmAttendeesEmail = function() {
   return [User.email];
+};
+
+Event.prototype.migrateDoctype = function() {
+  var hasMigrate;
+  hasMigrate = this.migrateDateTime('start');
+  if (!hasMigrate) {
+    return this;
+  }
+  this.migrateDateTime('end');
+  if (this.rrule) {
+    this.timezone = User.timezone;
+  } else {
+    this.timezone = void 0;
+  }
+  return this.save((function(_this) {
+    return function(err) {
+      if (err) {
+        console.log(err);
+      }
+      return _this;
+    };
+  })(this));
+};
+
+Event.prototype.migrateDateTime = function(dateField) {
+  var d, dateStr, m, timezone;
+  dateStr = this[dateField];
+  if (!dateStr) {
+    return false;
+  }
+  if (dateStr.length === 10 || dateStr.charAt(10) === 'T') {
+    return false;
+  }
+  d = dateStr;
+  if (__indexOf.call(dateStr, "GMT") < 0) {
+    d = d + " GMT+0000";
+  }
+  m = momentTz.tz(d, 'UTC');
+  if (this.rrule) {
+    timezone = User.timezone || "Europe/Paris";
+    this[dateField] = m.tz(timezone).format(Event.ambiguousDTFormat);
+  } else {
+    this[dateField] = m.format(Event.utcDTFormat);
+  }
+  return true;
+};
+
+Event.migrateAll = function() {
+  return Event.all({}, function(err, events) {
+    var event, _i, _len, _results;
+    if (err) {
+      console.log(err);
+      return;
+    }
+    _results = [];
+    for (_i = 0, _len = events.length; _i < _len; _i++) {
+      event = events[_i];
+      _results.push(event.migrateDoctype());
+    }
+    return _results;
+  });
 };
