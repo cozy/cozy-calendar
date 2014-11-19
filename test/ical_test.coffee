@@ -34,7 +34,7 @@ SUMMARY:Something else to remind
 BEGIN:VALARM
 ACTION:EMAIL
 TRIGGER:PT0M
-ATTENDEE:mailto:mailto:test@cozycloud.cc
+ATTENDEE;PARTSTAT=NEEDS-ACTION;CN=test@cozycloud.cc:mailto:test@cozycloud.cc
 DESCRIPTION:Something else to remind
 SUMMARY:Something else to remind
 END:VALARM
@@ -47,7 +47,7 @@ SUMMARY:Another thing to remind
 BEGIN:VALARM
 ACTION:EMAIL
 TRIGGER:PT0M
-ATTENDEE:mailto:mailto:test@cozycloud.cc
+ATTENDEE;PARTSTAT=NEEDS-ACTION;CN=test@cozycloud.cc:mailto:test@cozycloud.cc
 DESCRIPTION:Another thing to remind
 SUMMARY:Another thing to remind
 END:VALARM
@@ -86,7 +86,7 @@ describe "Calendar export/import", ->
                                         "Pacific/Apia")
                     helpers.createEvent("2013-06-09T15:00:00.000Z",
                                         "2013-06-10T15:00:00.000Z",
-                                        "my place", "", "my description",
+                                        "my place", "my description",
                                         "Indian/Cocos")
                 ], (err, results) ->
                     ids = results.map (doc) -> doc.id

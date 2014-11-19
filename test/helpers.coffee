@@ -41,13 +41,12 @@ helpers.getAllEvents = (callback) ->
     Event.all callback
 
 # Create an event from values
-helpers.createEvent = (start, end, place, diff, description, callback) ->
+helpers.createEvent = (start, end, place, description, callback) ->
     (callback) ->
         evt =
             start: start
             end: end
             place: place
-            diff: diff
             description: description
 
         Event.create evt, callback
