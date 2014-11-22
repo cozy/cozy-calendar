@@ -143,7 +143,7 @@ module.exports =
     "icalendar export"                  : "ICalendar Export"
     "icalendar import"                  : "ICalendar Import"
     "to sync your cal with"             : "To synchronize your calendar with your devices, you must follow two steps"
-    "install the webdav module"         : "Install the webdav module from the Cozy App Store"
+    "install the sync module"           : "Install the Sync module from the Cozy App Store"
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."
     "some event fail to save"           : "An event was not saved (an error occured)."
     "imported events and alarms": "Amount of imported alarms and events"
