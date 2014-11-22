@@ -123,6 +123,7 @@ module.exports =
     "from"                              : "From"
     "to"                                : "to"
     'Reminders before the event'        : 'Reminders before the event'
+    "reminder"                          : "Reminder"
 
 # ERRORS
     "no description"                    : "A title must be set."

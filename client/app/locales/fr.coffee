@@ -121,6 +121,7 @@ module.exports =
     "from"                              : "De"
     "to"                                : "à"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
+    "reminder"                          : "Rappel"
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
