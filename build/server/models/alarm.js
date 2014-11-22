@@ -35,26 +35,16 @@ module.exports = Alarm = americano.getModel('Alarm', {
   related: {
     type: String,
     "default": null
+  },
+  created: {
+    type: String
+  },
+  lastModification: {
+    type: String
   }
 });
 
 require('cozy-ical').decorateAlarm(Alarm);
-
-Alarm.prototype.migrateDoctype = function() {
-  var d;
-  if (!this.trigg) {
-    return this;
-  }
-  if ((this.trigg.charAt(10)) === 'T') {
-    return this;
-  }
-  d = this.trigg;
-  if (__indexOf.call(d, "GMT") < 0) {
-    d = d + " GMT+0000";
-  }
-  this.trigg = new Date(d).toISOString();
-  return this;
-};
 
 Alarm.all = function(params, callback) {
   return Alarm.request("all", params, callback);
