@@ -39,6 +39,8 @@ module.exports.read = (req, res) ->
 # it already exists.
 module.exports.create = (req, res) ->
     data = req.body
+    data.created = moment().tz('UTC').toISOString()
+    data.lastModification = moment().tz('UTC').toISOString()
     Event.createOrGetIfImport data, (err, event) =>
         return res.error "Server error while creating event." if err
         res.send event, 201
@@ -46,7 +48,7 @@ module.exports.create = (req, res) ->
 module.exports.update = (req, res) ->
     start = req.event.start
     data = req.body
-
+    data.lastModification = moment().tz('UTC').toISOString()
     req.event.updateAttributes data, (err, event) =>
 
         if err?

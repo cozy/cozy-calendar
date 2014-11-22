@@ -27,6 +27,8 @@ module.exports.read = (req, res) ->
 # it already exists.
 module.exports.create = (req, res) ->
     data = req.body
+    data.created = moment().tz('UTC').toISOString()
+    data.lastModification = moment().tz('UTC').toISOString()
     Alarm.createOrGetIfImport data, (err, alarm) =>
         if err
             res.send error: "Server error while creating alarm.", 500
@@ -35,6 +37,7 @@ module.exports.create = (req, res) ->
 
 module.exports.update = (req, res) ->
     data = req.body
+    data.lastModification = moment().tz('UTC').toISOString()
     req.alarm.updateAttributes data, (err, alarm) =>
         if err?
             res.send error: "Server error while saving alarm", 500

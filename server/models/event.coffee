@@ -6,17 +6,19 @@ log = require('printit')
 User = require './user'
 
 module.exports = Event = americano.getModel 'Event',
-    start       : type : String
-    end         : type : String
-    place       : type : String
-    details     : type : String
-    description : type : String
-    rrule       : type : String
-    tags        : type : (x) -> x # DAMN IT JUGGLING
-    attendees   : type : [Object]
-    related     : type : String, default: null
-    timezone    : type : String
-    alarms      : type : [Object]
+    start       : type: String
+    end         : type: String
+    place       : type: String
+    details     : type: String
+    description : type: String
+    rrule       : type: String
+    tags        : type: (x) -> x # DAMN IT JUGGLING
+    attendees   : type: [Object]
+    related     : type: String, default: null
+    timezone    : type: String
+    alarms      : type: [Object]
+    created     : type: String
+    lastModification: type: String
 
 # 'start' and 'end' use those format,
 # According to allDay or rrules.

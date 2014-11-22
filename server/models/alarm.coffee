@@ -15,6 +15,8 @@ module.exports = Alarm = americano.getModel 'Alarm',
     rrule : type : String # recurring rule.
     tags : type : (x) -> x # DAMN IT JUGGLING
     related : type : String, default: null
+    created     : type: String
+    lastModification: type: String
 
 
 require('cozy-ical').decorateAlarm Alarm
