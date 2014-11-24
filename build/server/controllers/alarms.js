@@ -42,6 +42,8 @@ module.exports.read = function(req, res) {
 module.exports.create = function(req, res) {
   var data;
   data = req.body;
+  data.created = moment().tz('UTC').toISOString();
+  data.lastModification = moment().tz('UTC').toISOString();
   return Alarm.createOrGetIfImport(data, (function(_this) {
     return function(err, alarm) {
       if (err) {
@@ -58,6 +60,7 @@ module.exports.create = function(req, res) {
 module.exports.update = function(req, res) {
   var data;
   data = req.body;
+  data.lastModification = moment().tz('UTC').toISOString();
   return req.alarm.updateAttributes(data, (function(_this) {
     return function(err, alarm) {
       if (err != null) {

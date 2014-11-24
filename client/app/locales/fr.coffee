@@ -121,6 +121,7 @@ module.exports =
     "from"                              : "De"
     "to"                                : "à"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
+    "reminder"                          : "Rappel"
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
@@ -142,7 +143,7 @@ module.exports =
     "icalendar export"                  : "Export ICalendar"
     "icalendar import"                  : "Import ICalendar"
     "to sync your cal with"             : "Pour synchroniser votre calendrier avec votre mobile vous devez :"
-    "install the webdav module"         : "Installer le module WebDAV depuis l'applithèque."
+    "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un événement a échoué."
     "imported events and alarms": "Nombre d'alarmes et événements importés"

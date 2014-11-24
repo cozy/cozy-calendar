@@ -48,6 +48,12 @@ module.exports = Event = americano.getModel('Event', {
   },
   alarms: {
     type: [Object]
+  },
+  created: {
+    type: String
+  },
+  lastModification: {
+    type: String
   }
 });
 

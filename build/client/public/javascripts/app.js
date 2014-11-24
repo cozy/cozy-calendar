@@ -1265,6 +1265,7 @@ module.exports = {
   "from": "From",
   "to": "to",
   'Reminders before the event': 'Reminders before the event',
+  "reminder": "Reminder",
   "no description": "A title must be set.",
   "no summary": "A summary must be set.",
   "start after end": "The start date is after the end date.",
@@ -1281,7 +1282,7 @@ module.exports = {
   "icalendar export": "ICalendar Export",
   "icalendar import": "ICalendar Import",
   "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
-  "install the webdav module": "Install the webdav module from the Cozy App Store",
+  "install the sync module": "Install the Sync module from the Cozy App Store",
   "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
   "some event fail to save": "An event was not saved (an error occured).",
   "imported events and alarms": "Amount of imported alarms and events",
@@ -1436,6 +1437,7 @@ module.exports = {
   "from": "De",
   "to": "à",
   'Reminders before the event': 'Rappels avant l\'évènement',
+  "reminder": "Rappel",
   "no description": "Le titre est obligatoire",
   "no summary": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
@@ -1452,7 +1454,7 @@ module.exports = {
   "icalendar export": "Export ICalendar",
   "icalendar import": "Import ICalendar",
   "to sync your cal with": "Pour synchroniser votre calendrier avec votre mobile vous devez :",
-  "install the webdav module": "Installer le module WebDAV depuis l'applithèque.",
+  "install the sync module": "Installer le module Sync depuis l'applithèque.",
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un événement a échoué.",
   "imported events and alarms": "Nombre d'alarmes et événements importés",
@@ -5141,7 +5143,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the webdav module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
+buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the sync module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p><a href=\"export/calendar.ics\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
