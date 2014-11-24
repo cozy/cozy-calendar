@@ -30,7 +30,7 @@ module.exports = class BucketView extends ViewCollection
     # @TODO : unused, but also outdated (see calendar_view for popover api).
     showPopover: (options) ->
         options.parentView = this
-        options.container = $('body')
+        options.container = $ 'body'
         @popover.close() if @popover
         @popover = new PopoverEvent options
         @popover.render()

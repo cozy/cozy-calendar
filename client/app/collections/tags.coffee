@@ -7,13 +7,7 @@ module.exports = class Tags extends Backbone.Collection
         toString: -> @get 'label'
 
     initialize: ->
-        @alarmCollection = app.alarms
         @eventCollection = app.events
-
-        @listenTo @alarmCollection, 'add', @onBaseCollectionAdd
-        @listenTo @alarmCollection, 'change:tags', @onBaseCollectionChange
-        @listenTo @alarmCollection, 'remove', @onBaseCollectionRemove
-        @listenTo @alarmCollection, 'reset', @resetFromBase
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
         @listenTo @eventCollection, 'change:tags', @onBaseCollectionChange
@@ -24,7 +18,6 @@ module.exports = class Tags extends Backbone.Collection
 
     resetFromBase: ->
         @reset []
-        @alarmCollection.each (model) => @onBaseCollectionAdd model
         @eventCollection.each (model) => @onBaseCollectionAdd model
 
     onBaseCollectionChange: (model) ->

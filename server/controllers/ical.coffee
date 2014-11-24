@@ -1,28 +1,21 @@
 ical = require 'cozy-ical'
 Event = require '../models/event'
-Alarm = require '../models/alarm'
 User = require  '../models/user'
 
 module.exports.export = (req, res) ->
-    calendar = Alarm.getICalCalendar()
-    Alarm.all (err, alarms) =>
-        if err
-            res.send error: true, msg: 'Server error occurred while retrieving data'
+    calendar = new ical.VCalendar
+        organization: 'Cozy'
+        title: 'Cozy Calendar'
+    Event.all (err, events) =>
+        if err then res.send
+                error: true
+                msg: 'Server error occurred while retrieving data'
         else
-            Event.all (err, events) =>
-                if err then res.send
-                        error: true
-                        msg: 'Server error occurred while retrieving data'
-                else
-                    if alarms.length > 0
-                        calendar.add alarm.toIcal() for alarm in alarms
+            if events.length > 0
+                calendar.add event.toIcal() for event in events
 
-                    if events.length > 0
-                        calendar.add event.toIcal() for event in events
-
-                    res.header 'Content-Type': 'text/calendar'
-                    res.send calendar.toString()
-
+            res.header 'Content-Type': 'text/calendar'
+            res.send calendar.toString()
 
 module.exports.import = (req, res) ->
     file = req.files['file']
@@ -32,11 +25,9 @@ module.exports.import = (req, res) ->
             if err
                 console.log err
                 console.log err.message
-                res.send error: 'error occured while saving file', 500
+                res.send 500, error: 'error occured while saving file'
             else
                 User.timezone ?= 'Europe/Paris'
-                res.send
-                    events: Event.extractEvents result
-                    alarms: Alarm.extractAlarms result, User.timezone
+                res.send 200, events: Event.extractEvents result
     else
         res.send error: 'no file sent', 500

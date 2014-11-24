@@ -7,11 +7,11 @@ start = (port, callback) ->
             host: process.env.HOST or "0.0.0.0"
             root: __dirname
     , (app, server) ->
-        
+
 
         User = require './server/models/user'
         Realtimer = require('cozy-realtime-adapter')
-        realtime = Realtimer server : server, ['alarm.*', 'event.*']
+        realtime = Realtimer server : server, ['event.*']
         realtime.on 'user.*', -> User.updateUser()
         User.updateUser (err) ->
             callback err, app, server

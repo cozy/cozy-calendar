@@ -2,8 +2,6 @@ BaseView = require '../lib/base_view'
 ComboBox = require 'views/widgets/combobox'
 helpers = require '../helpers'
 
-Alarm = require '../models/alarm'
-AlarmList = require './import_alarm_list'
 Event = require '../models/event'
 EventList = require './import_event_list'
 
@@ -22,8 +20,6 @@ module.exports = class ImportView extends BaseView
     afterRender: ->
         @$(".confirmation").hide()
         @$(".results").hide()
-        @alarmList = new AlarmList el: @$ "#import-alarm-list"
-        @alarmList.render()
         @eventList = new EventList el: @$ "#import-event-list"
         @eventList.render()
         @uploader = @$ '#import-file-input'
@@ -48,8 +44,7 @@ module.exports = class ImportView extends BaseView
         @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @importButton.spin 'tiny'
 
-        # Empty alarm and event collection before importing new lists.
-        @alarmList.collection.reset()
+        # Empty event collection before importing new lists.
         @eventList.collection.reset()
         @$('.import-progress').html null
         @$('.import-errors').html null
@@ -61,11 +56,6 @@ module.exports = class ImportView extends BaseView
             processData: false
             contentType: false
             success: (result) =>
-
-                if result?.alarms?
-                    for valarm in result.alarms
-                        alarm = new Alarm valarm, parse: true
-                        @alarmList.collection.add alarm
 
                 if result?.events?
                     for vevent in result.events
@@ -98,12 +88,12 @@ module.exports = class ImportView extends BaseView
         calendar = 'my calendar' if not calendar? or calendar is ''
 
         # Amount of elements to import.
-        total = @alarmList.collection.length + @eventList.collection.length
+        total = @eventList.collection.length
         counter = 0
 
         # Set the progress widget
         $('.import-progress').html """
-        <p>#{t 'imported events and alarms'}:
+        <p>#{t 'imported events'}:
             <span class="import-counter">0</span>/#{total}</p>
         """
 
@@ -124,25 +114,6 @@ module.exports = class ImportView extends BaseView
         # Show loading spinner.
         @confirmButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @confirmButton.spin 'tiny'
-
-        importAlarm = (alarm, callback) ->
-            alarm.set 'tags', [calendar]
-            alarm.set 'id', null
-            alarm.set 'import', true
-            alarm.save null,
-                success: (model) ->
-                    # When an element is successfully imported, it is added to
-                    # the current calendar view.
-                    app.alarms.add model
-                    updateCounter()
-                    callback()
-
-                error: ->
-                    # When an element failed to import, an error message is
-                    # displayed.
-                    addAlarmError alarm, './templates/import_alarm'
-                    updateCounter()
-                    callback()
 
         importEvent = (event, callback) ->
             event.set 'tags', [calendar]
@@ -173,12 +144,9 @@ module.exports = class ImportView extends BaseView
                 if $('.import-errors').html().length is 0
                     app.router.navigate "calendar", true
 
-        # Save every imported alarms to the database.
-        alarms = @alarmList.collection.models
-        async.eachSeries alarms, importAlarm, (err) =>
-            # Save every imported events to the database.
-            events = @eventList.collection.models
-            async.eachSeries events, importEvent, finalizeImport
+        # Save every imported events to the database.
+        events = @eventList.collection.models
+        async.eachSeries events, importEvent, finalizeImport
 
     onCancelImportClicked: ->
         @$(".confirmation").fadeOut()

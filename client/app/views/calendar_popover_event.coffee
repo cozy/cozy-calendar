@@ -2,7 +2,6 @@ PopoverView = require '../lib/popover_view'
 EventModal = require 'views/event_modal'
 ComboBox = require 'views/widgets/combobox'
 Toggle = require 'views/toggle'
-Alarm = require 'models/alarm'
 Event = require 'models/event'
 
 module.exports = class EventPopOver extends PopoverView
@@ -26,7 +25,7 @@ module.exports = class EventPopOver extends PopoverView
         'changeTime.timepicker #input-start': 'onSetStart'
         'changeTime.timepicker #input-end': 'onSetEnd'
         'input #input-diff': 'onSetDiff'
-        'input #input-desc': 'onSetDesc' 
+        'input #input-desc': 'onSetDesc'
 
     initialize: (options) ->
         if not @model
@@ -60,7 +59,7 @@ module.exports = class EventPopOver extends PopoverView
             inputDiff = @$('#input-diff')
             inputStart.on 'timepicker.next', => inputEnd.focus()
             inputEnd.on 'timepicker.next', => inputDiff.focus()
-            inputEnd.on 'timepicker.prev', => 
+            inputEnd.on 'timepicker.prev', =>
                 inputStart.focus().timepicker 'highlightMinute'
 
             inputDiff.on 'keydown', (ev) =>
@@ -81,7 +80,7 @@ module.exports = class EventPopOver extends PopoverView
     getTitle: ->
         if @model.isNew()
             title = @type + ' creation'
-        else 
+        else
             title = 'edit ' + @type
 
         return t(title)
@@ -96,11 +95,11 @@ module.exports = class EventPopOver extends PopoverView
             allDay: @model.isAllDay()
 
         return data
-        
+
     onSetStart: (ev) -> @model.setStart @formatDateTime ev.time.value
-    
+
     onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
-    
+
     onSetDiff: (ev) ->
         diff = parseInt ev.target.value
         @model.setDiff diff
@@ -108,15 +107,8 @@ module.exports = class EventPopOver extends PopoverView
 
     onSetDesc: (ev) -> @model.set 'description', ev.target.value
 
-    onTabClicked: (event) ->
-        @parentView.showPopover
-            type: 'alarm'
-            target: @options.target
-            start:  @options.start
-            end:    @options.end
-
     onAdvancedClicked: (event) =>
-        if @model.isNew()            
+        if @model.isNew()
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash
@@ -138,7 +130,7 @@ module.exports = class EventPopOver extends PopoverView
     formatDateTime: (dtStr) ->
         splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
         if splitted and splitted[0]
-            setObj = 
+            setObj =
                 hour: splitted[1]
                 minute: splitted[2]
             return setObj
@@ -185,8 +177,8 @@ module.exports = class EventPopOver extends PopoverView
                     @addButton.html @getButtonText()
                     @addButton.children().show()
                     @selfclose()
-            
-        
+
+
     selfclose: =>
         # Revert if not just saved with addButton.
         @model.fetch complete: super
