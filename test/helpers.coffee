@@ -9,7 +9,6 @@ else
     helpers.prefix = '../'
 
 Event = require "#{helpers.prefix}server/models/event"
-Alarm = require "#{helpers.prefix}server/models/alarm"
 User  = require "#{helpers.prefix}server/models/user"
 
 helpers.before = (done) ->
@@ -33,8 +32,7 @@ helpers.after = (done) ->
 
 # Remove all the alarms
 helpers.cleanDb = (callback) ->
-    Alarm.destroyAll () ->
-        Event.destroyAll callback
+    Event.destroyAll callback
 
 # Get all the alarams
 helpers.getAllEvents = (callback) ->
@@ -60,27 +58,3 @@ helpers.getEventByID = (id, callback) ->
 
 helpers.doesEventExist = (id, callback) ->
     Event.exists id, callback
-
-helpers.getAllAlarms = (callback) ->
-    Alarm.all callback
-
-# Create an alarm from values
-helpers.createAlarm = (action, description, trigger, timezone, callback) ->
-    (callback) ->
-        alarm =
-            action: action
-            description: description
-            trigg: trigger
-            timezone: timezone
-
-        Alarm.create alarm, callback
-
-# Create an alarm from object
-helpers.createAlarmFromObject = (data, callback) ->
-    Alarm.create data, callback
-
-helpers.getAlarmByID = (id, callback) ->
-    Alarm.find id, callback
-
-helpers.doesAlarmExist = (id, callback) ->
-    Alarm.exists id, callback

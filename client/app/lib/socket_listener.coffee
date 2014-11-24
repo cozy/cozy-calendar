@@ -1,11 +1,9 @@
 class SocketListener extends CozySocketListener
 
     models:
-        'alarm': require 'models/alarm'
         'event': require 'models/event'
 
     events: [
-        'alarm.create','alarm.update', 'alarm.delete'
         'event.create','event.update', 'event.delete'
     ]
 

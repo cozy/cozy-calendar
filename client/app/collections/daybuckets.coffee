@@ -9,7 +9,6 @@ DayBucket = class DayBucket extends Backbone.Model
         @items = new ScheduleItemsCollection()
 
 # DayBucket Collection
-# mix alarms & events into one collection
 # split into DayBucket (= group by day)
 module.exports = class DayBucketCollection extends Backbone.Collection
 
@@ -17,14 +16,8 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     comparator: 'date'
 
     initialize: ->
-        @alarmCollection = app.alarms
         @eventCollection = app.events
         @tagsCollection = app.tags
-
-        @listenTo @alarmCollection, 'add', @onBaseCollectionAdd
-        @listenTo @alarmCollection, 'change:trigg', @onBaseCollectionChange
-        @listenTo @alarmCollection, 'remove', @onBaseCollectionRemove
-        @listenTo @alarmCollection, 'reset', @resetFromBase
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
         @listenTo @eventCollection, 'change:start', @onBaseCollectionChange
@@ -37,7 +30,6 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
     resetFromBase: ->
         @reset []
-        @alarmCollection.each (model) => @onBaseCollectionAdd model
         @eventCollection.each (model) => @onBaseCollectionAdd model
 
     onBaseCollectionChange: (model) ->

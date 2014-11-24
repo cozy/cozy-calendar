@@ -13,7 +13,7 @@ start = function(port, callback) {
     Realtimer = require('cozy-realtime-adapter');
     realtime = Realtimer({
       server: server
-    }, ['alarm.*', 'event.*']);
+    }, ['event.*']);
     realtime.on('user.*', function() {
       return User.updateUser();
     });

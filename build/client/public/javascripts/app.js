@@ -101,7 +101,7 @@ module.exports = {
     })(this));
   },
   _initialize: function() {
-    var AlarmCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales;
+    var ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales;
     window.app = this;
     this.locale = window.locale;
     delete window.locale;
@@ -119,11 +119,9 @@ module.exports = {
     Menu = require('views/menu');
     Header = require('views/calendar_header');
     SocketListener = require('../lib/socket_listener');
-    AlarmCollection = require('collections/alarms');
     EventCollection = require('collections/events');
     ContactCollection = require('collections/contacts');
     TagsCollection = require('collections/tags');
-    this.alarms = new AlarmCollection();
     this.events = new EventCollection();
     this.contacts = new ContactCollection();
     this.tags = new TagsCollection();
@@ -132,12 +130,7 @@ module.exports = {
       collection: this.tags
     });
     this.menu.render().$el.prependTo('body');
-    SocketListener.watch(this.alarms);
     SocketListener.watch(this.events);
-    if (window.initalarms != null) {
-      this.alarms.reset(window.initalarms);
-      delete window.initalarms;
-    }
     if (window.initevents != null) {
       this.events.reset(window.initevents);
       delete window.initevents;
@@ -152,31 +145,6 @@ module.exports = {
     }
   }
 };
-});
-
-;require.register("collections/alarms", function(exports, require, module) {
-var Alarm, AlarmCollection, ScheduleItemsCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-ScheduleItemsCollection = require('./scheduleitems');
-
-Alarm = require('../models/alarm');
-
-module.exports = AlarmCollection = (function(_super) {
-  __extends(AlarmCollection, _super);
-
-  function AlarmCollection() {
-    return AlarmCollection.__super__.constructor.apply(this, arguments);
-  }
-
-  AlarmCollection.prototype.model = Alarm;
-
-  AlarmCollection.prototype.url = 'alarms';
-
-  return AlarmCollection;
-
-})(ScheduleItemsCollection);
 });
 
 ;require.register("collections/contacts", function(exports, require, module) {
@@ -260,13 +228,8 @@ module.exports = DayBucketCollection = (function(_super) {
   DayBucketCollection.prototype.comparator = 'date';
 
   DayBucketCollection.prototype.initialize = function() {
-    this.alarmCollection = app.alarms;
     this.eventCollection = app.events;
     this.tagsCollection = app.tags;
-    this.listenTo(this.alarmCollection, 'add', this.onBaseCollectionAdd);
-    this.listenTo(this.alarmCollection, 'change:trigg', this.onBaseCollectionChange);
-    this.listenTo(this.alarmCollection, 'remove', this.onBaseCollectionRemove);
-    this.listenTo(this.alarmCollection, 'reset', this.resetFromBase);
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
     this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
@@ -277,11 +240,6 @@ module.exports = DayBucketCollection = (function(_super) {
 
   DayBucketCollection.prototype.resetFromBase = function() {
     this.reset([]);
-    this.alarmCollection.each((function(_this) {
-      return function(model) {
-        return _this.onBaseCollectionAdd(model);
-      };
-    })(this));
     return this.eventCollection.each((function(_this) {
       return function(model) {
         return _this.onBaseCollectionAdd(model);
@@ -451,12 +409,7 @@ module.exports = Tags = (function(_super) {
   })(Backbone.Model);
 
   Tags.prototype.initialize = function() {
-    this.alarmCollection = app.alarms;
     this.eventCollection = app.events;
-    this.listenTo(this.alarmCollection, 'add', this.onBaseCollectionAdd);
-    this.listenTo(this.alarmCollection, 'change:tags', this.onBaseCollectionChange);
-    this.listenTo(this.alarmCollection, 'remove', this.onBaseCollectionRemove);
-    this.listenTo(this.alarmCollection, 'reset', this.resetFromBase);
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:tags', this.onBaseCollectionChange);
     this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
@@ -466,11 +419,6 @@ module.exports = Tags = (function(_super) {
 
   Tags.prototype.resetFromBase = function() {
     this.reset([]);
-    this.alarmCollection.each((function(_this) {
-      return function(model) {
-        return _this.onBaseCollectionAdd(model);
-      };
-    })(this));
     return this.eventCollection.each((function(_this) {
       return function(model) {
         return _this.onBaseCollectionAdd(model);
@@ -960,11 +908,10 @@ SocketListener = (function(_super) {
   }
 
   SocketListener.prototype.models = {
-    'alarm': require('models/alarm'),
     'event': require('models/event')
   };
 
-  SocketListener.prototype.events = ['alarm.create', 'alarm.update', 'alarm.delete', 'event.create', 'event.update', 'event.delete'];
+  SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete'];
 
   SocketListener.prototype.onRemoteCreate = function(model) {
     var collection, _i, _len, _ref, _results;
@@ -1146,12 +1093,8 @@ module.exports = ViewCollection = (function(_super) {
 ;require.register("locales/en", function(exports, require, module) {
 module.exports = {
   "Add": "Add",
-  "alarm": "Alarm",
   "event": "Event",
-  "add the alarm": "add the alarm",
-  "create alarm": "Alarm creation",
   "create event": "Event creation",
-  "edit alarm": "Alarm edition",
   "edit event": "Event edition",
   "edit": "Edit",
   "create": "Create",
@@ -1183,14 +1126,12 @@ module.exports = {
   "Today": "Today",
   'today': 'aujourd\'hui',
   "What should I remind you ?": "What should I remind you?",
-  "alarm description placeholder": "What do you want to be reminded?",
   "ICalendar import": "ICalendar import",
   "select an icalendar file": "Select an icalendar file",
   "import your icalendar file": "import your icalendar file",
   "confirm import": "confirm import",
   "cancel": "cancel",
   "Create": "Create",
-  "Alarms to import": "Alarms to import",
   "Events to import": "Events to import",
   "Create Event": "Create Event",
   "From hours:minutes": "From hours:minutes",
@@ -1199,14 +1140,12 @@ module.exports = {
   "days after": "days after",
   "days later": "days later",
   "Week": "Week",
-  "Alarms": "Alarms",
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
   "BOTH": "E-mail & Notification",
   "display previous events": "Display previous events",
   "event": "Event",
-  "alarm": "Alarm",
   "are you sure": "Are you sure ?",
   "advanced": "More details",
   "enter email": "Enter email",
@@ -1285,7 +1224,7 @@ module.exports = {
   "install the sync module": "Install the Sync module from the Cozy App Store",
   "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
   "some event fail to save": "An event was not saved (an error occured).",
-  "imported events and alarms": "Amount of imported alarms and events",
+  "imported events": "Amount of imported events",
   "import finished": "Your import is now finished",
   "import error occured for": "Import error occured for following elements",
   "export your calendar": "Export your calendar",
@@ -1320,12 +1259,8 @@ module.exports = {
 ;require.register("locales/fr", function(exports, require, module) {
 module.exports = {
   "Add": "Ajouter",
-  "alarm": "alarme",
   "event": "événement",
-  "add the alarm": "Ajouter l'alarme",
-  "create alarm": "Création d'une alarme",
   "create event": "Création d'un évènement",
-  "edit alarm": "Modification d'une alarme",
   "edit event": "Modification d'un évènement",
   "edit": "Enregistrer",
   "create": "Enregistrer",
@@ -1357,14 +1292,12 @@ module.exports = {
   "Today": "Aujourd'hui",
   'today': 'aujourd\'hui',
   "What should I remind you ?": "Que dois-je vous rappeler ?",
-  "alarm description placeholder": "Que voulez-vous vous rappeler ?",
   "ICalendar importer": "Importateur ICalendar",
   "import your icalendar file": "Importer votre fichier iCalendar",
   "select an icalendar file": "Sélectionner un fichier iCalendar",
   "confirm import": "Confirmer l'import",
   "cancel": "Annuler",
   "Create": "Créer",
-  "Alarms to import": "Alarmes à importer",
   "Events to import": "Évènements à importer",
   "Create Event": "Créer un évènement",
   "From hours:minutes": "De heures:minutes",
@@ -1373,7 +1306,6 @@ module.exports = {
   "days after": "jours plus tard",
   "days later": "jours plus tard",
   "Week": "Semaine",
-  "Alarms": "Alarmes",
   "Display": "Notification",
   "DISPLAY": "Notification",
   "EMAIL": "E-mail",
@@ -1457,7 +1389,7 @@ module.exports = {
   "install the sync module": "Installer le module Sync depuis l'applithèque.",
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un événement a échoué.",
-  "imported events and alarms": "Nombre d'alarmes et événements importés",
+  "imported events": "Nombre d'événements importés",
   "import finished": "Votre import est terminé !",
   "import error occured for": "Une erreur est survenue pour un de ces éléments ",
   "export your calendar": "Exportez votre calendrier",
@@ -1485,79 +1417,6 @@ module.exports = {
   'Nov': 'Nov',
   'Dec': 'Déc'
 };
-});
-
-;require.register("models/alarm", function(exports, require, module) {
-var Alarm, ScheduleItem, helpers,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-helpers = require('../helpers');
-
-ScheduleItem = require('./scheduleitem');
-
-module.exports = Alarm = (function(_super) {
-  __extends(Alarm, _super);
-
-  function Alarm() {
-    return Alarm.__super__.constructor.apply(this, arguments);
-  }
-
-  Alarm.prototype.fcEventType = 'alarm';
-
-  Alarm.prototype.startDateField = 'trigg';
-
-  Alarm.prototype.urlRoot = 'alarms';
-
-  Alarm.prototype.defaults = function() {
-    return {
-      description: '',
-      title: '',
-      place: '',
-      tags: ['my calendar']
-    };
-  };
-
-  Alarm.prototype.parse = function(attrs) {
-    if (attrs.id === "undefined") {
-      delete attrs.id;
-    }
-    return attrs;
-  };
-
-  Alarm.prototype.validate = function(attrs, options) {
-    var errors, _ref;
-    errors = [];
-    if (attrs.description == null) {
-      errors.push({
-        field: 'description',
-        value: "no summary"
-      });
-    }
-    if ((_ref = attrs.action) !== 'DISPLAY' && _ref !== 'EMAIL' && _ref !== 'BOTH') {
-      errors.push({
-        field: 'action',
-        value: "invalid action"
-      });
-    }
-    if (!attrs.trigg || !moment(attrs.start).isValid()) {
-      errors.push({
-        field: 'triggdate',
-        value: "invalid trigg date"
-      });
-    }
-    if (errors.length > 0) {
-      return errors;
-    }
-  };
-
-  Alarm.prototype.getDefaultColor = function() {
-    return '#00C67A';
-  };
-
-  return Alarm;
-
-})(ScheduleItem);
 });
 
 ;require.register("models/contact", function(exports, require, module) {
@@ -2067,7 +1926,6 @@ module.exports = Router = (function(_super) {
       date: parseInt(day),
       view: view,
       model: {
-        alarms: app.alarms,
         events: app.events
       }
     }));
@@ -2219,281 +2077,8 @@ module.exports = CalendarHeader = (function(_super) {
 })(BaseView);
 });
 
-;require.register("views/calendar_popover_alarm", function(exports, require, module) {
-var Alarm, AlarmPopOver, ComboBox, PopoverView, Toggle,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-PopoverView = require('../lib/popover_view');
-
-ComboBox = require('views/widgets/combobox');
-
-Toggle = require('views/toggle');
-
-Alarm = require('models/alarm');
-
-module.exports = AlarmPopOver = (function(_super) {
-  __extends(AlarmPopOver, _super);
-
-  function AlarmPopOver() {
-    this.handleError = __bind(this.handleError, this);
-    this.onAddClicked = __bind(this.onAddClicked, this);
-    this.onRemoveClicked = __bind(this.onRemoveClicked, this);
-    this.getModelAttributes = __bind(this.getModelAttributes, this);
-    return AlarmPopOver.__super__.constructor.apply(this, arguments);
-  }
-
-  AlarmPopOver.prototype.titleTemplate = require('./templates/popover_title');
-
-  AlarmPopOver.prototype.template = require('./templates/popover_alarm');
-
-  AlarmPopOver.prototype.dtFormat = "HH:mm";
-
-  AlarmPopOver.prototype.popoverWidth = 411;
-
-  AlarmPopOver.prototype.popoverHeight = 200;
-
-  AlarmPopOver.prototype.events = {
-    'keyup input': 'onKeyUp',
-    'change select': 'onKeyUp',
-    'change input': 'onKeyUp',
-    'click .add': 'onAddClicked',
-    'click .remove': 'onRemoveClicked',
-    'click #toggle-type': 'onTabClicked',
-    'click .close': 'selfclose'
-  };
-
-  AlarmPopOver.prototype.initialize = function(options) {
-    if (!this.model) {
-      this.model = new Alarm({
-        trigg: options.start.toISOString(),
-        description: '',
-        action: 'DISPLAY'
-      });
-    }
-    AlarmPopOver.__super__.initialize.call(this, options);
-    return this.options = options;
-  };
-
-  AlarmPopOver.prototype.afterRender = function() {
-    var inputTime, _ref, _ref1;
-    this.addButton = this.$('.btn.add').text(this.getButtonText());
-    this.removeButton = this.$('.remove');
-    if (this.model.isNew()) {
-      this.removeButton.hide();
-    }
-    this.$('input[type="time"]').attr('type', 'text').timepicker({
-      template: false,
-      minuteStep: 5,
-      showMeridian: false
-    });
-    this.$('.focused').focus();
-    this.actionMail = new Toggle({
-      icon: 'envelope',
-      label: 'email notification',
-      value: (_ref = this.model.get('action')) === 'EMAIL' || _ref === 'BOTH'
-    });
-    this.actionNotif = new Toggle({
-      icon: 'exclamation-sign',
-      label: 'home notification',
-      value: (_ref1 = this.model.get('action')) === 'DISPLAY' || _ref1 === 'BOTH'
-    });
-    this.actionMail.on('toggle', (function(_this) {
-      return function(mailIsOn) {
-        if (!mailIsOn) {
-          return _this.actionNotif.toggle(true);
-        }
-      };
-    })(this));
-    this.actionNotif.on('toggle', (function(_this) {
-      return function(notifIsOn) {
-        if (!notifIsOn) {
-          return _this.actionMail.toggle(true);
-        }
-      };
-    })(this));
-    inputTime = this.$('#input-time');
-    inputTime.after(this.actionMail.$el);
-    inputTime.after(this.actionNotif.$el);
-    return this.calendar = new ComboBox({
-      el: this.$('#calendarcombo'),
-      small: true,
-      source: app.tags.calendars()
-    });
-  };
-
-  AlarmPopOver.prototype.getTitle = function() {
-    var title;
-    title = this.model.isNew() ? this.type + ' creation' : 'edit ' + this.type;
-    return t(title);
-  };
-
-  AlarmPopOver.prototype.getButtonText = function() {
-    if (this.model.isNew()) {
-      return t('create');
-    } else {
-      return t('edit');
-    }
-  };
-
-  AlarmPopOver.prototype.getRenderData = function() {
-    var data, _ref;
-    data = {
-      model: this.model,
-      dtFormat: this.dtFormat,
-      editionMode: !this.model.isNew(),
-      calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || ''
-    };
-    return data;
-  };
-
-  AlarmPopOver.prototype.onTabClicked = function(event) {
-    return this.parentView.showPopover({
-      type: 'event',
-      target: this.options.target,
-      start: this.options.start,
-      end: this.options.end
-    });
-  };
-
-  AlarmPopOver.prototype.onKeyUp = function(event) {
-    if (event.keyCode === 13 || event.which === 13) {
-      return this.addButton.click();
-    } else if (event.keyCode === 27) {
-      return this.selfclose();
-    } else {
-      return this.addButton.removeClass('disabled');
-    }
-  };
-
-  AlarmPopOver.prototype.formatDateTime = function(dtStr) {
-    var setObj, splitted;
-    splitted = dtStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
-    if (splitted && splitted[0]) {
-      setObj = {
-        hour: splitted[1],
-        minute: splitted[2]
-      };
-      return setObj;
-    }
-  };
-
-  AlarmPopOver.prototype.getModelAttributes = function() {
-    var action, data, trigg, unit, value, _ref;
-    action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
-    trigg = this.model.getStartDateObject();
-    _ref = this.formatDateTime($('#input-time').val());
-    for (unit in _ref) {
-      value = _ref[unit];
-      trigg.set(unit, value);
-    }
-    data = {
-      trigg: trigg,
-      description: this.$('#input-desc').val(),
-      action: action
-    };
-    data.tags = [this.calendar.value()];
-    return data;
-  };
-
-  AlarmPopOver.prototype.onRemoveClicked = function() {
-    this.removeButton.css('width', '42px');
-    this.removeButton.spin('tiny');
-    if (confirm('Are you sure ?')) {
-      return this.model.destroy({
-        wait: true,
-        error: function() {
-          return alert('server error occured');
-        },
-        complete: (function(_this) {
-          return function() {
-            _this.removeButton.spin();
-            _this.removeButton.css('width', '14px');
-            return _this.selfclose();
-          };
-        })(this)
-      });
-    } else {
-      return this.removeButton.spin();
-    }
-  };
-
-  AlarmPopOver.prototype.onAddClicked = function() {
-    var err, validModel, _i, _len, _ref, _results;
-    if (this.$('.btn.add').hasClass('disabled')) {
-      return;
-    }
-    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-    this.addButton.spin('small');
-    validModel = this.model.save(this.getModelAttributes(), {
-      wait: true,
-      success: (function(_this) {
-        return function() {
-          var collection;
-          collection = app.alarms;
-          return collection.add(_this.model);
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          return alert('server error occured');
-        };
-      })(this),
-      complete: (function(_this) {
-        return function() {
-          _this.addButton.spin(false);
-          _this.addButton.html(_this.getButtonText());
-          return _this.selfclose();
-        };
-      })(this)
-    });
-    if (!validModel) {
-      this.addButton.html(this.getButtonText());
-      this.addButton.spin();
-      this.$('.alert').remove();
-      this.$('input').css('border-color', '');
-      _ref = this.model.validationError;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        err = _ref[_i];
-        _results.push(this.handleError(err));
-      }
-      return _results;
-    }
-  };
-
-  AlarmPopOver.prototype.handleError = function(error) {
-    var alertMsg, guiltyFields;
-    switch (error.field) {
-      case 'description':
-        guiltyFields = '#input-desc';
-        break;
-      case 'startdate':
-        guiltyFields = '#input-start';
-        break;
-      case 'enddate':
-        guiltyFields = '#input-end';
-        break;
-      case 'triggdate':
-        guiltyFields = '#input-time';
-        break;
-      case 'date':
-        guiltyFields = '#input-start, #input-end';
-    }
-    this.$(guiltyFields).css('border-color', 'red');
-    this.$(guiltyFields).focus();
-    alertMsg = $('<div class="alert"></div>').text(t(error.value));
-    return this.$('.popover-content').before(alertMsg);
-  };
-
-  return AlarmPopOver;
-
-})(PopoverView);
-});
-
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
-var Alarm, ComboBox, Event, EventModal, EventPopOver, PopoverView, Toggle,
+var ComboBox, Event, EventModal, EventPopOver, PopoverView, Toggle,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2505,8 +2090,6 @@ EventModal = require('views/event_modal');
 ComboBox = require('views/widgets/combobox');
 
 Toggle = require('views/toggle');
-
-Alarm = require('models/alarm');
 
 Event = require('models/event');
 
@@ -2655,15 +2238,6 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.onSetDesc = function(ev) {
     return this.model.set('description', ev.target.value);
-  };
-
-  EventPopOver.prototype.onTabClicked = function(event) {
-    return this.parentView.showPopover({
-      type: 'alarm',
-      target: this.options.target,
-      start: this.options.start,
-      end: this.options.end
-    });
   };
 
   EventPopOver.prototype.onAdvancedClicked = function(event) {
@@ -2835,7 +2409,7 @@ module.exports = EventPopOver = (function(_super) {
 });
 
 ;require.register("views/calendar_view", function(exports, require, module) {
-var Alarm, AlarmPopover, BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
+var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2846,15 +2420,11 @@ BaseView = require('lib/base_view');
 
 EventPopover = require('./calendar_popover_event');
 
-AlarmPopover = require('./calendar_popover_alarm');
-
 Header = require('./calendar_header');
 
 helpers = require('helpers');
 
 timezones = require('helpers/timezone').timezones;
-
-Alarm = require('models/alarm');
 
 Event = require('models/event');
 
@@ -2879,11 +2449,6 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.initialize = function(options) {
     this.options = options;
-    this.alarmCollection = this.model.alarms;
-    this.listenTo(this.alarmCollection, 'add', this.refresh);
-    this.listenTo(this.alarmCollection, 'reset', this.refresh);
-    this.listenTo(this.alarmCollection, 'remove', this.onRemove);
-    this.listenTo(this.alarmCollection, 'change', this.refreshOne);
     this.eventCollection = this.model.events;
     this.listenTo(this.eventCollection, 'add', this.refresh);
     this.listenTo(this.eventCollection, 'reset', this.refresh);
@@ -2941,8 +2506,6 @@ module.exports = CalendarView = (function(_super) {
       handleWindowResize: false
     });
     source = this.eventCollection.getFCEventSource(this.tagsCollection);
-    this.cal.fullCalendar('addEventSource', source);
-    source = this.alarmCollection.getFCEventSource(this.tagsCollection);
     this.cal.fullCalendar('addEventSource', source);
     this.calHeader = new Header({
       cal: this.cal
@@ -3049,7 +2612,7 @@ module.exports = CalendarView = (function(_super) {
         return;
       }
     }
-    this.popover = options.type === 'event' ? new EventPopover(options) : new AlarmPopover(options);
+    this.popover = options.type === 'event' ? new EventPopover(options) : void 0;
     return this.popover.render();
   };
 
@@ -3098,7 +2661,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventRender = function(event, element) {
-    var icon, spinTarget;
+    var spinTarget;
     if ((event.isSaving != null) && event.isSaving) {
       spinTarget = $(element).find('.fc-event-time');
       spinTarget.addClass('spinning');
@@ -3106,10 +2669,6 @@ module.exports = CalendarView = (function(_super) {
       spinTarget.spin("tiny");
     }
     $(element).attr('title', event.title);
-    if (event.type === 'alarm') {
-      icon = '<i class="icon-bell icon-white"></i>';
-      element.find('.fc-title').prepend(icon);
-    }
     return element;
   };
 
@@ -3119,28 +2678,18 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.onEventDrop = function(fcEvent, delta, revertFunc, jsEvent, ui, view) {
     var evt;
-    evt = null;
-    if (fcEvent.type === 'alarm') {
-      evt = this.alarmCollection.get(fcEvent.id);
-      evt.addToStart(delta);
-    } else {
-      evt = this.eventCollection.get(fcEvent.id);
-      evt.addToStart(delta);
-      evt.addToEnd(delta);
-    }
+    evt = this.eventCollection.get(fcEvent.id);
+    evt.addToStart(delta);
+    evt.addToEnd(delta);
     return evt.save({}, {
       wait: true,
-      success: (function(_this) {
-        return function() {
-          return fcEvent.isSaving = false;
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          fcEvent.isSaving = false;
-          return revertFunc();
-        };
-      })(this)
+      success: function() {
+        return fcEvent.isSaving = false;
+      },
+      error: function() {
+        fcEvent.isSaving = false;
+        return revertFunc();
+      }
     });
   };
 
@@ -3150,27 +2699,17 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.onEventResize = function(fcEvent, delta, revertFunc, jsEvent, ui, view) {
     var model;
-    if (fcEvent.type === "alarm") {
-      fcEvent.isSaving = false;
-      this.cal.fullCalendar('renderEvent', fcEvent);
-      revertFunc();
-      return;
-    }
     model = this.eventCollection.get(fcEvent.id);
     model.addToEnd(delta);
     return model.save({}, {
       wait: true,
-      success: (function(_this) {
-        return function() {
-          return fcEvent.isSaving = false;
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          fcEvent.isSaving = false;
-          return revertFunc();
-        };
-      })(this)
+      success: function() {
+        return fcEvent.isSaving = false;
+      },
+      error: function() {
+        fcEvent.isSaving = false;
+        return revertFunc();
+      }
     });
   };
 
@@ -3180,9 +2719,7 @@ module.exports = CalendarView = (function(_super) {
       return true;
     }
     model = (function() {
-      if (fcEvent.type === 'alarm') {
-        return this.alarmCollection.get(fcEvent.id);
-      } else if (fcEvent.type === 'event') {
+      if (fcEvent.type === 'event') {
         return this.eventCollection.get(fcEvent.id);
       } else {
         throw new Error('wrong typed event in fc');
@@ -3916,65 +3453,6 @@ module.exports = RRuleView = (function(_super) {
 })(BaseView);
 });
 
-;require.register("views/import_alarm_list", function(exports, require, module) {
-var AlarmCollection, AlarmList, AlarmView, ViewCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-ViewCollection = require('../lib/view_collection');
-
-AlarmView = require('./import_alarm_view');
-
-AlarmCollection = require('../collections/alarms');
-
-module.exports = AlarmList = (function(_super) {
-  __extends(AlarmList, _super);
-
-  function AlarmList() {
-    return AlarmList.__super__.constructor.apply(this, arguments);
-  }
-
-  AlarmList.prototype.itemview = AlarmView;
-
-  AlarmList.prototype.collection = new AlarmCollection();
-
-  return AlarmList;
-
-})(ViewCollection);
-});
-
-;require.register("views/import_alarm_view", function(exports, require, module) {
-var AlarmView, BaseView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-module.exports = AlarmView = (function(_super) {
-  __extends(AlarmView, _super);
-
-  function AlarmView() {
-    return AlarmView.__super__.constructor.apply(this, arguments);
-  }
-
-  AlarmView.prototype.tagName = 'div';
-
-  AlarmView.prototype.className = 'alarm';
-
-  AlarmView.prototype.template = require('./templates/import_alarm');
-
-  AlarmView.prototype.getRenderData = function() {
-    return _.extend(this.model.toJSON(), {
-      time: this.model.getFormattedDate('YYYY/MM/DD HH:mm'),
-      description: this.model.get('description')
-    });
-  };
-
-  return AlarmView;
-
-})(BaseView);
-});
-
 ;require.register("views/import_event_list", function(exports, require, module) {
 var EventCollection, EventList, EventView, ViewCollection,
   __hasProp = {}.hasOwnProperty,
@@ -4035,7 +3513,7 @@ module.exports = EventView = (function(_super) {
 });
 
 ;require.register("views/import_view", function(exports, require, module) {
-var Alarm, AlarmList, BaseView, ComboBox, Event, EventList, ImportView, helpers,
+var BaseView, ComboBox, Event, EventList, ImportView, helpers,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -4044,10 +3522,6 @@ BaseView = require('../lib/base_view');
 ComboBox = require('views/widgets/combobox');
 
 helpers = require('../helpers');
-
-Alarm = require('../models/alarm');
-
-AlarmList = require('./import_alarm_list');
 
 Event = require('../models/event');
 
@@ -4073,10 +3547,6 @@ module.exports = ImportView = (function(_super) {
   ImportView.prototype.afterRender = function() {
     this.$(".confirmation").hide();
     this.$(".results").hide();
-    this.alarmList = new AlarmList({
-      el: this.$("#import-alarm-list")
-    });
-    this.alarmList.render();
     this.eventList = new EventList({
       el: this.$("#import-event-list")
     });
@@ -4105,7 +3575,6 @@ module.exports = ImportView = (function(_super) {
     form.append("file", file);
     this.importButton.find('span').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.importButton.spin('tiny');
-    this.alarmList.collection.reset();
     this.eventList.collection.reset();
     this.$('.import-progress').html(null);
     this.$('.import-errors').html(null);
@@ -4117,21 +3586,11 @@ module.exports = ImportView = (function(_super) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var alarm, valarm, vevent, _i, _j, _len, _len1, _ref, _ref1;
-          if ((result != null ? result.alarms : void 0) != null) {
-            _ref = result.alarms;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              valarm = _ref[_i];
-              alarm = new Alarm(valarm, {
-                parse: true
-              });
-              _this.alarmList.collection.add(alarm);
-            }
-          }
+          var vevent, _i, _len, _ref;
           if ((result != null ? result.events : void 0) != null) {
-            _ref1 = result.events;
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              vevent = _ref1[_j];
+            _ref = result.events;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              vevent = _ref[_i];
               event = new Event(vevent);
               _this.eventList.collection.add(event);
             }
@@ -4162,14 +3621,14 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var addError, alarms, calendar, counter, finalizeImport, importAlarm, importEvent, total, updateCounter;
+    var addError, calendar, counter, events, finalizeImport, importEvent, total, updateCounter;
     calendar = this.calendarCombo.value();
     if ((calendar == null) || calendar === '') {
       calendar = 'my calendar';
     }
-    total = this.alarmList.collection.length + this.eventList.collection.length;
+    total = this.eventList.collection.length;
     counter = 0;
-    $('.import-progress').html("<p>" + (t('imported events and alarms')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
+    $('.import-progress').html("<p>" + (t('imported events')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
     updateCounter = function() {
       counter++;
       return $('.import-counter').html(counter);
@@ -4182,23 +3641,6 @@ module.exports = ImportView = (function(_super) {
     };
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
-    importAlarm = function(alarm, callback) {
-      alarm.set('tags', [calendar]);
-      alarm.set('id', null);
-      alarm.set('import', true);
-      return alarm.save(null, {
-        success: function(model) {
-          app.alarms.add(model);
-          updateCounter();
-          return callback();
-        },
-        error: function() {
-          addAlarmError(alarm, './templates/import_alarm');
-          updateCounter();
-          return callback();
-        }
-      });
-    };
     importEvent = function(event, callback) {
       event.set('tags', [calendar]);
       event.set('id', null);
@@ -4229,14 +3671,8 @@ module.exports = ImportView = (function(_super) {
         });
       };
     })(this);
-    alarms = this.alarmList.collection.models;
-    return async.eachSeries(alarms, importAlarm, (function(_this) {
-      return function(err) {
-        var events;
-        events = _this.eventList.collection.models;
-        return async.eachSeries(events, importEvent, finalizeImport);
-      };
-    })(this));
+    events = this.eventList.collection.models;
+    return async.eachSeries(events, importEvent, finalizeImport);
   };
 
   ImportView.prototype.onCancelImportClicked = function() {
@@ -4295,20 +3731,16 @@ module.exports = ListView = (function(_super) {
   ListView.prototype.afterRender = function() {
     this.calHeader = new Header();
     this.$('#alarm-list').prepend(this.calHeader.render().$el);
-    this.calHeader.on('month', (function(_this) {
-      return function() {
-        return app.router.navigate('', {
-          trigger: true
-        });
-      };
-    })(this));
-    this.calHeader.on('week', (function(_this) {
-      return function() {
-        return app.router.navigate('week', {
-          trigger: true
-        });
-      };
-    })(this));
+    this.calHeader.on('month', function() {
+      return app.router.navigate('', {
+        trigger: true
+      });
+    });
+    this.calHeader.on('week', function() {
+      return app.router.navigate('week', {
+        trigger: true
+      });
+    });
     return ListView.__super__.afterRender.apply(this, arguments);
   };
 
@@ -4503,19 +3935,12 @@ module.exports = AlarmView = (function(_super) {
     data = this.model.toJSON();
     tag = this.model.getCalendar();
     data.color = tag ? colorHash(tag) : '';
-    if (this.model instanceof Event) {
-      _.extend(data, {
-        type: 'event',
-        start: this.model.getFormattedStartDate('HH:mm'),
-        end: this.model.getFormattedEndDate('HH:mm'),
-        allDay: this.model.isAllDay()
-      });
-    } else {
-      _.extend(data, {
-        type: 'alarm',
-        time: this.model.getFormattedDate('HH:mm')
-      });
-    }
+    _.extend(data, {
+      type: 'event',
+      start: this.model.getFormattedStartDate('HH:mm'),
+      end: this.model.getFormattedEndDate('HH:mm'),
+      allDay: this.model.isAllDay()
+    });
     return data;
   };
 
@@ -4845,25 +4270,6 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/import_alarm", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),time = locals_.time,description = locals_.description,action = locals_.action;
-buf.push("<p>" + (jade.escape((jade_interp = time) == null ? '' : jade_interp)) + "\n" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = action) == null ? '' : jade_interp)) + ")</p>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
 ;require.register("views/templates/import_event", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
@@ -4889,7 +4295,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><p>" + (jade.escape(null == (jade_interp = t('import an ical file') ) ? "" : jade_interp)) + "</p><div class=\"import-form\"><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"import-progress mt3\"></div><div class=\"import-errors mt3\"></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Alarms to import')) ? "" : jade_interp)) + "</h4><div id=\"import-alarm-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
+buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><p>" + (jade.escape(null == (jade_interp = t('import an ical file')) ? "" : jade_interp)) + "</p><div class=\"import-form\"><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"import-progress mt3\"></div><div class=\"import-errors mt3\"></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -4945,29 +4351,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),type = locals_.type,color = locals_.color,timezoneHour = locals_.timezoneHour,timezone = locals_.timezone,time = locals_.time,description = locals_.description,action = locals_.action,allDay = locals_.allDay,start = locals_.start,end = locals_.end;
-if ( type == 'alarm')
-{
-buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>");
-if ( typeof timezoneHour != 'undefined')
-{
-buf.push("<span" + (jade.attr("title", "" + (timezoneHour) + " - " + (timezone) + "", true, false)) + ">" + (jade.escape((jade_interp = time) == null ? '' : jade_interp)) + "</span>");
-}
-else
-{
-buf.push("<span>" + (jade.escape((jade_interp = time) == null ? '' : jade_interp)) + "</span>");
-}
-buf.push(" " + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = t(action)) == null ? '' : jade_interp)) + ")<i class=\"icon-trash\"></i></p>");
-}
-else if ( type == 'event')
-{
+var locals_ = (locals || {}),color = locals_.color,allDay = locals_.allDay,start = locals_.start,end = locals_.end,description = locals_.description;
 buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>");
 if ( !allDay)
 {
 buf.push("" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "");
 }
-buf.push("" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");
-};return buf.join("");
+buf.push("" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5020,62 +4410,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_alarm", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),model = locals_.model,dtFormat = locals_.dtFormat;
-buf.push("<div class=\"line\"><input id=\"input-time\" type=\"time\"" + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get('description'), true, false)) + (jade.attr("placeholder", t("alarm description placeholder"), true, false)) + " class=\"input-xlarge w100\"/></div><div class=\"line\"><div id=\"rrule-container\"></div></div><div class=\"popover-footer\"><a class=\"btn add\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
 ;require.register("views/templates/popover_content", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),type = locals_.type,time = locals_.time,timezones = locals_.timezones,timezone = locals_.timezone,description = locals_.description,start = locals_.start,end = locals_.end,diff = locals_.diff,place = locals_.place,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
-if ( type == 'alarm')
-{
-buf.push("<div class=\"line\"><input id=\"input-time\" type=\"time\"" + (jade.attr("value", time, true, false)) + " class=\"focused input-mini\"/><select id=\"input-timezone\" class=\"input\">");
-// iterate timezones
-;(function(){
-  var $$obj = timezones;
-  if ('number' == typeof $$obj.length) {
-
-    for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
-      var tz = $$obj[$index];
-
-buf.push("<option" + (jade.attr("value", tz, true, false)) + (jade.attr("selected", (timezone == tz), true, false)) + ">" + (jade.escape(null == (jade_interp = tz) ? "" : jade_interp)) + "</option>");
-    }
-
-  } else {
-    var $$l = 0;
-    for (var $index in $$obj) {
-      $$l++;      var tz = $$obj[$index];
-
-buf.push("<option" + (jade.attr("value", tz, true, false)) + (jade.attr("selected", (timezone == tz), true, false)) + ">" + (jade.escape(null == (jade_interp = tz) ? "" : jade_interp)) + "</option>");
-    }
-
-  }
-}).call(this);
-
-buf.push("</select></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("alarm description placeholder"), true, false)) + " class=\"input-xlarge w100\"/></div><div class=\"line\"><div id=\"rrule-container\"></div></div><div class=\"popover-footer\"><a class=\"btn add\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></div>");
-}
-else if ( type = 'event')
-{
-buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");
-};return buf.join("");
+var locals_ = (locals || {}),start = locals_.start,end = locals_.end,diff = locals_.diff,description = locals_.description,place = locals_.place,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
+buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5121,13 +4462,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar,editionMode = locals_.editionMode,model = locals_.model;
-buf.push("<input id=\"calendarcombo\"" + (jade.attr("value", calendar, true, false)) + "/>");
-if ( !editionMode)
-{
-buf.push("<a id=\"toggle-type\">" + (jade.escape(null == (jade_interp = t('change to') + " " + t(model.fcEventType=='event'?'alarm':'event')) ? "" : jade_interp)) + "</a>");
-}
-buf.push("<button" + (jade.attr("title", t('close'), true, false)) + " class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"remove icon-trash\"></i>");;return buf.join("");
+var locals_ = (locals || {}),calendar = locals_.calendar;
+buf.push("<input id=\"calendarcombo\"" + (jade.attr("value", calendar, true, false)) + "/><button" + (jade.attr("title", t('close'), true, false)) + " class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"remove icon-trash\"></i>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

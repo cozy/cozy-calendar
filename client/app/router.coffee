@@ -83,11 +83,11 @@ module.exports = class Router extends Backbone.Router
     displayCalendar: (view, year, month, day) =>
         @lastDisplayCall = Array.apply arguments
         @displayView new CalendarView
-            year: parseInt(year)
-            month: (parseInt(month) + 11)%12
-            date: parseInt(day)
+            year: parseInt year
+            month: (parseInt(month) + 11) % 12
+            date: parseInt day
             view: view
-            model: {alarms:app.alarms, events:app.events}
+            model: events: app.events
 
         app.menu.activate 'calendar'
         @onCalendar = true

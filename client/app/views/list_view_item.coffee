@@ -22,17 +22,17 @@ module.exports = class AlarmView extends BaseView
         @$el.spin 'tiny'
         @model.destroy
             error: ->
-                alert('server error')
+                alert 'server error'
                 @$el.spin()
 
     # @TODO : unused, but also outdated (see calendar_view for popover api).
-    editMode: -> 
+    editMode: ->
         @popover.close() if @popover
         @popover = new PopoverEvent
             model: @model,
             target: @$el
             parentView: this
-            container: $('body')
+            container: $ 'body'
         @popover.render()
 
     getUrlHash: -> 'list'
@@ -41,16 +41,11 @@ module.exports = class AlarmView extends BaseView
         data = @model.toJSON()
         tag = @model.getCalendar()
         data.color = if tag then colorHash(tag) else ''
-        if @model instanceof Event
-            _.extend data,
-                type: 'event'
-                start: @model.getFormattedStartDate 'HH:mm'
-                end: @model.getFormattedEndDate 'HH:mm'
-                allDay: @model.isAllDay()
-        else
-            _.extend data,
-                type: 'alarm'
-                time: @model.getFormattedDate 'HH:mm'
+        _.extend data,
+            type: 'event'
+            start: @model.getFormattedStartDate 'HH:mm'
+            end: @model.getFormattedEndDate 'HH:mm'
+            allDay: @model.isAllDay()
 
         return data
 
