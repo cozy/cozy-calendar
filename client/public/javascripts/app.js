@@ -1791,6 +1791,7 @@ module.exports = ScheduleItem = (function(_super) {
     if (this.isAllDay()) {
       s = H.momentToDateString(m);
     } else if (this.isRecurrent()) {
+      m = moment(m).tz(this.get('timezone'));
       s = H.momentToAmbiguousString(m);
     } else {
       s = m.toISOString();
