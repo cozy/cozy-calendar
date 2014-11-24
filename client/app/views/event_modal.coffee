@@ -95,8 +95,8 @@ module.exports = class EventModal extends ViewCollection
             dtFormat = @inputDateFormat
             _.extend options,
                 format: @inputDateDTPickerFormat
-                startView: 2
                 minView: 2
+                viewSelect: 4
 
         else
             dtFormat = @inputDateTimeFormat
