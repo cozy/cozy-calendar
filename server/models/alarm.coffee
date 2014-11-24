@@ -19,9 +19,6 @@ module.exports = Alarm = americano.getModel 'Alarm',
     lastModification: type: String
 
 
-require('cozy-ical').decorateAlarm Alarm
-
-
 Alarm.all = (params, callback) ->
     Alarm.request "all", params, callback
 
@@ -60,27 +57,23 @@ Alarm::getAttendeesEmail = ->
 # Migrate from v1.0.4 to next-gen doctypes.
 # Use date format as key to detect doctype version.
 Alarm::migrateDoctype = ->
-    # Skip buggy or empty values.
-    if not @trigg
-        return @
 
-    # Check if it's already ISO8601
-    if (@trigg.charAt 10) is 'T'
-        return @
+    end = moment(@start).format 'YYYY-MM-DD'
+    body =
+        start: @start
+        end: end
+        description: @description
+        place: ''
+        rrule: ''
+        tags: @tags
+        alarms:
+            id: 1
+            trigg: '-PT10M'
+            action: 'DISPLAY'
+        created: moment().tz('UTC').toISOString()
+        lastModification: moment().tz('UTC').toISOString()
 
-    d = @trigg
-    # Check for a timezone
-    if "GMT" not in d
-        d = d + " GMT+0000"
-    @trigg = new Date(d).toISOString()
-
-    @timezone = undefined
-    @rrule = undefined
-    @save (err) =>
-        if err
-            console.log err
-
-        return @
+    Event.create body, => @destroy()
 
 Alarm.migrateAll = ->
     Alarm.all {}, (err, alarms) ->

@@ -14,44 +14,7 @@ helpers = require './helpers'
 expectedContent = """
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Cozy Cloud//NONSGML Cozy Agenda//EN
-BEGIN:VTODO
-UID:[id-1]
-DTSTAMP:20141110T090600Z
-DTSTART:20130423T124000Z
-SUMMARY:Something to remind
-BEGIN:VALARM
-ACTION:DISPLAY
-TRIGGER:PT0M
-DESCRIPTION:Something to remind
-END:VALARM
-END:VTODO
-BEGIN:VTODO
-UID:[id-2]
-DTSTAMP:20141110T090600Z
-DTSTART:20130424T133000Z
-SUMMARY:Something else to remind
-BEGIN:VALARM
-ACTION:EMAIL
-TRIGGER:PT0M
-ATTENDEE;PARTSTAT=NEEDS-ACTION;CN=test@cozycloud.cc:mailto:test@cozycloud.cc
-DESCRIPTION:Something else to remind
-SUMMARY:Something else to remind
-END:VALARM
-END:VTODO
-BEGIN:VTODO
-UID:[id-3]
-DTSTAMP:20141110T090600Z
-DTSTART:20130425T113000Z
-SUMMARY:Another thing to remind
-BEGIN:VALARM
-ACTION:EMAIL
-TRIGGER:PT0M
-ATTENDEE;PARTSTAT=NEEDS-ACTION;CN=test@cozycloud.cc:mailto:test@cozycloud.cc
-DESCRIPTION:Another thing to remind
-SUMMARY:Another thing to remind
-END:VALARM
-END:VTODO
+PRODID:-//Cozy//NONSGML Cozy Calendar//EN
 BEGIN:VEVENT
 UID:[id-4]
 DTSTAMP:20141110T090600Z
@@ -75,15 +38,6 @@ describe "Calendar export/import", ->
             before helpers.cleanDb
             before (done) ->
                 async.series [
-                    helpers.createAlarm("DISPLAY", "Something to remind",
-                                        "2013-04-23T12:40:00.000Z",
-                                        "Europe/Paris")
-                    helpers.createAlarm("EMAIL", "Something else to remind",
-                                        "2013-04-24T13:30:00.000Z",
-                                        "Africa/Abidjan")
-                    helpers.createAlarm("EMAIL", "Another thing to remind",
-                                        "2013-04-25T11:30:00.000Z",
-                                        "Pacific/Apia")
                     helpers.createEvent("2013-06-09T15:00:00.000Z",
                                         "2013-06-10T15:00:00.000Z",
                                         "my place", "my description",
@@ -98,14 +52,11 @@ describe "Calendar export/import", ->
                     done()
                 , false
 
-            it "Then it should contains my alarms", ->
+            it "Then it should contains my event", ->
                 dtstamp = moment.tz moment(), 'UTC'
                 dtstampValue = "DTSTAMP:#{dtstamp.format 'YYYYMMDDTHHmm[00Z]'}"
                 expectedBody = expectedContent
-                    .replace '[id-1]', ids[0]
-                    .replace '[id-2]', ids[1]
-                    .replace '[id-3]', ids[2]
-                    .replace '[id-4]', ids[3]
+                    .replace '[id-4]', ids[0]
                     # DTSTAMP is new all the time in our implementation
                     .replace /DTSTAMP:.*/g, dtstampValue
 
@@ -122,7 +73,6 @@ describe "Calendar export/import", ->
                     done()
 
             it "Then it sends to me the parsing result", (done) ->
-                @body.alarms.length.should.equal 1
                 @body.events.length.should.equal 3
                 done()
 
@@ -134,7 +84,6 @@ describe "Calendar export/import", ->
                     done()
 
             it "Then it sends to me the parsing result", (done) ->
-                @body.alarms.length.should.equal 0
                 @body.events.length.should.equal 2
                 done()
 
@@ -146,6 +95,5 @@ describe "Calendar export/import", ->
                     done()
 
             it "Then it sends to me the parsing result", (done) ->
-                @body.alarms.length.should.equal 0
                 @body.events.length.should.equal 2
                 done()

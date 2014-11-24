@@ -1,15 +1,11 @@
 app = require 'application'
 BaseView = require 'lib/base_view'
 EventPopover = require './calendar_popover_event'
-AlarmPopover = require './calendar_popover_alarm'
 Header = require './calendar_header'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
 
-Alarm = require 'models/alarm'
 Event = require 'models/event'
-
-
 
 module.exports = class CalendarView extends BaseView
 
@@ -17,11 +13,6 @@ module.exports = class CalendarView extends BaseView
     template: require './templates/calendarview'
 
     initialize: (@options) ->
-        @alarmCollection = @model.alarms
-        @listenTo @alarmCollection, 'add'  , @refresh
-        @listenTo @alarmCollection, 'reset', @refresh
-        @listenTo @alarmCollection, 'remove', @onRemove
-        @listenTo @alarmCollection, 'change', @refreshOne
 
         @eventCollection = @model.events
         @listenTo @eventCollection, 'add'  , @refresh
@@ -36,7 +27,7 @@ module.exports = class CalendarView extends BaseView
     afterRender: ->
         locale = moment.localeData()
 
-        @cal = @$('#alarms')
+        @cal = @$ '#alarms'
         @view = @options.view
         @cal.fullCalendar
             lang: window.locale
@@ -61,7 +52,7 @@ module.exports = class CalendarView extends BaseView
                 day:   t('day')
 
             # Display time in the cozy's user timezone.
-            # time given by Fullcalendar are ambiguous moments, 
+            # time given by Fullcalendar are ambiguous moments,
             # with cozy's user timezone values.
             # Cf http://fullcalendar.io/docs/timezone/timezone/
             timezone: window.app.timezone
@@ -85,9 +76,6 @@ module.exports = class CalendarView extends BaseView
             handleWindowResize: false
 
         source = @eventCollection.getFCEventSource @tagsCollection
-        @cal.fullCalendar 'addEventSource', source
-
-        source = @alarmCollection.getFCEventSource @tagsCollection
         @cal.fullCalendar 'addEventSource', source
 
         @calHeader = new Header cal: @cal
@@ -132,7 +120,7 @@ module.exports = class CalendarView extends BaseView
     refreshOne: (model) =>
         return @refresh() if model.isRecurrent()
 
-        # fullCalendar('updateEvent') eats end of allDay events!(?), 
+        # fullCalendar('updateEvent') eats end of allDay events!(?),
         # perform a full refresh as a workaround.
         return @refresh() if model.isAllDay()
 
@@ -159,7 +147,7 @@ module.exports = class CalendarView extends BaseView
                 @popover = null
                 return
 
-        @popover = if options.type == 'event' then new EventPopover options else new AlarmPopover options
+        @popover = if options.type is 'event' then new EventPopover options
         @popover.render()
 
     onChangeView: (view) =>
@@ -181,7 +169,7 @@ module.exports = class CalendarView extends BaseView
 
     onSelect: (startDate, endDate, jsEvent, view) =>
         # In month view, default to 10:00 - 18:00 instead of fullday event.
-        if @view is 'month'            
+        if @view is 'month'
             # startDate and endDate are dates, we add time part to create an
             # ambiguous date string.
 
@@ -189,7 +177,7 @@ module.exports = class CalendarView extends BaseView
             endDate = startDate.format() + 'T18:00:00.000'
             startDate = startDate.format() + 'T10:00:00.000'
 
-        
+
         start = helpers.ambiguousToTimezoned(startDate)
         end = helpers.ambiguousToTimezoned(endDate)
 
@@ -211,9 +199,6 @@ module.exports = class CalendarView extends BaseView
             spinTarget.spin "tiny"
 
         $(element).attr 'title', event.title
-        if event.type is 'alarm'
-            icon = '<i class="icon-bell icon-white"></i>'
-            element.find('.fc-title').prepend icon
 
         return element
 
@@ -221,21 +206,15 @@ module.exports = class CalendarView extends BaseView
         event.isSaving = true
 
     onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
-        evt = null
-        if fcEvent.type is 'alarm'
-            evt = @alarmCollection.get fcEvent.id
-            evt.addToStart(delta)
-
-        else # event
-            evt = @eventCollection.get fcEvent.id
-            evt.addToStart(delta)
-            evt.addToEnd(delta)
+        evt = @eventCollection.get fcEvent.id
+        evt.addToStart(delta)
+        evt.addToEnd(delta)
 
         evt.save {},
             wait: true
-            success: =>
+            success: ->
                 fcEvent.isSaving = false
-            error: =>
+            error: ->
                 fcEvent.isSaving = false
                 revertFunc()
 
@@ -243,23 +222,16 @@ module.exports = class CalendarView extends BaseView
         fcEvent.isSaving = true
 
     onEventResize: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
-        # alarms can't be resized
-        if fcEvent.type is "alarm"
-            fcEvent.isSaving = false
-            @cal.fullCalendar 'renderEvent', fcEvent
-            revertFunc()
-            return
 
         model = @eventCollection.get fcEvent.id
-
-        model.addToEnd(delta)
+        model.addToEnd delta
 
         model.save {},
             wait: true
-            success: =>
+            success: ->
                 fcEvent.isSaving = false
 
-            error: =>
+            error: ->
                 fcEvent.isSaving = false
                 revertFunc()
 
@@ -267,8 +239,7 @@ module.exports = class CalendarView extends BaseView
     onEventClick: (fcEvent, jsEvent, view) =>
         return true if $(jsEvent.target).hasClass 'ui-resizable-handle'
 
-        model = if fcEvent.type is 'alarm' then @alarmCollection.get fcEvent.id
-        else if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
+        model = if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
         else throw new Error('wrong typed event in fc')
 
         @showPopover
