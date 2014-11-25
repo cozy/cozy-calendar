@@ -11,8 +11,7 @@ module.exports = class ListView extends ViewCollection
     itemview: require './list_view_bucket'
     collectionEl: '#alarm-list'
     events:
-        'click .showafter': -> @collection.loadNextPage() # 'showbefore'
-        'click .showbefore': -> @collection.loadPreviousPage()
+        'click .showbefore': 'showbefore'
 
     afterRender: ->
         @calHeader = new Header()
@@ -24,30 +23,24 @@ module.exports = class ListView extends ViewCollection
     appendView: (view) ->
         index = @collection.indexOf view.model
         el = view.$el
-
-        # today = moment().startOf('day')
-        # if view.model.get('date').isBefore today
-        #     el.addClass('before').hide()
-        # else
-        #     el.addClass('after')
+        today = moment().startOf('day')
+        if view.model.get('date').isBefore today
+            el.addClass('before').hide()
+        else
+            el.addClass('after')
 
         if index is 0 then @calHeader.$el.after el
         else
             prevCid = @collection.at(index-1).cid
             @views[prevCid].$el.after el
 
+    showbefore: =>
+        first = @$('.after').first()
+        body = $ 'html, body'
+        @$('.before').slideDown
+            progress: ->
+                # only scroll to top if it's necessary
+                if first.length > 0
+                    body.scrollTop first.offset().top
 
-    showbefore: ->
-        # TODO : test, show after...
-        # @collection.getNextPage()
-        @collection.loadPreviousPage()
-    # showbefore: =>
-    #     first = @$('.after').first()
-    #     body = $ 'html, body'
-    #     @$('.before').slideDown
-    #         progress: ->
-    #             # only scroll to top if it's necessary
-    #             if first.length > 0
-    #                 body.scrollTop first.offset().top
-
-    #     @$('.showbefore').fadeOut()
+        @$('.showbefore').fadeOut()

@@ -1,12 +1,14 @@
-ScheduleItemsCollection = require './scheduleitems'
+# ScheduleItemsCollection = require './scheduleitems'
+RealEventCollection = require './realevents'
 
 DayBucket = class DayBucket extends Backbone.Model
     constructor: (model) ->
         super
             id: model.getDateHash()
-            date: model.getDateObject().startOf 'day'
+            date: model.start.startOf 'day'
     initialize: ->
-        @items = new ScheduleItemsCollection()
+        # @items = new ScheduleItemsCollection()
+        @items = new RealEventCollection()
 
 # DayBucket Collection
 # split into DayBucket (= group by day)
@@ -16,7 +18,11 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     comparator: 'date'
 
     initialize: ->
-        @eventCollection = app.events
+        # @eventCollection = app.events
+        @eventCollection = new RealEventCollection()
+        
+        @eventCollection.generateRealEvents moment().add(-1, 'week'), moment().add(1, 'week')
+        
         @tagsCollection = app.tags
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
@@ -26,6 +32,7 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
         @listenTo @tagsCollection, 'change', @resetFromBase
 
+        
         @resetFromBase()
 
     resetFromBase: ->
@@ -55,3 +62,7 @@ module.exports = class DayBucketCollection extends Backbone.Collection
         bucket.items.remove model
         @remove bucket if bucket.items.length is 0
 
+
+    loadNextPage: (callback) -> @eventCollection.loadNextPage()
+
+    loadPreviousPage: (callback) -> @eventCollection.loadPreviousPage()

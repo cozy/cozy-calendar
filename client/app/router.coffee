@@ -4,6 +4,7 @@ CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
 ImportView = require 'views/import_view'
 SyncView = require 'views/sync_view'
+# RealEventCollection = require 'collections/realevents'
 DayBucketCollection = require 'collections/daybuckets'
 
 module.exports = class Router extends Backbone.Router
@@ -40,6 +41,7 @@ module.exports = class Router extends Backbone.Router
     list: ->
         @displayView new ListView
             collection: new DayBucketCollection()
+            # collection: new RealEventCollection()
         app.menu.activate 'calendar'
         @onCalendar = true
 

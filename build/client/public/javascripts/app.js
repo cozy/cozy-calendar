@@ -192,11 +192,11 @@ module.exports = ContactCollection = (function(_super) {
 });
 
 ;require.register("collections/daybuckets", function(exports, require, module) {
-var DayBucket, DayBucketCollection, ScheduleItemsCollection,
+var DayBucket, DayBucketCollection, RealEventCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-ScheduleItemsCollection = require('./scheduleitems');
+RealEventCollection = require('./realevents');
 
 DayBucket = DayBucket = (function(_super) {
   __extends(DayBucket, _super);
@@ -204,12 +204,12 @@ DayBucket = DayBucket = (function(_super) {
   function DayBucket(model) {
     DayBucket.__super__.constructor.call(this, {
       id: model.getDateHash(),
-      date: model.getDateObject().startOf('day')
+      date: model.start.startOf('day')
     });
   }
 
   DayBucket.prototype.initialize = function() {
-    return this.items = new ScheduleItemsCollection();
+    return this.items = new RealEventCollection();
   };
 
   return DayBucket;
@@ -228,7 +228,8 @@ module.exports = DayBucketCollection = (function(_super) {
   DayBucketCollection.prototype.comparator = 'date';
 
   DayBucketCollection.prototype.initialize = function() {
-    this.eventCollection = app.events;
+    this.eventCollection = new RealEventCollection();
+    this.eventCollection.generateRealEvents(moment().add(-1, 'week'), moment().add(1, 'week'));
     this.tagsCollection = app.tags;
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
@@ -288,6 +289,14 @@ module.exports = DayBucketCollection = (function(_super) {
     }
   };
 
+  DayBucketCollection.prototype.loadNextPage = function(callback) {
+    return this.eventCollection.loadNextPage();
+  };
+
+  DayBucketCollection.prototype.loadPreviousPage = function(callback) {
+    return this.eventCollection.loadPreviousPage();
+  };
+
   return DayBucketCollection;
 
 })(Backbone.Collection);
@@ -318,6 +327,127 @@ module.exports = EventCollection = (function(_super) {
 })(ScheduleItemsCollection);
 });
 
+;require.register("collections/realevents", function(exports, require, module) {
+var Event, RealEvent, RealEventCollection,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+Event = require('../models/event');
+
+RealEvent = RealEvent = (function(_super) {
+  __extends(RealEvent, _super);
+
+  function RealEvent(event, start, end) {
+    RealEvent.__super__.constructor.apply(this, arguments);
+    this.event = event;
+    if (event.isRecurrent()) {
+      this.start = start;
+      this.end = end;
+      this.set('id', event.get('id') + start.toISOString());
+    } else {
+      this.set('id', event.get('id'));
+      this.start = event.getStartDateObject();
+      this.end = event.getEndDateObject();
+    }
+  }
+
+  RealEvent.prototype.getCalendar = function() {
+    return this.event.getCalendar();
+  };
+
+  RealEvent.prototype.getDateHash = function() {
+    return this.start.format('YYYYMMDD');
+  };
+
+  RealEvent.prototype.isAllDay = function() {
+    return this.event.isAllDay();
+  };
+
+  RealEvent.prototype.getFormattedStartDate = function(format) {
+    return this.start.format(format);
+  };
+
+  RealEvent.prototype.getFormattedEndDate = function(format) {
+    return this.end.format(format);
+  };
+
+  return RealEvent;
+
+})(Backbone.Model);
+
+module.exports = RealEventCollection = (function(_super) {
+  var model;
+
+  __extends(RealEventCollection, _super);
+
+  function RealEventCollection() {
+    this.generateRealEvents = __bind(this.generateRealEvents, this);
+    return RealEventCollection.__super__.constructor.apply(this, arguments);
+  }
+
+  model = RealEvent;
+
+  RealEventCollection.prototype.comparator = function(re1, re2) {
+    return re1.start.diff(re2.start);
+  };
+
+  RealEventCollection.prototype.initialize = function() {
+    this.baseCollection = app.events;
+    this.listenTo(this.baseCollection, 'add', this.resetFromBase);
+    this.listenTo(this.baseCollection, 'change:start', this.resetFromBase);
+    this.listenTo(this.baseCollection, 'remove', this.resetFromBase);
+    return this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
+  };
+
+  RealEventCollection.prototype.resetFromBase = function() {
+    var first, last;
+    first = moment(this.at(0).start);
+    last = moment(this.at(this.length - 1).start);
+    this.reset([]);
+    return this.generateRealEvents(first, last);
+  };
+
+  RealEventCollection.prototype.generateRealEvents = function(start, end) {
+    var eventsInRange;
+    eventsInRange = [];
+    this.baseCollection.each(function(item) {
+      var duration, evs, itemEnd, itemStart;
+      itemStart = item.getStartDateObject();
+      itemEnd = item.getEndDateObject();
+      duration = itemEnd - itemStart;
+      if (item.isRecurrent()) {
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, s, e) {
+          return new RealEvent(event, s, e);
+        });
+        return eventsInRange = eventsInRange.concat(evs);
+      } else if (item.isInRange(start, end)) {
+        return eventsInRange.push(new RealEvent(item));
+      }
+    });
+    console.log(eventsInRange);
+    return this.add(eventsInRange);
+  };
+
+  RealEventCollection.prototype.loadNextPage = function(callback) {
+    var last;
+    callback = callback || function() {};
+    last = this.at(this.length - 1).start;
+    return this.generateRealEvents(moment(last), moment(last).add(1, 'month'), callback);
+  };
+
+  RealEventCollection.prototype.loadPreviousPage = function(callback) {
+    var first;
+    callback = callback || function() {};
+    first = this.at(0).start;
+    return this.generateRealEvents(moment(first).add(-1, 'month'), moment(first), callback);
+  };
+
+  return RealEventCollection;
+
+})(Backbone.Collection);
+});
+
 ;require.register("collections/scheduleitems", function(exports, require, module) {
 var ScheduleItemsCollection,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -328,6 +458,7 @@ module.exports = ScheduleItemsCollection = (function(_super) {
   __extends(ScheduleItemsCollection, _super);
 
   function ScheduleItemsCollection() {
+    this.fcEventBetween = __bind(this.fcEventBetween, this);
     this.getFCEventSource = __bind(this.getFCEventSource, this);
     return ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
   }
@@ -365,11 +496,15 @@ module.exports = ScheduleItemsCollection = (function(_super) {
     })(this);
   };
 
+<<<<<<< HEAD
   ScheduleItemsCollection.prototype.getByCalendar = function(calendarName) {
     return this.filter(function(event) {
       return event.get('tags')[0] === calendarName;
     });
   };
+=======
+  ScheduleItemsCollection.prototype.fcEventBetween = function(start, end, callback) {};
+>>>>>>> Recurring and allday events in list view, with buttons for pagination.
 
   return ScheduleItemsCollection;
 
@@ -1757,7 +1892,7 @@ module.exports = ScheduleItem = (function(_super) {
     return this.has('rrule') && this.get('rrule') !== '';
   };
 
-  ScheduleItem.prototype.getRecurrentFCEventBetween = function(start, end) {
+  ScheduleItem.prototype.generateRecurrentInstancesBetween = function(start, end, generator) {
     var eventTimezone, events, fces, fixDSTTroubles, jsDateBoundE, jsDateBoundS, jsDateEventS, mDateEventE, mDateEventS, options, rrule;
     events = [];
     if (!this.isRecurrent()) {
@@ -1793,11 +1928,17 @@ module.exports = ScheduleItem = (function(_super) {
         var fce, mDateRecurrentE, mDateRecurrentS;
         mDateRecurrentS = H.toTimezonedMoment(fixDSTTroubles(jsDateRecurrentS));
         mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
-        fce = _this._toFullCalendarEvent(mDateRecurrentS, mDateRecurrentE);
+        fce = generator(_this, mDateRecurrentS, mDateRecurrentE);
         return fce;
       };
     })(this));
     return fces;
+  };
+
+  ScheduleItem.prototype.getRecurrentFCEventBetween = function(start, end) {
+    return this.generateRecurrentInstancesBetween(start, end, function(event, start, end) {
+      return event._toFullCalendarEvent(start, end);
+    });
   };
 
   ScheduleItem.prototype.isInRange = function(start, end) {
@@ -3755,7 +3896,6 @@ module.exports = ImportView = (function(_super) {
 
 ;require.register("views/list_view", function(exports, require, module) {
 var Header, ListView, ViewCollection, defaultTimezone, helpers,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3771,7 +3911,6 @@ module.exports = ListView = (function(_super) {
   __extends(ListView, _super);
 
   function ListView() {
-    this.showbefore = __bind(this.showbefore, this);
     return ListView.__super__.constructor.apply(this, arguments);
   }
 
@@ -3784,7 +3923,12 @@ module.exports = ListView = (function(_super) {
   ListView.prototype.collectionEl = '#alarm-list';
 
   ListView.prototype.events = {
-    'click .showbefore': 'showbefore'
+    'click .showafter': function() {
+      return this.collection.loadNextPage();
+    },
+    'click .showbefore': function() {
+      return this.collection.loadPreviousPage();
+    }
   };
 
   ListView.prototype.afterRender = function() {
@@ -3804,15 +3948,9 @@ module.exports = ListView = (function(_super) {
   };
 
   ListView.prototype.appendView = function(view) {
-    var el, index, prevCid, today;
+    var el, index, prevCid;
     index = this.collection.indexOf(view.model);
     el = view.$el;
-    today = moment().startOf('day');
-    if (view.model.get('date').isBefore(today)) {
-      el.addClass('before').hide();
-    } else {
-      el.addClass('after');
-    }
     if (index === 0) {
       return this.calHeader.$el.after(el);
     } else {
@@ -3822,17 +3960,7 @@ module.exports = ListView = (function(_super) {
   };
 
   ListView.prototype.showbefore = function() {
-    var body, first;
-    first = this.$('.after').first();
-    body = $('html, body');
-    this.$('.before').slideDown({
-      progress: function() {
-        if (first.length > 0) {
-          return body.scrollTop(first.offset().top);
-        }
-      }
-    });
-    return this.$('.showbefore').fadeOut();
+    return this.collection.loadPreviousPage();
   };
 
   return ListView;
@@ -3928,6 +4056,89 @@ module.exports = BucketView = (function(_super) {
 });
 
 ;require.register("views/list_view_item", function(exports, require, module) {
+var BaseView, Event, EventItemView, PopoverEvent, colorHash,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('lib/base_view');
+
+PopoverEvent = require('./calendar_popover_event');
+
+Event = require('models/event');
+
+colorHash = require('lib/colorhash');
+
+module.exports = EventItemView = (function(_super) {
+  __extends(EventItemView, _super);
+
+  function EventItemView() {
+    return EventItemView.__super__.constructor.apply(this, arguments);
+  }
+
+  EventItemView.prototype.className = 'scheduleElement';
+
+  EventItemView.prototype.template = require('./templates/list_view_item');
+
+  EventItemView.prototype.events = {
+    'click .icon-pencil': 'editMode',
+    'click .icon-trash': 'deleteModel'
+  };
+
+  EventItemView.prototype.initialize = function() {
+    this.listenTo(this.model, 'change', this.render);
+    return this.listenTo(app.tags, 'change:visible', this.render);
+  };
+
+  EventItemView.prototype.deleteModel = function() {
+    if (!confirm(t("are you sure"))) {
+      return;
+    }
+    this.$el.spin('tiny');
+    return this.model.destroy({
+      error: function() {
+        alert('server error');
+        return this.$el.spin();
+      }
+    });
+  };
+
+  EventItemView.prototype.editMode = function() {
+    if (this.popover) {
+      this.popover.close();
+    }
+    this.popover = new PopoverEvent({
+      model: this.model,
+      target: this.$el,
+      parentView: this,
+      container: $('body')
+    });
+    return this.popover.render();
+  };
+
+  EventItemView.prototype.getUrlHash = function() {
+    return 'list';
+  };
+
+  EventItemView.prototype.getRenderData = function() {
+    var data, tag;
+    data = this.model.event.toJSON();
+    tag = this.model.getCalendar();
+    data.color = tag ? colorHash(tag) : '';
+    _.extend(data, {
+      type: 'event',
+      start: this.model.getFormattedStartDate('HH:mm'),
+      end: this.model.getFormattedEndDate('HH:mm'),
+      allDay: this.model.isAllDay()
+    });
+    return data;
+  };
+
+  return EventItemView;
+
+})(BaseView);
+});
+
+;require.register("views/list_view_item_old", function(exports, require, module) {
 var AlarmView, BaseView, Event, PopoverEvent, colorHash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4008,6 +4219,93 @@ module.exports = AlarmView = (function(_super) {
   return AlarmView;
 
 })(BaseView);
+});
+
+;require.register("views/list_view_old", function(exports, require, module) {
+var Header, ListView, ViewCollection, defaultTimezone, helpers,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ViewCollection = require('../lib/view_collection');
+
+Header = require('views/calendar_header');
+
+helpers = require('../helpers');
+
+defaultTimezone = 'timezone';
+
+module.exports = ListView = (function(_super) {
+  __extends(ListView, _super);
+
+  function ListView() {
+    this.showbefore = __bind(this.showbefore, this);
+    return ListView.__super__.constructor.apply(this, arguments);
+  }
+
+  ListView.prototype.id = 'view-container';
+
+  ListView.prototype.template = require('./templates/list_view');
+
+  ListView.prototype.itemview = require('./list_view_bucket');
+
+  ListView.prototype.collectionEl = '#alarm-list';
+
+  ListView.prototype.events = {
+    'click .showbefore': 'showbefore'
+  };
+
+  ListView.prototype.afterRender = function() {
+    this.calHeader = new Header();
+    this.$('#alarm-list').prepend(this.calHeader.render().$el);
+    this.calHeader.on('month', function() {
+      return app.router.navigate('', {
+        trigger: true
+      });
+    });
+    this.calHeader.on('week', function() {
+      return app.router.navigate('week', {
+        trigger: true
+      });
+    });
+    return ListView.__super__.afterRender.apply(this, arguments);
+  };
+
+  ListView.prototype.appendView = function(view) {
+    var el, index, prevCid, today;
+    index = this.collection.indexOf(view.model);
+    el = view.$el;
+    today = moment().startOf('day');
+    if (view.model.get('date').isBefore(today)) {
+      el.addClass('before').hide();
+    } else {
+      el.addClass('after');
+    }
+    if (index === 0) {
+      return this.calHeader.$el.after(el);
+    } else {
+      prevCid = this.collection.at(index - 1).cid;
+      return this.views[prevCid].$el.after(el);
+    }
+  };
+
+  ListView.prototype.showbefore = function() {
+    var body, first;
+    first = this.$('.after').first();
+    body = $('html, body');
+    this.$('.before').slideDown({
+      progress: function() {
+        if (first.length > 0) {
+          return body.scrollTop(first.offset().top);
+        }
+      }
+    });
+    return this.$('.showbefore').fadeOut();
+  };
+
+  return ListView;
+
+})(ViewCollection);
 });
 
 ;require.register("views/menu", function(exports, require, module) {
@@ -4457,7 +4755,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"alarm-list\" class=\"well\"></div><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a>");;return buf.join("");
+buf.push("<a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\" class=\"well\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

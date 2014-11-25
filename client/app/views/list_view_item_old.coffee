@@ -4,7 +4,7 @@ Event = require 'models/event'
 colorHash = require 'lib/colorhash'
 
 
-module.exports = class EventItemView extends BaseView
+module.exports = class AlarmView extends BaseView
 
     className: 'scheduleElement'
     template: require './templates/list_view_item'
@@ -38,8 +38,7 @@ module.exports = class EventItemView extends BaseView
     getUrlHash: -> 'list'
 
     getRenderData: ->
-        data = @model.event.toJSON()
-        # data = @model.toJSON()
+        data = @model.toJSON()
         tag = @model.getCalendar()
         data.color = if tag then colorHash(tag) else ''
         _.extend data,

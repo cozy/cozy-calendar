@@ -101,7 +101,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     # Compute list of fullcalendar event objects, that this recurring event
     # generate between start and end.
     # Expect that start and end are fullcalendar's moment objects.
-    getRecurrentFCEventBetween: (start, end) ->
+    # getRecurrentFCEventBetween: (start, end) ->
+    generateRecurrentInstancesBetween: (start, end, generator) ->
         events = []
         # skip errors
         return events if not @isRecurrent()
@@ -160,12 +161,16 @@ module.exports = class ScheduleItem extends Backbone.Model
             # Compute event.end as event.start + event.duration.
             mDateRecurrentE = mDateRecurrentS.clone()
                 .add 'seconds', mDateEventE.diff(mDateEventS, 'seconds')
-
-            fce = @_toFullCalendarEvent mDateRecurrentS, mDateRecurrentE
+            fce = generator @, mDateRecurrentS, mDateRecurrentE
             return fce
 
         return fces
 
+    getRecurrentFCEventBetween: (start, end) ->
+        @generateRecurrentInstancesBetween start, end, (event, start, end) ->
+            return event._toFullCalendarEvent start, end
+
+            
     # @TODO Deprecated and unsued ? <-- in calendar popover.. ?
     # isOneDay: ->
     #     # 20140904 TODO !
