@@ -60,6 +60,7 @@ module.exports = class ComboBox extends BaseView
         value = ui?.item?.value or @value()
         @badge = @makeBadge colorhash value
         @$el.before @badge
+        @trigger 'change', value
         return true
 
     renderItem: (ul, item) =>

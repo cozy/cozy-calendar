@@ -1601,6 +1601,13 @@ module.exports = ScheduleItem = (function(_super) {
     return (_ref = this.get('tags')) != null ? _ref[0] : void 0;
   };
 
+  ScheduleItem.prototype.setCalendar = function(cal) {
+    var tags;
+    tags = this.get('tags' || []);
+    tags[0] = cal;
+    return this.set('tags', tags);
+  };
+
   ScheduleItem.prototype.getDefaultColor = function() {
     return 'grey';
   };
@@ -2130,7 +2137,10 @@ module.exports = EventPopOver = (function(_super) {
     'changeTime.timepicker #input-start': 'onSetStart',
     'changeTime.timepicker #input-end': 'onSetEnd',
     'input #input-diff': 'onSetDiff',
-    'input #input-desc': 'onSetDesc'
+    'input #input-desc': 'onSetDesc',
+    'input #input-place': function(ev) {
+      return this.model.set('place', ev.target.value);
+    }
   };
 
   EventPopOver.prototype.initialize = function(options) {
@@ -2195,6 +2205,11 @@ module.exports = EventPopOver = (function(_super) {
       small: true,
       source: app.tags.calendars()
     });
+    this.calendar.on('change', (function(_this) {
+      return function(value) {
+        return _this.model.setCalendar(value);
+      };
+    })(this));
     this.updateMapLink();
     return this.refresh();
   };
@@ -2243,6 +2258,7 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.onAdvancedClicked = function(event) {
     var modal;
     if (this.model.isNew()) {
+      console.log(this.model.toJSON());
       modal = new EventModal({
         model: this.model,
         backurl: window.location.hash
@@ -4665,6 +4681,7 @@ module.exports = ComboBox = (function(_super) {
     value = (ui != null ? (_ref1 = ui.item) != null ? _ref1.value : void 0 : void 0) || this.value();
     this.badge = this.makeBadge(colorhash(value));
     this.$el.before(this.badge);
+    this.trigger('change', value);
     return true;
   };
 
