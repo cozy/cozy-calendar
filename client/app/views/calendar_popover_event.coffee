@@ -26,6 +26,7 @@ module.exports = class EventPopOver extends PopoverView
         'changeTime.timepicker #input-end': 'onSetEnd'
         'input #input-diff': 'onSetDiff'
         'input #input-desc': 'onSetDesc'
+        'input #input-place': (ev) -> @model.set 'place', ev.target.value
 
     initialize: (options) ->
         if not @model
@@ -73,6 +74,8 @@ module.exports = class EventPopOver extends PopoverView
             small: true
             source: app.tags.calendars()
 
+        @calendar.on 'change', (value) => @model.setCalendar value
+            
         @updateMapLink()
         @refresh()
 
@@ -109,6 +112,7 @@ module.exports = class EventPopOver extends PopoverView
 
     onAdvancedClicked: (event) =>
         if @model.isNew()
+            console.log @model.toJSON()
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash

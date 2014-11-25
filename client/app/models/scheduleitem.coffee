@@ -13,6 +13,12 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getCalendar: -> @get('tags')?[0]
 
+    setCalendar: (cal)-> 
+        tags = @get 'tags' or []
+        tags[0] = cal
+        @set 'tags', tags
+
+
     getDefaultColor: -> 'grey'
     getColor: ->
         tag = @getCalendar()
