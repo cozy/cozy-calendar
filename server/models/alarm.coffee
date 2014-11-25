@@ -68,10 +68,10 @@ Alarm::migrateDoctype = ->
         place: ''
         rrule: ''
         tags: @tags
-        alarms:
-            id: 1
-            trigg: '-PT10M'
-            action: 'DISPLAY'
+        alarms: [
+            {id: 1, trigg: '-PT10M', action: 'DISPLAY'}
+        ]
+        attendees: []
         created: moment().tz('UTC').toISOString()
         lastModification: moment().tz('UTC').toISOString()
 
