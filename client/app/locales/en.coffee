@@ -75,6 +75,7 @@ module.exports =
     "occurences"                        : "occurences"
     "every"                             : "Every"
     'minutes'                           : 'minutes'
+    'minute'                            : 'minute'
     'minute '                           : 'minute'
     'hours'                             : 'hours'
     'hour'                              : 'hour'
