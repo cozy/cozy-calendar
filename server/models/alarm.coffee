@@ -1,5 +1,6 @@
 americano = require 'americano-cozy'
 moment = require 'moment-timezone'
+Event = require './event'
 log = require('printit')
     prefix: 'alarm:model'
 
