@@ -38,6 +38,9 @@ module.exports = class ListView extends ViewCollection
         first = @$('.after').first()
         body = $ 'html, body'
         @$('.before').slideDown
-            progress: -> body.scrollTop first.offset().top
+            progress: ->
+                # only scroll to top if it's necessary
+                if first.length > 0
+                    body.scrollTop first.offset().top
 
         @$('.showbefore').fadeOut()
