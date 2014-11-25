@@ -99,11 +99,12 @@ Alarm.prototype.getAttendeesEmail = function() {
 };
 
 Alarm.prototype.migrateDoctype = function() {
-  var body, end;
-  end = moment(this.start).format('YYYY-MM-DD');
+  var body, date, timezone;
+  timezone = this.timezone || 'UTC';
+  date = moment.tz(this.trigg, timezone).format('YYYY-MM-DD');
   body = {
-    start: this.start,
-    end: end,
+    start: date,
+    end: date,
     description: this.description,
     place: '',
     rrule: '',
