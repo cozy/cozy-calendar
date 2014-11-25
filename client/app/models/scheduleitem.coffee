@@ -51,6 +51,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             s = H.momentToDateString(m)
 
         else if @isRecurrent()
+            m = moment(m).tz @get 'timezone'
             s = H.momentToAmbiguousString(m)
 
         else

@@ -1651,6 +1651,7 @@ module.exports = ScheduleItem = (function(_super) {
     if (this.isAllDay()) {
       s = H.momentToDateString(m);
     } else if (this.isRecurrent()) {
+      m = moment(m).tz(this.get('timezone'));
       s = H.momentToAmbiguousString(m);
     } else {
       s = m.toISOString();
@@ -2893,8 +2894,8 @@ module.exports = EventModal = (function(_super) {
       dtFormat = this.inputDateFormat;
       _.extend(options, {
         format: this.inputDateDTPickerFormat,
-        startView: 2,
-        minView: 2
+        minView: 2,
+        viewSelect: 4
       });
     } else {
       dtFormat = this.inputDateTimeFormat;
@@ -3266,8 +3267,10 @@ module.exports = RRuleView = (function(_super) {
     this.$('#rrule').hide();
     this.updateHelp();
     return this.$('#rrule-until').attr('type', 'text').datetimepicker({
+      autoclose: true,
       format: this.inputDateDTPickerFormat,
-      minView: 2
+      minView: 2,
+      viewSelect: 4
     }).on('changeDate', this.updateHelp);
   };
 
