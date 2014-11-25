@@ -59,8 +59,9 @@ Alarm::getAttendeesEmail = ->
 # Migrate from v1.0.4 to next-gen doctypes.
 # Use date format as key to detect doctype version.
 Alarm::migrateDoctype = ->
+    timezone = @timezone or 'UTC'
+    date = moment.tz(@trigg, timezone).format 'YYYY-MM-DD'
 
-    date = moment(@start).format 'YYYY-MM-DD'
     body =
         start: date
         end: date
@@ -78,10 +79,10 @@ Alarm::migrateDoctype = ->
     Event.create body, => @destroy()
 
 Alarm.migrateAll = ->
-    Alarm.all {}, (err, alarms) ->
-        if err
-            console.log err
-            return
+        Alarm.all {}, (err, alarms) ->
+            if err
+                console.log err
+                return
 
-        for alarm in alarms
-            alarm.migrateDoctype()
+            for alarm in alarms
+                alarm.migrateDoctype()
