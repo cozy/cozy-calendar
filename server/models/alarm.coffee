@@ -60,10 +60,10 @@ Alarm::getAttendeesEmail = ->
 # Use date format as key to detect doctype version.
 Alarm::migrateDoctype = ->
 
-    end = moment(@start).format 'YYYY-MM-DD'
+    date = moment(@start).format 'YYYY-MM-DD'
     body =
-        start: @start
-        end: end
+        start: date
+        end: date
         description: @description
         place: ''
         rrule: ''
