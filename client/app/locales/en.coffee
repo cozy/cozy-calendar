@@ -9,6 +9,7 @@ module.exports =
     "invite"                            : "Invite"
     "close"                             : "Close"
     "delete"                            : "Delete"
+    "rename"                            : "Rename"
     "Place"                             : "Place"
     'all day'                           : 'all day'
     'All day'                           : 'All day'
@@ -54,6 +55,7 @@ module.exports =
     "display previous events"           : "Display previous events"
     "event"                             : "Event"
     "are you sure"                      : "Are you sure ?"
+    "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure ?"
     "advanced"                          : "More details"
     "enter email"                       : "Enter email"
     "ON"                                : "on"
