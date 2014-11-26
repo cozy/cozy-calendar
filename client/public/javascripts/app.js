@@ -365,6 +365,12 @@ module.exports = ScheduleItemsCollection = (function(_super) {
     })(this);
   };
 
+  ScheduleItemsCollection.prototype.getByCalendar = function(calendarName) {
+    return this.filter(function(event) {
+      return event.get('tags')[0] === calendarName;
+    });
+  };
+
   return ScheduleItemsCollection;
 
 })(Backbone.Collection);
@@ -450,6 +456,36 @@ module.exports = Tags = (function(_super) {
 
   Tags.prototype.onBaseCollectionRemove = function(model) {
     return this.resetFromBase();
+  };
+
+  Tags.prototype.remove = function(calendarName, callback) {
+    var eventsToRemove;
+    eventsToRemove = this.eventCollection.getByCalendar(calendarName);
+    return async.eachLimit(eventsToRemove, 5, function(event, done) {
+      return event.destroy({
+        wait: true,
+        error: done.bind(null, t('server error occured')),
+        success: done
+      });
+    }, callback);
+  };
+
+  Tags.prototype.rename = function(oldName, newName, callback) {
+    var eventsToChange;
+    eventsToChange = this.eventCollection.getByCalendar(oldName);
+    return async.eachLimit(eventsToChange, 5, function(event, done) {
+      var newTags, tags;
+      tags = event.get('tags');
+      newTags = tags != null ? [].concat(tags) : [];
+      newTags[0] = newName;
+      return event.save({
+        tags: newTags
+      }, {
+        wait: true,
+        error: done.bind(null, t('server error occured')),
+        success: done
+      });
+    }, callback);
   };
 
   Tags.prototype.parse = function(raw) {
@@ -1102,6 +1138,7 @@ module.exports = {
   "invite": "Invite",
   "close": "Close",
   "delete": "Delete",
+  "rename": "Rename",
   "Place": "Place",
   'all day': 'all day',
   'All day': 'All day',
@@ -1147,6 +1184,7 @@ module.exports = {
   "display previous events": "Display previous events",
   "event": "Event",
   "are you sure": "Are you sure ?",
+  "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure ?",
   "advanced": "More details",
   "enter email": "Enter email",
   "ON": "on",
@@ -1269,6 +1307,7 @@ module.exports = {
   "invite": "Inviter",
   "close": "Fermer",
   "delete": "Supprimer",
+  "rename": "Renommer",
   "Place": "Lieu",
   'all day': 'journée entière',
   'All day': 'Journée entière',
@@ -1313,6 +1352,7 @@ module.exports = {
   "BOTH": "E-mail & Notification",
   "display previous events": "Montrer les évènements précédents",
   "are you sure": "Êtes-vous sûr(e) ?",
+  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
   "advanced": "Détails",
   "enter email": "Entrer l'adresse email",
   "ON": "activée",
@@ -1603,10 +1643,13 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.setCalendar = function(cal) {
-    var tags;
-    tags = this.get('tags' || []);
+    var oldTags, tags;
+    oldTags = this.get('tags');
+    tags = oldTags != null ? [].concat(oldTags) : [];
     tags[0] = cal;
-    return this.set('tags', tags);
+    return this.set({
+      tags: tags
+    });
   };
 
   ScheduleItem.prototype.getDefaultColor = function() {
@@ -2109,7 +2152,6 @@ module.exports = EventPopOver = (function(_super) {
     this.refresh = __bind(this.refresh, this);
     this.updateMapLink = __bind(this.updateMapLink, this);
     this.selfclose = __bind(this.selfclose, this);
-    this.onAddClicked = __bind(this.onAddClicked, this);
     this.onRemoveClicked = __bind(this.onRemoveClicked, this);
     this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
@@ -2206,7 +2248,7 @@ module.exports = EventPopOver = (function(_super) {
       small: true,
       source: app.tags.calendars()
     });
-    this.calendar.on('change', (function(_this) {
+    this.calendar.on('edition-complete', (function(_this) {
       return function(value) {
         return _this.model.setCalendar(value);
       };
@@ -2218,9 +2260,9 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.getTitle = function() {
     var title;
     if (this.model.isNew()) {
-      title = this.type + ' creation';
+      title = "" + this.type + " creation";
     } else {
-      title = 'edit ' + this.type;
+      title = "edit " + this.type;
     }
     return t(title);
   };
@@ -2259,7 +2301,6 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.onAdvancedClicked = function(event) {
     var modal;
     if (this.model.isNew()) {
-      console.log(this.model.toJSON());
       modal = new EventModal({
         model: this.model,
         backurl: window.location.hash
@@ -2275,6 +2316,7 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.onKeyUp = function(event) {
     if (event.keyCode === 13 || event.which === 13) {
+      this.calendar.onBlur();
       return this.addButton.click();
     } else if (event.keyCode === 27) {
       return this.selfclose();
@@ -4044,7 +4086,9 @@ module.exports = MenuItemView = (function(_super) {
   MenuItemView.prototype.template = require('./templates/menu_item');
 
   MenuItemView.prototype.events = {
-    'click': 'toggleVisible'
+    'click > span': 'toggleVisible',
+    'click .calendar-remove': 'onRemoveCalendar',
+    'click .calendar-rename': 'onRenameCalendar'
   };
 
   MenuItemView.prototype.toggleVisible = function() {
@@ -4057,10 +4101,90 @@ module.exports = MenuItemView = (function(_super) {
 
   MenuItemView.prototype.getRenderData = function() {
     return {
-      label: this.model.get('label'),
-      color: colorhash(this.model.get('label')),
-      visible: this.model.get('visible')
+      label: this.model.get('label')
     };
+  };
+
+  MenuItemView.prototype.afterRender = function() {
+    return this.buildBadge(this.model.get('label'));
+  };
+
+  MenuItemView.prototype.onRenameCalendar = function() {
+    var calendarName, input, rawTextElement, restore, template;
+    calendarName = this.model.get('label');
+    template = "<input type=\"text\" class=\"calendar-name\" value=\"" + calendarName + "\"/>";
+    input = $(template);
+    rawTextElement = this.$('.calendar-name').detach();
+    input.insertAfter(this.$('.badge'));
+    this.$('.dropdown-toggle').hide();
+    input.focus();
+    input[0].setSelectionRange(0, calendarName.length);
+    input.keyup((function(_this) {
+      return function(event) {
+        var key;
+        key = event.keyCode || event.charCode;
+        if (key === 13) {
+          _this.startSpinner();
+          input.off('keyup');
+          return _this.model.collection.rename(calendarName, input.val(), function() {
+            return _this.stopSpinner();
+          });
+        } else {
+          return _this.buildBadge(input.val());
+        }
+      };
+    })(this));
+    return $(document).keyup(restore = (function(_this) {
+      return function(event) {
+        var key;
+        key = event.keyCode || event.charCode;
+        if (key === 27) {
+          $(document).off('keyup', 'document', restore);
+          input.off('keyup');
+          input.remove();
+          rawTextElement.insertAfter(_this.$('.badge'));
+          _this.buildBadge(calendarName);
+          return _this.$('.dropdown-toggle').show();
+        }
+      };
+    })(this));
+  };
+
+  MenuItemView.prototype.onRemoveCalendar = function() {
+    var calendarName, message;
+    calendarName = this.model.get('label');
+    message = t('confirm delete calendar', {
+      calendarName: calendarName
+    });
+    if (confirm(message)) {
+      this.startSpinner();
+      return this.model.collection.remove(calendarName, (function(_this) {
+        return function() {
+          return _this.stopSpinner();
+        };
+      })(this));
+    }
+  };
+
+  MenuItemView.prototype.buildBadge = function(calendarName) {
+    var backColor, borderColor, color, styles, visible;
+    color = colorhash(calendarName);
+    visible = this.model.get('visible');
+    backColor = visible ? color : "transparent";
+    borderColor = visible ? "transparent" : color;
+    styles = {
+      'background-color': backColor,
+      'border': "1px solid " + borderColor
+    };
+    return this.$('.badge').css(styles);
+  };
+
+  MenuItemView.prototype.startSpinner = function() {
+    return this.$('.spinHolder').spin('tiny', '#000');
+  };
+
+  MenuItemView.prototype.stopSpinner = function() {
+    return this.$('.spinHolder').spin(false);
   };
 
   return MenuItemView;
@@ -4416,7 +4540,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<span" + (jade.attr("style", "background-color:" + back + "; border: 1px solid "+border+";", true, false)) + " class=\"badge true\">&nbsp;</span><span>" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span>");;return buf.join("");
+buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -4667,8 +4791,9 @@ module.exports = ComboBox = (function(_super) {
 
   ComboBox.prototype.onBlur = function() {
     if (!this.menuOpen) {
-      return this.$el.removeClass('expanded');
+      this.$el.removeClass('expanded');
     }
+    return this.trigger('edition-complete', this.value());
   };
 
   ComboBox.prototype.onSelect = function(ev, ui) {
