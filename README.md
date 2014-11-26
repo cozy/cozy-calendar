@@ -6,7 +6,7 @@ Cozy Calendar makes your event management easy. Main features are:
 * Event tagging
 * Event sharing (via email)
 * ICal import
-* CalDAV sync (require [Cozy Webdav](https://github.com/mycozycloud/cozy-webdav))
+* CalDAV sync (require [Cozy Sync](https://github.com/mycozycloud/cozy-sync))
 
 ## Install
 
