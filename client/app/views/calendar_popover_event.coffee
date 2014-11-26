@@ -44,8 +44,8 @@ module.exports = class EventPopOver extends PopoverView
 
 
     afterRender: ->
-        @addButton = @$('.btn.add')
-        @removeButton = @$('.remove')
+        @addButton = @$ '.btn.add'
+        @removeButton = @$ '.remove'
 
         @removeButton.hide() if @model.isNew()
         @$('input[type="time"]').attr('type', 'text').timepicker
@@ -70,23 +70,23 @@ module.exports = class EventPopOver extends PopoverView
                     @$('#input-desc').focus()
 
         @calendar = new ComboBox
-            el: @$('#calendarcombo')
+            el: @$ '#calendarcombo'
             small: true
             source: app.tags.calendars()
 
-        @calendar.on 'change', (value) => @model.setCalendar value
-            
+        @calendar.on 'edition-complete', (value) => @model.setCalendar value
+
         @updateMapLink()
         @refresh()
 
 
     getTitle: ->
         if @model.isNew()
-            title = @type + ' creation'
+            title = "#{@type} creation"
         else
-            title = 'edit ' + @type
+            title = "edit #{@type}"
 
-        return t(title)
+        return t title
 
     getRenderData: ->
         data =
@@ -107,12 +107,10 @@ module.exports = class EventPopOver extends PopoverView
         diff = parseInt ev.target.value
         @model.setDiff diff
 
-
     onSetDesc: (ev) -> @model.set 'description', ev.target.value
 
     onAdvancedClicked: (event) =>
         if @model.isNew()
-            console.log @model.toJSON()
             modal = new EventModal
                 model: @model
                 backurl: window.location.hash
@@ -125,6 +123,8 @@ module.exports = class EventPopOver extends PopoverView
 
     onKeyUp: (event) -> #
         if event.keyCode is 13 or event.which is 13 #ENTER
+            # Forces the combobox to blur to save the calendar if it has changed
+            @calendar.onBlur()
             @addButton.click()
         else if event.keyCode is 27 # ESC
             @selfclose()
@@ -154,7 +154,7 @@ module.exports = class EventPopOver extends PopoverView
         else @removeButton.spin()
 
 
-    onAddClicked: () =>
+    onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
         @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @addButton.spin 'small'

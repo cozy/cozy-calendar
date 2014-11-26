@@ -25,16 +25,16 @@ module.exports = class Tags extends Backbone.Collection
 
     onBaseCollectionAdd: (model) ->
         [calendar, tags...] = model.get 'tags'
-        @add type: 'calendar', label:calendar
-        @add type: 'tag', label:tag for tag in tags
+        @add type: 'calendar', label: calendar
+        @add type: 'tag', label: tag for tag in tags
 
     onBaseCollectionRemove: (model) ->
         @resetFromBase()
 
     parse: (raw) ->
         out = []
-        out.push type:'calendar', label:tag for tag in raw.calendars
-        out.push type:'tag',      label:tag for tag in raw.tags
+        out.push type: 'calendar', label: tag for tag in raw.calendars
+        out.push type: 'tag',      label: tag for tag in raw.tags
         return out
 
     stringify = (tag) -> tag.toString()

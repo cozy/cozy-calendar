@@ -50,6 +50,7 @@ module.exports = class ComboBox extends BaseView
 
     onBlur: =>
         @$el.removeClass 'expanded' unless @menuOpen
+        @trigger 'edition-complete', @value()
 
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
