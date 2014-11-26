@@ -8,7 +8,6 @@ module.exports = class ScheduleItem extends Backbone.Model
     endDateField: false
 
     initialize: ->
-        # console.log "initialize"
         @set 'tags', ['my calendar'] unless @get('tags')?.length
 
     getCalendar: -> @get('tags')?[0]

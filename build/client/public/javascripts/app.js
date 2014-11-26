@@ -2390,7 +2390,7 @@ module.exports = EventPopOver = (function(_super) {
       small: true,
       source: app.tags.calendars()
     });
-    this.calendar.on('edition-complete', (function(_this) {
+    this.calendar.on('change', (function(_this) {
       return function(value) {
         return _this.model.setCalendar(value);
       };

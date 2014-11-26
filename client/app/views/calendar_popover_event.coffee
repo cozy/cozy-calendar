@@ -74,7 +74,7 @@ module.exports = class EventPopOver extends PopoverView
             small: true
             source: app.tags.calendars()
 
-        @calendar.on 'edition-complete', (value) => @model.setCalendar value
+        @calendar.on 'change', (value) => @model.setCalendar value
 
         @updateMapLink()
         @refresh()
