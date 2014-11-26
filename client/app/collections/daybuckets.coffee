@@ -62,7 +62,6 @@ module.exports = class DayBucketCollection extends Backbone.Collection
         bucket.items.remove model
         @remove bucket if bucket.items.length is 0
 
+    loadNextPage: (callback) -> @eventCollection.loadNextPage callback
 
-    loadNextPage: (callback) -> @eventCollection.loadNextPage()
-
-    loadPreviousPage: (callback) -> @eventCollection.loadPreviousPage()
+    loadPreviousPage: (callback) -> @eventCollection.loadPreviousPage callback

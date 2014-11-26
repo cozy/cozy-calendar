@@ -290,11 +290,11 @@ module.exports = DayBucketCollection = (function(_super) {
   };
 
   DayBucketCollection.prototype.loadNextPage = function(callback) {
-    return this.eventCollection.loadNextPage();
+    return this.eventCollection.loadNextPage(callback);
   };
 
   DayBucketCollection.prototype.loadPreviousPage = function(callback) {
-    return this.eventCollection.loadPreviousPage();
+    return this.eventCollection.loadPreviousPage(callback);
   };
 
   return DayBucketCollection;
@@ -408,8 +408,9 @@ module.exports = RealEventCollection = (function(_super) {
     return this.generateRealEvents(first, last);
   };
 
-  RealEventCollection.prototype.generateRealEvents = function(start, end) {
+  RealEventCollection.prototype.generateRealEvents = function(start, end, callback) {
     var eventsInRange;
+    callback = callback || function() {};
     eventsInRange = [];
     this.baseCollection.each(function(item) {
       var duration, evs, itemEnd, itemStart;
@@ -426,7 +427,8 @@ module.exports = RealEventCollection = (function(_super) {
       }
     });
     console.log(eventsInRange);
-    return this.add(eventsInRange);
+    this.add(eventsInRange);
+    return callback(eventsInRange);
   };
 
   RealEventCollection.prototype.loadNextPage = function(callback) {
@@ -458,7 +460,6 @@ module.exports = ScheduleItemsCollection = (function(_super) {
   __extends(ScheduleItemsCollection, _super);
 
   function ScheduleItemsCollection() {
-    this.fcEventBetween = __bind(this.fcEventBetween, this);
     this.getFCEventSource = __bind(this.getFCEventSource, this);
     return ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
   }
@@ -496,15 +497,11 @@ module.exports = ScheduleItemsCollection = (function(_super) {
     })(this);
   };
 
-<<<<<<< HEAD
   ScheduleItemsCollection.prototype.getByCalendar = function(calendarName) {
     return this.filter(function(event) {
       return event.get('tags')[0] === calendarName;
     });
   };
-=======
-  ScheduleItemsCollection.prototype.fcEventBetween = function(start, end, callback) {};
->>>>>>> Recurring and allday events in list view, with buttons for pagination.
 
   return ScheduleItemsCollection;
 
@@ -3896,6 +3893,7 @@ module.exports = ImportView = (function(_super) {
 
 ;require.register("views/list_view", function(exports, require, module) {
 var Header, ListView, ViewCollection, defaultTimezone, helpers,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3911,10 +3909,13 @@ module.exports = ListView = (function(_super) {
   __extends(ListView, _super);
 
   function ListView() {
+    this.checkScroll = __bind(this.checkScroll, this);
     return ListView.__super__.constructor.apply(this, arguments);
   }
 
   ListView.prototype.id = 'view-container';
+
+  ListView.prototype.className = 'well';
 
   ListView.prototype.template = require('./templates/list_view');
 
@@ -3923,17 +3924,13 @@ module.exports = ListView = (function(_super) {
   ListView.prototype.collectionEl = '#alarm-list';
 
   ListView.prototype.events = {
-    'click .showafter': function() {
-      return this.collection.loadNextPage();
-    },
-    'click .showbefore': function() {
-      return this.collection.loadPreviousPage();
-    }
+    'click .showafter': 'loadAfter',
+    'click .showbefore': 'loadBefore'
   };
 
   ListView.prototype.afterRender = function() {
     this.calHeader = new Header();
-    this.$('#alarm-list').prepend(this.calHeader.render().$el);
+    this.$el.prepend(this.calHeader.render().$el);
     this.calHeader.on('month', function() {
       return app.router.navigate('', {
         trigger: true
@@ -3944,6 +3941,7 @@ module.exports = ListView = (function(_super) {
         trigger: true
       });
     });
+    this.$('#list-container').scroll(this.checkScroll);
     return ListView.__super__.afterRender.apply(this, arguments);
   };
 
@@ -3952,15 +3950,41 @@ module.exports = ListView = (function(_super) {
     index = this.collection.indexOf(view.model);
     el = view.$el;
     if (index === 0) {
-      return this.calHeader.$el.after(el);
+      return this.$(this.collectionEl).prepend(el);
     } else {
       prevCid = this.collection.at(index - 1).cid;
       return this.views[prevCid].$el.after(el);
     }
   };
 
-  ListView.prototype.showbefore = function() {
-    return this.collection.loadPreviousPage();
+  ListView.prototype.checkScroll = function() {
+    var triggerPoint;
+    triggerPoint = 100;
+    if (this.el.scrollTop + this.el.clientHeight + triggerPoint > this.el.scrollHeight) {
+      return this.loadAfter();
+    }
+  };
+
+  ListView.prototype.loadBefore = function() {
+    if (!this.isLoading) {
+      this.isLoading = true;
+      return this.collection.loadPreviousPage((function(_this) {
+        return function() {
+          return _this.isLoading = false;
+        };
+      })(this));
+    }
+  };
+
+  ListView.prototype.loadAfter = function() {
+    if (!this.isLoading) {
+      this.isLoading = true;
+      return this.collection.loadNextPage((function(_this) {
+        return function() {
+          return _this.isLoading = false;
+        };
+      })(this));
+    }
   };
 
   return ListView;
@@ -4755,7 +4779,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\" class=\"well\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a>");;return buf.join("");
+buf.push("<div id=\"list-container\"><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

@@ -10802,8 +10802,12 @@ h3 {
 .mb2 {
   margin-bottom: 20px;
 }
+.main-container {
+  height: 100%;
+}
 #view-container {
   border-bottom: 0;
+  height: 100%;
 }
 .addform #date-control {
   display: inline-block;
@@ -10821,6 +10825,10 @@ h3 {
 }
 #action {
   width: 110px;
+}
+#list-container {
+  overflow-y: auto;
+  height: 100%;
 }
 #alarm-list {
   width: auto;

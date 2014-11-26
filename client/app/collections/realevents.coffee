@@ -59,7 +59,8 @@ module.exports = class RealEventCollection extends Backbone.Collection
         @reset []
         @generateRealEvents first, last
 
-    generateRealEvents: (start, end) =>
+    generateRealEvents: (start, end, callback) =>
+        callback = callback || ->
         eventsInRange = []
         @baseCollection.each (item) ->
             itemStart = item.getStartDateObject()
@@ -79,6 +80,7 @@ module.exports = class RealEventCollection extends Backbone.Collection
 
         console.log eventsInRange
         @add eventsInRange
+        callback eventsInRange
 
     loadNextPage: (callback) ->
         callback = callback || ->

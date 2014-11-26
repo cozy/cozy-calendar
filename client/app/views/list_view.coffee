@@ -7,18 +7,22 @@ defaultTimezone = 'timezone'
 module.exports = class ListView extends ViewCollection
 
     id: 'view-container'
+    className: 'well'
     template: require './templates/list_view'
     itemview: require './list_view_bucket'
     collectionEl: '#alarm-list'
     events:
-        'click .showafter': -> @collection.loadNextPage() # 'showbefore'
-        'click .showbefore': -> @collection.loadPreviousPage()
+        'click .showafter': 'loadAfter'
+        'click .showbefore': 'loadBefore'
+        
 
     afterRender: ->
         @calHeader = new Header()
-        @$('#alarm-list').prepend @calHeader.render().$el
+        @$el.prepend @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
+        
+        @$('#list-container').scroll @checkScroll
         super
 
     appendView: (view) ->
@@ -31,23 +35,24 @@ module.exports = class ListView extends ViewCollection
         # else
         #     el.addClass('after')
 
-        if index is 0 then @calHeader.$el.after el
+        if index is 0 then @$(@collectionEl).prepend el
         else
             prevCid = @collection.at(index-1).cid
             @views[prevCid].$el.after el
 
+    checkScroll: =>
+        triggerPoint = 100 # 100px from the bottom
+        if @el.scrollTop + @el.clientHeight + triggerPoint > @el.scrollHeight
+            @loadAfter()
 
-    showbefore: ->
-        # TODO : test, show after...
-        # @collection.getNextPage()
-        @collection.loadPreviousPage()
-    # showbefore: =>
-    #     first = @$('.after').first()
-    #     body = $ 'html, body'
-    #     @$('.before').slideDown
-    #         progress: ->
-    #             # only scroll to top if it's necessary
-    #             if first.length > 0
-    #                 body.scrollTop first.offset().top
+    loadBefore: ->
+        if not @isLoading
+            @isLoading = true
+            @collection.loadPreviousPage =>
+                @isLoading = false
 
-    #     @$('.showbefore').fadeOut()
+    loadAfter: ->
+        if not @isLoading
+            @isLoading = true
+            @collection.loadNextPage =>
+                @isLoading = false
