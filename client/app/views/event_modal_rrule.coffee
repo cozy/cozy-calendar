@@ -22,6 +22,7 @@ module.exports = class RRuleView extends BaseView
             format: @inputDateDTPickerFormat
             minView: 2
             viewSelect: 4 
+            keyboardNavigation: false
             # datepicker only
         ).on 'changeDate', @updateHelp
 

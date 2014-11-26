@@ -91,6 +91,9 @@ module.exports = class EventModal extends ViewCollection
             autoclose: true
             pickerPosition: 'bottom-right'
 
+            keyboardNavigation: false
+            
+
         if @$('#allday').is ':checked'
             dtFormat = @inputDateFormat
             _.extend options,

@@ -51,11 +51,11 @@ form.form-inline#rrule
         .control-group
             label.radio
                 input(type="radio", name="endMode", value='count', checked=endModeSelected('count'))
-                label(for="rrule-count")= t('after')
+                label(for="count")= t('after')
                 input#rrule-count.input-mini(type="number", min=0, value=rrule.count)
                 label(for="rrule-count")=t('occurences')
         .control-group
             label.radio
                 input(type="radio", name="endMode", value='until', checked=endModeSelected('until'))
-                label(for="rrule-count")= t('until')
+                label(for="until")= t('until')
                 input#rrule-until(type="date", value=rrule.until)
