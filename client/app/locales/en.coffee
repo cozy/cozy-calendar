@@ -53,6 +53,7 @@ module.exports =
     "EMAIL"                             : "E-mail"
     "BOTH"                              : "E-mail & Notification"
     "display previous events"           : "Display previous events"
+    "display next events"               : "Display next events"
     "event"                             : "Event"
     "are you sure"                      : "Are you sure ?"
     "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure ?"

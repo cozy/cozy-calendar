@@ -7,7 +7,6 @@ defaultTimezone = 'timezone'
 module.exports = class ListView extends ViewCollection
 
     id: 'view-container'
-    className: 'well'
     template: require './templates/list_view'
     itemview: require './list_view_bucket'
     collectionEl: '#alarm-list'
@@ -18,7 +17,8 @@ module.exports = class ListView extends ViewCollection
 
     afterRender: ->
         @calHeader = new Header()
-        @$el.prepend @calHeader.render().$el
+        #@$el.prepend @calHeader.render().$el
+        @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
         

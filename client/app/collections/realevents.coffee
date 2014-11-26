@@ -30,45 +30,37 @@ RealEvent  = class RealEvent extends Backbone.Model
     getFormattedEndDate: (format) ->
         return @end.format format
 
-        
 
 module.exports = class RealEventCollection extends Backbone.Collection
     model = RealEvent
     comparator: (re1, re2) ->
         return re1.start.diff(re2.start)
 
-    # baseCollection: new ScheduleItems.
     initialize: ->
 
         @baseCollection = app.events
-        # @generateRealEvents moment().add(-1, 'week'), moment().add(1, 'week')
+        @tagsCollection = app.tags
 
         @listenTo @baseCollection, 'add', @resetFromBase
         @listenTo @baseCollection, 'change:start', @resetFromBase
         @listenTo @baseCollection, 'remove', @resetFromBase
         @listenTo @baseCollection, 'reset', @resetFromBase
 
-        #@listenTo @tagsCollection, 'change', @resetFromBase
-
-        #@generateRealEvents moment().add(-1, 'week'), moment().add(1, 'week')
-
+        @listenTo @tagsCollection, 'change', @resetFromBase
 
     resetFromBase: ->
-        first = moment @at(0).start
-        last = moment @at(@length - 1).start
+        #first = moment @at(0).start
+        #last = moment @at(@length - 1).start
         @reset []
-        @generateRealEvents first, last
+        #@generateRealEvents first, last
 
     generateRealEvents: (start, end, callback) =>
         callback = callback || ->
         eventsInRange = []
-        @baseCollection.each (item) ->
-            itemStart = item.getStartDateObject()
-            itemEnd = item.getEndDateObject()
-            duration = itemEnd - itemStart
+        @baseCollection.each (item) =>
 
-            # tag = tags.findWhere label: item.getCalendar()
-            # return null if tag and tag.get('visible') is false
+            tag = @tagsCollection.findWhere label: item.getCalendar()
+            return null if tag and tag.get('visible') is false
 
             if item.isRecurrent()
                 evs = item.generateRecurrentInstancesBetween start, end, (event, s, e) ->
@@ -78,20 +70,16 @@ module.exports = class RealEventCollection extends Backbone.Collection
             else if item.isInRange start, end
                 eventsInRange.push new RealEvent item
 
-        console.log eventsInRange
         @add eventsInRange
         callback eventsInRange
 
     loadNextPage: (callback) ->
         callback = callback || ->
-        last = @at(@length - 1).start
+        last = @at(@length - 1)?.start || moment()
         @generateRealEvents moment(last), moment(last).add(1, 'month'), callback
 
     loadPreviousPage: (callback) ->
         callback = callback || ->
-        first = @at(0).start
+        first = @at(0)?.start || moment()
         @generateRealEvents moment(first).add(-1, 'month'), 
             moment(first), callback
-
-
-

@@ -1,13 +1,11 @@
-# ScheduleItemsCollection = require './scheduleitems'
 RealEventCollection = require './realevents'
 
 DayBucket = class DayBucket extends Backbone.Model
     constructor: (model) ->
         super
             id: model.getDateHash()
-            date: model.start.startOf 'day'
+            date: moment(model.start).startOf 'day'
     initialize: ->
-        # @items = new ScheduleItemsCollection()
         @items = new RealEventCollection()
 
 # DayBucket Collection
@@ -18,7 +16,6 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     comparator: 'date'
 
     initialize: ->
-        # @eventCollection = app.events
         @eventCollection = new RealEventCollection()
         
         @eventCollection.generateRealEvents moment().add(-1, 'week'), moment().add(1, 'week')

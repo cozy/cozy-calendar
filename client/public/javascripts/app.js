@@ -204,7 +204,7 @@ DayBucket = DayBucket = (function(_super) {
   function DayBucket(model) {
     DayBucket.__super__.constructor.call(this, {
       id: model.getDateHash(),
-      date: model.start.startOf('day')
+      date: moment(model.start).startOf('day')
     });
   }
 
@@ -394,54 +394,56 @@ module.exports = RealEventCollection = (function(_super) {
 
   RealEventCollection.prototype.initialize = function() {
     this.baseCollection = app.events;
+    this.tagsCollection = app.tags;
     this.listenTo(this.baseCollection, 'add', this.resetFromBase);
     this.listenTo(this.baseCollection, 'change:start', this.resetFromBase);
     this.listenTo(this.baseCollection, 'remove', this.resetFromBase);
-    return this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
+    this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
+    return this.listenTo(this.tagsCollection, 'change', this.resetFromBase);
   };
 
   RealEventCollection.prototype.resetFromBase = function() {
-    var first, last;
-    first = moment(this.at(0).start);
-    last = moment(this.at(this.length - 1).start);
-    this.reset([]);
-    return this.generateRealEvents(first, last);
+    return this.reset([]);
   };
 
   RealEventCollection.prototype.generateRealEvents = function(start, end, callback) {
     var eventsInRange;
     callback = callback || function() {};
     eventsInRange = [];
-    this.baseCollection.each(function(item) {
-      var duration, evs, itemEnd, itemStart;
-      itemStart = item.getStartDateObject();
-      itemEnd = item.getEndDateObject();
-      duration = itemEnd - itemStart;
-      if (item.isRecurrent()) {
-        evs = item.generateRecurrentInstancesBetween(start, end, function(event, s, e) {
-          return new RealEvent(event, s, e);
+    this.baseCollection.each((function(_this) {
+      return function(item) {
+        var evs, tag;
+        tag = _this.tagsCollection.findWhere({
+          label: item.getCalendar()
         });
-        return eventsInRange = eventsInRange.concat(evs);
-      } else if (item.isInRange(start, end)) {
-        return eventsInRange.push(new RealEvent(item));
-      }
-    });
-    console.log(eventsInRange);
+        if (tag && tag.get('visible') === false) {
+          return null;
+        }
+        if (item.isRecurrent()) {
+          evs = item.generateRecurrentInstancesBetween(start, end, function(event, s, e) {
+            return new RealEvent(event, s, e);
+          });
+          return eventsInRange = eventsInRange.concat(evs);
+        } else if (item.isInRange(start, end)) {
+          return eventsInRange.push(new RealEvent(item));
+        }
+      };
+    })(this));
     this.add(eventsInRange);
     return callback(eventsInRange);
   };
 
   RealEventCollection.prototype.loadNextPage = function(callback) {
-    var last;
+    var last, _ref;
     callback = callback || function() {};
-    last = this.at(this.length - 1).start;
+    last = ((_ref = this.at(this.length - 1)) != null ? _ref.start : void 0) || moment();
     return this.generateRealEvents(moment(last), moment(last).add(1, 'month'), callback);
   };
 
   RealEventCollection.prototype.loadPreviousPage = function(callback) {
-    var first;
+    var first, _ref;
     callback = callback || function() {};
-    first = this.at(0).start;
+    first = ((_ref = this.at(0)) != null ? _ref.start : void 0) || moment();
     return this.generateRealEvents(moment(first).add(-1, 'month'), moment(first), callback);
   };
 
@@ -1314,6 +1316,7 @@ module.exports = {
   "EMAIL": "E-mail",
   "BOTH": "E-mail & Notification",
   "display previous events": "Display previous events",
+  "display next events": "Display next events",
   "event": "Event",
   "are you sure": "Are you sure ?",
   "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure ?",
@@ -1483,6 +1486,7 @@ module.exports = {
   "EMAIL": "E-mail",
   "BOTH": "E-mail & Notification",
   "display previous events": "Montrer les évènements précédents",
+  "display next events": "Montrer les évènements suivants",
   "are you sure": "Êtes-vous sûr(e) ?",
   "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
   "advanced": "Détails",
@@ -3915,8 +3919,6 @@ module.exports = ListView = (function(_super) {
 
   ListView.prototype.id = 'view-container';
 
-  ListView.prototype.className = 'well';
-
   ListView.prototype.template = require('./templates/list_view');
 
   ListView.prototype.itemview = require('./list_view_bucket');
@@ -3930,7 +3932,7 @@ module.exports = ListView = (function(_super) {
 
   ListView.prototype.afterRender = function() {
     this.calHeader = new Header();
-    this.$el.prepend(this.calHeader.render().$el);
+    this.$('#calheader').html(this.calHeader.render().$el);
     this.calHeader.on('month', function() {
       return app.router.navigate('', {
         trigger: true
@@ -4160,176 +4162,6 @@ module.exports = EventItemView = (function(_super) {
   return EventItemView;
 
 })(BaseView);
-});
-
-;require.register("views/list_view_item_old", function(exports, require, module) {
-var AlarmView, BaseView, Event, PopoverEvent, colorHash,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('lib/base_view');
-
-PopoverEvent = require('./calendar_popover_event');
-
-Event = require('models/event');
-
-colorHash = require('lib/colorhash');
-
-module.exports = AlarmView = (function(_super) {
-  __extends(AlarmView, _super);
-
-  function AlarmView() {
-    return AlarmView.__super__.constructor.apply(this, arguments);
-  }
-
-  AlarmView.prototype.className = 'scheduleElement';
-
-  AlarmView.prototype.template = require('./templates/list_view_item');
-
-  AlarmView.prototype.events = {
-    'click .icon-pencil': 'editMode',
-    'click .icon-trash': 'deleteModel'
-  };
-
-  AlarmView.prototype.initialize = function() {
-    this.listenTo(this.model, 'change', this.render);
-    return this.listenTo(app.tags, 'change:visible', this.render);
-  };
-
-  AlarmView.prototype.deleteModel = function() {
-    if (!confirm(t("are you sure"))) {
-      return;
-    }
-    this.$el.spin('tiny');
-    return this.model.destroy({
-      error: function() {
-        alert('server error');
-        return this.$el.spin();
-      }
-    });
-  };
-
-  AlarmView.prototype.editMode = function() {
-    if (this.popover) {
-      this.popover.close();
-    }
-    this.popover = new PopoverEvent({
-      model: this.model,
-      target: this.$el,
-      parentView: this,
-      container: $('body')
-    });
-    return this.popover.render();
-  };
-
-  AlarmView.prototype.getUrlHash = function() {
-    return 'list';
-  };
-
-  AlarmView.prototype.getRenderData = function() {
-    var data, tag;
-    data = this.model.toJSON();
-    tag = this.model.getCalendar();
-    data.color = tag ? colorHash(tag) : '';
-    _.extend(data, {
-      type: 'event',
-      start: this.model.getFormattedStartDate('HH:mm'),
-      end: this.model.getFormattedEndDate('HH:mm'),
-      allDay: this.model.isAllDay()
-    });
-    return data;
-  };
-
-  return AlarmView;
-
-})(BaseView);
-});
-
-;require.register("views/list_view_old", function(exports, require, module) {
-var Header, ListView, ViewCollection, defaultTimezone, helpers,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-ViewCollection = require('../lib/view_collection');
-
-Header = require('views/calendar_header');
-
-helpers = require('../helpers');
-
-defaultTimezone = 'timezone';
-
-module.exports = ListView = (function(_super) {
-  __extends(ListView, _super);
-
-  function ListView() {
-    this.showbefore = __bind(this.showbefore, this);
-    return ListView.__super__.constructor.apply(this, arguments);
-  }
-
-  ListView.prototype.id = 'view-container';
-
-  ListView.prototype.template = require('./templates/list_view');
-
-  ListView.prototype.itemview = require('./list_view_bucket');
-
-  ListView.prototype.collectionEl = '#alarm-list';
-
-  ListView.prototype.events = {
-    'click .showbefore': 'showbefore'
-  };
-
-  ListView.prototype.afterRender = function() {
-    this.calHeader = new Header();
-    this.$('#alarm-list').prepend(this.calHeader.render().$el);
-    this.calHeader.on('month', function() {
-      return app.router.navigate('', {
-        trigger: true
-      });
-    });
-    this.calHeader.on('week', function() {
-      return app.router.navigate('week', {
-        trigger: true
-      });
-    });
-    return ListView.__super__.afterRender.apply(this, arguments);
-  };
-
-  ListView.prototype.appendView = function(view) {
-    var el, index, prevCid, today;
-    index = this.collection.indexOf(view.model);
-    el = view.$el;
-    today = moment().startOf('day');
-    if (view.model.get('date').isBefore(today)) {
-      el.addClass('before').hide();
-    } else {
-      el.addClass('after');
-    }
-    if (index === 0) {
-      return this.calHeader.$el.after(el);
-    } else {
-      prevCid = this.collection.at(index - 1).cid;
-      return this.views[prevCid].$el.after(el);
-    }
-  };
-
-  ListView.prototype.showbefore = function() {
-    var body, first;
-    first = this.$('.after').first();
-    body = $('html, body');
-    this.$('.before').slideDown({
-      progress: function() {
-        if (first.length > 0) {
-          return body.scrollTop(first.offset().top);
-        }
-      }
-    });
-    return this.$('.showbefore').fadeOut();
-  };
-
-  return ListView;
-
-})(ViewCollection);
 });
 
 ;require.register("views/menu", function(exports, require, module) {
@@ -4779,7 +4611,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"list-container\"><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<div id=\"calheader\" class=\"well\"></div><div id=\"list-container\" class=\"well\"><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -4822,7 +4654,7 @@ if ( !allDay)
 {
 buf.push("" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "");
 }
-buf.push("" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");;return buf.join("");
+buf.push("&nbsp;" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
