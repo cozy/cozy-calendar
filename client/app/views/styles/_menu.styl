@@ -44,21 +44,63 @@ ul#menu
         margin-right: 10px
         margin-left: 10px
 
-  li:hover
-    background: #FFC47F
-    text-decoration: none
+  &> li:hover
+    background #FFC47F
+    text-decoration none
 
   ul#menuitems
     margin-left 0px
     li.tagmenuitem
       margin-left 0px
       padding-left 35px
+
       i
         margin 0px
+
       .badge
         padding 1px 3px
         margin-right 5px
-        border-radius: 3px
+        border-radius 3px
+        position relative
+
+        .spinHolder
+          position absolute
+          left -100%
+
+      input.calendar-name
+        width 100px
+        margin-bottom 0
+        border-radius 0
+        padding 2px 5px
+
+      .dropdown
+        display inline-block
+        .dropdown-toggle
+          padding 0 5px
+          .caret
+            display none
+            margin-top 0 !important // overrides bootstrap
+            vertical-align middle
+            border-top-color #000
+            border-bottom-color #000
+            opacity 0.2
+            transform scale(1.5, 1.5)
+
+        .dropdown-menu
+          border-radius 0
+          padding 0
+          li
+            margin 0
+            padding 0
+            a
+              padding 5px
+              &:hover
+                background #ffc47f
 
 
+      &:hover
+        .dropdown .dropdown-toggle .caret
+          display inline-block
 
+          &:hover
+            opacity 1

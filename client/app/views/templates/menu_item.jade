@@ -1,7 +1,14 @@
 - back = visible?color:"transparent"
 - border = visible?"transparent":color
-span.badge(
-    style="background-color:" + back + "; border: 1px solid "+border+";"
-    class=)
+span.badge
     | &nbsp;
-span=label
+    span.spinHolder &nbsp;
+span.calendar-name=label
+.dropdown
+    a#dLabel.dropdown-toggle(data-toggle="dropdown")
+        span.caret
+    ul.dropdown-menu(aria-labelledBy='dLabel')
+        li
+            a.calendar-rename= t('rename')
+        li
+            a.calendar-remove= t('delete')

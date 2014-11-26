@@ -19,8 +19,11 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 if item.isRecurrent()
                     eventsInRange = eventsInRange.concat(
                         item.getRecurrentFCEventBetween start, end)
-               
+
                 else if item.isInRange start, end
                     eventsInRange.push item.toPunctualFullCalendarEvent()
 
             callback eventsInRange
+
+    getByCalendar: (calendarName) ->
+        return @filter (event) -> event.get('tags')[0] is calendarName

@@ -9765,7 +9765,7 @@ ul#menu li i {
   margin-right: 10px;
   margin-left: 10px;
 }
-ul#menu li:hover {
+ul#menu> li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
@@ -9784,6 +9784,62 @@ ul#menu ul#menuitems li.tagmenuitem .badge {
   margin-right: 5px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  position: relative;
+}
+ul#menu ul#menuitems li.tagmenuitem .badge .spinHolder {
+  position: absolute;
+  left: -100%;
+}
+ul#menu ul#menuitems li.tagmenuitem input.calendar-name {
+  width: 100px;
+  margin-bottom: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  padding: 2px 5px;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown {
+  display: inline-block;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-toggle {
+  padding: 0 5px;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-toggle .caret {
+  display: none;
+  margin-top: 0 !important;
+  vertical-align: middle;
+  border-top-color: #000;
+  border-bottom-color: #000;
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
+  -webkit-transform: scale(1.5, 1.5);
+  -moz-transform: scale(1.5, 1.5);
+  -o-transform: scale(1.5, 1.5);
+  -ms-transform: scale(1.5, 1.5);
+  transform: scale(1.5, 1.5);
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu {
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  padding: 0;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li {
+  margin: 0;
+  padding: 0;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a {
+  padding: 5px;
+}
+ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a:hover {
+  background: #ffc47f;
+}
+ul#menu ul#menuitems li.tagmenuitem:hover .dropdown .dropdown-toggle .caret {
+  display: inline-block;
+}
+ul#menu ul#menuitems li.tagmenuitem:hover .dropdown .dropdown-toggle .caret:hover {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
 }
 @font-face {
   font-family: styled;

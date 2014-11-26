@@ -9,6 +9,7 @@ module.exports =
     "invite"                            : "Inviter"
     "close"                             : "Fermer"
     "delete"                            : "Supprimer"
+    "rename"                            : "Renommer"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'
@@ -53,6 +54,7 @@ module.exports =
     "BOTH"                              : "E-mail & Notification"
     "display previous events"           : "Montrer les évènements précédents"
     "are you sure"                      : "Êtes-vous sûr(e) ?"
+    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"

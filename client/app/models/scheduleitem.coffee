@@ -13,11 +13,13 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getCalendar: -> @get('tags')?[0]
 
-    setCalendar: (cal)-> 
-        tags = @get 'tags' or []
+    setCalendar: (cal) ->
+        # we clone the source array, otherwise it's not considered as changed
+        # because it changes the model's attributes
+        oldTags = @get 'tags'
+        tags = if oldTags? then [].concat(oldTags) else []
         tags[0] = cal
-        @set 'tags', tags
-
+        @set tags: tags
 
     getDefaultColor: -> 'grey'
     getColor: ->
@@ -40,17 +42,17 @@ module.exports = class ScheduleItem extends Backbone.Model
         # convert to the cozy's timezone
         return H.toTimezonedMoment modelDateStr
 
-        
+
     getDateObject: ->
         return @_toDateObject @get @startDateField
-        
+
     getStartDateObject: -> @getDateObject()
     getEndDateObject: ->
         if @endDateField
             @_toDateObject @get @endDateField
         else
             @getDateObject().add('m', 30)
-    
+
     # Format a moment to the string format of the model.
     _formatMoment: (m) ->
         if @isAllDay()
@@ -67,7 +69,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     addToStart: (duration) ->
         @set @startDateField, @_formatMoment @getStartDateObject().add duration
-        
+
     addToEnd: (duration) ->
         @set @endDateField, @_formatMoment @getEndDateObject().add duration
 
@@ -83,20 +85,20 @@ module.exports = class ScheduleItem extends Backbone.Model
         previous = @previous @startDateField
         if previous?
             return @_toDateObject previous
-        else 
+        else
             return false
-    
+
     getPreviousDateHash: ->
         previous = @getPreviousDateObject()
         if previous?
             return previous.format 'YYYYMMDD'
-        else 
+        else
             return false
 
     isRecurrent: ->
         return @has('rrule') and @get('rrule') isnt ''
 
-    # Compute list of fullcalendar event objects, that this recurring event 
+    # Compute list of fullcalendar event objects, that this recurring event
     # generate between start and end.
     # Expect that start and end are fullcalendar's moment objects.
     getRecurrentFCEventBetween: (start, end) ->
@@ -120,7 +122,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         mDateEventE = moment.tz @get(@endDateField), eventTimezone
 
         jsDateEventS = new Date mDateEventS.toISOString()
-    
+
         options = RRule.parseString @get 'rrule'
         options.dtstart = jsDateEventS
 
@@ -131,12 +133,12 @@ module.exports = class ScheduleItem extends Backbone.Model
         # may shift event from one hour. This function do that fix.
         fixDSTTroubles = (jsDateRecurrentS) ->
             # jsDateRecurrentS.toISOString is the UTC start date of the event.
-            # unless, DST of browser's timezone is different from event's 
+            # unless, DST of browser's timezone is different from event's
             # timezone.
             mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone)
 
             # Fix DST troubles :
-            # The hour of the recurring event is fixed in its timezone. 
+            # The hour of the recurring event is fixed in its timezone.
             # So we use it as reference.
             diff = mDateEventS.hour() - mDateRecurrentS.hour()
             # Correction is -1, 1 or 0.
@@ -145,7 +147,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             else if diff is -23
                 diff = 1
 
-            mDateRecurrentS.add 'hour', diff 
+            mDateRecurrentS.add 'hour', diff
 
             return mDateRecurrentS
 
@@ -154,18 +156,18 @@ module.exports = class ScheduleItem extends Backbone.Model
                 .map (jsDateRecurrentS) =>
 
             mDateRecurrentS = H.toTimezonedMoment fixDSTTroubles jsDateRecurrentS
-            
+
             # Compute event.end as event.start + event.duration.
             mDateRecurrentE = mDateRecurrentS.clone()
                 .add 'seconds', mDateEventE.diff(mDateEventS, 'seconds')
-            
+
             fce = @_toFullCalendarEvent mDateRecurrentS, mDateRecurrentE
             return fce
 
         return fces
 
     # @TODO Deprecated and unsued ? <-- in calendar popover.. ?
-    # isOneDay: -> 
+    # isOneDay: ->
     #     # 20140904 TODO !
     #     # @startDateObject.short() is @endDateObject.short()
     #     return false
@@ -186,7 +188,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             start: start
             end: end
             allDay: @isAllDay()
-            diff: @get 'diff' # @TODO 
+            diff: @get 'diff' # @TODO
             place: @get 'place'
             timezone: @get 'timezone'
             type: @fcEventType
