@@ -1,21 +1,30 @@
 app = require 'application'
 
 $ ->
-    require 'lib/app_helpers'
-
-    locale = Date.getLocale(window.locale)
-    $.fn.datetimepicker.dates['en'] = { # as default
-        days: locale.weekdays.slice(0, 7)
-        daysShort: locale.weekdays.slice(7, 15)
-        daysMin: locale.weekdays.slice(7, 15)
-        months: locale.full_month.split('|').slice(1,13)
-        monthsShort: locale.full_month.split('|').slice(13,26)
-        today: locale.day.split('|')[1],
-        suffix: [],
-        meridiem: locale.ampm
-        weekStart: 1
-        format: "dd/mm/yyyy"
-    };
+    moment.locale window.locale
+    # If needed, add locales to client/vendor/scripts/lang
+    # from : https://github.com/moment/moment/tree/develop/locale
+    locale = moment.localeData()
+    # @TODO : why "en" default
+    $.fn.datetimepicker.dates['en'] = # as default
+        days: locale._weekdays
+        daysShort: locale._weekdaysShort
+        daysMin: locale._weekdaysMin
+        months: locale._months
+        monthsShort: locale._monthsShort
+        today: locale.calendar["sameDay"]
+        suffix: [], # ?
+        meridiem: locale.meridiem()
+        weekStart: locale._week["dow"]
+        # datetimepicker and moment use different convention for short naming
+        # of datetime components
+        format: locale._longDateFormat.L
+                    .replace /D/g, 'd'
+                    .replace /M/g, 'm'
+                    .replace /Y/g, 'y'
+                    .replace /H/g, 'h'
+                    .replace /h/g, 'H'
+                    .replace /m/g, 'i'
 
     app.initialize()
 
@@ -42,21 +51,21 @@ $ ->
 
         if Spinner
             @each ->
-                $this = $(this)
-                spinner = $this.data("spinner")
+                $this = $ this
+                spinner = $this.data 'spinner'
                 if spinner?
                     spinner.stop()
-                    $this.data "spinner", null
+                    $this.data 'spinner', null
                 else if opts isnt false
-                    if typeof opts is "string"
+                    if typeof opts is 'string'
                         if opts of presets
                             opts = presets[opts]
                         else
                             opts = {}
-                        opts.color = color    if color
+                        opts.color = color if color
                     spinner = new Spinner(
                         $.extend(color: $this.css("color"), opts))
-                    spinner.spin(this)
+                    spinner.spin this
                     $this.data "spinner", spinner
 
         else

@@ -71,14 +71,16 @@ task 'tests:client', 'run client tests through mocha', (opts) ->
 task "lint", "Run Coffeelint", ->
     process.env.TZ = "Europe/Paris"
     command = "coffeelint "
-    command += " -f coffeelint.json -r server/"
+    files = walk 'server/'
+    files = files.concat walk 'client/app', ['fr.coffee', 'en.coffee']
+    command += " -f coffeelint.json #{files.join ' '}"
     logger.options.prefix = 'cake:lint'
     logger.info 'Start linting...'
     exec command, (err, stdout, stderr) ->
         if err
             logger.error err
         else
-            console.log stdout
+            logger.info stdout
 
 task 'build', 'Build CoffeeScript to Javascript', ->
     logger.options.prefix = 'cake:build'

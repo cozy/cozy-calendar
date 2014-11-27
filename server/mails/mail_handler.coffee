@@ -1,7 +1,6 @@
 async = require 'async'
 jade = require 'jade'
 fs = require 'fs'
-moment = require 'moment'
 log = require('printit')
     prefix: 'MailHandler'
     date: true
@@ -15,7 +14,7 @@ catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
 module.exports = class MailHandler
 
     # compile templates
-    constructor: () ->
+    constructor: ->
         @templates = {}
 
         file = __dirname + '/mail_invitation.jade'
@@ -45,7 +44,8 @@ module.exports = class MailHandler
                 return callback()
 
             async.forEach guests, (guest, cb) =>
-                ismail = guest.status is 'INVITATION-NOT-SENT' or (guest.status is 'ACCEPTED' and dateChanged)
+                ismail = guest.status is 'INVITATION-NOT-SENT' or \
+                         (guest.status is 'ACCEPTED' and dateChanged)
 
                 if guest.status is 'INVITATION-NOT-SENT' or
                 (guest.status is 'ACCEPTED' and dateChanged)
@@ -58,7 +58,7 @@ module.exports = class MailHandler
                     return cb()
 
                 dateFormat = 'MMMM Do YYYY, h:mm a'
-                date = moment(event.start).format dateFormat
+                date = event.formatStart dateFormat
                 url = "https://#{domain}/public/calendar/events/#{event.id}"
 
                 mailOptions =
@@ -106,7 +106,7 @@ no
         async.forEach event.toJSON().attendees, (guest, cb) =>
             return cb null unless guest.status is 'ACCEPTED'
             dateFormat = 'MMMM Do YYYY, h:mm a'
-            date = moment(event.start).format dateFormat
+            date = event.formatStart dateFormat
 
             mailOptions =
                 to: guest.email

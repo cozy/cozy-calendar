@@ -10,7 +10,8 @@ module.exports = class ComboBox extends BaseView
         'blur': 'onBlur'
 
     initialize: (options) ->
-        super
+        super()
+
         @$el.autocomplete
             delay: 0
             minLength: 0
@@ -48,17 +49,21 @@ module.exports = class ComboBox extends BaseView
         @$el.removeClass 'expanded' unless @$el.is ':focus'
 
     onBlur: =>
+        console.log 'blur'
         @$el.removeClass 'expanded' unless @menuOpen
+        @trigger 'edition-complete', @value()
 
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
         @updateBadge ev, ui
+        @trigger 'edition-complete', ui.item.value
 
     updateBadge: (ev, ui) =>
         @badge?.remove()
         value = ui?.item?.value or @value()
         @badge = @makeBadge colorhash value
         @$el.before @badge
+        @trigger 'change', value
         return true
 
     renderItem: (ul, item) =>

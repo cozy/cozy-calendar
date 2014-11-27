@@ -1,4 +1,4 @@
-@import 'nib'
+    @import 'nib'
 
 @import '_base'
 @import '_ui'
@@ -19,6 +19,7 @@
 
         button
             margin-top: -4px
+            height: 20px
 
         a
             font-weight normal
@@ -190,13 +191,10 @@
         border-radius: 4px
         color: blue
 
-.fc-content
+.fc-view-container
     clear:none
 
     thead
-        background: blue
-        color: #fff
-
         tr
             th
                 height: 30px
@@ -213,7 +211,7 @@
             .fc-state-highlight
                 background: lightblue
 
-    .fc-event-inner .fc-event-time
+    .fc-content .fc-time
 
         &.spinning
             display: inline-block
@@ -232,14 +230,46 @@
     h2
         font-weight: normal
 
-.fc-title, .fc-content
+.fc-header-title h2
+    margin-top: 0px
+    white-space: nowrap
+
+
+.fc-header td 
+    border-style: none
+
+.fc-header .fc-button
+    margin-bottom: 1em
+    vertical-align: top
+
+.fc-header-right
+    text-align: right
+    
+.fc-text-arrow
+    margin: 0px 0.1em
+    font-size: 2em
+    font-family: "Courier New",Courier,monospace
+    vertical-align: baseline
+
+.fc-button
+    position: relative
+    display: inline-block
+    padding: 0px 0.6em
+    overflow: hidden
+    height: 1.9em
+    line-height: 1.9em
+    white-space: nowrap
+    cursor: pointer
+
+
+.fc-title, 
+.fc-view-container
 
     thead
     thead > tr.fc-first
     .fc-day-header
     .fc-widget-header
         font-family: styled
-        background: white
         border-radius: 0
         color: black
         cursor: default
@@ -257,7 +287,7 @@
 .fc-day-number
     font-family: styled
 
-.fc-event-inner
+.fc-content
     border: 0
     border-radius: 0
     color: white
@@ -268,6 +298,7 @@
     i
         margin-top: 2px
         margin-right: 5px
+
 
 .fc-day:hover
     background: orange + 80%
@@ -285,16 +316,21 @@
 .fc-view
     overflow: visible
 
-#view-container .fc-content .fc-cell-overlay
+#view-container .fc-view-container .fc-cell-overlay
     background: #CBE4FB
 
-#view-container .fc-content tbody .fc-state-highlight
+#view-container .fc-view-container tbody .fc-state-highlight
     background: #CCF0CC
 
-#view-container .fc-event-inner:hover
-    color: white
-    background: orange
-    border: 0
+.fc-event:hover
+    background: orange !important
+
+
+td.fc-widget-header
+    border-style: none
+
+.fc-row .fc-content-skeleton td, .fc-row .fc-helper-skeleton td
+    border-color: #DDD
 
 #alarms
     thead

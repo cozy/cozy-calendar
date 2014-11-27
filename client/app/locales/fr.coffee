@@ -1,11 +1,7 @@
 module.exports =
     "Add"                               : "Ajouter"
-    "alarm"                             : "alarme"
     "event"                             : "événement"
-    "add the alarm"                     : "Ajouter l'alarme"
-    "create alarm"                      : "Création d'une alarme"
     "create event"                      : "Création d'un évènement"
-    "edit alarm"                        : "Modification d'une alarme"
     "edit event"                        : "Modification d'un évènement"
     "edit"                              : "Enregistrer"
     "create"                            : "Enregistrer"
@@ -13,7 +9,10 @@ module.exports =
     "invite"                            : "Inviter"
     "close"                             : "Fermer"
     "delete"                            : "Supprimer"
+    "rename"                            : "Renommer"
     "Place"                             : "Lieu"
+    'all day'                           : 'journée entière'
+    'All day'                           : 'Journée entière'
     "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"
@@ -33,15 +32,14 @@ module.exports =
     "Switch to Calendar"                : "Basculer en mode Calendrier"
     "time"                              : "Heure"
     "Today"                             : "Aujourd'hui"
+    'today'                             : 'aujourd\'hui'
     "What should I remind you ?"        : "Que dois-je vous rappeler ?"
-    "alarm description placeholder"     : "Que voulez-vous vous rappeler ?"
     "ICalendar importer"                : "Importateur ICalendar"
     "import your icalendar file"        : "Importer votre fichier iCalendar"
     "select an icalendar file"          : "Sélectionner un fichier iCalendar"
     "confirm import"                    : "Confirmer l'import"
     "cancel"                            : "Annuler"
     "Create"                            : "Créer"
-    "Alarms to import"                  : "Alarmes à importer"
     "Events to import"                  : "Évènements à importer"
     "Create Event"                      : "Créer un évènement"
     "From hours:minutes"                : "De heures:minutes"
@@ -50,13 +48,14 @@ module.exports =
     "days after"                        : "jours plus tard"
     "days later"                        : "jours plus tard"
     "Week"                              : "Semaine"
-    "Alarms"                            : "Alarmes"
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
     "EMAIL"                             : "E-mail"
     "BOTH"                              : "E-mail & Notification"
     "display previous events"           : "Montrer les évènements précédents"
+    "display next events"           : "Montrer les évènements suivants"
     "are you sure"                      : "Êtes-vous sûr(e) ?"
+    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"
@@ -77,6 +76,10 @@ module.exports =
     "forever"                           : "Pour toujours"
     "occurences"                        : "occasions"
     "every"                             : "tous les"
+    'minutes'                           : 'minutes'
+    'minute '                           : 'minute'
+    'hours'                             : 'heures'
+    'hour'                              : 'heure'
     "days"                              : "jours"
     "day"                               : "jour"
     "weeks"                             : "semaines"
@@ -113,6 +116,8 @@ module.exports =
     "guests"                            : "Invités"
     "from"                              : "De"
     "to"                                : "à"
+    'Reminders before the event'        : 'Rappels avant l\'évènement'
+    "reminder"                          : "Rappel"
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
@@ -122,6 +127,8 @@ module.exports =
     "invalid end date"                  : "La fin est invalide."
     "invalid trigg date"                : "Le moment est invalide."
     "invalid action"                    : "L'action est invalide."
+    "server error occured"              : "Une erreure est survenue sur le serveur."
+
 
 # SYNC
     "synchronization"                   : "Synchronisation"
@@ -132,10 +139,10 @@ module.exports =
     "icalendar export"                  : "Export ICalendar"
     "icalendar import"                  : "Import ICalendar"
     "to sync your cal with"             : "Pour synchroniser votre calendrier avec votre mobile vous devez :"
-    "install the webdav module"         : "Installer le module WebDAV depuis l'applithèque."
+    "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un événement a échoué."
-    "imported events and alarms": "Nombre d'alarmes et événements importés"
+    "imported events": "Nombre d'événements importés"
     "import finished": "Votre import est terminé !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
     "export your calendar": "Exportez votre calendrier"

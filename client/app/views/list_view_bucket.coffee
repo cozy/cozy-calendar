@@ -1,5 +1,5 @@
 ViewCollection = require '../lib/view_collection'
-Popover = require './calendar_popover'
+PopoverEvent = require './calendar_popover_event'
 
 module.exports = class BucketView extends ViewCollection
 
@@ -17,8 +17,9 @@ module.exports = class BucketView extends ViewCollection
         super
 
     getRenderData: ->
-        date: @model.get('date').format 'short'
+        date: @model.get('date').format 'LL'
 
+    # @TODO : seems unplugged.
     makeNew: ->
         @showPopover
             type: 'event'
@@ -26,11 +27,12 @@ module.exports = class BucketView extends ViewCollection
             end: @model.get('date').clone().set hour: 10, minute: 0
             target: @$('.add')
 
-    showPopover: (options) -> #@TODO
+    # @TODO : unused, but also outdated (see calendar_view for popover api).
+    showPopover: (options) ->
         options.parentView = this
-        options.container = $('body')
+        options.container = $ 'body'
         @popover.close() if @popover
-        @popover = new Popover options
+        @popover = new PopoverEvent options
         @popover.render()
 
     getUrlHash: -> 'list'

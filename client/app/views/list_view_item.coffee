@@ -1,20 +1,20 @@
-BaseView = require '../lib/base_view'
-Popover = require './calendar_popover'
-Event = require '../models/event'
+BaseView = require 'lib/base_view'
+PopoverEvent = require './calendar_popover_event'
+Event = require 'models/event'
 colorHash = require 'lib/colorhash'
 
 
-module.exports = class AlarmView extends BaseView
+module.exports = class EventItemView extends BaseView
 
     className: 'scheduleElement'
     template: require './templates/list_view_item'
 
     events:
-        'click .icon-pencil':'editMode'
-        'click .icon-trash':'deleteModel'
+        'click .icon-pencil': 'editMode'
+        'click .icon-trash': 'deleteModel'
 
     initialize: ->
-        @listenTo @model, "change", @render
+        @listenTo @model, 'change', @render
         @listenTo app.tags, 'change:visible', @render
 
     deleteModel: ->
@@ -22,33 +22,31 @@ module.exports = class AlarmView extends BaseView
         @$el.spin 'tiny'
         @model.destroy
             error: ->
-                alert('server error')
+                alert 'server error'
                 @$el.spin()
 
-    editMode: -> #@TODO
+    # @TODO : unused, but also outdated (see calendar_view for popover api).
+    editMode: ->
         @popover.close() if @popover
-        @popover = new Popover
+        @popover = new PopoverEvent
             model: @model,
             target: @$el
             parentView: this
-            container: $('body')
+            container: $ 'body'
         @popover.render()
 
     getUrlHash: -> 'list'
 
     getRenderData: ->
-        data = @model.toJSON()
+        data = @model.event.toJSON()
+        # data = @model.toJSON()
         tag = @model.getCalendar()
         data.color = if tag then colorHash(tag) else ''
-        if @model instanceof Event
-            _.extend data,
-                type: 'event'
-                start: @model.getFormattedStartDate '{HH}:{mm}'
-                end: @model.getFormattedEndDate '{HH}:{mm}'
-        else
-            _.extend data,
-                type: 'alarm'
-                time: @model.getFormattedDate '{HH}:{mm}'
+        _.extend data,
+            type: 'event'
+            start: @model.getFormattedStartDate 'HH:mm'
+            end: @model.getFormattedEndDate 'HH:mm'
+            allDay: @model.isAllDay()
 
         return data
 

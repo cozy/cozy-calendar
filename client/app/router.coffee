@@ -4,6 +4,7 @@ CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
 ImportView = require 'views/import_view'
 SyncView = require 'views/sync_view'
+# RealEventCollection = require 'collections/realevents'
 DayBucketCollection = require 'collections/daybuckets'
 
 module.exports = class Router extends Backbone.Router
@@ -26,7 +27,7 @@ module.exports = class Router extends Backbone.Router
         if year?
             @displayCalendar 'month', year, month, 1
         else
-            hash = new Date().format('month/{yyyy}/{M}')
+            hash = moment().format('[month]/YYYY/M')
             @navigate hash, trigger: true
 
     week: (year, month, day) ->
@@ -34,12 +35,13 @@ module.exports = class Router extends Backbone.Router
             [year, month, day] = getBeginningOfWeek year, month, day
             @displayCalendar 'agendaWeek', year, month, day
         else
-            hash = new Date().format('week/{yyyy}/{M}/{d}')
+            hash = moment().format('[week]/YYYY/M/D')
             @navigate hash, trigger: true
 
     list: ->
         @displayView new ListView
             collection: new DayBucketCollection()
+            # collection: new RealEventCollection()
         app.menu.activate 'calendar'
         @onCalendar = true
 
@@ -83,11 +85,11 @@ module.exports = class Router extends Backbone.Router
     displayCalendar: (view, year, month, day) =>
         @lastDisplayCall = Array.apply arguments
         @displayView new CalendarView
-            year: parseInt(year)
-            month: (parseInt(month) + 11)%12
-            date: parseInt(day)
+            year: parseInt year
+            month: (parseInt(month) + 11) % 12
+            date: parseInt day
             view: view
-            model: {alarms:app.alarms, events:app.events}
+            model: events: app.events
 
         app.menu.activate 'calendar'
         @onCalendar = true
@@ -99,8 +101,8 @@ module.exports = class Router extends Backbone.Router
         $('.main-container').append @mainView.$el
         @mainView.render()
 
-    getBeginningOfWeek = (year, month, day) =>
+    getBeginningOfWeek = (year, month, day) ->
         [year, month, day] = [year, month, day].map (x) -> parseInt x
         monday = new Date(year, (month-1)%12, day)
-        monday.setDate(monday.getDate() - monday.getDay() + 1);
-        [year, monday.getMonth()+1, monday.getDate()]
+        monday.setDate(monday.getDate() - monday.getDay() + 1)
+        return [year, monday.getMonth()+1, monday.getDate()]

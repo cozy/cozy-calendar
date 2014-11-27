@@ -1,25 +1,13 @@
-alarms = require './alarms'
 events = require './events'
 contacts = require './contacts'
 index  = require './index'
 ical   = require './ical'
 
-
 module.exports =
 
     '' : get : index.index
     'tags': get : index.tags
-
-    # Alarm management
-    'alarms':
-        get   : alarms.all
-        post  : alarms.create
-    'alarmid':
-        param : alarms.fetch
-    'alarms/:alarmid':
-        get   : alarms.read
-        put   : alarms.update
-        del   : alarms.delete
+    'users/current': get : index.userTimezone
 
     # Event management
     'events':

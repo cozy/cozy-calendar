@@ -32,19 +32,21 @@ exports.config =
                     'vendor/scripts/underscore-1.4.4.js'
                     'vendor/scripts/backbone-1.1.2.js'
                     'vendor/scripts/spin.js'
-                    'vendor/scripts/fullcalendar.js'
                     'vendor/scripts/rrule.js'
+                    'vendor/scripts/moment.js'
+                    'vendor/scripts/moment-timezone-with-data.js'
+                    'vendor/scripts/fullcalendar.min.js'
                 ]
 
         stylesheets:
             joinTo: 'stylesheets/app.css'
             order:
                 before: [
-                    'vendor/styles/normalize.css',
-                    'vendor/styles/bootstrap.css',
+                    'vendor/styles/normalize.css'
+                    'vendor/styles/bootstrap.css'
                     'vendor/styles/bootstrap-datepicker.css'
                     'vendor/styles/bootstrap-timepicker.css'
-                    'vendor/styles/fullcalendar.css'
+                    'vendor/styles/fullcalendar.min.css'
                 ]
                 after: ['vendor/styles/helpers.css']
 
