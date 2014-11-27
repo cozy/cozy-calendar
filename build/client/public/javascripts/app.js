@@ -2390,7 +2390,7 @@ module.exports = EventPopOver = (function(_super) {
       small: true,
       source: app.tags.calendars()
     });
-    this.calendar.on('change', (function(_this) {
+    this.calendar.on('edition-complete', (function(_this) {
       return function(value) {
         return _this.model.setCalendar(value);
       };
@@ -2552,6 +2552,13 @@ module.exports = EventPopOver = (function(_super) {
     return this.model.fetch({
       complete: EventPopOver.__super__.selfclose.apply(this, arguments)
     });
+  };
+
+  EventPopOver.prototype.close = function() {
+    this.model.fetch({
+      complete: EventPopOver.__super__.close.apply(this, arguments)
+    });
+    return EventPopOver.__super__.close.apply(this, arguments);
   };
 
   EventPopOver.prototype.updateMapLink = function() {
