@@ -18,24 +18,22 @@ MailHandler = require('../mails/mail_handler');
 mails = new MailHandler();
 
 module.exports.fetch = function(req, res, next, id) {
-  return Event.find(id, (function(_this) {
-    return function(err, event) {
-      var acceptLanguage;
-      if (err || !event) {
-        acceptLanguage = req.headers['accept-language'];
-        if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
-          return res.send({
-            error: "Event not found"
-          }, 404);
-        } else {
-          return res.send("Event not found: the event is probably canceled.", 404);
-        }
+  return Event.find(id, function(err, event) {
+    var acceptLanguage;
+    if (err || !event) {
+      acceptLanguage = req.headers['accept-language'];
+      if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
+        return res.send({
+          error: "Event not found"
+        }, 404);
       } else {
-        req.event = event;
-        return next();
+        return res.send("Event not found: the event is probably canceled.", 404);
       }
-    };
-  })(this));
+    } else {
+      req.event = event;
+      return next();
+    }
+  });
 };
 
 module.exports.all = function(req, res) {
@@ -59,14 +57,12 @@ module.exports.create = function(req, res) {
   data = req.body;
   data.created = moment().tz('UTC').toISOString();
   data.lastModification = moment().tz('UTC').toISOString();
-  return Event.createOrGetIfImport(data, (function(_this) {
-    return function(err, event) {
-      if (err) {
-        return res.error("Server error while creating event.");
-      }
-      return res.send(event, 201);
-    };
-  })(this));
+  return Event.createOrGetIfImport(data, function(err, event) {
+    if (err) {
+      return res.error("Server error while creating event.");
+    }
+    return res.send(event, 201);
+  });
 };
 
 module.exports.update = function(req, res) {
@@ -74,21 +70,19 @@ module.exports.update = function(req, res) {
   start = req.event.start;
   data = req.body;
   data.lastModification = moment().tz('UTC').toISOString();
-  return req.event.updateAttributes(data, (function(_this) {
-    return function(err, event) {
-      var dateChanged;
-      if (err != null) {
-        return res.send({
-          error: "Server error while saving event"
-        }, 500);
-      } else {
-        dateChanged = data.start !== start;
-        return mails.sendInvitations(event, dateChanged, function(err, event2) {
-          return res.send(event2 || event, 200);
-        });
-      }
-    };
-  })(this));
+  return req.event.updateAttributes(data, function(err, event) {
+    var dateChanged;
+    if (err != null) {
+      return res.send({
+        error: "Server error while saving event"
+      }, 500);
+    } else {
+      dateChanged = data.start !== start;
+      return mails.sendInvitations(event, dateChanged, function(err, event2) {
+        return res.send(event2 || event, 200);
+      });
+    }
+  });
 };
 
 module.exports["delete"] = function(req, res) {
@@ -116,19 +110,17 @@ module.exports["public"] = function(req, res) {
     }, 401);
   }
   if ((_ref = req.query.status) === 'ACCEPTED' || _ref === 'DECLINED') {
-    return visitor.setStatus(req.query.status, (function(_this) {
-      return function(err) {
-        if (err) {
-          return res.send({
-            error: "server error occured"
-          }, 500);
-        }
-        res.header({
-          'Location': "./" + req.event.id + "?key=" + key
-        });
-        return res.send(303);
-      };
-    })(this));
+    return visitor.setStatus(req.query.status, function(err) {
+      if (err) {
+        return res.send({
+          error: "server error occured"
+        }, 500);
+      }
+      res.header({
+        'Location': "./" + req.event.id + "?key=" + key
+      });
+      return res.send(303);
+    });
   } else {
     dateFormat = 'MMMM Do YYYY, h:mm a';
     date = moment(req.event.start).format(dateFormat);
