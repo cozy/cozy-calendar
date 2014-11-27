@@ -781,7 +781,6 @@ app = require('application');
 
 $(function() {
   var locale;
-  require('lib/app_helpers');
   moment.locale(window.locale);
   locale = moment.localeData();
   $.fn.datetimepicker.dates['en'] = {
