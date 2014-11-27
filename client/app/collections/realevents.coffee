@@ -7,9 +7,9 @@ RealEvent  = class RealEvent extends Backbone.Model
     # TODO : re-think class hierarchy, or way to construct this object.
     constructor: (event, start, end) ->
         super
-        
+
         @event = event
-        
+
         if event.isRecurrent()
             @start = start
             @end = end
@@ -20,7 +20,7 @@ RealEvent  = class RealEvent extends Backbone.Model
             @end = event.getEndDateObject()
 
     getCalendar: -> @event.getCalendar()
-    getDateHash: -> 
+    getDateHash: ->
         return @start.format 'YYYYMMDD'
 
     isAllDay: -> @event.isAllDay()
@@ -49,13 +49,10 @@ module.exports = class RealEventCollection extends Backbone.Collection
         @listenTo @tagsCollection, 'change', @resetFromBase
 
     resetFromBase: ->
-        #first = moment @at(0).start
-        #last = moment @at(@length - 1).start
         @reset []
-        #@generateRealEvents first, last
 
-    generateRealEvents: (start, end, callback) =>
-        callback = callback || ->
+    generateRealEvents: (start, end, callback) ->
+        callback = callback or ->
         eventsInRange = []
         @baseCollection.each (item) =>
 
@@ -63,10 +60,11 @@ module.exports = class RealEventCollection extends Backbone.Collection
             return null if tag and tag.get('visible') is false
 
             if item.isRecurrent()
-                evs = item.generateRecurrentInstancesBetween start, end, (event, s, e) ->
-                        return new RealEvent event, s, e
-                eventsInRange = eventsInRange.concat(evs)
-           
+                evs = item.generateRecurrentInstancesBetween start, end, \
+                (event, s, e) ->
+                    return new RealEvent event, s, e
+                eventsInRange = eventsInRange.concat evs
+
             else if item.isInRange start, end
                 eventsInRange.push new RealEvent item
 
@@ -74,12 +72,12 @@ module.exports = class RealEventCollection extends Backbone.Collection
         callback eventsInRange
 
     loadNextPage: (callback) ->
-        callback = callback || ->
-        last = @at(@length - 1)?.start || moment()
+        callback = callback or ->
+        last = @at(@length - 1)?.start or moment()
         @generateRealEvents moment(last), moment(last).add(1, 'month'), callback
 
     loadPreviousPage: (callback) ->
-        callback = callback || ->
-        first = @at(0)?.start || moment()
-        @generateRealEvents moment(first).add(-1, 'month'), 
+        callback = callback or ->
+        first = @at(0)?.start or moment()
+        @generateRealEvents moment(first).add(-1, 'month'),
             moment(first), callback

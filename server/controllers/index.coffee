@@ -13,7 +13,7 @@ module.exports.tags = (req, res, next) ->
 
 module.exports.index = (req, res) ->
     async.parallel [
-        (cb) => Contact.all (err, contacts) =>
+        (cb) -> Contact.all (err, contacts) ->
             return cb err if err
             for contact, index in contacts
                 contacts[index] = contact.asNameAndEmails()
@@ -21,11 +21,11 @@ module.exports.index = (req, res) ->
 
         Event.all
 
-        (cb) => CozyInstance.getLocale (err, locale) ->
+        (cb) -> CozyInstance.getLocale (err, locale) ->
             console.log err if err
             cb null, locale
 
-    ], (err, results) =>
+    ], (err, results) ->
 
         if err then res.send
             error: 'Server error occurred while retrieving data'

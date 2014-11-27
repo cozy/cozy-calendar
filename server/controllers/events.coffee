@@ -10,7 +10,7 @@ mails = new MailHandler()
 
 
 module.exports.fetch = (req, res, next, id) ->
-    Event.find id, (err, event) =>
+    Event.find id, (err, event) ->
         if err or not event
             acceptLanguage = req.headers['accept-language']
             if acceptLanguage?.indexOf('text/html') isnt -1
@@ -41,7 +41,7 @@ module.exports.create = (req, res) ->
     data = req.body
     data.created = moment().tz('UTC').toISOString()
     data.lastModification = moment().tz('UTC').toISOString()
-    Event.createOrGetIfImport data, (err, event) =>
+    Event.createOrGetIfImport data, (err, event) ->
         return res.error "Server error while creating event." if err
         res.send event, 201
 
@@ -49,7 +49,7 @@ module.exports.update = (req, res) ->
     start = req.event.start
     data = req.body
     data.lastModification = moment().tz('UTC').toISOString()
-    req.event.updateAttributes data, (err, event) =>
+    req.event.updateAttributes data, (err, event) ->
 
         if err?
             res.send error: "Server error while saving event", 500
@@ -76,7 +76,7 @@ module.exports.public = (req, res) ->
 
     if req.query.status in ['ACCEPTED', 'DECLINED']
 
-        visitor.setStatus req.query.status, (err) =>
+        visitor.setStatus req.query.status, (err) ->
             return res.send error: "server error occured", 500 if err
             res.header 'Location': "./#{req.event.id}?key=#{key}"
             res.send 303

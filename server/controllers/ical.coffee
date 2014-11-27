@@ -6,8 +6,9 @@ module.exports.export = (req, res) ->
     calendar = new ical.VCalendar
         organization: 'Cozy'
         title: 'Cozy Calendar'
-    Event.all (err, events) =>
-        if err then res.send
+    Event.all (err, events) ->
+        if err
+            res.send
                 error: true
                 msg: 'Server error occurred while retrieving data'
         else

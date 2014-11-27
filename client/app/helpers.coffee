@@ -51,7 +51,7 @@ exports.isEvent = (start, end) ->
 
 
 # Convert an ambiguously fullcalendar moment, to a timezoned moment.
-# Use Cozy's timezone as reference. 
+# Use Cozy's timezone as reference.
 # Fullcalendar should use timezone = "Cozy's timezone" to be coherent.
 exports.ambiguousToTimezoned = (ambigM) ->
     return moment.tz ambigM, window.app.timezone
@@ -74,7 +74,7 @@ exports.unitValuesToiCalDuration = (unitsValues) ->
     for u in ['H', 'M', 'S']
         if u of unitsValues
             t += unitsValues[u] + u
-    
+
     if t
         s += 'T' + t
 
@@ -90,9 +90,9 @@ exports.iCalDurationToUnitValue = (s) ->
 
 # Convert any date parsable by moment to a moment with cozy's timezone.
 # CAUTION depend on
-exports.toTimezonedMoment = (d) -> 
+exports.toTimezonedMoment = (d) ->
     # moment.tz d, window.app.timezone
     m = moment d
     m.tz window.app.timezone
-    
+
     return m

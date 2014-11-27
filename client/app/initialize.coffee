@@ -4,7 +4,7 @@ $ ->
     require 'lib/app_helpers'
 
     moment.locale(window.locale)
-    # If needed, add locales to client/vendor/scripts/lang 
+    # If needed, add locales to client/vendor/scripts/lang
     # from : https://github.com/moment/moment/tree/develop/locale
     locale = moment.localeData()
     # @TODO : why "en" default
@@ -18,7 +18,7 @@ $ ->
         suffix: [], # ?
         meridiem: locale.meridiem()
         weekStart: locale._week["dow"]
-        # datetimepicker and moment use different convention for short naming 
+        # datetimepicker and moment use different convention for short naming
         # of datetime components
         format: locale._longDateFormat.L
                     .replace /D/g, 'd'
@@ -27,7 +27,7 @@ $ ->
                     .replace /H/g, 'h'
                     .replace /h/g, 'H'
                     .replace /m/g, 'i'
-    };
+    }
 
     app.initialize()
 
@@ -54,21 +54,21 @@ $ ->
 
         if Spinner
             @each ->
-                $this = $(this)
-                spinner = $this.data("spinner")
+                $this = $ this
+                spinner = $this.data 'spinner'
                 if spinner?
                     spinner.stop()
-                    $this.data "spinner", null
+                    $this.data 'spinner', null
                 else if opts isnt false
-                    if typeof opts is "string"
+                    if typeof opts is 'string'
                         if opts of presets
                             opts = presets[opts]
                         else
                             opts = {}
-                        opts.color = color    if color
+                        opts.color = color if color
                     spinner = new Spinner(
                         $.extend(color: $this.css("color"), opts))
-                    spinner.spin(this)
+                    spinner.spin this
                     $this.data "spinner", spinner
 
         else

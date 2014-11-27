@@ -58,12 +58,12 @@ module.exports = class EventPopOver extends PopoverView
             inputEnd = @$('#input-end')
             inputStart = @$('#input-start')
             inputDiff = @$('#input-diff')
-            inputStart.on 'timepicker.next', => inputEnd.focus()
-            inputEnd.on 'timepicker.next', => inputDiff.focus()
-            inputEnd.on 'timepicker.prev', =>
+            inputStart.on 'timepicker.next', -> inputEnd.focus()
+            inputEnd.on 'timepicker.next', -> inputDiff.focus()
+            inputEnd.on 'timepicker.prev', ->
                 inputStart.focus().timepicker 'highlightMinute'
 
-            inputDiff.on 'keydown', (ev) =>
+            inputDiff.on 'keydown', (ev) ->
                 if ev.keyCode is 37 # left
                     inputEnd.focus().timepicker 'highlightMinute'
                 if ev.keyCode is 39 # right
@@ -139,7 +139,7 @@ module.exports = class EventPopOver extends PopoverView
                 minute: splitted[2]
             return setObj
 
-    onRemoveClicked: =>
+    onRemoveClicked: ->
         @removeButton.css 'width', '42px'
         @removeButton.spin 'tiny'
         if confirm t('are you sure')
@@ -174,7 +174,7 @@ module.exports = class EventPopOver extends PopoverView
                 success: =>
                     collection = app['events']
                     collection.add @model
-                error: =>
+                error: ->
                     alert 'server error occured'
                 complete: =>
                     @addButton.spin false
@@ -183,7 +183,7 @@ module.exports = class EventPopOver extends PopoverView
                     @selfclose()
 
 
-    selfclose: =>
+    selfclose: ->
         # Revert if not just saved with addButton.
         @model.fetch complete: super
 
@@ -194,9 +194,9 @@ module.exports = class EventPopOver extends PopoverView
         @model.fetch complete: super
         super
 
-    updateMapLink: =>
+    updateMapLink: ->
         value = encodeURIComponent @$('#input-place').val()
-        btn = @$('#showmap')
+        btn = @$ '#showmap'
         if value
             url = "http://www.openstreetmap.org/search?query=#{value}"
             btn.show().attr 'href', url
@@ -204,14 +204,12 @@ module.exports = class EventPopOver extends PopoverView
             btn.hide()
 
 
-    refresh: =>
+    refresh: ->
         @$('#input-start').val @model.getStartDateObject().format(@dtFormat)
         @$('#input-end').val @model.getEndDateObject().format(@dtFormat)
         @$('#input-diff').val @model.getDiff()
 
-
-
-    handleError: (error) =>
+    handleError: (error) ->
         switch error.field
             when 'description'
                 guiltyFields = '#input-desc'

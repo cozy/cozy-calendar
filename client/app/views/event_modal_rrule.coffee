@@ -21,7 +21,7 @@ module.exports = class RRuleView extends BaseView
             autoclose: true
             format: @inputDateDTPickerFormat
             minView: 2
-            viewSelect: 4 
+            viewSelect: 4
             keyboardNavigation: false
             # datepicker only
         ).on 'changeDate', @updateHelp
@@ -47,7 +47,8 @@ module.exports = class RRuleView extends BaseView
 
         if options.until
             rrule.endMode = 'until'
-            rrule.until = moment.tz(options.until, 'UTC').format @inputDateFormat
+            rrule.until = moment.tz options.until, 'UTC'
+                            .format @inputDateFormat
             rrule.count = ''
 
         else if options.count
@@ -111,7 +112,8 @@ module.exports = class RRuleView extends BaseView
             when 'count'
                 options.count = +@$('#rrule-count').val()
             when 'until'
-                options.until = moment.tz @$('#rrule-until').val(), @inputDateFormat, 'UTC'
+                rawDate = @$('#rrule-until').val()
+                options.until = moment.tz rawDate, @inputDateFormat, 'UTC'
                     .toDate()
 
         new RRule options

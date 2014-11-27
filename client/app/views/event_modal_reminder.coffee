@@ -7,7 +7,7 @@ module.exports = class ReminderView extends BaseView
     className: 'reminder'
     template: require('./templates/event_modal_reminder')
 
-    events: -> 
+    events: ->
         'click .removereminder': 'remove'
 
     afterRender: ->
@@ -41,9 +41,9 @@ module.exports = class ReminderView extends BaseView
             unit = 'M'
             value = 10
 
-        data = 
+        data =
             isNew: @model.isNew
-            isSelectedUnit: (u) => u is unit
+            isSelectedUnit: (u) -> u is unit
             durationValue: value
             model: @model
 
@@ -55,7 +55,7 @@ module.exports = class ReminderView extends BaseView
         else 'DISPLAY'
 
         uv = {}
-        uv[@$('.triggerunit').val()] = @$('.triggervalue').val() 
+        uv[@$('.triggerunit').val()] = @$('.triggervalue').val()
         data =
             action: action
             trigg: H.unitValuesToiCalDuration uv

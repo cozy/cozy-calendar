@@ -16,7 +16,7 @@ module.exports = class Toggle extends BaseView
         @render()
         @toggle @value
 
-    getRenderData: () -> icon: @icon
+    getRenderData: -> icon: @icon
 
     events: ->
         'click': => @toggle()

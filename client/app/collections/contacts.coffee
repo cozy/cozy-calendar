@@ -6,8 +6,8 @@ module.exports = class ContactCollection extends Backbone.Collection
     url: 'contacts'
 
     asTypeaheadSource: (query) ->
-        regexp = new RegExp(query);
-        contacts = @filter((contact) -> contact.match regexp)
+        regexp = new RegExp query
+        contacts = @filter (contact) -> contact.match regexp
         items = []
         contacts.forEach (contact) ->
             contact.get('emails').forEach (email) ->

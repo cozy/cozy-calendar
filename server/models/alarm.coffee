@@ -79,10 +79,10 @@ Alarm::migrateDoctype = ->
     Event.create body, => @destroy()
 
 Alarm.migrateAll = ->
-        Alarm.all {}, (err, alarms) ->
-            if err
-                console.log err
-                return
+    Alarm.all {}, (err, alarms) ->
+        if err
+            console.log err
+            return
 
-            for alarm in alarms
-                alarm.migrateDoctype()
+        for alarm in alarms
+            alarm.migrateDoctype()

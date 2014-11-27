@@ -1,21 +1,21 @@
 BaseView = require './base_view'
 module.exports = class PopoverView extends BaseView
 # Backbone view which implements Bootstrap popover tool.
-    
+
     titleTemplate: ->
 
-    initialize: (options) ->        
+    initialize: (options) ->
         @target = options.target
         @container = options.container
         @parentView = options.parentView
 
         return @
 
-    selfclose: () ->
+    selfclose: ->
         @parentView.onPopoverClose?()
         @close()
 
-    close: () ->
+    close: ->
         @target.popover 'destroy'
         @target.data 'popover', undefined
         @remove()
@@ -31,15 +31,15 @@ module.exports = class PopoverView extends BaseView
             placement: @getDirection()
             content: @template @getRenderData()
             container: @container
-        ).popover('show')
+        ).popover 'show'
 
         # Manage responsive (for smartphones)
         if $(window).width() <= 500
             $('.popover').css 'top', 0
             $('.popover').css 'left', 0
 
-        @setElement $('#' + @parentView.id + ' .popover')
-        
+        @setElement $("##{@parentView.id} .popover")
+
         @afterRender()
         return @
 
@@ -48,10 +48,12 @@ module.exports = class PopoverView extends BaseView
     getDirection: ->
         pos = @target.offset()
         ctnOfs = @container.offset()
-        fitRight = pos.left + @target.width() + @popoverWidth < ctnOfs.left + @container.width()
+        realWidth = pos.left + @target.width() + @popoverWidth
+        fitRight = realWidth < ctnOfs.left + @container.width()
         fitLeft = pos.left - @popoverWidth > ctnOfs.left
 
-        fitBottom = pos.top + @target.height() + @popoverHeight < ctnOfs.top + @container.height()
+        realHeight = pos.top + @target.height() + @popoverHeight
+        fitBottom = realHeight < ctnOfs.top + @container.height()
 
         if fitRight
             return 'right'
