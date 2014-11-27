@@ -1,14 +1,12 @@
 app = require 'application'
 
 $ ->
-    require 'lib/app_helpers'
-
-    moment.locale(window.locale)
+    moment.locale window.locale
     # If needed, add locales to client/vendor/scripts/lang
     # from : https://github.com/moment/moment/tree/develop/locale
     locale = moment.localeData()
     # @TODO : why "en" default
-    $.fn.datetimepicker.dates['en'] = { # as default
+    $.fn.datetimepicker.dates['en'] = # as default
         days: locale._weekdays
         daysShort: locale._weekdaysShort
         daysMin: locale._weekdaysMin
@@ -27,7 +25,6 @@ $ ->
                     .replace /H/g, 'h'
                     .replace /h/g, 'H'
                     .replace /m/g, 'i'
-    }
 
     app.initialize()
 
