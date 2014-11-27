@@ -89,7 +89,7 @@ Event::getAlarmAttendeesEmail = ->
 # November 2014 Migration :
 # Migrate from v1.0.4 to next-gen doctypes.
 # Use date format as key to detect doctype version.
-Event::migrateDoctype = () ->
+Event::migrateDoctype = ->
 
     hasMigrate = @migrateDateTime 'start'
     # Quick quit if no migration.

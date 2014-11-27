@@ -16,7 +16,7 @@ module.exports = class TagsView extends BaseView
 
         return this
 
-    tagAdded: (ev, ui) =>
+    tagAdded: (ev, ui) ->
         ui.tag.css 'background-color', colorHash ui.tagLabel
 
     getTags: ->

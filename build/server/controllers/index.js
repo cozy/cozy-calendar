@@ -27,46 +27,40 @@ module.exports.tags = function(req, res, next) {
 
 module.exports.index = function(req, res) {
   return async.parallel([
-    (function(_this) {
-      return function(cb) {
-        return Contact.all(function(err, contacts) {
-          var contact, index, _i, _len;
-          if (err) {
-            return cb(err);
-          }
-          for (index = _i = 0, _len = contacts.length; _i < _len; index = ++_i) {
-            contact = contacts[index];
-            contacts[index] = contact.asNameAndEmails();
-          }
-          return cb(null, contacts);
-        });
-      };
-    })(this), Event.all, (function(_this) {
-      return function(cb) {
-        return CozyInstance.getLocale(function(err, locale) {
-          if (err) {
-            console.log(err);
-          }
-          return cb(null, locale);
-        });
-      };
-    })(this)
-  ], (function(_this) {
-    return function(err, results) {
-      var contacts, events, locale;
-      if (err) {
-        return res.send({
-          error: 'Server error occurred while retrieving data',
-          stack: err.stack
-        });
-      } else {
-        contacts = results[0], events = results[1], locale = results[2];
-        return res.render('index.jade', {
-          imports: "window.locale = \"" + locale + "\";\nwindow.initevents = " + (JSON.stringify(events)) + ";\nwindow.initcontacts = " + (JSON.stringify(contacts)) + ";"
-        });
-      }
-    };
-  })(this));
+    function(cb) {
+      return Contact.all(function(err, contacts) {
+        var contact, index, _i, _len;
+        if (err) {
+          return cb(err);
+        }
+        for (index = _i = 0, _len = contacts.length; _i < _len; index = ++_i) {
+          contact = contacts[index];
+          contacts[index] = contact.asNameAndEmails();
+        }
+        return cb(null, contacts);
+      });
+    }, Event.all, function(cb) {
+      return CozyInstance.getLocale(function(err, locale) {
+        if (err) {
+          console.log(err);
+        }
+        return cb(null, locale);
+      });
+    }
+  ], function(err, results) {
+    var contacts, events, locale;
+    if (err) {
+      return res.send({
+        error: 'Server error occurred while retrieving data',
+        stack: err.stack
+      });
+    } else {
+      contacts = results[0], events = results[1], locale = results[2];
+      return res.render('index.jade', {
+        imports: "window.locale = \"" + locale + "\";\nwindow.initevents = " + (JSON.stringify(events)) + ";\nwindow.initcontacts = " + (JSON.stringify(contacts)) + ";"
+      });
+    }
+  });
 };
 
 module.exports.userTimezone = function(req, res) {

@@ -5,8 +5,8 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
 
     getFCEventSource: (tags) =>
         return (start, end, timezone, callback) =>
-            # start and end : ambiguous moments ; only dates if month or week view.
-
+            # start and end : ambiguous moments
+            # only dates if month or week view.
             eventsInRange = []
             @each (item) ->
                 itemStart = item.getStartDateObject()

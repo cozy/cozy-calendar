@@ -14,7 +14,7 @@ catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
 module.exports = class MailHandler
 
     # compile templates
-    constructor: () ->
+    constructor: ->
         @templates = {}
 
         file = __dirname + '/mail_invitation.jade'
@@ -44,7 +44,8 @@ module.exports = class MailHandler
                 return callback()
 
             async.forEach guests, (guest, cb) =>
-                ismail = guest.status is 'INVITATION-NOT-SENT' or (guest.status is 'ACCEPTED' and dateChanged)
+                ismail = guest.status is 'INVITATION-NOT-SENT' or \
+                         (guest.status is 'ACCEPTED' and dateChanged)
 
                 if guest.status is 'INVITATION-NOT-SENT' or
                 (guest.status is 'ACCEPTED' and dateChanged)

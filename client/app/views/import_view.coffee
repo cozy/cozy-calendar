@@ -41,7 +41,7 @@ module.exports = class ImportView extends BaseView
         return unless file
         form = new FormData()
         form.append "file", file
-        @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        @importButton.find('span').html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         @importButton.spin 'tiny'
 
         # Empty event collection before importing new lists.

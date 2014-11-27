@@ -85,7 +85,7 @@ module.exports = class CalendarView extends BaseView
         @calHeader.on 'today', => @cal.fullCalendar 'today'
         @calHeader.on 'week', => @cal.fullCalendar 'changeView', 'agendaWeek'
         @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
-        @calHeader.on 'list', => app.router.navigate 'list', trigger:true
+        @calHeader.on 'list', -> app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -108,8 +108,11 @@ module.exports = class CalendarView extends BaseView
             targetHeight = $(window).height() - 50
             $("#menu").height 40
 
-        @cal.fullCalendar 'option', 'height', targetHeight unless initial is 'initial'
-        @cal.height @$('.fc-header').height() + @$('.fc-view-container').height()
+        unless initial is 'initial'
+            @cal.fullCalendar 'option', 'height', targetHeight
+        fcHeaderHeight = @$('.fc-header').height()
+        fcViewContainreHeight = @$('.fc-view-container').height()
+        @cal.height fcHeaderHeight + fcViewContainreHeight
 
     refresh: (collection) ->
         @cal.fullCalendar 'refetchEvents'
@@ -137,11 +140,11 @@ module.exports = class CalendarView extends BaseView
             @popover.close()
 
             # click on same case
-            if @popover.options? and (
-                @popover.options.model? and @popover.options.model is options.model or(
-                        @popover.options.start?.isSame(options.start) and
-                        @popover.options.end?.isSame(options.end) and
-                        @popover.options.type is options.type))
+            if @popover.options? and (@popover.options.model? and \
+               @popover.options.model is options.model or \
+               (@popover.options.start?.isSame(options.start) and \
+               @popover.options.end?.isSame(options.end) and \
+               @popover.options.type is options.type))
 
                 @cal.fullCalendar 'unselect'
                 @popover = null

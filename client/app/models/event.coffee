@@ -16,7 +16,7 @@ module.exports = class Event extends ScheduleItem
     getDiff: ->
         return @getEndDateObject().diff @getStartDateObject(), 'days'
 
-    # Update start, with values in setObj, 
+    # Update start, with values in setObj,
     # while ensuring that end stays after start.
     # @param setObj a object, with hour, minute, ... as key, and corrresponding
     # values, in the cozy's user timezone.
@@ -54,7 +54,7 @@ module.exports = class Event extends ScheduleItem
     setDiff: (days) ->
         edo = @getStartDateObject().startOf 'day'
         edo.add days, 'day'
-        
+
         if not @isAllDay()
             oldEnd = @getEndDateObject()
             edo.set 'hour', oldEnd.hour()

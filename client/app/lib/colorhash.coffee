@@ -6,7 +6,7 @@ hue2rgb = (p,q,t) ->
     if t < 2/3 then return p + (q - p) * (2/3 - t) * 6
     return p
 
-hslToRgb = (h, s, l) =>
+hslToRgb = (h, s, l) ->
     if s is 0 then r = g = b = l
     else
         q = if l < 0.5 then l * (1 + s) else l + s - l * s
@@ -15,7 +15,8 @@ hslToRgb = (h, s, l) =>
         g = hue2rgb p, q, h
         b = hue2rgb p, q, h - 1/3
 
-    return "#" + ((1 << 24) + (r*255 << 16) + (g*255 << 8) + parseInt(b*255)).toString(16).slice(1)
+    color = ((1 << 24) + (r*255 << 16) + (g*255 << 8) + parseInt(b*255))
+    return "##{color.toString(16).slice 1}"
 
 module.exports = (tag) ->
     if tag isnt "my calendar"

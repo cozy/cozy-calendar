@@ -17,9 +17,11 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
     initialize: ->
         @eventCollection = new RealEventCollection()
-        
-        @eventCollection.generateRealEvents moment().add(-1, 'week'), moment().add(1, 'week')
-        
+
+        lowBoundary = moment().add -1, 'week'
+        topBoundary = moment().add 1, 'week'
+        @eventCollection.generateRealEvents lowBoundary, topBoundary
+
         @tagsCollection = app.tags
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
@@ -29,7 +31,7 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
         @listenTo @tagsCollection, 'change', @resetFromBase
 
-        
+
         @resetFromBase()
 
     resetFromBase: ->

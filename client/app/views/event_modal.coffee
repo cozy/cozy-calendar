@@ -39,7 +39,8 @@ module.exports = class EventModal extends ViewCollection
         'click #addguest': => @onGuestAdded @$('#addguest-field').val()
         'keydown #basic-description'    : 'resizeDescription'
         'keypress #basic-description'   : 'resizeDescription'
-        'click .addreminder': =>  @addReminder action: 'DISPLAY', trigg: '-PT10M'
+        'click .addreminder': =>
+            @addReminder action: 'DISPLAY', trigg: '-PT10M'
         'click #allday' : 'toggleAllDay'
 
     afterRender: ->
@@ -54,7 +55,7 @@ module.exports = class EventModal extends ViewCollection
 
         @reminders = []
         @model.get('alarms')?.forEach @addReminder
-            
+
         @rruleForm = new RRuleFormView model: @model
         @rruleForm.render()
         @$('#rrule-container').append @rruleForm.$el
@@ -92,7 +93,7 @@ module.exports = class EventModal extends ViewCollection
             pickerPosition: 'bottom-right'
 
             keyboardNavigation: false
-            
+
 
         if @$('#allday').is ':checked'
             dtFormat = @inputDateFormat
@@ -103,7 +104,7 @@ module.exports = class EventModal extends ViewCollection
 
         else
             dtFormat = @inputDateTimeFormat
-            _.extend options, 
+            _.extend options,
                 format: @inputDateTimeDTPickerFormat
                 viewSelect: 4
 
@@ -151,7 +152,7 @@ module.exports = class EventModal extends ViewCollection
         data = _.extend {}, @model.toJSON(),
             summary: @model.get 'description'
             description: @model.get 'details'
-            
+
             allDay: @model.isAllDay()
             exportdate: @model.getStartDateObject().format @exportDateFormat
 
@@ -171,10 +172,10 @@ module.exports = class EventModal extends ViewCollection
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
             tags: [@$('#basic-calendar').val()].concat @tags.getTags()
-        
+
         data.alarms = @reminders.map (v) -> return v.getModelAttributes()
 
-        data.rrule = 
+        data.rrule =
         if @rruleForm.hasRRule()
             rruleStr = @rruleForm.getRRule().toString()
 
@@ -185,23 +186,23 @@ module.exports = class EventModal extends ViewCollection
 
         # start and end :
         if @$('#allday').is ':checked'
-            dtS = moment.tz @startField.val(), @inputDateFormat, 
+            dtS = moment.tz @startField.val(), @inputDateFormat,
                     window.app.timezone
-            dtE = moment.tz @endField.val(), @inputDateFormat, 
+            dtE = moment.tz @endField.val(), @inputDateFormat,
                     window.app.timezone
 
             data.start = H.momentToDateString(dtS)
             data.end = H.momentToDateString(dtE)
 
         else
-            dtS = moment.tz @startField.val(), @inputDateTimeFormat, 
+            dtS = moment.tz @startField.val(), @inputDateTimeFormat,
                     window.app.timezone
-            dtE = moment.tz @endField.val(), @inputDateTimeFormat, 
+            dtE = moment.tz @endField.val(), @inputDateTimeFormat,
                     window.app.timezone
 
             if @rruleForm.hasRRule()
                 # Recurring event, save ambiguous datetime, and the timezone.
-                
+
                 # Reset timezone to the cozy's user one.
                 data.timezone = window.app.timezone
                 data.start = H.momentToAmbiguousString(dtS)
@@ -255,9 +256,10 @@ module.exports = class EventModal extends ViewCollection
 
                 while (contact = contacts.shift())
                     item = contact.display
-                    if !item.toLowerCase().indexOf this.query.toLowerCase()
+                    if not item.toLowerCase().indexOf(this.query.toLowerCase())
                         beginswith.push contact
-                    else if ~item.indexOf this.query then caseSensitive.push contact
+                    else if ~item.indexOf this.query
+                        caseSensitive.push contact
                     else caseInsensitive.push contact
 
                 return beginswith.concat caseSensitive, caseInsensitive

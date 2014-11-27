@@ -1,6 +1,7 @@
 americano = require 'americano'
 
-staticMiddleware = americano.static __dirname + '/../client/public', maxAge: 86400000
+publicPath = "#{__dirname}/../client/public"
+staticMiddleware = americano.static publicPath, maxAge: 86400000
 
 module.exports =
 

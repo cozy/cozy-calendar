@@ -228,8 +228,11 @@ module.exports = DayBucketCollection = (function(_super) {
   DayBucketCollection.prototype.comparator = 'date';
 
   DayBucketCollection.prototype.initialize = function() {
+    var lowBoundary, topBoundary;
     this.eventCollection = new RealEventCollection();
-    this.eventCollection.generateRealEvents(moment().add(-1, 'week'), moment().add(1, 'week'));
+    lowBoundary = moment().add(-1, 'week');
+    topBoundary = moment().add(1, 'week');
+    this.eventCollection.generateRealEvents(lowBoundary, topBoundary);
     this.tagsCollection = app.tags;
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
@@ -330,8 +333,7 @@ module.exports = EventCollection = (function(_super) {
 ;require.register("collections/realevents", function(exports, require, module) {
 var Event, RealEvent, RealEventCollection,
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Event = require('../models/event');
 
@@ -382,7 +384,6 @@ module.exports = RealEventCollection = (function(_super) {
   __extends(RealEventCollection, _super);
 
   function RealEventCollection() {
-    this.generateRealEvents = __bind(this.generateRealEvents, this);
     return RealEventCollection.__super__.constructor.apply(this, arguments);
   }
 
@@ -780,7 +781,6 @@ app = require('application');
 
 $(function() {
   var locale;
-  require('lib/app_helpers');
   moment.locale(window.locale);
   locale = moment.localeData();
   $.fn.datetimepicker.dates['en'] = {
@@ -822,12 +822,12 @@ $(function() {
       return this.each(function() {
         var $this, spinner;
         $this = $(this);
-        spinner = $this.data("spinner");
+        spinner = $this.data('spinner');
         if (spinner != null) {
           spinner.stop();
-          return $this.data("spinner", null);
+          return $this.data('spinner', null);
         } else if (opts !== false) {
-          if (typeof opts === "string") {
+          if (typeof opts === 'string') {
             if (opts in presets) {
               opts = presets[opts];
             } else {
@@ -850,23 +850,6 @@ $(function() {
     }
   };
 });
-});
-
-;require.register("lib/app_helpers", function(exports, require, module) {
-(function() {
-  return (function() {
-    var console, dummy, method, methods, _results;
-    console = window.console = window.console || {};
-    method = void 0;
-    dummy = function() {};
-    methods = 'assert,count,debug,dir,dirxml,error,exception, group,groupCollapsed,groupEnd,info,log,markTimeline, profile,profileEnd,time,timeEnd,trace,warn'.split(',');
-    _results = [];
-    while (method = methods.pop()) {
-      _results.push(console[method] = console[method] || dummy);
-    }
-    return _results;
-  })();
-})();
 });
 
 ;require.register("lib/base_view", function(exports, require, module) {
@@ -937,21 +920,20 @@ hue2rgb = function(p, q, t) {
   return p;
 };
 
-hslToRgb = (function(_this) {
-  return function(h, s, l) {
-    var b, g, p, q, r;
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1 / 3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1 / 3);
-    }
-    return "#" + ((1 << 24) + (r * 255 << 16) + (g * 255 << 8) + parseInt(b * 255)).toString(16).slice(1);
-  };
-})(this);
+hslToRgb = function(h, s, l) {
+  var b, color, g, p, q, r;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  color = (1 << 24) + (r * 255 << 16) + (g * 255 << 8) + parseInt(b * 255);
+  return "#" + (color.toString(16).slice(1));
+};
 
 module.exports = function(tag) {
   var colour, h, hash, i, l, s, _i, _ref;
@@ -1023,18 +1005,20 @@ module.exports = PopoverView = (function(_super) {
       $('.popover').css('top', 0);
       $('.popover').css('left', 0);
     }
-    this.setElement($('#' + this.parentView.id + ' .popover'));
+    this.setElement($("#" + this.parentView.id + " .popover"));
     this.afterRender();
     return this;
   };
 
   PopoverView.prototype.getDirection = function() {
-    var ctnOfs, fitBottom, fitLeft, fitRight, pos;
+    var ctnOfs, fitBottom, fitLeft, fitRight, pos, realHeight, realWidth;
     pos = this.target.offset();
     ctnOfs = this.container.offset();
-    fitRight = pos.left + this.target.width() + this.popoverWidth < ctnOfs.left + this.container.width();
+    realWidth = pos.left + this.target.width() + this.popoverWidth;
+    fitRight = realWidth < ctnOfs.left + this.container.width();
     fitLeft = pos.left - this.popoverWidth > ctnOfs.left;
-    fitBottom = pos.top + this.target.height() + this.popoverHeight < ctnOfs.top + this.container.height();
+    realHeight = pos.top + this.target.height() + this.popoverHeight;
+    fitBottom = realHeight < ctnOfs.top + this.container.height();
     if (fitRight) {
       return 'right';
     } else if (fitLeft) {
@@ -1913,8 +1897,9 @@ module.exports = ScheduleItem = (function(_super) {
     options.dtstart = jsDateEventS;
     rrule = new RRule(options);
     fixDSTTroubles = function(jsDateRecurrentS) {
-      var diff, mDateRecurrentS;
-      mDateRecurrentS = moment.tz(jsDateRecurrentS.toISOString(), eventTimezone);
+      var diff, isoDate, mDateRecurrentS;
+      isoDate = jsDateRecurrentS.toISOString();
+      mDateRecurrentS = moment.tz(isoDate, eventTimezone);
       diff = mDateEventS.hour() - mDateRecurrentS.hour();
       if (diff === 23) {
         diff = -1;
@@ -1926,8 +1911,9 @@ module.exports = ScheduleItem = (function(_super) {
     };
     fces = rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
       return function(jsDateRecurrentS) {
-        var fce, mDateRecurrentE, mDateRecurrentS;
-        mDateRecurrentS = H.toTimezonedMoment(fixDSTTroubles(jsDateRecurrentS));
+        var fce, fixedDate, mDateRecurrentE, mDateRecurrentS;
+        fixedDate = fixDSTTroubles(jsDateRecurrentS);
+        mDateRecurrentS = H.toTimezonedMoment(fixedDate);
         mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
         fce = generator(_this, mDateRecurrentS, mDateRecurrentE);
         return fce;
@@ -1954,10 +1940,11 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype._toFullCalendarEvent = function(start, end) {
-    var fcEvent;
+    var displayedTime, fcEvent;
+    displayedTime = !this.isAllDay() ? start.format('H:mm[ ]') : '';
     return fcEvent = {
       id: this.cid,
-      title: (!this.isAllDay() ? start.format('H:mm[ ]') : '') + this.get('description'),
+      title: "" + displayedTime + (this.get('description')),
       start: start,
       end: end,
       allDay: this.isAllDay(),
@@ -2290,11 +2277,6 @@ module.exports = EventPopOver = (function(_super) {
   __extends(EventPopOver, _super);
 
   function EventPopOver() {
-    this.handleError = __bind(this.handleError, this);
-    this.refresh = __bind(this.refresh, this);
-    this.updateMapLink = __bind(this.updateMapLink, this);
-    this.selfclose = __bind(this.selfclose, this);
-    this.onRemoveClicked = __bind(this.onRemoveClicked, this);
     this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
@@ -2359,31 +2341,23 @@ module.exports = EventPopOver = (function(_super) {
       inputEnd = this.$('#input-end');
       inputStart = this.$('#input-start');
       inputDiff = this.$('#input-diff');
-      inputStart.on('timepicker.next', (function(_this) {
-        return function() {
-          return inputEnd.focus();
-        };
-      })(this));
-      inputEnd.on('timepicker.next', (function(_this) {
-        return function() {
-          return inputDiff.focus();
-        };
-      })(this));
-      inputEnd.on('timepicker.prev', (function(_this) {
-        return function() {
-          return inputStart.focus().timepicker('highlightMinute');
-        };
-      })(this));
-      inputDiff.on('keydown', (function(_this) {
-        return function(ev) {
-          if (ev.keyCode === 37) {
-            inputEnd.focus().timepicker('highlightMinute');
-          }
-          if (ev.keyCode === 39) {
-            return _this.$('#input-desc').focus();
-          }
-        };
-      })(this));
+      inputStart.on('timepicker.next', function() {
+        return inputEnd.focus();
+      });
+      inputEnd.on('timepicker.next', function() {
+        return inputDiff.focus();
+      });
+      inputEnd.on('timepicker.prev', function() {
+        return inputStart.focus().timepicker('highlightMinute');
+      });
+      inputDiff.on('keydown', function(ev) {
+        if (ev.keyCode === 37) {
+          inputEnd.focus().timepicker('highlightMinute');
+        }
+        if (ev.keyCode === 39) {
+          return this.$('#input-desc').focus();
+        }
+      });
     }
     this.calendar = new ComboBox({
       el: this.$('#calendarcombo'),
@@ -2531,11 +2505,9 @@ module.exports = EventPopOver = (function(_super) {
             return collection.add(_this.model);
           };
         })(this),
-        error: (function(_this) {
-          return function() {
-            return alert('server error occured');
-          };
-        })(this),
+        error: function() {
+          return alert('server error occured');
+        },
         complete: (function(_this) {
           return function() {
             _this.addButton.spin(false);
@@ -2743,13 +2715,11 @@ module.exports = CalendarView = (function(_super) {
         return _this.cal.fullCalendar('changeView', 'month');
       };
     })(this));
-    this.calHeader.on('list', (function(_this) {
-      return function() {
-        return app.router.navigate('list', {
-          trigger: true
-        });
-      };
-    })(this));
+    this.calHeader.on('list', function() {
+      return app.router.navigate('list', {
+        trigger: true
+      });
+    });
     this.$('#alarms').prepend(this.calHeader.render().$el);
     this.handleWindowResize();
     debounced = _.debounce(this.handleWindowResize, 10);
@@ -2769,7 +2739,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.handleWindowResize = function(initial) {
-    var targetHeight;
+    var fcHeaderHeight, fcViewContainreHeight, targetHeight;
     if ($(window).width() > 1000) {
       targetHeight = $(window).height() - 90;
       $("#menu").height(targetHeight + 90);
@@ -2783,7 +2753,9 @@ module.exports = CalendarView = (function(_super) {
     if (initial !== 'initial') {
       this.cal.fullCalendar('option', 'height', targetHeight);
     }
-    return this.cal.height(this.$('.fc-header').height() + this.$('.fc-view-container').height());
+    fcHeaderHeight = this.$('.fc-header').height();
+    fcViewContainreHeight = this.$('.fc-view-container').height();
+    return this.cal.height(fcHeaderHeight + fcViewContainreHeight);
   };
 
   CalendarView.prototype.refresh = function(collection) {
@@ -3406,11 +3378,9 @@ module.exports = ReminderView = (function(_super) {
     }
     data = {
       isNew: this.model.isNew,
-      isSelectedUnit: (function(_this) {
-        return function(u) {
-          return u === unit;
-        };
-      })(this),
+      isSelectedUnit: function(u) {
+        return u === unit;
+      },
       durationValue: value,
       model: this.model
     };
@@ -3570,7 +3540,7 @@ module.exports = RRuleView = (function(_super) {
   };
 
   RRuleView.prototype.getRRule = function() {
-    var RRuleWdays, day, monthmode, options, start, wk;
+    var RRuleWdays, day, monthmode, options, rawDate, start, wk;
     start = this.model.getStartDateObject();
     RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
     options = {
@@ -3603,7 +3573,8 @@ module.exports = RRuleView = (function(_super) {
         options.count = +this.$('#rrule-count').val();
         break;
       case 'until':
-        options.until = moment.tz(this.$('#rrule-until').val(), this.inputDateFormat, 'UTC').toDate();
+        rawDate = this.$('#rrule-until').val();
+        options.until = moment.tz(rawDate, this.inputDateFormat, 'UTC').toDate();
     }
     return new RRule(options);
   };
@@ -3783,7 +3754,7 @@ module.exports = ImportView = (function(_super) {
     }
     form = new FormData();
     form.append("file", file);
-    this.importButton.find('span').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+    this.importButton.find('span').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.importButton.spin('tiny');
     this.eventList.collection.reset();
     this.$('.import-progress').html(null);
@@ -4399,7 +4370,6 @@ module.exports = TagsView = (function(_super) {
 
   function TagsView() {
     this.refresh = __bind(this.refresh, this);
-    this.tagAdded = __bind(this.tagAdded, this);
     return TagsView.__super__.constructor.apply(this, arguments);
   }
 

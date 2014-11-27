@@ -13,28 +13,26 @@ module.exports["export"] = function(req, res) {
     organization: 'Cozy',
     title: 'Cozy Calendar'
   });
-  return Event.all((function(_this) {
-    return function(err, events) {
-      var event, _i, _len;
-      if (err) {
-        return res.send({
-          error: true,
-          msg: 'Server error occurred while retrieving data'
-        });
-      } else {
-        if (events.length > 0) {
-          for (_i = 0, _len = events.length; _i < _len; _i++) {
-            event = events[_i];
-            calendar.add(event.toIcal());
-          }
+  return Event.all(function(err, events) {
+    var event, _i, _len;
+    if (err) {
+      return res.send({
+        error: true,
+        msg: 'Server error occurred while retrieving data'
+      });
+    } else {
+      if (events.length > 0) {
+        for (_i = 0, _len = events.length; _i < _len; _i++) {
+          event = events[_i];
+          calendar.add(event.toIcal());
         }
-        res.header({
-          'Content-Type': 'text/calendar'
-        });
-        return res.send(calendar.toString());
       }
-    };
-  })(this));
+      res.header({
+        'Content-Type': 'text/calendar'
+      });
+      return res.send(calendar.toString());
+    }
+  });
 };
 
 module.exports["import"] = function(req, res) {

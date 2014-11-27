@@ -101,8 +101,8 @@ module.exports = class Router extends Backbone.Router
         $('.main-container').append @mainView.$el
         @mainView.render()
 
-    getBeginningOfWeek = (year, month, day) =>
+    getBeginningOfWeek = (year, month, day) ->
         [year, month, day] = [year, month, day].map (x) -> parseInt x
         monday = new Date(year, (month-1)%12, day)
-        monday.setDate(monday.getDate() - monday.getDay() + 1);
-        [year, monday.getMonth()+1, monday.getDate()]
+        monday.setDate(monday.getDate() - monday.getDay() + 1)
+        return [year, monday.getMonth()+1, monday.getDate()]
