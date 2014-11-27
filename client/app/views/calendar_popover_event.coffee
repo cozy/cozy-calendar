@@ -74,7 +74,7 @@ module.exports = class EventPopOver extends PopoverView
             small: true
             source: app.tags.calendars()
 
-        @calendar.on 'change', (value) => @model.setCalendar value
+        @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
         @updateMapLink()
         @refresh()
@@ -186,6 +186,13 @@ module.exports = class EventPopOver extends PopoverView
     selfclose: =>
         # Revert if not just saved with addButton.
         @model.fetch complete: super
+
+    close: ->
+        # we don't reuse @selfclose because both are doing mostly the same thing
+        # but are a little bit different.
+        # Revert if not just saved with addButton.
+        @model.fetch complete: super
+        super
 
     updateMapLink: =>
         value = encodeURIComponent @$('#input-place').val()
