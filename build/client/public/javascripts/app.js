@@ -4953,6 +4953,7 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onBlur = function() {
+    console.log('blur');
     if (!this.menuOpen) {
       this.$el.removeClass('expanded');
     }
@@ -4961,7 +4962,8 @@ module.exports = ComboBox = (function(_super) {
 
   ComboBox.prototype.onSelect = function(ev, ui) {
     this.$el.blur().removeClass('expanded');
-    return this.updateBadge(ev, ui);
+    this.updateBadge(ev, ui);
+    return this.trigger('edition-complete', ui.item.value);
   };
 
   ComboBox.prototype.updateBadge = function(ev, ui) {
