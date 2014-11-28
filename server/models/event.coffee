@@ -1,5 +1,6 @@
 americano = require 'americano-cozy'
 momentTz = require 'moment-timezone'
+async = require 'async'
 log = require('printit')
     prefix: 'event:model'
 
@@ -146,3 +147,17 @@ Event.migrateAll = ->
         for event in events
             event.migrateDoctype()
 
+Event.bulkCalendarRename = (oldName, newName, callback) ->
+    Event.request 'byCalendar', key: oldName, (err, events) ->
+        async.eachLimit events, 10, (event, done) ->
+            # clones the array
+            tags = [].concat event.tags
+            tags[0] = newName
+            event.updateAttributes {tags}, done
+        , (err) -> callback err, events
+
+Event.bulkDelete = (calendarName, callback) ->
+    Event.request 'byCalendar', key: calendarName, (err, events) ->
+        async.eachLimit events, 10, (event, done) ->
+            event.destroy done
+        , (err) -> callback err, events

@@ -162,3 +162,47 @@ module.exports.publicIcal = function(req, res) {
   });
   return res.send(calendar.toString());
 };
+
+module.exports.bulkCalendarRename = function(req, res) {
+  var newName, oldName, _ref;
+  _ref = req.body, oldName = _ref.oldName, newName = _ref.newName;
+  if (oldName == null) {
+    return res.send(400, {
+      error: '`oldName` is mandatory'
+    });
+  } else if (newName == null) {
+    return res.send(400, {
+      error: '`newName` is mandatory'
+    });
+  } else {
+    return Event.bulkCalendarRename(oldName, newName, function(err, events) {
+      if (err != null) {
+        return res.send(500, {
+          error: err
+        });
+      } else {
+        return res.send(200, events);
+      }
+    });
+  }
+};
+
+module.exports.bulkDelete = function(req, res) {
+  var calendarName;
+  calendarName = req.body.calendarName;
+  if (calendarName == null) {
+    return res.send(400, {
+      error: '`calendarName` is mandatory'
+    });
+  } else {
+    return Event.bulkDelete(calendarName, function(err, events) {
+      if (err != null) {
+        return res.send(500, {
+          error: err
+        });
+      } else {
+        return res.send(200, events);
+      }
+    });
+  }
+};

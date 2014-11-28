@@ -108,3 +108,28 @@ module.exports.publicIcal = (req, res) ->
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()
+
+
+module.exports.bulkCalendarRename = (req, res) ->
+    {oldName, newName} = req.body
+    unless oldName?
+        res.send 400, error: '`oldName` is mandatory'
+    else if not newName?
+        res.send 400, error: '`newName` is mandatory'
+    else
+        Event.bulkCalendarRename oldName, newName, (err, events) ->
+            if err?
+                res.send 500, error: err
+            else
+                res.send 200, events
+
+module.exports.bulkDelete = (req, res) ->
+    {calendarName} = req.body
+    unless calendarName?
+        res.send 400, error: '`calendarName` is mandatory'
+    else
+        Event.bulkDelete calendarName, (err, events) ->
+            if err?
+                res.send 500, error: err
+            else
+                res.send 200, events

@@ -514,10 +514,12 @@ module.exports = ScheduleItemsCollection = (function(_super) {
 });
 
 ;require.register("collections/tags", function(exports, require, module) {
-var Tags,
+var SocketListener, Tags,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
+
+SocketListener = require('../lib/socket_listener');
 
 module.exports = Tags = (function(_super) {
   var Tag, stringify;
@@ -595,34 +597,75 @@ module.exports = Tags = (function(_super) {
     return this.resetFromBase();
   };
 
+  Tags.prototype._pauseModels = function(models, options) {
+    return models.forEach(function(model) {
+      return SocketListener.pause(model, null, options);
+    });
+  };
+
+  Tags.prototype._resumeModels = function(models, options) {
+    return models.forEach(function(model) {
+      return SocketListener.resume(model, null, options);
+    });
+  };
+
   Tags.prototype.remove = function(calendarName, callback) {
-    var eventsToRemove;
+    var eventsToRemove, options;
     eventsToRemove = this.eventCollection.getByCalendar(calendarName);
-    return async.eachLimit(eventsToRemove, 5, function(event, done) {
-      return event.destroy({
-        wait: true,
-        error: done.bind(null, t('server error occured')),
-        success: done
-      });
-    }, callback);
+    options = {
+      ignoreMySocketNotification: true
+    };
+    this._pauseModels(eventsToRemove, options);
+    return $.ajax('events/delete', {
+      type: 'DELETE',
+      data: {
+        calendarName: calendarName
+      },
+      success: (function(_this) {
+        return function() {
+          _this.eventCollection.remove(eventsToRemove);
+          callback();
+          return _this._resumeModels(eventsToRemove, options);
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          _this._resumeModels(eventsToRemove, options);
+          return callback(t('server error occured'));
+        };
+      })(this)
+    });
   };
 
   Tags.prototype.rename = function(oldName, newName, callback) {
-    var eventsToChange;
+    var eventsToChange, options;
+    options = {
+      ignoreMySocketNotification: true
+    };
     eventsToChange = this.eventCollection.getByCalendar(oldName);
-    return async.eachLimit(eventsToChange, 5, function(event, done) {
-      var newTags, tags;
-      tags = event.get('tags');
-      newTags = tags != null ? [].concat(tags) : [];
-      newTags[0] = newName;
-      return event.save({
-        tags: newTags
-      }, {
-        wait: true,
-        error: done.bind(null, t('server error occured')),
-        success: done
-      });
-    }, callback);
+    this._pauseModels(eventsToChange, options);
+    return $.ajax('events/rename-calendar', {
+      type: 'POST',
+      data: {
+        oldName: oldName,
+        newName: newName
+      },
+      success: (function(_this) {
+        return function(data) {
+          _this.eventCollection.add(data, {
+            merge: true
+          });
+          callback();
+          return _this._resumeModels(eventsToChange, options);
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          _this._resumeModels(eventsToChange, options);
+          return callback(t('server error occured'));
+        };
+      })(this)
+    });
   };
 
   Tags.prototype.parse = function(raw) {
@@ -2794,8 +2837,10 @@ module.exports = CalendarView = (function(_super) {
     }
     data = model.toPunctualFullCalendarEvent();
     fcEvent = this.cal.fullCalendar('clientEvents', data.id)[0];
-    _.extend(fcEvent, data);
-    return this.cal.fullCalendar('updateEvent', fcEvent);
+    if (fcEvent != null) {
+      _.extend(fcEvent, data);
+      return this.cal.fullCalendar('updateEvent', fcEvent);
+    }
   };
 
   CalendarView.prototype.showPopover = function(options) {
