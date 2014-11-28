@@ -5047,7 +5047,6 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onBlur = function() {
-    console.log('blur');
     if (!this.menuOpen) {
       this.$el.removeClass('expanded');
     }

@@ -92,25 +92,23 @@ Event::getAlarmAttendeesEmail = ->
 # November 2014 Migration :
 # Migrate from v1.0.4 to next-gen doctypes.
 # Use date format as key to detect doctype version.
-Event::migrateDoctype = ->
+Event::migrateDoctype = (callback) ->
 
     hasMigrate = @migrateDateTime 'start'
     # Quick quit if no migration.
-    return @ if not hasMigrate
-
-    @migrateDateTime 'end'
-
-    if @rrule
-        @timezone = User.timezone
-
+    if not hasMigrate
+        callback()
     else
-        @timezone = undefined
+        @migrateDateTime 'end'
 
-    @save (err) =>
-        if err
-            console.log err
+        if @rrule
+            @timezone = User.timezone
 
-        return @
+        else
+            @timezone = undefined
+
+        @save callback
+
 
 Event::migrateDateTime = (dateField) ->
     dateStr = @[dateField]
@@ -140,14 +138,21 @@ Event::migrateDateTime = (dateField) ->
 
     return true
 
-Event.migrateAll = ->
-    Event.all {}, (err, events) ->
-        if err
-            console.log err
-            return
+Event::patchTag = (callback) ->
+    if not @tags? or not @tags[0]?
+        @updateAttributes tags: ['my-calendar'], callback
+    else
+        callback()
 
-        for event in events
-            event.migrateDoctype()
+Event.migrateAll = (callback) ->
+    Event.all {}, (err, events) ->
+        if err?
+            console.log err
+            callback()
+        else
+            async.eachLimit events, 10, (event, done) ->
+                event.migrateDoctype -> event.patchTag done
+            , callback
 
 Event.bulkCalendarRename = (oldName, newName, callback) ->
     Event.request 'byCalendar', key: oldName, (err, events) ->

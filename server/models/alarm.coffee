@@ -1,4 +1,5 @@
 americano = require 'americano-cozy'
+async = require 'async'
 moment = require 'moment-timezone'
 Event = require './event'
 log = require('printit')
@@ -58,7 +59,7 @@ Alarm::getAttendeesEmail = ->
 # November 2014 Migration :
 # Migrate from v1.0.4 to next-gen doctypes.
 # Use date format as key to detect doctype version.
-Alarm::migrateDoctype = ->
+Alarm::migrateDoctype = (callback) ->
     timezone = @timezone or 'UTC'
     date = moment.tz(@trigg, timezone).format 'YYYY-MM-DD'
 
@@ -76,13 +77,14 @@ Alarm::migrateDoctype = ->
         created: moment().tz('UTC').toISOString()
         lastModification: moment().tz('UTC').toISOString()
 
-    Event.create body, => @destroy()
+    Event.create body, => @destroy callback
 
-Alarm.migrateAll = ->
+Alarm.migrateAll = (callback) ->
     Alarm.all {}, (err, alarms) ->
         if err
             console.log err
-            return
-
-        for alarm in alarms
-            alarm.migrateDoctype()
+            callback()
+        else
+            async.eachLimit alarms, 10, (alarm, done) ->
+                alarm.migrateDoctype done
+            , callback
