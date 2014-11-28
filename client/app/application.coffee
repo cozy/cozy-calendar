@@ -53,4 +53,8 @@ module.exports =
 
         Backbone.history.start()
 
+        # Starts the automatic update of 'today'
+        todayChecker = require '../lib/today_checker'
+        todayChecker @router
+
         Object.freeze this if typeof Object.freeze is 'function'

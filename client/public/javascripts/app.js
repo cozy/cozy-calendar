@@ -101,7 +101,7 @@ module.exports = {
     })(this));
   },
   _initialize: function() {
-    var ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales;
+    var ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagsCollection, e, locales, todayChecker;
     window.app = this;
     this.locale = window.locale;
     delete window.locale;
@@ -140,6 +140,8 @@ module.exports = {
       delete window.initcontacts;
     }
     Backbone.history.start();
+    todayChecker = require('../lib/today_checker');
+    todayChecker(this.router);
     if (typeof Object.freeze === 'function') {
       return Object.freeze(this);
     }
@@ -1093,6 +1095,22 @@ SocketListener = (function(_super) {
 module.exports = new SocketListener();
 });
 
+;require.register("lib/today_checker", function(exports, require, module) {
+module.exports = function(router) {
+  var nextDay, nextTick, now;
+  now = moment();
+  nextDay = moment(now).add(1, 'days').startOf('day');
+  nextTick = nextDay.valueOf() - now.valueOf();
+  return setTimeout(function() {
+    var view;
+    view = router.mainView;
+    if (view.cal != null) {
+      return view.cal.fullCalendar('render');
+    }
+  }, nextTick);
+};
+});
+
 ;require.register("lib/view", function(exports, require, module) {
 var View,
   __hasProp = {}.hasOwnProperty,
@@ -1279,7 +1297,7 @@ module.exports = {
   "Switch to Calendar": "Switch to Calendar",
   "time": "time",
   "Today": "Today",
-  'today': 'aujourd\'hui',
+  'today': 'today',
   "What should I remind you ?": "What should I remind you?",
   "ICalendar import": "ICalendar import",
   "select an icalendar file": "Select an icalendar file",
@@ -1302,8 +1320,8 @@ module.exports = {
   "display previous events": "Display previous events",
   "display next events": "Display next events",
   "event": "Event",
-  "are you sure": "Are you sure ?",
-  "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure ?",
+  "are you sure": "Are you sure?",
+  "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
   "advanced": "More details",
   "enter email": "Enter email",
   "ON": "on",
