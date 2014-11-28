@@ -17,32 +17,33 @@ module.exports = class ListView extends ViewCollection
 
     afterRender: ->
         @calHeader = new Header()
-        #@$el.prepend @calHeader.render().$el
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
         
         @$('#list-container').scroll @checkScroll
+        @keepScreenFull()
+        @collection.on 'reset', @keepScreenFull
         super
 
     appendView: (view) ->
         index = @collection.indexOf view.model
         el = view.$el
 
-        # today = moment().startOf('day')
-        # if view.model.get('date').isBefore today
-        #     el.addClass('before').hide()
-        # else
-        #     el.addClass('after')
-
         if index is 0 then @$(@collectionEl).prepend el
         else
             prevCid = @collection.at(index-1).cid
             @views[prevCid].$el.after el
 
+    keepScreenFull: =>
+        list = @$('#list-container')[0]
+        if list.scrollHeight <= list.clientHeight
+            @loadAfter()
+
     checkScroll: =>
         triggerPoint = 100 # 100px from the bottom
-        if @el.scrollTop + @el.clientHeight + triggerPoint > @el.scrollHeight
+        list = @$('#list-container')[0]
+        if list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight
             @loadAfter()
 
     loadBefore: ->
