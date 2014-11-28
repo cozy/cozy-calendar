@@ -152,26 +152,20 @@ Event.prototype.getAlarmAttendeesEmail = function() {
   return [User.email];
 };
 
-Event.prototype.migrateDoctype = function() {
+Event.prototype.migrateDoctype = function(callback) {
   var hasMigrate;
   hasMigrate = this.migrateDateTime('start');
   if (!hasMigrate) {
-    return this;
-  }
-  this.migrateDateTime('end');
-  if (this.rrule) {
-    this.timezone = User.timezone;
+    return callback();
   } else {
-    this.timezone = void 0;
+    this.migrateDateTime('end');
+    if (this.rrule) {
+      this.timezone = User.timezone;
+    } else {
+      this.timezone = void 0;
+    }
+    return this.save(callback);
   }
-  return this.save((function(_this) {
-    return function(err) {
-      if (err) {
-        console.log(err);
-      }
-      return _this;
-    };
-  })(this));
 };
 
 Event.prototype.migrateDateTime = function(dateField) {
@@ -197,19 +191,28 @@ Event.prototype.migrateDateTime = function(dateField) {
   return true;
 };
 
-Event.migrateAll = function() {
+Event.prototype.patchTag = function(callback) {
+  if ((this.tags == null) || (this.tags[0] == null)) {
+    return this.updateAttributes({
+      tags: ['my-calendar']
+    }, callback);
+  } else {
+    return callback();
+  }
+};
+
+Event.migrateAll = function(callback) {
   return Event.all({}, function(err, events) {
-    var event, _i, _len, _results;
-    if (err) {
+    if (err != null) {
       console.log(err);
-      return;
+      return callback();
+    } else {
+      return async.eachLimit(events, 10, function(event, done) {
+        return event.migrateDoctype(function() {
+          return event.patchTag(done);
+        });
+      }, callback);
     }
-    _results = [];
-    for (_i = 0, _len = events.length; _i < _len; _i++) {
-      event = events[_i];
-      _results.push(event.migrateDoctype());
-    }
-    return _results;
   });
 };
 
