@@ -129,8 +129,10 @@ module.exports = class CalendarView extends BaseView
 
         data = model.toPunctualFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
-        _.extend fcEvent, data
-        @cal.fullCalendar 'updateEvent', fcEvent
+        # if updated event is not shown on screen, fcEvent doesn't exist
+        if fcEvent?
+            _.extend fcEvent, data
+            @cal.fullCalendar 'updateEvent', fcEvent
 
     showPopover: (options) ->
         options.container = @cal
