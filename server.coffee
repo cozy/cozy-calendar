@@ -10,18 +10,16 @@ start = (port, callback) ->
 
 
         User = require './server/models/user'
-        Realtimer = require('cozy-realtime-adapter')
+        Realtimer = require 'cozy-realtime-adapter'
         realtime = Realtimer server : server, ['event.*']
         realtime.on 'user.*', -> User.updateUser()
         User.updateUser (err) ->
-            callback err, app, server
+            # Migration scripts. Relies on User.
+            Event = require './server/models/event'
+            Alarm = require './server/models/alarm'
+            Event.migrateAll -> Alarm.migrateAll ->
+                callback err, app, server
 
-        # Migration scripts. Relies on User.
-        Event = require './server/models/event'
-        Event.migrateAll()
-
-        Alarm = require './server/models/alarm'
-        Alarm.migrateAll()
 
 if not module.parent
     port = process.env.PORT or 9113
