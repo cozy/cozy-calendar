@@ -63,13 +63,13 @@ Event.createOrGetIfImport = (data, callback) ->
 
 Event::formatStart = (dateFormat) ->
     if @rrule
-        date = momentTz.tz(@start, @timezone)
+        date = momentTz.tz @start, @timezone
     else
-        date = momentTz(@start)
+        date = momentTz @start
 
     date.tz User.timezone
-    dStr = date.format dateFormat
-    dStr += ' ' + User.timezone
+    formattedDate = date.format dateFormat
+    formattedDate += ' ' + User.timezone
 
     return dStr
 
