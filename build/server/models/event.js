@@ -117,14 +117,16 @@ Event.createOrGetIfImport = function(data, callback) {
 };
 
 Event.prototype.formatStart = function(dateFormat) {
-  var date;
+  var date, formattedDate;
   if (this.rrule) {
-    date = momentTz.tz(this.start, this.timezone).format(dateFormat);
-    date += ' ' + this.timezone;
+    date = momentTz.tz(this.start, this.timezone);
   } else {
-    date = momentTz.tz(this.start, User.timezone).format(dateFormat);
+    date = momentTz(this.start);
   }
-  return date;
+  date.tz(User.timezone);
+  formattedDate = date.format(dateFormat);
+  formattedDate += ' ' + User.timezone;
+  return formattedDate;
 };
 
 Event.prototype.getGuest = function(key) {

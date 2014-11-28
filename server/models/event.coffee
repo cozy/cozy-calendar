@@ -63,13 +63,15 @@ Event.createOrGetIfImport = (data, callback) ->
 
 Event::formatStart = (dateFormat) ->
     if @rrule
-        date = momentTz.tz(@start, @timezone).format dateFormat
-        date += ' ' + @timezone
-
+        date = momentTz.tz @start, @timezone
     else
-        date = momentTz.tz(@start, User.timezone).format dateFormat
+        date = momentTz @start
 
-    return date
+    date.tz User.timezone
+    formattedDate = date.format dateFormat
+    formattedDate += ' ' + User.timezone
+
+    return formattedDate
 
 # @TODO : this doesn't handle merge correctly
 Event::getGuest = (key) ->
