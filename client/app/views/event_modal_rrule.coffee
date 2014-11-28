@@ -127,7 +127,6 @@ module.exports = class RRuleView extends BaseView
 
     # if [count] in entered, empty [until] value & viceversa
     toggleCountUntil: (event) =>
-
         radio = @$('input:radio[name=endMode]')
 
         if event.target.id is 'rrule-count'
@@ -143,7 +142,6 @@ module.exports = class RRuleView extends BaseView
     updateHelp: =>
         freq = @$('#rrule-freq').val()
         if freq is 'NOREPEAT'
-            # @$('#rrule').hide()
             @$('#rrule-action').show()
             @$('#rrule-help').html t 'no recurrence'
             @$('#rrule-interval').toggle false
