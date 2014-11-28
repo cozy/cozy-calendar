@@ -825,21 +825,7 @@ var app;
 app = require('application');
 
 $(function() {
-  var locale;
   moment.locale(window.locale);
-  locale = moment.localeData();
-  $.fn.datetimepicker.dates['en'] = {
-    days: locale._weekdays,
-    daysShort: locale._weekdaysShort,
-    daysMin: locale._weekdaysMin,
-    months: locale._months,
-    monthsShort: locale._monthsShort,
-    today: locale.calendar["sameDay"],
-    suffix: [],
-    meridiem: locale.meridiem(),
-    weekStart: locale._week["dow"],
-    format: locale._longDateFormat.L.replace(/D/g, 'd').replace(/M/g, 'm').replace(/Y/g, 'y').replace(/H/g, 'h').replace(/h/g, 'H').replace(/m/g, 'i')
-  };
   app.initialize();
   return $.fn.spin = function(opts, color) {
     var presets;
@@ -3129,6 +3115,7 @@ module.exports = EventModal = (function(_super) {
     this.startField.datetimepicker('remove');
     this.endField.datetimepicker('remove');
     options = {
+      language: window.app.locale,
       autoclose: true,
       pickerPosition: 'bottom-right',
       keyboardNavigation: false
@@ -3508,11 +3495,13 @@ module.exports = RRuleView = (function(_super) {
     this.$('#rrule').hide();
     this.updateHelp();
     return this.$('#rrule-until').attr('type', 'text').datetimepicker({
+      language: window.app.locale,
       autoclose: true,
       format: this.inputDateDTPickerFormat,
       minView: 2,
       viewSelect: 4,
-      keyboardNavigation: false
+      keyboardNavigation: false,
+      pickerPosition: 'top-right'
     }).on('changeDate', this.updateHelp);
   };
 

@@ -7206,6 +7206,10 @@ button.close {
 	width: 145px;
 }
 
+.datetimepicker th span.glyphicon {
+	pointer-events: none;
+}
+
 .datetimepicker thead tr:first-child th,
 .datetimepicker tfoot tr:first-child th {
 	cursor: pointer;

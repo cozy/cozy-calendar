@@ -23,7 +23,10 @@ module.exports =
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
+
+        # If needed, add locales to client/vendor/scripts/lang
         moment.locale @locale
+        # $.fn.datetimepicker.language = @locale
 
         Router = require 'router'
         Menu = require 'views/menu'

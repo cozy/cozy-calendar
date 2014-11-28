@@ -18,12 +18,13 @@ module.exports = class RRuleView extends BaseView
         @updateHelp()
 
         @$('#rrule-until').attr('type','text').datetimepicker(
+            language: window.app.locale
             autoclose: true
             format: @inputDateDTPickerFormat
             minView: 2
             viewSelect: 4
             keyboardNavigation: false
-            # datepicker only
+            pickerPosition: 'top-right'
         ).on 'changeDate', @updateHelp
 
     getRenderData: ->

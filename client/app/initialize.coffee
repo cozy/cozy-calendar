@@ -1,31 +1,8 @@
 app = require 'application'
 
 $ ->
-    moment.locale window.locale
     # If needed, add locales to client/vendor/scripts/lang
-    # from : https://github.com/moment/moment/tree/develop/locale
-    locale = moment.localeData()
-    # @TODO : why "en" default
-    $.fn.datetimepicker.dates['en'] = # as default
-        days: locale._weekdays
-        daysShort: locale._weekdaysShort
-        daysMin: locale._weekdaysMin
-        months: locale._months
-        monthsShort: locale._monthsShort
-        today: locale.calendar["sameDay"]
-        suffix: [], # ?
-        meridiem: locale.meridiem()
-        weekStart: locale._week["dow"]
-        # datetimepicker and moment use different convention for short naming
-        # of datetime components
-        format: locale._longDateFormat.L
-                    .replace /D/g, 'd'
-                    .replace /M/g, 'm'
-                    .replace /Y/g, 'y'
-                    .replace /H/g, 'h'
-                    .replace /h/g, 'H'
-                    .replace /m/g, 'i'
-
+    moment.locale window.locale
     app.initialize()
 
     # Initialize Spin JS the lib that displays loading indicators

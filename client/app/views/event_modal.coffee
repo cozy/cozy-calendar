@@ -89,6 +89,7 @@ module.exports = class EventModal extends ViewCollection
         @endField.datetimepicker 'remove'
 
         options =
+            language: window.app.locale
             autoclose: true
             pickerPosition: 'bottom-right'
 
@@ -113,6 +114,7 @@ module.exports = class EventModal extends ViewCollection
 
         @startField.datetimepicker options
         @endField.datetimepicker options
+
 
     onGuestAdded: (info) =>
         [email, id] = info.split ';'
