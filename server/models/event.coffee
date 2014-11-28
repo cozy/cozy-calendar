@@ -68,7 +68,7 @@ Event::formatStart = (dateFormat) ->
         date = momentTz(@start)
 
     date.tz User.timezone
-    dStr = date.format dateFormat 
+    dStr = date.format dateFormat
     dStr += ' ' + User.timezone
 
     return dStr
