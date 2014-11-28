@@ -32,7 +32,7 @@ module.exports =
     "Switch to Calendar"                : "Switch to Calendar"
     "time"                              : "time"
     "Today"                             : "Today"
-    'today'                             : 'aujourd\'hui'
+    'today'                             : 'today'
     "What should I remind you ?"        : "What should I remind you?"
     "ICalendar import"                  : "ICalendar import"
     "select an icalendar file"          : "Select an icalendar file"
@@ -55,8 +55,8 @@ module.exports =
     "display previous events"           : "Display previous events"
     "display next events"               : "Display next events"
     "event"                             : "Event"
-    "are you sure"                      : "Are you sure ?"
-    "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure ?"
+    "are you sure"                      : "Are you sure?"
+    "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure?"
     "advanced"                          : "More details"
     "enter email"                       : "Enter email"
     "ON"                                : "on"
