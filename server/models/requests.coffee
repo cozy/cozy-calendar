@@ -16,9 +16,10 @@ module.exports =
 
 
     event:
-        all       : (doc) -> emit doc.title, doc
+        all       : (doc) -> emit doc._id, doc
         byDate    : (doc) -> emit new Date(doc.start), doc
         tags      : tagsView
+        byCalendar: (doc) -> emit doc.tags[0], doc
 
     user:
         all       : (doc) -> emit doc.title, doc

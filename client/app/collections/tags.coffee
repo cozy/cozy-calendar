@@ -1,3 +1,5 @@
+SocketListener = require '../lib/socket_listener'
+
 module.exports = class Tags extends Backbone.Collection
 
     url: 'tags'
@@ -31,33 +33,54 @@ module.exports = class Tags extends Backbone.Collection
     onBaseCollectionRemove: (model) ->
         @resetFromBase()
 
+    _pauseModels: (models, options) ->
+        models.forEach (model) ->
+            SocketListener.pause model, null, options
+
+    _resumeModels: (models, options) ->
+        models.forEach (model) ->
+            SocketListener.resume model, null, options
+
     # Overrides backbone behaviour
     # Removes a calendar (<=> removes all its events)
     remove: (calendarName, callback) ->
         eventsToRemove = @eventCollection.getByCalendar calendarName
-        # removes all calendar's events 5 by 5
-        async.eachLimit eventsToRemove, 5,  (event, done) ->
-            event.destroy
-                wait: true
-                error: done.bind null, t('server error occured')
-                success: done
-        , callback
+        # Pause real time for models to be removed
+        options = ignoreMySocketNotification: true
+        @_pauseModels eventsToRemove, options
+        $.ajax 'events/delete',
+            type: 'DELETE'
+            data: {calendarName}
+            success: =>
+                @eventCollection.remove eventsToRemove
+                callback()
+                # Resume real time for models that have changed
+                # It takes a noticeable time so we do it after the callback call
+                @_resumeModels eventsToRemove, options
+            error: =>
+                @_resumeModels eventsToRemove, options
+                callback t('server error occured')
 
     # Renames a calendar (<=> change all its events)
     rename: (oldName, newName, callback) ->
+        # Pause real time for models to be changed
+        options = ignoreMySocketNotification: true
         eventsToChange = @eventCollection.getByCalendar oldName
-        # updates the name of the calendar for all calendar's events, 5 by 5
-        async.eachLimit eventsToChange, 5,  (event, done) ->
-            tags = event.get 'tags'
-            # Clones the array so a `change` event can be fired
-            newTags = if tags? then [].concat(tags) else []
-            newTags[0] = newName
+        @_pauseModels eventsToChange, options
 
-            event.save tags: newTags,
-                wait: true
-                error: done.bind null, t('server error occured')
-                success: done
-        , callback
+        $.ajax 'events/rename-calendar',
+            type: 'POST'
+            data: {oldName, newName}
+            success: (data) =>
+                @eventCollection.add data, merge: true
+                callback()
+                # Resume real time for models that have changed
+                # It takes a noticeable time so we do it after the callback call
+                @_resumeModels eventsToChange, options
+            error: =>
+                @_resumeModels eventsToChange, options
+                callback t('server error occured')
+
 
     parse: (raw) ->
         out = []

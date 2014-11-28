@@ -15,6 +15,12 @@ module.exports =
         post  : events.create
     'eventid':
         param : events.fetch
+
+    'events/rename-calendar':
+        post: events.bulkCalendarRename
+    'events/delete':
+        del: events.bulkDelete
+
     'events/:eventid':
         get   : events.read
         put   : events.update
