@@ -194,11 +194,13 @@ module.exports = ContactCollection = (function(_super) {
 });
 
 ;require.register("collections/daybuckets", function(exports, require, module) {
-var DayBucket, DayBucketCollection, RealEventCollection,
+var DayBucket, DayBucketCollection, RealEventCollection, RealEventGeneratorCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 RealEventCollection = require('./realevents');
+
+RealEventGeneratorCollection = require('./realeventsgenerator');
 
 DayBucket = DayBucket = (function(_super) {
   __extends(DayBucket, _super);
@@ -230,11 +232,7 @@ module.exports = DayBucketCollection = (function(_super) {
   DayBucketCollection.prototype.comparator = 'date';
 
   DayBucketCollection.prototype.initialize = function() {
-    var lowBoundary, topBoundary;
-    this.eventCollection = new RealEventCollection();
-    lowBoundary = moment().add(-1, 'week');
-    topBoundary = moment().add(1, 'week');
-    this.eventCollection.generateRealEvents(lowBoundary, topBoundary);
+    this.eventCollection = new RealEventGeneratorCollection();
     this.tagsCollection = app.tags;
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
@@ -333,52 +331,11 @@ module.exports = EventCollection = (function(_super) {
 });
 
 ;require.register("collections/realevents", function(exports, require, module) {
-var Event, RealEvent, RealEventCollection,
+var RealEvent, RealEventCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Event = require('../models/event');
-
-RealEvent = RealEvent = (function(_super) {
-  __extends(RealEvent, _super);
-
-  function RealEvent(event, start, end) {
-    RealEvent.__super__.constructor.apply(this, arguments);
-    this.event = event;
-    if (event.isRecurrent()) {
-      this.start = start;
-      this.end = end;
-      this.set('id', event.get('id') + start.toISOString());
-    } else {
-      this.set('id', event.get('id'));
-      this.start = event.getStartDateObject();
-      this.end = event.getEndDateObject();
-    }
-  }
-
-  RealEvent.prototype.getCalendar = function() {
-    return this.event.getCalendar();
-  };
-
-  RealEvent.prototype.getDateHash = function() {
-    return this.start.format('YYYYMMDD');
-  };
-
-  RealEvent.prototype.isAllDay = function() {
-    return this.event.isAllDay();
-  };
-
-  RealEvent.prototype.getFormattedStartDate = function(format) {
-    return this.start.format(format);
-  };
-
-  RealEvent.prototype.getFormattedEndDate = function(format) {
-    return this.end.format(format);
-  };
-
-  return RealEvent;
-
-})(Backbone.Model);
+RealEvent = require('../models/realevent');
 
 module.exports = RealEventCollection = (function(_super) {
   var model;
@@ -395,21 +352,48 @@ module.exports = RealEventCollection = (function(_super) {
     return re1.start.diff(re2.start);
   };
 
-  RealEventCollection.prototype.initialize = function() {
+  return RealEventCollection;
+
+})(Backbone.Collection);
+});
+
+;require.register("collections/realeventsgenerator", function(exports, require, module) {
+var RealEvent, RealEventGeneratorCollection,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+RealEvent = require('../models/realevent');
+
+module.exports = RealEventGeneratorCollection = (function(_super) {
+  var model;
+
+  __extends(RealEventGeneratorCollection, _super);
+
+  function RealEventGeneratorCollection() {
+    return RealEventGeneratorCollection.__super__.constructor.apply(this, arguments);
+  }
+
+  model = RealEvent;
+
+  RealEventGeneratorCollection.prototype.comparator = function(re1, re2) {
+    return re1.start.diff(re2.start);
+  };
+
+  RealEventGeneratorCollection.prototype.initialize = function() {
     this.baseCollection = app.events;
     this.tagsCollection = app.tags;
     this.listenTo(this.baseCollection, 'add', this.resetFromBase);
     this.listenTo(this.baseCollection, 'change:start', this.resetFromBase);
     this.listenTo(this.baseCollection, 'remove', this.resetFromBase);
-    this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
-    return this.listenTo(this.tagsCollection, 'change', this.resetFromBase);
+    return this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
   };
 
-  RealEventCollection.prototype.resetFromBase = function() {
-    return this.reset([]);
+  RealEventGeneratorCollection.prototype.resetFromBase = function() {
+    this.reset([]);
+    return this.trigger('reset');
   };
 
-  RealEventCollection.prototype.generateRealEvents = function(start, end, callback) {
+  RealEventGeneratorCollection.prototype.generateRealEvents = function(start, end, callback) {
     var eventsInRange;
     callback = callback || function() {};
     eventsInRange = [];
@@ -436,21 +420,50 @@ module.exports = RealEventCollection = (function(_super) {
     return callback(eventsInRange);
   };
 
-  RealEventCollection.prototype.loadNextPage = function(callback) {
-    var last, _ref;
-    callback = callback || function() {};
-    last = ((_ref = this.at(this.length - 1)) != null ? _ref.start : void 0) || moment();
-    return this.generateRealEvents(moment(last), moment(last).add(1, 'month'), callback);
+  RealEventGeneratorCollection.prototype._loadEventsCount = function(eventCount, forward, callback) {
+    var boundary, count, start, _ref;
+    count = 0;
+    start = ((_ref = this.at(forward ? this.length - 1 : 0)) != null ? _ref.start : void 0) || moment();
+    boundary = moment(start).add((forward ? 1 : -1), 'years');
+    return async.whilst((function() {
+      if (count > eventCount) {
+        return false;
+      } else if (forward) {
+        return start.isBefore(boundary);
+      } else {
+        return start.isAfter(boundary);
+      }
+    }), ((function(_this) {
+      return function(cb) {
+        var periodEnd, periodStart;
+        if (forward) {
+          periodStart = moment(start);
+          periodEnd = start.add(1, 'month');
+        } else {
+          periodEnd = moment(start);
+          periodStart = start.add(-1, 'month');
+        }
+        return _this.generateRealEvents(periodStart, periodEnd, function(events) {
+          count += events.length;
+          return cb();
+        });
+      };
+    })(this)), function(err) {
+      return callback(err);
+    });
   };
 
-  RealEventCollection.prototype.loadPreviousPage = function(callback) {
-    var first, _ref;
+  RealEventGeneratorCollection.prototype.loadNextPage = function(callback) {
     callback = callback || function() {};
-    first = ((_ref = this.at(0)) != null ? _ref.start : void 0) || moment();
-    return this.generateRealEvents(moment(first).add(-1, 'month'), moment(first), callback);
+    return this._loadEventsCount(10, true, callback);
   };
 
-  return RealEventCollection;
+  RealEventGeneratorCollection.prototype.loadPreviousPage = function(callback) {
+    callback = callback || function() {};
+    return this._loadEventsCount(10, false, callback);
+  };
+
+  return RealEventGeneratorCollection;
 
 })(Backbone.Collection);
 });
@@ -1773,6 +1786,53 @@ module.exports = Event = (function(_super) {
   return Event;
 
 })(ScheduleItem);
+});
+
+;require.register("models/realevent", function(exports, require, module) {
+var RealEvent,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = RealEvent = (function(_super) {
+  __extends(RealEvent, _super);
+
+  function RealEvent(event, start, end) {
+    RealEvent.__super__.constructor.apply(this, arguments);
+    this.event = event;
+    if (event.isRecurrent()) {
+      this.start = start;
+      this.end = end;
+      this.set('id', event.get('id') + start.toISOString());
+    } else {
+      this.set('id', event.get('id'));
+      this.start = event.getStartDateObject();
+      this.end = event.getEndDateObject();
+    }
+  }
+
+  RealEvent.prototype.getCalendar = function() {
+    return this.event.getCalendar();
+  };
+
+  RealEvent.prototype.getDateHash = function() {
+    return this.start.format('YYYYMMDD');
+  };
+
+  RealEvent.prototype.isAllDay = function() {
+    return this.event.isAllDay();
+  };
+
+  RealEvent.prototype.getFormattedStartDate = function(format) {
+    return this.start.format(format);
+  };
+
+  RealEvent.prototype.getFormattedEndDate = function(format) {
+    return this.end.format(format);
+  };
+
+  return RealEvent;
+
+})(Backbone.Model);
 });
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
@@ -3946,6 +4006,7 @@ module.exports = ListView = (function(_super) {
 
   function ListView() {
     this.checkScroll = __bind(this.checkScroll, this);
+    this.keepScreenFull = __bind(this.keepScreenFull, this);
     return ListView.__super__.constructor.apply(this, arguments);
   }
 
@@ -3976,6 +4037,8 @@ module.exports = ListView = (function(_super) {
       });
     });
     this.$('#list-container').scroll(this.checkScroll);
+    this.keepScreenFull();
+    this.collection.on('reset', this.keepScreenFull);
     return ListView.__super__.afterRender.apply(this, arguments);
   };
 
@@ -3991,10 +4054,19 @@ module.exports = ListView = (function(_super) {
     }
   };
 
+  ListView.prototype.keepScreenFull = function() {
+    var list;
+    list = this.$('#list-container')[0];
+    if (list.scrollHeight <= list.clientHeight) {
+      return this.loadAfter();
+    }
+  };
+
   ListView.prototype.checkScroll = function() {
-    var triggerPoint;
+    var list, triggerPoint;
     triggerPoint = 100;
-    if (this.el.scrollTop + this.el.clientHeight + triggerPoint > this.el.scrollHeight) {
+    list = this.$('#list-container')[0];
+    if (list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight) {
       return this.loadAfter();
     }
   };
