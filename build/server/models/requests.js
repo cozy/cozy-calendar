@@ -29,12 +29,15 @@ module.exports = {
   },
   event: {
     all: function(doc) {
-      return emit(doc.title, doc);
+      return emit(doc._id, doc);
     },
     byDate: function(doc) {
       return emit(new Date(doc.start), doc);
     },
-    tags: tagsView
+    tags: tagsView,
+    byCalendar: function(doc) {
+      return emit(doc.tags[0], doc);
+    }
   },
   user: {
     all: function(doc) {
