@@ -1,4 +1,5 @@
 RealEventCollection = require './realevents'
+RealEventGeneratorCollection = require './realeventsgenerator'
 
 DayBucket = class DayBucket extends Backbone.Model
     constructor: (model) ->
@@ -16,11 +17,7 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     comparator: 'date'
 
     initialize: ->
-        @eventCollection = new RealEventCollection()
-
-        lowBoundary = moment().add -1, 'week'
-        topBoundary = moment().add 1, 'week'
-        @eventCollection.generateRealEvents lowBoundary, topBoundary
+        @eventCollection = new RealEventGeneratorCollection()
 
         @tagsCollection = app.tags
 
