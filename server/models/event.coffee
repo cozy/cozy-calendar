@@ -71,7 +71,7 @@ Event::formatStart = (dateFormat) ->
     formattedDate = date.format dateFormat
     formattedDate += ' ' + User.timezone
 
-    return dStr
+    return formattedDate
 
 # @TODO : this doesn't handle merge correctly
 Event::getGuest = (key) ->
