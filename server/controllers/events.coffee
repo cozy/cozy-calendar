@@ -55,7 +55,6 @@ module.exports.update = (req, res) ->
             res.send error: "Server error while saving event", 500
         else
             dateChanged = data.start isnt start
-
             mails.sendInvitations event, dateChanged, (err, event2) ->
                 res.send (event2 or event), 200
 
