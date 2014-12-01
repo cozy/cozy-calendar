@@ -61,7 +61,13 @@ module.exports.create = function(req, res) {
     if (err) {
       return res.error("Server error while creating event.");
     }
-    return res.send(event, 201);
+    if (data["import"]) {
+      return res.send(event, 201);
+    } else {
+      return mails.sendInvitations(event, false, function(err, event2) {
+        return res.send(event2 || event, 201);
+      });
+    }
   });
 };
 

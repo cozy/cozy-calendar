@@ -43,7 +43,14 @@ module.exports.create = (req, res) ->
     data.lastModification = moment().tz('UTC').toISOString()
     Event.createOrGetIfImport data, (err, event) ->
         return res.error "Server error while creating event." if err
-        res.send event, 201
+
+        if data.import
+            res.send event, 201
+        else    
+            mails.sendInvitations event, false, (err, event2) ->
+                res.send (event2 or event), 201
+
+       
 
 module.exports.update = (req, res) ->
     start = req.event.start
