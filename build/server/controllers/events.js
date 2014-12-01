@@ -61,7 +61,13 @@ module.exports.create = function(req, res) {
     if (err) {
       return res.error("Server error while creating event.");
     }
-    return res.send(event, 201);
+    if (data["import"]) {
+      return res.send(event, 201);
+    } else {
+      return mails.sendInvitations(event, false, function(err, updatedEvent) {
+        return res.send(updatedEvent || event, 201);
+      });
+    }
   });
 };
 
@@ -78,8 +84,8 @@ module.exports.update = function(req, res) {
       }, 500);
     } else {
       dateChanged = data.start !== start;
-      return mails.sendInvitations(event, dateChanged, function(err, event2) {
-        return res.send(event2 || event, 200);
+      return mails.sendInvitations(event, dateChanged, function(err, updatedEvent) {
+        return res.send(updatedEvent || event, 200);
       });
     }
   });
