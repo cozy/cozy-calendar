@@ -47,8 +47,8 @@ module.exports.create = (req, res) ->
         if data.import
             res.send event, 201
         else    
-            mails.sendInvitations event, false, (err, event2) ->
-                res.send (event2 or event), 201
+            mails.sendInvitations event, false, (err, updatedEvent) ->
+                res.send (updatedEvent or event), 201
 
        
 
@@ -62,8 +62,8 @@ module.exports.update = (req, res) ->
             res.send error: "Server error while saving event", 500
         else
             dateChanged = data.start isnt start
-            mails.sendInvitations event, dateChanged, (err, event2) ->
-                res.send (event2 or event), 200
+            mails.sendInvitations event, dateChanged, (err, updatedEvent) ->
+                res.send (updatedEvent or event), 200
 
 
 module.exports.delete = (req, res) ->
