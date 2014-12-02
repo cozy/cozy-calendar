@@ -137,11 +137,13 @@ module.exports = class EventModal extends ViewCollection
         @collection.reset @model.get 'attendees'
 
     addReminder: (reminderM) =>
-        @$('#reminder-explanation').removeClass 'hide'
-        reminder = new ReminderView(model: reminderM)
-        @reminders.push reminder
-        reminder.render()
-        @$('#reminder-container').append reminder.$el
+        # doesn't shown action "AUDIO" because the app doesn't support it
+        if reminderM.action in ['EMAIL', 'DISPLAY', 'BOTH']
+            @$('#reminder-explanation').removeClass 'hide'
+            reminder = new ReminderView model: reminderM
+            @reminders.push reminder
+            reminder.render()
+            @$('#reminder-container').append reminder.$el
 
     resizeDescription: =>
         notes = @descriptionField.val()

@@ -2403,7 +2403,6 @@ module.exports = EventPopOver = (function(_super) {
     'keyup input': 'onKeyUp',
     'change select': 'onKeyUp',
     'change input': 'onKeyUp',
-    'change #input-place': 'updateMapLink',
     'click .add': 'onAddClicked',
     'click .advanced-link': 'onAdvancedClicked',
     'click .remove': 'onRemoveClicked',
@@ -2477,7 +2476,6 @@ module.exports = EventPopOver = (function(_super) {
         return _this.model.setCalendar(value);
       };
     })(this));
-    this.updateMapLink();
     return this.refresh();
   };
 
@@ -2639,18 +2637,6 @@ module.exports = EventPopOver = (function(_super) {
       complete: EventPopOver.__super__.close.apply(this, arguments)
     });
     return EventPopOver.__super__.close.apply(this, arguments);
-  };
-
-  EventPopOver.prototype.updateMapLink = function() {
-    var btn, url, value;
-    value = encodeURIComponent(this.$('#input-place').val());
-    btn = this.$('#showmap');
-    if (value) {
-      url = "http://www.openstreetmap.org/search?query=" + value;
-      return btn.show().attr('href', url);
-    } else {
-      return btn.hide();
-    }
   };
 
   EventPopOver.prototype.refresh = function() {
@@ -2932,8 +2918,9 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
     var end, start;
     if (this.view === 'month') {
-      endDate = startDate.format() + 'T18:00:00.000';
+      endDate.subtract(1, 'days');
       startDate = startDate.format() + 'T10:00:00.000';
+      endDate = endDate.format() + 'T11:00:00.000';
     }
     start = helpers.ambiguousToTimezoned(startDate);
     end = helpers.ambiguousToTimezoned(endDate);
@@ -3230,14 +3217,16 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.addReminder = function(reminderM) {
-    var reminder;
-    this.$('#reminder-explanation').removeClass('hide');
-    reminder = new ReminderView({
-      model: reminderM
-    });
-    this.reminders.push(reminder);
-    reminder.render();
-    return this.$('#reminder-container').append(reminder.$el);
+    var reminder, _ref;
+    if ((_ref = reminderM.action) === 'EMAIL' || _ref === 'DISPLAY' || _ref === 'BOTH') {
+      this.$('#reminder-explanation').removeClass('hide');
+      reminder = new ReminderView({
+        model: reminderM
+      });
+      this.reminders.push(reminder);
+      reminder.render();
+      return this.$('#reminder-container').append(reminder.$el);
+    }
   };
 
   EventModal.prototype.resizeDescription = function() {
@@ -4845,7 +4834,7 @@ else
 {
 buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span>");
 }
-buf.push("<input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
