@@ -2055,6 +2055,7 @@ module.exports = ScheduleItem = (function(_super) {
       start: start,
       end: end,
       allDay: this.isAllDay(),
+      startEditable: !this.isRecurrent(),
       diff: this.get('diff'),
       place: this.get('place'),
       timezone: this.get('timezone'),

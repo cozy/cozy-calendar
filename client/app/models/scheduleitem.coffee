@@ -192,6 +192,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             start: start
             end: end
             allDay: @isAllDay()
+            startEditable: not @isRecurrent() #disable dragNdrop
             diff: @get 'diff'
             place: @get 'place'
             timezone: @get 'timezone'
