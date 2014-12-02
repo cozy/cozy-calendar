@@ -16,7 +16,6 @@ module.exports = class EventPopOver extends PopoverView
         'keyup input': 'onKeyUp'
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
-        'change #input-place': 'updateMapLink'
         'click .add'  : 'onAddClicked'
         'click .advanced-link'  : 'onAdvancedClicked'
         'click .remove': 'onRemoveClicked'
@@ -76,7 +75,6 @@ module.exports = class EventPopOver extends PopoverView
 
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
-        @updateMapLink()
         @refresh()
 
 
@@ -193,15 +191,6 @@ module.exports = class EventPopOver extends PopoverView
         # Revert if not just saved with addButton.
         @model.fetch complete: super
         super
-
-    updateMapLink: ->
-        value = encodeURIComponent @$('#input-place').val()
-        btn = @$ '#showmap'
-        if value
-            url = "http://www.openstreetmap.org/search?query=#{value}"
-            btn.show().attr 'href', url
-        else
-            btn.hide()
 
 
     refresh: ->
