@@ -179,18 +179,18 @@ module.exports = class CalendarView extends BaseView
             # ambiguous date string.
 
             # endDate is the next day, it's the startDate date that we need.
-            endDate = startDate.format() + 'T18:00:00.000'
-            startDate = startDate.format() + 'T10:00:00.000'
+            endDate = startDate.format() + 'T10:00:00.000'
+            startDate = startDate.format() + 'T11:00:00.000'
 
 
-        start = helpers.ambiguousToTimezoned(startDate)
-        end = helpers.ambiguousToTimezoned(endDate)
+        start = helpers.ambiguousToTimezoned startDate
+        end = helpers.ambiguousToTimezoned endDate
 
         @showPopover
             type: 'event'
             start: start
             end: end
-            target: $(jsEvent.target)
+            target: $ jsEvent.target
 
     onPopoverClose: ->
         @cal.fullCalendar 'unselect'
