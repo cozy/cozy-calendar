@@ -3188,7 +3188,7 @@ module.exports = EventModal = (function(_super) {
     modelE = this.model.getEndDateObject();
     uiE = modelE.add('day', -1);
     uiS = this.model.getStartDateObject();
-    if (!uiE.isAfter(uiS)) {
+    if (uiE.isBefore(uiS)) {
       uiE.add('day', 1);
     }
     this.startField.val(uiS.format(dtFormat));

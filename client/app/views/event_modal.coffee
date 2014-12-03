@@ -116,7 +116,7 @@ module.exports = class EventModal extends ViewCollection
 
         uiS = @model.getStartDateObject()
         # Avoid duration 0 events.
-        if not uiE.isAfter uiS
+        if uiE.isBefore uiS
             uiE.add 'day', 1
 
         @startField.val uiS.format dtFormat
