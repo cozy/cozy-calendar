@@ -190,7 +190,6 @@ module.exports = class EventPopOver extends PopoverView
         # but are a little bit different.
         # Revert if not just saved with addButton.
         @model.fetch complete: super
-        super
 
 
     refresh: ->

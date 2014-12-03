@@ -2633,10 +2633,9 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.close = function() {
-    this.model.fetch({
+    return this.model.fetch({
       complete: EventPopOver.__super__.close.apply(this, arguments)
     });
-    return EventPopOver.__super__.close.apply(this, arguments);
   };
 
   EventPopOver.prototype.refresh = function() {
