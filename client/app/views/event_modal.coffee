@@ -109,8 +109,18 @@ module.exports = class EventModal extends ViewCollection
                 format: @inputDateTimeDTPickerFormat
                 viewSelect: 4
 
-        @startField.val @model.getStartDateObject().format dtFormat
-        @endField.val @model.getEndDateObject().format dtFormat
+        # Model has non-inclusive end-date, but UI has inclusive end-date,
+        # which means a difference of one day.
+        modelE = @model.getEndDateObject()
+        uiE = modelE.add 'day', -1
+
+        uiS = @model.getStartDateObject()
+        # Avoid duration 0 events.
+        if not uiE.isAfter uiS
+            uiE.add 'day', 1
+
+        @startField.val uiS.format dtFormat
+        @endField.val uiE.format dtFormat
 
         @startField.datetimepicker options
         @endField.datetimepicker options
@@ -194,7 +204,10 @@ module.exports = class EventModal extends ViewCollection
                     window.app.timezone
             dtE = moment.tz @endField.val(), @inputDateFormat,
                     window.app.timezone
-
+            # Model has non-inclusive end-date, but UI has inclusive end-date,
+            # which means a difference of one day.        
+            dtE.add 'day', 1
+            
             data.start = H.momentToDateString(dtS)
             data.end = H.momentToDateString(dtE)
 

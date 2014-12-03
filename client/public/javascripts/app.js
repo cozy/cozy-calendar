@@ -1320,9 +1320,11 @@ module.exports = {
   "Place": "Place",
   'all day': 'all day',
   'All day': 'All day',
+  'all day during': 'All day during',
   "description": "Description",
   "date": "date",
   "Day": "Day",
+  "days": "days",
   "Edit": "Edit",
   "Email": "Email",
   "Import": "Import",
@@ -1490,9 +1492,11 @@ module.exports = {
   "Place": "Lieu",
   'all day': 'journée entière',
   'All day': 'Journée entière',
+  'all day during': 'Toute la journée pendant',
   "description": "Description",
   "date": "Date",
   "Day": "Jour",
+  'days': 'jours',
   "Edit": "Modifier",
   "Email": "Email",
   "Import": "Import",
@@ -3158,7 +3162,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.toggleAllDay = function() {
-    var dtFormat, options;
+    var dtFormat, modelE, options, uiE, uiS;
     this.startField.datetimepicker('remove');
     this.endField.datetimepicker('remove');
     options = {
@@ -3181,8 +3185,14 @@ module.exports = EventModal = (function(_super) {
         viewSelect: 4
       });
     }
-    this.startField.val(this.model.getStartDateObject().format(dtFormat));
-    this.endField.val(this.model.getEndDateObject().format(dtFormat));
+    modelE = this.model.getEndDateObject();
+    uiE = modelE.add('day', -1);
+    uiS = this.model.getStartDateObject();
+    if (!uiE.isAfter(uiS)) {
+      uiE.add('day', 1);
+    }
+    this.startField.val(uiS.format(dtFormat));
+    this.endField.val(uiE.format(dtFormat));
     this.startField.datetimepicker(options);
     return this.endField.datetimepicker(options);
   };
@@ -3271,6 +3281,7 @@ module.exports = EventModal = (function(_super) {
     if (this.$('#allday').is(':checked')) {
       dtS = moment.tz(this.startField.val(), this.inputDateFormat, window.app.timezone);
       dtE = moment.tz(this.endField.val(), this.inputDateFormat, window.app.timezone);
+      dtE.add('day', 1);
       data.start = H.momentToDateString(dtS);
       data.end = H.momentToDateString(dtE);
     } else {
@@ -4799,6 +4810,25 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
+;require.register("views/templates/popover_content", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),start = locals_.start,end = locals_.end,diff = locals_.diff,description = locals_.description,place = locals_.place,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
+buf.push("<div class=\"line\"><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("value", start, true, false)) + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("value", end, true, false)) + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", diff, true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/><a id=\"showmap\" target=\"_blank\" class=\"btn\"><i class=\"icon-white icon-map-marker\"></i></a></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
 ;require.register("views/templates/popover_event", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
@@ -4808,13 +4838,13 @@ var locals_ = (locals || {}),allDay = locals_.allDay,model = locals_.model,dtFor
 buf.push("<div class=\"line\">");
 if ( allDay)
 {
-buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("All day")) ? "" : jade_interp)) + "</span>");
+buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t('all day during')) ? "" : jade_interp)) + "</span><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"1\" min=\"1\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days')) ? "" : jade_interp)) + "</span>");
 }
 else
 {
-buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span>");
+buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span>");
 }
-buf.push("<input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span></div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("</div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

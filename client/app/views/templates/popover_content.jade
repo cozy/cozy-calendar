@@ -1,0 +1,25 @@
+.line
+    span.timeseparator=t("from")
+    input#input-start.focused.input-mini(type="time", value=start,
+        placeholder=t("From hours:minutes"))
+    span &nbsp;
+    span.timeseparator=t("to")
+    input#input-end.input-mini(type="time", value=end,
+        placeholder=t("To hours:minutes+days"))
+    span &nbsp;
+    input#input-diff.col-xs2.input-mini(type="number", value=diff,
+        placeholder=0, min=0)
+    span &nbsp;
+    span.timeseparator= ' ' + t('days later')
+
+.line
+    input#input-desc.input(type="text", value=description,
+        placeholder=t("summary"))
+    input#input-place.input-small(type="text", value=place,
+        placeholder=t("Place"))
+    a#showmap(target="_blank").btn: i.icon-white.icon-map-marker
+
+.popover-footer.line
+    a.advanced-link(href='#'+advancedUrl)= t('advanced')
+    span &nbsp;
+    a.btn.add= editionMode ? t('Edit') : t('Create')
