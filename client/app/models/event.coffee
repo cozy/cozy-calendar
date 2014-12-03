@@ -95,3 +95,5 @@ module.exports = class Event extends ScheduleItem
 
     #@TODO tags = color
     getDefaultColor: -> '#008AF6'
+
+

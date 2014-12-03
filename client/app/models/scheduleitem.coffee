@@ -1,3 +1,4 @@
+Modal = require 'lib/modal'
 colorHash = require 'lib/colorhash'
 H = require '../helpers'
 
@@ -9,6 +10,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     initialize: ->
         @set 'tags', ['my calendar'] unless @get('tags')?.length
+
+        @on 'change' => @dirty = true
+        # @on 'sync', @confirmSendEmails
 
     getCalendar: -> @get('tags')?[0]
 
@@ -199,3 +203,31 @@ module.exports = class ScheduleItem extends Backbone.Model
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()
+
+
+    save: (options, callback) ->
+        if @isNew() or @dirty
+            @dirty = false
+            @confirmSendEmails (sendMails) =>
+                options.sendMails = sendMails
+                super options, callback
+
+        else
+            super options, callback
+    
+    destroy: (options, callback) ->
+        @confirmSendEmails (sendMails) =>
+            options.sendMails = sendMails
+            super options, callback
+
+    confirmSendEmails: (callback) ->
+        attendees = @get('attendees') or []
+        if attendees.length is 0 
+            callback false
+        else
+            text = t('send mails question') 
+            text += attendees.map (attendee) -> attendee.email
+                        .join ', '
+
+            Modal.confirm t('modal send mails'), text, \
+                t("yes"), t("no"), callback
