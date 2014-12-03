@@ -3162,7 +3162,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.toggleAllDay = function() {
-    var dtFormat, modelE, options, uiE, uiS;
+    var dtFormat, modelEnd, options, uiEnd, uiStart;
     this.startField.datetimepicker('remove');
     this.endField.datetimepicker('remove');
     options = {
@@ -3185,14 +3185,14 @@ module.exports = EventModal = (function(_super) {
         viewSelect: 4
       });
     }
-    modelE = this.model.getEndDateObject();
-    uiE = modelE.add('day', -1);
-    uiS = this.model.getStartDateObject();
-    if (uiE.isBefore(uiS)) {
-      uiE.add('day', 1);
+    modelEnd = this.model.getEndDateObject();
+    uiEnd = modelEnd.add('day', -1);
+    uiStart = this.model.getStartDateObject();
+    if (uiEnd.isBefore(uiStart)) {
+      uiEnd.add('day', 1);
     }
-    this.startField.val(uiS.format(dtFormat));
-    this.endField.val(uiE.format(dtFormat));
+    this.startField.val(uiStart.format(dtFormat));
+    this.endField.val(uiEnd.format(dtFormat));
     this.startField.datetimepicker(options);
     return this.endField.datetimepicker(options);
   };

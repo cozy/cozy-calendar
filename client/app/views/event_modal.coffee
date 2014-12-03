@@ -111,16 +111,16 @@ module.exports = class EventModal extends ViewCollection
 
         # Model has non-inclusive end-date, but UI has inclusive end-date,
         # which means a difference of one day.
-        modelE = @model.getEndDateObject()
-        uiE = modelE.add 'day', -1
+        modelEnd = @model.getEndDateObject()
+        uiEnd = modelEnd.add 'day', -1
 
-        uiS = @model.getStartDateObject()
+        uiStart = @model.getStartDateObject()
         # Avoid duration 0 events.
-        if uiE.isBefore uiS
-            uiE.add 'day', 1
+        if uiEnd.isBefore uiStart
+            uiEnd.add 'day', 1
 
-        @startField.val uiS.format dtFormat
-        @endField.val uiE.format dtFormat
+        @startField.val uiStart.format dtFormat
+        @endField.val uiEnd.format dtFormat
 
         @startField.datetimepicker options
         @endField.datetimepicker options
