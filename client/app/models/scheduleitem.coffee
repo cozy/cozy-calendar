@@ -11,8 +11,7 @@ module.exports = class ScheduleItem extends Backbone.Model
     initialize: ->
         @set 'tags', ['my calendar'] unless @get('tags')?.length
 
-        @on 'change' => @dirty = true
-        # @on 'sync', @confirmSendEmails
+        @on 'change', => @dirty = true
 
     getCalendar: -> @get('tags')?[0]
 
@@ -204,21 +203,18 @@ module.exports = class ScheduleItem extends Backbone.Model
             backgroundColor: @getColor()
             borderColor: @getColor()
 
-
-    save: (options, callback) ->
-        if @isNew() or @dirty
+    # Override sync to ask email sending just before changes save on server.
+    sync: (method, model, options) ->
+        if method in ['create', 'delete'] or (
+            method in ['update', 'patch'] and @dirty)
             @dirty = false
             @confirmSendEmails (sendMails) =>
-                options.sendMails = sendMails
-                super options, callback
+                model.sendMails = sendMails
+                return super method, model, options
 
         else
-            super options, callback
-    
-    destroy: (options, callback) ->
-        @confirmSendEmails (sendMails) =>
-            options.sendMails = sendMails
-            super options, callback
+            return super method, model, options
+
 
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []
@@ -230,4 +226,4 @@ module.exports = class ScheduleItem extends Backbone.Model
                         .join ', '
 
             Modal.confirm t('modal send mails'), text, \
-                t("yes"), t("no"), callback
+                t('yes'), t('no'), callback

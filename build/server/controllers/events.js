@@ -99,7 +99,7 @@ module.exports["delete"] = function(req, res) {
       return res.send({
         error: "Server error while deleting the event"
       }, 500);
-    } else if (data.sendMails) {
+    } else if (req.event.sendMails) {
       return mails.sendDeleteNotification(req.event, function() {
         return res.send({
           success: true

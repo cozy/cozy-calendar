@@ -1586,6 +1586,10 @@ module.exports = {
   "to": "to",
   'Reminders before the event': 'Reminders before the event',
   "reminder": "Reminder",
+  'send mails question': 'Send a notification email to: ',
+  'modal send mails': 'Send a notification',
+  'yes': 'Yes',
+  'no': 'No',
   "no description": "A title must be set.",
   "no summary": "A summary must be set.",
   "start after end": "The start date is after the end date.",
@@ -1756,6 +1760,10 @@ module.exports = {
   "to": "à",
   'Reminders before the event': 'Rappels avant l\'évènement',
   "reminder": "Rappel",
+  'send mails question': 'Envoyer un email de notification à : ',
+  'modal send mails': 'Envoyer une notification',
+  'yes': 'Oui',
+  'no': 'Non',
   "no description": "Le titre est obligatoire",
   "no summary": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
@@ -2029,7 +2037,7 @@ module.exports = ScheduleItem = (function(_super) {
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
       this.set('tags', ['my calendar']);
     }
-    return this.on('change:' + this.startDateField, (function(_this) {
+    return this.on('change', (function(_this) {
       return function() {
         return _this.dirty = true;
       };
@@ -2237,27 +2245,18 @@ module.exports = ScheduleItem = (function(_super) {
     };
   };
 
-  ScheduleItem.prototype.save = function(options, callback) {
-    if (this.isNew() || this.dirty) {
+  ScheduleItem.prototype.sync = function(method, model, options) {
+    if ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && this.dirty)) {
       this.dirty = false;
       return this.confirmSendEmails((function(_this) {
         return function(sendMails) {
-          options.sendMails = sendMails;
-          return ScheduleItem.__super__.save.call(_this, options, callback);
+          model.sendMails = sendMails;
+          return ScheduleItem.__super__.sync.call(_this, method, model, options);
         };
       })(this));
     } else {
-      return ScheduleItem.__super__.save.call(this, options, callback);
+      return ScheduleItem.__super__.sync.call(this, method, model, options);
     }
-  };
-
-  ScheduleItem.prototype.destroy = function(options, callback) {
-    return this.confirmSendEmails((function(_this) {
-      return function(sendMails) {
-        options.sendMails = sendMails;
-        return ScheduleItem.__super__.destroy.call(_this, options, callback);
-      };
-    })(this));
   };
 
   ScheduleItem.prototype.confirmSendEmails = function(callback) {
@@ -2270,7 +2269,7 @@ module.exports = ScheduleItem = (function(_super) {
       text += attendees.map(function(attendee) {
         return attendee.email;
       }).join(', ');
-      return Modal.confirm(t('modal send mails'), text, t("yes"), t("no"), callback);
+      return Modal.confirm(t('modal send mails'), text, t('yes'), t('no'), callback);
     }
   };
 
@@ -3501,6 +3500,7 @@ module.exports = EventModal = (function(_super) {
         data.end = dtE.toISOString();
       }
     }
+    this.model.dirty = true;
     validModel = this.model.save(data, {
       wait: true,
       success: (function(_this) {

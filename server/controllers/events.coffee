@@ -72,7 +72,7 @@ module.exports.delete = (req, res) ->
     req.event.destroy (err) ->
         if err?
             res.send error: "Server error while deleting the event", 500
-        else if data.sendMails
+        else if req.event.sendMails
             mails.sendDeleteNotification req.event, ->
                 res.send success: true, 200
         else

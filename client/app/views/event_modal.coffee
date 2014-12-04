@@ -229,6 +229,8 @@ module.exports = class EventModal extends ViewCollection
                 data.start = dtS.toISOString()
                 data.end = dtE.toISOString()
 
+        @model.dirty = true
+
         validModel = @model.save data,
             wait: true
             success: =>

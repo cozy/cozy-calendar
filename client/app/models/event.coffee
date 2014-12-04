@@ -67,6 +67,8 @@ module.exports = class Event extends ScheduleItem
 
         @set @endDateField, @_formatMoment edo
 
+
+    
     validate: (attrs, options) ->
 
         errors = []
