@@ -1,5 +1,5 @@
-Modal = require 'lib/modal'
-colorHash = require 'lib/colorhash'
+colorHash = require '../lib/colorhash'
+Modal = require '../lib/modal'
 H = require '../helpers'
 
 module.exports = class ScheduleItem extends Backbone.Model
@@ -11,7 +11,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     initialize: ->
         @set 'tags', ['my calendar'] unless @get('tags')?.length
 
-        @on 'change', => @dirty = true
+        @on 'change:' + @startDateField, => @startDateChanged = true
+        @on 'change:attendees', => @attendeesChanged = true
 
     getCalendar: -> @get('tags')?[0]
 
@@ -205,8 +206,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     # Override sync to ask email sending just before changes save on server.
     sync: (method, model, options) ->
         if method in ['create', 'delete'] or (
-            method in ['update', 'patch'] and @dirty)
-            @dirty = false
+            method in ['update', 'patch'] and (
+                @startDateChanged or @attendeesChanged))
             @confirmSendEmails (sendMails) =>
                 model.sendMails = sendMails
                 return super method, model, options
@@ -219,9 +220,20 @@ module.exports = class ScheduleItem extends Backbone.Model
         if attendees.length is 0 
             callback false
         else
-            text = t('send mails question') 
-            text += attendees.map (attendee) -> attendee.email
-                        .join ', '
+            text = t('send mails question')
+
+            first = true
+            attendees.forEach (guest) ->
+                if guest.status is 'INVITATION-NOT-SENT' or (
+                    guest.status is 'ACCEPTED' and dateChanged)
+                    if not first
+                        text += ', '
+                    else
+                        first = false
+                    text += guest.email
 
             Modal.confirm t('modal send mails'), text, \
                 t('yes'), t('no'), callback
+
+        @startDateChanged = false
+        @attendeesChanged = false
