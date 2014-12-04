@@ -13,9 +13,11 @@ module.exports =
     "Place"                             : "Place"
     'all day'                           : 'all day'
     'All day'                           : 'All day'
+    'all day during'                    : 'All day during'
     "description"                       : "Description"
     "date"                              : "date"
     "Day"                               : "Day"
+    "days"                              : "days"
     "Edit"                              : "Edit"
     "Email"                             : "Email"
     "Import"                            : "Import"
