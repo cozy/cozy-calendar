@@ -67,8 +67,6 @@ module.exports = class Event extends ScheduleItem
 
         @set @endDateField, @_formatMoment edo
 
-
-    
     validate: (attrs, options) ->
 
         errors = []
@@ -97,5 +95,3 @@ module.exports = class Event extends ScheduleItem
 
     #@TODO tags = color
     getDefaultColor: -> '#008AF6'
-
-

@@ -175,7 +175,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         @generateRecurrentInstancesBetween start, end, (event, start, end) ->
             return event._toFullCalendarEvent start, end
 
-
     isInRange: (start, end) ->
         sdo = @getStartDateObject()
         edo = @getEndDateObject()
@@ -214,7 +213,6 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         else
             return super method, model, options
-
 
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []

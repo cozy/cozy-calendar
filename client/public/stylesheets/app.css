@@ -9480,13 +9480,13 @@ textarea:active {
   padding: 10px;
 }
 .modal-header {
-  background: #fff;
-  color: #333;
+  background-color: #34a6bb;
+  color: #fff;
   font-family: styled;
   font-size: 26px;
   padding: 20px;
-  -webkit-border-radius: 5px 5px 0 0;
-  border-radius: 5px 5px 0 0;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 .modal-body {
   font-family: main;
@@ -9548,13 +9548,14 @@ textarea:active {
 #event-modal .alert {
   margin-bottom: 0px;
 }
+#event-modal .modal-header {
+  background: #aaa;
+  color: #fff;
+  -webkit-border-radius: 5px 5px 0 0;
+  border-radius: 5px 5px 0 0;
+}
 #event-modal .modal-header button.close {
   margin-top: -2px;
-}
-#event-modal .modal-header a {
-  font-size: 16px;
-  text-decoration: none;
-  color: #333;
 }
 #event-modal .modal-body h4 {
   margin-top: 25px;
@@ -9658,6 +9659,15 @@ textarea:active {
 }
 #event-modal .modal-body #guests-list i.blue {
   color: #34a6ff;
+}
+#event-modal .modal-header {
+  background: #fff;
+  color: #333;
+}
+#event-modal .modal-header a {
+  font-size: 16px;
+  text-decoration: none;
+  color: #333;
 }
 #event-modal .modal-footer #cancel-btn {
   cursor: pointer;
