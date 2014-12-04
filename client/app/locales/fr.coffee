@@ -121,6 +121,12 @@ module.exports =
     'Reminders before the event'        : 'Rappels avant l\'évènement'
     "reminder"                          : "Rappel"
 
+# CONFIRM MODAL
+    'send mails question'               : 'Envoyer un email de notification à : '
+    'modal send mails'                  : 'Envoyer une notification'
+    'yes'                               : 'Oui'
+    'no'                                : 'Non'
+
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
     "no summary"                        : "Le titre est obligatoire"

@@ -997,6 +997,167 @@ module.exports = function(tag) {
 };
 });
 
+;require.register("lib/modal", function(exports, require, module) {
+var Modal,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Modal = (function(_super) {
+  __extends(Modal, _super);
+
+  function Modal() {
+    this.closeOnEscape = __bind(this.closeOnEscape, this);
+    return Modal.__super__.constructor.apply(this, arguments);
+  }
+
+  Modal.prototype.id = 'modal-dialog';
+
+  Modal.prototype.className = 'modal fade';
+
+  Modal.prototype.attributes = {
+    'data-backdrop': "static",
+    'data-keyboard': "false"
+  };
+
+  Modal.prototype.initialize = function(options) {
+    if (this.title == null) {
+      this.title = options.title;
+    }
+    if (this.content == null) {
+      this.content = options.content;
+    }
+    if (this.yes == null) {
+      this.yes = options.yes || 'ok';
+    }
+    if (this.no == null) {
+      this.no = options.no || 'cancel';
+    }
+    if (this.cb == null) {
+      this.cb = options.cb || function() {};
+    }
+    this.render();
+    this.saving = false;
+    this.$el.modal('show');
+    this.$('button.close').click((function(_this) {
+      return function(event) {
+        event.stopPropagation();
+        return _this.onNo();
+      };
+    })(this));
+    return $(document).on('keyup', this.closeOnEscape);
+  };
+
+  Modal.prototype.events = function() {
+    return {
+      "click #modal-dialog-no": 'onNo',
+      "click #modal-dialog-yes": 'onYes',
+      'click': 'onClickAnywhere'
+    };
+  };
+
+  Modal.prototype.onNo = function() {
+    if (this.closing) {
+      return;
+    }
+    this.closing = true;
+    this.$el.modal('hide');
+    setTimeout(((function(_this) {
+      return function() {
+        return _this.remove();
+      };
+    })(this)), 500);
+    return this.cb(false);
+  };
+
+  Modal.prototype.onYes = function() {
+    if (this.closing) {
+      return;
+    }
+    this.closing = true;
+    this.$el.modal('hide');
+    setTimeout(((function(_this) {
+      return function() {
+        return _this.remove();
+      };
+    })(this)), 500);
+    return this.cb(true);
+  };
+
+  Modal.prototype.closeOnEscape = function(e) {
+    if (e.which === 27) {
+      return this.onNo();
+    }
+  };
+
+  Modal.prototype.remove = function() {
+    $(document).off('keyup', this.closeOnEscape);
+    return Modal.__super__.remove.apply(this, arguments);
+  };
+
+  Modal.prototype.render = function() {
+    var body, close, container, foot, head, title, yesBtn;
+    close = $('<button class="close" type="button" data-dismiss="modal" aria-hidden="true">×</button>');
+    title = $('<h4 class="model-title">').text(this.title);
+    head = $('<div class="modal-header">').append(close, title);
+    body = $('<div class="modal-body">').append(this.renderContent());
+    yesBtn = $('<button id="modal-dialog-yes" class="btn btn-cozy">').text(this.yes);
+    foot = $('<div class="modal-footer">').append(yesBtn);
+    if (this.no) {
+      foot.prepend($('<button id="modal-dialog-no" class="btn btn-link">').text(this.no));
+    }
+    container = $('<div class="modal-content">').append(head, body, foot);
+    container = $('<div class="modal-dialog">').append(container);
+    return $("body").append(this.$el.append(container));
+  };
+
+  Modal.prototype.renderContent = function() {
+    return this.content;
+  };
+
+  Modal.prototype.onClickAnywhere = function(event) {
+    if (event.target.id === this.id) {
+      return this.onNo();
+    }
+  };
+
+  return Modal;
+
+})(Backbone.View);
+
+Modal.alert = function(title, content, cb) {
+  return new Modal({
+    title: title,
+    content: content,
+    yes: 'ok',
+    no: null,
+    cb: cb
+  });
+};
+
+Modal.confirm = function(title, content, yesMsg, noMsg, cb) {
+  return new Modal({
+    title: title,
+    content: content,
+    yes: yesMsg,
+    no: noMsg,
+    cb: cb
+  });
+};
+
+Modal.error = function(text, cb) {
+  return new Modal({
+    title: t('modal error'),
+    content: text,
+    yes: t('modal ok'),
+    no: false,
+    cb: cb
+  });
+};
+
+module.exports = Modal;
+});
+
 ;require.register("lib/popover_view", function(exports, require, module) {
 var BaseView, PopoverView,
   __hasProp = {}.hasOwnProperty,
@@ -1425,6 +1586,10 @@ module.exports = {
   "to": "to",
   'Reminders before the event': 'Reminders before the event',
   "reminder": "Reminder",
+  'send mails question': 'Send a notification email to: ',
+  'modal send mails': 'Send a notification',
+  'yes': 'Yes',
+  'no': 'No',
   "no description": "A title must be set.",
   "no summary": "A summary must be set.",
   "start after end": "The start date is after the end date.",
@@ -1595,6 +1760,10 @@ module.exports = {
   "to": "à",
   'Reminders before the event': 'Rappels avant l\'évènement',
   "reminder": "Rappel",
+  'send mails question': 'Envoyer un email de notification à : ',
+  'modal send mails': 'Envoyer une notification',
+  'yes': 'Oui',
+  'no': 'Non',
   "no description": "Le titre est obligatoire",
   "no summary": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
@@ -1840,11 +2009,13 @@ module.exports = RealEvent = (function(_super) {
 });
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
-var H, ScheduleItem, colorHash,
+var H, Modal, ScheduleItem, colorHash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-colorHash = require('lib/colorhash');
+colorHash = require('../lib/colorhash');
+
+Modal = require('../lib/modal');
 
 H = require('../helpers');
 
@@ -1864,8 +2035,18 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.initialize = function() {
     var _ref;
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
-      return this.set('tags', ['my calendar']);
+      this.set('tags', ['my calendar']);
     }
+    this.on('change:' + this.startDateField, (function(_this) {
+      return function() {
+        return _this.startDateChanged = true;
+      };
+    })(this));
+    return this.on('change:attendees', (function(_this) {
+      return function() {
+        return _this.attendeesChanged = true;
+      };
+    })(this));
   };
 
   ScheduleItem.prototype.getCalendar = function() {
@@ -2067,6 +2248,43 @@ module.exports = ScheduleItem = (function(_super) {
       backgroundColor: this.getColor(),
       borderColor: this.getColor()
     };
+  };
+
+  ScheduleItem.prototype.sync = function(method, model, options) {
+    if ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && (this.startDateChanged || this.attendeesChanged))) {
+      return this.confirmSendEmails((function(_this) {
+        return function(sendMails) {
+          model.sendMails = sendMails;
+          return ScheduleItem.__super__.sync.call(_this, method, model, options);
+        };
+      })(this));
+    } else {
+      return ScheduleItem.__super__.sync.call(this, method, model, options);
+    }
+  };
+
+  ScheduleItem.prototype.confirmSendEmails = function(callback) {
+    var attendees, first, text;
+    attendees = this.get('attendees') || [];
+    if (attendees.length === 0) {
+      callback(false);
+    } else {
+      text = t('send mails question');
+      first = true;
+      attendees.forEach(function(guest) {
+        if (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged)) {
+          if (!first) {
+            text += ', ';
+          } else {
+            first = false;
+          }
+          return text += guest.email;
+        }
+      });
+      Modal.confirm(t('modal send mails'), text, t('yes'), t('no'), callback);
+    }
+    this.startDateChanged = false;
+    return this.attendeesChanged = false;
   };
 
   return ScheduleItem;
@@ -3295,6 +3513,9 @@ module.exports = EventModal = (function(_super) {
         data.start = dtS.toISOString();
         data.end = dtE.toISOString();
       }
+    }
+    if (data.start !== this.model.get(this.model.startDateField)) {
+      this.model.startDateChanged = true;
     }
     validModel = this.model.save(data, {
       wait: true,

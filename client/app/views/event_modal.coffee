@@ -229,6 +229,9 @@ module.exports = class EventModal extends ViewCollection
                 data.start = dtS.toISOString()
                 data.end = dtE.toISOString()
 
+        if data.start isnt @model.get @model.startDateField
+            @model.startDateChanged = true
+
         validModel = @model.save data,
             wait: true
             success: =>

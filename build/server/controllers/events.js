@@ -61,7 +61,7 @@ module.exports.create = function(req, res) {
     if (err) {
       return res.error("Server error while creating event.");
     }
-    if (data["import"]) {
+    if (data["import"] || !data.sendMails) {
       return res.send(event, 201);
     } else {
       return mails.sendInvitations(event, false, function(err, updatedEvent) {
@@ -82,11 +82,13 @@ module.exports.update = function(req, res) {
       return res.send({
         error: "Server error while saving event"
       }, 500);
-    } else {
+    } else if (data.sendMails) {
       dateChanged = data.start !== start;
       return mails.sendInvitations(event, dateChanged, function(err, updatedEvent) {
         return res.send(updatedEvent || event, 200);
       });
+    } else {
+      return res.send(event, 200);
     }
   });
 };
@@ -97,12 +99,16 @@ module.exports["delete"] = function(req, res) {
       return res.send({
         error: "Server error while deleting the event"
       }, 500);
-    } else {
+    } else if (req.event.sendMails) {
       return mails.sendDeleteNotification(req.event, function() {
         return res.send({
           success: true
         }, 200);
       });
+    } else {
+      return res.send({
+        success: true
+      }, 200);
     }
   });
 };

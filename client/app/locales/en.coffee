@@ -122,6 +122,11 @@ module.exports =
     "to"                                : "to"
     'Reminders before the event'        : 'Reminders before the event'
     "reminder"                          : "Reminder"
+# CONFIRM MODAL
+    'send mails question'               : 'Send a notification email to: '
+    'modal send mails'                  : 'Send a notification'
+    'yes'                               : 'Yes'
+    'no'                                : 'No'
 
 # ERRORS
     "no description"                    : "A title must be set."
