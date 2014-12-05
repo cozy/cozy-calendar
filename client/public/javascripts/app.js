@@ -3475,6 +3475,11 @@ module.exports = EventModal = (function(_super) {
         model: reminderM
       });
       this.reminders.push(reminder);
+      reminder.on('remove', (function(_this) {
+        return function(removedReminder) {
+          return _this.reminders.splice(_this.reminders.indexOf(removedReminder), 1);
+        };
+      })(this));
       reminder.render();
       return this.$('#reminder-container').append(reminder.$el);
     }
@@ -3719,6 +3724,11 @@ module.exports = ReminderView = (function(_super) {
     inputDuration = this.$('.triggervalue');
     inputDuration.before(this.actionMail.$el);
     return inputDuration.before(this.actionNotif.$el);
+  };
+
+  ReminderView.prototype.remove = function() {
+    this.trigger('remove', this);
+    return ReminderView.__super__.remove.apply(this, arguments);
   };
 
   ReminderView.prototype.getRenderData = function() {
