@@ -2244,6 +2244,7 @@ module.exports = ScheduleItem = (function(_super) {
       end: end,
       allDay: this.isAllDay(),
       startEditable: !this.isRecurrent(),
+      durationEditable: true,
       diff: this.get('diff'),
       place: this.get('place'),
       timezone: this.get('timezone'),
@@ -2986,7 +2987,6 @@ module.exports = CalendarView = (function(_super) {
     this.cal.fullCalendar({
       lang: window.locale,
       header: false,
-      editable: true,
       firstDay: 1,
       height: "auto",
       defaultView: this.view,
