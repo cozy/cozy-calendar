@@ -23,6 +23,21 @@ module.exports = class Router extends Backbone.Router
         'sync'                            : 'sync'
         'calendar'                        : 'backToCalendar'
 
+    initialize: (options) ->
+        super options
+
+        # Only listview on mobile devices.
+        $(window).resize =>
+            if window.app.isMobile()
+                @navigate 'list', trigger:true
+
+    navigate: (route, options) ->
+        # Only listview on mobile devices.
+        if window.app.isMobile()
+            super 'list', options
+        else
+            super route, options
+
     month: (year, month) ->
         if year?
             @displayCalendar 'month', year, month, 1
@@ -106,3 +121,4 @@ module.exports = class Router extends Backbone.Router
         monday = new Date(year, (month-1)%12, day)
         monday.setDate(monday.getDate() - monday.getDay() + 1)
         return [year, monday.getMonth()+1, monday.getDate()]
+
