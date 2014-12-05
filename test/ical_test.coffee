@@ -54,7 +54,7 @@ describe "Calendar export/import", ->
 
             it "Then it should contains my event", ->
                 dtstamp = moment.tz moment(), 'UTC'
-                dtstampValue = "DTSTAMP:#{dtstamp.format 'YYYYMMDDTHHmm[00Z]'}"
+                dtstampValue = "DTSTAMP:#{dtstamp.format 'YYYYMMDDTHHmmss[Z]'}"
                 expectedBody = expectedContent
                     .replace '[id-4]', ids[0]
                     # DTSTAMP is new all the time in our implementation
