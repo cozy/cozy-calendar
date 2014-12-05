@@ -145,6 +145,9 @@ module.exports = {
     if (typeof Object.freeze === 'function') {
       return Object.freeze(this);
     }
+  },
+  isMobile: function() {
+    return $('ul#menu').height() === 40;
   }
 };
 });
@@ -2337,6 +2340,27 @@ module.exports = Router = (function(_super) {
     'list/:eventid': 'list_event',
     'sync': 'sync',
     'calendar': 'backToCalendar'
+  };
+
+  Router.prototype.initialize = function(options) {
+    Router.__super__.initialize.call(this, options);
+    return $(window).resize((function(_this) {
+      return function() {
+        if (window.app.isMobile()) {
+          return _this.navigate('list', {
+            trigger: true
+          });
+        }
+      };
+    })(this));
+  };
+
+  Router.prototype.navigate = function(route, options) {
+    if (window.app.isMobile()) {
+      return Router.__super__.navigate.call(this, 'list', options);
+    } else {
+      return Router.__super__.navigate.call(this, route, options);
+    }
   };
 
   Router.prototype.month = function(year, month) {
