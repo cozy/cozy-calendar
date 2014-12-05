@@ -36,6 +36,9 @@ require('cozy-ical').decorateEvent Event
 Event.all = (params, callback) ->
     Event.request "all", params, callback
 
+Event.byCalendar = (calendarId, callback) ->
+    Event.request 'byCalendar', key: calendarId, callback
+
 Event.tags = (callback) ->
     Event.rawRequest "tags", group: true, (err, results) ->
         return callback err if err

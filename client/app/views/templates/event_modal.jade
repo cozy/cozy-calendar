@@ -35,7 +35,7 @@
         .row-fluid
             .control-group.span12
                 label.control-label(for="basic-calendar")= t('calendar')
-                .controls: input#basic-calendar(value=calendar)
+                .surrounded-combobox.controls: input#basic-calendar(value=calendar)
             .control-group.span8(style="display:none;")
                 label.control-label(for="basic-tags")= t('tags')
                 .controls: input.span12#basic-tags.tagit(value=tags.join(','))

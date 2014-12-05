@@ -3,10 +3,13 @@ Event = require '../models/event'
 User = require  '../models/user'
 
 module.exports.export = (req, res) ->
+
+    calendarId = req.params.calendarid
+
     calendar = new ical.VCalendar
         organization: 'Cozy'
-        title: 'Cozy Calendar'
-    Event.all (err, events) ->
+        title: calendarId
+    Event.byCalendar calendarId, (err, events) ->
         if err
             res.send
                 error: true

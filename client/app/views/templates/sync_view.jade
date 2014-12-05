@@ -15,8 +15,11 @@
     h3= t('icalendar export')
     p
       = t('download a copy of your calendar')
-    p
-      a.btn(href="export/calendar.ics")= t('export your calendar')
+    p.line
+      span.surrounded-combobox
+        input#export-calendar(value=calendar)
+      span &nbsp;
+      a#export.btn= t('export your calendar')
 
 .helptext
     h3= t('icalendar import')

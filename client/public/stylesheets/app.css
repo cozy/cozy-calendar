@@ -9521,25 +9521,25 @@ textarea:active {
   padding: 0px 4px;
   margin-right: 5px;
 }
-#event-modal {
-  padding: 0;
-}
-#event-modal .combobox {
+.surrounded-combobox .combobox {
   padding-left: 20px;
   margin-left: -11px;
 }
-#event-modal .combobox-caret {
+.surrounded-combobox .combobox-caret {
   padding: 4px;
   position: relative;
   left: -20px;
 }
-#event-modal .combobox-caret .caret {
+.surrounded-combobox .combobox-caret .caret {
   margin-top: 8px;
 }
-#event-modal .combobox-badge {
+.surrounded-combobox .combobox-badge {
   margin-right: 0px;
   position: relative;
   left: 3px;
+}
+#event-modal {
+  padding: 0;
 }
 #event-modal .btn {
   -webkit-border-radius: 5px;
@@ -9983,25 +9983,25 @@ input[type="time"] {
   padding: 0px 4px;
   margin-right: 5px;
 }
-#event-modal {
-  padding: 0;
-}
-#event-modal .combobox {
+.surrounded-combobox .combobox {
   padding-left: 20px;
   margin-left: -11px;
 }
-#event-modal .combobox-caret {
+.surrounded-combobox .combobox-caret {
   padding: 4px;
   position: relative;
   left: -20px;
 }
-#event-modal .combobox-caret .caret {
+.surrounded-combobox .combobox-caret .caret {
   margin-top: 8px;
 }
-#event-modal .combobox-badge {
+.surrounded-combobox .combobox-badge {
   margin-right: 0px;
   position: relative;
   left: 3px;
+}
+#event-modal {
+  padding: 0;
 }
 #event-modal .btn {
   -webkit-border-radius: 5px;
