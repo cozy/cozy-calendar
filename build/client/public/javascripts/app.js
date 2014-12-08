@@ -1535,6 +1535,7 @@ module.exports = {
   "enter email": "Enter email",
   "ON": "on",
   "OFF": "off",
+  "no description": "No description",
   "recurrence": "Recurrence",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
@@ -1594,7 +1595,6 @@ module.exports = {
   'modal send mails': 'Send a notification',
   'yes': 'Yes',
   'no': 'No',
-  "no description": "A title must be set.",
   "no summary": "A summary must be set.",
   "start after end": "The start date is after the end date.",
   "invalid start date": "The start date is invalid.",
@@ -1720,6 +1720,7 @@ module.exports = {
   "enter email": "Entrer l'adresse email",
   "ON": "activée",
   "OFF": "désactivée",
+  "no description": "Sans description",
   "recurrence": "Récurrence",
   "recurrence rule": "Règle de récurrence",
   "make reccurent": "Rendre réccurent",
@@ -1778,7 +1779,6 @@ module.exports = {
   'modal send mails': 'Envoyer une notification',
   'yes': 'Oui',
   'no': 'Non',
-  "no description": "Le titre est obligatoire",
   "no summary": "Le titre est obligatoire",
   "start after end": "La fin est après le début.",
   "invalid start date": "Le début est invalide.",
@@ -2255,11 +2255,13 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype._toFullCalendarEvent = function(start, end) {
-    var displayedTime, fcEvent;
+    var description, displayedTime, fcEvent;
     displayedTime = !this.isAllDay() ? start.format('H:mm[ ]') : '';
+    description = this.get('description');
+    description = description || t('no description');
     return fcEvent = {
       id: this.cid,
-      title: "" + displayedTime + (this.get('description')),
+      title: "" + displayedTime + description,
       start: start,
       end: end,
       allDay: this.isAllDay(),
@@ -5067,7 +5069,7 @@ if ( !allDay)
 {
 buf.push("" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "");
 }
-buf.push("&nbsp;" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");;return buf.join("");
+buf.push("&nbsp;" + (jade.escape((jade_interp = description || t("no description")) == null ? '' : jade_interp)) + "<i class=\"icon-trash\"></i></p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

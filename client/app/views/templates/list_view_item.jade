@@ -2,5 +2,5 @@ p
     span.badge(style="background-color:"+color+";") &nbsp;
     if !allDay
         | #{start} - #{end}
-    | &nbsp;#{description}
+    | &nbsp;#{description || t("no description")}
     i.icon-trash
