@@ -3362,11 +3362,17 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.afterRender = function() {
-    var _ref;
+    var end, _ref;
     EventModal.__super__.afterRender.apply(this, arguments);
     this.addGuestField = this.configureGuestTypeahead();
     this.startField = this.$('#basic-start').attr('type', 'text');
     this.endField = this.$('#basic-end').attr('type', 'text');
+    this.startField.val(this.model.getStartDateObject().format(this.inputDateTimeFormat));
+    end = this.model.getEndDateObject();
+    if (this.model.isAllDay()) {
+      end.add(-1, 'days');
+    }
+    this.endField.val(end.format(this.inputDateTimeFormat));
     this.toggleAllDay();
     this.descriptionField = this.$('#basic-description');
     this.reminders = [];
@@ -3408,9 +3414,11 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.toggleAllDay = function() {
-    var dtFormat, modelEnd, options, uiEnd, uiStart;
+    var dtFormat, end, options, start;
     this.startField.datetimepicker('remove');
     this.endField.datetimepicker('remove');
+    start = moment(this.startField.val(), this.inputDateTimeFormat);
+    end = moment(this.endField.val(), this.inputDateTimeFormat);
     options = {
       language: window.app.locale,
       autoclose: true,
@@ -3431,14 +3439,8 @@ module.exports = EventModal = (function(_super) {
         viewSelect: 4
       });
     }
-    modelEnd = this.model.getEndDateObject();
-    uiEnd = modelEnd.add('day', -1);
-    uiStart = this.model.getStartDateObject();
-    if (uiEnd.isBefore(uiStart)) {
-      uiEnd.add('day', 1);
-    }
-    this.startField.val(uiStart.format(dtFormat));
-    this.endField.val(uiEnd.format(dtFormat));
+    this.startField.val(start.format(dtFormat));
+    this.endField.val(end.format(dtFormat));
     this.startField.datetimepicker(options);
     return this.endField.datetimepicker(options);
   };
