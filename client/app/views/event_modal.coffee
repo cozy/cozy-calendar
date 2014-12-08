@@ -49,6 +49,16 @@ module.exports = class EventModal extends ViewCollection
 
         @startField = @$('#basic-start').attr 'type', 'text'
         @endField = @$('#basic-end').attr 'type', 'text'
+
+        # Put initial value.
+        @startField.val @model.getStartDateObject().format @inputDateTimeFormat
+        end = @model.getEndDateObject()
+        if @model.isAllDay()
+            # Model has non-inclusive end-date, but UI has inclusive end-date,
+            # which means a difference of one day.
+            end.add -1, 'days'
+        @endField.val end.format @inputDateTimeFormat
+
         @toggleAllDay()
 
         @descriptionField = @$('#basic-description')
@@ -84,17 +94,18 @@ module.exports = class EventModal extends ViewCollection
         @close() if e.which is 27 and not e.isDefaultPrevented()
 
     toggleAllDay: =>
-
         @startField.datetimepicker 'remove'
         @endField.datetimepicker 'remove'
 
+        start = moment @startField.val(), @inputDateTimeFormat
+        end = moment @endField.val(), @inputDateTimeFormat
+        
         options =
             language: window.app.locale
             autoclose: true
             pickerPosition: 'bottom-right'
 
             keyboardNavigation: false
-
 
         if @$('#allday').is ':checked'
             dtFormat = @inputDateFormat
@@ -109,18 +120,8 @@ module.exports = class EventModal extends ViewCollection
                 format: @inputDateTimeDTPickerFormat
                 viewSelect: 4
 
-        # Model has non-inclusive end-date, but UI has inclusive end-date,
-        # which means a difference of one day.
-        modelEnd = @model.getEndDateObject()
-        uiEnd = modelEnd.add 'day', -1
-
-        uiStart = @model.getStartDateObject()
-        # Avoid duration 0 events.
-        if uiEnd.isBefore uiStart
-            uiEnd.add 'day', 1
-
-        @startField.val uiStart.format dtFormat
-        @endField.val uiEnd.format dtFormat
+        @startField.val start.format dtFormat
+        @endField.val end.format dtFormat
 
         @startField.datetimepicker options
         @endField.datetimepicker options
