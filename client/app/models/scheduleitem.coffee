@@ -189,9 +189,11 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     _toFullCalendarEvent: (start, end) ->
         displayedTime = if not @isAllDay() then start.format 'H:mm[ ]' else ''
+        description = @get 'description'
+        description = description or t 'no description'
         return fcEvent =
             id: @cid
-            title:  "#{displayedTime}#{@get 'description'}"
+            title:  "#{displayedTime}#{description}"
             start: start
             end: end
             allDay: @isAllDay()

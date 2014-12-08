@@ -13,8 +13,7 @@ module.exports = class ListView extends ViewCollection
     events:
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
-        
-
+    
     afterRender: ->
         @calHeader = new Header()
         @$('#calheader').html @calHeader.render().$el
