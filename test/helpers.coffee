@@ -46,6 +46,7 @@ helpers.createEvent = (start, end, place, description, callback) ->
             end: end
             place: place
             description: description
+            tags: ['my calendar']
 
         Event.create evt, callback
 

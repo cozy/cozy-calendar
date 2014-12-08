@@ -31,6 +31,9 @@ module.exports = class ReminderView extends BaseView
         inputDuration.before @actionMail.$el
         inputDuration.before @actionNotif.$el
 
+    remove: ->
+        @trigger 'remove', @
+        super
 
     getRenderData: =>
         if not @model.isNew

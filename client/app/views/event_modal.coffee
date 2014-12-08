@@ -152,6 +152,9 @@ module.exports = class EventModal extends ViewCollection
             @$('#reminder-explanation').removeClass 'hide'
             reminder = new ReminderView model: reminderM
             @reminders.push reminder
+            reminder.on 'remove', (removedReminder) =>
+                @reminders.splice @reminders.indexOf(removedReminder), 1
+            
             reminder.render()
             @$('#reminder-container').append reminder.$el
 

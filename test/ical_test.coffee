@@ -14,7 +14,7 @@ helpers = require './helpers'
 expectedContent = """
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Cozy//NONSGML Cozy Calendar//EN
+PRODID:-//Cozy//NONSGML my calendar//EN
 BEGIN:VEVENT
 UID:[id-4]
 DTSTAMP:20141110T090600Z
@@ -32,7 +32,7 @@ describe "Calendar export/import", ->
     after helpers.after
 
     describe 'Resources', ->
-        describe "GET /export/calendar.ics", ->
+        describe "GET /export/my calendar.ics", ->
 
             ids = null
             before helpers.cleanDb
@@ -47,7 +47,7 @@ describe "Calendar export/import", ->
                     done()
 
             it "When I request for iCal export file", (done) ->
-                client.get "export/calendar.ics", (error, response, body) =>
+                client.get "export/my%20calendar.ics", (error, response, body) =>
                     @body = body
                     done()
                 , false
