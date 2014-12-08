@@ -62,12 +62,6 @@ task 'tests', "Run tests #{taskDetails}", (opts) ->
             logger.info "Tests succeeded!"
             process.exit 0
 
-task 'tests:client', 'run client tests through mocha', (opts) ->
-    exec "mocha-phantomjs client/_specs/index.html", (err, stdout, stderr) ->
-        if err
-            console.log "Running mocha caught exception: \n" + err
-        console.log stdout
-
 task "lint", "Run Coffeelint", ->
     process.env.TZ = "Europe/Paris"
     command = "coffeelint "
