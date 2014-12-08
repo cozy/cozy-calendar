@@ -11,6 +11,7 @@ module.exports = class MenuItemView extends BaseView
         'click > span': 'toggleVisible'
         'click .calendar-remove': 'onRemoveCalendar'
         'click .calendar-rename': 'onRenameCalendar'
+        'click .calendar-export': 'onExportCalendar'
 
     toggleVisible: ->
         unless app.router.onCalendar
@@ -80,6 +81,10 @@ module.exports = class MenuItemView extends BaseView
             @startSpinner()
             @model.collection.remove calendarName, =>
                 @stopSpinner()
+
+    onExportCalendar: ->
+        calendarName = @model.get 'label'
+        window.location = "export/#{calendarName}.ics"
 
     buildBadge: (calendarName)->
         color = colorhash calendarName

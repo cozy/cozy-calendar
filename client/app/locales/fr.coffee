@@ -10,6 +10,7 @@ module.exports =
     "close"                             : "Fermer"
     "delete"                            : "Supprimer"
     "rename"                            : "Renommer"
+    "export"                            : "Exporter"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'

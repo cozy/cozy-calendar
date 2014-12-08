@@ -1481,6 +1481,7 @@ module.exports = {
   "close": "Close",
   "delete": "Delete",
   "rename": "Rename",
+  "export": "Export",
   "Place": "Place",
   'all day': 'all day',
   'All day': 'All day',
@@ -1658,6 +1659,7 @@ module.exports = {
   "close": "Fermer",
   "delete": "Supprimer",
   "rename": "Renommer",
+  "export": "Exporter",
   "Place": "Lieu",
   'all day': 'journée entière',
   'All day': 'Journée entière',
@@ -4603,7 +4605,8 @@ module.exports = MenuItemView = (function(_super) {
   MenuItemView.prototype.events = {
     'click > span': 'toggleVisible',
     'click .calendar-remove': 'onRemoveCalendar',
-    'click .calendar-rename': 'onRenameCalendar'
+    'click .calendar-rename': 'onRenameCalendar',
+    'click .calendar-export': 'onExportCalendar'
   };
 
   MenuItemView.prototype.toggleVisible = function() {
@@ -4679,6 +4682,12 @@ module.exports = MenuItemView = (function(_super) {
         };
       })(this));
     }
+  };
+
+  MenuItemView.prototype.onExportCalendar = function() {
+    var calendarName;
+    calendarName = this.model.get('label');
+    return window.location = "export/" + calendarName + ".ics";
   };
 
   MenuItemView.prototype.buildBadge = function(calendarName) {
@@ -5077,7 +5086,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
+buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
