@@ -12,7 +12,8 @@ module.exports["export"] = function(req, res) {
   calendarId = req.params.calendarid;
   calendar = new ical.VCalendar({
     organization: 'Cozy',
-    title: calendarId
+    title: 'Cozy Calendar',
+    name: calendarId
   });
   return Event.byCalendar(calendarId, function(err, events) {
     var event, _i, _len;
@@ -42,6 +43,7 @@ module.exports["import"] = function(req, res) {
   if (file != null) {
     parser = new ical.ICalParser();
     return parser.parseFile(file.path, function(err, result) {
+      var calendarName, _ref;
       if (err) {
         console.log(err);
         console.log(err.message);
@@ -49,11 +51,13 @@ module.exports["import"] = function(req, res) {
           error: 'error occured while saving file'
         });
       } else {
-        if (User.timezone == null) {
-          User.timezone = 'Europe/Paris';
-        }
+        calendarName = (result != null ? (_ref = result.model) != null ? _ref.name : void 0 : void 0) || 'my calendar';
+        console.log("calendarName " + calendarName);
         return res.send(200, {
-          events: Event.extractEvents(result)
+          events: Event.extractEvents(result, calendarName),
+          calendar: {
+            name: calendarName
+          }
         });
       }
     });

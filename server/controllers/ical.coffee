@@ -8,7 +8,8 @@ module.exports.export = (req, res) ->
 
     calendar = new ical.VCalendar
         organization: 'Cozy'
-        title: calendarId
+        title: 'Cozy Calendar'
+        name: calendarId
     Event.byCalendar calendarId, (err, events) ->
         if err
             res.send
@@ -31,7 +32,11 @@ module.exports.import = (req, res) ->
                 console.log err.message
                 res.send 500, error: 'error occured while saving file'
             else
-                User.timezone ?= 'Europe/Paris'
-                res.send 200, events: Event.extractEvents result
+                calendarName = result?.model?.name or 'my calendar'
+                console.log "calendarName " +  calendarName
+                res.send 200, 
+                    events: Event.extractEvents result, calendarName
+                    calendar: 
+                        name: calendarName
     else
         res.send error: 'no file sent', 500

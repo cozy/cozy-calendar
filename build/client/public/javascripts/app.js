@@ -1605,7 +1605,7 @@ module.exports = {
   "synchronization": "Synchronization",
   "mobile sync": "Mobile Sync (CalDAV)",
   "link imported events with calendar": "Link events to import with following calendar:",
-  "import an ical file": "To import an ICal file into your cozy calendar, click on this button:",
+  "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
   "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
   "icalendar export": "ICalendar Export",
   "icalendar import": "ICalendar Import",
@@ -1788,7 +1788,7 @@ module.exports = {
   "server error occured": "Une erreur est survenue sur le serveur.",
   "synchronization": "Synchronisation",
   "mobile sync": "Synchro Mobile (CalDAV)",
-  "import an ical file": "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :",
+  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
   "link imported events with calendar": "Lier les événements à importer avec le calendrier suivant:",
   "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
   "icalendar export": "Exporter ICalendar",
@@ -4161,11 +4161,14 @@ module.exports = ImportView = (function(_super) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var vevent, _i, _len, _ref;
+          var vevent, _i, _len, _ref, _ref1;
+          if (result != null ? (_ref = result.calendar) != null ? _ref.name : void 0 : void 0) {
+            _this.calendarCombo.setValue(result.calendar.name);
+          }
           if ((result != null ? result.events : void 0) != null) {
-            _ref = result.events;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              vevent = _ref[_i];
+            _ref1 = result.events;
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              vevent = _ref1[_i];
               event = new Event(vevent);
               _this.eventList.collection.add(event);
             }
@@ -5007,7 +5010,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><p>" + (jade.escape(null == (jade_interp = t('import an ical file')) ? "" : jade_interp)) + "</p><div class=\"import-form\"><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"import-progress mt3\"></div><div class=\"import-errors mt3\"></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
+buf.push("<div id=\"import-form\" class=\"well\"><div class=\"import-form\"><p>" + (jade.escape(null == (jade_interp = t('import an ical file')) ? "" : jade_interp)) + "</p><div id=\"import-button\" class=\"btn\"><span>" + (jade.escape(null == (jade_interp = t('select an icalendar file')) ? "" : jade_interp)) + "</span><input id=\"import-file-input\" type=\"file\"/></div></div><div class=\"confirmation\"><div class=\"import-calendar-selection mb2\"><span>" + (jade.escape(null == (jade_interp = t('link imported events with calendar')) ? "" : jade_interp)) + "</span><br/><input id=\"import-calendar-combo\" class=\"mt1\"/></div><button id=\"confirm-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('confirm import')) ? "" : jade_interp)) + "</button><button id=\"cancel-import-button\" class=\"btn\">" + (jade.escape(null == (jade_interp = t ('cancel')) ? "" : jade_interp)) + "</button></div><div class=\"import-progress mt3\"></div><div class=\"import-errors mt3\"></div><div class=\"results mt3\"><h4>" + (jade.escape(null == (jade_interp = t('Events to import')) ? "" : jade_interp)) + "</h4><div id=\"import-event-list\"></div></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5299,6 +5302,7 @@ module.exports = ComboBox = (function(_super) {
     this.onBlur = __bind(this.onBlur, this);
     this.onClose = __bind(this.onClose, this);
     this.onOpen = __bind(this.onOpen, this);
+    this.setValue = __bind(this.setValue, this);
     this.openMenu = __bind(this.openMenu, this);
     return ComboBox.__super__.constructor.apply(this, arguments);
   }
@@ -5347,6 +5351,11 @@ module.exports = ComboBox = (function(_super) {
     return this.$el.focus().val(this.value()).autocomplete('search', '');
   };
 
+  ComboBox.prototype.setValue = function(value) {
+    this.$el.val(value);
+    return this.onSelect();
+  };
+
   ComboBox.prototype.onOpen = function() {
     return this.menuOpen = true;
   };
@@ -5366,9 +5375,10 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onSelect = function(ev, ui) {
+    var _ref;
     this.$el.blur().removeClass('expanded');
     this.updateBadge(ev, ui);
-    return this.trigger('edition-complete', ui.item.value);
+    return this.trigger('edition-complete', (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value());
   };
 
   ComboBox.prototype.updateBadge = function(ev, ui) {

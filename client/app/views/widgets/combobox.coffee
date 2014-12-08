@@ -42,6 +42,10 @@ module.exports = class ComboBox extends BaseView
         @$el.addClass 'expanded'
         @$el.focus().val(@value()).autocomplete 'search', ''
 
+    setValue: (value) =>
+        @$el.val value
+        @onSelect()
+
     onOpen: => @menuOpen = true
 
     onClose: =>
@@ -55,7 +59,7 @@ module.exports = class ComboBox extends BaseView
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
         @updateBadge ev, ui
-        @trigger 'edition-complete', ui.item.value
+        @trigger 'edition-complete', ui?.item?.value or @value()
 
     updateBadge: (ev, ui) =>
         @badge?.remove()
