@@ -64,6 +64,7 @@ module.exports =
     "enter email"                       : "Enter email"
     "ON"                                : "on"
     "OFF"                               : "off"
+    "no description"                    : "No description"
 
 # RRULE related
     "recurrence"                        : "Recurrence"
@@ -130,7 +131,6 @@ module.exports =
     'no'                                : 'No'
 
 # ERRORS
-    "no description"                    : "A title must be set."
     "no summary"                        : "A summary must be set."
     "start after end"                   : "The start date is after the end date."
     "invalid start date"                : "The start date is invalid."
