@@ -56,6 +56,9 @@ module.exports = class ImportView extends BaseView
             processData: false
             contentType: false
             success: (result) =>
+                if result?.calendar?.name
+                    # @$('#import-calendar-combo').val result.calendar.name
+                    @calendarCombo.setValue result.calendar.name
 
                 if result?.events?
                     for vevent in result.events
