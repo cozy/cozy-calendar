@@ -143,7 +143,7 @@ module.exports =
     "mobile sync"                       : "Mobile Sync (CalDAV)"
     "link imported events with calendar": "Link events to import with following calendar:"
     "import an ical file"               : "To import an ICal file into your cozy calendar, click on this button:"
-    "download a copy of your calendar"  : "To download a copy of a calendar on your computer as an ICal file, select one calendar and then click on the export button:"
+    "download a copy of your calendar"  : "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :"
     "icalendar export"                  : "ICalendar Export"
     "icalendar import"                  : "ICalendar Import"
     "to sync your cal with"             : "To synchronize your calendar with your devices, you must follow two steps"

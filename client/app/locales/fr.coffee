@@ -143,7 +143,7 @@ module.exports =
     "mobile sync"                       : "Synchro Mobile (CalDAV)"
     "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :"
     "link imported events with calendar": "Lier les événements à importer avec le calendrier suivant:"
-    "download a copy of your calendar"  : "Pour télécharger une copie d'un calendrier sur votre ordinateur comme un fichier iCal, sélectionnez un calendrier puis cliquez sur le bouton exporter :"
+    "download a copy of your calendar"  : "Sélectionner un calendrier puis cliquer sur le bouton exporter pour télécharger une copie du calendrier comme un fichier iCal :"
     "icalendar export"                  : "Export ICalendar"
     "icalendar import"                  : "Import ICalendar"
     "to sync your cal with"             : "Pour synchroniser votre calendrier avec votre mobile vous devez :"
@@ -153,7 +153,7 @@ module.exports =
     "imported events": "Nombre d'événements importés"
     "import finished": "Votre import est terminé !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
-    "export your calendar": "Exportez votre calendrier"
+    "export your calendar": "Exporter votre calendrier"
     'please select existing calendar' : 'Veuillez sélectionner un calendrier existant.'
 
 # DATE
