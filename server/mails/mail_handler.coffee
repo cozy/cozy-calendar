@@ -89,7 +89,7 @@ no
                         guest.status = 'NEEDS-ACTION' # ical = waiting an answer
                     else
                         log.error "An error occured while sending invitation"
-                        console.log err.stack
+                        log.error err
 
                     cb err
 
@@ -126,8 +126,8 @@ on #{date}
                     needSaving = true
                     guest.status = 'NEEDS-ACTION' # ical = waiting an answer
                 else
-                    log.error "An error occured while sending invitation"
-                    console.log err.stack
+                    log.error "An error occured while sending email"
+                    log.error err
 
                 cb err
 

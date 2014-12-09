@@ -210,7 +210,8 @@ module.exports = class ScheduleItem extends Backbone.Model
             method in ['update', 'patch'] and (
                 @startDateChanged or @attendeesChanged))
             @confirmSendEmails (sendMails) =>
-                model.sendMails = sendMails
+                # overrides the url to append the sendmails parameter
+                options.url = "#{model.url()}?sendMails=#{sendMails}"
                 return super method, model, options
 
         else
@@ -218,7 +219,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []
-        if attendees.length is 0 
+        if attendees.length is 0
             callback false
         else
             text = t('send mails question')
