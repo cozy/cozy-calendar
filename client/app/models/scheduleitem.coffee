@@ -209,7 +209,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         if method in ['create', 'delete'] or (
             method in ['update', 'patch'] and (
                 @startDateChanged or @attendeesChanged))
-            @confirmSendEmails (sendMails) =>
+            @confirmSendEmails (sendMails) ->
                 # overrides the url to append the sendmails parameter
                 options.url = "#{model.url()}?sendMails=#{sendMails}"
                 return super method, model, options
@@ -223,7 +223,6 @@ module.exports = class ScheduleItem extends Backbone.Model
             callback false
         else
             text = t('send mails question')
-
             first = true
             attendees.forEach (guest) ->
                 if guest.status is 'INVITATION-NOT-SENT' or (

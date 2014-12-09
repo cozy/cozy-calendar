@@ -190,7 +190,6 @@ module.exports = class EventModal extends ViewCollection
             description: @$('#basic-summary').val()
             place: @$('#basic-place').val()
             tags: [@$('#basic-calendar').val()].concat @tags.getTags()
-
         data.alarms = @reminders.map (v) -> return v.getModelAttributes()
 
         data.rrule =
@@ -237,7 +236,6 @@ module.exports = class EventModal extends ViewCollection
             @model.startDateChanged = true
 
         validModel = @model.save data,
-            wait: true
             success: =>
                 @close()
             error: =>
