@@ -99,7 +99,7 @@ module.exports = class EventModal extends ViewCollection
 
         start = moment @startField.val(), @inputDateTimeFormat
         end = moment @endField.val(), @inputDateTimeFormat
-        
+
         options =
             language: window.app.locale
             autoclose: true
@@ -155,7 +155,7 @@ module.exports = class EventModal extends ViewCollection
             @reminders.push reminder
             reminder.on 'remove', (removedReminder) =>
                 @reminders.splice @reminders.indexOf(removedReminder), 1
-            
+
             reminder.render()
             @$('#reminder-container').append reminder.$el
 
@@ -209,9 +209,9 @@ module.exports = class EventModal extends ViewCollection
             dtE = moment.tz @endField.val(), @inputDateFormat,
                     window.app.timezone
             # Model has non-inclusive end-date, but UI has inclusive end-date,
-            # which means a difference of one day.        
+            # which means a difference of one day.
             dtE.add 'day', 1
-            
+
             data.start = H.momentToDateString(dtS)
             data.end = H.momentToDateString(dtE)
 
@@ -247,7 +247,9 @@ module.exports = class EventModal extends ViewCollection
         if not validModel
             @$('.alert').remove()
             @$('.control-group').removeClass('error')
-            @handleError error for error in @model.validationError
+            validationErrors = @model.validationError
+            if validationErrors?
+                @handleError error for error in validationErrors
 
     handleError: (error) =>
         switch error.field
