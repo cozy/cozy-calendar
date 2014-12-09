@@ -2277,7 +2277,7 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.sync = function(method, model, options) {
-    if ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && (this.startDateChanged || this.attendeesChanged))) {
+    if (!this.get('import') && ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && (this.startDateChanged || this.attendeesChanged)))) {
       return this.confirmSendEmails(function(sendMails) {
         options.url = "" + (model.url()) + "?sendMails=" + sendMails;
         return ScheduleItem.__super__.sync.call(this, method, model, options);
@@ -2291,8 +2291,7 @@ module.exports = ScheduleItem = (function(_super) {
     var attendees, content, guestsList, guestsToInform;
     attendees = this.get('attendees') || [];
     guestsToInform = attendees.filter(function(guest) {
-      var _ref;
-      return (_ref = guest.status) === 'INVITATION-NOT-SENT' || _ref === 'ACCEPTED';
+      return guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && this.startDateChanged);
     }).map(function(guest) {
       return guest.email;
     });
@@ -4161,17 +4160,18 @@ module.exports = ImportView = (function(_super) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var vevent, _i, _len, _ref, _ref1;
+          var events, vevent, _i, _len, _ref, _ref1;
           if (result != null ? (_ref = result.calendar) != null ? _ref.name : void 0 : void 0) {
             _this.calendarCombo.setValue(result.calendar.name);
           }
           if ((result != null ? result.events : void 0) != null) {
+            events = [];
             _ref1 = result.events;
             for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
               vevent = _ref1[_i];
-              event = new Event(vevent);
-              _this.eventList.collection.add(event);
+              events.push(new Event(vevent));
             }
+            _this.eventList.collection.add(events);
           }
           return _this.$(".import-form").fadeOut(function() {
             _this.resetUploader();

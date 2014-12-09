@@ -33,7 +33,6 @@ module.exports.import = (req, res) ->
                 res.send 500, error: 'error occured while saving file'
             else
                 calendarName = result?.model?.name or 'my calendar'
-                console.log "calendarName " +  calendarName
                 res.send 200, 
                     events: Event.extractEvents result, calendarName
                     calendar: 
