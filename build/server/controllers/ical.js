@@ -52,7 +52,6 @@ module.exports["import"] = function(req, res) {
         });
       } else {
         calendarName = (result != null ? (_ref = result.model) != null ? _ref.name : void 0 : void 0) || 'my calendar';
-        console.log("calendarName " + calendarName);
         return res.send(200, {
           events: Event.extractEvents(result, calendarName),
           calendar: {

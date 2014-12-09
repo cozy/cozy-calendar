@@ -61,9 +61,12 @@ module.exports = class ImportView extends BaseView
                     @calendarCombo.setValue result.calendar.name
 
                 if result?.events?
+                    events = []
                     for vevent in result.events
-                        event = new Event vevent
-                        @eventList.collection.add event
+                        events.push new Event vevent
+                    # Speed optimisation: add all events at once is MUCH faster
+                    # than one by one.
+                    @eventList.collection.add events
 
                 @$(".import-form").fadeOut =>
                     @resetUploader()
