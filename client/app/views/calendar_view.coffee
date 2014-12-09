@@ -151,7 +151,7 @@ module.exports = class CalendarView extends BaseView
                 @popover = null
                 return
 
-        @popover = if options.type is 'event' then new EventPopover options
+        @popover = new EventPopover options
         @popover.render()
 
     onChangeView: (view) =>
