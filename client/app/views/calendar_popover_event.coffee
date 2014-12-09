@@ -183,13 +183,19 @@ module.exports = class EventPopOver extends PopoverView
 
     selfclose: ->
         # Revert if not just saved with addButton.
-        @model.fetch complete: super
+        if @model.isNew()
+            super()
+        else
+            @model.fetch complete: super
 
     close: ->
         # we don't reuse @selfclose because both are doing mostly the same thing
         # but are a little bit different.
         # Revert if not just saved with addButton.
-        @model.fetch complete: super
+        if @model.isNew()
+            super()
+        else
+            @model.fetch complete: super
 
 
     refresh: ->
