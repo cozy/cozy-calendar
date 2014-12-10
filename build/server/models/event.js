@@ -73,6 +73,12 @@ Event.all = function(params, callback) {
   return Event.request("all", params, callback);
 };
 
+Event.byCalendar = function(calendarId, callback) {
+  return Event.request('byCalendar', {
+    key: calendarId
+  }, callback);
+};
+
 Event.tags = function(callback) {
   return Event.rawRequest("tags", {
     group: true

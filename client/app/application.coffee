@@ -60,3 +60,9 @@ module.exports =
         todayChecker @router
 
         Object.freeze this if typeof Object.freeze is 'function'
+    
+    isMobile: ->
+        # Test agains't property changed by css @media, 
+        # instead of direct windows.width .
+        return $('ul#menu').height() is 40
+        

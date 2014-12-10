@@ -49,6 +49,16 @@ module.exports = class EventModal extends ViewCollection
 
         @startField = @$('#basic-start').attr 'type', 'text'
         @endField = @$('#basic-end').attr 'type', 'text'
+
+        # Put initial value.
+        @startField.val @model.getStartDateObject().format @inputDateTimeFormat
+        end = @model.getEndDateObject()
+        if @model.isAllDay()
+            # Model has non-inclusive end-date, but UI has inclusive end-date,
+            # which means a difference of one day.
+            end.add -1, 'days'
+        @endField.val end.format @inputDateTimeFormat
+
         @toggleAllDay()
 
         @descriptionField = @$('#basic-description')
@@ -84,17 +94,18 @@ module.exports = class EventModal extends ViewCollection
         @close() if e.which is 27 and not e.isDefaultPrevented()
 
     toggleAllDay: =>
-
         @startField.datetimepicker 'remove'
         @endField.datetimepicker 'remove'
 
+        start = moment @startField.val(), @inputDateTimeFormat
+        end = moment @endField.val(), @inputDateTimeFormat
+        
         options =
             language: window.app.locale
             autoclose: true
             pickerPosition: 'bottom-right'
 
             keyboardNavigation: false
-
 
         if @$('#allday').is ':checked'
             dtFormat = @inputDateFormat
@@ -109,8 +120,8 @@ module.exports = class EventModal extends ViewCollection
                 format: @inputDateTimeDTPickerFormat
                 viewSelect: 4
 
-        @startField.val @model.getStartDateObject().format dtFormat
-        @endField.val @model.getEndDateObject().format dtFormat
+        @startField.val start.format dtFormat
+        @endField.val end.format dtFormat
 
         @startField.datetimepicker options
         @endField.datetimepicker options
@@ -142,6 +153,9 @@ module.exports = class EventModal extends ViewCollection
             @$('#reminder-explanation').removeClass 'hide'
             reminder = new ReminderView model: reminderM
             @reminders.push reminder
+            reminder.on 'remove', (removedReminder) =>
+                @reminders.splice @reminders.indexOf(removedReminder), 1
+            
             reminder.render()
             @$('#reminder-container').append reminder.$el
 
@@ -194,7 +208,10 @@ module.exports = class EventModal extends ViewCollection
                     window.app.timezone
             dtE = moment.tz @endField.val(), @inputDateFormat,
                     window.app.timezone
-
+            # Model has non-inclusive end-date, but UI has inclusive end-date,
+            # which means a difference of one day.        
+            dtE.add 'day', 1
+            
             data.start = H.momentToDateString(dtS)
             data.end = H.momentToDateString(dtE)
 
@@ -215,6 +232,9 @@ module.exports = class EventModal extends ViewCollection
                 # Save UTC for punctual event.
                 data.start = dtS.toISOString()
                 data.end = dtE.toISOString()
+
+        if data.start isnt @model.get @model.startDateField
+            @model.startDateChanged = true
 
         validModel = @model.save data,
             wait: true

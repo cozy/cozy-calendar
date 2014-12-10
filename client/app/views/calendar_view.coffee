@@ -32,7 +32,6 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar
             lang: window.locale
             header: false
-            editable: true
             firstDay: 1 # first day of the week is monday
             height: "auto"
             defaultView: @view

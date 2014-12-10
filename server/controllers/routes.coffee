@@ -34,7 +34,7 @@ module.exports =
         get   : events.public
 
     # ICal
-    'export/calendar.ics':
+    'export/:calendarid.ics':
         get   : ical.export
     'import/ical':
         post  : ical.import

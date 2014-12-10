@@ -8,12 +8,13 @@ Event = require('../models/event');
 User = require('../models/user');
 
 module.exports["export"] = function(req, res) {
-  var calendar;
+  var calendar, calendarId;
+  calendarId = req.params.calendarid;
   calendar = new ical.VCalendar({
     organization: 'Cozy',
-    title: 'Cozy Calendar'
+    title: calendarId
   });
-  return Event.all(function(err, events) {
+  return Event.byCalendar(calendarId, function(err, events) {
     var event, _i, _len;
     if (err) {
       return res.send({

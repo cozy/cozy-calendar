@@ -10,26 +10,29 @@ module.exports =
     "close"                             : "Fermer"
     "delete"                            : "Supprimer"
     "rename"                            : "Renommer"
+    "export"                            : "Exporter"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'
+    'all day during'                    : 'Toute la journée pendant'
     "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"
+    'days'                              : 'jours'
     "Edit"                              : "Modifier"
     "Email"                             : "Email"
     "Import"                            : "Import"
     "Export"                            : "Export"
     "List"                              : "Liste"
     "list"                              : "liste"
-    "Calendar"                          : "Calendrier"
-    "calendar"                          : "Calendrier"
+    "Calendar"                          : "Agenda"
+    "calendar"                          : "Agenda"
     "Sync"                              : "Sync"
-    "ie: 9:00 important meeting"        : "exemple: 9:00 appeler Jacques"
+    "ie: 9:00 important meeting"        : "exemple : 9:00 appeler Jacques"
     "Month"                             : "Mois"
     "Popup"                             : "Popup"
     "Switch to List"                    : "Basculer en mode Liste"
-    "Switch to Calendar"                : "Basculer en mode Calendrier"
+    "Switch to Calendar"                : "Basculer en mode Agenda"
     "time"                              : "Heure"
     "Today"                             : "Aujourd'hui"
     'today'                             : 'aujourd\'hui'
@@ -51,9 +54,9 @@ module.exports =
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
     "EMAIL"                             : "E-mail"
-    "BOTH"                              : "E-mail & Notification"
-    "display previous events"           : "Montrer les évènements précédents"
-    "display next events"           : "Montrer les évènements suivants"
+    "BOTH"                              : "E-mail & notification"
+    "display previous events"           : "Afficher les évènements précédents"
+    "display next events"           : "Afficher les évènements suivants"
     "are you sure"                      : "Êtes-vous sûr(e) ?"
     "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
@@ -64,7 +67,7 @@ module.exports =
 # RRULE related
     "recurrence"                        : "Récurrence"
     "recurrence rule"                   : "Règle de récurrence"
-    "make reccurent"                    : "Rendre réccurent"
+    "make reccurent"                    : "Rendre récurrent"
     "repeat every"                      : "Répéter tous les"
     "no recurrence"                     : "Pas de répétition"
     "repeat on"                         : "Répéter les"
@@ -110,7 +113,7 @@ module.exports =
     "add tags"                          : "Ajouter des tags"
     "change to"                         : "Changer en"
     "change"                            : "Modifier"
-    "change calendar"                   : "Changer le calendrier"
+    "change calendar"                   : "Modifier l'agenda"
     "save changes"                      : "Enregistrer"
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
@@ -118,6 +121,12 @@ module.exports =
     "to"                                : "à"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
     "reminder"                          : "Rappel"
+
+# CONFIRM MODAL
+    'send mails question'               : 'Envoyer un email de notification à : '
+    'modal send mails'                  : 'Envoyer une notification'
+    'yes'                               : 'Oui'
+    'no'                                : 'Non'
 
 # ERRORS
     "no description"                    : "Le titre est obligatoire"
@@ -127,25 +136,28 @@ module.exports =
     "invalid end date"                  : "La fin est invalide."
     "invalid trigg date"                : "Le moment est invalide."
     "invalid action"                    : "L'action est invalide."
-    "server error occured"              : "Une erreure est survenue sur le serveur."
+    "server error occured"              : "Une erreur est survenue sur le serveur."
 
 
 # SYNC
     "synchronization"                   : "Synchronisation"
     "mobile sync"                       : "Synchro Mobile (CalDAV)"
-    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :"
+    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :"
     "link imported events with calendar": "Lier les événements à importer avec le calendrier suivant:"
-    "download a copy of your calendar"  : "Pour télécharger une copie de votre calendrier sur votre ordinateur comme un fichier iCal, cliquez sur ce bouton :"
-    "icalendar export"                  : "Export ICalendar"
-    "icalendar import"                  : "Import ICalendar"
-    "to sync your cal with"             : "Pour synchroniser votre calendrier avec votre mobile vous devez :"
+    "download a copy of your calendar"  : "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :"
+    "icalendar export"                  : "Exporter ICalendar"
+    "icalendar import"                  : "Importer ICalendar"
+    "to sync your cal with"             : "Pour synchroniser votre agenda avec votre mobile vous devez :"
     "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un événement a échoué."
     "imported events": "Nombre d'événements importés"
-    "import finished": "Votre import est terminé !"
+    "import finished": "Votre importation est terminée !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
-    "export your calendar": "Exportez votre calendrier"
+    "export your calendar": "Exporter votre agenda"
+    'please select existing calendar' : 'Veuillez sélectionner un agenda existant.'
+
+# DATE
 
     "January"                           : "Janvier"
     "February"                          : "Février"

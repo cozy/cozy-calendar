@@ -1,6 +1,11 @@
 .line
     if allDay
-        span.timeseparator=t("All day")
+        span.timeseparator=t('all day during')
+        span &nbsp;
+        input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
+        placeholder=1, min=1)
+        span &nbsp;
+        span.timeseparator= ' ' + t('days')
 
     else
         span.timeseparator=t("from")
@@ -9,10 +14,10 @@
         span.timeseparator=t("to")
         input#input-end.input-mini(type="time", placeholder=t("To hours:minutes+days"), value=model.getEndDateObject().format(dtFormat))
         span &nbsp;
-    input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
+        input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
         placeholder=0, min=0)
-    span &nbsp;
-    span.timeseparator= ' ' + t('days later')
+        span &nbsp;
+        span.timeseparator= ' ' + t('days later')
 
 .line
     input#input-desc.input(type="text", value=model.get("description"),
