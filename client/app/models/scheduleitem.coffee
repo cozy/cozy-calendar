@@ -219,21 +219,17 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []
-        if attendees.length is 0
+        guestsToInform = attendees.filter (guest) ->
+            return guest.status is 'INVITATION-NOT-SENT' or \
+                   (guest.status is 'ACCEPTED' and dateChanged)
+        .map (guest) -> guest.email
+
+        if guestsToInform.length is 0
             callback false
         else
-            text = t('send mails question')
-            first = true
-            attendees.forEach (guest) ->
-                if guest.status is 'INVITATION-NOT-SENT' or (
-                    guest.status is 'ACCEPTED' and dateChanged)
-                    if not first
-                        text += ', '
-                    else
-                        first = false
-                    text += guest.email
-
-            Modal.confirm t('modal send mails'), text, \
+            guestsList = guestsToInform.join ', '
+            content = "#{t 'send mails question'} #{guestsList}"
+            Modal.confirm t('modal send mails'), content, \
                 t('yes'), t('no'), callback
 
         @startDateChanged = false
