@@ -184,3 +184,42 @@ module.exports =
     'Oct'                               : 'Oct'
     'Nov'                               : 'Nov'
     'Dec'                               : 'Dec'
+
+# Emails
+    'email date format': 'MMMM Do YYYY, h:mm a'
+    'email date format allday': 'MMMM Do YYYY, [all day long]'
+
+    'email invitation title': 'Invitation to "%{description}"'
+    'email invitation content': """
+        Hello, I would like to invite you to the following event:
+
+        %{description} %{place}
+        on %{date}
+        Would you be there?
+
+        Yes
+        %{url}?status=ACCEPTED&key=%{key}
+
+        No
+        %{url}?status=DECLINED&key=%{key}
+    """
+    'email update title': "L'événement \"%{description}\" a changé"
+    'email update content': """
+        An event you were invited to has changed:
+        %{description} %{place}
+        On %{date}
+
+        I'm still going
+        %{url}?status=ACCEPTED&key=%{key}
+
+        I'm not going anymore
+        %{url}?status=DECLINED&key=%{key}
+    """
+    'email delete title': 'This event has been canceled: %{description}'
+    'email delete content': """
+        This event has been canceled:
+        %{description} %{place}
+        On %{date}
+    """
+
+

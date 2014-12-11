@@ -1642,7 +1642,15 @@ module.exports = {
   'Sep': 'Sep',
   'Oct': 'Oct',
   'Nov': 'Nov',
-  'Dec': 'Dec'
+  'Dec': 'Dec',
+  'email date format': 'MMMM Do YYYY, h:mm a',
+  'email date format allday': 'MMMM Do YYYY, [all day long]',
+  'email invitation title': 'Invitation to "%{description}"',
+  'email invitation content': "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+  'email update title': "L'événement \"%{description}\" a changé",
+  'email update content': "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+  'email delete title': 'This event has been canceled: %{description}',
+  'email delete content': "This event has been canceled:\n%{description} %{place}\nOn %{date}"
 };
 });
 
@@ -1816,7 +1824,15 @@ module.exports = {
   'Sep': 'Sep',
   'Oct': 'Oct',
   'Nov': 'Nov',
-  'Dec': 'Déc'
+  'Dec': 'Déc',
+  'email date format': 'DD/MM/YYYY [à] HH[h]mm',
+  'email date format allday': 'DD/MM/YYYY [toute la journée]',
+  'email invitation title': "Invitation à l'événement \"%{description}\"",
+  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'événement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
+  'email update title': "L'événement \"%{description}\" a changé",
+  'email update content': "Un événement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}\n",
+  'email delete title': 'Cet événement a été annulé : %{description}',
+  'email delete content': "Cet événement a été annulé :\n%{description} %{place}\nLe %{date}"
 };
 });
 
@@ -1869,8 +1885,8 @@ module.exports = Event = (function(_super) {
 
   Event.prototype.defaults = function() {
     return {
+      details: '',
       description: '',
-      title: '',
       place: '',
       tags: ['my calendar']
     };
@@ -2260,36 +2276,30 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.sync = function(method, model, options) {
     if ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && (this.startDateChanged || this.attendeesChanged))) {
-      return this.confirmSendEmails((function(_this) {
-        return function(sendMails) {
-          model.sendMails = sendMails;
-          return ScheduleItem.__super__.sync.call(_this, method, model, options);
-        };
-      })(this));
+      return this.confirmSendEmails(function(sendMails) {
+        options.url = "" + (model.url()) + "?sendMails=" + sendMails;
+        return ScheduleItem.__super__.sync.call(this, method, model, options);
+      });
     } else {
       return ScheduleItem.__super__.sync.call(this, method, model, options);
     }
   };
 
   ScheduleItem.prototype.confirmSendEmails = function(callback) {
-    var attendees, first, text;
+    var attendees, content, guestsList, guestsToInform;
     attendees = this.get('attendees') || [];
-    if (attendees.length === 0) {
+    guestsToInform = attendees.filter(function(guest) {
+      var _ref;
+      return (_ref = guest.status) === 'INVITATION-NOT-SENT' || _ref === 'ACCEPTED';
+    }).map(function(guest) {
+      return guest.email;
+    });
+    if (guestsToInform.length === 0) {
       callback(false);
     } else {
-      text = t('send mails question');
-      first = true;
-      attendees.forEach(function(guest) {
-        if (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged)) {
-          if (!first) {
-            text += ', ';
-          } else {
-            first = false;
-          }
-          return text += guest.email;
-        }
-      });
-      Modal.confirm(t('modal send mails'), text, t('yes'), t('no'), callback);
+      guestsList = guestsToInform.join(', ');
+      content = "" + (t('send mails question')) + " " + guestsList;
+      Modal.confirm(t('modal send mails'), content, t('yes'), t('no'), callback);
     }
     this.startDateChanged = false;
     return this.attendeesChanged = false;
@@ -2878,15 +2888,23 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.selfclose = function() {
-    return this.model.fetch({
-      complete: EventPopOver.__super__.selfclose.apply(this, arguments)
-    });
+    if (this.model.isNew()) {
+      return EventPopOver.__super__.selfclose.call(this);
+    } else {
+      return this.model.fetch({
+        complete: EventPopOver.__super__.selfclose.apply(this, arguments)
+      });
+    }
   };
 
   EventPopOver.prototype.close = function() {
-    return this.model.fetch({
-      complete: EventPopOver.__super__.close.apply(this, arguments)
-    });
+    if (this.model.isNew()) {
+      return EventPopOver.__super__.close.call(this);
+    } else {
+      return this.model.fetch({
+        complete: EventPopOver.__super__.close.apply(this, arguments)
+      });
+    }
   };
 
   EventPopOver.prototype.refresh = function() {
@@ -3137,7 +3155,7 @@ module.exports = CalendarView = (function(_super) {
         return;
       }
     }
-    this.popover = options.type === 'event' ? new EventPopover(options) : void 0;
+    this.popover = new EventPopover(options);
     return this.popover.render();
   };
 
@@ -3518,7 +3536,7 @@ module.exports = EventModal = (function(_super) {
   };
 
   EventModal.prototype.save = function() {
-    var data, dtE, dtS, error, rruleStr, validModel, _i, _len, _ref, _results;
+    var data, dtE, dtS, error, rruleStr, validModel, validationErrors, _i, _len, _results;
     data = {
       details: this.descriptionField.val(),
       description: this.$('#basic-summary').val(),
@@ -3553,7 +3571,6 @@ module.exports = EventModal = (function(_super) {
       this.model.startDateChanged = true;
     }
     validModel = this.model.save(data, {
-      wait: true,
       success: (function(_this) {
         return function() {
           return _this.close();
@@ -3569,13 +3586,15 @@ module.exports = EventModal = (function(_super) {
     if (!validModel) {
       this.$('.alert').remove();
       this.$('.control-group').removeClass('error');
-      _ref = this.model.validationError;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        error = _ref[_i];
-        _results.push(this.handleError(error));
+      validationErrors = this.model.validationError;
+      if (validationErrors != null) {
+        _results = [];
+        for (_i = 0, _len = validationErrors.length; _i < _len; _i++) {
+          error = validationErrors[_i];
+          _results.push(this.handleError(error));
+        }
+        return _results;
       }
-      return _results;
     }
   };
 

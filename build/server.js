@@ -8,8 +8,9 @@ start = function(port, callback) {
     host: process.env.HOST || "0.0.0.0",
     root: __dirname
   }, function(app, server) {
-    var Realtimer, User, realtime;
+    var Realtimer, User, localization, realtime;
     User = require('./server/models/user');
+    localization = require('./server/libs/localization_manager');
     Realtimer = require('cozy-realtime-adapter');
     realtime = Realtimer({
       server: server
@@ -18,12 +19,14 @@ start = function(port, callback) {
       return User.updateUser();
     });
     return User.updateUser(function(err) {
-      var Alarm, Event;
-      Event = require('./server/models/event');
-      Alarm = require('./server/models/alarm');
-      return Event.migrateAll(function() {
-        return Alarm.migrateAll(function() {
-          return callback(err, app, server);
+      return localization.initialize(function() {
+        var Alarm, Event;
+        Event = require('./server/models/event');
+        Alarm = require('./server/models/alarm');
+        return Event.migrateAll(function() {
+          return Alarm.migrateAll(function() {
+            return callback(err, app, server);
+          });
         });
       });
     });

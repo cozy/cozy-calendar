@@ -64,6 +64,8 @@ Event.createOrGetIfImport = (data, callback) ->
     else
         Event.create data, callback
 
+Event::isAllDayEvent = -> return @start.length is 10
+
 Event::formatStart = (dateFormat) ->
     if @rrule
         date = momentTz.tz @start, @timezone
@@ -72,7 +74,7 @@ Event::formatStart = (dateFormat) ->
 
     date.tz User.timezone
     formattedDate = date.format dateFormat
-    formattedDate += ' ' + User.timezone
+    formattedDate += " (#{User.timezone})" unless @isAllDayEvent()
 
     return formattedDate
 

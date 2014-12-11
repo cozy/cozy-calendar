@@ -1,0 +1,22 @@
+html
+    head
+        meta(name="viewport", content="width=device-width")
+        meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
+
+    body
+        table(cellspacing="0", style="border-radius: 5px; border: 5px solid #34A6FF; margin: auto; width: 75%; padding: 20px 20px 10px 20px")
+            tr
+                th(style="color: #34A6FF; font-size: 20px") An event you were invited to has been canceled:
+            tr
+                td(style="padding: 45px 0; text-align: center; font-size: 18px")
+                    | "#{description}"
+            tr
+                td(style="padding: 45px 0; text-align: center; font-size: 18px")
+                    | On #{date}
+                    if place != null && place.length > 0
+                        | &nbsp; at #{place}
+            tr
+                td(style="text-align: right; font-size: 12px; padding-top: 10px;")
+                    | Sent from my&nbsp;
+                    a(href="http://cozy.io", style="color: #34A6FF;") Cozy
+                    | .

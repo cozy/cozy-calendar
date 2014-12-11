@@ -8,8 +8,8 @@ module.exports = class Event extends ScheduleItem
     urlRoot: 'events'
 
     defaults: ->
+        details: ''
         description: ''
-        title: ''
         place: ''
         tags: ['my calendar']
 
