@@ -63,6 +63,7 @@ module.exports =
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"
     "OFF"                               : "désactivée"
+    "no description"                    : "Sans description"
 
 # RRULE related
     "recurrence"                        : "Récurrence"
@@ -129,7 +130,6 @@ module.exports =
     'no'                                : 'Non'
 
 # ERRORS
-    "no description"                    : "Le titre est obligatoire"
     "no summary"                        : "Le titre est obligatoire"
     "start after end"                   : "La fin est après le début."
     "invalid start date"                : "Le début est invalide."
@@ -142,7 +142,7 @@ module.exports =
 # SYNC
     "synchronization"                   : "Synchronisation"
     "mobile sync"                       : "Synchro Mobile (CalDAV)"
-    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, cliquez sur ce bouton :"
+    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :"
     "link imported events with calendar": "Lier les événements à importer avec le calendrier suivant:"
     "download a copy of your calendar"  : "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :"
     "icalendar export"                  : "Exporter ICalendar"

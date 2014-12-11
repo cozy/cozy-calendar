@@ -64,6 +64,7 @@ module.exports =
     "enter email"                       : "Enter email"
     "ON"                                : "on"
     "OFF"                               : "off"
+    "no description"                    : "No description"
 
 # RRULE related
     "recurrence"                        : "Recurrence"
@@ -130,7 +131,6 @@ module.exports =
     'no'                                : 'No'
 
 # ERRORS
-    "no description"                    : "A title must be set."
     "no summary"                        : "A summary must be set."
     "start after end"                   : "The start date is after the end date."
     "invalid start date"                : "The start date is invalid."
@@ -143,7 +143,7 @@ module.exports =
     "synchronization"                   : "Synchronization"
     "mobile sync"                       : "Mobile Sync (CalDAV)"
     "link imported events with calendar": "Link events to import with following calendar:"
-    "import an ical file"               : "To import an ICal file into your cozy calendar, click on this button:"
+    "import an ical file"               : "To import an ICal file into your cozy calendar, first click on this button to preload it:"
     "download a copy of your calendar"  : "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :"
     "icalendar export"                  : "ICalendar Export"
     "icalendar import"                  : "ICalendar Import"

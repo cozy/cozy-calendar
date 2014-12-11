@@ -189,9 +189,11 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     _toFullCalendarEvent: (start, end) ->
         displayedTime = if not @isAllDay() then start.format 'H:mm[ ]' else ''
+        description = @get 'description'
+        description = description or t 'no description'
         return fcEvent =
             id: @cid
-            title:  "#{displayedTime}#{@get 'description'}"
+            title:  "#{displayedTime}#{description}"
             start: start
             end: end
             allDay: @isAllDay()
@@ -206,9 +208,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     # Override sync to ask email sending just before changes save on server.
     sync: (method, model, options) ->
-        if method in ['create', 'delete'] or (
+        if not @get('import') and (method in ['create', 'delete'] or (
             method in ['update', 'patch'] and (
-                @startDateChanged or @attendeesChanged))
+                @startDateChanged or @attendeesChanged)))
             @confirmSendEmails (sendMails) ->
                 # overrides the url to append the sendmails parameter
                 options.url = "#{model.url()}?sendMails=#{sendMails}"
@@ -220,7 +222,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []
         guestsToInform = attendees.filter (guest) ->
-            return guest.status in ['INVITATION-NOT-SENT', 'ACCEPTED']
+            return guest.status is 'INVITATION-NOT-SENT' or (
+                    guest.status is 'ACCEPTED' and @startDateChanged)
         .map (guest) -> guest.email
 
         if guestsToInform.length is 0
