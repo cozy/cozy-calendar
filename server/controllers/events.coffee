@@ -1,3 +1,5 @@
+fs = require 'fs'
+path = require 'path'
 moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
@@ -6,6 +8,7 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
+localization = require '../libs/localization_manager'
 
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
@@ -88,9 +91,19 @@ module.exports.public = (req, res) ->
             res.send 303
 
     else
-        dateFormat = 'MMMM Do YYYY, h:mm a'
-        date = moment(req.event.start).format dateFormat
-        res.render 'event_public.jade',
+        if req.event.isAllDayEvent()
+            dateFormatKey = 'email date format allday'
+        else
+            dateFormatKey = 'email date format'
+        dateFormat = localization.t dateFormatKey
+        date = req.event.formatStart dateFormat
+
+        locale = localization.getLocale()
+        fileName = "event_public_#{locale}.jade"
+        filePath = path.resolve __dirname, '../../client/', fileName
+        fileName = 'event_public_en.jade' unless fs.existsSync(filePath)
+
+        res.render fileName,
             event: req.event
             date: date
             key: key
