@@ -122,6 +122,10 @@ Event.createOrGetIfImport = function(data, callback) {
   }
 };
 
+Event.prototype.isAllDayEvent = function() {
+  return this.start.length === 10;
+};
+
 Event.prototype.formatStart = function(dateFormat) {
   var date, formattedDate;
   if (this.rrule) {
@@ -131,7 +135,9 @@ Event.prototype.formatStart = function(dateFormat) {
   }
   date.tz(User.timezone);
   formattedDate = date.format(dateFormat);
-  formattedDate += ' ' + User.timezone;
+  if (!this.isAllDayEvent()) {
+    formattedDate += " (" + User.timezone + ")";
+  }
   return formattedDate;
 };
 
