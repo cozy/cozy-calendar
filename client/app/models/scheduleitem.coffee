@@ -220,8 +220,7 @@ module.exports = class ScheduleItem extends Backbone.Model
     confirmSendEmails: (callback) ->
         attendees = @get('attendees') or []
         guestsToInform = attendees.filter (guest) ->
-            return guest.status is 'INVITATION-NOT-SENT' or \
-                   (guest.status is 'ACCEPTED' and dateChanged)
+            return guest.status in ['INVITATION-NOT-SENT', 'ACCEPTED']
         .map (guest) -> guest.email
 
         if guestsToInform.length is 0
