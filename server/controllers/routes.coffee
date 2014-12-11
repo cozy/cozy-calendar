@@ -1,3 +1,4 @@
+tags = require './tags'
 events = require './events'
 contacts = require './contacts'
 index  = require './index'
@@ -6,8 +7,19 @@ ical   = require './ical'
 module.exports =
 
     '' : get : index.index
-    'tags': get : index.tags
     'users/current': get : index.userTimezone
+
+    # Tag management
+    'tags': 
+        get : tags.all
+        post : tags.create
+    'tagid':
+        param : tags.fetch
+    'tags/:tagid':
+        get : tags.read
+        put : tags.update
+        del : tags.delete
+
 
     # Event management
     'events':

@@ -9841,6 +9841,17 @@ ul#menu ul#menuitems li.tagmenuitem:hover .dropdown .dropdown-toggle .caret:hove
   -ms-filter: none;
   filter: none;
 }
+.color-picker .track {
+  display: block;
+  background: #efefef url("../img/color-picker.png") no-repeat 50% 50%;
+  height: 150px;
+  width: 150px;
+  margin: 5px;
+  cursor: crosshair;
+  display: none;
+  border: 1px solid #ccc;
+  z-index: 10;
+}
 @font-face {
   font-family: styled;
   src: url("../fonts/maven-pro-light-300.otf");

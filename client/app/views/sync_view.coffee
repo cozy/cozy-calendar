@@ -13,13 +13,13 @@ module.exports = class SyncView extends BaseView
     afterRender: ->
         @calendar = new ComboBox
             el: @$('#export-calendar')
-            source: app.tags.calendars()
+            source: app.calendars.toAutoCompleteSource()
 
         @$('#importviewplaceholder').append new ImportView().render().$el
 
     exportCalendar: ->
         calendarId = @calendar.value()
-        if calendarId in app.tags.calendars().map((c)-> c.label)
+        if calendarId in app.calendars.toArray()
             window.location = "export/#{calendarId}.ics"
 
         else

@@ -9,6 +9,7 @@ module.exports = class MenuItemView extends BaseView
 
     events:
         'click > span': 'toggleVisible'
+        'click .dropdown': 'openDropdown'
         'click .calendar-remove': 'onRemoveCalendar'
         'click .calendar-rename': 'onRenameCalendar'
         'click .calendar-export': 'onExportCalendar'
@@ -20,13 +21,26 @@ module.exports = class MenuItemView extends BaseView
         @render()
 
     getRenderData: ->
-        label: @model.get 'label'
+        label: @model.get 'name'
 
     afterRender: ->
-        @buildBadge @model.get('label')
+        @buildBadge @model.get 'color'
+
+    openDropdown: ->
+        # TODO : works only once !!
+        console.log "openDropdown"
+        @colorPicker = @$('.color-picker')
+        @colorPicker.tinycolorpicker()
+        
+        @colorPicker.on 'change', (ev) =>
+            color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
+            @model.set 'color', color
+            @buildBadge color
+            @$('.dropdown-toggle').dropdown 'toggle'
+            @model.save()
 
     onRenameCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
 
         # Creates the input and replace the raw text by it
         template = """
@@ -51,10 +65,10 @@ module.exports = class MenuItemView extends BaseView
                 @startSpinner()
                 # removes the binding to prevent memory leak
                 input.off 'keyup'
-                @model.collection.rename calendarName, input.val(), =>
+                app.calendars.rename calendarName, input.val(), =>
                     @stopSpinner()
             else
-                @buildBadge input.val()
+                @buildBadge colorhash input.val()
 
         # Close the form and restore original state when user presses "escape"
         $(document).keyup restore = (event) =>
@@ -75,19 +89,18 @@ module.exports = class MenuItemView extends BaseView
                 @$('.dropdown-toggle').show()
 
     onRemoveCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
         message = t 'confirm delete calendar', {calendarName}
         if confirm(message)
             @startSpinner()
-            @model.collection.remove calendarName, =>
+            app.calendars.remove calendarName, =>
                 @stopSpinner()
 
     onExportCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
         window.location = "export/#{calendarName}.ics"
 
-    buildBadge: (calendarName)->
-        color = colorhash calendarName
+    buildBadge: (color) ->
         visible = @model.get 'visible'
         backColor = if visible then color else "transparent"
         borderColor = if visible then "transparent" else color

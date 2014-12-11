@@ -33,7 +33,7 @@ module.exports = class ImportView extends BaseView
             @calendarCombo = new ComboBox
                 el: @$('#import-calendar-combo')
                 small: true
-                source: app.tags.calendars()
+                source: app.calendars.toAutoCompleteSource()
         , 500
 
     onFileChanged: (event) ->
@@ -150,6 +150,9 @@ module.exports = class ImportView extends BaseView
                 if $('.import-errors').html().length is 0
                     app.router.navigate "calendar", true
 
+        # Save the calendar tag 
+        @calendarCombo.save()
+        
         # Save every imported events to the database.
         events = @eventList.collection.models
         async.eachSeries events, importEvent, finalizeImport

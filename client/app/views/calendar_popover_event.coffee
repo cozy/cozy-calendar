@@ -6,8 +6,8 @@ Event = require 'models/event'
 
 module.exports = class EventPopOver extends PopoverView
 
-    titleTemplate: require('./templates/popover_title')
-    template: require('./templates/popover_event')
+    titleTemplate: require './templates/popover_title'
+    template: require './templates/popover_event'
     dtFormat: "HH:mm"
     popoverWidth: 411
     popoverHeight: 200
@@ -71,7 +71,7 @@ module.exports = class EventPopOver extends PopoverView
         @calendar = new ComboBox
             el: @$ '#calendarcombo'
             small: true
-            source: app.tags.calendars()
+            source: app.calendars.toAutoCompleteSource()
 
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
@@ -170,6 +170,7 @@ module.exports = class EventPopOver extends PopoverView
             @model.save {},
                 wait: true
                 success: =>
+                    @calendar.save()
                     collection = app['events']
                     collection.add @model
                 error: ->

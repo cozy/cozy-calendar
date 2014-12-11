@@ -8,7 +8,6 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     initialize: ->
 
         @baseCollection = app.events
-        @tagsCollection = app.tags
 
         @listenTo @baseCollection, 'add', @resetFromBase
         @listenTo @baseCollection, 'change:start', @resetFromBase
@@ -24,8 +23,8 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         eventsInRange = []
         @baseCollection.each (item) =>
 
-            tag = @tagsCollection.findWhere label: item.getCalendar()
-            return null if tag and tag.get('visible') is false
+            calendar = item.getCalendar()
+            return null if calendar and calendar.get('visible') is false
 
             if item.isRecurrent()
                 evs = item.generateRecurrentInstancesBetween start, end, \

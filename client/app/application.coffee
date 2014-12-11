@@ -31,19 +31,26 @@ module.exports =
         Menu = require 'views/menu'
         Header = require 'views/calendar_header'
         SocketListener = require '../lib/socket_listener'
+        TagCollection = require 'collections/tags'
         EventCollection = require 'collections/events'
         ContactCollection = require 'collections/contacts'
-        TagsCollection = require 'collections/tags'
+        CalendarsCollection = require 'collections/calendars'
 
+        @tags = new TagCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()
-        @tags = new TagsCollection()
+        @calendars = new CalendarsCollection()
 
         @router = new Router()
-        @menu = new Menu collection: @tags
+        @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 
+        # TODO ? SocketListener.watch @tags
         SocketListener.watch @events
+
+        if window.inittags?
+            @tags.reset window.inittags
+            delete window.inittags
 
         if window.initevents?
             @events.reset window.initevents

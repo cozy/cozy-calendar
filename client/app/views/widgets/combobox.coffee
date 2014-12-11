@@ -1,12 +1,14 @@
 colorhash = require 'lib/colorhash'
 BaseView  = require 'lib/base_view'
+TagCollection = require 'collections/tags'
+Tag = require 'models/tag'
 
 module.exports = class ComboBox extends BaseView
 
     events:
-        'keyup': 'updateBadge'
-        'keypress': 'updateBadge'
-        'change': 'updateBadge'
+        'keyup': 'onChange'
+        'keypress': 'onChange'
+        'change': 'onChange'
         'blur': 'onBlur'
 
     initialize: (options) ->
@@ -29,13 +31,15 @@ module.exports = class ComboBox extends BaseView
         method = @$el[if isInput then "val" else "text"]
         @value = => method.apply @$el, arguments
 
+        @on 'edition-complete', @onEditionComplete
+
         unless @small
             caret = $ '<a class="combobox-caret">'
             caret.append $ '<span class="caret"></span>'
             caret.click @openMenu
             @$el.after caret
 
-        @updateBadge()
+        @onEditionComplete @value()
 
     openMenu: =>
         @menuOpen = true
@@ -45,6 +49,12 @@ module.exports = class ComboBox extends BaseView
     setValue: (value) =>
         @$el.val value
         @onSelect()
+
+    save: ->
+        if @tag and @tag.isNew()
+            @tag.save
+                success: ->
+                    @tags.add @tag
 
     onOpen: => @menuOpen = true
 
@@ -58,21 +68,29 @@ module.exports = class ComboBox extends BaseView
 
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
-        @updateBadge ev, ui
+        @onChange ev, ui
         @trigger 'edition-complete', ui?.item?.value or @value()
 
-    updateBadge: (ev, ui) =>
-        @badge?.remove()
+    onEditionComplete: (name) =>
+        @tag = app.tags.getOrCreateByName name
+
+        @buildBadge @tag.get 'color'
+        
+
+    onChange: (ev, ui) =>
         value = ui?.item?.value or @value()
-        @badge = @makeBadge colorhash value
-        @$el.before @badge
+        @buildBadge colorhash value
         @trigger 'change', value
         return true
 
     renderItem: (ul, item) =>
-        color = colorhash item.label
-        link = $("<a>").text(item.label).prepend @makeBadge color
+        link = $("<a>").text(item.label).prepend @makeBadge item.color
         ul.append $('<li>').append(link).data 'ui-autocomplete-item', item
+
+    buildBadge: (color) ->
+        @badge?.remove()
+        @badge = @makeBadge color
+        @$el.before @badge
 
     makeBadge: (color) ->
         badge = $ '<span class="badge combobox-badge">'
@@ -83,7 +101,6 @@ module.exports = class ComboBox extends BaseView
 
         if @small
             badge.attr 'title', t 'change calendar'
-
         return badge
 
     remove: =>

@@ -18,6 +18,7 @@ module.exports = class RealEvent extends Backbone.Model
             @end = event.getEndDateObject()
 
     getCalendar: -> @event.getCalendar()
+    getColor: -> @event.getColor()
     getDateHash: ->
         return @start.format 'YYYYMMDD'
 

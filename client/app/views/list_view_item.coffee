@@ -40,13 +40,11 @@ module.exports = class EventItemView extends BaseView
     getRenderData: ->
         data = @model.event.toJSON()
         # data = @model.toJSON()
-        tag = @model.getCalendar()
-        data.color = if tag then colorHash(tag) else ''
         _.extend data,
             type: 'event'
             start: @model.getFormattedStartDate 'HH:mm'
             end: @model.getFormattedEndDate 'HH:mm'
             allDay: @model.isAllDay()
+            color: @model.getColor()
 
         return data
-

@@ -19,14 +19,14 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     initialize: ->
         @eventCollection = new RealEventGeneratorCollection()
 
-        @tagsCollection = app.tags
+        @calendarsCollection = app.calendars
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
         @listenTo @eventCollection, 'change:start', @onBaseCollectionChange
         @listenTo @eventCollection, 'remove', @onBaseCollectionRemove
         @listenTo @eventCollection, 'reset', @resetFromBase
 
-        @listenTo @tagsCollection, 'change', @resetFromBase
+        @listenTo @calendarsCollection, 'change', @resetFromBase
 
 
         @resetFromBase()
@@ -47,8 +47,8 @@ module.exports = class DayBucketCollection extends Backbone.Collection
     onBaseCollectionAdd: (model) ->
         bucket = @get model.getDateHash()
 
-        tag = @tagsCollection.findWhere label: model.getCalendar()
-        return null if tag and tag.get('visible') is false
+        calendar = model.getCalendar()
+        return null if calendar and calendar.get('visible') is false
 
         @add(bucket = new DayBucket model) unless bucket
         bucket.items.add model
