@@ -81,11 +81,14 @@ task 'build', 'Build CoffeeScript to Javascript', ->
     logger.info "Start compilation..."
     command = "coffee -cb --output build/server server && " + \
               "coffee -cb --output build/ server.coffee && " + \
+              "rm -rf build/server/mails/en && " + \
+              "rm -rf build/server/mails/fr && " + \
               "mkdir build/server/mails/en && " + \
               "mkdir build/server/mails/fr && " + \
               "cp server/mails/fr/*.jade build/server/mails/en/ && " + \
               "cp server/mails/en/*.jade build/server/mails/fr/ && " + \
               "rm -rf build/client && mkdir build/client && " + \
+              "coffee -cb --output build/client/app/locales client/app/locales && " + \
               "cp -R client/*.jade build/client/ && " + \
               "cp -R client/public build/client/"
     exec command, (err, stdout, stderr) ->
