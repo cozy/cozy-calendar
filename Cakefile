@@ -85,8 +85,8 @@ task 'build', 'Build CoffeeScript to Javascript', ->
               "rm -rf build/server/mails/fr && " + \
               "mkdir build/server/mails/en && " + \
               "mkdir build/server/mails/fr && " + \
-              "cp server/mails/fr/*.jade build/server/mails/en/ && " + \
-              "cp server/mails/en/*.jade build/server/mails/fr/ && " + \
+              "cp server/mails/fr/*.jade build/server/mails/fr/ && " + \
+              "cp server/mails/en/*.jade build/server/mails/en/ && " + \
               "rm -rf build/client && mkdir build/client && " + \
               "coffee -cb --output build/client/app/locales client/app/locales && " + \
               "cp -R client/*.jade build/client/ && " + \
