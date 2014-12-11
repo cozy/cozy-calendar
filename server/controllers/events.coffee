@@ -6,8 +6,6 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
-mails = new MailHandler()
-
 
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
@@ -43,10 +41,10 @@ module.exports.create = (req, res) ->
     data.lastModification = moment().tz('UTC').toISOString()
     Event.createOrGetIfImport data, (err, event) ->
         return res.error "Server error while creating event." if err
-        if data.import or not req.query.sendMails
+        if data.import or req.query.sendMails isnt 'true'
             res.send event, 201
         else
-            mails.sendInvitations event, false, (err, updatedEvent) ->
+            MailHandler.sendInvitations event, false, (err, updatedEvent) ->
                 res.send (updatedEvent or event), 201
 
 
@@ -58,9 +56,9 @@ module.exports.update = (req, res) ->
 
         if err?
             res.send error: "Server error while saving event", 500
-        else if req.query.sendMails
+        else if req.query.sendMails is 'true'
             dateChanged = data.start isnt start
-            mails.sendInvitations event, dateChanged, (err, updatedEvent) ->
+            MailHandler.sendInvitations event, dateChanged, (err, updatedEvent) ->
                 res.send (updatedEvent or event), 200
         else
             res.send event, 200
@@ -70,8 +68,8 @@ module.exports.delete = (req, res) ->
     req.event.destroy (err) ->
         if err?
             res.send error: "Server error while deleting the event", 500
-        else if req.query.sendMails
-            mails.sendDeleteNotification req.event, ->
+        else if req.query.sendMails is 'true'
+            MailHandler.sendDeleteNotification req.event, ->
                 res.send success: true, 200
         else
             res.send success: true, 200

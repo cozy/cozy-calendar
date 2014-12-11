@@ -7,128 +7,111 @@ log = require('printit')
 
 Event = require '../models/event'
 CozyInstance = require '../models/cozy_instance'
-try CozyAdapter = require('americano-cozy/node_modules/jugglingdb-cozy-adapter')
-catch e then CozyAdapter = require('jugglingdb-cozy-adapter')
+try CozyAdapter = require 'americano-cozy/node_modules/jugglingdb-cozy-adapter'
+catch e then CozyAdapter = require 'jugglingdb-cozy-adapter'
 
+localization = require '../libs/localization_manager'
 
-module.exports = class MailHandler
+module.exports.sendInvitations = (event, dateChanged, callback) ->
+    guests = event.toJSON().attendees
+    needSaving = false
+    CozyInstance.getURL (err, domain) ->
+        if err
+            log.error 'Cannot get Cozy instance'
+            log.error err
+            return callback()
 
-    # compile templates
-    constructor: ->
-        @templates = {}
+        async.forEach guests, (guest, done) ->
 
-        file = __dirname + '/mail_invitation.jade'
-        fs.readFile file, 'utf8', (err, jadeString) =>
-            throw err if err
-            @templates.invitation = jade.compile jadeString
+            shouldSend = guest.status is 'INVITATION-NOT-SENT' or \
+                        (guest.status is 'ACCEPTED' and dateChanged)
 
-        file = __dirname + '/mail_update.jade'
-        fs.readFile file, 'utf8', (err, jadeString) =>
-            throw err if err
-            @templates.update = jade.compile jadeString
+            # only process relevant guests, quits otherwise
+            return done() unless shouldSend
 
-        file = __dirname + '/mail_delete.jade'
-        fs.readFile file, 'utf8', (err, jadeString) =>
-            throw err if err
-            @templates.deletion = jade.compile jadeString
+            if dateChanged
+                htmlTemplate = localization.getEmailTemplate 'mail_update'
+                subjectKey = 'email update title'
+                templateKey = 'email update content'
+            else
+                htmlTemplate = localization.getEmailTemplate 'mail_invitation'
+                subjectKey = 'email invitation title'
+                templateKey = 'email invitation content'
 
-
-    sendInvitations: (event, dateChanged, callback) ->
-
-        guests = event.toJSON().attendees
-        needSaving = false
-        CozyInstance.getURL (err, domain) =>
-            if err
-                log.error 'Cannot get Cozy instance'
-                console.log err.stack
-                return callback()
-
-            async.forEach guests, (guest, cb) =>
-                ismail = guest.status is 'INVITATION-NOT-SENT' or \
-                         (guest.status is 'ACCEPTED' and dateChanged)
-
-                if guest.status is 'INVITATION-NOT-SENT' or
-                (guest.status is 'ACCEPTED' and dateChanged)
-                    subject = "Invitation: " + event.description
-                    if dateChanged
-                        template = @templates.update
-                    else
-                        template = @templates.invitation
-                else
-                    return cb()
-
-                dateFormat = 'MMMM Do YYYY, h:mm a'
-                date = event.formatStart dateFormat
-                url = "https://#{domain}/public/calendar/events/#{event.id}"
-
-                mailOptions =
-                    to: guest.email
-                    subject: subject
-                    html: template
-                        event: event.toJSON()
-                        key: guest.key
-                        date: date
-                        url: url
-                    content: """
-Hello, I would like to invite you to the following event:
-
-#{event.description} @ #{event.place}
-on #{date}
-Would you be there?
-
-yes
-#{url}?status=ACCEPTED&key=#{guest.key}
-
-no
-#{url}?status=DECLINED&key=#{guest.key}
-"""
-
-                CozyAdapter.sendMailFromUser mailOptions, (err) ->
-                    if not err
-                        needSaving = true
-                        guest.status = 'NEEDS-ACTION' # ical = waiting an answer
-                    else
-                        log.error "An error occured while sending invitation"
-                        log.error err
-
-                    cb err
-
-            , (err) ->
-                if err
-                    callback err
-                else if not needSaving
-                    callback()
-                else event.updateAttributes attendees: guests, callback
-
-
-    sendDeleteNotification: (event, callback) ->
-
-        async.forEach event.toJSON().attendees, (guest, cb) =>
-            return cb null unless guest.status is 'ACCEPTED'
-            dateFormat = 'MMMM Do YYYY, h:mm a'
+            subject = localization.t subjectKey, description: event.description
+            if event.isAllDayEvent()
+                dateFormatKey = 'email date format allday'
+            else
+                dateFormatKey = 'email date format'
+            dateFormat = localization.t dateFormatKey
             date = event.formatStart dateFormat
 
+            url = "https://#{domain}/public/calendar/events/#{event.id}"
+
+
+            {description, place} = event.toJSON()
+            place = if place?.length > 0 then "(#{place})" else ""
+            templateOptions =
+                description: description
+                place: place
+                key: guest.key
+                date: date
+                url: url
             mailOptions =
                 to: guest.email
-                subject: "This event has been canceled: " + event.description
-                content: """
-This event has been canceled:
-#{event.description} @ #{event.location}
-on #{date}
-                """
-                html: @templates.deletion
-                    event: event.toJSON()
-                    key: guest.key
-                    date: date
+                subject: subject
+                html: htmlTemplate templateOptions
+                content: localization.t templateKey, templateOptions
 
             CozyAdapter.sendMailFromUser mailOptions, (err) ->
                 if not err
                     needSaving = true
                     guest.status = 'NEEDS-ACTION' # ical = waiting an answer
                 else
-                    log.error "An error occured while sending email"
+                    log.error "An error occured while sending invitation"
                     log.error err
 
-                cb err
+                done err
 
-        , callback
+        , (err) ->
+            if err?
+                callback err
+            else if not needSaving
+                callback()
+            else event.updateAttributes attendees: guests, callback
+
+
+module.exports.sendDeleteNotification = (event, callback) ->
+    guests = event.toJSON().attendees
+    # only process guests that have accepted to attend the event
+    guestsToInform = guests.filter (guest) ->
+        return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
+    async.eachSeries guestsToInform, (guest, done) ->
+
+        if event.isAllDayEvent()
+            dateFormatKey = 'email date format allday'
+        else
+            dateFormatKey = 'email date format'
+        dateFormat = localization.t dateFormatKey
+        date = event.formatStart dateFormat
+        {description, place} = event.toJSON()
+        place = if place?.length > 0 then "(#{place})" else ""
+        templateOptions =
+            description: description
+            place: place
+            date: date
+        htmlTemplate = localization.getEmailTemplate 'mail_delete'
+        subjectKey = 'email delete title'
+        mailOptions =
+            to: guest.email
+            subject: localization.t subjectKey, description: event.description
+            content: localization.t 'email delete content', templateOptions
+            html: htmlTemplate templateOptions
+        CozyAdapter.sendMailFromUser mailOptions, (err) ->
+            if err?
+                log.error "An error occured while sending email"
+                log.error err
+
+            done err
+
+    , callback

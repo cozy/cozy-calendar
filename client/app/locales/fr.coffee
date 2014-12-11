@@ -158,7 +158,6 @@ module.exports =
     'please select existing calendar' : 'Veuillez sélectionner un agenda existant.'
 
 # DATE
-
     "January"                           : "Janvier"
     "February"                          : "Février"
     "March"                             : "Mars"
@@ -183,3 +182,39 @@ module.exports =
     'Oct'                               : 'Oct'
     'Nov'                               : 'Nov'
     'Dec'                               : 'Déc'
+
+# Emails
+    'email date format': 'DD/MM/YYYY [à] HH[h]mm'
+    'email date format allday': 'DD/MM/YYYY [toute la journée]'
+    'email invitation title': "Invitation à l'événement \"%{description}\""
+    'email invitation content': """
+        Bonjour, je souhaiterais vous inviter à l'événement suivant :
+        %{description} %{place}
+        Le %{date}
+        Serez-vous présent ?
+
+        Oui
+        %{url}?status=ACCEPTED&key=%{key}
+
+        Non
+        %{url}?status=DECLINED&key=%{key}
+    """
+    'email update title': "L'événement \"%{description}\" a changé"
+    'email update content': """
+        Un événement auquel vous participez a changé :
+        %{description} %{place}
+        Le %{date}
+
+        Je viens toujours
+        %{url}?status=ACCEPTED&key=%{key}
+
+        Je ne viens plus
+        %{url}?status=DECLINED&key=%{key}
+
+    """
+    'email delete title': 'Cet événement a été annulé : %{description}'
+    'email delete content': """
+        Cet événement a été annulé :
+        %{description} %{place}
+        Le %{date}
+    """
