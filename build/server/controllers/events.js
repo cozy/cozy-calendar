@@ -121,11 +121,15 @@ module.exports["public"] = function(req, res) {
   var date, dateFormat, dateFormatKey, fileName, filePath, key, locale, visitor, _ref;
   key = req.query.key;
   if (!(visitor = req.event.getGuest(key))) {
-    return res.send({
-      error: 'invalid key'
-    }, 401);
-  }
-  if ((_ref = req.query.status) === 'ACCEPTED' || _ref === 'DECLINED') {
+    locale = localization.getLocale();
+    fileName = "404_" + locale + ".jade";
+    filePath = path.resolve(__dirname, '../../client/', fileName);
+    if (!fs.existsSync(filePath)) {
+      fileName = '404_en.jade';
+    }
+    res.status(404);
+    return res.render(fileName);
+  } else if ((_ref = req.query.status) === 'ACCEPTED' || _ref === 'DECLINED') {
     return visitor.setStatus(req.query.status, function(err) {
       if (err) {
         return res.send({
