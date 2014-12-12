@@ -5,7 +5,6 @@ module.exports = class RealEvent extends Backbone.Model
     # TODO : re-think class hierarchy, or way to construct this object.
     constructor: (event, start, end) ->
         super
-
         @event = event
 
         if event.isRecurrent()

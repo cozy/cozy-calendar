@@ -6,6 +6,7 @@ DayBucket = class DayBucket extends Backbone.Model
         super
             id: model.getDateHash()
             date: moment(model.start).startOf 'day'
+
     initialize: ->
         @items = new RealEventCollection()
 
@@ -14,7 +15,7 @@ DayBucket = class DayBucket extends Backbone.Model
 module.exports = class DayBucketCollection extends Backbone.Collection
 
     model: DayBucket
-    comparator: 'date'
+    comparator: 'id'
 
     initialize: ->
         @eventCollection = new RealEventGeneratorCollection()
@@ -49,7 +50,6 @@ module.exports = class DayBucketCollection extends Backbone.Collection
 
         calendar = model.getCalendar()
         return null if calendar and calendar.get('visible') is false
-
         @add(bucket = new DayBucket model) unless bucket
         bucket.items.add model
 

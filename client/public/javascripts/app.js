@@ -407,7 +407,7 @@ module.exports = DayBucketCollection = (function(_super) {
 
   DayBucketCollection.prototype.model = DayBucket;
 
-  DayBucketCollection.prototype.comparator = 'date';
+  DayBucketCollection.prototype.comparator = 'id';
 
   DayBucketCollection.prototype.initialize = function() {
     this.eventCollection = new RealEventGeneratorCollection();
@@ -525,7 +525,7 @@ module.exports = RealEventCollection = (function(_super) {
   model = RealEvent;
 
   RealEventCollection.prototype.comparator = function(re1, re2) {
-    return re1.start.diff(re2.start);
+    return re1.start.isBefore(re2.start);
   };
 
   return RealEventCollection;
@@ -552,7 +552,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   model = RealEvent;
 
   RealEventGeneratorCollection.prototype.comparator = function(re1, re2) {
-    return re1.start.diff(re2.start);
+    return re1.start.isBefore(re2.start);
   };
 
   RealEventGeneratorCollection.prototype.initialize = function() {
@@ -596,8 +596,9 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   RealEventGeneratorCollection.prototype._loadEventsCount = function(eventCount, forward, callback) {
     var boundary, count, start, _ref;
     count = 0;
-    start = ((_ref = this.at(forward ? this.length - 1 : 0)) != null ? _ref.start : void 0) || moment();
-    boundary = moment(start).add((forward ? 1 : -1), 'years');
+    start = (_ref = this.at(forward ? this.length - 1 : 0)) != null ? _ref.start : void 0;
+    start = start ? start.clone() : moment();
+    boundary = start.clone().add((forward ? 1 : -1), 'years');
     return async.whilst((function() {
       if (count > eventCount) {
         return false;
@@ -610,10 +611,10 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
       return function(cb) {
         var periodEnd, periodStart;
         if (forward) {
-          periodStart = moment(start);
+          periodStart = start.clone();
           periodEnd = start.add(1, 'month');
         } else {
-          periodEnd = moment(start);
+          periodEnd = start.clone();
           periodStart = start.add(-1, 'month');
         }
         return _this.generateRealEvents(periodStart, periodEnd, function(events) {
@@ -4521,7 +4522,7 @@ module.exports = BucketView = (function(_super) {
 
   BucketView.prototype.getRenderData = function() {
     return {
-      date: this.model.get('date').format('LL')
+      date: this.model.get('date').format('dddd LL')
     };
   };
 
@@ -4601,8 +4602,7 @@ module.exports = EventItemView = (function(_super) {
   };
 
   EventItemView.prototype.initialize = function() {
-    this.listenTo(this.model, 'change', this.render);
-    return this.listenTo(app.tags, 'change:visible', this.render);
+    return this.listenTo(this.model, 'change', this.render);
   };
 
   EventItemView.prototype.deleteModel = function() {

@@ -15,7 +15,6 @@ module.exports = class EventItemView extends BaseView
 
     initialize: ->
         @listenTo @model, 'change', @render
-        @listenTo app.tags, 'change:visible', @render
 
     deleteModel: ->
         return unless confirm t "are you sure"
@@ -39,7 +38,6 @@ module.exports = class EventItemView extends BaseView
 
     getRenderData: ->
         data = @model.event.toJSON()
-        # data = @model.toJSON()
         _.extend data,
             type: 'event'
             start: @model.getFormattedStartDate 'HH:mm'
