@@ -81,10 +81,14 @@ module.exports.delete = (req, res) ->
 module.exports.public = (req, res) ->
     key = req.query.key
     if not visitor = req.event.getGuest key
-        return res.send error: 'invalid key', 401
+        locale = localization.getLocale()
+        fileName = "404_#{locale}.jade"
+        filePath = path.resolve __dirname, '../../client/', fileName
+        fileName = '404_en.jade' unless fs.existsSync(filePath)
+        res.status 404
+        res.render fileName
 
-    if req.query.status in ['ACCEPTED', 'DECLINED']
-
+    else if req.query.status in ['ACCEPTED', 'DECLINED']
         visitor.setStatus req.query.status, (err) ->
             return res.send error: "server error occured", 500 if err
             res.header 'Location': "./#{req.event.id}?key=#{key}"
@@ -112,7 +116,7 @@ module.exports.public = (req, res) ->
 
 module.exports.ical = (req, res) ->
     key = req.query.key
-    calendar = new VCalendar organization:'Cozy Cloud', title:'Cozy Calendar'
+    calendar = new VCalendar organization:'Cozy Cloud', title: 'Cozy Calendar'
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()
@@ -123,7 +127,7 @@ module.exports.publicIcal = (req, res) ->
     if not visitor = req.event.getGuest key
         return res.send error: 'invalid key', 401
 
-    calendar = new ical.VCalendar organization: 'Cozy', 'Cozy Calendar'
+    calendar = new VCalendar organization: 'Cozy', title: 'Cozy Calendar'
     calendar.add req.event.toIcal()
     res.header 'Content-Type': 'text/calendar'
     res.send calendar.toString()
