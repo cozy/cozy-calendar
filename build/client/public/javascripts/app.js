@@ -2277,21 +2277,30 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.sync = function(method, model, options) {
-    if (!this.get('import') && ((method === 'create' || method === 'delete') || ((method === 'update' || method === 'patch') && (this.startDateChanged || this.attendeesChanged)))) {
-      return this.confirmSendEmails(function(sendMails) {
-        options.url = "" + (model.url()) + "?sendMails=" + sendMails;
-        return ScheduleItem.__super__.sync.call(this, method, model, options);
-      });
-    } else {
+    return this.confirmSendEmails(method, function(sendMails) {
+      options.url = "" + (model.url()) + "?sendMails=" + sendMails;
       return ScheduleItem.__super__.sync.call(this, method, model, options);
-    }
+    });
   };
 
-  ScheduleItem.prototype.confirmSendEmails = function(callback) {
+  ScheduleItem.prototype.confirmSendEmails = function(method, callback) {
     var attendees, content, guestsList, guestsToInform;
+    if (this.get('import')) {
+      return callback(false);
+    }
+    if ((method === 'update' || method === 'patch') && !(this.startDateChanged || this.attendeesChanged)) {
+      return callback(false);
+    }
     attendees = this.get('attendees') || [];
     guestsToInform = attendees.filter(function(guest) {
-      return guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && this.startDateChanged);
+      var _ref;
+      if (method === 'create') {
+        return true;
+      } else if (method === 'delete') {
+        return (_ref = guest.status) === 'ACCEPTED' || _ref === 'NEEDS-ACTION';
+      } else if (method === 'update' || method === 'patch') {
+        return guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && this.startDateChanged);
+      }
     }).map(function(guest) {
       return guest.email;
     });
@@ -3474,6 +3483,7 @@ module.exports = EventModal = (function(_super) {
     if (!_.findWhere(guests, {
       email: email
     })) {
+      guests = _.clone(guests);
       guests.push({
         key: random.randomString(),
         status: 'INVITATION-NOT-SENT',

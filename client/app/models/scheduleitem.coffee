@@ -208,22 +208,33 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     # Override sync to ask email sending just before changes save on server.
     sync: (method, model, options) ->
-        if not @get('import') and (method in ['create', 'delete'] or (
-            method in ['update', 'patch'] and (
-                @startDateChanged or @attendeesChanged)))
-            @confirmSendEmails (sendMails) ->
-                # overrides the url to append the sendmails parameter
-                options.url = "#{model.url()}?sendMails=#{sendMails}"
-                return super method, model, options
-
-        else
+        @confirmSendEmails method, (sendMails) ->
+            # overrides the url to append the sendmails parameter
+            options.url = "#{model.url()}?sendMails=#{sendMails}"
             return super method, model, options
 
-    confirmSendEmails: (callback) ->
+    confirmSendEmails: (method, callback) ->
+        if @get 'import' # No mails on files import. 
+            return callback false
+
+        # Kind of changes which doesn't need mails.
+        if method in ['update', 'patch'] and not (
+                @startDateChanged or @attendeesChanged)
+            return callback false
+
+        # else: look state of each guest.
         attendees = @get('attendees') or []
         guestsToInform = attendees.filter (guest) ->
-            return guest.status is 'INVITATION-NOT-SENT' or (
+            if method is 'create'
+                return true
+
+            else if method is 'delete'
+                 return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
+
+            else if method in ['update', 'patch']
+                return guest.status is 'INVITATION-NOT-SENT' or (
                     guest.status is 'ACCEPTED' and @startDateChanged)
+
         .map (guest) -> guest.email
 
         if guestsToInform.length is 0

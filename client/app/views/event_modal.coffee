@@ -132,6 +132,9 @@ module.exports = class EventModal extends ViewCollection
         return "" unless email
         guests = @model.get('attendees') or []
         if not _.findWhere(guests, email: email)
+            # we clone the source array, otherwise it's not considered as 
+            # changed because it changes the model's attributes
+            guests = _.clone guests
             guests.push
                 key: random.randomString()
                 status: 'INVITATION-NOT-SENT'
