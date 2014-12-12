@@ -117,6 +117,7 @@ module.exports = {
   "save changes": "Save changes",
   "save changes and invite guests": "Save changes and invite guests",
   "guests": "Guests",
+  "cancel Invitation": "Cancel the invitation",
   "from": "From",
   "to": "to",
   'Reminders before the event': 'Reminders before the event',

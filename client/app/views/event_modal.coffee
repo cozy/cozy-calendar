@@ -29,6 +29,7 @@ module.exports = class EventModal extends ViewCollection
     initialize: (options) ->
         guests = @model.get('attendees') or []
         @collection = new Backbone.Collection guests
+        @listenTo @collection, 'remove', @onGuestRemoved
         @backurl = options.backurl
         super
 
@@ -149,6 +150,16 @@ module.exports = class EventModal extends ViewCollection
 
     refreshGuestList: =>
         @collection.reset @model.get 'attendees'
+
+    onGuestRemoved: (removed) ->
+        attendees = @model.get('attendees') or []
+        # looks for the attendee to remove and process the deletion
+        for attendee, index in attendees
+            if attendee.email is removed.get('email')
+                attendees.splice index, 1
+                break
+
+        @model.set 'attendees', attendees
 
     addReminder: (reminderM) =>
         # doesn't shown action "AUDIO" because the app doesn't support it

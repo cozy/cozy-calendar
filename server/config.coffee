@@ -2,19 +2,23 @@ americano = require 'americano'
 
 publicPath = "#{__dirname}/../client/public"
 staticMiddleware = americano.static publicPath, maxAge: 86400000
+publicStatic = (req, res, next) ->
+
+    # Allows assets to be loaded from any route
+    detectAssets = /\/(stylesheets|javascripts|images|fonts)+\/(.+)$/
+    assetsMatched = detectAssets.exec req.url
+
+    if assetsMatched?
+        req.url = assetsMatched[0]
+
+    staticMiddleware req, res, (err) -> next err
 
 module.exports =
 
     common:
         use: [
             staticMiddleware
-            (req, res, next) ->
-                req.url = req.url.replace '/public', ''
-                staticMiddleware req, res, (err) ->
-                    if req.url isnt req.originalUrl
-                        req.url = '/public' + req.url
-                    next err
-
+            publicStatic
             americano.bodyParser keepExtensions: true
             americano.errorHandler
                 dumpExceptions: true

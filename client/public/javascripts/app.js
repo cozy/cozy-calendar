@@ -1587,6 +1587,7 @@ module.exports = {
   "save changes": "Save changes",
   "save changes and invite guests": "Save changes and invite guests",
   "guests": "Guests",
+  "cancel Invitation": "Cancel the invitation",
   "from": "From",
   "to": "to",
   'Reminders before the event': 'Reminders before the event',
@@ -1771,6 +1772,7 @@ module.exports = {
   "save changes": "Enregistrer",
   "save changes and invite guests": "Enregistrer et envoyer les invitations",
   "guests": "Invités",
+  "cancel Invitation": "Annuler l'invitation",
   "from": "De",
   "to": "à",
   'Reminders before the event': 'Rappels avant l\'évènement',
@@ -3361,6 +3363,7 @@ module.exports = EventModal = (function(_super) {
     var guests;
     guests = this.model.get('attendees') || [];
     this.collection = new Backbone.Collection(guests);
+    this.listenTo(this.collection, 'remove', this.onGuestRemoved);
     this.backurl = options.backurl;
     return EventModal.__super__.initialize.apply(this, arguments);
   };
@@ -3500,6 +3503,19 @@ module.exports = EventModal = (function(_super) {
 
   EventModal.prototype.refreshGuestList = function() {
     return this.collection.reset(this.model.get('attendees'));
+  };
+
+  EventModal.prototype.onGuestRemoved = function(removed) {
+    var attendee, attendees, index, _i, _len;
+    attendees = this.model.get('attendees') || [];
+    for (index = _i = 0, _len = attendees.length; _i < _len; index = ++_i) {
+      attendee = attendees[index];
+      if (attendee.email === removed.get('email')) {
+        attendees.splice(index, 1);
+        break;
+      }
+    }
+    return this.model.set('attendees', attendees);
   };
 
   EventModal.prototype.addReminder = function(reminderM) {
@@ -3695,6 +3711,14 @@ module.exports = GuestView = (function(_super) {
   }
 
   GuestView.prototype.template = require('./templates/event_modal_guest');
+
+  GuestView.prototype.events = {
+    'click .remove-guest': 'onRemoveGuest'
+  };
+
+  GuestView.prototype.onRemoveGuest = function() {
+    return this.model.collection.remove(this.model);
+  };
 
   return GuestView;
 
@@ -4944,7 +4968,7 @@ else if ( model.status == 'NEED-ACTION')
 {
 buf.push("<i class=\"icon-time blue\"></i>");
 }
-buf.push("&nbsp;" + (jade.escape((jade_interp = model.email) == null ? '' : jade_interp)) + "</p>");;return buf.join("");
+buf.push("&nbsp;" + (jade.escape((jade_interp = model.email) == null ? '' : jade_interp)) + "<a" + (jade.attr("title", "" + (t('cancel Invitation')) + "", true, false)) + " class=\"remove-guest\"><i class=\"icon-trash\"></i></a></p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
