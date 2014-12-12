@@ -186,9 +186,10 @@ module.exports.publicIcal = function(req, res) {
       error: 'invalid key'
     }, 401);
   }
-  calendar = new ical.VCalendar({
-    organization: 'Cozy'
-  }, 'Cozy Calendar');
+  calendar = new VCalendar({
+    organization: 'Cozy',
+    title: 'Cozy Calendar'
+  });
   calendar.add(req.event.toIcal());
   res.header({
     'Content-Type': 'text/calendar'
