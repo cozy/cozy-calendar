@@ -14,7 +14,8 @@ helpers = require './helpers'
 expectedContent = """
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Cozy//NONSGML my calendar//EN
+PRODID:-//Cozy//NONSGML Cozy Calendar//EN
+X-WR-CALNAME:my calendar
 BEGIN:VEVENT
 UID:[id-4]
 DTSTAMP:20141110T090600Z
