@@ -16,8 +16,25 @@ module.exports = Tag = americano.getModel('Tag', {
   }
 });
 
+Tag.all = function(callback) {
+  return Tag.request('all', callback);
+};
+
 Tag.byName = function(name, callback) {
   return Tag.request('all', {
     key: name
   }, callback);
+};
+
+Tag.getOrCreate = function(data, callback) {
+  return Tag.byName(data.name, function(err, tags) {
+    if (err) {
+      log.error(err);
+      return Tag.create(data, callback);
+    } else if (tags.length === 0) {
+      return Tag.create(data, callback);
+    } else {
+      return callback(null, tags[0]);
+    }
+  });
 };

@@ -5,16 +5,10 @@ Tag = require('../models/tag');
 
 module.exports.fetch = function(req, res, next, id) {
   return Tag.find(id, function(err, tag) {
-    var acceptLanguage;
     if (err || !tag) {
-      acceptLanguage = req.headers['accept-language'];
-      if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
-        return res.send({
-          error: "Tag not found"
-        }, 404);
-      } else {
-        return res.send("Tag not found: the tag is probably not created yet.", 404);
-      }
+      return res.send({
+        error: "Tag not found"
+      }, 404);
     } else {
       req.tag = tag;
       return next();
@@ -38,7 +32,7 @@ module.exports.read = function(req, res) {
 module.exports.create = function(req, res) {
   var data;
   data = req.body;
-  return Tag.create(data, function(err, tag) {
+  return Tag.getOrCreate(data, function(err, tag) {
     if (err) {
       return res.error("Server error while creating tag.");
     }
