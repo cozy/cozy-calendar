@@ -4701,6 +4701,7 @@ module.exports = MenuView = (function(_super) {
 
 ;require.register("views/menu_item", function(exports, require, module) {
 var BaseView, MenuItemView, colorhash,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -4712,6 +4713,7 @@ module.exports = MenuItemView = (function(_super) {
   __extends(MenuItemView, _super);
 
   function MenuItemView() {
+    this.openDropdown = __bind(this.openDropdown, this);
     return MenuItemView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4723,10 +4725,11 @@ module.exports = MenuItemView = (function(_super) {
 
   MenuItemView.prototype.events = {
     'click > span': 'toggleVisible',
-    'click .dropdown': 'openDropdown',
+    'click .dropdown-toggle': 'openDropdown',
     'click .calendar-remove': 'onRemoveCalendar',
     'click .calendar-rename': 'onRenameCalendar',
-    'click .calendar-export': 'onExportCalendar'
+    'click .calendar-export': 'onExportCalendar',
+    'change .color-picker': 'setColor'
   };
 
   MenuItemView.prototype.toggleVisible = function() {
@@ -4748,19 +4751,19 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.openDropdown = function() {
-    console.log("openDropdown");
     this.colorPicker = this.$('.color-picker');
     this.colorPicker.tinycolorpicker();
-    return this.colorPicker.on('change', (function(_this) {
-      return function(ev) {
-        var color, _ref, _ref1;
-        color = (_ref = _this.colorPicker.data()) != null ? (_ref1 = _ref.plugin_tinycolorpicker) != null ? _ref1.colorHex : void 0 : void 0;
-        _this.model.set('color', color);
-        _this.buildBadge(color);
-        _this.$('.dropdown-toggle').dropdown('toggle');
-        return _this.model.save();
-      };
-    })(this));
+    return this.$('.track').attr('style', 'display: block;');
+  };
+
+  MenuItemView.prototype.setColor = function(ev) {
+    var color, _ref, _ref1;
+    color = (_ref = this.colorPicker.data()) != null ? (_ref1 = _ref.plugin_tinycolorpicker) != null ? _ref1.colorHex : void 0 : void 0;
+    this.model.set('color', color);
+    this.buildBadge(color);
+    this.model.save();
+    this.$('.dropdown-toggle').dropdown('toggle');
+    return this.$('.dropdown-toggle').on('click', this.openDropdown);
   };
 
   MenuItemView.prototype.onRenameCalendar = function() {
@@ -5219,7 +5222,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
+buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div><ul class=\"dropdown\"><li></li></ul><input type=\"hidden\" class=\"colorInput\"/></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

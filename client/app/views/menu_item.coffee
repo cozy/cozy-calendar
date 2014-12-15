@@ -9,10 +9,11 @@ module.exports = class MenuItemView extends BaseView
 
     events:
         'click > span': 'toggleVisible'
-        'click .dropdown': 'openDropdown'
+        'click .dropdown-toggle': 'openDropdown'
         'click .calendar-remove': 'onRemoveCalendar'
         'click .calendar-rename': 'onRenameCalendar'
         'click .calendar-export': 'onExportCalendar'
+        'change .color-picker': 'setColor'
 
     toggleVisible: ->
         unless app.router.onCalendar
@@ -26,18 +27,21 @@ module.exports = class MenuItemView extends BaseView
     afterRender: ->
         @buildBadge @model.get 'color'
 
-    openDropdown: ->
-        # TODO : works only once !!
-        console.log "openDropdown"
+    openDropdown: =>
+        # Tiny color picker seems buggy, refresh it on each open.
         @colorPicker = @$('.color-picker')
         @colorPicker.tinycolorpicker()
-        
-        @colorPicker.on 'change', (ev) =>
-            color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
-            @model.set 'color', color
-            @buildBadge color
-            @$('.dropdown-toggle').dropdown 'toggle'
-            @model.save()
+        @$('.track').attr 'style', 'display: block;'
+    
+    setColor: (ev)  ->
+        color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
+        @model.set 'color', color
+        @buildBadge color
+        @model.save()
+        @$('.dropdown-toggle').dropdown 'toggle'
+
+        # Gone after succefull color pick, put it back.
+        @$('.dropdown-toggle').on 'click', @openDropdown
 
     onRenameCalendar: ->
         calendarName = @model.get 'name'
