@@ -55,6 +55,9 @@
     "Contact": {
       "description": "Invite your contacts to an event"
     },
+    "Tag": {
+      "description": "Create new tags and change their color"
+    },
     "send mail from user": {
       "description": "Send invitations by mail"
     }
