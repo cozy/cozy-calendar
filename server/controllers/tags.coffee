@@ -3,12 +3,7 @@ Tag = require '../models/tag'
 module.exports.fetch = (req, res, next, id) ->
     Tag.find id, (err, tag) ->
         if err or not tag
-            acceptLanguage = req.headers['accept-language']
-            if acceptLanguage?.indexOf('text/html') isnt -1
-                res.send error: "Tag not found", 404
-            else
-                res.send "Tag not found: the tag is probably not created yet.",
-                         404
+            res.send error: "Tag not found", 404
         else
             req.tag = tag
             next()
