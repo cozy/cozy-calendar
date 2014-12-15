@@ -21,8 +21,8 @@ module.exports = class CalendarView extends BaseView
         @listenTo @eventCollection, 'change', @refreshOne
         @model = null
 
-        @tagsCollection = app.tags
-        @listenTo @tagsCollection, 'change', @refresh
+        @calendarsCollection = app.calendars
+        @listenTo @calendarsCollection, 'change', @refresh
 
     afterRender: ->
         locale = moment.localeData()
@@ -74,7 +74,7 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
 
-        source = @eventCollection.getFCEventSource @tagsCollection
+        source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
 
         @calHeader = new Header cal: @cal

@@ -19,7 +19,3 @@ module.exports = class MenuView extends ViewCollection
 
     toggleDropdown: ->
         @$('#menuitems').toggleClass 'visible'
-
-    addItem: (model) ->
-        return if model.get('type') isnt 'calendar'
-        super

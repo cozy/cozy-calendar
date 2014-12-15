@@ -1,15 +1,9 @@
 async = require 'async'
 CozyInstance = require '../models/cozy_instance'
+Tag = require '../models/tag'
 Event = require '../models/event'
 Contact = require '../models/contact'
 User  = require '../models/user'
-
-module.exports.tags = (req, res, next) ->
-    Event.tags (err, results) ->
-        return next err if err
-
-        {calendars, tags} = results
-        res.send 200, {calendars, tags}
 
 module.exports.index = (req, res) ->
     async.parallel [
@@ -19,6 +13,7 @@ module.exports.index = (req, res) ->
                 contacts[index] = contact.asNameAndEmails()
             cb null, contacts
 
+        Tag.all
         Event.all
 
         (cb) -> CozyInstance.getLocale (err, locale) ->
@@ -32,10 +27,11 @@ module.exports.index = (req, res) ->
             stack : err.stack
         else
 
-            [contacts, events, locale] = results
+            [contacts, tags, events, locale] = results
 
             res.render 'index.jade', imports: """
                 window.locale = "#{locale}";
+                window.inittags = #{JSON.stringify tags};
                 window.initevents = #{JSON.stringify events};
                 window.initcontacts = #{JSON.stringify contacts};
             """

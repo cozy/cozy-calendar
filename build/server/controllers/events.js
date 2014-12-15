@@ -23,16 +23,10 @@ localization = require('../libs/localization_manager');
 
 module.exports.fetch = function(req, res, next, id) {
   return Event.find(id, function(err, event) {
-    var acceptLanguage;
     if (err || !event) {
-      acceptLanguage = req.headers['accept-language'];
-      if ((acceptLanguage != null ? acceptLanguage.indexOf('text/html') : void 0) !== -1) {
-        return res.send({
-          error: "Event not found"
-        }, 404);
-      } else {
-        return res.send("Event not found: the event is probably canceled.", 404);
-      }
+      return res.send({
+        error: "Event not found"
+      }, 404);
     } else {
       req.event = event;
       return next();

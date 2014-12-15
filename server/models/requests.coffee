@@ -9,6 +9,9 @@ tagsView =
 
 module.exports =
 
+    tag:
+        all       : (doc) -> emit doc.name, doc
+
     alarm:
         all       : (doc) -> emit doc.title, doc
         byDate    : (doc) -> emit new Date(doc.trigg), doc

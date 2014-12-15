@@ -3,12 +3,11 @@ RealEvent = require '../models/realevent'
 module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     model = RealEvent
     comparator: (re1, re2) ->
-        return re1.start.diff(re2.start)
+        return re1.start.isBefore re2.start
 
     initialize: ->
 
         @baseCollection = app.events
-        @tagsCollection = app.tags
 
         @listenTo @baseCollection, 'add', @resetFromBase
         @listenTo @baseCollection, 'change:start', @resetFromBase
@@ -24,8 +23,8 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         eventsInRange = []
         @baseCollection.each (item) =>
 
-            tag = @tagsCollection.findWhere label: item.getCalendar()
-            return null if tag and tag.get('visible') is false
+            calendar = item.getCalendar()
+            return null if calendar and calendar.get('visible') is false
 
             if item.isRecurrent()
                 evs = item.generateRecurrentInstancesBetween start, end, \
@@ -43,8 +42,9 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     # in the future or the past (forward)
     _loadEventsCount: (eventCount, forward, callback) ->
         count = 0
-        start = @at(if forward then @length - 1 else 0)?.start or moment()
-        boundary = moment(start).add (if forward then 1 else -1), 'years'
+        start = @at(if forward then @length - 1 else 0)?.start
+        start = if start then start.clone() else moment()
+        boundary = start.clone().add (if forward then 1 else -1), 'years'
 
         async.whilst (
             ->
@@ -58,10 +58,10 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             ),
             ((cb) =>
                 if forward
-                    periodStart = moment start
+                    periodStart = start.clone()
                     periodEnd = start.add 1, 'month'
                 else
-                    periodEnd = moment start
+                    periodEnd = start.clone()
                     periodStart = start.add -1, 'month'
 
                 @generateRealEvents periodStart, periodEnd, (events) ->

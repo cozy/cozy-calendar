@@ -9,6 +9,7 @@ module.exports =
     "invite"                            : "Invite"
     "close"                             : "Close"
     "delete"                            : "Delete"
+    "change color"                      : "Change color"
     "rename"                            : "Rename"
     "export"                            : "Export"
     "Place"                             : "Place"

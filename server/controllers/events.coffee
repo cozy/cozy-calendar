@@ -13,12 +13,7 @@ localization = require '../libs/localization_manager'
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
         if err or not event
-            acceptLanguage = req.headers['accept-language']
-            if acceptLanguage?.indexOf('text/html') isnt -1
-                res.send error: "Event not found", 404
-            else
-                res.send "Event not found: the event is probably canceled.",
-                         404
+            res.send error: "Event not found", 404
         else
             req.event = event
             next()

@@ -3,7 +3,7 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
     model: require '../models/scheduleitem'
     comparator: (si1, si2) -> si1.getDateObject().diff si2.getDateObject()
 
-    getFCEventSource: (tags) =>
+    getFCEventSource: (calendars) =>
         return (start, end, timezone, callback) =>
             # start and end : ambiguous moments
             # only dates if month or week view.
@@ -13,8 +13,8 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 itemEnd = item.getEndDateObject()
                 duration = itemEnd - itemStart
 
-                tag = tags.findWhere label: item.getCalendar()
-                return null if tag and tag.get('visible') is false
+                calendar = item.getCalendar()
+                return null if calendar and calendar.get('visible') is false
 
                 if item.isRecurrent()
                     eventsInRange = eventsInRange.concat(

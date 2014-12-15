@@ -13,6 +13,10 @@ module.exports = class MenuItemView extends BaseView
         'click .calendar-rename': 'onRenameCalendar'
         'click .calendar-export': 'onExportCalendar'
 
+        'click .dropdown-toggle': 'hideColorPicker'
+        'click .calendar-color': 'showColorPicker'
+        'change .color-picker': 'setColor'
+
     toggleVisible: ->
         unless app.router.onCalendar
             app.router.navigate 'calendar', true
@@ -20,13 +24,41 @@ module.exports = class MenuItemView extends BaseView
         @render()
 
     getRenderData: ->
-        label: @model.get 'label'
+        label: @model.get 'name'
 
     afterRender: ->
-        @buildBadge @model.get('label')
+        @buildBadge @model.get 'color'
+
+    showColorPicker: (ev) ->
+        ev?.stopPropagation() # avoid dropdown auto close.
+
+        @$('.color-picker').show()
+        @$('.calendar-color').hide()
+
+        # TinyColorPicker seems buggy, refresh it on each open.
+        @colorPicker = @$('.color-picker')
+        @colorPicker.tinycolorpicker()
+        @$('.track').attr 'style', 'display: block;'
+    
+    hideColorPicker: =>
+        @$('.color-picker').hide()
+        @$('.calendar-color').show()
+
+    setColor: (ev)  ->
+        color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
+        @model.set 'color', color
+        @buildBadge color
+        @model.save()
+
+        @$('.dropdown-toggle').dropdown 'toggle'
+        @hideColorPicker()
+
+        # Gone after succefull color pick, put it back.
+        @$('.dropdown-toggle').on 'click', @hideColorPicker
+
 
     onRenameCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
 
         # Creates the input and replace the raw text by it
         template = """
@@ -51,10 +83,10 @@ module.exports = class MenuItemView extends BaseView
                 @startSpinner()
                 # removes the binding to prevent memory leak
                 input.off 'keyup'
-                @model.collection.rename calendarName, input.val(), =>
+                app.calendars.rename calendarName, input.val(), =>
                     @stopSpinner()
             else
-                @buildBadge input.val()
+                @buildBadge colorhash input.val()
 
         # Close the form and restore original state when user presses "escape"
         $(document).keyup restore = (event) =>
@@ -75,19 +107,18 @@ module.exports = class MenuItemView extends BaseView
                 @$('.dropdown-toggle').show()
 
     onRemoveCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
         message = t 'confirm delete calendar', {calendarName}
         if confirm(message)
             @startSpinner()
-            @model.collection.remove calendarName, =>
+            app.calendars.remove calendarName, =>
                 @stopSpinner()
 
     onExportCalendar: ->
-        calendarName = @model.get 'label'
+        calendarName = @model.get 'name'
         window.location = "export/#{calendarName}.ics"
 
-    buildBadge: (calendarName)->
-        color = colorhash calendarName
+    buildBadge: (color) ->
         visible = @model.get 'visible'
         backColor = if visible then color else "transparent"
         borderColor = if visible then "transparent" else color

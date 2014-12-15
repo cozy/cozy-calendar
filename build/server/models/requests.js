@@ -18,6 +18,11 @@ tagsView = {
 };
 
 module.exports = {
+  tag: {
+    all: function(doc) {
+      return emit(doc.name, doc);
+    }
+  },
   alarm: {
     all: function(doc) {
       return emit(doc.title, doc);

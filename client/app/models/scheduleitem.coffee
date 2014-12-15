@@ -1,4 +1,4 @@
-colorHash = require '../lib/colorhash'
+
 Modal = require '../lib/modal'
 H = require '../helpers'
 
@@ -14,7 +14,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         @on 'change:' + @startDateField, => @startDateChanged = true
         @on 'change:attendees', => @attendeesChanged = true
 
-    getCalendar: -> @get('tags')?[0]
+    # Return the Tag object of the calendar tag of this.
+    getCalendar: ->
+        return app.tags.getByName @get('tags')?[0]
 
     setCalendar: (cal) ->
         # we clone the source array, otherwise it's not considered as changed
@@ -26,9 +28,11 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     getDefaultColor: -> 'grey'
     getColor: ->
-        tag = @getCalendar()
-        return @getDefaultColor() if not tag
-        return colorHash tag
+        calendarObject = @getCalendar()
+        if calendarObject
+            return calendarObject.get 'color'
+        else
+            return @getDefaultColor()
 
     isAllDay: ->
         @get(@startDateField)?.length is 10

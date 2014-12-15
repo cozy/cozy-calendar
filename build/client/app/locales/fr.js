@@ -9,6 +9,7 @@ module.exports = {
   "creation": "Création",
   "invite": "Inviter",
   "close": "Fermer",
+  "change color": "Changer la couleur",
   "delete": "Supprimer",
   "rename": "Renommer",
   "export": "Exporter",
