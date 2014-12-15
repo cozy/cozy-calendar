@@ -114,7 +114,6 @@ module.exports = class CalendarView extends BaseView
         @cal.height fcHeaderHeight + fcViewContainreHeight
 
     refresh: (collection) ->
-        console.log "cal_view refresh"
         @cal.fullCalendar 'refetchEvents'
 
     onRemove: (model) ->
