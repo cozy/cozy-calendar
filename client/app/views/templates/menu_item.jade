@@ -8,11 +8,10 @@ span.calendar-name=label
     a#dLabel.dropdown-toggle(data-toggle="dropdown")
         span.caret
     ul.dropdown-menu(aria-labelledBy='dLabel')
-        li.color-picker
-            .track(style="display: block;")
-            ul.dropdown
-                li
-            input.colorInput(type="hidden")
+        li
+            a.calendar-color= t('change color')
+            .color-picker(style='display: none;')
+                .track(style="display: block;")
         li
             a.calendar-rename= t('rename')
         li

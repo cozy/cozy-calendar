@@ -45,7 +45,6 @@ module.exports =
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 
-        # TODO ? SocketListener.watch @tags
         SocketListener.watch @events
 
         if window.inittags?

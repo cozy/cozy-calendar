@@ -4,12 +4,6 @@ TagCollection = require 'collections/tags'
 
 module.exports = class CalendarCollection extends TagCollection
 
-   # # url: 'tags'
-   #  model: class Calendar extends Backbone.Model
-   #      idAttribute: 'label'
-   #      defaults: visible: true
-   #      toString: -> @get 'label'
-
     model: Tag
 
     initialize: ->
@@ -89,15 +83,6 @@ module.exports = class CalendarCollection extends TagCollection
             error: =>
                 @_resumeModels eventsToChange, options
                 callback t('server error occured')
-
-    # TODO : what is it ?
-    parse: (raw) ->
-        console.log "Calendars::parse"
-        out = []
-        out.push type: 'calendar', label: tag for tag in raw.calendars
-        # TODO usage ?
-        # out.push type: 'tag',      label: tag for tag in raw.tags
-        return out
 
     stringify = (tag) -> tag.toString()
 

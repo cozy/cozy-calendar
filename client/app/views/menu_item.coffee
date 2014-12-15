@@ -9,7 +9,7 @@ module.exports = class MenuItemView extends BaseView
 
     events:
         'click > span': 'toggleVisible'
-        'click .dropdown-toggle': 'openDropdown'
+        'click .calendar-color': 'onShowColor'
         'click .calendar-remove': 'onRemoveCalendar'
         'click .calendar-rename': 'onRenameCalendar'
         'click .calendar-export': 'onExportCalendar'
@@ -27,8 +27,10 @@ module.exports = class MenuItemView extends BaseView
     afterRender: ->
         @buildBadge @model.get 'color'
 
-    openDropdown: =>
-        # Tiny color picker seems buggy, refresh it on each open.
+    onShowColor: (ev) ->
+        ev.stopPropagation() # avoid dropdown close.
+        @$('.color-picker').show()
+        # TinyColorPicker seems buggy, refresh it on each open.
         @colorPicker = @$('.color-picker')
         @colorPicker.tinycolorpicker()
         @$('.track').attr 'style', 'display: block;'
@@ -38,10 +40,9 @@ module.exports = class MenuItemView extends BaseView
         @model.set 'color', color
         @buildBadge color
         @model.save()
-        @$('.dropdown-toggle').dropdown 'toggle'
 
-        # Gone after succefull color pick, put it back.
-        @$('.dropdown-toggle').on 'click', @openDropdown
+        @$('.dropdown-toggle').dropdown 'toggle'
+        @$('.color-picker').hide()
 
     onRenameCalendar: ->
         calendarName = @model.get 'name'
