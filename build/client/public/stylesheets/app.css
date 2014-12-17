@@ -10236,6 +10236,7 @@ input[type="time"] {
   width: 1px;
   height: 1em;
   overflow: hidden;
+  visibility: hidden;
 }
 .popover .popover-title #calendarcombo.expanded {
   -webkit-transition: 0.1s;
@@ -10245,6 +10246,7 @@ input[type="time"] {
   transition: 0.1s;
   width: 132px;
   border-width: 1px;
+  visibility: visible;
 }
 .popover .popover-content {
   font-family: styled;

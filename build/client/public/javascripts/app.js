@@ -5515,6 +5515,7 @@ module.exports = ComboBox = (function(_super) {
     value = (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value();
     this.buildBadge(colorhash(value));
     this.trigger('change', value);
+    _.debounce(this.onEditionComplete(value), 500);
     return true;
   };
 
