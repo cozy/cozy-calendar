@@ -3,11 +3,11 @@ RealEvent = require '../models/realevent'
 module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     model = RealEvent
     comparator: (re1, re2) ->
-        return re1.start.isBefore re2.start
+        return re1.start.isAfter re2.start
 
     initialize: ->
-
         @baseCollection = app.events
+        @generateAllRealEvents()
 
         @listenTo @baseCollection, 'add', @resetFromBase
         @listenTo @baseCollection, 'change:start', @resetFromBase
@@ -16,60 +16,52 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
 
     resetFromBase: ->
         @reset []
+        @generateAllRealEvents()
         @trigger 'reset'
 
-    generateRealEvents: (start, end, callback) ->
-        callback = callback or ->
-        eventsInRange = []
+    generateAllRealEvents: ->
+        start = @baseCollection.first().getStartDateObject()
+        end = @baseCollection.last().getStartDateObject()
+        generatedEvents = []
         @baseCollection.each (item) =>
-
-            calendar = item.getCalendar()
-            return null if calendar and calendar.get('visible') is false
-
             if item.isRecurrent()
                 evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, s, e) ->
                     return new RealEvent event, s, e
-                eventsInRange = eventsInRange.concat evs
+                generatedEvents = generatedEvents.concat evs
 
-            else if item.isInRange start, end
-                eventsInRange.push new RealEvent item
+            else
+                generatedEvents.push new RealEvent item
 
-        @add eventsInRange
-        callback eventsInRange
+        @realEvents = generatedEvents.sort @comparator
 
-    # Try to load (generate) at least 'count' events, 
+
+    # Try to load (generate) up to 'count' events, from generated realEvents,
     # in the future or the past (forward)
-    _loadEventsCount: (eventCount, forward, callback) ->
-        count = 0
-        start = @at(if forward then @length - 1 else 0)?.start
-        start = if start then start.clone() else moment()
-        boundary = start.clone().add (if forward then 1 else -1), 'years'
+    _loadEventsCount: (count, forward, callback) ->
+        boundary = @at if forward then @length - 1 else 0
+        if not boundary
+            # use the closest event to now.
+            now = moment()
+            @realEvents.some (realEvent) ->
+                if now.isBefore realEvent.start
+                    boundary = realEvent
+                    return true
 
-        async.whilst (
-            ->
-                if count > eventCount
-                    return false
+        if boundary
+            # Take the previous N events
+            boundaryIndex = @realEvents.indexOf boundary
+            if forward
+                startIndex = boundaryIndex
+                endIndex = boundaryIndex + count
 
-                else if forward
-                    return start.isBefore boundary
-                else 
-                    return start.isAfter boundary
-            ),
-            ((cb) =>
-                if forward
-                    periodStart = start.clone()
-                    periodEnd = start.add 1, 'month'
-                else
-                    periodEnd = start.clone()
-                    periodStart = start.add -1, 'month'
+            else
+                startIndex = boundaryIndex - count
+                endIndex = boundaryIndex
 
-                @generateRealEvents periodStart, periodEnd, (events) ->
-                    count += events.length
-                    cb()
-            ),
-            (err) ->
-                callback err
+            @add @realEvents.slice startIndex, endIndex
+
+        callback()
 
     loadNextPage: (callback) ->
         callback = callback or ->
