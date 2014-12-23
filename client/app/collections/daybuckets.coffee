@@ -27,9 +27,6 @@ module.exports = class DayBucketCollection extends Backbone.Collection
         @listenTo @eventCollection, 'remove', @onBaseCollectionRemove
         @listenTo @eventCollection, 'reset', @resetFromBase
 
-        @listenTo @calendarsCollection, 'change', @resetFromBase
-
-
         @resetFromBase()
 
     resetFromBase: ->

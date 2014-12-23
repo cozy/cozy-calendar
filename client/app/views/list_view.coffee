@@ -13,16 +13,20 @@ module.exports = class ListView extends ViewCollection
     events:
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
-    
+
     afterRender: ->
         @calHeader = new Header()
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
-        
+
         @$('#list-container').scroll @checkScroll
         @keepScreenFull()
-        @collection.on 'reset', @keepScreenFull
+        @collection.on 'reset', =>
+            @$('.showafter').show()
+            @$('.showbefore').show()
+            @lastAlreadyLoaded = false
+            @keepScreenFull()
         super
 
     appendView: (view) ->
@@ -48,11 +52,16 @@ module.exports = class ListView extends ViewCollection
     loadBefore: ->
         if not @isLoading
             @isLoading = true
-            @collection.loadPreviousPage =>
+            @collection.loadPreviousPage (addedRealEvents) =>
+                if addedRealEvents?.length == 0
+                    @$('.showbefore').hide()
                 @isLoading = false
 
     loadAfter: ->
-        if not @isLoading
+        if not @isLoading and not @lastAlreadyLoaded
             @isLoading = true
-            @collection.loadNextPage =>
+            @collection.loadNextPage (addedRealEvents) =>
+                if addedRealEvents?.length == 0
+                    @lastAlreadyLoaded = true
+                    @$('.showafter').hide()
                 @isLoading = false
