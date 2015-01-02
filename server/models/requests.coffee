@@ -32,3 +32,6 @@ module.exports =
 
     cozy_instance:
         all       : americano.defaultRequests.all
+
+    webdavaccount:
+        all       : americano.defaultRequests.all
