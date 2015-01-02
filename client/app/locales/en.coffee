@@ -156,7 +156,7 @@ module.exports =
     "sync url"                          : "URL:"
     "sync login"                        : "Username:"
     "sync password"                     : "Password: "
-    "sync help"                         : "You don't know what to do with those information? Check the "
+    "sync help"                         : "Are you lost? Follow the "
     "sync help link"                    : "step-by-step guide!"
     "install the sync module"           : "Install the Sync module from the Cozy App Store"
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."

@@ -156,7 +156,7 @@ module.exports =
     "sync url"                          : "URL :"
     "sync login"                        : "Nom d'utilisateur :"
     "sync password"                     : "Mot de passe : "
-    "sync help"                         : "Vous ne savez pas quoi faire de ces informations ? Référez-vous au "
+    "sync help"                         : "Vous êtes perdu(e) ? Suivez le "
     "sync help link"                    : "guide pas à pas !"
     "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
