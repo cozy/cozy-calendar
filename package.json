@@ -60,6 +60,9 @@
     },
     "send mail from user": {
       "description": "Send invitations by mail"
+    },
+    "WebDAVAccount": {
+      "description": "Store webDAV password and sync informations"
     }
   }
 }
