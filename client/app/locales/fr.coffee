@@ -124,6 +124,7 @@ module.exports =
     "cancel Invitation"                 : "Annuler l'invitation"
     "from"                              : "De"
     "to"                                : "à"
+    "all day, to"                       : "Journée entière, jusqu'à"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
     "reminder"                          : "Rappel"
 
