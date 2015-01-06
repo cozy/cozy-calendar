@@ -1,8 +1,8 @@
 PopoverView = require '../lib/popover_view'
-EventModal = require 'views/event_modal'
-ComboBox = require 'views/widgets/combobox'
-Toggle = require 'views/toggle'
-Event = require 'models/event'
+EventModal  = require 'views/event_modal'
+ComboBox    = require 'views/widgets/combobox'
+Event       = require 'models/event'
+
 
 module.exports = class EventPopOver extends PopoverView
 
@@ -12,20 +12,24 @@ module.exports = class EventPopOver extends PopoverView
     popoverWidth: 411
     popoverHeight: 200
 
+
     events:
         'keyup input': 'onKeyUp'
         'change select': 'onKeyUp'
         'change input': 'onKeyUp'
+
         'click .add'  : 'onAddClicked'
         'click .advanced-link'  : 'onAdvancedClicked'
+
         'click .remove': 'onRemoveClicked'
-        'click #toggle-type': 'onTabClicked'
         'click .close' : 'selfclose'
+
         'changeTime.timepicker #input-start': 'onSetStart'
         'changeTime.timepicker #input-end': 'onSetEnd'
-        'input #input-diff': 'onSetDiff'
+
         'input #input-desc': 'onSetDesc'
         'input #input-place': (ev) -> @model.set 'place', ev.target.value
+
 
     initialize: (options) ->
         if not @model
@@ -56,17 +60,11 @@ module.exports = class EventPopOver extends PopoverView
         if not @model.isAllDay()
             inputEnd = @$('#input-end')
             inputStart = @$('#input-start')
-            inputDiff = @$('#input-diff')
             inputStart.on 'timepicker.next', -> inputEnd.focus()
             inputEnd.on 'timepicker.next', -> inputDiff.focus()
             inputEnd.on 'timepicker.prev', ->
                 inputStart.focus().timepicker 'highlightMinute'
 
-            inputDiff.on 'keydown', (ev) ->
-                if ev.keyCode is 37 # left
-                    inputEnd.focus().timepicker 'highlightMinute'
-                if ev.keyCode is 39 # right
-                    @$('#input-desc').focus()
 
         @calendar = new ComboBox
             el: @$ '#calendarcombo'
@@ -86,26 +84,29 @@ module.exports = class EventPopOver extends PopoverView
 
         return t title
 
+
     getRenderData: ->
         data =
             model: @model
             dtFormat: @dtFormat
             editionMode: not @model.isNew()
-            advancedUrl: @parentView.getUrlHash() + '/' + @model.id
             calendar: @model.attributes.tags?[0] or ''
             allDay: @model.isAllDay()
+            advancedUrl: "#{@parentView.getUrlHash()}/#{@model.id}"
 
-        return data
+    onSetStart: ->
+        @model.setStart @formatDateTime @$('.input-start').val()
 
-    onSetStart: (ev) -> @model.setStart @formatDateTime ev.time.value
 
-    onSetEnd: (ev) -> @model.setEnd @formatDateTime ev.time.value
+    onSetEnd: ->
+        @model.setEnd @formatDateTime @$('.input-end-time').val(), @$('.input-end-date').val()
 
-    onSetDiff: (ev) ->
-        diff = parseInt ev.target.value
-        @model.setDiff diff
 
-    onSetDesc: (ev) -> @model.set 'description', ev.target.value
+
+
+    onSetDesc: (ev) ->
+        @model.set 'description', ev.target.value
+
 
     onAdvancedClicked: (event) =>
         if @model.isNew()
@@ -116,10 +117,12 @@ module.exports = class EventPopOver extends PopoverView
             modal.render()
         else
             window.location.hash += "/#{@model.id}"
+
         event.preventDefault()
         @selfclose()
 
-    onKeyUp: (event) -> #
+
+    onKeyUp: (event) ->
         if event.keyCode is 13 or event.which is 13 #ENTER
             # Forces the combobox to blur to save the calendar if it has changed
             @calendar.onBlur()
@@ -129,6 +132,7 @@ module.exports = class EventPopOver extends PopoverView
         else
             @addButton.removeClass 'disabled'
 
+
     formatDateTime: (dtStr) ->
         splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
         if splitted and splitted[0]
@@ -136,6 +140,7 @@ module.exports = class EventPopOver extends PopoverView
                 hour: splitted[1]
                 minute: splitted[2]
             return setObj
+
 
     onRemoveClicked: ->
         @removeButton.css 'width', '42px'
@@ -189,6 +194,7 @@ module.exports = class EventPopOver extends PopoverView
         else
             @model.fetch complete: super
 
+
     close: ->
         # we don't reuse @selfclose because both are doing mostly the same thing
         # but are a little bit different.
@@ -226,5 +232,7 @@ module.exports = class EventPopOver extends PopoverView
         alertMsg = $('<div class="alert"></div>').text(t(error.value))
         @$('.popover-content').before alertMsg
 
-    getButtonText: -> if @model.isNew() then t('create') else t('edit')
+
+    getButtonText: ->
+        if @model.isNew() then t('create') else t('edit')
 
