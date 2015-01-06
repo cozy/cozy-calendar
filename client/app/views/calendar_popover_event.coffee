@@ -4,31 +4,51 @@ ComboBox    = require 'views/widgets/combobox'
 Event       = require 'models/event'
 
 
+tFormat                 = 'H:mm'
+dFormat                 = 'DD/MM/YYYY'
+inputDateDTPickerFormat = 'dd/mm/yyyy'
+popoverWidth            = 411
+popoverHeight           = 200
+
+defTimePickerOpts       =
+    template: false
+    minuteStep: 5
+    showMeridian: false
+
+defDatePickerOps        =
+    language: window.app.locale
+    autoclose: true
+    pickerPosition: 'bottom-right'
+    keyboardNavigation: false
+    format: inputDateDTPickerFormat
+    minView: 2
+    viewSelect: 4
+
+
 module.exports = class EventPopOver extends PopoverView
 
     titleTemplate: require './templates/popover_title'
     template: require './templates/popover_event'
-    dtFormat: "HH:mm"
-    popoverWidth: 411
-    popoverHeight: 200
 
 
     events:
-        'keyup input': 'onKeyUp'
-        'change select': 'onKeyUp'
-        'change input': 'onKeyUp'
+        'keyup input':                           'onKeyUp'
+        'change select':                         'onKeyUp'
+        'change input':                          'onKeyUp'
 
-        'click .add'  : 'onAddClicked'
-        'click .advanced-link'  : 'onAdvancedClicked'
+        'click .add':                            'onAddClicked'
+        'click .advanced-link':                  'onAdvancedClicked'
 
-        'click .remove': 'onRemoveClicked'
-        'click .close' : 'selfclose'
+        'click .remove':                         'onRemoveClicked'
+        'click .close':                          'selfclose'
 
-        'changeTime.timepicker #input-start': 'onSetStart'
-        'changeTime.timepicker #input-end': 'onSetEnd'
+        'changeTime.timepicker .input-start':    'onSetStart'
+        'changeTime.timepicker .input-end-time': 'onSetEnd'
+        'changeDate .input-end-date':            'onSetEnd'
+        'click .input-allday':                   'toggleAllDay'
 
-        'input #input-desc': 'onSetDesc'
-        'input #input-place': (ev) -> @model.set 'place', ev.target.value
+        'input .input-desc':                     'onSetDesc'
+        'input .input-place':                    (ev) -> @model.set 'place', ev.target.value
 
 
     initialize: (options) ->
@@ -51,23 +71,17 @@ module.exports = class EventPopOver extends PopoverView
         @removeButton = @$ '.remove'
 
         @removeButton.hide() if @model.isNew()
-        @$('input[type="time"]').attr('type', 'text').timepicker
-            template: false
-            minuteStep: 5
-            showMeridian: false
-        @$('.focused').focus()
-
-        if not @model.isAllDay()
-            inputEnd = @$('#input-end')
-            inputStart = @$('#input-start')
-            inputStart.on 'timepicker.next', -> inputEnd.focus()
-            inputEnd.on 'timepicker.next', -> inputDiff.focus()
-            inputEnd.on 'timepicker.prev', ->
-                inputStart.focus().timepicker 'highlightMinute'
-
+        @$('input[type="time"]').attr('type', 'text')
+                                .timepicker defTimePickerOpts
+                                .on 'focus', -> $(@).timepicker 'highlightHour'
+                                .on 'timepicker.next', -> $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
+                                .on 'timepicker.prev', -> $("[tabindex=#{+$(@).attr('tabindex') - 1}]").focus()
+        @$('input[type="date"]').attr('type', 'text')
+                                .datetimepicker defDatePickerOps
+        @$('[tabindex=1]').focus()
 
         @calendar = new ComboBox
-            el: @$ '#calendarcombo'
+            el: @$ '.calendarcombo'
             small: true
             source: app.calendars.toAutoCompleteSource()
 
@@ -86,13 +100,17 @@ module.exports = class EventPopOver extends PopoverView
 
 
     getRenderData: ->
-        data =
-            model: @model
-            dtFormat: @dtFormat
+        data = _.extend {}, @model.toJSON(),
+            tFormat:     tFormat
+            dFormat:     dFormat
             editionMode: not @model.isNew()
-            calendar: @model.attributes.tags?[0] or ''
-            allDay: @model.isAllDay()
             advancedUrl: "#{@parentView.getUrlHash()}/#{@model.id}"
+            calendar:    @model.get('tags')?[0] or ''
+            allDay:      @model.isAllDay()
+            start:       @model.getStartDateObject()
+            end:         @model.getEndDateObject()
+                               .add((if @model.isAllDay() then -1 else 0), 'day')
+
 
     onSetStart: ->
         @model.setStart @formatDateTime @$('.input-start').val()
@@ -102,6 +120,16 @@ module.exports = class EventPopOver extends PopoverView
         @model.setEnd @formatDateTime @$('.input-end-time').val(), @$('.input-end-date').val()
 
 
+    toggleAllDay: ->
+        isAllDay = @$('.input-allday').is ':checked'
+
+        # NOTE: I'm not especially fan to set models logics in the view. Maybe
+        # we should handle those kind of changes inside the model directly.
+        start = @model.getStartDateObject()
+        end = @model.getEndDateObject()
+        @$('.timed').attr 'aria-hidden', isAllDay
+        @model.set 'start', if isAllDay then start.format('YYYY-MM-DDD') else start.hour(12).toISOString()
+        @model.set 'end', if isAllDay then end.add(1, 'd').format('YYYY-MM-DDD') else start.hour(13).toISOString()
 
 
     onSetDesc: (ev) ->
@@ -133,13 +161,18 @@ module.exports = class EventPopOver extends PopoverView
             @addButton.removeClass 'disabled'
 
 
-    formatDateTime: (dtStr) ->
-        splitted = dtStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
-        if splitted and splitted[0]
-            setObj =
-                hour: splitted[1]
-                minute: splitted[2]
-            return setObj
+    formatDateTime: (timeStr = '', dateStr = '') ->
+        t = timeStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
+        d = splitted = dateStr.match /([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/
+
+        [hour, minute] = t[1..2] if t?[0]
+        [date, month, year] = d[1..3] if d?[0]
+
+        date = +date + 1 if date and @model.isAllDay() # Add a day later if
+                                                       # event is all-day long
+        month = +month - 1 if month # Months are 0 indexed in moment.js
+
+        setObj = { hour, minute, date, month, year }
 
 
     onRemoveClicked: ->
@@ -206,26 +239,24 @@ module.exports = class EventPopOver extends PopoverView
 
 
     refresh: ->
-        @$('#input-start').val @model.getStartDateObject().format(@dtFormat)
-        @$('#input-end').val @model.getEndDateObject().format(@dtFormat)
-        @$('#input-diff').val @model.getDiff()
+        @$('.input-start').val @model.getStartDateObject().format(tFormat)
+        @$('.input-end-time').val @model.getEndDateObject().format(tFormat)
+        @$('.input-end-date').val @model.getEndDateObject().add((if @model.isAllDay() then -1 else 0), 'day').format(dFormat)
+
 
     handleError: (error) ->
         switch error.field
             when 'description'
-                guiltyFields = '#input-desc'
+                guiltyFields = '.input-desc'
 
             when 'startdate'
-                guiltyFields = '#input-start'
+                guiltyFields = '.input-start'
 
             when 'enddate'
-                guiltyFields = '#input-end'
-
-            when 'triggdate'
-                guiltyFields = '#input-time'
+                guiltyFields = '.input-end-time, .input-end-date'
 
             when 'date'
-                guiltyFields = '#input-start, #input-end'
+                guiltyFields = '.input-start, .input-end-time, .input-end-date'
 
         @$(guiltyFields).css('border-color', 'red')
         @$(guiltyFields).focus()

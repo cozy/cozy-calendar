@@ -1,31 +1,31 @@
-.line
-    if allDay
-        span.timeseparator=t('all day during')
-        span &nbsp;
-        input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
-        placeholder=1, min=1)
-        span &nbsp;
-        span.timeseparator= ' ' + t('days')
+label.timed(aria-hidden="#{allDay}")
+    = t("from")
+    input.input-start(tabindex="4",
+                      type="time",
+                      placeholder=t("From hours:minutes"),
+                      value=start.format(tFormat))
 
-    else
-        span.timeseparator=t("from")
-        input#input-start.focused.input-mini(type="time", placeholder=t("From hours:minutes"), value=model.getStartDateObject().format(dtFormat))
-        span &nbsp;
-        span.timeseparator=t("to")
-        input#input-end.input-mini(type="time", placeholder=t("To hours:minutes+days"), value=model.getEndDateObject().format(dtFormat))
-        span &nbsp;
-        input#input-diff.col-xs2.input-mini(type="number", value=model.getDiff(),''
-        placeholder=0, min=0)
-        span &nbsp;
-        span.timeseparator= ' ' + t('days later')
+label
+    =t('All day')
+    input.input-allday(tabindex="3",
+                       type="checkbox",
+                       value='checked',
+                       checked=allDay)
 
-.line
-    input#input-desc.input(type="text", value=model.get("description"),
-        placeholder=t("summary"))
-    input#input-place.input-small(type="text", value=model.get("place"),
-        placeholder=t("Place"))
+label
+    =t("to")
+    span.timed(aria-hidden="#{allDay}")
+        input.input-end-time(tabindex="5",
+                             type="time",
+                             placeholder=t("To hours:minutes"),
+                             value=end.format(tFormat))
+        | ,
+    input.input-end-date(tabindex="6",
+                         type="date",
+                         placeholder=t("To date"),
+                         value=end.format(dFormat))
+
 
 .popover-footer.line
     a.advanced-link(href='#'+advancedUrl)= t('advanced')
-    span &nbsp;
-    a.btn.add= model.isNew() ? t('Create') : t('Edit')
+    a.btn.add= editionMode ? t('Edit') : t('Create')
