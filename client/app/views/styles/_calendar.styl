@@ -8,6 +8,7 @@
  * Vars
  */
 overlay-color = #F5F5F5
+opacity-color = #C5C5C5
 icon-color = #333
 
 /**
@@ -128,6 +129,16 @@ icon-color = #333
 .popover-content-wrapper
     padding: 5px 10px 0
     overflow: hidden
+
+    &.is-same-day .input-end-date
+        color: opacity-color
+
+        &:hover
+        &:focus
+            color: #555
+
+    &.is-all-day .input-end-date
+        color: #555
 
 
 .popover-footer
