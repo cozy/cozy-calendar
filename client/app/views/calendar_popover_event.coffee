@@ -4,11 +4,9 @@ ComboBox    = require 'views/widgets/combobox'
 Event       = require 'models/event'
 
 
-tFormat                 = 'H:mm'
+tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
 inputDateDTPickerFormat = 'dd/mm/yyyy'
-popoverWidth            = 411
-popoverHeight           = 200
 
 defTimePickerOpts       =
     template: false
