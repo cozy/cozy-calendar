@@ -21,7 +21,7 @@ icon-color = #333
     padding: 0
     font-family: styled
 
-    label,
+    label
     .label
         box-sizing: border-box
         margin: 0
@@ -33,10 +33,14 @@ icon-color = #333
         box-sizing: border-box
         margin: 0px
         border: 1px solid white
+        border-radius: 0
         box-shadow: none !important
 
+        &:hover
+            border: 1px solid orange
+
         &:focus
-            border: 1px solid greyblue
+            border: 1px solid blue
 
         &[type=text]
             width: 100%
