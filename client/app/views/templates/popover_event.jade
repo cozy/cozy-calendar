@@ -1,31 +1,36 @@
-label.timed(aria-hidden="#{allDay}")
-    = t("from")
-    input.input-start(tabindex="4",
-                      type="time",
-                      placeholder=t("From hours:minutes"),
-                      value=start.format(tFormat))
+.popover-content-wrapper
+    label.timed(aria-hidden="#{allDay}")
+        span.caption= t("from")
+        input.input-start.input-time(tabindex="4",
+                                     type="time",
+                                     size="5"
+                                     placeholder=t("From hours:minutes"),
+                                     value=start.format(tFormat))
 
-label
-    =t('All day')
-    input.input-allday(tabindex="3",
-                       type="checkbox",
-                       value='checked',
-                       checked=allDay)
+    label.aside
+        input.input-allday(tabindex="3",
+                           type="checkbox",
+                           value='checked',
+                           checked=allDay)
+        span.caption= t('All day')
 
-label
-    =t("to")
-    span.timed(aria-hidden="#{allDay}")
-        input.input-end-time(tabindex="5",
-                             type="time",
-                             placeholder=t("To hours:minutes"),
-                             value=end.format(tFormat))
-        | ,
-    input.input-end-date(tabindex="6",
-                         type="date",
-                         placeholder=t("To date"),
-                         value=end.format(dFormat))
+    label
+        span.caption= t("To")
+        span.timed(aria-hidden="#{allDay}")
+            input.input-end-time.input-time(tabindex="5",
+                                            type="time",
+                                            size="5"
+                                            placeholder=t("To hours:minutes"),
+                                            value=end.format(tFormat))
+            |,
+        span
+            input.input-end-date.input-date(tabindex="6",
+                                            type="date",
+                                            size="10"
+                                            placeholder=t("To date"),
+                                            value=end.format(dFormat))
 
 
-.popover-footer.line
-    a.advanced-link(href='#'+advancedUrl)= t('advanced')
-    a.btn.add= editionMode ? t('Edit') : t('Create')
+.popover-footer
+    a.advanced-link(role="button", href='#'+advancedUrl)= t('advanced')
+    a.btn.add(role="button")= editionMode ? t('Edit') : t('Create')

@@ -1,160 +1,147 @@
-    @import 'nib'
+@import 'nib'
 
 @import '_base'
 @import '_ui'
 
-/* Styles for the calendar popover (event and alarm creation/edition) */
 
+/**
+ * Vars
+ */
+overlay-color = #F5F5F5
+icon-color = #333
+
+/**
+ * Styles for the calendar popover (event and alarm creation/edition)
+ */
+// TODO: rebuild all styles with relative units. Need to revamp a whole bunch of
+//       the app styles
 .popover
-    max-width: none
     width: 400px
+    max-width: none
+    padding: 0
+    font-family: styled
 
-    .timeseparator
-        display: inline-block
-        margin-bottom: 10px
-        vertical-align: middle
-
-    .popover-title
-        font-weight bold
-
-        button
-            margin-top: -4px
-            height: 20px
-
-        a
-            font-weight normal
-            font-size 0.8em
-            cursor pointer
-
-        .remove
-            float: right
-            margin-right: 20px
-            margin-top: -2px
-            display: inline-block
-            cursor: pointer
-
-        #calendarcombo
-            transition 0s
-            display inline-block
-            border-color transparent
-            width 1px
-            height 1em
-            overflow hidden
-            visibility hidden
-        #calendarcombo.expanded
-            transition 0.1s
-            width 132px
-            border-width 1px
-            visibility visible
-
-
-    .popover-content
-        font-family: styled
-        padding: 0
-
-        .line:first-child
-            padding-bottom: 0px
-            
-        .line
-            padding: 10px
-
-        a.advanced-link
-            margin-left 10px
-
-        .popover-footer
-            text-align: right
-            background: #F5F5F5
-            padding: 5px
-            border-bottom-left-radius: 5px
-            border-bottom-right-radius: 5px
-
-        .nav-tabs
-            li
-                a
-                    font-size: 16px
-                    cursor: pointer
-                a:hover
-                    background: lightorange
-                    color: #333
-            li.active
-                a:hover
-                    background: white
-                    color: #333
-
-        #input-start, #input-end, #input-time
-            width: 3em
-
-        #input-diff
-            width: 35px
-
-        #input-place
-            min-width: 120px
-
-        #showmap
-            position: relative
-            display: inline-block
-            top: -5px
-            left: -20px
-            padding: 0px 1px 1px 0px
-            border-radius: 10px
-
-        .badge
-            margin-bottom: 10px
-            margin-left: 5px
-            line-height: 20px
-            vertical-align: middle
-            cursor: pointer
-
-            i
-                margin-top: 0px
-
-            &:hover
-                background: orange
-
-        #toggle-type, i.remove
-            cursor: pointer
-            margin 5px 0px 0px 5px
-
-
-
-        button
-            margin-left: 5px
-
-            &.disabled
-                border: 1px solid grey
-
-                &:hover
-                    background: #e6e6e6
-                    color: #333
-
-        p
-            font-size: 12px
-            margin-left: 5px
-
-        a
-            font-size 12px
+    label,
+    .label
+        box-sizing: border-box
+        margin: 0
+        padding: 5px 0 0
+        background-color: transparent
+        border: medium none
 
     input
-    select
-    textarea
-        font-family: styled
-        margin-left: 5px
-        border-radius: 0
-        box-shadow: 0
-        border: 1px solid transparent
+        box-sizing: border-box
+        margin: 0px
+        border: 1px solid white
+        box-shadow: none !important
 
-    input:hover
-    select:hover
-        border: 1px solid orange
+        &:focus
+            border: 1px solid greyblue
 
-    input:active
-    select:active
-    input:focus
-    select:focus
-        box-shadow: none
+        &[type=text]
+            width: 100%
+            height: 1.8em
+
+    input[type=text].input-time
+        width: 4em
+        text-align: right
+
+    input[type=text].input-date
+        width: 8em
 
 
-/* Styles for the fullcalendar plugin */
+.controls
+    position: absolute
+    top: 8px
+    right: 8px
+
+    [role=button]
+        display: block
+        float: right
+        clear: right
+        width: 14px
+        height: 14px
+        line-height: 14px
+        padding: 0
+        margin: 0 0 14px
+        cursor: pointer
+
+    .close
+        color: icon-color
+        opacity: 0.7
+
+
+.popover-title
+    padding: 5px 0
+    background-color: white
+    border-bottom: 1px solid overlay-color
+    font-size: 18px
+
+    .label
+        width: 100%
+        padding: 0 24px 2px
+
+    .calendar
+        position: absolute
+        top: 10px    // vertical badge alignment with desc input
+        left: 8px
+
+        .badge
+            margin: 0
+
+        .calendarcombo
+            display: none
+
+            &.expanded
+                display: inline-block
+                margin-left: 5px
+
+    .input-desc
+        font-size: 1.4em
+
+
+.popover-content
+    padding: 0
+
+    label
+        float: left
+        clear: left
+        display: flex
+        align-items: baseline
+
+        &.aside
+            float: right
+            clear: none
+
+    .caption
+        display: inline-block
+        min-width: 3em
+
+    .input-allday
+        margin-right: 5px
+
+
+.popover-content-wrapper
+    padding: 5px 10px 0
+    overflow: hidden
+
+
+.popover-footer
+    padding: 5px
+    background-color: overlay-color
+    border-radius: 0 0 5px 5px
+    display: flex
+    justify-content: flex-end
+    align-items: baseline
+
+    [role=button]
+        margin-left: 1em
+        font-size: 0.85em
+
+
+/**
+ * Styles for the fullcalendar plugin
+ */
 
 .fc-button-prev, .fc-button-next, .fc-button-today,
 .fc-button-month, .fc-button-week, .fc-button-agendaWeek
@@ -237,7 +224,7 @@
     white-space: nowrap
 
 
-.fc-header td 
+.fc-header td
     border-style: none
 
 .fc-header .fc-button
@@ -246,7 +233,7 @@
 
 .fc-header-right
     text-align: right
-    
+
 .fc-text-arrow
     margin: 0px 0.1em
     font-size: 2em
@@ -264,7 +251,7 @@
     cursor: pointer
 
 
-.fc-title, 
+.fc-title,
 .fc-view-container
 
     thead
@@ -343,25 +330,6 @@ td.fc-widget-header
 
 a.btn:visited
     color: white
-
-.popover
-    padding: 0
-
-.popover-title
-    color: white
-    background-color: white
-    color: #333
-    border: 0
-    font-family: styled
-    font-size: 18px
-    margin-top: 5px
-
-    .close
-        color: #333
-        opacity: 0.7
-
-.popover-content
-
 
 #add-alarm
 
@@ -462,12 +430,3 @@ a.btn:visited
 
     h3
         margin-top: 0
-
-// #view-container
-//     .popover
-//         .arrow
-//             box-shadow: none
-//             left: -10px
-//             border: 0
-
-

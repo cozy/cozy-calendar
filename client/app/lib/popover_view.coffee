@@ -28,31 +28,42 @@ module.exports = class PopoverView extends BaseView
             trigger: 'manual'
             title: @titleTemplate @getRenderData()
             html: true
-            placement: @getDirection()
+            placement: @getDirection
             content: @template @getRenderData()
             container: @container
-        ).popover 'show'
+        )
+        .popover 'show'
+
+        @setElement $("##{@parentView.id} .popover")
 
         # Manage responsive (for smartphones)
         if $(window).width() <= 500
-            $('.popover').css 'top', 0
-            $('.popover').css 'left', 0
-
-        @setElement $("##{@parentView.id} .popover")
+            $('.popover').css
+                top: 0
+                left: 0
 
         @afterRender()
         return @
 
 
 
-    getDirection: ->
+    getDirection: (tip) =>
+        # We need to inject the tip to determines its dimensions, then
+        # auto-detect position.
+        # This causes an unexpected reflow, but we can't do this otherwise for
+        # this time. Bootstrap's Hell...
+        $tmp = $(tip).clone().appendTo('body')
+        popoverWidth = $tmp.innerWidth()
+        popoverHeight = $tmp.innerHeight()
+        $tmp.remove()
+
         pos = @target.offset()
         ctnOfs = @container.offset()
-        realWidth = pos.left + @target.width() + @popoverWidth
+        realWidth = pos.left + @target.width() + popoverWidth
         fitRight = realWidth < ctnOfs.left + @container.width()
-        fitLeft = pos.left - @popoverWidth > ctnOfs.left
+        fitLeft = pos.left - popoverWidth > ctnOfs.left
 
-        realHeight = pos.top + @target.height() + @popoverHeight
+        realHeight = pos.top + @target.height() + popoverHeight
         fitBottom = realHeight < ctnOfs.top + @container.height()
 
         if fitRight
