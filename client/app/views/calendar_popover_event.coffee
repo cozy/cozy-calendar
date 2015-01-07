@@ -46,7 +46,7 @@ module.exports = class EventPopOver extends PopoverView
         'click .input-allday':                   'toggleAllDay'
 
         'input .input-desc':                     'onSetDesc'
-        'input .input-place':                    (ev) -> @model.set 'place', ev.target.value
+        'input .input-place':                    'onSetPlace'
 
 
     initialize: (options) ->
@@ -68,12 +68,18 @@ module.exports = class EventPopOver extends PopoverView
         @addButton = @$ '.btn.add'
         @removeButton = @$ '.remove'
 
+        timepickerEvents =
+            'focus': ->
+                $(@).timepicker 'highlightHour'
+            'timepicker.next': ->
+                $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
+            'timepicker.prev': ->
+                $("[tabindex=#{+$(@).attr('tabindex') - 1}]").focus()
+
         @removeButton.hide() if @model.isNew()
         @$('input[type="time"]').attr('type', 'text')
                                 .timepicker defTimePickerOpts
-                                .on 'focus', -> $(@).timepicker 'highlightHour'
-                                .on 'timepicker.next', -> $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
-                                .on 'timepicker.prev', -> $("[tabindex=#{+$(@).attr('tabindex') - 1}]").focus()
+                                .delegate timepickerEvents
         @$('input[type="date"]').attr('type', 'text')
                                 .datetimepicker defDatePickerOps
         @$('[tabindex=1]').focus()
@@ -107,7 +113,7 @@ module.exports = class EventPopOver extends PopoverView
             allDay:      @model.isAllDay()
             start:       @model.getStartDateObject()
             end:         @model.getEndDateObject()
-                               .add((if @model.isAllDay() then -1 else 0), 'day')
+                               .add((if @model.isAllDay() then -1 else 0), 'd')
 
 
     onSetStart: ->
@@ -115,23 +121,33 @@ module.exports = class EventPopOver extends PopoverView
 
 
     onSetEnd: ->
-        @model.setEnd @formatDateTime @$('.input-end-time').val(), @$('.input-end-date').val()
+        @model.setEnd @formatDateTime @$('.input-end-time').val(),
+                                      @$('.input-end-date').val()
 
 
     toggleAllDay: ->
         isAllDay = @$('.input-allday').is ':checked'
 
+        @$('.timed').attr 'aria-hidden', isAllDay
+
         # NOTE: I'm not especially fan to set models logics in the view. Maybe
         # we should handle those kind of changes inside the model directly.
         start = @model.getStartDateObject()
         end = @model.getEndDateObject()
-        @$('.timed').attr 'aria-hidden', isAllDay
-        @model.set 'start', if isAllDay then start.format('YYYY-MM-DDD') else start.hour(12).toISOString()
-        @model.set 'end', if isAllDay then end.add(1, 'd').format('YYYY-MM-DDD') else start.hour(13).toISOString()
+        if isAllDay
+            @model.set 'start', start.format('YYYY-MM-DDD')
+            @model.set 'end', end.add(1, 'd').format('YYYY-MM-DDD')
+        else
+            @model.set 'start', start.hour(12).toISOString()
+            @model.set 'end', start.hour(13).toISOString()
 
 
     onSetDesc: (ev) ->
         @model.set 'description', ev.target.value
+
+
+    onSetPlace: (ev) ->
+        @model.set 'place', ev.target.value
 
 
     onAdvancedClicked: (event) =>
@@ -237,9 +253,19 @@ module.exports = class EventPopOver extends PopoverView
 
 
     refresh: ->
+        # We must apply a delta when an event is all-day long, because it starts
+        # one day, and finishes the day after (if its duration is one day). But
+        # we don't want to display the day afteras endDate, but the start day.
+        #
+        # e.g.: you set a all-day long event on 15/01/2015. The event starts at
+        # 15/01/2015 and finishes at 16/01/2015, but we want to display the
+        # event as starting and finishing on 15/01/2015.
+        delta = if @model.isAllDay() then -1 else 0
+        end = @model.getEndDateObject().add(delta, 'd')
+
         @$('.input-start').val @model.getStartDateObject().format(tFormat)
-        @$('.input-end-time').val @model.getEndDateObject().format(tFormat)
-        @$('.input-end-date').val @model.getEndDateObject().add((if @model.isAllDay() then -1 else 0), 'day').format(dFormat)
+        @$('.input-end-time').val end.format(tFormat)
+        @$('.input-end-date').val end.format(dFormat)
 
 
     handleError: (error) ->

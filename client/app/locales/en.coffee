@@ -124,9 +124,9 @@ module.exports =
     "save changes and invite guests"    : "Save changes and invite guests"
     "guests"                            : "Guests"
     "cancel Invitation"                 : "Cancel the invitation"
-    "from"                              : "From"
-    "to"                                : "to"
-    "all day, to"                       : "All day, to"
+    "From"                              : "From"
+    "To"                                : "To"
+    "All day, to"                       : "All day, to"
     'Reminders before the event'        : 'Reminders before the event'
     "reminder"                          : "Reminder"
 # CONFIRM MODAL
