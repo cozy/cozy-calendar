@@ -120,9 +120,9 @@ module.exports =
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
     "cancel Invitation"                 : "Annuler l'invitation"
-    "from"                              : "De"
-    "to"                                : "à"
-    "all day, to"                       : "Journée entière, jusqu'à"
+    "From"                              : "De"
+    "To"                                : "à"
+    "All day, to"                       : "Journée entière, jusqu'à"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
     "reminder"                          : "Rappel"
 
