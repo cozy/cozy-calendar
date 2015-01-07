@@ -124,11 +124,21 @@ module.exports = class EventPopOver extends PopoverView
         @model.setEnd @formatDateTime @$('.input-end-time').val(),
                                       @$('.input-end-date').val()
 
+        # We put or remove a top-level class on the popover body that target if
+        # the event is one day long or not
+        start = @model.getStartDateObject()
+        end = @model.getEndDateObject()
+        isSameDay = end.format(dFormat) == start.format(dFormat)
+        @$('.popover-content-wrapper').toggleClass 'is-same-day', isSameDay
+
 
     toggleAllDay: ->
         isAllDay = @$('.input-allday').is ':checked'
 
         @$('.timed').attr 'aria-hidden', isAllDay
+        @$('.popover-content-wrapper').toggleClass 'is-all-day', isAllDay
+        @$('.input-end-caption').text ->
+            t if isAllDay then 'All day, to' else 'To'
 
         # NOTE: I'm not especially fan to set models logics in the view. Maybe
         # we should handle those kind of changes inside the model directly.

@@ -1,4 +1,5 @@
-.popover-content-wrapper
+- var popoverClassName = (allDay ? 'is-all-day' : '')
+.popover-content-wrapper(class=popoverClassName)
     label.timed(aria-hidden="#{allDay}")
         span.caption= t("From")
         input.input-start.input-time(tabindex="4",
@@ -15,7 +16,7 @@
         span.caption= t('All day')
 
     label
-        span.caption= t("To")
+        span.input-end-caption.caption= t( allDay? "All day, to" : "To" )
         span.timed(aria-hidden="#{allDay}")
             input.input-end-time.input-time(tabindex="5",
                                             type="time",
