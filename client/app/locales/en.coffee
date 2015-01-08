@@ -123,7 +123,8 @@ module.exports =
     "cancel Invitation"                 : "Cancel the invitation"
     "From"                              : "From"
     "To"                                : "To"
-    "All day, to"                       : "All day, to"
+    "All day, until"                    : "All day, until"
+    "All one day"                       : "All day"
     'Reminders before the event'        : 'Reminders before the event'
     "reminder"                          : "Reminder"
 # CONFIRM MODAL

@@ -7,6 +7,7 @@ Event       = require 'models/event'
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
 inputDateDTPickerFormat = 'dd/mm/yyyy'
+allDayDateFieldFormat   = 'YYYY-MM-DDD'
 
 defTimePickerOpts       =
     template: false
@@ -65,8 +66,9 @@ module.exports = class EventPopOver extends PopoverView
 
 
     afterRender: ->
-        @addButton = @$ '.btn.add'
+        @addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
+        @$container   = @$ '.popover-content-wrapper'
 
         timepickerEvents =
             'focus': ->
@@ -94,6 +96,19 @@ module.exports = class EventPopOver extends PopoverView
         @refresh()
 
 
+    # Set captions contents, taking care of event state (all-day, same day, etc)
+    setCaptions: ->
+        @$('.input-end-caption').text =>
+            if @model.isAllDay()
+                if @model.isSameDay()
+                    str = 'All one day'
+                else
+                    str = 'All day, until'
+            else
+                str = 'To'
+            t str
+
+
     getTitle: ->
         if @model.isNew()
             title = "#{@type} creation"
@@ -111,6 +126,7 @@ module.exports = class EventPopOver extends PopoverView
             advancedUrl: "#{@parentView.getUrlHash()}/#{@model.id}"
             calendar:    @model.get('tags')?[0] or ''
             allDay:      @model.isAllDay()
+            sameDay:     @model.isSameDay()
             start:       @model.getStartDateObject()
             end:         @model.getEndDateObject()
                                .add((if @model.isAllDay() then -1 else 0), 'd')
@@ -126,30 +142,28 @@ module.exports = class EventPopOver extends PopoverView
 
         # We put or remove a top-level class on the popover body that target if
         # the event is one day long or not
-        start = @model.getStartDateObject()
-        end = @model.getEndDateObject()
-        isSameDay = end.format(dFormat) == start.format(dFormat)
-        @$('.popover-content-wrapper').toggleClass 'is-same-day', isSameDay
+        @$container.toggleClass 'is-same-day', @model.isSameDay()
+        @setCaptions()
 
 
     toggleAllDay: ->
-        isAllDay = @$('.input-allday').is ':checked'
-
-        @$('.timed').attr 'aria-hidden', isAllDay
-        @$('.popover-content-wrapper').toggleClass 'is-all-day', isAllDay
-        @$('.input-end-caption').text ->
-            t if isAllDay then 'All day, to' else 'To'
-
-        # NOTE: I'm not especially fan to set models logics in the view. Maybe
-        # we should handle those kind of changes inside the model directly.
+        # NOTE: I'm not especially fan to set models logics in the view.
+        #
+        # Maybe we should handle those kind of changes inside the model
+        # directly. Need to revamp the model event view also.
         start = @model.getStartDateObject()
         end = @model.getEndDateObject()
-        if isAllDay
-            @model.set 'start', start.format('YYYY-MM-DDD')
-            @model.set 'end', end.add(1, 'd').format('YYYY-MM-DDD')
+        if @$('.input-allday').is ':checked'
+            @model.set 'start', start.format(allDayDateFieldFormat)
+            @model.set 'end', end.add(1, 'd').format(allDayDateFieldFormat)
         else
             @model.set 'start', start.hour(12).toISOString()
             @model.set 'end', start.hour(13).toISOString()
+
+        # Set labels, captions and views states
+        @$('.timed').attr 'aria-hidden', @model.isAllDay()
+        @$container.toggleClass 'is-all-day', @model.isAllDay()
+        @setCaptions()
 
 
     onSetDesc: (ev) ->
