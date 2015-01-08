@@ -7,7 +7,7 @@ Event       = require 'models/event'
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
 inputDateDTPickerFormat = 'dd/mm/yyyy'
-allDayDateFieldFormat   = 'YYYY-MM-DDD'
+allDayDateFieldFormat   = 'YYYY-MM-DD'
 
 defTimePickerOpts       =
     template: false
