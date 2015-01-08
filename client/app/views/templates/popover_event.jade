@@ -7,7 +7,7 @@
         input.input-start.input-time(tabindex="4",
                                      type="time",
                                      size="5"
-                                     placeholder=t("From hours:minutes"),
+                                     placeholder=t("From [hours:minutes]"),
                                      value=start.format(tFormat))
 
     label.aside
@@ -22,15 +22,16 @@
         input.input-end-time.input-time(tabindex="5",
                                         type="time",
                                         size="5"
-                                        placeholder=t("To hours:minutes"),
+                                        placeholder=t("To [hours:minutes]"),
                                         value=end.format(tFormat))
     label.end-date
         span.caption
-            = allDay? t(sameDay? "All one day" : "All day, until") : " — "
+            = allDay? t(sameDay? "All one day" : "All day, until") : ","
+            |&nbsp;
         input.input-end-date.input-date(tabindex="6",
                                         type="date",
                                         size="10"
-                                        placeholder=t("To date"),
+                                        placeholder=t("To [date]"),
                                         value=end.format(dFormat))
 
 
