@@ -15,7 +15,6 @@ module.exports =
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'
-    'all day during'                    : 'Toute la journée pendant'
     "description"                       : "Description"
     "date"                              : "Date"
     "Day"                               : "Jour"
@@ -123,8 +122,8 @@ module.exports =
     "guests"                            : "Invités"
     "cancel Invitation"                 : "Annuler l'invitation"
     "From"                              : "De"
-    "To"                                : "à"
-    "All day, to"                       : "Journée entière, jusqu'à"
+    "To"                                : "À"
+    "All day, to"                       : "Journée entière, jusqu'au"
     'Reminders before the event'        : 'Rappels avant l\'évènement'
     "reminder"                          : "Rappel"
 
