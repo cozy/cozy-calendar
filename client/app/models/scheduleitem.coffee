@@ -37,6 +37,16 @@ module.exports = class ScheduleItem extends Backbone.Model
     isAllDay: ->
         @get(@startDateField)?.length is 10
 
+    # Returns a boolean, true if the start day and the end day are the same ones
+    # Compares endDate to startDate, and takes care of all-day-long event, in
+    # which case event ends at least one day after begin.
+    #
+    # @see https://tools.ietf.org/html/rfc5545#section-3.3.9
+    isSameDay: ->
+        endDate = if @isAllDay() then @getEndDateObject().add -1, 'd' else
+                                      @getEndDateObject()
+        endDate.isSame @getStartDateObject(), 'day'
+
     # Convert the date string from cozy, to moment with cozy's timezone.
     _toDateObject: (modelDateStr) ->
         if @isAllDay()
@@ -218,7 +228,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             return super method, model, options
 
     confirmSendEmails: (method, callback) ->
-        if @get 'import' # No mails on files import. 
+        if @get 'import' # No mails on files import.
             return callback false
 
         # Kind of changes which doesn't need mails.
