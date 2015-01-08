@@ -11,7 +11,7 @@
     }
   ],
   "engines": [
-    "node = 0.8.x"
+    "node = 0.10.x"
   ],
   "repository": {
     "type": "git",
@@ -60,6 +60,9 @@
     },
     "send mail from user": {
       "description": "Send invitations by mail"
+    },
+    "WebDAVAccount": {
+      "description": "Store webDAV password and sync informations"
     }
   }
 }

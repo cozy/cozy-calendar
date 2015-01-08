@@ -10903,6 +10903,13 @@ h3 {
   margin: 0;
   sharefont-weight: 10px;
 }
+#show-password,
+#hide-password {
+  margin-left: 5px;
+}
+#hide-password {
+  display: none;
+}
 body.error-404 {
   background: #fff;
 }

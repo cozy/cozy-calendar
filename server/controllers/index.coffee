@@ -4,21 +4,20 @@ Tag = require '../models/tag'
 Event = require '../models/event'
 Contact = require '../models/contact'
 User  = require '../models/user'
+WebDavAccount = require '../models/webdavaccount'
 
 module.exports.index = (req, res) ->
     async.parallel [
-        (cb) -> Contact.all (err, contacts) ->
-            return cb err if err
+        (done) -> Contact.all (err, contacts) ->
+            return done err if err
             for contact, index in contacts
                 contacts[index] = contact.asNameAndEmails()
-            cb null, contacts
+            done null, contacts
 
         Tag.all
         Event.all
-
-        (cb) -> CozyInstance.getLocale (err, locale) ->
-            console.log err if err
-            cb null, locale
+        CozyInstance.first
+        WebDavAccount.first
 
     ], (err, results) ->
 
@@ -27,13 +26,18 @@ module.exports.index = (req, res) ->
             stack : err.stack
         else
 
-            [contacts, tags, events, locale] = results
+            [contacts, tags, events, instance, webDavAccount] = results
+
+            locale = instance?.locale or 'en'
+            if webDavAccount?
+                webDavAccount.domain = instance?.domain or ''
 
             res.render 'index.jade', imports: """
                 window.locale = "#{locale}";
                 window.inittags = #{JSON.stringify tags};
                 window.initevents = #{JSON.stringify events};
                 window.initcontacts = #{JSON.stringify contacts};
+                window.webDavAccount = #{JSON.stringify webDavAccount};
             """
 
 module.exports.userTimezone = (req, res) ->
