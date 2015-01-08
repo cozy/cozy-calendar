@@ -58,8 +58,8 @@ input-color   = #555
 
     .controls
         position: absolute
-        top: 8px
-        right: 8px
+        top: 14px
+        right: 18px
 
         [role=button]
             display: block
@@ -69,7 +69,7 @@ input-color   = #555
             height: 14px
             line-height: 14px
             padding: 0
-            margin: 0 0 14px
+            margin: 0 0 22px
             cursor: pointer
 
         .close
@@ -78,19 +78,22 @@ input-color   = #555
 
 
 .popover-title
-    padding: 10px 0 5px
+    padding: 20px 0 10px
     background-color: white
     border-bottom: 1px solid overlay-color
     font-size: 18px
 
     .label
         width: 100%
-        padding: 0 24px 2px
+        padding: 0 44px
+
+    .label + .label
+        margin-top: 4px
 
     .calendar
         position: absolute
-        top: 14px    // vertical badge alignment with desc input
-        left: 8px
+        top: 24px    // vertical badge alignment with desc input
+        left: 20px
 
         .badge
             margin: 0
@@ -135,7 +138,7 @@ input-color   = #555
 
 
 .popover-content-wrapper
-    padding: 5px 15px
+    padding: 10px 20px
     overflow: hidden
 
     &.is-same-day .end-date
@@ -152,7 +155,7 @@ input-color   = #555
 
 
 .popover-footer
-    padding: 8px 10px
+    padding: 14px 20px
     background-color: overlay-color
     border-top: 1px solid #ddd;
     box-shadow: inset 0 1px 0 #ffffff;
