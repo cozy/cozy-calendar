@@ -98,14 +98,14 @@ module.exports = class EventPopOver extends PopoverView
 
     # Set captions contents, taking care of event state (all-day, same day, etc)
     setCaptions: ->
-        @$('.end-date .caption').text =>
+        @$('.end-date .caption').html =>
             if @model.isAllDay()
                 if @model.isSameDay()
                     str = 'All one day'
                 else
                     str = 'All day, until'
             else
-                str = ' — '
+                return ',&nbsp;'
             t str
 
 
