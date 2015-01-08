@@ -1180,6 +1180,7 @@ module.exports = Modal;
 
 ;require.register("lib/popover_view", function(exports, require, module) {
 var BaseView, PopoverView,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1189,6 +1190,7 @@ module.exports = PopoverView = (function(_super) {
   __extends(PopoverView, _super);
 
   function PopoverView() {
+    this.getDirection = __bind(this.getDirection, this);
     return PopoverView.__super__.constructor.apply(this, arguments);
   }
 
@@ -1222,27 +1224,33 @@ module.exports = PopoverView = (function(_super) {
       trigger: 'manual',
       title: this.titleTemplate(this.getRenderData()),
       html: true,
-      placement: this.getDirection(),
+      placement: this.getDirection,
       content: this.template(this.getRenderData()),
       container: this.container
     }).popover('show');
-    if ($(window).width() <= 500) {
-      $('.popover').css('top', 0);
-      $('.popover').css('left', 0);
-    }
     this.setElement($("#" + this.parentView.id + " .popover"));
+    if ($(window).width() <= 500) {
+      $('.popover').css({
+        top: 0,
+        left: 0
+      });
+    }
     this.afterRender();
     return this;
   };
 
-  PopoverView.prototype.getDirection = function() {
-    var ctnOfs, fitBottom, fitLeft, fitRight, pos, realHeight, realWidth;
+  PopoverView.prototype.getDirection = function(tip) {
+    var $tmp, ctnOfs, fitBottom, fitLeft, fitRight, popoverHeight, popoverWidth, pos, realHeight, realWidth;
+    $tmp = $(tip).clone().appendTo('body');
+    popoverWidth = $tmp.innerWidth();
+    popoverHeight = $tmp.innerHeight();
+    $tmp.remove();
     pos = this.target.offset();
     ctnOfs = this.container.offset();
-    realWidth = pos.left + this.target.width() + this.popoverWidth;
+    realWidth = pos.left + this.target.width() + popoverWidth;
     fitRight = realWidth < ctnOfs.left + this.container.width();
-    fitLeft = pos.left - this.popoverWidth > ctnOfs.left;
-    realHeight = pos.top + this.target.height() + this.popoverHeight;
+    fitLeft = pos.left - popoverWidth > ctnOfs.left;
+    realHeight = pos.top + this.target.height() + popoverHeight;
     fitBottom = realHeight < ctnOfs.top + this.container.height();
     if (fitRight) {
       return 'right';
@@ -1503,7 +1511,6 @@ module.exports = {
   "Place": "Place",
   'all day': 'all day',
   'All day': 'All day',
-  'all day during': 'All day during',
   "description": "Description",
   "date": "date",
   "Day": "Day",
@@ -1536,8 +1543,9 @@ module.exports = {
   "Create": "Create",
   "Events to import": "Events to import",
   "Create Event": "Create Event",
-  "From hours:minutes": "From hours:minutes",
-  "To hours:minutes+days": "To hours:minutes+days",
+  "From [hours:minutes]": "From [hours:minutes]",
+  "To [hours:minutes]": "To [hours:minutes]",
+  "To [date]": "To [date]",
   "Description": "Description",
   "days after": "days after",
   "days later": "days later",
@@ -1608,8 +1616,10 @@ module.exports = {
   "save changes and invite guests": "Save changes and invite guests",
   "guests": "Guests",
   "cancel Invitation": "Cancel the invitation",
-  "from": "From",
-  "to": "to",
+  "From": "From",
+  "To": "To",
+  "All day, until": "All day, until",
+  "All one day": "All day",
   'Reminders before the event': 'Reminders before the event',
   "reminder": "Reminder",
   'send mails question': 'Send a notification email to: ',
@@ -1699,7 +1709,6 @@ module.exports = {
   "Place": "Lieu",
   'all day': 'journée entière',
   'All day': 'Journée entière',
-  'all day during': 'Toute la journée pendant',
   "description": "Description",
   "date": "Date",
   "Day": "Jour",
@@ -1732,8 +1741,9 @@ module.exports = {
   "Create": "Créer",
   "Events to import": "Évènements à importer",
   "Create Event": "Créer un évènement",
-  "From hours:minutes": "De heures:minutes",
-  "To hours:minutes+days": "À heures:minutes+jours",
+  "From [hours:minutes]": "De [heure:minutes]",
+  "To [hours:minutes]": "À [heure:minutes]",
+  "To [date]": "À [date]",
   "Description": "Description",
   "days after": "jours plus tard",
   "days later": "jours plus tard",
@@ -1802,8 +1812,10 @@ module.exports = {
   "save changes and invite guests": "Enregistrer et envoyer les invitations",
   "guests": "Invités",
   "cancel Invitation": "Annuler l'invitation",
-  "from": "De",
-  "to": "à",
+  "From": "De",
+  "To": "À",
+  "All day, until": "Journée entière, jusqu'au",
+  "All one day": "Toute la journée du",
   'Reminders before the event': 'Rappels avant l\'évènement',
   "reminder": "Rappel",
   'send mails question': 'Envoyer un email de notification à : ',
@@ -2143,6 +2155,12 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.isAllDay = function() {
     var _ref;
     return ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
+  };
+
+  ScheduleItem.prototype.isSameDay = function() {
+    var endDate;
+    endDate = this.isAllDay() ? this.getEndDateObject().add(-1, 'd') : this.getEndDateObject();
+    return endDate.isSame(this.getStartDateObject(), 'day');
   };
 
   ScheduleItem.prototype._toDateObject = function(modelDateStr) {
@@ -2706,7 +2724,7 @@ module.exports = CalendarHeader = (function(_super) {
 });
 
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
-var ComboBox, Event, EventModal, EventPopOver, PopoverView, Toggle,
+var ComboBox, Event, EventModal, EventPopOver, PopoverView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2717,9 +2735,31 @@ EventModal = require('views/event_modal');
 
 ComboBox = require('views/widgets/combobox');
 
-Toggle = require('views/toggle');
-
 Event = require('models/event');
+
+tFormat = 'HH:mm';
+
+dFormat = 'DD/MM/YYYY';
+
+inputDateDTPickerFormat = 'dd/mm/yyyy';
+
+allDayDateFieldFormat = 'YYYY-MM-DD';
+
+defTimePickerOpts = {
+  template: false,
+  minuteStep: 5,
+  showMeridian: false
+};
+
+defDatePickerOps = {
+  language: window.app.locale,
+  autoclose: true,
+  pickerPosition: 'bottom-right',
+  keyboardNavigation: false,
+  format: inputDateDTPickerFormat,
+  minView: 2,
+  viewSelect: 4
+};
 
 module.exports = EventPopOver = (function(_super) {
   __extends(EventPopOver, _super);
@@ -2733,12 +2773,6 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.template = require('./templates/popover_event');
 
-  EventPopOver.prototype.dtFormat = "HH:mm";
-
-  EventPopOver.prototype.popoverWidth = 411;
-
-  EventPopOver.prototype.popoverHeight = 200;
-
   EventPopOver.prototype.events = {
     'keyup input': 'onKeyUp',
     'change select': 'onKeyUp',
@@ -2746,15 +2780,13 @@ module.exports = EventPopOver = (function(_super) {
     'click .add': 'onAddClicked',
     'click .advanced-link': 'onAdvancedClicked',
     'click .remove': 'onRemoveClicked',
-    'click #toggle-type': 'onTabClicked',
     'click .close': 'selfclose',
-    'changeTime.timepicker #input-start': 'onSetStart',
-    'changeTime.timepicker #input-end': 'onSetEnd',
-    'input #input-diff': 'onSetDiff',
-    'input #input-desc': 'onSetDesc',
-    'input #input-place': function(ev) {
-      return this.model.set('place', ev.target.value);
-    }
+    'changeTime.timepicker .input-start': 'onSetStart',
+    'changeTime.timepicker .input-end-time': 'onSetEnd',
+    'changeDate .input-end-date': 'onSetEnd',
+    'click .input-allday': 'toggleAllDay',
+    'input .input-desc': 'onSetDesc',
+    'input .input-place': 'onSetPlace'
   };
 
   EventPopOver.prototype.initialize = function(options) {
@@ -2772,42 +2804,29 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.afterRender = function() {
-    var inputDiff, inputEnd, inputStart;
+    var timepickerEvents;
     this.addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
+    this.$container = this.$('.popover-content-wrapper');
+    timepickerEvents = {
+      'focus': function() {
+        return $(this).timepicker('highlightHour');
+      },
+      'timepicker.next': function() {
+        return $("[tabindex=" + (+$(this).attr('tabindex') + 1) + "]").focus();
+      },
+      'timepicker.prev': function() {
+        return $("[tabindex=" + (+$(this).attr('tabindex') - 1) + "]").focus();
+      }
+    };
     if (this.model.isNew()) {
       this.removeButton.hide();
     }
-    this.$('input[type="time"]').attr('type', 'text').timepicker({
-      template: false,
-      minuteStep: 5,
-      showMeridian: false
-    });
-    this.$('.focused').focus();
-    if (!this.model.isAllDay()) {
-      inputEnd = this.$('#input-end');
-      inputStart = this.$('#input-start');
-      inputDiff = this.$('#input-diff');
-      inputStart.on('timepicker.next', function() {
-        return inputEnd.focus();
-      });
-      inputEnd.on('timepicker.next', function() {
-        return inputDiff.focus();
-      });
-      inputEnd.on('timepicker.prev', function() {
-        return inputStart.focus().timepicker('highlightMinute');
-      });
-      inputDiff.on('keydown', function(ev) {
-        if (ev.keyCode === 37) {
-          inputEnd.focus().timepicker('highlightMinute');
-        }
-        if (ev.keyCode === 39) {
-          return this.$('#input-desc').focus();
-        }
-      });
-    }
+    this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
+    this.$('input[type="date"]').attr('type', 'text').datetimepicker(defDatePickerOps);
+    this.$('[tabindex=1]').focus();
     this.calendar = new ComboBox({
-      el: this.$('#calendarcombo'),
+      el: this.$('.calendarcombo'),
       small: true,
       source: app.calendars.toAutoCompleteSource()
     });
@@ -2817,6 +2836,24 @@ module.exports = EventPopOver = (function(_super) {
       };
     })(this));
     return this.refresh();
+  };
+
+  EventPopOver.prototype.setCaptions = function() {
+    return this.$('.end-date .caption').html((function(_this) {
+      return function() {
+        var str;
+        if (_this.model.isAllDay()) {
+          if (_this.model.isSameDay()) {
+            str = 'All one day';
+          } else {
+            str = 'All day, until';
+          }
+        } else {
+          return ',&nbsp;';
+        }
+        return t(str);
+      };
+    })(this));
   };
 
   EventPopOver.prototype.getTitle = function() {
@@ -2831,33 +2868,51 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.getRenderData = function() {
     var data, _ref;
-    data = {
-      model: this.model,
-      dtFormat: this.dtFormat,
+    return data = _.extend({}, this.model.toJSON(), {
+      tFormat: tFormat,
+      dFormat: dFormat,
       editionMode: !this.model.isNew(),
-      advancedUrl: this.parentView.getUrlHash() + '/' + this.model.id,
-      calendar: ((_ref = this.model.attributes.tags) != null ? _ref[0] : void 0) || '',
-      allDay: this.model.isAllDay()
-    };
-    return data;
+      advancedUrl: "" + (this.parentView.getUrlHash()) + "/" + this.model.id,
+      calendar: ((_ref = this.model.get('tags')) != null ? _ref[0] : void 0) || '',
+      allDay: this.model.isAllDay(),
+      sameDay: this.model.isSameDay(),
+      start: this.model.getStartDateObject(),
+      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd')
+    });
   };
 
-  EventPopOver.prototype.onSetStart = function(ev) {
-    return this.model.setStart(this.formatDateTime(ev.time.value));
+  EventPopOver.prototype.onSetStart = function() {
+    return this.model.setStart(this.formatDateTime(this.$('.input-start').val()));
   };
 
-  EventPopOver.prototype.onSetEnd = function(ev) {
-    return this.model.setEnd(this.formatDateTime(ev.time.value));
+  EventPopOver.prototype.onSetEnd = function() {
+    this.model.setEnd(this.formatDateTime(this.$('.input-end-time').val(), this.$('.input-end-date').val()));
+    this.$container.toggleClass('is-same-day', this.model.isSameDay());
+    return this.setCaptions();
   };
 
-  EventPopOver.prototype.onSetDiff = function(ev) {
-    var diff;
-    diff = parseInt(ev.target.value);
-    return this.model.setDiff(diff);
+  EventPopOver.prototype.toggleAllDay = function() {
+    var end, start;
+    start = this.model.getStartDateObject();
+    end = this.model.getEndDateObject();
+    if (this.$('.input-allday').is(':checked')) {
+      this.model.set('start', start.format(allDayDateFieldFormat));
+      this.model.set('end', end.add(1, 'd').format(allDayDateFieldFormat));
+    } else {
+      this.model.set('start', start.hour(12).toISOString());
+      this.model.set('end', start.hour(13).toISOString());
+    }
+    this.$('.timed').attr('aria-hidden', this.model.isAllDay());
+    this.$container.toggleClass('is-all-day', this.model.isAllDay());
+    return this.setCaptions();
   };
 
   EventPopOver.prototype.onSetDesc = function(ev) {
     return this.model.set('description', ev.target.value);
+  };
+
+  EventPopOver.prototype.onSetPlace = function(ev) {
+    return this.model.set('place', ev.target.value);
   };
 
   EventPopOver.prototype.onAdvancedClicked = function(event) {
@@ -2887,16 +2942,35 @@ module.exports = EventPopOver = (function(_super) {
     }
   };
 
-  EventPopOver.prototype.formatDateTime = function(dtStr) {
-    var setObj, splitted;
-    splitted = dtStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
-    if (splitted && splitted[0]) {
-      setObj = {
-        hour: splitted[1],
-        minute: splitted[2]
-      };
-      return setObj;
+  EventPopOver.prototype.formatDateTime = function(timeStr, dateStr) {
+    var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
+    if (timeStr == null) {
+      timeStr = '';
     }
+    if (dateStr == null) {
+      dateStr = '';
+    }
+    t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
+    d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
+    if (t != null ? t[0] : void 0) {
+      _ref = t.slice(1, 3), hour = _ref[0], minute = _ref[1];
+    }
+    if (d != null ? d[0] : void 0) {
+      _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
+    }
+    if (date && this.model.isAllDay()) {
+      date = +date + 1;
+    }
+    if (month) {
+      month = +month - 1;
+    }
+    return setObj = {
+      hour: hour,
+      minute: minute,
+      date: date,
+      month: month,
+      year: year
+    };
   };
 
   EventPopOver.prototype.onRemoveClicked = function() {
@@ -2988,28 +3062,28 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.refresh = function() {
-    this.$('#input-start').val(this.model.getStartDateObject().format(this.dtFormat));
-    this.$('#input-end').val(this.model.getEndDateObject().format(this.dtFormat));
-    return this.$('#input-diff').val(this.model.getDiff());
+    var delta, end;
+    delta = this.model.isAllDay() ? -1 : 0;
+    end = this.model.getEndDateObject().add(delta, 'd');
+    this.$('.input-start').val(this.model.getStartDateObject().format(tFormat));
+    this.$('.input-end-time').val(end.format(tFormat));
+    return this.$('.input-end-date').val(end.format(dFormat));
   };
 
   EventPopOver.prototype.handleError = function(error) {
     var alertMsg, guiltyFields;
     switch (error.field) {
       case 'description':
-        guiltyFields = '#input-desc';
+        guiltyFields = '.input-desc';
         break;
       case 'startdate':
-        guiltyFields = '#input-start';
+        guiltyFields = '.input-start';
         break;
       case 'enddate':
-        guiltyFields = '#input-end';
-        break;
-      case 'triggdate':
-        guiltyFields = '#input-time';
+        guiltyFields = '.input-end-time, .input-end-date';
         break;
       case 'date':
-        guiltyFields = '#input-start, #input-end';
+        guiltyFields = '.input-start, .input-end-time, .input-end-date';
     }
     this.$(guiltyFields).css('border-color', 'red');
     this.$(guiltyFields).focus();
@@ -5309,17 +5383,10 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),allDay = locals_.allDay,model = locals_.model,dtFormat = locals_.dtFormat,advancedUrl = locals_.advancedUrl;
-buf.push("<div class=\"line\">");
-if ( allDay)
-{
-buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t('all day during')) ? "" : jade_interp)) + "</span><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"1\" min=\"1\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days')) ? "" : jade_interp)) + "</span>");
-}
-else
-{
-buf.push("<span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input id=\"input-start\" type=\"time\"" + (jade.attr("placeholder", t("From hours:minutes"), true, false)) + (jade.attr("value", model.getStartDateObject().format(dtFormat), true, false)) + " class=\"focused input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input id=\"input-end\" type=\"time\"" + (jade.attr("placeholder", t("To hours:minutes+days"), true, false)) + (jade.attr("value", model.getEndDateObject().format(dtFormat), true, false)) + " class=\"input-mini\"/><span>&nbsp;</span><input id=\"input-diff\" type=\"number\"" + (jade.attr("value", model.getDiff(), true, false)) + " placeholder=\"0\" min=\"0\" class=\"col-xs2 input-mini\"/><span>&nbsp;</span><span class=\"timeseparator\">" + (jade.escape(null == (jade_interp = ' ' + t('days later')) ? "" : jade_interp)) + "</span>");
-}
-buf.push("</div><div class=\"line\"><input id=\"input-desc\" type=\"text\"" + (jade.attr("value", model.get("description"), true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input\"/><input id=\"input-place\" type=\"text\"" + (jade.attr("value", model.get("place"), true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-small\"/></div><div class=\"popover-footer line\"><a" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><span>&nbsp;</span><a class=\"btn add\">" + (jade.escape(null == (jade_interp = model.isNew() ? t('Create') : t('Edit')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,start = locals_.start,tFormat = locals_.tFormat,end = locals_.end,dFormat = locals_.dFormat,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
+popoverClassName  = (allDay ? ' is-all-day' : '')
+popoverClassName += (sameDay? ' is-same-day' : '')
+buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : ",") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5337,8 +5404,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar;
-buf.push("<input id=\"calendarcombo\"" + (jade.attr("value", calendar, true, false)) + "/><button" + (jade.attr("title", t('close'), true, false)) + " class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"remove icon-trash\"></i>");;return buf.join("");
+var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
+buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i></span>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

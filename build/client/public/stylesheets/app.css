@@ -9302,6 +9302,9 @@ a:hover,
 a:visited:hover {
   text-decoration: underline;
 }
+[aria-hidden=true] {
+  display: none !important;
+}
 body.modal-open,
 .modal-open .navbar-fixed-top,
 .modal-open .navbar-fixed-bottom {
@@ -9347,7 +9350,8 @@ a:focus,
   background: #34a6ff;
   color: #fff;
 }
-.btn:hover {
+.btn:hover,
+.btn:focus {
   background: #fe8800;
   color: #fff;
   border-color: #fe8800;
@@ -9518,8 +9522,10 @@ textarea:active {
   z-index: 1200;
 }
 .combobox-badge {
-  padding: 0px 4px;
   margin-right: 5px;
+  padding: 0;
+  width: 1em;
+  height: 1em;
 }
 .surrounded-combobox .combobox {
   padding-left: 20px;
@@ -9892,6 +9898,9 @@ a:hover,
 a:visited:hover {
   text-decoration: underline;
 }
+[aria-hidden=true] {
+  display: none !important;
+}
 body.modal-open,
 .modal-open .navbar-fixed-top,
 .modal-open .navbar-fixed-bottom {
@@ -9937,7 +9946,8 @@ a:focus,
   background: #34a6ff;
   color: #fff;
 }
-.btn:hover {
+.btn:hover,
+.btn:focus {
   background: #fe8800;
   color: #fff;
   border-color: #fe8800;
@@ -9996,8 +10006,10 @@ input[type="time"] {
   z-index: 1200;
 }
 .combobox-badge {
-  padding: 0px 4px;
   margin-right: 5px;
+  padding: 0;
+  width: 1em;
+  height: 1em;
 }
 .surrounded-combobox .combobox {
   padding-left: 20px;
@@ -10198,164 +10210,183 @@ input[type="time"] {
   }
 }
 .popover {
-  max-width: none;
   width: 400px;
-}
-.popover .timeseparator {
-  display: inline-block;
-  margin-bottom: 10px;
-  vertical-align: middle;
-}
-.popover .popover-title {
-  font-weight: bold;
-}
-.popover .popover-title button {
-  margin-top: -4px;
-  height: 20px;
-}
-.popover .popover-title a {
-  font-weight: normal;
-  font-size: 0.8em;
-  cursor: pointer;
-}
-.popover .popover-title .remove {
-  float: right;
-  margin-right: 20px;
-  margin-top: -2px;
-  display: inline-block;
-  cursor: pointer;
-}
-.popover .popover-title #calendarcombo {
-  -webkit-transition: 0s;
-  -moz-transition: 0s;
-  -o-transition: 0s;
-  -ms-transition: 0s;
-  transition: 0s;
-  display: inline-block;
-  border-color: transparent;
-  width: 1px;
-  height: 1em;
-  overflow: hidden;
-  visibility: hidden;
-}
-.popover .popover-title #calendarcombo.expanded {
-  -webkit-transition: 0.1s;
-  -moz-transition: 0.1s;
-  -o-transition: 0.1s;
-  -ms-transition: 0.1s;
-  transition: 0.1s;
-  width: 132px;
-  border-width: 1px;
-  visibility: visible;
-}
-.popover .popover-content {
-  font-family: styled;
+  max-width: none;
   padding: 0;
-}
-.popover .popover-content .line:first-child {
-  padding-bottom: 0px;
-}
-.popover .popover-content .line {
-  padding: 10px;
-}
-.popover .popover-content a.advanced-link {
-  margin-left: 10px;
-}
-.popover .popover-content .popover-footer {
-  text-align: right;
-  background: #f5f5f5;
-  padding: 5px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
-.popover .popover-content .nav-tabs li a {
-  font-size: 16px;
-  cursor: pointer;
-}
-.popover .popover-content .nav-tabs li a:hover {
-  background: #ffc47f;
-  color: #333;
-}
-.popover .popover-content .nav-tabs li.active a:hover {
-  background: #fff;
-  color: #333;
-}
-.popover .popover-content #input-start,
-.popover .popover-content #input-end,
-.popover .popover-content #input-time {
-  width: 3em;
-}
-.popover .popover-content #input-diff {
-  width: 35px;
-}
-.popover .popover-content #input-place {
-  min-width: 120px;
-}
-.popover .popover-content #showmap {
-  position: relative;
-  display: inline-block;
-  top: -5px;
-  left: -20px;
-  padding: 0px 1px 1px 0px;
-  -webkit-border-radius: 10px;
-  border-radius: 10px;
-}
-.popover .popover-content .badge {
-  margin-bottom: 10px;
-  margin-left: 5px;
-  line-height: 20px;
-  vertical-align: middle;
-  cursor: pointer;
-}
-.popover .popover-content .badge i {
-  margin-top: 0px;
-}
-.popover .popover-content .badge:hover {
-  background: #fe8800;
-}
-.popover .popover-content #toggle-type,
-.popover .popover-content i.remove {
-  cursor: pointer;
-  margin: 5px 0px 0px 5px;
-}
-.popover .popover-content button {
-  margin-left: 5px;
-}
-.popover .popover-content button.disabled {
-  border: 1px solid #aaa;
-}
-.popover .popover-content button.disabled:hover {
-  background: #e6e6e6;
-  color: #333;
-}
-.popover .popover-content p {
-  font-size: 12px;
-  margin-left: 5px;
-}
-.popover .popover-content a {
-  font-size: 12px;
-}
-.popover input,
-.popover select,
-.popover textarea {
   font-family: styled;
-  margin-left: 5px;
+}
+.popover label,
+.popover .label {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 5px 0 0;
+  background-color: transparent;
+  border: medium none;
+}
+.popover input {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0px;
+  border: 1px solid #fff;
   -webkit-border-radius: 0;
   border-radius: 0;
-  -webkit-box-shadow: 0;
-  box-shadow: 0;
-  border: 1px solid transparent;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
 }
-.popover input:hover,
-.popover select:hover {
+.popover input:hover {
   border: 1px solid #fe8800;
 }
-.popover input:active,
-.popover select:active,
-.popover input:focus,
-.popover select:focus {
-  -webkit-box-shadow: none;
-  box-shadow: none;
+.popover input:focus {
+  border: 1px solid #34a6ff;
+}
+.popover input[type=text] {
+  width: 100%;
+  height: 1.8em;
+}
+.popover input[type=text].input-time {
+  width: 4em;
+  text-align: right;
+}
+.popover input[type=text].input-date {
+  width: 8em;
+}
+.popover .controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.popover .controls [role=button] {
+  display: block;
+  float: right;
+  clear: right;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  padding: 0;
+  margin: 0 0 14px;
+  cursor: pointer;
+}
+.popover .controls .close {
+  color: #333;
+  opacity: 0.7;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+  filter: alpha(opacity=70);
+}
+.popover-title {
+  padding: 10px 0 5px;
+  background-color: #fff;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 18px;
+}
+.popover-title .label {
+  width: 100%;
+  padding: 0 24px 2px;
+}
+.popover-title .calendar {
+  position: absolute;
+  top: 14px;
+  left: 8px;
+}
+.popover-title .calendar .badge {
+  margin: 0;
+}
+.popover-title .calendar .calendarcombo {
+  display: none;
+}
+.popover-title .calendar .calendarcombo.expanded {
+  display: inline-block;
+  margin-left: 5px;
+}
+.popover-title .input-desc {
+  font-size: 1.4em;
+}
+.popover-content {
+  padding: 0;
+}
+.popover-content label {
+  float: left;
+  clear: left;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-align: baseline;
+  -moz-box-align: baseline;
+  -o-box-align: baseline;
+  -ms-flex-align: baseline;
+  -webkit-align-items: baseline;
+  align-items: baseline;
+}
+.popover-content .caption {
+  display: inline-block;
+  min-width: 3em;
+}
+.popover-content .input-allday {
+  margin-right: 5px;
+}
+.popover-content .aside {
+  float: right;
+  clear: none;
+}
+.popover-content .end-date {
+  clear: none;
+}
+.popover-content .end-date .caption {
+  min-width: inherit;
+}
+.popover-content-wrapper {
+  padding: 5px 15px;
+  overflow: hidden;
+}
+.popover-content-wrapper.is-same-day .end-date,
+.popover-content-wrapper.is-same-day .end-date input {
+  color: #c5c5c5;
+}
+.popover-content-wrapper.is-same-day .end-date:hover,
+.popover-content-wrapper.is-same-day .end-date input:hover,
+.popover-content-wrapper.is-same-day .end-date:focus,
+.popover-content-wrapper.is-same-day .end-date input:focus {
+  color: #555;
+}
+.popover-content-wrapper.is-all-day .end-date,
+.popover-content-wrapper.is-all-day .end-date input {
+  color: #555;
+}
+.popover-footer {
+  padding: 8px 10px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+  -webkit-box-shadow: inset 0 1px 0 #fff;
+  box-shadow: inset 0 1px 0 #fff;
+  -webkit-border-radius: 0 0 5px 5px;
+  border-radius: 0 0 5px 5px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-pack: end;
+  -moz-box-pack: end;
+  -o-box-pack: end;
+  -ms-flex-pack: end;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+  -webkit-box-align: baseline;
+  -moz-box-align: baseline;
+  -o-box-align: baseline;
+  -ms-flex-align: baseline;
+  -webkit-align-items: baseline;
+  align-items: baseline;
+}
+.popover-footer [role=button] {
+  margin-left: 1em;
+  font-size: 0.85em;
 }
 .fc-button-prev,
 .fc-button-next,
@@ -10601,27 +10632,7 @@ td.fc-widget-header {
 a.btn:visited {
   color: #fff;
 }
-.popover {
-  padding: 0;
-}
-.popover-title {
-  color: #fff;
-  background-color: #fff;
-  color: #333;
-  border: 0;
-  font-family: styled;
-  font-size: 18px;
-  margin-top: 5px;
-}
-.popover-title .close {
-  color: #333;
-  opacity: 0.7;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
-  filter: alpha(opacity=70);
-}
-.popover-content input,
 #add-alarm input,
-.popover-content select,
 #add-alarm select {
   border: 1px solid #ccc;
   -webkit-box-shadow: 0;
@@ -10631,13 +10642,10 @@ a.btn:visited {
   shadow: none;
   font-family: styled, helvetica;
 }
-.popover-content input.disabled,
 #add-alarm input.disabled {
   border: 1px solid transparent;
 }
-.popover-content input:hover,
 #add-alarm input:hover,
-.popover-content select:hover,
 #add-alarm select:hover {
   border: 1px solid #fe8800;
   -webkit-border-radius: 0px;
@@ -10645,48 +10653,37 @@ a.btn:visited {
   shadow: inset 1px 1px 2px rgba(100,100,100,0.1);
   color: #333;
 }
-.popover-content input:focus,
 #add-alarm input:focus,
-.popover-content input:active,
 #add-alarm input:active,
-.popover-content select:active,
 #add-alarm select:active,
-.popover-content select:focus,
 #add-alarm select:focus {
   border: 1px solid #34a6ff;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.popover-content .add-on,
 #add-alarm .add-on {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
-.popover-content .datepicker td.day:hover,
 #add-alarm .datepicker td.day:hover {
   background: #ffc47f;
 }
-.popover-content .bootstrap-timepicker-widget table td a:hover,
 #add-alarm .bootstrap-timepicker-widget table td a:hover {
   background: #ffc47f;
   border: 1px solid transparent;
 }
-.popover-content #alarm-description-input,
 #add-alarm #alarm-description-input {
   font-size: 24px;
   line-height: 40px;
   height: 40px;
 }
-.popover-content button.add-alarm.disabled,
 #add-alarm button.add-alarm.disabled {
   border: 1px solid #aaa;
 }
-.popover-content button.add-alarm,
 #add-alarm button.add-alarm {
   float: left;
   margin-top: 10px;
 }
-.popover-content button.cancel,
 #add-alarm button.cancel {
   margin-left: 5px;
   margin-top: 10px;
