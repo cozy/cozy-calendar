@@ -9,7 +9,8 @@
  */
 overlay-color = #F5F5F5
 opacity-color = #C5C5C5
-icon-color = #333
+icon-color    = #333
+input-color   = #555
 
 /**
  * Styles for the calendar popover (event and alarm creation/edition)
@@ -77,7 +78,7 @@ icon-color = #333
 
 
 .popover-title
-    padding: 5px 0
+    padding: 10px 0 5px
     background-color: white
     border-bottom: 1px solid overlay-color
     font-size: 18px
@@ -114,35 +115,44 @@ icon-color = #333
         display: flex
         align-items: baseline
 
-        &.aside
-            float: right
-            clear: none
-
     .caption
         display: inline-block
         min-width: 3em
 
+    // Specific rules for elements
     .input-allday
         margin-right: 5px
 
+    .aside
+            float: right
+            clear: none
+
+    .end-date
+        clear: none
+
+        .caption
+            min-width: inherit
+
 
 .popover-content-wrapper
-    padding: 5px 10px 0
+    padding: 5px 10px
     overflow: hidden
 
-    &.is-same-day .input-end-date
+    &.is-same-day .end-date
+    &.is-same-day .end-date input
         color: opacity-color
 
         &:hover
         &:focus
-            color: #555
+            color: input-color
 
-    &.is-all-day .input-end-date
-        color: #555
+    &.is-all-day .end-date
+    &.is-all-day .end-date input
+        color: input-color
 
 
 .popover-footer
-    padding: 5px
+    padding: 10px
     background-color: overlay-color
     border-radius: 0 0 5px 5px
     display: flex

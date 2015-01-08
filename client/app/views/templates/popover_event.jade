@@ -17,24 +17,28 @@
                            checked=allDay)
         span.caption= t('All day')
 
-    label
-        span.input-end-caption.caption
-            = t( allDay? sameDay? "All one day" : "All day, until" : "To" )
-        span.timed(aria-hidden="#{allDay}")
-            input.input-end-time.input-time(tabindex="5",
-                                            type="time",
-                                            size="5"
-                                            placeholder=t("To hours:minutes"),
-                                            value=end.format(tFormat))
-            |,
-        span
-            input.input-end-date.input-date(tabindex="6",
-                                            type="date",
-                                            size="10"
-                                            placeholder=t("To date"),
-                                            value=end.format(dFormat))
+    label.timed(aria-hidden="#{allDay}")
+        span.input-end-caption.caption= t("To")
+        input.input-end-time.input-time(tabindex="5",
+                                        type="time",
+                                        size="5"
+                                        placeholder=t("To hours:minutes"),
+                                        value=end.format(tFormat))
+    label.end-date
+        span.caption
+            = allDay? t(sameDay? "All one day" : "All day, until") : " — "
+        input.input-end-date.input-date(tabindex="6",
+                                        type="date",
+                                        size="10"
+                                        placeholder=t("To date"),
+                                        value=end.format(dFormat))
 
 
 .popover-footer
-    a.advanced-link(role="button", href='#'+advancedUrl)= t('advanced')
-    a.btn.add(role="button")= editionMode ? t('Edit') : t('Create')
+    a.advanced-link(role="button",
+                    tabindex="8"
+                    href='#'+advancedUrl)
+        = t('advanced')
+    a.btn.add(role="button",
+              tabindex="7")
+        = editionMode ? t('Edit') : t('Create')
