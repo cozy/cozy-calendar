@@ -31,7 +31,7 @@ module.exports = class EventPopOver extends PopoverView
 
 
     events:
-        'keyup input':                           'onKeyUp'
+        'keyup':                                 'onKeyUp'
         'change select':                         'onKeyUp'
         'change input':                          'onKeyUp'
 
@@ -138,7 +138,7 @@ module.exports = class EventPopOver extends PopoverView
     # Loop over controls elements w/o exiting the popover scope
     onTab: (ev) =>
         # Early return if the key pressed isn't `tab` (keyCode == 9)
-        return unless ev.keyCode == 9
+        return unless ev.keyCode is 9
         # Find if the element has an explicit next/prev control, and if it fits
         # w/ loop direction (forward/backward over controls)
         $this = $(ev.target)
