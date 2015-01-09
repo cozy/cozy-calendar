@@ -112,7 +112,6 @@ module.exports =
 
 # MODAL
     "summary"                           : "Summary"
-    "place"                             : "Place"
     "start"                             : "Start"
     "end"                               : "End"
     "tags"                              : "Tags"
