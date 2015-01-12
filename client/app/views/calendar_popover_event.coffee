@@ -31,7 +31,7 @@ module.exports = class EventPopOver extends PopoverView
 
 
     events:
-        'keyup input':                           'onKeyUp'
+        'keyup':                                 'onKeyUp'
         'change select':                         'onKeyUp'
         'change input':                          'onKeyUp'
 
@@ -48,6 +48,9 @@ module.exports = class EventPopOver extends PopoverView
 
         'input .input-desc':                     'onSetDesc'
         'input .input-place':                    'onSetPlace'
+
+        'keydown [data-tabindex-next]':          'onTab'
+        'keydown [data-tabindex-prev]':          'onTab'
 
 
     initialize: (options) ->
@@ -130,6 +133,26 @@ module.exports = class EventPopOver extends PopoverView
             start:       @model.getStartDateObject()
             end:         @model.getEndDateObject()
                                .add((if @model.isAllDay() then -1 else 0), 'd')
+
+
+    # Loop over controls elements w/o exiting the popover scope
+    onTab: (ev) =>
+        # Early return if the key pressed isn't `tab` (keyCode == 9)
+        return unless ev.keyCode is 9
+        # Find if the element has an explicit next/prev control, and if it fits
+        # w/ loop direction (forward/backward over controls)
+        $this = $(ev.target)
+        if not ev.shiftKey and $this.is '[data-tabindex-next]'
+            index = $this.data 'tabindex-next'
+        if ev.shiftKey and $this.is '[data-tabindex-prev]'
+            index = $this.data 'tabindex-prev'
+        # Early return if no index is found
+        return unless index
+        # Set focus to the targetted element and prevent focusing to fix the
+        # overlooping effect (directly jump to the next/prev element rather than
+        # the declared one)
+        @$("[tabindex=#{index}]").focus()
+        ev.preventDefault()
 
 
     onSetStart: ->

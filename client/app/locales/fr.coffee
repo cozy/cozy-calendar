@@ -110,7 +110,6 @@ module.exports =
 
 # MODAL
     "summary"                           : "Titre"
-    "place"                             : "Endroit"
     "start"                             : "Début"
     "end"                               : "Fin"
     "tags"                              : "Tags"

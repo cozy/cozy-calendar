@@ -37,8 +37,9 @@
 
 .popover-footer
     a.advanced-link(role="button",
-                    tabindex="8"
-                    href='#'+advancedUrl)
+                    tabindex="8",
+                    href='#'+advancedUrl,
+                    data-tabindex-next="1")
         = t('advanced')
     a.btn.add(role="button",
               tabindex="7")
