@@ -13,13 +13,13 @@ module.exports = class ListView extends ViewCollection
     events:
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
-    
+
     afterRender: ->
         @calHeader = new Header()
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
-        
+
         @$('#list-container').scroll @checkScroll
         @keepScreenFull()
         @collection.on 'reset', @keepScreenFull
@@ -32,7 +32,23 @@ module.exports = class ListView extends ViewCollection
         if index is 0 then @$(@collectionEl).prepend el
         else
             prevCid = @collection.at(index-1).cid
-            @views[prevCid].$el.after el
+            if prevCid of @views
+                @views[prevCid].$el.after el
+            else # previous not present, insert in place
+                prevView = _.values(@views).reduce (previous, current) ->
+                    dCurrent = view.model.get('date').diff current.model.date
+                    if dCurrent < 0
+                        return previous
+
+                    else if previous?
+                        dPrevious = view.model.get('date').diff previous.model.date
+                        return if dCurrent < dPrevious then current else previous
+                    else
+                        return current
+                if prevView?
+                    prevView.$el.after el
+                else
+                    @$(@collectionEl).prepend el
 
     keepScreenFull: =>
         list = @$('#list-container')[0]

@@ -198,6 +198,17 @@ module.exports = class ScheduleItem extends Backbone.Model
                (edo.isAfter(start) and edo.isBefore(end)) or \
                (sdo.isBefore(start) and edo.isAfter(end)))
 
+    getLastOccurenceDate: ->
+        if @isRecurrent()
+            options = RRule.parseString @get 'rrule'
+            if options.until?
+                return moment options.until
+            else
+                # arbitrary big value
+                return moment().add 10, 'years'
+        else
+            return @getStartDateObject()
+
     toPunctualFullCalendarEvent : ->
         return @_toFullCalendarEvent @getStartDateObject(), @getEndDateObject()
 

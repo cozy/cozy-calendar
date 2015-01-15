@@ -14,17 +14,33 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @listenTo @baseCollection, 'remove', @resetFromBase
         @listenTo @baseCollection, 'reset', @resetFromBase
 
-    resetFromBase: ->
-        @reset []
-        @trigger 'reset'
+        #init @ with coming week.
+        today = moment()
+        @firstDate = today
+        @lastDate = today.clone().add 1, 'week'
 
-    generateRealEvents: (start, end, callback) ->
-        callback = callback or ->
+        @_initializeGenerator()
+
+
+    _initializeGenerator: ->
+        @previousRecuringEvents = []
+        @runningRecuringEvents = []
+
+        @firstGeneratedEvent = null
+        @lastGeneratedEvent = null
+
         eventsInRange = []
-        @baseCollection.each (item) =>
+        start = @firstDate.clone()
+        end = @lastDate.clone()
 
-            calendar = item.getCalendar()
-            return null if calendar and calendar.get('visible') is false
+        i = 0
+        while i < @baseCollection.length
+            item = @baseCollection.at i
+            i++
+
+            if item.getStartDateObject().isAfter end
+                @lastGeneratedEvent = item
+                break
 
             if item.isRecurrent()
                 evs = item.generateRecurrentInstancesBetween start, end, \
@@ -32,49 +48,118 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
                     return new RealEvent event, s, e
                 eventsInRange = eventsInRange.concat evs
 
+                if item.getStartDateObject().isBefore start
+                    @previousRecuringEvents.push item
+
+                if item.getLastOccurenceDate().isAfter end
+                    @runningRecuringEvents.push item
+
+
             else if item.isInRange start, end
+                # initialize firstGeneratedEvent
+                if firstGeneratedEvent is null
+                    firstGeneratedEvent = item
                 eventsInRange.push new RealEvent item
 
         @add eventsInRange
-        callback eventsInRange
 
-    # Try to load (generate) at least 'count' events, 
-    # in the future or the past (forward)
-    _loadEventsCount: (eventCount, forward, callback) ->
-        count = 0
-        start = @at(if forward then @length - 1 else 0)?.start
-        start = if start then start.clone() else moment()
-        boundary = start.clone().add (if forward then 1 else -1), 'years'
+    resetFromBase: ->
+        @reset []
+        @_initializeGenerator()
+        @trigger 'reset'
 
-        async.whilst (
-            ->
-                if count > eventCount
-                    return false
 
-                else if forward
-                    return start.isBefore boundary
-                else 
-                    return start.isAfter boundary
-            ),
-            ((cb) =>
-                if forward
-                    periodStart = start.clone()
-                    periodEnd = start.add 1, 'month'
-                else
-                    periodEnd = start.clone()
-                    periodStart = start.add -1, 'month'
-
-                @generateRealEvents periodStart, periodEnd, (events) ->
-                    count += events.length
-                    cb()
-            ),
-            (err) ->
-                callback err
 
     loadNextPage: (callback) ->
         callback = callback or ->
-        @_loadEventsCount 10, true, callback
+
+        eventsInRange = []
+        start = @lastDate.clone()
+        @lastDate.add 1, 'month'
+        end = @lastDate.clone()
+
+        # pic ponctual event and store newly found recurring ones.
+        i = @baseCollection.indexOf @lastGeneratedEvent
+        while i >= 0 and i < @baseCollection.length
+            item = @baseCollection.at i
+            i++
+
+            # End loop conditions
+            if item.getStartDateObject().isAfter end
+                @lastGeneratedEvent = item
+                break
+
+            else if i is @baseCollection.length
+                @lastGeneratedEvent = null
+
+            if item.isRecurrent()
+                @runningRecuringEvents.push item
+
+            else
+                eventsInRange.push new RealEvent item
+
+        # generated recurring events.
+        @runningRecuringEvents.forEach (item, index) =>
+            evs = item.generateRecurrentInstancesBetween start, end, \
+                (event, s, e) ->
+                    return new RealEvent event, s, e
+                eventsInRange = eventsInRange.concat evs
+
+            # Remove out of next scope recurring events.
+            if item.getLastOccurenceDate().isBefore end
+                @runningRecuringEvents.splice index, 1
+
+        # No more events condition :
+        #   @runningRecuringEvents.length is 0 and @lastGeneratedEvent is null
+
+        @add eventsInRange
+
+        callback()
 
     loadPreviousPage: (callback) ->
         callback = callback or ->
-        @_loadEventsCount 10, false, callback
+
+        eventsInRange = []
+        end = @firstDate.clone()
+        @firstDate.add -1, 'month'
+        start = @firstDate.clone()
+
+        # pick ponctual events
+        i = @baseCollection.indexOf @firstGeneratedEvent
+        while i >= 0
+            item = @baseCollection.at i
+            i--
+
+            # End loop condition.
+            if item.getStartDateObject().isBefore start
+                @firstGeneratedEvent = item
+                break
+            else if i is 0
+                @firstGeneratedEvent = null
+
+            # pick ponctual events.
+            if not item.isRecurrent()
+                eventsInRange.push new RealEvent item
+
+        # generated recurring events.
+        @previousRecuringEvents.forEach (item, index) =>
+            # Skip not yet in period recurring events.
+            if item.getLastOccurenceDate().isBefore start
+                return
+            # Remove out of scope recurring events.
+            if item.getStartDateObject().isAfter end
+                @previousRecuringEvents.splice index, 1
+                return
+
+            # else: generate realevents
+            evs = item.generateRecurrentInstancesBetween start, end, \
+                (event, s, e) ->
+                    return new RealEvent event, s, e
+                eventsInRange = eventsInRange.concat evs
+
+        # No more events condition :
+        #   @runningRecuringEvents.length is 0 and @lastGeneratedEvent is null
+
+        @add eventsInRange
+
+        callback()
