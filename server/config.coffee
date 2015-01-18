@@ -20,10 +20,11 @@ module.exports =
             staticMiddleware
             publicStatic
             americano.bodyParser keepExtensions: true
-            americano.errorHandler
+        ]
+        afterStart: (app, server) ->
+            app.use americano.errorHandler
                 dumpExceptions: true
                 showStack: true
-        ]
         set:
             views: './client'
 
@@ -36,5 +37,5 @@ module.exports =
     ]
 
     plugins: [
-        'americano-cozy'
+        'cozydb'
     ]

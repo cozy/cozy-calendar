@@ -1,4 +1,4 @@
-americano = require 'americano-cozy'
+cozydb = require 'cozydb'
 async = require 'async'
 moment = require 'moment-timezone'
 Event = require './event'
@@ -9,21 +9,17 @@ User = require './user'
 
 # Alarm should be interpreted as VTODO + VALARM iCal objects.
 # with DTSTART <-> trigg ; DURATION = 0 ; TRIGGER = 0 .
-module.exports = Alarm = americano.getModel 'Alarm',
+module.exports = Alarm = cozydb.getModel 'Alarm',
     action : type : String, default: 'DISPLAY' # One of DISPLAY, EMAIL, BOTH.
     trigg : type : String # DT to trigger at.
         # As UTC if ponctual. If recurent, to interpret in @timezone.
     description : type : String
     timezone : type : String # Timezone of trigg time (if recurent)
     rrule : type : String # recurring rule.
-    tags : type : (x) -> x # DAMN IT JUGGLING
+    tags : type : cozydb.NoSchema # DAMN IT JUGGLING
     related : type : String, default: null
     created     : type: String
     lastModification: type: String
-
-
-Alarm.all = (params, callback) ->
-    Alarm.request "all", params, callback
 
 Alarm.tags = (callback) ->
     Alarm.rawRequest "tags", group: true, (err, results) ->

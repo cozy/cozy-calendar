@@ -1,15 +1,9 @@
-americano = require 'americano-cozy'
+cozydb = require 'cozydb'
 
-module.exports = User = americano.getModel 'User',
+module.exports = cozydb = americano.getModel 'User',
     email    : type : String
     timezone : type : String, default: "Europe/Paris"
 
-
-User.all = (callback) ->
-    User.request "all", callback
-
-User.destroyAll = (callback) ->
-    User.requestDestroy "all", callback
 
 User.getUser = (callback) ->
     User.all (err, users) ->

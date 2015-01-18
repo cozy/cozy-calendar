@@ -21,7 +21,7 @@
   "dependencies": {
     "jade": "0.27.6",
     "americano": "0.3.5",
-    "americano-cozy": "0.2.6",
+    "cozydb": "0.0.1",
     "async": "0.9.0",
     "cozy-realtime-adapter": "0.11.3",
     "printit": "0.1.3",

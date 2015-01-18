@@ -7,8 +7,7 @@ log = require('printit')
 
 Event = require '../models/event'
 CozyInstance = require '../models/cozy_instance'
-try CozyAdapter = require 'americano-cozy/node_modules/jugglingdb-cozy-adapter'
-catch e then CozyAdapter = require 'jugglingdb-cozy-adapter'
+CozyAdapter = require 'cozydb'
 
 localization = require '../libs/localization_manager'
 

@@ -1,6 +1,6 @@
-americano = require 'americano-cozy'
+cozydb = require 'cozydb'
 
-module.exports = Contact = americano.getModel 'Contact',
+module.exports = Contact = cozydb.getModel 'Contact',
     fn            : String
     n             : String
     datapoints    : [Object]
