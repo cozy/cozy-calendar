@@ -16,7 +16,7 @@ module.exports = Alarm = cozydb.getModel 'Alarm',
     description : type : String
     timezone : type : String # Timezone of trigg time (if recurent)
     rrule : type : String # recurring rule.
-    tags : type : cozydb.NoSchema # DAMN IT JUGGLING
+    tags : type : [String]
     related : type : String, default: null
     created     : type: String
     lastModification: type: String

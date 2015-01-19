@@ -1,6 +1,6 @@
 cozydb = require 'cozydb'
 
-module.exports = cozydb = americano.getModel 'User',
+module.exports = User = cozydb.getModel 'User',
     email    : type : String
     timezone : type : String, default: "Europe/Paris"
 
