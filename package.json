@@ -27,7 +27,8 @@
     "printit": "0.1.3",
     "moment-timezone": "0.2.2",
     "cozy-ical": "1.1.4",
-    "node-polyglot": "0.4.1"
+    "node-polyglot": "0.4.1",
+    "multiparty": "4.1.1"
   },
   "devDependencies": {
     "should": "4.1.0",
