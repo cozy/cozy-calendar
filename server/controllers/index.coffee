@@ -14,10 +14,10 @@ module.exports.index = (req, res) ->
                 contacts[index] = contact.asNameAndEmails()
             done null, contacts
 
-        Tag.all
-        Event.all
-        CozyInstance.first
-        WebDavAccount.first
+        (cb) -> Tag.all cb
+        (cb) -> Event.all cb
+        (cb) -> CozyInstance.first cb
+        (cb) -> WebDavAccount.first cb
 
     ], (err, results) ->
 
