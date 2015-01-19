@@ -28,6 +28,10 @@ module.exports =
         set:
             views: './client'
 
+        engine:
+            js: (path, locales, callback) ->
+                callback null, require(path)(locales)
+
     development: [
         americano.logger 'dev'
     ]

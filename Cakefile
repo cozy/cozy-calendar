@@ -76,6 +76,17 @@ task "lint", "Run Coffeelint", ->
         else
             logger.info stdout
 
+buildJade = ->
+    jade = require 'jade'
+    jadeFile = new RegExp '\.jade$'
+    for file in fs.readdirSync './client/'when jadeFile.test file
+        filename = "./client/#{file}"
+        template = fs.readFileSync filename, 'utf8'
+        output = "var jade = require('jade/runtime');\n"
+        output += "module.exports = " + jade.compileClient template, {filename}
+        name = file.replace '.jade', '.js'
+        fs.writeFileSync "./build/client/#{name}", output
+
 task 'build', 'Build CoffeeScript to Javascript', ->
     logger.options.prefix = 'cake:build'
     logger.info "Start compilation..."
@@ -89,12 +100,12 @@ task 'build', 'Build CoffeeScript to Javascript', ->
               "cp server/mails/en/*.jade build/server/mails/en/ && " + \
               "rm -rf build/client && mkdir build/client && " + \
               "coffee -cb --output build/client/app/locales client/app/locales && " + \
-              "cp -R client/*.jade build/client/ && " + \
               "cp -R client/public build/client/"
     exec command, (err, stdout, stderr) ->
         if err
             logger.error "An error has occurred while compiling:\n" + err
             process.exit 1
         else
+            buildJade()
             logger.info "Compilation succeeded."
             process.exit 0
