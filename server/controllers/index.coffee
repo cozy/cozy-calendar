@@ -1,9 +1,9 @@
 async = require 'async'
-CozyInstance = require '../models/cozy_instance'
 Tag = require '../models/tag'
 Event = require '../models/event'
 Contact = require '../models/contact'
 User  = require '../models/user'
+cozydb = require 'cozydb'
 WebDavAccount = require '../models/webdavaccount'
 
 module.exports.index = (req, res) ->
@@ -16,7 +16,7 @@ module.exports.index = (req, res) ->
 
         (cb) -> Tag.all cb
         (cb) -> Event.all cb
-        (cb) -> CozyInstance.first cb
+        (cb) -> cozydb.api.getCozyInstance cb
         (cb) -> WebDavAccount.first cb
 
     ], (err, results) ->

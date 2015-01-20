@@ -1,7 +1,7 @@
 jade = require 'jade'
 fs = require 'fs'
 Polyglot = require 'node-polyglot'
-Instance = require '../models/cozy_instance'
+cozydb = require 'cozydb'
 
 # Seeks the proper locale files, depending if we run from build/ or from sources
 path = require 'path'
@@ -23,7 +23,7 @@ class LocalizationManager
             callback null, @polyglot
 
     retrieveLocale: (callback) ->
-        Instance.getLocale (err, locale) ->
+        cozydb.api.getCozyLocale (err, locale) ->
             if err? or not locale then locale = 'en' # default value
             callback err, locale
 

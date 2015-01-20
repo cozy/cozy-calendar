@@ -4,7 +4,6 @@ moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
 
-User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'

@@ -1,6 +1,5 @@
 ical = require 'cozy-ical'
 Event = require '../models/event'
-User = require  '../models/user'
 multiparty = require 'multiparty'
 fs = require 'fs'
 

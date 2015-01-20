@@ -1,5 +1,7 @@
 Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
+ds = new Client "http://localhost:9101/"
+ds.setBasicAuth process.env.NAME, process.env.TOKEN
 
 module.exports = helpers = {}
 
@@ -11,24 +13,28 @@ else
 Event = require "#{helpers.prefix}server/models/event"
 User  = require "#{helpers.prefix}server/models/user"
 
+userID = null
+
 helpers.before = (done) ->
     @timeout 10000
     start = require "#{helpers.prefix}server"
     start 8888, (err, app, server) =>
         @server = server
         data =
+            docType: 'User'
             email: 'test@cozycloud.cc'
             password: 'password'
             timezone: 'Europe/Paris'
-        User.create data, (err) ->
+        ds.post '/data/', data, (err, response, body) ->
             return done err if err
+            userID = body._id
             # wait a little for User.timezone to be updated through Realtime
             setTimeout done, 1000
 
 helpers.after = (done) ->
     @server.close()
     helpers.cleanDb ->
-        User.destroyAll done
+        ds.del "/data/#{userID}/", done
 
 # Remove all the alarms
 helpers.cleanDb = (callback) ->

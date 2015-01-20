@@ -24,13 +24,7 @@ module.exports =
         tags      : tagsView
         byCalendar: cozydb.defaultRequests.by 'tags[0]'
 
-    user:
-        all       : cozydb.defaultRequests.by 'title'
-
     contact:
-        all       : cozydb.defaultRequests.all
-
-    cozy_instance:
         all       : cozydb.defaultRequests.all
 
     webdavaccount:

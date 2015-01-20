@@ -1,22 +1,10 @@
 cozydb = require 'cozydb'
 
-module.exports = User = cozydb.getModel 'User',
-    email    : type : String
-    timezone : type : String, default: "Europe/Paris"
-
-
-User.getUser = (callback) ->
-    User.all (err, users) ->
-        if err
-            callback err
-        else if users.length is 0
-            callback new Error 'no user'
-        else
-            callback null, users[0]
+module.exports = User = {}
 
 User.updateUser = (callback) ->
-    User.getUser (err, user) ->
-        if err
+    cozydb.api.getCozyUser (err, user) ->
+        if err or not user
             console.log err
             User.timezone = 'Europe/Paris'
             User.email = ''
