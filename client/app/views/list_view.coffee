@@ -21,9 +21,16 @@ module.exports = class ListView extends ViewCollection
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
 
         @$('#list-container').scroll @checkScroll
-        @keepScreenFull()
-        @collection.on 'reset', @keepScreenFull
+
+        @collection.on 'reset', =>
+            @$('.showafter').show()
+            @$('.showbefore').show()
+            @lastAlreadyLoaded = false
+            @keepScreenFull()
+
         super
+
+        @keepScreenFull()
 
     appendView: (view) ->
         index = @collection.indexOf view.model
@@ -52,8 +59,8 @@ module.exports = class ListView extends ViewCollection
 
     keepScreenFull: =>
         list = @$('#list-container')[0]
-        if list.scrollHeight <= list.clientHeight
-            @loadAfter()
+        if list.scrollHeight <= @el.clientHeight
+            @loadAfter @keepScreenFull # infinite loop end by @lastAlreadyLoaded
 
     checkScroll: =>
         triggerPoint = 100 # 100px from the bottom
@@ -61,14 +68,38 @@ module.exports = class ListView extends ViewCollection
         if list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight
             @loadAfter()
 
-    loadBefore: ->
+    loadBefore: (callback)->
         if not @isLoading
             @isLoading = true
-            @collection.loadPreviousPage =>
-                @isLoading = false
+            button = @$('.showbefore')
+            button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+            button.spin 'tiny'
+            setTimeout =>
+                    @collection.loadPreviousPage (noMoreEvents) =>
+                        if noMoreEvents
+                            button.hide()
+                        button.html t('display previous events')
+                        button.spin 'none'
+                        @isLoading = false
+                        callback?()
+                , 1
 
-    loadAfter: ->
-        if not @isLoading
+    loadAfter: (callback) ->
+        if not @isLoading and not @lastAlreadyLoaded
             @isLoading = true
-            @collection.loadNextPage =>
-                @isLoading = false
+            button = @$('.showafter')
+            button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+            button.spin 'tiny'
+
+            setTimeout =>
+                @collection.loadNextPage (noMoreEvents) =>
+                    if noMoreEvents
+                        @lastAlreadyLoaded = true
+                        button.hide()
+
+                    button.html t('display next events')
+                    button.spin 'none'
+                    @isLoading = false
+                    callback?()
+
+                , 1

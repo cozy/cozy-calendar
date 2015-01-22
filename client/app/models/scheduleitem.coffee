@@ -34,6 +34,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         else
             return @getDefaultColor()
 
+    isVisible: ->
+        return @getCalendar()?.get 'visible'
+
     isAllDay: ->
         @get(@startDateField)?.length is 10
 

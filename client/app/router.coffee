@@ -56,7 +56,6 @@ module.exports = class Router extends Backbone.Router
     list: ->
         @displayView new ListView
             collection: new DayBucketCollection()
-            # collection: new RealEventCollection()
         app.menu.activate 'calendar'
         @onCalendar = true
 
