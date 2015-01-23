@@ -63,10 +63,10 @@ module.exports = class ListView extends ViewCollection
             @loadAfter @keepScreenFull # infinite loop end by @lastAlreadyLoaded
 
     checkScroll: =>
-        triggerPoint = 100 # 100px from the bottom
+        triggerPoint = 150 # 100px from the bottom
         list = @$('#list-container')[0]
         if list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight
-            @loadAfter()
+            @loadAfter @checkScroll
 
     loadBefore: (callback)->
         if not @isLoading
