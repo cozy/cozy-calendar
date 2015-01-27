@@ -74,6 +74,8 @@ module.exports = class ListView extends ViewCollection
             button = @$('.showbefore')
             button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
             button.spin 'tiny'
+            # make asynchronous to allow the spinner to show up, before heavy
+            # call on loadPreviousPage block the UI for à while.
             setTimeout =>
                     @collection.loadPreviousPage (noMoreEvents) =>
                         if noMoreEvents
@@ -90,7 +92,8 @@ module.exports = class ListView extends ViewCollection
             button = @$('.showafter')
             button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
             button.spin 'tiny'
-
+            # make asynchronous to allow the spinner to show up, before heavy
+            # call on loadNextPage block the UI for à while.
             setTimeout =>
                 @collection.loadNextPage (noMoreEvents) =>
                     if noMoreEvents

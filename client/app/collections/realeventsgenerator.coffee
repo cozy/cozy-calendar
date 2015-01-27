@@ -39,7 +39,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             if not item.isVisible() then continue
 
             # break loop condition
-            if item.getStartDateObject().isAfter today
+            if item.getStartDateObject().isAfter(today)
                 @firstGeneratedEvent = item
                 @lastGeneratedEvent = item
                 break
@@ -47,7 +47,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             if item.isRecurrent()
                 @previousRecurringEvents.push item
 
-                if item.getLastOccurenceDate().isAfter today
+                if item.getLastOccurenceDate().isAfter(today)
                     @runningReccuringEvents.push item
 
         @loadNextPage()
@@ -72,38 +72,30 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @lastDate.add 1, 'month'
         end = @lastDate.clone()
 
-        # pic ponctual event and store newly found recurring ones.
+        # pick ponctual event and store newly found recurring ones.
         i = @baseCollection.indexOf @lastGeneratedEvent
-        while i >= 0 and i < @baseCollection.length
-            item = @baseCollection.at i
-            i++
-
-            if not item.isVisible() then continue
-
-            # End loop conditions
-            if item.getStartDateObject().isAfter end
-                @lastGeneratedEvent = item
-                break
-
-            if item.isRecurrent()
-                @runningReccuringEvents.push item
-
-            else
-                eventsInRange.push new RealEvent item
-
-        # if we reach end of the list
-        if i is @baseCollection.length
-            @lastGeneratedEvent = null
+        @lastGeneratedEvent = null # reset, before finding the new one.
+        unless i is -1
+            while i < @baseCollection.length and @lastGeneratedEvent is null
+                item = @baseCollection. at i
+                i++
+                unless item.isVisible() then continue
+                # else if item.getStartDateObject().isAfter(end)
+                #     @lastGeneratedEvent = item # end loop condition
+                else if item.isRecurrent()
+                    @runningRecurringEvents.push item
+                else
+                    eventsInRange.push new RealEvent(item)
 
         # generated recurring events.
         @runningReccuringEvents.forEach (item, index) =>
             evs = item.generateRecurrentInstancesBetween start, end, \
-                (event, s, e) ->
-                    return new RealEvent event, s, e
+                (event, instanceStart, instanceEnd) ->
+                    return new RealEvent event, instanceStart, instanceEnd
                 eventsInRange = eventsInRange.concat evs
 
             # Remove out of next scope recurring events.
-            if item.getLastOccurenceDate().isBefore end
+            if item.getLastOccurenceDate().isBefore(end)
                 @runningReccuringEvents.splice index, 1
 
 
@@ -124,41 +116,33 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @firstDate.add -1, 'month'
         start = @firstDate.clone()
 
-        # pick ponctual events
-        i = @baseCollection.indexOf @firstGeneratedEvent
-        while i >= 0
+    # pick ponctual event and store newly found recurring ones.
+        i = @baseCollection.indexOf @firsGeneratedEvent
+        @firstGeneratedEvent = null # reset, before finding the new one.
+        while i >= 0 and @firstGeneratedEvent is null
             item = @baseCollection.at i
             i--
 
-            if not item.isVisible() then continue
-
-            # End loop condition.
-            if item.getStartDateObject().isBefore start
-                @firstGeneratedEvent = item
-                break
-
-            # pick ponctual events.
-            if not item.isRecurrent()
+            unless item.isVisible() then continue
+            else if item.getStartDateObject().isBefore(start)
+                @firstGeneratedEvent = item # end loop condition
+            else unless item.isRecurrent() # pick ponctual events.
                 eventsInRange.push new RealEvent item
-
-        # if we reach start of the list
-        if i < 0
-            @firstGeneratedEvent = null
 
         # generated recurring events.
         @previousRecurringEvents.forEach (item, index) =>
             # Skip not yet in period recurring events.
-            if item.getLastOccurenceDate().isBefore start
+            if item.getLastOccurenceDate().isBefore(start)
                 return
             # Remove out of scope recurring events.
-            if item.getStartDateObject().isAfter end
+            if item.getStartDateObject().isAfter(end)
                 @previousRecurringEvents.splice index, 1
                 return
 
             # else: generate realevents
             evs = item.generateRecurrentInstancesBetween start, end, \
-                (event, s, e) ->
-                    return new RealEvent event, s, e
+                (event, instanceStart, instanceEnd) ->
+                    return new RealEvent event, instanceStart, instanceEnd
                 eventsInRange = eventsInRange.concat evs
 
         @add eventsInRange

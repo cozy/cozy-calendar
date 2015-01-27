@@ -29,7 +29,9 @@ module.exports = class MenuItemView extends BaseView
         unless app.router.onCalendar
             app.router.navigate 'calendar', true
         @startSpinner()
-        setTimeout => # async, to allow spinner to show up.
+        # make asynchronous to allow the spinner to show up, before make.set
+        # and it's heavy load events chain block the UI for à while.
+        setTimeout =>
                 @model.set 'visible', not @model.get 'visible'
                 @stopSpinner()
                 @render()
