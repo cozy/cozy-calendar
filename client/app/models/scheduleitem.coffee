@@ -34,6 +34,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         else
             return @getDefaultColor()
 
+    isVisible: ->
+        return @getCalendar()?.get 'visible'
+
     isAllDay: ->
         @get(@startDateField)?.length is 10
 
@@ -197,6 +200,17 @@ module.exports = class ScheduleItem extends Backbone.Model
         return ((sdo.isAfter(start) and sdo.isBefore(end)) or \
                (edo.isAfter(start) and edo.isBefore(end)) or \
                (sdo.isBefore(start) and edo.isAfter(end)))
+
+    getLastOccurenceDate: ->
+        if @isRecurrent()
+            options = RRule.parseString @get 'rrule'
+            if options.until?
+                return moment options.until
+            else
+                # arbitrary big value
+                return moment().add 10, 'years'
+        else
+            return @getStartDateObject()
 
     toPunctualFullCalendarEvent : ->
         return @_toFullCalendarEvent @getStartDateObject(), @getEndDateObject()

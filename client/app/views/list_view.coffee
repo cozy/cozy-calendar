@@ -13,17 +13,24 @@ module.exports = class ListView extends ViewCollection
     events:
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
-    
+
     afterRender: ->
         @calHeader = new Header()
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
         @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
-        
+
         @$('#list-container').scroll @checkScroll
-        @keepScreenFull()
-        @collection.on 'reset', @keepScreenFull
+
+        @collection.on 'reset', =>
+            @$('.showafter').show()
+            @$('.showbefore').show()
+            @lastAlreadyLoaded = false
+            @keepScreenFull()
+
         super
+
+        @keepScreenFull()
 
     appendView: (view) ->
         index = @collection.indexOf view.model
@@ -32,27 +39,70 @@ module.exports = class ListView extends ViewCollection
         if index is 0 then @$(@collectionEl).prepend el
         else
             prevCid = @collection.at(index-1).cid
-            @views[prevCid].$el.after el
+            if prevCid of @views
+                @views[prevCid].$el.after el
+            else # previous not present, insert in place
+                prevView = _.values(@views).reduce (previous, current) ->
+                    dCurrent = view.model.get('date').diff current.model.date
+                    if dCurrent < 0
+                        return previous
+
+                    else if previous?
+                        dPrevious = view.model.get('date').diff previous.model.date
+                        return if dCurrent < dPrevious then current else previous
+                    else
+                        return current
+                if prevView?
+                    prevView.$el.after el
+                else
+                    @$(@collectionEl).prepend el
 
     keepScreenFull: =>
         list = @$('#list-container')[0]
-        if list.scrollHeight <= list.clientHeight
-            @loadAfter()
+        if list.scrollHeight <= @el.clientHeight
+            @loadAfter @keepScreenFull # infinite loop end by @lastAlreadyLoaded
 
     checkScroll: =>
-        triggerPoint = 100 # 100px from the bottom
+        triggerPoint = 150 # 100px from the bottom
         list = @$('#list-container')[0]
         if list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight
-            @loadAfter()
+            @loadAfter @checkScroll
 
-    loadBefore: ->
+    loadBefore: (callback)->
         if not @isLoading
             @isLoading = true
-            @collection.loadPreviousPage =>
-                @isLoading = false
+            button = @$('.showbefore')
+            button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+            button.spin 'tiny'
+            # make asynchronous to allow the spinner to show up, before heavy
+            # call on loadPreviousPage block the UI for à while.
+            setTimeout =>
+                    @collection.loadPreviousPage (noMoreEvents) =>
+                        if noMoreEvents
+                            button.hide()
+                        button.html t('display previous events')
+                        button.spin 'none'
+                        @isLoading = false
+                        callback?()
+                , 1
 
-    loadAfter: ->
-        if not @isLoading
+    loadAfter: (callback) ->
+        if not @isLoading and not @lastAlreadyLoaded
             @isLoading = true
-            @collection.loadNextPage =>
-                @isLoading = false
+            button = @$('.showafter')
+            button.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+            button.spin 'tiny'
+            # make asynchronous to allow the spinner to show up, before heavy
+            # call on loadNextPage block the UI for à while.
+            setTimeout =>
+                @collection.loadNextPage (noMoreEvents) =>
+                    if noMoreEvents
+                        @lastAlreadyLoaded = true
+                        button.hide()
+
+                    button.html t('display next events')
+                    button.spin 'none'
+                    @isLoading = false
+                    callback?()
+
+                , 1

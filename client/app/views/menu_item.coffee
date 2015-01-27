@@ -17,17 +17,25 @@ module.exports = class MenuItemView extends BaseView
         'click .calendar-color': 'showColorPicker'
         'change .color-picker': 'setColor'
 
-    toggleVisible: ->
-        unless app.router.onCalendar
-            app.router.navigate 'calendar', true
-        @model.set 'visible', not @model.get 'visible'
-        @render()
+
 
     getRenderData: ->
         label: @model.get 'name'
 
     afterRender: ->
         @buildBadge @model.get 'color'
+
+    toggleVisible: ->
+        unless app.router.onCalendar
+            app.router.navigate 'calendar', true
+        @startSpinner()
+        # make asynchronous to allow the spinner to show up, before make.set
+        # and it's heavy load events chain block the UI for à while.
+        setTimeout =>
+                @model.set 'visible', not @model.get 'visible'
+                @stopSpinner()
+                @render()
+            , 1
 
     showColorPicker: (ev) ->
         ev?.stopPropagation() # avoid dropdown auto close.
@@ -39,7 +47,7 @@ module.exports = class MenuItemView extends BaseView
         @colorPicker = @$('.color-picker')
         @colorPicker.tinycolorpicker()
         @$('.track').attr 'style', 'display: block;'
-    
+
     hideColorPicker: =>
         @$('.color-picker').hide()
         @$('.calendar-color').show()
