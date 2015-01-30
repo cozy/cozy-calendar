@@ -215,6 +215,10 @@ module.exports = class EventPopOver extends PopoverView
         if event.keyCode is 13 or event.which is 13 #ENTER
             # Forces the combobox to blur to save the calendar if it has changed
             @calendar.onBlur()
+            # Update start and end too.
+            @onSetStart()
+            @onSetEnd()
+
             @addButton.click()
         else if event.keyCode is 27 # ESC
             @selfclose()
