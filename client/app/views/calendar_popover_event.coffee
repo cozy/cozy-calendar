@@ -310,8 +310,8 @@ module.exports = class EventPopOver extends PopoverView
         delta = if @model.isAllDay() then -1 else 0
         end = @model.getEndDateObject().add(delta, 'd')
 
-        @$('.input-start').val @model.getStartDateObject().format(tFormat)
-        @$('.input-end-time').val end.format(tFormat)
+        @$('.input-start').timepicker 'setTime', @model.getStartDateObject().format(tFormat), true, true
+        @$('.input-end-time').timepicker 'setTime', end.format(tFormat), true, true
         @$('.input-end-date').val end.format(dFormat)
 
 
