@@ -109,7 +109,6 @@ module.exports = {
   "times": "times",
   "weekday": "weekday",
   "summary": "Summary",
-  "place": "Place",
   "start": "Start",
   "end": "End",
   "tags": "Tags",

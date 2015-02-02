@@ -396,12 +396,10 @@ module.exports = DayBucketCollection = (function(_super) {
 
   DayBucketCollection.prototype.initialize = function() {
     this.eventCollection = new RealEventGeneratorCollection();
-    this.calendarsCollection = app.calendars;
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
     this.listenTo(this.eventCollection, 'change:start', this.onBaseCollectionChange);
     this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
     this.listenTo(this.eventCollection, 'reset', this.resetFromBase);
-    this.listenTo(this.calendarsCollection, 'change', this.resetFromBase);
     return this.resetFromBase();
   };
 
@@ -432,12 +430,8 @@ module.exports = DayBucketCollection = (function(_super) {
   };
 
   DayBucketCollection.prototype.onBaseCollectionAdd = function(model) {
-    var bucket, calendar;
+    var bucket;
     bucket = this.get(model.getDateHash());
-    calendar = model.getCalendar();
-    if (calendar && calendar.get('visible') === false) {
-      return null;
-    }
     if (!bucket) {
       this.add(bucket = new DayBucket(model));
     }
@@ -545,81 +539,138 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
     this.listenTo(this.baseCollection, 'add', this.resetFromBase);
     this.listenTo(this.baseCollection, 'change:start', this.resetFromBase);
     this.listenTo(this.baseCollection, 'remove', this.resetFromBase);
-    return this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
+    this.listenTo(this.baseCollection, 'reset', this.resetFromBase);
+    this.listenTo(app.calendars, 'change', function() {
+      return this.resetFromBase(true);
+    });
+    return this._initializeGenerator();
   };
 
-  RealEventGeneratorCollection.prototype.resetFromBase = function() {
-    this.reset([]);
-    return this.trigger('reset');
+  RealEventGeneratorCollection.prototype._initializeGenerator = function() {
+    var i, item, today;
+    this.previousRecurringEvents = [];
+    this.runningReccuringEvents = [];
+    this.firstGeneratedEvent = this.baseCollection.at(this.baseCollection.length - 1);
+    this.lastGeneratedEvent = null;
+    today = moment().startOf('day');
+    this.firstDate = today.clone();
+    this.lastDate = today.clone();
+    i = 0;
+    while (i < this.baseCollection.length) {
+      item = this.baseCollection.at(i);
+      i++;
+      if (!item.isVisible()) {
+        continue;
+      }
+      if (item.getStartDateObject().isAfter(today)) {
+        this.firstGeneratedEvent = item;
+        this.lastGeneratedEvent = item;
+        break;
+      }
+      if (item.isRecurrent()) {
+        this.previousRecurringEvents.push(item);
+        if (item.getLastOccurenceDate().isAfter(today)) {
+          this.runningReccuringEvents.push(item);
+        }
+      }
+    }
+    return this.loadNextPage();
   };
 
-  RealEventGeneratorCollection.prototype.generateRealEvents = function(start, end, callback) {
-    var eventsInRange;
+  RealEventGeneratorCollection.prototype.resetFromBase = function(sync) {
+    var resetProc;
+    resetProc = (function(_this) {
+      return function() {
+        _this.reset([]);
+        _this._initializeGenerator();
+        return _this.trigger('reset');
+      };
+    })(this);
+    if (sync) {
+      return resetProc();
+    } else {
+      return setTimeout(resetProc, 1);
+    }
+  };
+
+  RealEventGeneratorCollection.prototype.loadNextPage = function(callback) {
+    var end, eventsInRange, i, item, noEventsRemaining, start;
     callback = callback || function() {};
     eventsInRange = [];
-    this.baseCollection.each((function(_this) {
-      return function(item) {
-        var calendar, evs;
-        calendar = item.getCalendar();
-        if (calendar && calendar.get('visible') === false) {
-          return null;
+    start = this.lastDate.clone();
+    this.lastDate.add(1, 'month');
+    end = this.lastDate.clone();
+    i = this.baseCollection.indexOf(this.lastGeneratedEvent);
+    this.lastGeneratedEvent = null;
+    if (i !== -1) {
+      while (i < this.baseCollection.length && this.lastGeneratedEvent === null) {
+        item = this.baseCollection.at(i);
+        i++;
+        if (!item.isVisible()) {
+          continue;
+        } else if (item.isRecurrent()) {
+          this.runningRecurringEvents.push(item);
+        } else {
+          eventsInRange.push(new RealEvent(item));
         }
-        if (item.isRecurrent()) {
-          evs = item.generateRecurrentInstancesBetween(start, end, function(event, s, e) {
-            return new RealEvent(event, s, e);
-          });
-          return eventsInRange = eventsInRange.concat(evs);
-        } else if (item.isInRange(start, end)) {
-          return eventsInRange.push(new RealEvent(item));
+      }
+    }
+    this.runningReccuringEvents.forEach((function(_this) {
+      return function(item, index) {
+        var evs;
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
+          return new RealEvent(event, instanceStart, instanceEnd);
+        });
+        eventsInRange = eventsInRange.concat(evs);
+        if (item.getLastOccurenceDate().isBefore(end)) {
+          return _this.runningReccuringEvents.splice(index, 1);
         }
       };
     })(this));
     this.add(eventsInRange);
-    return callback(eventsInRange);
-  };
-
-  RealEventGeneratorCollection.prototype._loadEventsCount = function(eventCount, forward, callback) {
-    var boundary, count, start, _ref;
-    count = 0;
-    start = (_ref = this.at(forward ? this.length - 1 : 0)) != null ? _ref.start : void 0;
-    start = start ? start.clone() : moment();
-    boundary = start.clone().add((forward ? 1 : -1), 'years');
-    return async.whilst((function() {
-      if (count > eventCount) {
-        return false;
-      } else if (forward) {
-        return start.isBefore(boundary);
-      } else {
-        return start.isAfter(boundary);
-      }
-    }), ((function(_this) {
-      return function(cb) {
-        var periodEnd, periodStart;
-        if (forward) {
-          periodStart = start.clone();
-          periodEnd = start.add(1, 'month');
-        } else {
-          periodEnd = start.clone();
-          periodStart = start.add(-1, 'month');
-        }
-        return _this.generateRealEvents(periodStart, periodEnd, function(events) {
-          count += events.length;
-          return cb();
-        });
-      };
-    })(this)), function(err) {
-      return callback(err);
-    });
-  };
-
-  RealEventGeneratorCollection.prototype.loadNextPage = function(callback) {
-    callback = callback || function() {};
-    return this._loadEventsCount(10, true, callback);
+    noEventsRemaining = this.runningReccuringEvents.length === 0 && this.lastGeneratedEvent === null;
+    return callback(noEventsRemaining);
   };
 
   RealEventGeneratorCollection.prototype.loadPreviousPage = function(callback) {
+    var end, eventsInRange, i, item, noPreviousEventsRemaining, start;
     callback = callback || function() {};
-    return this._loadEventsCount(10, false, callback);
+    eventsInRange = [];
+    end = this.firstDate.clone();
+    this.firstDate.add(-1, 'month');
+    start = this.firstDate.clone();
+    i = this.baseCollection.indexOf(this.firsGeneratedEvent);
+    this.firstGeneratedEvent = null;
+    while (i >= 0 && this.firstGeneratedEvent === null) {
+      item = this.baseCollection.at(i);
+      i--;
+      if (!item.isVisible()) {
+        continue;
+      } else if (item.getStartDateObject().isBefore(start)) {
+        this.firstGeneratedEvent = item;
+      } else if (!item.isRecurrent()) {
+        eventsInRange.push(new RealEvent(item));
+      }
+    }
+    this.previousRecurringEvents.forEach((function(_this) {
+      return function(item, index) {
+        var evs;
+        if (item.getLastOccurenceDate().isBefore(start)) {
+          return;
+        }
+        if (item.getStartDateObject().isAfter(end)) {
+          _this.previousRecurringEvents.splice(index, 1);
+          return;
+        }
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
+          return new RealEvent(event, instanceStart, instanceEnd);
+        });
+        return eventsInRange = eventsInRange.concat(evs);
+      };
+    })(this));
+    this.add(eventsInRange);
+    noPreviousEventsRemaining = this.previousRecurringEvents.length === 0 && this.firstGeneratedEvent === null;
+    return callback(noPreviousEventsRemaining);
   };
 
   return RealEventGeneratorCollection;
@@ -1604,7 +1655,6 @@ module.exports = {
   "times": "times",
   "weekday": "weekday",
   "summary": "Summary",
-  "place": "Place",
   "start": "Start",
   "end": "End",
   "tags": "Tags",
@@ -1800,7 +1850,6 @@ module.exports = {
   "times": "fois",
   "weekday": "jours de la semaine",
   "summary": "Titre",
-  "place": "Endroit",
   "start": "Début",
   "end": "Fin",
   "tags": "Tags",
@@ -2152,6 +2201,11 @@ module.exports = ScheduleItem = (function(_super) {
     }
   };
 
+  ScheduleItem.prototype.isVisible = function() {
+    var _ref;
+    return (_ref = this.getCalendar()) != null ? _ref.get('visible') : void 0;
+  };
+
   ScheduleItem.prototype.isAllDay = function() {
     var _ref;
     return ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
@@ -2306,6 +2360,20 @@ module.exports = ScheduleItem = (function(_super) {
     sdo = this.getStartDateObject();
     edo = this.getEndDateObject();
     return (sdo.isAfter(start) && sdo.isBefore(end)) || (edo.isAfter(start) && edo.isBefore(end)) || (sdo.isBefore(start) && edo.isAfter(end));
+  };
+
+  ScheduleItem.prototype.getLastOccurenceDate = function() {
+    var options;
+    if (this.isRecurrent()) {
+      options = RRule.parseString(this.get('rrule'));
+      if (options.until != null) {
+        return moment(options.until);
+      } else {
+        return moment().add(10, 'years');
+      }
+    } else {
+      return this.getStartDateObject();
+    }
   };
 
   ScheduleItem.prototype.toPunctualFullCalendarEvent = function() {
@@ -2766,6 +2834,7 @@ module.exports = EventPopOver = (function(_super) {
 
   function EventPopOver() {
     this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
+    this.onTab = __bind(this.onTab, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
 
@@ -2774,7 +2843,7 @@ module.exports = EventPopOver = (function(_super) {
   EventPopOver.prototype.template = require('./templates/popover_event');
 
   EventPopOver.prototype.events = {
-    'keyup input': 'onKeyUp',
+    'keyup': 'onKeyUp',
     'change select': 'onKeyUp',
     'change input': 'onKeyUp',
     'click .add': 'onAddClicked',
@@ -2786,7 +2855,9 @@ module.exports = EventPopOver = (function(_super) {
     'changeDate .input-end-date': 'onSetEnd',
     'click .input-allday': 'toggleAllDay',
     'input .input-desc': 'onSetDesc',
-    'input .input-place': 'onSetPlace'
+    'input .input-place': 'onSetPlace',
+    'keydown [data-tabindex-next]': 'onTab',
+    'keydown [data-tabindex-prev]': 'onTab'
   };
 
   EventPopOver.prototype.initialize = function(options) {
@@ -2879,6 +2950,25 @@ module.exports = EventPopOver = (function(_super) {
       start: this.model.getStartDateObject(),
       end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd')
     });
+  };
+
+  EventPopOver.prototype.onTab = function(ev) {
+    var $this, index;
+    if (ev.keyCode !== 9) {
+      return;
+    }
+    $this = $(ev.target);
+    if (!ev.shiftKey && $this.is('[data-tabindex-next]')) {
+      index = $this.data('tabindex-next');
+    }
+    if (ev.shiftKey && $this.is('[data-tabindex-prev]')) {
+      index = $this.data('tabindex-prev');
+    }
+    if (!index) {
+      return;
+    }
+    this.$("[tabindex=" + index + "]").focus();
+    return ev.preventDefault();
   };
 
   EventPopOver.prototype.onSetStart = function() {
@@ -4500,57 +4590,113 @@ module.exports = ListView = (function(_super) {
       });
     });
     this.$('#list-container').scroll(this.checkScroll);
-    this.keepScreenFull();
-    this.collection.on('reset', this.keepScreenFull);
-    return ListView.__super__.afterRender.apply(this, arguments);
+    this.collection.on('reset', (function(_this) {
+      return function() {
+        _this.$('.showafter').show();
+        _this.$('.showbefore').show();
+        _this.lastAlreadyLoaded = false;
+        return _this.keepScreenFull();
+      };
+    })(this));
+    ListView.__super__.afterRender.apply(this, arguments);
+    return this.keepScreenFull();
   };
 
   ListView.prototype.appendView = function(view) {
-    var el, index, prevCid;
+    var el, index, prevCid, prevView;
     index = this.collection.indexOf(view.model);
     el = view.$el;
     if (index === 0) {
       return this.$(this.collectionEl).prepend(el);
     } else {
       prevCid = this.collection.at(index - 1).cid;
-      return this.views[prevCid].$el.after(el);
+      if (prevCid in this.views) {
+        return this.views[prevCid].$el.after(el);
+      } else {
+        prevView = _.values(this.views).reduce(function(previous, current) {
+          var dCurrent, dPrevious;
+          dCurrent = view.model.get('date').diff(current.model.date);
+          if (dCurrent < 0) {
+            return previous;
+          } else if (previous != null) {
+            dPrevious = view.model.get('date').diff(previous.model.date);
+            if (dCurrent < dPrevious) {
+              return current;
+            } else {
+              return previous;
+            }
+          } else {
+            return current;
+          }
+        });
+        if (prevView != null) {
+          return prevView.$el.after(el);
+        } else {
+          return this.$(this.collectionEl).prepend(el);
+        }
+      }
     }
   };
 
   ListView.prototype.keepScreenFull = function() {
     var list;
     list = this.$('#list-container')[0];
-    if (list.scrollHeight <= list.clientHeight) {
-      return this.loadAfter();
+    if (list.scrollHeight <= this.el.clientHeight) {
+      return this.loadAfter(this.keepScreenFull);
     }
   };
 
   ListView.prototype.checkScroll = function() {
     var list, triggerPoint;
-    triggerPoint = 100;
+    triggerPoint = 150;
     list = this.$('#list-container')[0];
     if (list.scrollTop + list.clientHeight + triggerPoint > list.scrollHeight) {
-      return this.loadAfter();
+      return this.loadAfter(this.checkScroll);
     }
   };
 
-  ListView.prototype.loadBefore = function() {
+  ListView.prototype.loadBefore = function(callback) {
+    var button;
     if (!this.isLoading) {
       this.isLoading = true;
-      return this.collection.loadPreviousPage((function(_this) {
+      button = this.$('.showbefore');
+      button.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      button.spin('tiny');
+      return setTimeout((function(_this) {
         return function() {
-          return _this.isLoading = false;
+          return _this.collection.loadPreviousPage(function(noMoreEvents) {
+            if (noMoreEvents) {
+              button.hide();
+            }
+            button.html(t('display previous events'));
+            button.spin('none');
+            _this.isLoading = false;
+            return typeof callback === "function" ? callback() : void 0;
+          });
         };
-      })(this));
+      })(this), 1);
     }
   };
 
-  ListView.prototype.loadAfter = function() {
-    if (!this.isLoading) {
+  ListView.prototype.loadAfter = function(callback) {
+    var button;
+    if (!this.isLoading && !this.lastAlreadyLoaded) {
       this.isLoading = true;
-      return this.collection.loadNextPage((function(_this) {
+      button = this.$('.showafter');
+      button.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+      button.spin('tiny');
+      return setTimeout((function(_this) {
         return function() {
-          return _this.isLoading = false;
+          return _this.collection.loadNextPage(function(noMoreEvents) {
+            if (noMoreEvents) {
+              _this.lastAlreadyLoaded = true;
+              button.hide();
+            }
+            button.html(t('display next events'));
+            button.spin('none');
+            _this.isLoading = false;
+            return typeof callback === "function" ? callback() : void 0;
+          }, 1);
         };
       })(this));
     }
@@ -4809,14 +4955,6 @@ module.exports = MenuItemView = (function(_super) {
     'change .color-picker': 'setColor'
   };
 
-  MenuItemView.prototype.toggleVisible = function() {
-    if (!app.router.onCalendar) {
-      app.router.navigate('calendar', true);
-    }
-    this.model.set('visible', !this.model.get('visible'));
-    return this.render();
-  };
-
   MenuItemView.prototype.getRenderData = function() {
     return {
       label: this.model.get('name')
@@ -4825,6 +4963,20 @@ module.exports = MenuItemView = (function(_super) {
 
   MenuItemView.prototype.afterRender = function() {
     return this.buildBadge(this.model.get('color'));
+  };
+
+  MenuItemView.prototype.toggleVisible = function() {
+    if (!app.router.onCalendar) {
+      app.router.navigate('calendar', true);
+    }
+    this.startSpinner();
+    return setTimeout((function(_this) {
+      return function() {
+        _this.model.set('visible', !_this.model.get('visible'));
+        _this.stopSpinner();
+        return _this.render();
+      };
+    })(this), 1);
   };
 
   MenuItemView.prototype.showColorPicker = function(ev) {
@@ -5136,7 +5288,7 @@ if ( typeof id != "undefined")
 {
 buf.push("<a" + (jade.attr("href", "events/" + (id) + "/" + (exportdate) + ".ics", true, false)) + "><i class=\"fa fa-download fa-1\"></i></a>");
 }
-buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span4 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"surrounded-combobox controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder') ) ? "" : jade_interp)) + "&nbsp;<a class=\"btn addreminder\">+</a></h4><label id=\"reminder-explanation\" class=\"control-label hide\">" + (jade.escape(null == (jade_interp = t('Reminders before the event')) ? "" : jade_interp)) + "</label><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span4 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('Place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"surrounded-combobox controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder')) ? "" : jade_interp)) + "&nbsp;<a class=\"btn addreminder\">+</a></h4><label id=\"reminder-explanation\" class=\"control-label hide\">" + (jade.escape(null == (jade_interp = t('Reminders before the event')) ? "" : jade_interp)) + "</label><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5386,7 +5538,7 @@ var jade_interp;
 var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,start = locals_.start,tFormat = locals_.tFormat,end = locals_.end,dFormat = locals_.dFormat,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
 popoverClassName  = (allDay ? ' is-all-day' : '')
 popoverClassName += (sameDay? ' is-same-day' : '')
-buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : ",") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#'+advancedUrl, true, false)) + " class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : ",") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#'+advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Edit') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5405,7 +5557,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i></span>");;return buf.join("");
+buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i></span>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
