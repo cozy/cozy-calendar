@@ -215,6 +215,10 @@ module.exports = class EventPopOver extends PopoverView
         if event.keyCode is 13 or event.which is 13 #ENTER
             # Forces the combobox to blur to save the calendar if it has changed
             @calendar.onBlur()
+            # Update start and end too.
+            @onSetStart()
+            @onSetEnd()
+
             @addButton.click()
         else if event.keyCode is 27 # ESC
             @selfclose()
@@ -310,8 +314,8 @@ module.exports = class EventPopOver extends PopoverView
         delta = if @model.isAllDay() then -1 else 0
         end = @model.getEndDateObject().add(delta, 'd')
 
-        @$('.input-start').val @model.getStartDateObject().format(tFormat)
-        @$('.input-end-time').val end.format(tFormat)
+        @$('.input-start').timepicker 'setTime', @model.getStartDateObject().format(tFormat), true, true
+        @$('.input-end-time').timepicker 'setTime', end.format(tFormat), true, true
         @$('.input-end-date').val end.format(dFormat)
 
 
