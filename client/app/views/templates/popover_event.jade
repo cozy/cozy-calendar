@@ -26,7 +26,7 @@
                                         value=end.format(tFormat))
     label.end-date
         span.caption
-            = allDay? t(sameDay? "All one day" : "All day, until") : ","
+            = allDay? t(sameDay? "All one day" : "All day, until") : "-"
             |&nbsp;
         input.input-end-date.input-date(tabindex="6",
                                         type="date",
