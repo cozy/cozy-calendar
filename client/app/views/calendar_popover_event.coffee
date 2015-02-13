@@ -16,6 +16,7 @@ defTimePickerOpts       =
 
 defDatePickerOps        =
     language: window.app.locale
+    fontAwesome: true
     autoclose: true
     pickerPosition: 'bottom-right'
     keyboardNavigation: false

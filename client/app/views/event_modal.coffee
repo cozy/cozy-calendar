@@ -103,6 +103,7 @@ module.exports = class EventModal extends ViewCollection
 
         options =
             language: window.app.locale
+            fontAwesome: true
             autoclose: true
             pickerPosition: 'bottom-right'
 
@@ -133,7 +134,7 @@ module.exports = class EventModal extends ViewCollection
         return "" unless email
         guests = @model.get('attendees') or []
         if not _.findWhere(guests, email: email)
-            # we clone the source array, otherwise it's not considered as 
+            # we clone the source array, otherwise it's not considered as
             # changed because it changes the model's attributes
             guests = _.clone guests
             guests.push
