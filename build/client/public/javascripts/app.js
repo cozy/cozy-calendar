@@ -2821,6 +2821,7 @@ defTimePickerOpts = {
 
 defDatePickerOps = {
   language: window.app.locale,
+  fontAwesome: true,
   autoclose: true,
   pickerPosition: 'bottom-right',
   keyboardNavigation: false,
@@ -3686,6 +3687,7 @@ module.exports = EventModal = (function(_super) {
     end = moment(this.endField.val(), this.inputDateTimeFormat);
     options = {
       language: window.app.locale,
+      fontAwesome: true,
       autoclose: true,
       pickerPosition: 'bottom-right',
       keyboardNavigation: false
@@ -4106,6 +4108,7 @@ module.exports = RRuleView = (function(_super) {
     this.updateHelp();
     return this.$('#rrule-until').attr('type', 'text').datetimepicker({
       language: window.app.locale,
+      fontAwesome: true,
       autoclose: true,
       format: this.inputDateDTPickerFormat,
       minView: 2,
@@ -5479,7 +5482,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li><a href=\"#sync\"><i class=\"fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span></a></li><ul id=\"menuitems\"></ul>");;return buf.join("");
+buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span></a></li><ul id=\"menuitems\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
