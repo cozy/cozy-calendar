@@ -19,6 +19,7 @@ module.exports = class RRuleView extends BaseView
 
         @$('#rrule-until').attr('type','text').datetimepicker(
             language: window.app.locale
+            fontAwesome: true
             autoclose: true
             format: @inputDateDTPickerFormat
             minView: 2
