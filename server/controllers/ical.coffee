@@ -38,7 +38,7 @@ module.exports.import = (req, res, next) ->
                             console.log "failed to cleanup file", file.path, err
 
         unless file = files['file']?[0]
-            res.send error: 'no file sent', 500
+            res.send error: 'no file sent', 400
             return cleanUp()
 
         parser = new ical.ICalParser()
