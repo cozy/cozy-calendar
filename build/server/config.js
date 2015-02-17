@@ -26,16 +26,24 @@ module.exports = {
     use: [
       staticMiddleware, publicStatic, americano.bodyParser({
         keepExtensions: true
-      }), americano.errorHandler({
-        dumpExceptions: true,
-        showStack: true
       })
     ],
+    afterStart: function(app, server) {
+      return app.use(americano.errorHandler({
+        dumpExceptions: true,
+        showStack: true
+      }));
+    },
     set: {
       views: './client'
+    },
+    engine: {
+      js: function(path, locales, callback) {
+        return callback(null, require(path)(locales));
+      }
     }
   },
   development: [americano.logger('dev')],
   production: [americano.logger('short')],
-  plugins: ['americano-cozy']
+  plugins: ['cozydb']
 };
