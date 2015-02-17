@@ -6,16 +6,14 @@ log = require('printit')
     date: true
 
 Event = require '../models/event'
-CozyInstance = require '../models/cozy_instance'
-try CozyAdapter = require 'americano-cozy/node_modules/jugglingdb-cozy-adapter'
-catch e then CozyAdapter = require 'jugglingdb-cozy-adapter'
+cozydb = require 'cozydb'
 
 localization = require '../libs/localization_manager'
 
 module.exports.sendInvitations = (event, dateChanged, callback) ->
     guests = event.toJSON().attendees
     needSaving = false
-    CozyInstance.getURL (err, domain) ->
+    cozydb.api.getCozyDomain (err, domain) ->
         if err
             log.error 'Cannot get Cozy instance'
             log.error err

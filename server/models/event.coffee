@@ -1,4 +1,4 @@
-americano = require 'americano-cozy'
+cozydb = require 'cozydb'
 momentTz = require 'moment-timezone'
 async = require 'async'
 log = require('printit')
@@ -6,14 +6,14 @@ log = require('printit')
 
 User = require './user'
 
-module.exports = Event = americano.getModel 'Event',
+module.exports = Event = cozydb.getModel 'Event',
     start       : type: String
     end         : type: String
     place       : type: String
     details     : type: String
     description : type: String
     rrule       : type: String
-    tags        : type: (x) -> x # DAMN IT JUGGLING
+    tags        : [String]
     attendees   : type: [Object]
     related     : type: String, default: null
     timezone    : type: String
@@ -31,10 +31,6 @@ Event.utcDTFormat = 'YYYY-MM-DD[T]HH:mm:00.000[Z]'
 Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
 require('cozy-ical').decorateEvent Event
-
-
-Event.all = (params, callback) ->
-    Event.request "all", params, callback
 
 Event.byCalendar = (calendarId, callback) ->
     Event.request 'byCalendar', key: calendarId, callback

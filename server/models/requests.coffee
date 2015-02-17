@@ -1,4 +1,4 @@
-americano = require 'americano-cozy'
+cozydb = require 'cozydb'
 
 tagsView =
     map    : (doc) ->
@@ -10,28 +10,22 @@ tagsView =
 module.exports =
 
     tag:
-        all       : (doc) -> emit doc.name, doc
+        all       : cozydb.defaultRequests.by 'name'
 
     alarm:
-        all       : (doc) -> emit doc.title, doc
+        all       : cozydb.defaultRequests.by 'title'
         byDate    : (doc) -> emit new Date(doc.trigg), doc
         tags      : tagsView
 
 
     event:
-        all       : (doc) -> emit doc._id, doc
+        all       : cozydb.defaultRequests.all
         byDate    : (doc) -> emit new Date(doc.start), doc
         tags      : tagsView
-        byCalendar: (doc) -> emit doc.tags[0], doc
-
-    user:
-        all       : (doc) -> emit doc.title, doc
+        byCalendar: cozydb.defaultRequests.by 'tags[0]'
 
     contact:
-        all       : americano.defaultRequests.all
-
-    cozy_instance:
-        all       : americano.defaultRequests.all
+        all       : cozydb.defaultRequests.all
 
     webdavaccount:
-        all       : americano.defaultRequests.all
+        all       : cozydb.defaultRequests.all
