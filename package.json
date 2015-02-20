@@ -1,6 +1,6 @@
 {
   "name": "Calendar",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "displayName": "Calendar",
   "description": "Manage your events and alarms with your Cozy.",
   "author": "Cozy Cloud <contact@cozycloud.cc> (http://cozycloud.cc)",
@@ -39,7 +39,7 @@
   "scripts": {
     "test": "cake --use-js tests",
     "start": "node build/server.js",
-    "test:mocha-no-env" : "mocha test --reporter spec --colors --globals setImmediate,clearImmediate --compilers coffee:coffee-script/register",
+    "test:mocha-no-env": "mocha test --reporter spec --colors --globals setImmediate,clearImmediate --compilers coffee:coffee-script/register",
     "lint": "npm run lint:client && npm run lint:server",
     "lint:server": "coffeelint server -f coffeelint.json",
     "lint:client": "coffeelint client/app -f coffeelint.json",
