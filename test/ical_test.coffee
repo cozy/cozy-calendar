@@ -64,7 +64,7 @@ describe "Calendar export/import", ->
                 @body.should.equal expectedBody
 
 
-        describe "POST /import/ical", ->
+        describe "POST /import/ical the calendar name is found in iCal", ->
 
             it "When I send an iCal file to import", (done) ->
                 client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
@@ -73,9 +73,12 @@ describe "Calendar export/import", ->
                     @body = JSON.parse body
                     done()
 
-            it "Then it sends to me the parsing result", (done) ->
+            it "Then it sends to me the parsing result", ->
                 @body.events.length.should.equal 3
-                done()
+
+            it "It should have the default calendar name", ->
+                should.exist @body.calendar
+                @body.calendar.should.have.property 'name', 'my calendar'
 
             it "When I send an iCal file from Apple to import", (done) ->
                 client.sendFile "import/ical", "./test/apple.ics", (err, res, body) =>
@@ -84,9 +87,12 @@ describe "Calendar export/import", ->
                     @body = JSON.parse body
                     done()
 
-            it "Then it sends to me the parsing result", (done) ->
+            it "Then it sends to me the parsing result", ->
                 @body.events.length.should.equal 2
-                done()
+
+            it "It should have the default calendar name", ->
+                should.exist @body.calendar
+                @body.calendar.should.have.property 'name', 'my calendar'
 
             it "When I send an iCal file from Google to import", (done) ->
                 client.sendFile "import/ical", "./test/google.ics", (err, res, body) =>
@@ -95,6 +101,31 @@ describe "Calendar export/import", ->
                     @body = JSON.parse body
                     done()
 
-            it "Then it sends to me the parsing result", (done) ->
+            it "Then it sends to me the parsing result", ->
                 @body.events.length.should.equal 2
-                done()
+
+            it "It should have the calendar name from the file", ->
+                should.exist @body.calendar
+                @body.calendar.should.have.property 'name', 'random.test@gmail.com'
+
+        describe "POST /import/ical the calendar name is not found, with existing events", ->
+            before helpers.cleanDb
+            after helpers.cleanDb
+
+            it "Given there are existing tags", (done) ->
+                helpers.createTag 'zomething', ->
+                    helpers.createTag 'aomething', -> done()
+
+            it "When I send an iCal file to import", (done) ->
+                client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
+                    should.not.exist err
+                    res.statusCode.should.equal 200
+                    @body = JSON.parse body
+                    done()
+
+            it "Then it sends to me the parsing result", ->
+                @body.events.length.should.equal 3
+
+            it "It should have the first calendar name by alphabetical order", ->
+                should.exist @body.calendar
+                @body.calendar.should.have.property 'name', 'aomething'
