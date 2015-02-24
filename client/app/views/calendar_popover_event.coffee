@@ -275,8 +275,7 @@ module.exports = class EventPopOver extends PopoverView
                 wait: true
                 success: =>
                     @calendar.save()
-                    collection = app['events']
-                    collection.add @model
+                    app.events.add @model
                 error: ->
                     alert 'server error occured'
                 complete: =>

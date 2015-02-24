@@ -3113,10 +3113,8 @@ module.exports = EventPopOver = (function(_super) {
         wait: true,
         success: (function(_this) {
           return function() {
-            var collection;
             _this.calendar.save();
-            collection = app['events'];
-            return collection.add(_this.model);
+            return app.events.add(_this.model);
           };
         })(this),
         error: function() {
@@ -3836,10 +3834,8 @@ module.exports = EventModal = (function(_super) {
     validModel = this.model.save(data, {
       success: (function(_this) {
         return function() {
-          var collection;
           _this.calendar.save();
-          collection = app['events'];
-          collection.add(_this.model);
+          app.events.add(_this.model);
           return _this.close();
         };
       })(this),

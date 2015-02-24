@@ -253,8 +253,7 @@ module.exports = class EventModal extends ViewCollection
         validModel = @model.save data,
             success: =>
                 @calendar.save()
-                collection = app['events']
-                collection.add @model
+                app.events.add @model
                 @close()
             error: =>
                 alert('server error')
