@@ -1546,6 +1546,7 @@ module.exports = ViewCollection = (function(_super) {
 
 ;require.register("locales/en", function(exports, require, module) {
 module.exports = {
+  "default calendar name": "my calendar",
   "Add": "Add",
   "event": "Event",
   "create event": "Event creation",
@@ -1743,6 +1744,7 @@ module.exports = {
 
 ;require.register("locales/fr", function(exports, require, module) {
 module.exports = {
+  "default calendar name": "mon agenda",
   "Add": "Ajouter",
   "event": "événement",
   "create event": "Création d'un évènement",
