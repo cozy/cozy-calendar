@@ -1,7 +1,9 @@
 ical = require 'cozy-ical'
 Event = require '../models/event'
+Tag = require '../models/tag'
 multiparty = require 'multiparty'
 fs = require 'fs'
+localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
 
@@ -49,9 +51,12 @@ module.exports.import = (req, res, next) ->
                 res.send 500, error: 'error occured while saving file'
                 cleanUp()
             else
-                calendarName = result?.model?.name or 'my calendar'
-                res.send 200,
-                    events: Event.extractEvents result, calendarName
-                    calendar:
-                        name: calendarName
-                cleanUp()
+                Tag.request 'all', (err, tags) ->
+                    key = 'default calendar name'
+                    defaultCalendar = tags?[0]?.name or localization.t key
+                    calendarName = result?.model?.name or defaultCalendar
+                    res.send 200,
+                        events: Event.extractEvents result, calendarName
+                        calendar:
+                            name: calendarName
+                    cleanUp()

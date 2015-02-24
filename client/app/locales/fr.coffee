@@ -1,4 +1,5 @@
 module.exports =
+    "default calendar name"             : "mon agenda"
     "Add"                               : "Ajouter"
     "event"                             : "événement"
     "create event"                      : "Création d'un évènement"
