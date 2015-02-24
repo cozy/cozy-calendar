@@ -3836,7 +3836,10 @@ module.exports = EventModal = (function(_super) {
     validModel = this.model.save(data, {
       success: (function(_this) {
         return function() {
+          var collection;
           _this.calendar.save();
+          collection = app['events'];
+          collection.add(_this.model);
           return _this.close();
         };
       })(this),
