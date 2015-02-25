@@ -123,12 +123,22 @@ module.exports = class EventPopOver extends PopoverView
 
 
     getRenderData: ->
+
+        # A new event's calendar is the first calendar in alphabetical order
+        # It fallbacks to the default calendar name if anything goes wrong
+        firstCalendar = app.calendars?.at(0)?.get 'name'
+        defaultCalendar = t 'default calendar name'
+        if @model.isNew()
+            currentCalendar = firstCalendar or defaultCalendar
+        else
+            currentCalendar = @model.get('tags')?[0] or defaultCalendar
+
         data = _.extend {}, @model.toJSON(),
             tFormat:     tFormat
             dFormat:     dFormat
             editionMode: not @model.isNew()
             advancedUrl: "#{@parentView.getUrlHash()}/#{@model.id}"
-            calendar:    @model.get('tags')?[0] or ''
+            calendar:    currentCalendar
             allDay:      @model.isAllDay()
             sameDay:     @model.isSameDay()
             start:       @model.getStartDateObject()

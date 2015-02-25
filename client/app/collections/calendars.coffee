@@ -88,9 +88,14 @@ module.exports = class CalendarCollection extends TagCollection
 
     toArray: -> @map stringify
 
-    toAutoCompleteSource: -> 
-        return @map (tag) -> 
-            return _.extend 
+    comparator: (a, b) ->
+        aName = a.get 'name'
+        bName = b.get 'name'
+        return aName.localeCompare bName, {}, sensitivity: 'base'
+
+    toAutoCompleteSource: ->
+        return @map (tag) ->
+            return _.extend
                     label: tag.get 'name'
                     value: tag.get 'name'
                 , tag.attributes

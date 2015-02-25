@@ -298,6 +298,15 @@ module.exports = CalendarCollection = (function(_super) {
     return this.map(stringify);
   };
 
+  CalendarCollection.prototype.comparator = function(a, b) {
+    var aName, bName;
+    aName = a.get('name');
+    bName = b.get('name');
+    return aName.localeCompare(bName, {}, {
+      sensitivity: 'base'
+    });
+  };
+
   CalendarCollection.prototype.toAutoCompleteSource = function() {
     return this.map(function(tag) {
       return _.extend({
@@ -1052,7 +1061,7 @@ hslToRgb = function(h, s, l) {
 
 module.exports = function(tag) {
   var colour, h, hash, i, l, s, _i, _ref;
-  if (tag !== "my calendar") {
+  if (tag !== t('default calendar name')) {
     hash = 0;
     for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
       hash = tag.charCodeAt(i) + (hash << 5) - hash;
@@ -1988,7 +1997,7 @@ module.exports = Event = (function(_super) {
       details: '',
       description: '',
       place: '',
-      tags: ['my calendar']
+      tags: [t('default calendar name')]
     };
   };
 
@@ -2158,9 +2167,10 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.endDateField = false;
 
   ScheduleItem.prototype.initialize = function() {
-    var _ref;
+    var defaultCalendarName, _ref;
+    defaultCalendarName = t('default calendar name');
     if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
-      this.set('tags', ['my calendar']);
+      this.set('tags', [defaultCalendarName]);
     }
     this.on('change:' + this.startDateField, (function(_this) {
       return function() {
@@ -2941,13 +2951,20 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.getRenderData = function() {
-    var data, _ref;
+    var currentCalendar, data, defaultCalendar, firstCalendar, _ref, _ref1, _ref2;
+    firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
+    defaultCalendar = t('default calendar name');
+    if (this.model.isNew()) {
+      currentCalendar = firstCalendar || defaultCalendar;
+    } else {
+      currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
+    }
     return data = _.extend({}, this.model.toJSON(), {
       tFormat: tFormat,
       dFormat: dFormat,
       editionMode: !this.model.isNew(),
       advancedUrl: "" + (this.parentView.getUrlHash()) + "/" + this.model.id,
-      calendar: ((_ref = this.model.get('tags')) != null ? _ref[0] : void 0) || '',
+      calendar: currentCalendar,
       allDay: this.model.isAllDay(),
       sameDay: this.model.isSameDay(),
       start: this.model.getStartDateObject(),
@@ -4475,7 +4492,7 @@ module.exports = ImportView = (function(_super) {
     var addError, calendar, counter, events, finalizeImport, importEvent, total, updateCounter;
     calendar = this.calendarCombo.value();
     if ((calendar == null) || calendar === '') {
-      calendar = 'my calendar';
+      calendar = t('default calendar name');
     }
     total = this.eventList.collection.length;
     counter = 0;

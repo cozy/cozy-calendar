@@ -9,7 +9,8 @@ module.exports = class ScheduleItem extends Backbone.Model
     endDateField: false
 
     initialize: ->
-        @set 'tags', ['my calendar'] unless @get('tags')?.length
+        defaultCalendarName = t 'default calendar name'
+        @set 'tags', [defaultCalendarName] unless @get('tags')?.length
 
         @on 'change:' + @startDateField, => @startDateChanged = true
         @on 'change:attendees', => @attendeesChanged = true
