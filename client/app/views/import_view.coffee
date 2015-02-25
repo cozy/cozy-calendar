@@ -91,7 +91,7 @@ module.exports = class ImportView extends BaseView
         # The user selects the calendar that will be set on all imported events
         # and alarms.
         calendar = @calendarCombo.value()
-        calendar = 'my calendar' if not calendar? or calendar is ''
+        calendar = t('default calendar name') if not calendar? or calendar is ''
 
         # Amount of elements to import.
         total = @eventList.collection.length
@@ -150,9 +150,9 @@ module.exports = class ImportView extends BaseView
                 if $('.import-errors').html().length is 0
                     app.router.navigate "calendar", true
 
-        # Save the calendar tag 
+        # Save the calendar tag
         @calendarCombo.save()
-        
+
         # Save every imported events to the database.
         events = @eventList.collection.models
         async.eachSeries events, importEvent, finalizeImport

@@ -11,7 +11,7 @@ module.exports = class Event extends ScheduleItem
         details: ''
         description: ''
         place: ''
-        tags: ['my calendar']
+        tags: [t('default calendar name')]
 
     getDiff: ->
         return @getEndDateObject().diff @getStartDateObject(), 'days'

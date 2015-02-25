@@ -19,7 +19,7 @@ hslToRgb = (h, s, l) ->
     return "##{color.toString(16).slice 1}"
 
 module.exports = (tag) ->
-    if tag isnt "my calendar"
+    if tag isnt t('default calendar name')
         hash = 0
         for i in [0..tag.length-1]
             hash = (tag.charCodeAt(i) + (hash << 5) - hash)
