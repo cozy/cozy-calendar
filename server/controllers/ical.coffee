@@ -51,9 +51,10 @@ module.exports.import = (req, res, next) ->
                 res.send 500, error: 'error occured while saving file'
                 cleanUp()
             else
-                Tag.request 'all', (err, tags) ->
+                Event.tags (err, tags) ->
+                    calendars = tags.calendar
                     key = 'default calendar name'
-                    defaultCalendar = tags?[0]?.name or localization.t key
+                    defaultCalendar = calendars?[0] or localization.t key
                     calendarName = result?.model?.name or defaultCalendar
                     res.send 200,
                         events: Event.extractEvents result, calendarName

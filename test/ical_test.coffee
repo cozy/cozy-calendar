@@ -113,8 +113,21 @@ describe "Calendar export/import", ->
             after helpers.cleanDb
 
             it "Given there are existing tags", (done) ->
-                helpers.createTag 'zomething', ->
-                    helpers.createTag 'aomething', -> done()
+                rawEvent =
+                    description: 'Something to do'
+                    start: "2013-04-25T15:30:00.000Z"
+                    end: "2013-04-25T18:30:00.000Z"
+                    place: "place"
+                    tags: ['zsomething']
+                rawEvent2 =
+                    description: 'Something to do'
+                    start: "2013-04-25T18:30:00.000Z"
+                    end: "2013-04-25T19:30:00.000Z"
+                    place: "place"
+                    tags: ['asomething']
+                helpers.createEventFromObject rawEvent, ->
+                    helpers.createEventFromObject rawEvent2, ->
+                        done()
 
             it "When I send an iCal file to import", (done) ->
                 client.sendFile "import/ical", "./test/calendar.ics", (err, res, body) =>
@@ -128,4 +141,4 @@ describe "Calendar export/import", ->
 
             it "It should have the first calendar name by alphabetical order", ->
                 should.exist @body.calendar
-                @body.calendar.should.have.property 'name', 'aomething'
+                @body.calendar.should.have.property 'name', 'asomething'

@@ -1,11 +1,11 @@
 cozydb = require 'cozydb'
 
 tagsView =
-    map    : (doc) ->
+    map: (doc) ->
         doc.tags?.forEach? (tag, index) ->
             type = if index is 0 then 'calendar' else 'tag'
             emit [type, tag], true
-    reduce : (key, values, rereduce) -> true
+    reduce: "_count"
 
 module.exports =
 

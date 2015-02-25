@@ -12,7 +12,6 @@ else
 
 Event = require "#{helpers.prefix}server/models/event"
 User  = require "#{helpers.prefix}server/models/user"
-Tag = require "#{helpers.prefix}server/models/tag"
 
 userID = null
 
@@ -39,7 +38,7 @@ helpers.after = (done) ->
 
 # Remove all the alarms
 helpers.cleanDb = (callback) ->
-    Event.destroyAll ->Tag.destroyAll callback
+    Event.destroyAll callback
 
 # Get all the alarams
 helpers.getAllEvents = (callback) ->
@@ -55,10 +54,7 @@ helpers.createEvent = (start, end, place, description, callback) ->
             description: description
             tags: ['my calendar']
 
-        Event.create evt, callback
-
-helpers.createTag = (name, callback) ->
-    Tag.create {name}, callback
+        helpers.createEventFromObject evt, callback
 
 # Create an alarm from object
 helpers.createEventFromObject = (data, callback) ->
