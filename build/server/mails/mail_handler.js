@@ -69,7 +69,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
         html: htmlTemplate(templateOptions),
         content: localization.t(templateKey, templateOptions)
       };
-      return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
+      return cozydb.sendMailFromUser(mailOptions, function(err) {
         if (!err) {
           needSaving = true;
           guest.status = 'NEEDS-ACTION';
@@ -126,7 +126,7 @@ module.exports.sendDeleteNotification = function(event, callback) {
       content: localization.t('email delete content', templateOptions),
       html: htmlTemplate(templateOptions)
     };
-    return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
+    return cozydb.sendMailFromUser(mailOptions, function(err) {
       if (err != null) {
         log.error("An error occured while sending email");
         log.error(err);
