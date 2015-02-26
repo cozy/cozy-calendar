@@ -166,6 +166,75 @@ describe "Events management", ->
                 event.should.have.property 'place', @event.place
                 done()
 
+    describe "PUT events/:id - Add guest to an event", ->
+        before helpers.cleanDb
+        after -> delete @event
+
+        it "When I create an event", (done) ->
+            @event =
+                description: 'Something to do'
+                start: "2013-04-25T15:30:00.000Z"
+                end: "2013-04-25T18:30:00.000Z"
+                place: "place"
+            helpers.createEventFromObject @event, (err, event) =>
+                @event.id = event.id
+                done()
+
+        it "should return the event with the updated value", (done) ->
+            @key = 'ehv629olotwdrito7zxp7qem14iqtmer'
+            @event.attendees = []
+            @event.attendees.push
+                'key': @key
+                'status': 'INVITATION-NOT-SENT'
+                'email': 'test@cozycloud.cc'
+
+            client.put "events/#{@event.id}", @event, (err, resp, body) =>
+
+                should.not.exist err
+                should.exist resp
+                resp.should.have.property 'statusCode', 200
+                should.exist body
+
+                body.should.have.property 'start'
+                body.should.have.property 'end'
+                body.should.have.property 'description'
+                body.should.have.property 'place'
+
+                body.should.have.property 'attendees'
+                body.attendees[0].should.have.property 'key', @key
+                body.attendees[0].should.have.property 'status', 'INVITATION-NOT-SENT'
+                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                done()
+
+        it "Then guess accepts it", (done) ->
+            client.get "public/events/#{@event.id}?key=#{@key}&status=ACCEPTED", (err, resp, body) =>
+                err.should.not.exist
+                done()
+
+        it "And event should be updated", (done) ->
+            client.get "events/#{@event.id}", (err, resp, body) =>
+
+                body.should.have.property 'attendees'
+                body.attendees[0].should.have.property 'key', @key
+                body.attendees[0].should.have.property 'status', 'ACCEPTED'
+                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                done()
+
+        it "Then guess declines it", (done) ->
+            client.get "public/events/#{@event.id}?key=#{@key}&status=DECLINED", (err, resp, body) =>
+                err.should.not.exist
+                done()
+
+        it "And event should be updated", (done) ->
+            client.get "events/#{@event.id}", (err, resp, body) =>
+
+                body.should.have.property 'attendees'
+                body.attendees[0].should.have.property 'key', @key
+                body.attendees[0].should.have.property 'status', 'DECLINED'
+                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                done()
+
+
     describe "DELETE events/:id", ->
 
         before helpers.cleanDb
