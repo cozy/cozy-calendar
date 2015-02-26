@@ -44,7 +44,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
             dateFormat = localization.t dateFormatKey
             date = event.formatStart dateFormat
 
-            url = "https://#{domain}/public/calendar/events/#{event.id}"
+            url = "#{domain}/public/calendar/events/#{event.id}"
 
 
             {description, place} = event.toJSON()

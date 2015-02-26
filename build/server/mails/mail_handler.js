@@ -53,7 +53,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
       }
       dateFormat = localization.t(dateFormatKey);
       date = event.formatStart(dateFormat);
-      url = "https://" + domain + "/public/calendar/events/" + event.id;
+      url = domain + "/public/calendar/events/" + event.id;
       ref = event.toJSON(), description = ref.description, place = ref.place;
       place = (place != null ? place.length : void 0) > 0 ? "(" + place + ")" : "";
       templateOptions = {
