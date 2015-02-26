@@ -61,7 +61,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                 html: htmlTemplate templateOptions
                 content: localization.t templateKey, templateOptions
 
-            cozydb.sendMailFromUser mailOptions, (err) ->
+            cozydb.api.sendMailFromUser mailOptions, (err) ->
                 if not err
                     needSaving = true
                     guest.status = 'NEEDS-ACTION' # ical = waiting an answer
@@ -105,7 +105,7 @@ module.exports.sendDeleteNotification = (event, callback) ->
             subject: localization.t subjectKey, description: event.description
             content: localization.t 'email delete content', templateOptions
             html: htmlTemplate templateOptions
-        cozydb.sendMailFromUser mailOptions, (err) ->
+        cozydb.api.sendMailFromUser mailOptions, (err) ->
             if err?
                 log.error "An error occured while sending email"
                 log.error err
