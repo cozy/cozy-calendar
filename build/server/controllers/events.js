@@ -110,7 +110,7 @@ module.exports["delete"] = function(req, res) {
 };
 
 module.exports["public"] = function(req, res) {
-  var date, dateFormat, dateFormatKey, fileName, filePath, filePathBuild, key, locale, ref, visitor;
+  var date, dateFormat, dateFormatKey, day, desc, fileName, filePath, filePathBuild, key, locale, ref, visitor;
   key = req.query.key;
   if (!(visitor = req.event.getGuest(key))) {
     locale = localization.getLocale();
@@ -149,8 +149,11 @@ module.exports["public"] = function(req, res) {
     if (!(fs.existsSync(filePath) || fs.existsSync(filePathBuild))) {
       fileName = 'event_public_en.jade';
     }
+    desc = req.event.description.replace(' ', '-');
+    day = moment(req.event.start).format("YYYY-MM-DD");
     return res.render(fileName, {
       event: req.event,
+      file: day + "-" + desc,
       date: date,
       key: key,
       visitor: visitor

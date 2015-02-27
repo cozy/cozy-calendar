@@ -107,8 +107,12 @@ module.exports.public = (req, res) ->
         unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
             fileName = 'event_public_en.jade'
 
+        desc = req.event.description.replace(' ', '-')
+        day =  moment(req.event.start).format("YYYY-MM-DD")
+
         res.render fileName,
             event: req.event
+            file: "#{day}-#{desc}"
             date: date
             key: key
             visitor: visitor
