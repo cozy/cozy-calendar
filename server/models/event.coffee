@@ -76,7 +76,7 @@ Event::formatStart = (dateFormat) ->
 
 # @TODO : this doesn't handle merge correctly
 Event::getGuest = (key) ->
-    guests = @attendees?.toJSON() or []
+    guests = @attendees or []
     currentguest = guests.filter((guest) -> guest.key is key)[0]
     if currentguest
         currentguest.setStatus = (status, callback) =>
