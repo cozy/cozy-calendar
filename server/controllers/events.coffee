@@ -78,7 +78,10 @@ module.exports.public = (req, res) ->
         locale = localization.getLocale()
         fileName = "404_#{locale}.jade"
         filePath = path.resolve __dirname, '../../client/', fileName
-        fileName = '404_en.jade' unless fs.existsSync(filePath)
+        # Usefull for build
+        filePathBuild = path.resolve __dirname, '../../../client/', fileName
+        unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
+            fileName = '404_en.jade'
         res.status 404
         res.render fileName
 
@@ -99,10 +102,17 @@ module.exports.public = (req, res) ->
         locale = localization.getLocale()
         fileName = "event_public_#{locale}.jade"
         filePath = path.resolve __dirname, '../../client/', fileName
-        fileName = 'event_public_en.jade' unless fs.existsSync(filePath)
+        # Usefull for build
+        filePathBuild = path.resolve __dirname, '../../../client/', fileName
+        unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
+            fileName = 'event_public_en.jade'
+
+        desc = req.event.description.replace(' ', '-')
+        day =  moment(req.event.start).format("YYYY-MM-DD")
 
         res.render fileName,
             event: req.event
+            file: "#{day}-#{desc}"
             date: date
             key: key
             visitor: visitor

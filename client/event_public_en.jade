@@ -24,7 +24,7 @@ html
       else if visitor.status == 'ACCEPTED'
         p
             | You declared you will participage to this event.
-        p: a(href="#{event.id}/file.ics?key=" + key) Download this event
+        p: a(href="#{event.id}/#{file}.ics?key=" + key) Download this event
         p
             a.btn(href="?status=DECLINED&key=" + key)
                 | Decline the invitation
