@@ -13,6 +13,8 @@ module.exports =
     "delete"                            : "Supprimer"
     "rename"                            : "Renommer"
     "export"                            : "Exporter"
+    "remove"                            : "Supprimer l'événement"
+    "duplicate"                         : "Dupliquer l'événement"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'
