@@ -10,7 +10,7 @@ module.exports =
     'users/current': get : index.userTimezone
 
     # Tag management
-    'tags': 
+    'tags':
         get : tags.all
         post : tags.create
     'tagid':
@@ -18,7 +18,7 @@ module.exports =
     'tags/:tagid':
         get : tags.read
         put : tags.update
-        del : tags.delete
+        delete : tags.delete
 
 
     # Event management
@@ -31,12 +31,12 @@ module.exports =
     'events/rename-calendar':
         post: events.bulkCalendarRename
     'events/delete':
-        del: events.bulkDelete
+        delete: events.bulkDelete
 
     'events/:eventid':
         get   : events.read
         put   : events.update
-        del   : events.delete
+        delete   : events.delete
 
     'events/:eventid/:name.ics':
         get   : events.ical
