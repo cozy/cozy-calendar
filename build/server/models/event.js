@@ -134,8 +134,8 @@ Event.prototype.formatStart = function(dateFormat) {
 };
 
 Event.prototype.getGuest = function(key) {
-  var currentguest, guests, ref;
-  guests = ((ref = this.attendees) != null ? ref.toJSON() : void 0) || [];
+  var currentguest, guests;
+  guests = this.attendees || [];
   currentguest = guests.filter(function(guest) {
     return guest.key === key;
   })[0];

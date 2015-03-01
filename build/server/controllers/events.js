@@ -110,13 +110,14 @@ module.exports["delete"] = function(req, res) {
 };
 
 module.exports["public"] = function(req, res) {
-  var date, dateFormat, dateFormatKey, fileName, filePath, key, locale, ref, visitor;
+  var date, dateFormat, dateFormatKey, day, desc, fileName, filePath, filePathBuild, key, locale, ref, visitor;
   key = req.query.key;
   if (!(visitor = req.event.getGuest(key))) {
     locale = localization.getLocale();
     fileName = "404_" + locale + ".jade";
     filePath = path.resolve(__dirname, '../../client/', fileName);
-    if (!fs.existsSync(filePath)) {
+    filePathBuild = path.resolve(__dirname, '../../../client/', fileName);
+    if (!(fs.existsSync(filePath) || fs.existsSync(filePathBuild))) {
       fileName = '404_en.jade';
     }
     res.status(404);
@@ -144,11 +145,15 @@ module.exports["public"] = function(req, res) {
     locale = localization.getLocale();
     fileName = "event_public_" + locale + ".jade";
     filePath = path.resolve(__dirname, '../../client/', fileName);
-    if (!fs.existsSync(filePath)) {
+    filePathBuild = path.resolve(__dirname, '../../../client/', fileName);
+    if (!(fs.existsSync(filePath) || fs.existsSync(filePathBuild))) {
       fileName = 'event_public_en.jade';
     }
+    desc = req.event.description.replace(' ', '-');
+    day = moment(req.event.start).format("YYYY-MM-DD");
     return res.render(fileName, {
       event: req.event,
+      file: day + "-" + desc,
       date: date,
       key: key,
       visitor: visitor

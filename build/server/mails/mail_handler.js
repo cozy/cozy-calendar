@@ -53,7 +53,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
       }
       dateFormat = localization.t(dateFormatKey);
       date = event.formatStart(dateFormat);
-      url = "https://" + domain + "/public/calendar/events/" + event.id;
+      url = domain + "public/calendar/events/" + event.id;
       ref = event.toJSON(), description = ref.description, place = ref.place;
       place = (place != null ? place.length : void 0) > 0 ? "(" + place + ")" : "";
       templateOptions = {
@@ -69,7 +69,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
         html: htmlTemplate(templateOptions),
         content: localization.t(templateKey, templateOptions)
       };
-      return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
+      return cozydb.api.sendMailFromUser(mailOptions, function(err) {
         if (!err) {
           needSaving = true;
           guest.status = 'NEEDS-ACTION';
@@ -126,7 +126,7 @@ module.exports.sendDeleteNotification = function(event, callback) {
       content: localization.t('email delete content', templateOptions),
       html: htmlTemplate(templateOptions)
     };
-    return CozyAdapter.sendMailFromUser(mailOptions, function(err) {
+    return cozydb.api.sendMailFromUser(mailOptions, function(err) {
       if (err != null) {
         log.error("An error occured while sending email");
         log.error(err);
