@@ -40,6 +40,7 @@ module.exports = class EventPopOver extends PopoverView
         'click .advanced-link':                  'onAdvancedClicked'
 
         'click .remove':                         'onRemoveClicked'
+        'click .duplicate':                      'onDuplicateClicked'
         'click .close':                          'selfclose'
 
         'changeTime.timepicker .input-start':    'onSetStart'
@@ -72,6 +73,7 @@ module.exports = class EventPopOver extends PopoverView
     afterRender: ->
         @addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
+        @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
 
         timepickerEvents =
@@ -82,7 +84,10 @@ module.exports = class EventPopOver extends PopoverView
             'timepicker.prev': ->
                 $("[tabindex=#{+$(@).attr('tabindex') - 1}]").focus()
 
-        @removeButton.hide() if @model.isNew()
+        if @model.isNew()
+            @removeButton.hide()
+            @duplicateButton.hide()
+
         @$('input[type="time"]').attr('type', 'text')
                                 .timepicker defTimePickerOpts
                                 .delegate timepickerEvents
@@ -264,6 +269,18 @@ module.exports = class EventPopOver extends PopoverView
                     @removeButton.css 'width', '14px'
                     @selfclose()
         else @removeButton.spin()
+
+
+    # When duplicate button is clicked, an new event with exact same date
+    # is created.
+    onDuplicateClicked: ->
+        attrs = []
+        attrs[key] = value for key, value of @model.attributes
+        delete attrs.id
+        delete attrs._id
+
+        calendarEvent = new Event attrs
+        calendarEvent.save()
 
 
     onAddClicked: ->
