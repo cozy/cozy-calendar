@@ -73,49 +73,51 @@ module.exports.delete = (req, res) ->
 
 
 module.exports.public = (req, res) ->
+    id = req.params.publiceventid
     key = req.query.key
-    if not visitor = req.event.getGuest key
-        locale = localization.getLocale()
-        fileName = "404_#{locale}.jade"
-        filePath = path.resolve __dirname, '../../client/', fileName
-        # Usefull for build
-        filePathBuild = path.resolve __dirname, '../../../client/', fileName
-        unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-            fileName = '404_en.jade'
-        res.status 404
-        res.render fileName
+    Event.find id, (err, event) ->
+        if err or not event or not visitor = event.getGuest key
+            locale = localization.getLocale()
+            fileName = "404_#{locale}.jade"
+            filePath = path.resolve __dirname, '../../client/', fileName
+            # Usefull for build
+            filePathBuild = path.resolve __dirname, '../../../client/', fileName
+            unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
+                fileName = '404_en.jade'
+            res.status 404
+            res.render fileName
 
-    else if req.query.status in ['ACCEPTED', 'DECLINED']
-        visitor.setStatus req.query.status, (err) ->
-            return res.send error: "server error occured", 500 if err
-            res.header 'Location': "./#{req.event.id}?key=#{key}"
-            res.send 303
+        else if req.query.status in ['ACCEPTED', 'DECLINED']
+            visitor.setStatus req.query.status, (err) ->
+                return res.send error: "server error occured", 500 if err
+                res.header 'Location': "./#{event.id}?key=#{key}"
+                res.send 303
 
-    else
-        if req.event.isAllDayEvent()
-            dateFormatKey = 'email date format allday'
         else
-            dateFormatKey = 'email date format'
-        dateFormat = localization.t dateFormatKey
-        date = req.event.formatStart dateFormat
+            if event.isAllDayEvent()
+                dateFormatKey = 'email date format allday'
+            else
+                dateFormatKey = 'email date format'
+            dateFormat = localization.t dateFormatKey
+            date = event.formatStart dateFormat
 
-        locale = localization.getLocale()
-        fileName = "event_public_#{locale}.jade"
-        filePath = path.resolve __dirname, '../../client/', fileName
-        # Usefull for build
-        filePathBuild = path.resolve __dirname, '../../../client/', fileName
-        unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-            fileName = 'event_public_en.jade'
+            locale = localization.getLocale()
+            fileName = "event_public_#{locale}.jade"
+            filePath = path.resolve __dirname, '../../client/', fileName
+            # Usefull for build
+            filePathBuild = path.resolve __dirname, '../../../client/', fileName
+            unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
+                fileName = 'event_public_en.jade'
 
-        desc = req.event.description.replace(' ', '-')
-        day =  moment(req.event.start).format("YYYY-MM-DD")
+            desc = event.description.replace(' ', '-')
+            day =  moment(event.start).format("YYYY-MM-DD")
 
-        res.render fileName,
-            event: req.event
-            file: "#{day}-#{desc}"
-            date: date
-            key: key
-            visitor: visitor
+            res.render fileName,
+                event: event
+                file: "#{day}-#{desc}"
+                date: date
+                key: key
+                visitor: visitor
 
 
 module.exports.ical = (req, res) ->
