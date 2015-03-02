@@ -109,7 +109,7 @@ module.exports["delete"] = function(req, res) {
   });
 };
 
-module.exports["public"] = function(req, res) {
+module.exports["public"] = function(req, res, next) {
   var id, key;
   id = req.params.publiceventid;
   key = req.query.key;
@@ -127,15 +127,13 @@ module.exports["public"] = function(req, res) {
       return res.render(fileName);
     } else if ((ref = req.query.status) === 'ACCEPTED' || ref === 'DECLINED') {
       return visitor.setStatus(req.query.status, function(err) {
-        if (err) {
-          return res.send({
-            error: "server error occured"
-          }, 500);
+        if (err != null) {
+          next(err);
         }
         res.header({
           'Location': "./" + event.id + "?key=" + key
         });
-        return res.send(303);
+        return res.status(303).send();
       });
     } else {
       if (event.isAllDayEvent()) {

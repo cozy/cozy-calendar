@@ -72,7 +72,7 @@ module.exports.delete = (req, res) ->
             res.send success: true, 200
 
 
-module.exports.public = (req, res) ->
+module.exports.public = (req, res, next) ->
     id = req.params.publiceventid
     key = req.query.key
     Event.find id, (err, event) ->
@@ -89,9 +89,10 @@ module.exports.public = (req, res) ->
 
         else if req.query.status in ['ACCEPTED', 'DECLINED']
             visitor.setStatus req.query.status, (err) ->
-                return res.send error: "server error occured", 500 if err
+                next err if err?
                 res.header 'Location': "./#{event.id}?key=#{key}"
-                res.send 303
+                res.status(303).send()
+
 
         else
             if event.isAllDayEvent()
