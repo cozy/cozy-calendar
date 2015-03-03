@@ -1,6 +1,7 @@
 ical = require 'cozy-ical'
 Event = require '../models/event'
 Tag = require '../models/tag'
+User  = require '../models/user'
 multiparty = require 'multiparty'
 fs = require 'fs'
 localization = require '../libs/localization_manager'
@@ -44,7 +45,8 @@ module.exports.import = (req, res, next) ->
             return cleanUp()
 
         parser = new ical.ICalParser()
-        parser.parseFile file.path, (err, result) ->
+        options = defaultTimezone: User.timezone
+        parser.parseFile file.path, options, (err, result) ->
             if err
                 console.log err
                 console.log err.message

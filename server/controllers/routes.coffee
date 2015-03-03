@@ -42,7 +42,7 @@ module.exports =
         get   : events.ical
     'public/events/:eventid/:name.ics':
         get   : events.publicIcal
-    'public/events/:eventid':
+    'public/events/:publiceventid':
         get   : events.public
 
     # ICal
