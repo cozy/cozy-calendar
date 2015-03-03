@@ -75,9 +75,14 @@ module.exports.delete = (req, res) ->
 module.exports.public = (req, res, next) ->
     id = req.params.publiceventid
     key = req.query.key
+    # Retrieve event
     Event.find id, (err, event) ->
+        # If event doesn't exist or visitor hasn't access display 404 page
         if err or not event or not visitor = event.getGuest key
+            # Retreive user localization
             locale = localization.getLocale()
+
+            # Display 404 page
             fileName = "404_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
             # Usefull for build
@@ -87,14 +92,18 @@ module.exports.public = (req, res, next) ->
             res.status 404
             res.render fileName
 
+        # If event exists, guess is authorized and request has a status
+        # Update status for guess (accepted or declined)
         else if req.query.status in ['ACCEPTED', 'DECLINED']
             visitor.setStatus req.query.status, (err) ->
                 next err if err?
                 res.header 'Location': "./#{event.id}?key=#{key}"
                 res.status(303).send()
 
-
+        # If event exists, guess is authorized and request hasn't a status
+        # Display event.
         else
+            # Retrive event data
             if event.isAllDayEvent()
                 dateFormatKey = 'email date format allday'
             else
@@ -102,7 +111,10 @@ module.exports.public = (req, res, next) ->
             dateFormat = localization.t dateFormatKey
             date = event.formatStart dateFormat
 
+            # Retrieve user localization
             locale = localization.getLocale()
+
+            # Display event
             fileName = "event_public_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
             # Usefull for build
