@@ -1569,6 +1569,8 @@ module.exports = {
   "change color": "Change color",
   "rename": "Rename",
   "export": "Export",
+  "remove": "Remove event",
+  "duplicate": "Duplicate event",
   "Place": "Place",
   'all day': 'all day',
   'All day': 'All day',
@@ -1767,6 +1769,8 @@ module.exports = {
   "delete": "Supprimer",
   "rename": "Renommer",
   "export": "Exporter",
+  "remove": "Supprimer l'événement",
+  "duplicate": "Dupliquer l'événement",
   "Place": "Lieu",
   'all day': 'journée entière',
   'All day': 'Journée entière',
@@ -2862,6 +2866,7 @@ module.exports = EventPopOver = (function(_super) {
     'click .add': 'onAddClicked',
     'click .advanced-link': 'onAdvancedClicked',
     'click .remove': 'onRemoveClicked',
+    'click .duplicate': 'onDuplicateClicked',
     'click .close': 'selfclose',
     'changeTime.timepicker .input-start': 'onSetStart',
     'changeTime.timepicker .input-end-time': 'onSetEnd',
@@ -2891,6 +2896,7 @@ module.exports = EventPopOver = (function(_super) {
     var timepickerEvents;
     this.addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
+    this.duplicateButton = this.$('.duplicate');
     this.$container = this.$('.popover-content-wrapper');
     timepickerEvents = {
       'focus': function() {
@@ -2905,6 +2911,7 @@ module.exports = EventPopOver = (function(_super) {
     };
     if (this.model.isNew()) {
       this.removeButton.hide();
+      this.duplicateButton.hide();
     }
     this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
     this.$('input[type="date"]').attr('type', 'text').datetimepicker(defDatePickerOps);
@@ -3105,6 +3112,20 @@ module.exports = EventPopOver = (function(_super) {
     } else {
       return this.removeButton.spin();
     }
+  };
+
+  EventPopOver.prototype.onDuplicateClicked = function() {
+    var attrs, calendarEvent, key, value, _ref;
+    attrs = [];
+    _ref = this.model.attributes;
+    for (key in _ref) {
+      value = _ref[key];
+      attrs[key] = value;
+    }
+    delete attrs.id;
+    delete attrs._id;
+    calendarEvent = new Event(attrs);
+    return calendarEvent.save();
   };
 
   EventPopOver.prototype.onAddClicked = function() {
@@ -5561,7 +5582,7 @@ var jade_interp;
 var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,start = locals_.start,tFormat = locals_.tFormat,end = locals_.end,dFormat = locals_.dFormat,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
 popoverClassName  = (allDay ? ' is-all-day' : '')
 popoverClassName += (sameDay? ' is-same-day' : '')
-buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : "-") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#'+advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('save changes') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : "-") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('save changes') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5580,7 +5601,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i></span>");;return buf.join("");
+buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i><i" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate icon-files-o\"></i></span>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
