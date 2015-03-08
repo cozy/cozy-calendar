@@ -37,12 +37,14 @@ module.exports.create = (req, res) ->
     data.created = moment().tz('UTC').toISOString()
     data.lastModification = moment().tz('UTC').toISOString()
     Event.createOrGetIfImport data, (err, event) ->
-        return res.error "Server error while creating event." if err
-        if data.import or req.query.sendMails isnt 'true'
-            res.send event, 201
+        if err?
+            res.send error: "Server error while creating event.", 500
         else
-            MailHandler.sendInvitations event, false, (err, updatedEvent) ->
-                res.send (updatedEvent or event), 201
+            if data.import or req.query.sendMails isnt 'true'
+                res.send event, 201
+            else
+                MailHandler.sendInvitations event, false, (err, updatedEvent) ->
+                    res.send (updatedEvent or event), 201
 
 
 module.exports.update = (req, res) ->
