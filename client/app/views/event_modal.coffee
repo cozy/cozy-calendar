@@ -21,7 +21,7 @@ module.exports = class EventModal extends ViewCollection
     inputDateTimeDTPickerFormat: 'dd/mm/yyyy hh:ii'
     inputDateFormat: 'DD/MM/YYYY'
     inputDateDTPickerFormat: 'dd/mm/yyyy'
-    exportDateFormat: 'YYYY-MM-DD-HH-mm'
+    exportDateFormat: 'YYYY-MM-DD'
 
     collectionEl: '#guests-list'
     itemview: require './event_modal_guest'
@@ -182,12 +182,14 @@ module.exports = class EventModal extends ViewCollection
         @descriptionField.prop 'rows', rows + 2
 
     getRenderData: ->
+        desc = @model.get('description').replace(' ', '-')
+        day = moment(@model.get('start')).format(@exportDateFormat)
         data = _.extend {}, @model.toJSON(),
             summary: @model.get 'description'
             description: @model.get 'details'
 
             allDay: @model.isAllDay()
-            exportdate: @model.getStartDateObject().format @exportDateFormat
+            file: "#{day}-#{desc}"
 
         f = if @model.isAllDay() then @inputDateFormat else @inputDateTimeFormat
 
