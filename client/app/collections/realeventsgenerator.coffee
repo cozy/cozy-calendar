@@ -117,7 +117,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         start = @firstDate.clone()
 
     # pick ponctual event and store newly found recurring ones.
-        i = @baseCollection.indexOf @firsGeneratedEvent
+        i = @baseCollection.indexOf @firstGeneratedEvent
         @firstGeneratedEvent = null # reset, before finding the new one.
         while i >= 0 and @firstGeneratedEvent is null
             item = @baseCollection.at i
