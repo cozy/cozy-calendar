@@ -124,7 +124,9 @@ module.exports.public = (req, res, next) ->
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
                 fileName = 'event_public_en.jade'
 
-            desc = event.description.replace(' ', '-')
+            specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
+            desc = event.description.replace(specialCharacters, '')
+            desc = desc.replace(/\ /g, '-')
             day =  moment(event.start).format("YYYY-MM-DD")
 
             res.render fileName,

@@ -182,7 +182,9 @@ module.exports = class EventModal extends ViewCollection
         @descriptionField.prop 'rows', rows + 2
 
     getRenderData: ->
-        desc = @model.get('description').replace(' ', '-')
+        specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
+        desc = @model.get('description').replace(specialCharacters, '')
+        desc = desc.replace(/\ /g, '-')
         day = moment(@model.get('start')).format(@exportDateFormat)
         data = _.extend {}, @model.toJSON(),
             summary: @model.get 'description'
