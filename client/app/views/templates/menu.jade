@@ -9,5 +9,11 @@ li.calendars
         i.fa.fa-calendar
         span
             = t('Calendar')
+        .dropdown
+            a#dLabel_.dropdown-toggle(data-toggle="dropdown")
+                span.caret
+            ul.dropdown-menu(aria-labelledBy='dLabel_')
+                li
+                    a.calendar-add= t('add calendar')
 
 ul#menuitems
