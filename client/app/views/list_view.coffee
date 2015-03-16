@@ -77,14 +77,14 @@ module.exports = class ListView extends ViewCollection
             # make asynchronous to allow the spinner to show up, before heavy
             # call on loadPreviousPage block the UI for à while.
             setTimeout =>
-                    @collection.loadPreviousPage (noMoreEvents) =>
-                        if noMoreEvents
-                            button.hide()
-                        button.html t('display previous events')
-                        button.spin 'none'
-                        @isLoading = false
-                        callback?()
-                , 1
+                @collection.loadPreviousPage (noMoreEvents) =>
+                    if noMoreEvents
+                        button.hide()
+                    button.html t('display previous events')
+                    button.spin 'none'
+                    @isLoading = false
+                    callback?()
+            , 1
 
     loadAfter: (callback) ->
         if not @isLoading and not @lastAlreadyLoaded
