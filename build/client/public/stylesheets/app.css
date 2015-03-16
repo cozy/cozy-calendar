@@ -8343,7 +8343,7 @@ textarea:active {
   border-radius: 0px;
   padding: 5px;
 }
-@media (min-width: 1100px) {
+@media( min-width: 1100px) {
   #event-modal {
     width: 1000px;
     margin-left: -500px;
@@ -8813,7 +8813,7 @@ input[type="time"] {
   border-radius: 0px;
   padding: 5px;
 }
-@media (min-width: 1100px) {
+@media( min-width: 1100px) {
   #event-modal {
     width: 1000px;
     margin-left: -500px;
@@ -9564,7 +9564,7 @@ body.error-404 .error-frame .headline {
   font-size: 30px;
   color: #34a6ff;
 }
-@media (max-width: 1000px) {
+@media( max-width: 1000px) {
   #alarms,
   #alarm-list {
     width: 100%;
@@ -9593,7 +9593,7 @@ body.error-404 .error-frame .headline {
     margin-bottom: 10px;
   }
 }
-@media (max-width: 700px) {
+@media( max-width: 700px) {
   #alarms .fc-day-header {
     font-size: 12px;
     text-align: center;
@@ -9603,7 +9603,7 @@ body.error-404 .error-frame .headline {
     font-size: 22px;
   }
 }
-@media (max-width: 600px) {
+@media( max-width: 600px) {
   ul#menu {
     height: 40px;
     width: 100%;
@@ -9674,7 +9674,7 @@ body.error-404 .error-frame .headline {
     top: 0px;
   }
 }
-@media (max-width: 500px) {
+@media( max-width: 500px) {
   #alarms .fc-day-header {
     font-size: 10px;
   }
