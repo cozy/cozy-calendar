@@ -45,6 +45,9 @@ module.exports = class ComboBox extends BaseView
         @menuOpen = true
         @$el.addClass 'expanded'
         @$el.focus().val(@value()).autocomplete 'search', ''
+        # when clicking on menu, auto selecting the input so that it
+        # can be updated when typing
+        @$el.select()
 
     setValue: (value) =>
         @$el.val value
@@ -74,7 +77,7 @@ module.exports = class ComboBox extends BaseView
     onEditionComplete: (name) =>
         @tag = app.tags.getOrCreateByName name
 
-        @buildBadge @tag.get 'color'        
+        @buildBadge @tag.get 'color'
 
     onChange: (ev, ui) =>
         value = ui?.item?.value or @value()
