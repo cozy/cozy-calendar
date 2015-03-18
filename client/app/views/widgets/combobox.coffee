@@ -74,7 +74,7 @@ module.exports = class ComboBox extends BaseView
     onEditionComplete: (name) =>
         @tag = app.tags.getOrCreateByName name
 
-        @buildBadge @tag.get 'color'        
+        @buildBadge @tag.get 'color'
 
     onChange: (ev, ui) =>
         value = ui?.item?.value or @value()

@@ -65,6 +65,14 @@ module.exports = class MenuItemView extends BaseView
         @$('.dropdown-toggle').on 'click', @hideColorPicker
 
 
+    #setting rename validation function to avoid code duplication
+    onRenameValidation: (input, calendarName) ->
+        @startSpinner()
+        # removes the binding to prevent memory leak
+        input.off 'keyup'
+        app.calendars.rename calendarName, input.val(), =>
+            @stopSpinner()
+
     onRenameCalendar: ->
         calendarName = @model.get 'name'
 
@@ -84,15 +92,15 @@ module.exports = class MenuItemView extends BaseView
         input.focus()
         input[0].setSelectionRange 0, calendarName.length
 
-        # Binds event to actually rename the calendar (enter key)
+        # Binds event to actually rename the calendar (enter key and blur)
+        input.blur (event) =>
+            console.log(calendarName)
+            @onRenameValidation input, calendarName
+
         input.keyup (event) =>
             key = event.keyCode or event.charCode
             if key is 13 # enter key
-                @startSpinner()
-                # removes the binding to prevent memory leak
-                input.off 'keyup'
-                app.calendars.rename calendarName, input.val(), =>
-                    @stopSpinner()
+                @onRenameValidation input, calendarName
             else
                 @buildBadge colorhash input.val()
 
