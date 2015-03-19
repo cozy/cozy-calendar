@@ -27,11 +27,13 @@ module.exports = class MenuView extends ViewCollection
                 place: ''
                 tags: [t("new calendar")]
         # saving the event, creating calendar
-        calendarEvent.save {}
-        #a timeout is needed for the created calendar to appear on bottom of the menu items
-        setTimeout ->
-            $('#menuitems li.tagmenuitem:last-of-type .calendar-rename').trigger("click")
-        ,100
+        calendarEvent.save null,
+            wait: true
+            success: =>
+                #a timeout is needed for the created calendar to appear on bottom of the menu items
+                setTimeout ->
+                    $('#menuitems li.tagmenuitem:last-of-type .calendar-rename').trigger("click")
+                , 100
 
     activate: (href) ->
         @$('.active').removeClass 'active'
