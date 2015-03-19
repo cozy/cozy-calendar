@@ -16,8 +16,8 @@ module.exports = class MenuItemView extends BaseView
         'click .dropdown-toggle': 'hideColorPicker'
         'click .calendar-color': 'showColorPicker'
         'change .color-picker': 'setColor'
-
-
+        'blur input.calendar-name': 'onRenameValidation'
+        'keyup input.calendar-name': 'onRenameValidation'
 
     getRenderData: ->
         label: @model.get 'name'
@@ -64,14 +64,28 @@ module.exports = class MenuItemView extends BaseView
         # Gone after succefull color pick, put it back.
         @$('.dropdown-toggle').on 'click', @hideColorPicker
 
+    #setting rename validation function to handle esc / return key, and blur event
+    onRenameValidation: (event) ->
 
-    #setting rename validation function to avoid code duplication
-    onRenameValidation: (input, calendarName) ->
+        input = $(event.target)
+        calendarName = @model.get 'name'
         @startSpinner()
+
         # removes the binding to prevent memory leak
-        input.off 'keyup'
-        app.calendars.rename calendarName, input.val(), =>
+        key = event.keyCode or event.charCode
+        if key is 27 # escape key
+            input.remove()
+            # re-appends text element
+            @rawTextElement.insertAfter @$('.badge')
+            # Restores the badge color
+            @buildBadge calendarName
+            # Shows the menu again
+            @$('.dropdown-toggle').show()
             @stopSpinner()
+        #blur and enter have the same effect
+        else if (key is 13 or event.type is 'focusout')
+            app.calendars.rename calendarName, input.val(), =>
+                @stopSpinner()
 
     onRenameCalendar: ->
         calendarName = @model.get 'name'
@@ -82,8 +96,7 @@ module.exports = class MenuItemView extends BaseView
         """
         input = $ template
         # Keeps a reference to the text element so we can re-append it later
-        rawTextElement = @$('.calendar-name').detach()
-        input.insertAfter @$('.badge')
+        @rawTextElement = @$('.calendar-name').detach()
 
         # hides the menu during edition
         @$('.dropdown-toggle').hide()
@@ -91,36 +104,6 @@ module.exports = class MenuItemView extends BaseView
         # focus the input and select its value
         input.focus()
         input[0].setSelectionRange 0, calendarName.length
-
-        # Binds event to actually rename the calendar (enter key and blur)
-        input.blur (event) =>
-            console.log(calendarName)
-            @onRenameValidation input, calendarName
-
-        input.keyup (event) =>
-            key = event.keyCode or event.charCode
-            if key is 13 # enter key
-                @onRenameValidation input, calendarName
-            else
-                @buildBadge colorhash input.val()
-
-        # Close the form and restore original state when user presses "escape"
-        $(document).keyup restore = (event) =>
-            key = event.keyCode or event.charCode
-            if key is 27 # escape key
-                # removes the binding to prevent memory leak
-                $(document).off 'keyup', 'document', restore
-                input.off 'keyup'
-
-                # re-appends text element
-                input.remove()
-                rawTextElement.insertAfter @$('.badge')
-
-                # Restores the badge color
-                @buildBadge calendarName
-
-                # Shows the menu again
-                @$('.dropdown-toggle').show()
 
     onRemoveCalendar: ->
         calendarName = @model.get 'name'
