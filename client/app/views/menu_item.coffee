@@ -86,6 +86,8 @@ module.exports = class MenuItemView extends BaseView
         else if (key is 13 or event.type is 'focusout')
             app.calendars.rename calendarName, input.val(), =>
                 @stopSpinner()
+        else
+            @buildBadge colorhash input.val()
 
     onRenameCalendar: ->
         calendarName = @model.get 'name'
