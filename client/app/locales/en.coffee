@@ -66,6 +66,7 @@ module.exports =
     "event"                             : "Event"
     "are you sure"                      : "Are you sure?"
     "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure?"
+    "confirm delete selected calendars" : "You are about to delete all the selected calendars. Are you sure?"
     "advanced"                          : "More details"
     "enter email"                       : "Enter email"
     "ON"                                : "on"
@@ -73,7 +74,7 @@ module.exports =
     "no description"                    : "No description"
     "add calendar"                      : "Add calendar"
     "new calendar"                      : "New calendar"
-
+    "multiple actions"                  : "Multiple actions"
 # RRULE related
     "recurrence"                        : "Recurrence"
     "recurrence rule"                   : "Recurrence rules"

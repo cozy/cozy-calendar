@@ -13,6 +13,8 @@ module.exports = class MenuItemView extends BaseView
         'click .calendar-rename': 'onRenameCalendar'
         'click .calendar-export': 'onExportCalendar'
 
+        'click .calendar-actions': 'onCalendarMultipleSelect'
+
         'click .dropdown-toggle': 'hideColorPicker'
         'click .calendar-color': 'showColorPicker'
         'change .color-picker': 'setColor'
@@ -70,6 +72,12 @@ module.exports = class MenuItemView extends BaseView
         # Gone after succefull color pick, put it back.
         @$('.dropdown-toggle').on 'click', @hideColorPicker
 
+    onCalendarMultipleSelect: ->
+        actionMenu = $('#multiple-actions')
+        if $('.calendar-actions:checked').length > 0
+            actionMenu.removeClass 'hidden'
+        else
+            actionMenu.addClass 'hidden'
 
     # Handle `blur` and `keyup` (`enter` and `esc` keys) events in order to
     # rename a calendar.

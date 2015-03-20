@@ -4,17 +4,26 @@ Tag = require '../models/tag'
 User  = require '../models/user'
 multiparty = require 'multiparty'
 fs = require 'fs'
+child = require 'child_process'
+rm = require 'rimraf'
+zip = require 'bauer-zip'
+# path = require 'path'
 localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
 
     calendarId = req.params.calendarid
+    createCalendar calendarId, (calendar) ->
+        res.header 'Content-Type': 'text/calendar'
+        res.send calendar.toString()
 
+
+createCalendar = (calendarName, callback) ->
     calendar = new ical.VCalendar
         organization: 'Cozy'
         title: 'Cozy Calendar'
-        name: calendarId
-    Event.byCalendar calendarId, (err, events) ->
+        name: calendarName
+    Event.byCalendar calendarName, (err, events) ->
         if err
             res.send
                 error: true
@@ -22,9 +31,7 @@ module.exports.export = (req, res) ->
         else
             if events.length > 0
                 calendar.add event.toIcal() for event in events
-
-            res.header 'Content-Type': 'text/calendar'
-            res.send calendar.toString()
+                callback calendar
 
 module.exports.import = (req, res, next) ->
 
@@ -63,3 +70,46 @@ module.exports.import = (req, res, next) ->
                         calendar:
                             name: calendarName
                     cleanUp()
+
+module.exports.zipExport = (req, res) ->
+    # create a tmp dir if not exists. Don't use trailing slash to avoid
+    # unzip errors
+    dir = '/tmp/cozy-cal'
+    if !fs.existsSync dir
+        fs.mkdir dir,'0744', (err) ->
+             if err
+                res.send
+                error: true
+                msg: 'Server error occurred while creating temp folders'
+
+    # for each selected calendar, create ics file, and write it into tmp folder
+    saveCal = (calName) ->
+        createCalendar calName, (calendar) ->
+            fs.writeFile dir + "/" + calName + ".ics", calendar, (err) ->
+                throw err if err
+
+    # parse name array received as parameter
+    for calName in JSON.parse req.params.ids
+        saveCal calName
+
+    # build a zip file with every .ics file in the tmp foler and sent it as response
+    zip.zip dir, "cozy.zip", (error) ->
+        res.contentType 'application/zip'
+        res.setHeader 'content-disposition','attachment; filename=' + "cozy.zip"
+        stream = fs.createReadStream 'cozy.zip'
+        stream.pipe res
+        stream.on 'close', ->
+            # cleaning the mess
+            # tmp archive
+            fs.unlink "cozy.zip", (err) ->
+                if err
+                    res.send
+                    error: true
+                    msg: 'Server error occurred while deleting temp archive'
+            # tmp dir
+            rm dir, (err) ->
+                if err
+                    res.send
+                    error: true
+                    msg: 'Server error occurred while deleting temp folders'
+            return
