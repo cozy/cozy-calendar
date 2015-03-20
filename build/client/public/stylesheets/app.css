@@ -8393,6 +8393,10 @@ ul#menu li.active {
 }
 ul#menu li.active a {
   background: transparent;
+  display: inline-block;
+}
+ul#menu li.active a.calendar-add {
+  width: 150px;
 }
 ul#menu li.divider {
   background-color: transparent;
@@ -8409,6 +8413,27 @@ ul#menu li {
 ul#menu li i {
   margin-right: 10px;
   margin-left: 10px;
+}
+ul#menu li.calendars {
+  position: relative;
+}
+ul#menu li.calendars .calendar-add {
+  margin-left: 10px;
+  font-size: 15px;
+  opacity: 0.4;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+  filter: alpha(opacity=40);
+}
+ul#menu li.calendars .calendar-add:hover {
+  opacity: 0.8;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+  filter: alpha(opacity=80);
+}
+ul#menu li.calendars .spinner {
+  margin-left: 10px;
+  display: none;
+  height: 15px;
+  width: 15px;
 }
 ul#menu> li:hover {
   background: #ffc47f;
@@ -8433,7 +8458,10 @@ ul#menu ul#menuitems li.tagmenuitem .badge {
 }
 ul#menu ul#menuitems li.tagmenuitem .badge .spinHolder {
   position: absolute;
-  left: -100%;
+  left: -150%;
+  height: 15px;
+  width: 15px;
+  display: none;
 }
 ul#menu ul#menuitems li.tagmenuitem input.calendar-name {
   width: 100px;
