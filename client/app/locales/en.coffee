@@ -71,6 +71,8 @@ module.exports =
     "ON"                                : "on"
     "OFF"                               : "off"
     "no description"                    : "No description"
+    "add calendar"                      : "Add calendar"
+    "new calendar"                      : "New calendar"
 
 # RRULE related
     "recurrence"                        : "Recurrence"
