@@ -7,13 +7,8 @@ li
 li.calendars
     a(href="#calendar")
         i.fa.fa-calendar
-        span
-            = t('Calendar')
-        .dropdown
-            a#dLabel_.dropdown-toggle(data-toggle="dropdown")
-                span.caret
-            ul.dropdown-menu(aria-labelledBy='dLabel_')
-                li
-                    a.calendar-add= t('add calendar')
+        span= t('Calendar')
+        span.fa.fa-plus.calendar-add
+        img.spinner(src="img/spinner.svg")
 
 ul#menuitems

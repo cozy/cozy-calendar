@@ -139,7 +139,7 @@ module.exports = class MenuItemView extends BaseView
         @$('.badge').css styles
 
     startSpinner: ->
-        @$('.spinHolder').spin 'tiny', '#000'
+        @$('.spinHolder').show()
 
     stopSpinner: ->
-        @$('.spinHolder').spin false
+        @$('.spinHolder').hide()

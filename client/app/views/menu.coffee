@@ -17,7 +17,9 @@ module.exports = class MenuView extends ViewCollection
         'click .calendars': 'toggleDropdown'
         'click .calendar-add': 'onAddCalendar'
 
+
     onAddCalendar: ->
+        @startSpinner()
         @tag = app.tags.getOrCreateByName "new calendar"
         # Since an event is needed to create a calendar, let's make a false one
         calendarEvent = new Event
@@ -31,13 +33,26 @@ module.exports = class MenuView extends ViewCollection
             wait: true
             success: =>
                 #a timeout is needed for the created calendar to appear on bottom of the menu items
-                setTimeout ->
+                setTimeout =>
                     $('#menuitems li.tagmenuitem:last-of-type .calendar-rename').trigger("click")
                 , 100
+            complete: =>
+                # Crappy timeout to match the input selection in `success`
+                setTimeout @stopSpinner.bind(@), 100
+
 
     activate: (href) ->
         @$('.active').removeClass 'active'
         @$('a[href="#' + href + '"]').parent().addClass 'active'
 
+
     toggleDropdown: ->
         @$('#menuitems').toggleClass 'visible'
+
+
+    startSpinner: ->
+        @$('.spinner').show()
+
+
+    stopSpinner: ->
+        @$('.spinner').hide()

@@ -1627,6 +1627,8 @@ module.exports = {
   "ON": "on",
   "OFF": "off",
   "no description": "No description",
+  "add calendar": "Add calendar",
+  "new calendar": "New calendar",
   "recurrence": "Recurrence",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
@@ -1826,6 +1828,8 @@ module.exports = {
   "ON": "activée",
   "OFF": "désactivée",
   "no description": "Sans description",
+  "add calendar": "Ajouter un calendrier",
+  "new calendar": "Nouveau calendrier",
   "recurrence": "Récurrence",
   "recurrence rule": "Règle de récurrence",
   "make reccurent": "Rendre récurrent",
@@ -4924,11 +4928,19 @@ module.exports = EventItemView = (function(_super) {
 });
 
 ;require.register("views/menu", function(exports, require, module) {
-var MenuView, ViewCollection,
+var ComboBox, Event, MenuView, Tag, ViewCollection, colorhash,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
+colorhash = require('lib/colorhash');
+
 ViewCollection = require('../lib/view_collection');
+
+ComboBox = require('views/widgets/combobox');
+
+Event = require('models/event');
+
+Tag = require('models/tag');
 
 module.exports = MenuView = (function(_super) {
   __extends(MenuView, _super);
@@ -4951,8 +4963,37 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.events = function() {
     return {
-      'click .calendars': 'toggleDropdown'
+      'click .calendars': 'toggleDropdown',
+      'click .calendar-add': 'onAddCalendar'
     };
+  };
+
+  MenuView.prototype.onAddCalendar = function() {
+    var calendarEvent;
+    this.startSpinner();
+    this.tag = app.tags.getOrCreateByName("new calendar");
+    calendarEvent = new Event({
+      start: moment("19010101", "YYYYMMDD"),
+      end: moment("19010101", "YYYYMMDD"),
+      description: '',
+      place: '',
+      tags: [t("new calendar")]
+    });
+    return calendarEvent.save(null, {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          return setTimeout(function() {
+            return $('#menuitems li.tagmenuitem:last-of-type .calendar-rename').trigger("click");
+          }, 100);
+        };
+      })(this),
+      complete: (function(_this) {
+        return function() {
+          return setTimeout(_this.stopSpinner.bind(_this), 100);
+        };
+      })(this)
+    });
   };
 
   MenuView.prototype.activate = function(href) {
@@ -4962,6 +5003,14 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.toggleDropdown = function() {
     return this.$('#menuitems').toggleClass('visible');
+  };
+
+  MenuView.prototype.startSpinner = function() {
+    return this.$('.spinner').show();
+  };
+
+  MenuView.prototype.stopSpinner = function() {
+    return this.$('.spinner').hide();
   };
 
   return MenuView;
@@ -5000,7 +5049,9 @@ module.exports = MenuItemView = (function(_super) {
     'click .calendar-export': 'onExportCalendar',
     'click .dropdown-toggle': 'hideColorPicker',
     'click .calendar-color': 'showColorPicker',
-    'change .color-picker': 'setColor'
+    'change .color-picker': 'setColor',
+    'blur input.calendar-name': 'onRenameValidation',
+    'keyup input.calendar-name': 'onRenameValidation'
   };
 
   MenuItemView.prototype.getRenderData = function() {
@@ -5054,45 +5105,38 @@ module.exports = MenuItemView = (function(_super) {
     return this.$('.dropdown-toggle').on('click', this.hideColorPicker);
   };
 
+  MenuItemView.prototype.onRenameValidation = function(event) {
+    var calendarName, input, key;
+    input = $(event.target);
+    calendarName = this.model.get('name');
+    key = event.keyCode || event.charCode;
+    if (key === 27) {
+      input.remove();
+      this.rawTextElement.insertAfter(this.$('.badge'));
+      this.buildBadge(calendarName);
+      return this.$('.dropdown-toggle').show();
+    } else if (key === 13 || event.type === 'focusout') {
+      this.startSpinner();
+      return app.calendars.rename(calendarName, input.val(), (function(_this) {
+        return function() {
+          return _this.stopSpinner();
+        };
+      })(this));
+    } else {
+      return this.buildBadge(colorhash(input.val()));
+    }
+  };
+
   MenuItemView.prototype.onRenameCalendar = function() {
-    var calendarName, input, rawTextElement, restore, template;
+    var calendarName, input, template;
     calendarName = this.model.get('name');
     template = "<input type=\"text\" class=\"calendar-name\" value=\"" + calendarName + "\"/>";
     input = $(template);
-    rawTextElement = this.$('.calendar-name').detach();
+    this.rawTextElement = this.$('.calendar-name').detach();
     input.insertAfter(this.$('.badge'));
     this.$('.dropdown-toggle').hide();
     input.focus();
-    input[0].setSelectionRange(0, calendarName.length);
-    input.keyup((function(_this) {
-      return function(event) {
-        var key;
-        key = event.keyCode || event.charCode;
-        if (key === 13) {
-          _this.startSpinner();
-          input.off('keyup');
-          return app.calendars.rename(calendarName, input.val(), function() {
-            return _this.stopSpinner();
-          });
-        } else {
-          return _this.buildBadge(colorhash(input.val()));
-        }
-      };
-    })(this));
-    return $(document).keyup(restore = (function(_this) {
-      return function(event) {
-        var key;
-        key = event.keyCode || event.charCode;
-        if (key === 27) {
-          $(document).off('keyup', 'document', restore);
-          input.off('keyup');
-          input.remove();
-          rawTextElement.insertAfter(_this.$('.badge'));
-          _this.buildBadge(calendarName);
-          return _this.$('.dropdown-toggle').show();
-        }
-      };
-    })(this));
+    return input[0].setSelectionRange(0, calendarName.length);
   };
 
   MenuItemView.prototype.onRemoveCalendar = function() {
@@ -5130,11 +5174,11 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.startSpinner = function() {
-    return this.$('.spinHolder').spin('tiny', '#000');
+    return this.$('.spinHolder').show();
   };
 
   MenuItemView.prototype.stopSpinner = function() {
-    return this.$('.spinHolder').spin(false);
+    return this.$('.spinHolder').hide();
   };
 
   return MenuItemView;
@@ -5525,7 +5569,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span></a></li><ul id=\"menuitems\"></ul>");;return buf.join("");
+buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5546,7 +5590,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<span class=\"badge\">&nbsp;<span class=\"spinHolder\">&nbsp;</span></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
+buf.push("<span class=\"badge\">&nbsp;<img src=\"img/spinner.svg\" class=\"spinHolder\"/></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5790,7 +5834,8 @@ module.exports = ComboBox = (function(_super) {
   ComboBox.prototype.openMenu = function() {
     this.menuOpen = true;
     this.$el.addClass('expanded');
-    return this.$el.focus().val(this.value()).autocomplete('search', '');
+    this.$el.focus().val(this.value()).autocomplete('search', '');
+    return this.$el[0].setSelectionRange(0, this.value().length);
   };
 
   ComboBox.prototype.setValue = function(value) {
