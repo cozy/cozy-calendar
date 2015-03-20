@@ -46,37 +46,18 @@ ul#menu
         margin-left: 10px
 
     &.calendars
-      .dropdown
-        display inline-block
-        .dropdown-toggle
-          padding 0 5px
-          .caret
+        position relative
+        .calendar-add
+            margin-left 10px
+            font-size 15px
+            opacity 0.4
+
+            &:hover
+                opacity 0.8
+
+        .spinner
+            margin-left 10px
             display none
-            margin-top 0 !important // overrides bootstrap
-            vertical-align middle
-            border-top-color #000
-            border-bottom-color #000
-            opacity 0.2
-            transform scale(1.5, 1.5)
-
-        .dropdown-menu
-          border-radius 0
-          padding 0
-          li
-            margin 0
-            padding 0
-            a
-              padding 5px
-              &:hover
-                background #ffc47f
-
-
-      &:hover
-        .dropdown .dropdown-toggle .caret
-          display inline-block
-
-          &:hover
-            opacity 1
 
   &> li:hover
     background #FFC47F
