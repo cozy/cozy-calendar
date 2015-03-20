@@ -73,6 +73,7 @@ module.exports = class EventPopOver extends PopoverView
     afterRender: ->
         @addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
+        @spinner = @$ '.remove-spinner'
         @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
 
@@ -100,6 +101,8 @@ module.exports = class EventPopOver extends PopoverView
             small: true
             source: app.calendars.toAutoCompleteSource()
 
+        # Set default calendar value.
+        @model.setCalendar @calendar.value()
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
         @refresh()
@@ -257,18 +260,16 @@ module.exports = class EventPopOver extends PopoverView
 
 
     onRemoveClicked: ->
-        @removeButton.css 'width', '42px'
-        @removeButton.spin 'tiny'
         if confirm t('are you sure')
+            @spinner.show()
+            @removeButton.hide()
             @model.destroy
                 wait: true
                 error: ->
                     alert t('server error occured')
                 complete: =>
-                    @removeButton.spin()
-                    @removeButton.css 'width', '14px'
+                    @spinner.show()
                     @selfclose()
-        else @removeButton.spin()
 
 
     # When duplicate button is clicked, an new event with exact same date
