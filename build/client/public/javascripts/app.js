@@ -2900,6 +2900,7 @@ module.exports = EventPopOver = (function(_super) {
     var timepickerEvents;
     this.addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
+    this.spinner = this.$('.remove-spinner');
     this.duplicateButton = this.$('.duplicate');
     this.$container = this.$('.popover-content-wrapper');
     timepickerEvents = {
@@ -2925,6 +2926,7 @@ module.exports = EventPopOver = (function(_super) {
       small: true,
       source: app.calendars.toAutoCompleteSource()
     });
+    this.model.setCalendar(this.calendar.value());
     this.calendar.on('edition-complete', (function(_this) {
       return function(value) {
         return _this.model.setCalendar(value);
@@ -3097,9 +3099,9 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.onRemoveClicked = function() {
-    this.removeButton.css('width', '42px');
-    this.removeButton.spin('tiny');
     if (confirm(t('are you sure'))) {
+      this.spinner.show();
+      this.removeButton.hide();
       return this.model.destroy({
         wait: true,
         error: function() {
@@ -3107,14 +3109,11 @@ module.exports = EventPopOver = (function(_super) {
         },
         complete: (function(_this) {
           return function() {
-            _this.removeButton.spin();
-            _this.removeButton.css('width', '14px');
+            _this.spinner.show();
             return _this.selfclose();
           };
         })(this)
       });
-    } else {
-      return this.removeButton.spin();
     }
   };
 
@@ -5649,7 +5648,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i><i" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate icon-files-o\"></i></span>");;return buf.join("");
+buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close\">&times;</button><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove icon-trash\"></i><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><i" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate icon-files-o\"></i></span>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

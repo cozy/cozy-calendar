@@ -8913,7 +8913,8 @@ input[type="time"] {
   top: 14px;
   right: 10px;
 }
-.popover .controls [role=button] {
+.popover .controls [role=button],
+.popover .controls .remove-spinner {
   display: block;
   float: right;
   clear: right;
@@ -8930,6 +8931,10 @@ input[type="time"] {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
   filter: alpha(opacity=70);
   margin-right: 5px;
+}
+.popover .controls .remove-spinner {
+  display: none;
+  cursor: wait;
 }
 .popover-title {
   padding: 15px 0 10px;
