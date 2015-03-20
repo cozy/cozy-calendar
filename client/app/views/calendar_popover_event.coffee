@@ -100,6 +100,8 @@ module.exports = class EventPopOver extends PopoverView
             small: true
             source: app.calendars.toAutoCompleteSource()
 
+        # Set default calendar value.
+        @model.setCalendar @calendar.value()
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
         @refresh()
