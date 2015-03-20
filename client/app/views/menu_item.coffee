@@ -64,48 +64,57 @@ module.exports = class MenuItemView extends BaseView
         # Gone after succefull color pick, put it back.
         @$('.dropdown-toggle').on 'click', @hideColorPicker
 
-    #setting rename validation function to handle esc / return key, and blur event
+
+    # Handle `blur` and `keyup` (`enter` and `esc` keys) events in order to
+    # rename a calendar.
     onRenameValidation: (event) ->
 
-        input = $(event.target)
+        input = $ event.target
         calendarName = @model.get 'name'
-        @startSpinner()
 
-        # removes the binding to prevent memory leak
         key = event.keyCode or event.charCode
-        if key is 27 # escape key
+         # `escape` key cancels the edition.
+        if key is 27
             input.remove()
             # re-appends text element
             @rawTextElement.insertAfter @$('.badge')
+
             # Restores the badge color
             @buildBadge calendarName
+
             # Shows the menu again
             @$('.dropdown-toggle').show()
-            @stopSpinner()
-        #blur and enter have the same effect
+
+        # `blur` event and `enter` key trigger the persistence
         else if (key is 13 or event.type is 'focusout')
+            @startSpinner()
             app.calendars.rename calendarName, input.val(), =>
                 @stopSpinner()
         else
             @buildBadge colorhash input.val()
 
+
+    # Replace the calendar's name by an input to edit the name.
     onRenameCalendar: ->
         calendarName = @model.get 'name'
 
-        # Creates the input and replace the raw text by it
+        # Create the input and replace the raw text by it.
         template = """
         <input type="text" class="calendar-name" value="#{calendarName}"/>
         """
         input = $ template
-        # Keeps a reference to the text element so we can re-append it later
-        @rawTextElement = @$('.calendar-name').detach()
 
-        # hides the menu during edition
+        # Keep a reference to the text element so we can re-append it later.
+        @rawTextElement = @$('.calendar-name').detach()
+        input.insertAfter @$('.badge')
+
+        # Hides the menu during edition.
         @$('.dropdown-toggle').hide()
 
-        # focus the input and select its value
+        # Focus the input and select its value/
         input.focus()
         input[0].setSelectionRange 0, calendarName.length
+
 
     onRemoveCalendar: ->
         calendarName = @model.get 'name'
