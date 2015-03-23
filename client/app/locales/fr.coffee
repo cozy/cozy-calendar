@@ -1,7 +1,7 @@
 module.exports =
     "default calendar name"             : "mon agenda"
     "Add"                               : "Ajouter"
-    "event"                             : "événement"
+    "event"                             : "évènement"
     "create event"                      : "Création d'un évènement"
     "edit event"                        : "Modification d'un évènement"
     "edit"                              : "Enregistrer"
@@ -13,8 +13,8 @@ module.exports =
     "delete"                            : "Supprimer"
     "rename"                            : "Renommer"
     "export"                            : "Exporter"
-    "remove"                            : "Supprimer l'événement"
-    "duplicate"                         : "Dupliquer l'événement"
+    "remove"                            : "Supprimer l'évènement"
+    "duplicate"                         : "Dupliquer l'évènement"
     "Place"                             : "Lieu"
     'all day'                           : 'journée entière'
     'All day'                           : 'Journée entière'
@@ -59,12 +59,12 @@ module.exports =
     "Week"                              : "Semaine"
     "Display"                           : "Notification"
     "DISPLAY"                           : "Notification"
-    "EMAIL"                             : "E-mail"
-    "BOTH"                              : "E-mail & notification"
+    "EMAIL"                             : "Email"
+    "BOTH"                              : "Email & notification"
     "display previous events"           : "Afficher les évènements précédents"
     "display next events"           : "Afficher les évènements suivants"
     "are you sure"                      : "Êtes-vous sûr(e) ?"
-    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
+    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les évènements associés à %{calendarName}. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"
@@ -73,7 +73,7 @@ module.exports =
     "add calendar"                      : "Ajouter un calendrier"
     "new calendar"                      : "Nouveau calendrier"
 
-# RRULE related
+# RULE related
     "recurrence"                        : "Récurrence"
     "recurrence rule"                   : "Règle de récurrence"
     "make reccurent"                    : "Rendre récurrent"
@@ -95,11 +95,11 @@ module.exports =
     "days"                              : "jours"
     "day"                               : "jour"
     "weeks"                             : "semaines"
-    "week"                              : "semaines"
+    "week"                              : "semaine"
     "months"                            : "mois"
     "month"                             : "mois"
     "years"                             : "ans"
-    "year"                              : "ans"
+    "year"                              : "an"
     "until"                             : "jusqu'au"
     "for"                               : "pour"
     "on"                                : "le"
@@ -140,7 +140,7 @@ module.exports =
     'no'                                : 'Non'
 
 # ERRORS
-    "no summary"                        : "Le titre est obligatoire"
+    "no summary"                        : "Le titre est obligatoire."
     "start after end"                   : "La fin est après le début."
     "invalid start date"                : "Le début est invalide."
     "invalid end date"                  : "La fin est invalide."
@@ -153,7 +153,7 @@ module.exports =
     "synchronization"                   : "Synchronisation"
     "mobile sync"                       : "Synchro Mobile (CalDAV)"
     "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :"
-    "link imported events with calendar": "Lier les événements à importer avec le calendrier suivant:"
+    "link imported events with calendar": "Lier les évènements à importer avec le calendrier suivant :"
     "download a copy of your calendar"  : "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :"
     "icalendar export"                  : "Exporter ICalendar"
     "icalendar import"                  : "Importer ICalendar"
@@ -166,8 +166,8 @@ module.exports =
     "sync help link"                    : "guide pas à pas !"
     "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
-    "some event fail to save"           : "La sauvegarde d'un événement a échoué."
-    "imported events": "Nombre d'événements importés"
+    "some event fail to save"           : "La sauvegarde d'un évènement a échoué."
+    "imported events": "Nombre d'évènements importés"
     "import finished": "Votre importation est terminée !"
     "import error occured for": "Une erreur est survenue pour un de ces éléments "
     "export your calendar": "Exporter votre agenda"
@@ -202,9 +202,9 @@ module.exports =
 # Emails
     'email date format': 'DD/MM/YYYY [à] HH[h]mm'
     'email date format allday': 'DD/MM/YYYY [toute la journée]'
-    'email invitation title': "Invitation à l'événement \"%{description}\""
+    'email invitation title': "Invitation à l'évènement \"%{description}\""
     'email invitation content': """
-        Bonjour, je souhaiterais vous inviter à l'événement suivant :
+        Bonjour, je souhaiterais vous inviter à l'évènement suivant :
         %{description} %{place}
         Le %{date}
         Serez-vous présent ?
@@ -215,9 +215,9 @@ module.exports =
         Non
         %{url}?status=DECLINED&key=%{key}
     """
-    'email update title': "L'événement \"%{description}\" a changé"
+    'email update title': "L'évènement \"%{description}\" a changé"
     'email update content': """
-        Un événement auquel vous participez a changé :
+        Un évènement auquel vous participez a changé :
         %{description} %{place}
         Le %{date}
 
@@ -228,9 +228,9 @@ module.exports =
         %{url}?status=DECLINED&key=%{key}
 
     """
-    'email delete title': 'Cet événement a été annulé : %{description}'
+    'email delete title': 'Cet évènement a été annulé : %{description}'
     'email delete content': """
-        Cet événement a été annulé :
+        Cet évènement a été annulé :
         %{description} %{place}
         Le %{date}
     """
