@@ -7,7 +7,7 @@ fs = require 'fs'
 child = require 'child_process'
 rm = require 'rimraf'
 zip = require 'bauer-zip'
-# path = require 'path'
+
 localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
