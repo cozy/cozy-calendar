@@ -7,7 +7,7 @@ module.exports = class Toggle extends BaseView
     tagName: 'span'
     className: 'badge'
     template: (data) ->
-        "<i class='icon-#{data.icon}'></i>"
+        "<i class='fa fa-#{data.icon}'></i>"
 
     initialize: (options) ->
         @value = options.value
@@ -26,10 +26,8 @@ module.exports = class Toggle extends BaseView
         @value = value
         if @value
             @$el.addClass 'badge-info'
-            @$('i').addClass 'icon-white'
         else
             @$el.removeClass 'badge-info'
-            @$('i').removeClass 'icon-white'
 
         title = @label + ' : ' + t(if value then 'ON' else 'OFF')
         @$el.attr 'title', title
