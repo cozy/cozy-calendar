@@ -85,8 +85,7 @@ module.exports = class MenuView extends ViewCollection
     onCalendarMultipleExport: ->
         calendars = []
         $('.calendar-actions:checked').each ->
-            calendars.push($(this).parent().find('.calendar-name')[0].innerHTML)
-        console.log "plop", calendars
+            calendars.push(@value)
         calendars = JSON.stringify calendars
         window.location = "exportzip/#{calendars}"
 

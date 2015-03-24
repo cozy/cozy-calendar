@@ -74,11 +74,19 @@ module.exports = class MenuItemView extends BaseView
 
     onCalendarMultipleSelect: ->
         actionMenu = $('#multiple-actions')
-        if $('.calendar-actions:checked').length > 0
+        trashButton = $('.remove-cals', actionMenu)
+        nbCalendars = $('.calendar-actions').length
+        nbCalendarsChecked = $('.calendar-actions:checked').length
+        # We display the additional menu if 2 cals or more are checked
+        if nbCalendarsChecked > 1
             actionMenu.removeClass 'hidden'
         else
             actionMenu.addClass 'hidden'
-
+        # We hide the trash icon if all calendars are selected
+        if nbCalendarsChecked == nbCalendars
+            trashButton.addClass 'hidden'
+        else
+            trashButton.removeClass 'hidden'
     # Handle `blur` and `keyup` (`enter` and `esc` keys) events in order to
     # rename a calendar.
     onRenameValidation: (event) ->
