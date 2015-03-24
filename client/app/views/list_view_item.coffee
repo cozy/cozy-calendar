@@ -10,8 +10,8 @@ module.exports = class EventItemView extends BaseView
     template: require './templates/list_view_item'
 
     events:
-        'click .icon-pencil': 'editMode'
-        'click .icon-trash': 'deleteModel'
+        'click .edit': 'editMode'
+        'click .delete': 'deleteModel'
 
     initialize: ->
         @listenTo @model, 'change', @render

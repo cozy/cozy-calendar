@@ -26,6 +26,7 @@ ul#menu
     a
         background: transparent
         display: inline-block
+
         &.calendar-add
           width 150px
 
@@ -47,13 +48,15 @@ ul#menu
 
     &.calendars
         position relative
+
         .calendar-add
+            display none
             margin-left 10px
             font-size 15px
-            opacity 0.4
+            text-shadow none
 
-            &:hover
-                opacity 0.8
+        &:hover .calendar-add
+            display inline-block
 
         .spinner
             margin-left 10px

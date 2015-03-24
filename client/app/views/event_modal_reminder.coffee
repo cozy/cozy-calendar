@@ -17,7 +17,7 @@ module.exports = class ReminderView extends BaseView
             value: @model.action in ['EMAIL', 'BOTH']
 
         @actionNotif = new Toggle
-            icon: 'exclamation-sign'
+            icon: 'exclamation'
             label: 'home notification'
             value: @model.action in ['DISPLAY', 'BOTH']
 

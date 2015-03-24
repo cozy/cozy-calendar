@@ -8235,9 +8235,19 @@ textarea:active {
 }
 #event-modal .modal-body #reminder-container .reminder .badge {
   margin-left: 5px;
-  line-height: 20px;
+  padding: 0px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  text-align: center;
   vertical-align: middle;
   cursor: pointer;
+  color: #000;
+}
+#event-modal .modal-body #reminder-container .reminder .badge.badge-info {
+  color: #fff;
 }
 #event-modal .modal-body #reminder-container .reminder .removereminder {
   margin-left: 5px;
@@ -8295,7 +8305,7 @@ textarea:active {
   font-size: 11px;
 }
 #event-modal .modal-body #guests-list i {
-  vertical-align: middle;
+  vertical-align: bottom;
 }
 #event-modal .modal-body #guests-list i.green {
   color: #5c5;
@@ -8418,16 +8428,13 @@ ul#menu li.calendars {
   position: relative;
 }
 ul#menu li.calendars .calendar-add {
+  display: none;
   margin-left: 10px;
   font-size: 15px;
-  opacity: 0.4;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-  filter: alpha(opacity=40);
+  text-shadow: none;
 }
-ul#menu li.calendars .calendar-add:hover {
-  opacity: 0.8;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
-  filter: alpha(opacity=80);
+ul#menu li.calendars:hover .calendar-add {
+  display: inline-block;
 }
 ul#menu li.calendars .spinner {
   margin-left: 10px;
@@ -8525,345 +8532,6 @@ ul#menu ul#menuitems li.tagmenuitem:hover .dropdown .dropdown-toggle .caret:hove
   border: 1px solid #ccc;
   z-index: 10;
 }
-html,
-body {
-  height: 100%;
-  width: 100%;
-  padding: 0;
-}
-body {
-  text-rendering: optimizeLegibility;
-  background-image: url("../img/background.jpg");
-}
-body,
-input {
-  color: #333;
-  font: 300 16px Geneva, Verdana, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
-  line-height: 1.2;
-}
-h2 {
-  font-family: 'Maven Pro', sans-serif;
-}
-a,
-a:visited {
-  color: #0086cc;
-  text-decoration: none;
-}
-a:hover,
-a:visited:hover {
-  text-decoration: underline;
-}
-[aria-hidden=true] {
-  display: none !important;
-}
-body.modal-open,
-.modal-open .navbar-fixed-top,
-.modal-open .navbar-fixed-bottom {
-  margin-right: 0;
-}
-textarea:hover,
-input[type="text"]:hover,
-textarea:active,
-input[type="text"]:active,
-textarea:focus,
-input[type="text"]:focus,
-a:focus,
-.btn:focus {
-  outline: 0px !important;
-  -webkit-appearance: none;
-}
-.well {
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  background: #fff;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border: 0;
-}
-.btn {
-  border: 0;
-  background: #34a6ff;
-  color: #fff;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  text-shadow: none;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  font-family: 'Source Sans Pro', sans-serif;
-  font-weight: bold;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-}
-.badge {
-  background: #f5f5f5;
-}
-.badge-info {
-  background: #34a6ff;
-  color: #fff;
-}
-.btn:hover,
-.btn:focus {
-  background: #fe8800;
-  color: #fff;
-  border-color: #fe8800;
-  text-shadow: none;
-}
-.form-horizontal {
-  margin-bottom: 0 !important;
-}
-.form-horizontal .control-group {
-  margin-bottom: 10px;
-}
-.form-horizontal .control-label {
-  font-size: 13px;
-  width: 100px;
-}
-.form-horizontal .controls {
-  margin-left: 120px;
-}
-.form-horizontal .controls .add-on i {
-  margin-top: 2px !important;
-}
-.helptext {
-  font-family: 'Source Sans Pro', sans-serif;
-  padding: 10px 20px;
-}
-.info {
-  font-size: 12px;
-  color: #777;
-}
-.datepicker {
-  z-index: 1150;
-}
-.showafter,
-.showbefore {
-  margin: 0px 20px 20px 20px;
-}
-.main-container {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  margin-left: 200px;
-  border: 0;
-  width: auto;
-  background: #fff;
-}
-.container {
-  margin: 0;
-}
-input[type="date"] {
-  width: 150px;
-}
-input[type="time"] {
-  width: 75px;
-}
-.ui-menu {
-  z-index: 1200;
-}
-.combobox-badge {
-  margin-right: 5px;
-  padding: 0;
-  width: 1em;
-  height: 1em;
-}
-.surrounded-combobox .combobox {
-  padding-left: 20px;
-  margin-left: -11px;
-}
-.surrounded-combobox .combobox-caret {
-  padding: 4px;
-  position: relative;
-  left: -20px;
-}
-.surrounded-combobox .combobox-caret .caret {
-  margin-top: 8px;
-}
-.surrounded-combobox .combobox-badge {
-  margin-right: 0px;
-  position: relative;
-  left: 3px;
-}
-#event-modal {
-  padding: 0;
-}
-#event-modal .btn {
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-}
-#event-modal .alert {
-  margin-bottom: 0px;
-}
-#event-modal .modal-header button.close {
-  margin-top: -2px;
-}
-#event-modal .modal-header a {
-  font-size: 16px;
-  text-decoration: none;
-  color: #333;
-}
-#event-modal .modal-body h4 {
-  margin-top: 25px;
-  font-size: 20px;
-  font-family: 'Maven Pro', sans-serif;
-}
-#event-modal .modal-body .rrule-show {
-  cursor: pointer;
-}
-#event-modal .modal-body .tagit .tagit-close,
-#event-modal .modal-body .tagit .tagit-choice {
-  color: inherit;
-}
-#event-modal .modal-body .tagit .tagit-close:hover,
-#event-modal .modal-body .tagit .tagit-choice:hover {
-  text-decoration: none;
-}
-#event-modal .modal-body .tagit .text-icon {
-  display: inline;
-  color: inherit;
-}
-#event-modal .modal-body #reminder-container .reminder .triggervalue,
-#event-modal .modal-body #reminder-container .reminder .triggerunit {
-  margin: 0px 5px;
-}
-#event-modal .modal-body #reminder-container .reminder .triggervalue {
-  width: 35px;
-}
-#event-modal .modal-body #reminder-container .reminder .triggerunit {
-  width: 100px;
-}
-#event-modal .modal-body #reminder-container .reminder .badge {
-  margin-left: 5px;
-  line-height: 20px;
-  vertical-align: middle;
-  cursor: pointer;
-}
-#event-modal .modal-body #reminder-container .reminder .removereminder {
-  margin-left: 5px;
-  line-height: 20px;
-  vertical-align: middle;
-  cursor: pointer;
-}
-#event-modal .modal-body #rrule-short {
-  font-size: 14px;
-}
-#event-modal .modal-body #rrule #rrule-interval,
-#event-modal .modal-body #rrule #rrule-freq,
-#event-modal .modal-body #rrule #rrule-until,
-#event-modal .modal-body #rrule #rrule-count {
-  margin: 0 5px;
-}
-#event-modal .modal-body #rrule #rrule-interval,
-#event-modal .modal-body #rrule #rrule-count {
-  width: 35px;
-}
-#event-modal .modal-body #rrule #rrule-freq {
-  width: 175px;
-}
-#event-modal .modal-body #rrule #rrule-weekdays label.checkbox {
-  margin-left: 5px;
-}
-#event-modal .modal-body #guests #addguest,
-#event-modal .modal-body #guests #addguest-field {
-  vertical-align: top;
-}
-#event-modal .modal-body #guests #addguest {
-  margin-left: 5px;
-}
-#event-modal .modal-body #guests #guest-info {
-  display: inline-block;
-  height: 30px;
-  max-width: 200px;
-  margin-left: 10px;
-  margin-top: 5px;
-}
-#event-modal .modal-body #guests #guest-info i {
-  display: inline-block;
-  width: 30px;
-  width: 30px;
-  vertical-align: text-top;
-  font-size: 30px;
-}
-#event-modal .modal-body #guests #guest-info span {
-  display: inline-block;
-  max-width: 165px;
-  vertical-align: middle;
-  text-align: center;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-  font-size: 11px;
-}
-#event-modal .modal-body #guests-list i {
-  vertical-align: middle;
-}
-#event-modal .modal-body #guests-list i.green {
-  color: #5c5;
-}
-#event-modal .modal-body #guests-list i.red {
-  color: #d33;
-}
-#event-modal .modal-body #guests-list i.blue {
-  color: #34a6ff;
-}
-#event-modal .modal-footer #cancel-btn {
-  cursor: pointer;
-  font-size: 13px;
-  margin-right: 10px;
-}
-#event-modal a.btn.rrule-show {
-  -webkit-border-radius: 0px;
-  border-radius: 0px;
-  padding: 5px;
-}
-#event-modal label {
-  color: #666;
-}
-#event-modal input,
-#event-modal select,
-#event-modal textarea {
-  font-family: 'Maven Pro', sans-serif;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border: 1px solid #ccc;
-  color: #111;
-}
-#event-modal input:focus,
-#event-modal select:focus,
-#event-modal textarea:focus {
-  border: 1px solid #34a6ff;
-}
-#event-modal input:hover,
-#event-modal select:hover,
-#event-modal textarea:hover {
-  border: 1px solid #fe8800;
-}
-#event-modal #addguest.btn {
-  -webkit-border-radius: 0px;
-  border-radius: 0px;
-  padding: 5px;
-}
-@media (min-width: 1100px) {
-  #event-modal {
-    width: 1000px;
-    margin-left: -500px;
-  }
-  #event-modal .modal-body > * {
-    width: 50%;
-  }
-  #event-modal .modal-body #guests-block {
-    position: absolute;
-    width: 40%;
-    top: 20px;
-    right: 20px;
-  }
-  #event-modal .modal-body #guests-block #guests-list {
-    border-bottom: 1px solid #000;
-  }
-  #event-modal .modal-body #guests-block #guests-list a.remove-guest {
-    display: inline-block;
-    margin-left: 15px;
-    cursor: pointer;
-  }
-}
 .popover {
   width: 400px;
   max-width: none;
@@ -8925,12 +8593,21 @@ input[type="time"] {
   margin: 0 5px 10px;
   cursor: pointer;
 }
-.popover .controls .close {
+.popover .controls button {
   color: #333;
   opacity: 0.7;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
   filter: alpha(opacity=70);
   margin-right: 5px;
+  border: none;
+  font-size: 14px;
+  background-color: transparent;
+}
+.popover .controls button:hover {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+  color: #fe8800;
 }
 .popover .controls .remove-spinner {
   display: none;
@@ -9200,12 +8877,6 @@ input[type="time"] {
 .fc-header-right {
   text-align: right;
 }
-.fc-text-arrow {
-  margin: 0px 0.1em;
-  font-size: 2em;
-  font-family: "Courier New", Courier, monospace;
-  vertical-align: baseline;
-}
 .fc-button {
   position: relative;
   display: inline-block;
@@ -9215,6 +8886,9 @@ input[type="time"] {
   line-height: 1.9em;
   white-space: nowrap;
   cursor: pointer;
+}
+.fc-button .fa {
+  font-size: 2em;
 }
 .fc-title thead,
 .fc-view-container thead,
