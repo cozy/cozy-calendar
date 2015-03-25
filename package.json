@@ -30,7 +30,8 @@
     "node-polyglot": "0.4.1",
     "multiparty": "4.1.1",
     "bauer-zip": "^1.0.2",
-    "rimraf": "^2.3.2"
+    "rimraf": "^2.3.2",
+    "tmp": "0.0.25"
   },
   "devDependencies": {
     "should": "4.1.0",

@@ -7,6 +7,7 @@ fs = require 'fs'
 child = require 'child_process'
 rm = require 'rimraf'
 zip = require 'bauer-zip'
+tmp = require 'tmp'
 
 localization = require '../libs/localization_manager'
 
@@ -72,18 +73,34 @@ module.exports.import = (req, res, next) ->
                     cleanUp()
 
 module.exports.zipExport = (req, res) ->
-    # create a tmp dir if not exists. Don't use trailing slash to avoid
-    # unzip errors
-    dir = '/tmp/cozy-cal'
-    if !fs.existsSync dir
-        fs.mkdir dir,'0744', (err) ->
-             if err
-                res.send
-                error: true
-                msg: 'Server error occurred while creating temp folders'
+    # create a tmp dir. Will remove itself at the end
+    tmp.dir { template: '/tmp/cozy-XXXXXX' }, (err, dir) ->
+        if err
+            throw err
 
-    # for each selected calendar, create ics file, and write it into tmp folder
-    saveCal = (calName) ->
+    # parse name array received as parameter and create an .ics
+        for calName in JSON.parse req.params.ids
+            saveCal calName, dir
+
+    # build a zip file with every .ics file in the tmp foler and sent it as response
+        zipName = "cozy.zip"
+    # Need a small timeout so that files still exists at zip creation
+        setTimeout ->
+            zip.zip dir, zipName, (error) ->
+                res.contentType 'application/zip'
+                res.setHeader 'content-disposition','attachment; filename=' + "cozy.zip"
+                stream = fs.createReadStream 'cozy.zip'
+                stream.pipe res
+                stream.on 'close', ->
+                    # Manual cleanup
+                    fs.unlink zipName, (err) ->
+                        if err
+                            res.send
+                            error: true
+                            msg: 'Server error occurred while deleting temp archive'
+        , 200
+
+    saveCal = (calName, dir) ->
         createCalendar calName, (calendar) ->
             fs.writeFile dir + "/" + calName + ".ics", calendar, (err) ->
                 throw err if err
