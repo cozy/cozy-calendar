@@ -201,6 +201,8 @@ module.exports =
     'Nov'                               : 'Nov'
     'Dec'                               : 'Dec'
 
+    'calendar exist error': 'A calendar named "New Calendar" already exists.'
+
 # Emails
     'email date format': 'MMMM Do YYYY, h:mm a'
     'email date format allday': 'MMMM Do YYYY, [all day long]'

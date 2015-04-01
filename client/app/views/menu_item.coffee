@@ -19,23 +19,27 @@ module.exports = class MenuItemView extends BaseView
         'blur input.calendar-name': 'onRenameValidation'
         'keyup input.calendar-name': 'onRenameValidation'
 
+
     getRenderData: ->
         label: @model.get 'name'
+
 
     afterRender: ->
         @buildBadge @model.get 'color'
 
+
     toggleVisible: ->
         unless app.router.onCalendar
             app.router.navigate 'calendar', true
-        @startSpinner()
+        @showLoading()
         # make asynchronous to allow the spinner to show up, before make.set
         # and it's heavy load events chain block the UI for à while.
         setTimeout =>
                 @model.set 'visible', not @model.get 'visible'
-                @stopSpinner()
+                @hideLoading()
                 @render()
             , 1
+
 
     showColorPicker: (ev) ->
         ev?.stopPropagation() # avoid dropdown auto close.
@@ -48,9 +52,11 @@ module.exports = class MenuItemView extends BaseView
         @colorPicker.tinycolorpicker()
         @$('.track').attr 'style', 'display: block;'
 
+
     hideColorPicker: =>
         @$('.color-picker').hide()
         @$('.calendar-color').show()
+
 
     setColor: (ev)  ->
         color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
@@ -75,21 +81,15 @@ module.exports = class MenuItemView extends BaseView
         key = event.keyCode or event.charCode
          # `escape` key cancels the edition.
         if key is 27
-            input.remove()
-            # re-appends text element
-            @rawTextElement.insertAfter @$('.badge')
 
-            # Restores the badge color
-            @buildBadge calendarName
-
-            # Shows the menu again
-            @$('.dropdown-toggle').show()
+            @hideInput input, calendarName
 
         # `blur` event and `enter` key trigger the persistence
         else if (key is 13 or event.type is 'focusout')
-            @startSpinner()
+            @showLoading()
             app.calendars.rename calendarName, input.val(), =>
-                @stopSpinner()
+                @hideLoading()
+                @hideInput input, calendarName
         else
             @buildBadge colorhash input.val()
 
@@ -119,14 +119,31 @@ module.exports = class MenuItemView extends BaseView
     onRemoveCalendar: ->
         calendarName = @model.get 'name'
         message = t 'confirm delete calendar', {calendarName}
+
         if confirm(message)
-            @startSpinner()
+            @showLoading()
+
             app.calendars.remove calendarName, =>
-                @stopSpinner()
+                @hideLoading()
+
+
+    hideInput: (input, calendarName) ->
+        input.remove()
+
+        # re-appends text element
+        @rawTextElement.insertAfter @$('.badge')
+
+        # Restores the badge color
+        @buildBadge calendarName
+
+        # Shows the menu again
+        @$('.dropdown-toggle').show()
+
 
     onExportCalendar: ->
         calendarName = @model.get 'name'
         window.location = "export/#{calendarName}.ics"
+
 
     buildBadge: (color) ->
         visible = @model.get 'visible'
@@ -138,8 +155,10 @@ module.exports = class MenuItemView extends BaseView
             'border': "1px solid #{borderColor}"
         @$('.badge').css styles
 
-    startSpinner: ->
+
+    showLoading: ->
         @$('.spinHolder').show()
 
-    stopSpinner: ->
+
+    hideLoading: ->
         @$('.spinHolder').hide()
