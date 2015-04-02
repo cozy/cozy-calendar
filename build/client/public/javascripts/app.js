@@ -1744,6 +1744,7 @@ module.exports = {
   'Oct': 'Oct',
   'Nov': 'Nov',
   'Dec': 'Dec',
+  'calendar exist error': 'A calendar named "New Calendar" already exists.',
   'email date format': 'MMMM Do YYYY, h:mm a',
   'email date format allday': 'MMMM Do YYYY, [all day long]',
   'email invitation title': 'Invitation to "%{description}"',
@@ -1942,6 +1943,7 @@ module.exports = {
   'Oct': 'Oct',
   'Nov': 'Nov',
   'Dec': 'Déc',
+  'calendar exist error': 'Un calendrier "Nouveau Calendrier" existe déjà.',
   'email date format': 'DD/MM/YYYY [à] HH[h]mm',
   'email date format allday': 'DD/MM/YYYY [toute la journée]',
   'email invitation title': "Invitation à l'évènement \"%{description}\"",
@@ -3109,7 +3111,7 @@ module.exports = EventPopOver = (function(_super) {
         },
         complete: (function(_this) {
           return function() {
-            _this.spinner.show();
+            _this.spinner.hide();
             return _this.selfclose();
           };
         })(this)
@@ -3128,7 +3130,23 @@ module.exports = EventPopOver = (function(_super) {
     delete attrs.id;
     delete attrs._id;
     calendarEvent = new Event(attrs);
-    return calendarEvent.save();
+    this.duplicateButton.hide();
+    this.spinner.show();
+    return calendarEvent.save(null, {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          _this.duplicateButton.show();
+          return _this.spinner.hide();
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          _this.duplicateButton.show();
+          return _this.spinner.hide();
+        };
+      })(this)
+    });
   };
 
   EventPopOver.prototype.onAddClicked = function() {
@@ -4968,9 +4986,21 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.onAddCalendar = function() {
-    var calendarEvent;
-    this.startSpinner();
+    var calendar;
     this.tag = app.tags.getOrCreateByName("new calendar");
+    calendar = app.calendars.find(function(tag) {
+      return (tag.get('name') === t("new calendar")) && tag.get('visible');
+    });
+    if (calendar != null) {
+      return alert('calendar exist error');
+    } else {
+      return this.createNewCalendar();
+    }
+  };
+
+  MenuView.prototype.createNewCalendar = function(callback) {
+    var calendarEvent;
+    this.showLoading();
     calendarEvent = new Event({
       start: moment("19010101", "YYYYMMDD"),
       end: moment("19010101", "YYYYMMDD"),
@@ -4989,7 +5019,10 @@ module.exports = MenuView = (function(_super) {
       })(this),
       complete: (function(_this) {
         return function() {
-          return setTimeout(_this.stopSpinner.bind(_this), 100);
+          setTimeout(_this.hideLoading.bind(_this), 100);
+          if (callback != null) {
+            return setTimeout(callback, 150);
+          }
         };
       })(this)
     });
@@ -5004,11 +5037,11 @@ module.exports = MenuView = (function(_super) {
     return this.$('#menuitems').toggleClass('visible');
   };
 
-  MenuView.prototype.startSpinner = function() {
+  MenuView.prototype.showLoading = function() {
     return this.$('.spinner').show();
   };
 
-  MenuView.prototype.stopSpinner = function() {
+  MenuView.prototype.hideLoading = function() {
     return this.$('.spinner').hide();
   };
 
@@ -5067,11 +5100,11 @@ module.exports = MenuItemView = (function(_super) {
     if (!app.router.onCalendar) {
       app.router.navigate('calendar', true);
     }
-    this.startSpinner();
+    this.showLoading();
     return setTimeout((function(_this) {
       return function() {
         _this.model.set('visible', !_this.model.get('visible'));
-        _this.stopSpinner();
+        _this.hideLoading();
         return _this.render();
       };
     })(this), 1);
@@ -5110,15 +5143,13 @@ module.exports = MenuItemView = (function(_super) {
     calendarName = this.model.get('name');
     key = event.keyCode || event.charCode;
     if (key === 27) {
-      input.remove();
-      this.rawTextElement.insertAfter(this.$('.badge'));
-      this.buildBadge(calendarName);
-      return this.$('.dropdown-toggle').show();
+      return this.hideInput(input, calendarName);
     } else if (key === 13 || event.type === 'focusout') {
-      this.startSpinner();
+      this.showLoading();
       return app.calendars.rename(calendarName, input.val(), (function(_this) {
         return function() {
-          return _this.stopSpinner();
+          _this.hideLoading();
+          return _this.hideInput(input, calendarName);
         };
       })(this));
     } else {
@@ -5145,13 +5176,20 @@ module.exports = MenuItemView = (function(_super) {
       calendarName: calendarName
     });
     if (confirm(message)) {
-      this.startSpinner();
+      this.showLoading();
       return app.calendars.remove(calendarName, (function(_this) {
         return function() {
-          return _this.stopSpinner();
+          return _this.hideLoading();
         };
       })(this));
     }
+  };
+
+  MenuItemView.prototype.hideInput = function(input, calendarName) {
+    input.remove();
+    this.rawTextElement.insertAfter(this.$('.badge'));
+    this.buildBadge(calendarName);
+    return this.$('.dropdown-toggle').show();
   };
 
   MenuItemView.prototype.onExportCalendar = function() {
@@ -5172,11 +5210,11 @@ module.exports = MenuItemView = (function(_super) {
     return this.$('.badge').css(styles);
   };
 
-  MenuItemView.prototype.startSpinner = function() {
+  MenuItemView.prototype.showLoading = function() {
     return this.$('.spinHolder').show();
   };
 
-  MenuItemView.prototype.stopSpinner = function() {
+  MenuItemView.prototype.hideLoading = function() {
     return this.$('.spinHolder').hide();
   };
 
@@ -5629,7 +5667,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close fa fa-close\"></button><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></span>");;return buf.join("");
+buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close fa fa-close\"></button><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></span>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
