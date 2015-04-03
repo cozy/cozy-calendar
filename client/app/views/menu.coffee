@@ -75,11 +75,13 @@ module.exports = class MenuView extends ViewCollection
         if confirm(message)
             @startSpinner()
             $('.calendar-actions:checked').each ->
-                calendarName = $(this).parent().find('.calendar-name')[0].innerHTML
+                calendarName = @value
                 tag = app.tags.getByName calendarName
                 app.calendars.remove calendarName, =>
                     @stopSpinner()
-
+        # remove additional menu if only 1 calendar is left
+        if $('#menu-items .calendar-name').length < 2
+            $('#multiple-actions').addClass 'hidden'
     showLoading: ->
         @$('.spinner').show()
     onCalendarMultipleExport: ->
