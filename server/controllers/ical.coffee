@@ -13,7 +13,6 @@ async = require 'async'
 localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
-    console.log "export one"
     calendarId = req.params.calendarid
     createCalendar calendarId, (calendar) ->
         res.header 'Content-Type': 'text/calendar'
@@ -95,7 +94,6 @@ module.exports.zipExport = (req, res, next) ->
                 return next err if err
 
     addToArchive = (cal, cb) ->
-        console.log "string", cal.model.name + ".ics"
         archive.append cal.toString(), name: cal.model.name + ".ics"
         cb()
 
