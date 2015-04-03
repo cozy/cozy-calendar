@@ -8,31 +8,29 @@ child = require 'child_process'
 rm = require 'rimraf'
 zip = require 'bauer-zip'
 tmp = require 'tmp'
-
+archiver = require 'archiver'
+async = require 'async'
 localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
-
+    console.log "export one"
     calendarId = req.params.calendarid
     createCalendar calendarId, (calendar) ->
         res.header 'Content-Type': 'text/calendar'
         res.send calendar.toString()
-
 
 createCalendar = (calendarName, callback) ->
     calendar = new ical.VCalendar
         organization: 'Cozy'
         title: 'Cozy Calendar'
         name: calendarName
+
     Event.byCalendar calendarName, (err, events) ->
-        if err
-            res.send
-                error: true
-                msg: 'Server error occurred while retrieving data'
-        else
-            if events.length > 0
-                calendar.add event.toIcal() for event in events
-                callback calendar
+        return callback err if err
+
+        if events.length > 0
+            calendar.add event.toIcal() for event in events
+            callback null, calendar
 
 module.exports.import = (req, res, next) ->
 
@@ -72,61 +70,36 @@ module.exports.import = (req, res, next) ->
                             name: calendarName
                     cleanUp()
 
-module.exports.zipExport = (req, res) ->
-    # create a tmp dir. Will remove itself at the end
-    tmp.dir { template: '/tmp/cozy-XXXXXX' }, (err, dir) ->
-        if err
-            throw err
+module.exports.zipExport = (req, res, next) ->
+    archive = archiver 'zip'
+    zipName = 'cozy-calendars'
 
-    # parse name array received as parameter and create an .ics
-        for calName in JSON.parse req.params.ids
-            saveCal calName, dir
+    # Build zip from file list and pip the result in the response.
+    makeZip = (zipName, files) ->
 
-    # build a zip file with every .ics file in the tmp foler and sent it as response
-        zipName = "cozy.zip"
-    # Need a small timeout so that files still exists at zip creation
-        setTimeout ->
-            zip.zip dir, zipName, (error) ->
-                res.contentType 'application/zip'
-                res.setHeader 'content-disposition','attachment; filename=' + "cozy.zip"
-                stream = fs.createReadStream 'cozy.zip'
-                stream.pipe res
-                stream.on 'close', ->
-                    # Manual cleanup
-                    fs.unlink zipName, (err) ->
-                        if err
-                            res.send
-                            error: true
-                            msg: 'Server error occurred while deleting temp archive'
-        , 200
+        # Start the streaming.
+        archive.pipe res
 
-    saveCal = (calName, dir) ->
-        createCalendar calName, (calendar) ->
-            fs.writeFile dir + "/" + calName + ".ics", calendar, (err) ->
-                throw err if err
+        # Arbort archiving process when request is closed.
+        req.on 'close', ->
+            archive.abort()
 
-    # parse name array received as parameter
-    for calName in JSON.parse req.params.ids
-        saveCal calName
+        # Set headers describing the final zip file.
+        disposition = "attachment; filename=\"#{zipName}.zip\""
+        res.setHeader 'Content-Disposition', disposition
+        res.setHeader 'Content-Type', 'application/zip'
 
-    # build a zip file with every .ics file in the tmp foler and sent it as response
-    zip.zip dir, "cozy.zip", (error) ->
-        res.contentType 'application/zip'
-        res.setHeader 'content-disposition','attachment; filename=' + "cozy.zip"
-        stream = fs.createReadStream 'cozy.zip'
-        stream.pipe res
-        stream.on 'close', ->
-            # cleaning the mess
-            # tmp archive
-            fs.unlink "cozy.zip", (err) ->
-                if err
-                    res.send
-                    error: true
-                    msg: 'Server error occurred while deleting temp archive'
-            # tmp dir
-            rm dir, (err) ->
-                if err
-                    res.send
-                    error: true
-                    msg: 'Server error occurred while deleting temp folders'
-            return
+        async.eachSeries files, addToArchive, (err) ->
+            return next err if err
+            archive.finalize (err, bytes) ->
+                return next err if err
+
+    addToArchive = (cal, cb) ->
+        console.log "string", cal.model.name + ".ics"
+        archive.append cal.toString(), name: cal.model.name + ".ics"
+        cb()
+
+    # Build cals and pass it to makeZip
+    async.map JSON.parse(req.params.ids), createCalendar, (err, cals) ->
+        return next err if err
+        makeZip zipName, cals
