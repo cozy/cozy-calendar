@@ -49,10 +49,10 @@
   },
   "cozy-permissions": {
     "Alarm": {
-      "description": "Creates and edits your alarms."
+      "description": "Create and edit your alarms."
     },
     "Event": {
-      "description": "Creates and edits your events."
+      "description": "Create and edit your events."
     },
     "User": {
       "description": "Used to recover your timezone"
