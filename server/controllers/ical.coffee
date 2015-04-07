@@ -4,27 +4,28 @@ Tag = require '../models/tag'
 User  = require '../models/user'
 multiparty = require 'multiparty'
 fs = require 'fs'
+archiver = require 'archiver'
+async = require 'async'
 localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
-
     calendarId = req.params.calendarid
+    createCalendar calendarId, (calendar) ->
+        res.header 'Content-Type': 'text/calendar'
+        res.send calendar.toString()
 
+createCalendar = (calendarName, callback) ->
     calendar = new ical.VCalendar
         organization: 'Cozy'
         title: 'Cozy Calendar'
-        name: calendarId
-    Event.byCalendar calendarId, (err, events) ->
-        if err
-            res.send
-                error: true
-                msg: 'Server error occurred while retrieving data'
-        else
-            if events.length > 0
-                calendar.add event.toIcal() for event in events
+        name: calendarName
 
-            res.header 'Content-Type': 'text/calendar'
-            res.send calendar.toString()
+    Event.byCalendar calendarName, (err, events) ->
+        return callback err if err
+
+        if events.length > 0
+            calendar.add event.toIcal() for event in events
+            callback null, calendar
 
 module.exports.import = (req, res, next) ->
 
@@ -63,3 +64,36 @@ module.exports.import = (req, res, next) ->
                         calendar:
                             name: calendarName
                     cleanUp()
+
+module.exports.zipExport = (req, res, next) ->
+    archive = archiver 'zip'
+    zipName = 'cozy-calendars'
+
+    # Build zip from file list and pip the result in the response.
+    makeZip = (zipName, files) ->
+
+        # Start the streaming.
+        archive.pipe res
+
+        # Arbort archiving process when request is closed.
+        req.on 'close', ->
+            archive.abort()
+
+        # Set headers describing the final zip file.
+        disposition = "attachment; filename=\"#{zipName}.zip\""
+        res.setHeader 'Content-Disposition', disposition
+        res.setHeader 'Content-Type', 'application/zip'
+
+        async.eachSeries files, addToArchive, (err) ->
+            return next err if err
+            archive.finalize (err, bytes) ->
+                return next err if err
+
+    addToArchive = (cal, cb) ->
+        archive.append cal.toString(), name: cal.model.name + ".ics"
+        cb()
+
+    # Build cals and pass it to makeZip
+    async.map JSON.parse(req.params.ids), createCalendar, (err, cals) ->
+        return next err if err
+        makeZip zipName, cals

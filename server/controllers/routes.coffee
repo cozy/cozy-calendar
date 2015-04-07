@@ -48,6 +48,8 @@ module.exports =
     # ICal
     'export/:calendarid.ics':
         get   : ical.export
+    'exportzip/:ids':
+        get   : ical.zipExport
     'import/ical':
         post  : ical.import
     #'public/calendars/:calendarname.ics':

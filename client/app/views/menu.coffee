@@ -16,7 +16,8 @@ module.exports = class MenuView extends ViewCollection
     events: ->
         'click .calendars': 'toggleDropdown'
         'click .calendar-add': 'onAddCalendar'
-
+        'click .remove-cals': 'onCalendarMultipleRemove'
+        'click .export-cals': 'onCalendarMultipleExport'
 
     # Check if a "New Calendar" already exists. If not, run the calendar
     # creation procedure.
@@ -61,7 +62,6 @@ module.exports = class MenuView extends ViewCollection
                 setTimeout @hideLoading.bind(@), 100
                 setTimeout callback, 150 if callback?
 
-
     activate: (href) ->
         @$('.active').removeClass 'active'
         @$('a[href="#' + href + '"]').parent().addClass 'active'
@@ -70,10 +70,29 @@ module.exports = class MenuView extends ViewCollection
     toggleDropdown: ->
         @$('#menuitems').toggleClass 'visible'
 
+    onCalendarMultipleRemove: ->
+        message = t 'confirm delete selected calendars'
+        if confirm(message)
+            @showLoading()
+            $('.calendar-actions:checked').each ->
+                calendarName = @value
+                tag = app.tags.getByName calendarName
+                app.calendars.remove calendarName, =>
+                    @hideLoading()
+        # remove additional menu if only 1 calendar is left
+        if $('#menu-items .calendar-name').length < 2
+            $('#multiple-actions').addClass 'hidden'
 
     showLoading: ->
         @$('.spinner').show()
 
+    onCalendarMultipleExport: ->
+        calendars = []
+        $('.calendar-actions:checked').each ->
+            calendars.push(@value)
+        calendars = JSON.stringify calendars
+        window.location = "exportzip/#{calendars}"
 
     hideLoading: ->
         @$('.spinner').hide()
+

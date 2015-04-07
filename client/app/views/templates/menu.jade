@@ -12,3 +12,10 @@ li.calendars
         img.spinner(src="img/spinner.svg")
 
 ul#menuitems
+
+#multiple-actions.hidden
+    hr
+    p
+        = t('multiple actions')
+    i.remove-cals.fa.fa-trash(title=t('delete'), role="button")
+    i.export-cals.fa.fa-download(title=t('export'), role="button")

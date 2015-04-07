@@ -64,7 +64,8 @@ module.exports =
     "display previous events"           : "Afficher les évènements précédents"
     "display next events"           : "Afficher les évènements suivants"
     "are you sure"                      : "Êtes-vous sûr(e) ?"
-    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les évènements associés à %{calendarName}. Êtes-vous sûr(e) ?"
+    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
+    "confirm delete selected calendars" : "Vous êtes sur le point de supprimer tous les calendriers sélectionnés. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"
@@ -72,6 +73,7 @@ module.exports =
     "no description"                    : "Sans description"
     "add calendar"                      : "Ajouter un calendrier"
     "new calendar"                      : "Nouveau calendrier"
+    "multiple actions"                  : "Actions multiples"
 
 # RULE related
     "recurrence"                        : "Récurrence"

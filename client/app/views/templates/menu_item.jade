@@ -1,5 +1,11 @@
 - back = visible?color:"transparent"
 - border = visible?"transparent":color
+input(
+        type='checkbox'
+        value= '#{label}'
+        name='calendar-actions'
+        class='calendar-actions'
+    )
 span.badge
     | &nbsp;
     img.spinHolder(src="img/spinner.svg")
