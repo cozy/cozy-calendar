@@ -1622,6 +1622,7 @@ module.exports = {
   "event": "Event",
   "are you sure": "Are you sure?",
   "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+  "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
   "advanced": "More details",
   "enter email": "Enter email",
   "ON": "on",
@@ -1629,6 +1630,7 @@ module.exports = {
   "no description": "No description",
   "add calendar": "Add calendar",
   "new calendar": "New calendar",
+  "multiple actions": "Multiple actions",
   "recurrence": "Recurrence",
   "recurrence rule": "Recurrence rules",
   "make reccurent": "Make recurrent",
@@ -1823,7 +1825,8 @@ module.exports = {
   "display previous events": "Afficher les évènements précédents",
   "display next events": "Afficher les évènements suivants",
   "are you sure": "Êtes-vous sûr(e) ?",
-  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les évènements associés à %{calendarName}. Êtes-vous sûr(e) ?",
+  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
+  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les calendriers sélectionnés. Êtes-vous sûr(e) ?",
   "advanced": "Détails",
   "enter email": "Entrer l'adresse email",
   "ON": "activée",
@@ -1831,6 +1834,7 @@ module.exports = {
   "no description": "Sans description",
   "add calendar": "Ajouter un calendrier",
   "new calendar": "Nouveau calendrier",
+  "multiple actions": "Actions multiples",
   "recurrence": "Récurrence",
   "recurrence rule": "Règle de récurrence",
   "make reccurent": "Rendre récurrent",
@@ -4981,7 +4985,9 @@ module.exports = MenuView = (function(_super) {
   MenuView.prototype.events = function() {
     return {
       'click .calendars': 'toggleDropdown',
-      'click .calendar-add': 'onAddCalendar'
+      'click .calendar-add': 'onAddCalendar',
+      'click .remove-cals': 'onCalendarMultipleRemove',
+      'click .export-cals': 'onCalendarMultipleExport'
     };
   };
 
@@ -5037,8 +5043,39 @@ module.exports = MenuView = (function(_super) {
     return this.$('#menuitems').toggleClass('visible');
   };
 
+  MenuView.prototype.onCalendarMultipleRemove = function() {
+    var message;
+    message = t('confirm delete selected calendars');
+    if (confirm(message)) {
+      this.showLoading();
+      $('.calendar-actions:checked').each(function() {
+        var calendarName, tag;
+        calendarName = this.value;
+        tag = app.tags.getByName(calendarName);
+        return app.calendars.remove(calendarName, (function(_this) {
+          return function() {
+            return _this.hideLoading();
+          };
+        })(this));
+      });
+    }
+    if ($('#menu-items .calendar-name').length < 2) {
+      return $('#multiple-actions').addClass('hidden');
+    }
+  };
+
   MenuView.prototype.showLoading = function() {
     return this.$('.spinner').show();
+  };
+
+  MenuView.prototype.onCalendarMultipleExport = function() {
+    var calendars;
+    calendars = [];
+    $('.calendar-actions:checked').each(function() {
+      return calendars.push(this.value);
+    });
+    calendars = JSON.stringify(calendars);
+    return window.location = "exportzip/" + calendars;
   };
 
   MenuView.prototype.hideLoading = function() {
@@ -5079,6 +5116,7 @@ module.exports = MenuItemView = (function(_super) {
     'click .calendar-remove': 'onRemoveCalendar',
     'click .calendar-rename': 'onRenameCalendar',
     'click .calendar-export': 'onExportCalendar',
+    'click .calendar-actions': 'onCalendarMultipleSelect',
     'click .dropdown-toggle': 'hideColorPicker',
     'click .calendar-color': 'showColorPicker',
     'change .color-picker': 'setColor',
@@ -5135,6 +5173,24 @@ module.exports = MenuItemView = (function(_super) {
     this.$('.dropdown-toggle').dropdown('toggle');
     this.hideColorPicker();
     return this.$('.dropdown-toggle').on('click', this.hideColorPicker);
+  };
+
+  MenuItemView.prototype.onCalendarMultipleSelect = function() {
+    var actionMenu, nbCalendars, nbCalendarsChecked, trashButton;
+    actionMenu = $('#multiple-actions');
+    trashButton = $('.remove-cals', actionMenu);
+    nbCalendars = $('.calendar-actions').length;
+    nbCalendarsChecked = $('.calendar-actions:checked').length;
+    if (nbCalendarsChecked > 1) {
+      actionMenu.removeClass('hidden');
+    } else {
+      actionMenu.addClass('hidden');
+    }
+    if (nbCalendarsChecked === nbCalendars) {
+      return trashButton.addClass('hidden');
+    } else {
+      return trashButton.removeClass('hidden');
+    }
   };
 
   MenuItemView.prototype.onRenameValidation = function(event) {
@@ -5606,7 +5662,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul>");;return buf.join("");
+buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul><div id=\"multiple-actions\" class=\"hidden\"><hr/><p>" + (jade.escape(null == (jade_interp = t('multiple actions')) ? "" : jade_interp)) + "</p><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove-cals fa fa-trash\"></i><i" + (jade.attr("title", t('export'), true, false)) + " role=\"button\" class=\"export-cals fa fa-download\"></i></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5627,7 +5683,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<span class=\"badge\">&nbsp;<img src=\"img/spinner.svg\" class=\"spinHolder\"/></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
+buf.push("<input type=\"checkbox\"" + (jade.attr("value", '' + (label) + '', true, false)) + " name=\"calendar-actions\" class=\"calendar-actions\"/><span class=\"badge\">&nbsp;<img src=\"img/spinner.svg\" class=\"spinHolder\"/></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

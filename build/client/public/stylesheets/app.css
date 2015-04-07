@@ -8446,12 +8446,40 @@ ul#menu> li:hover {
   background: #ffc47f;
   text-decoration: none;
 }
+ul#menu #multiple-actions {
+  text-align: center;
+}
+ul#menu #multiple-actions i {
+  cursor: pointer;
+  margin-right: 1em;
+}
+ul#menu #multiple-actions i.remove-cals.hidden {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+ul#menu #multiple-actions.hidden {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
 ul#menu ul#menuitems {
   margin-left: 0px;
 }
 ul#menu ul#menuitems li.tagmenuitem {
   margin-left: 0px;
   padding-left: 35px;
+}
+ul#menu ul#menuitems li.tagmenuitem .calendar-actions {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+  margin-right: 1em;
+}
+ul#menu ul#menuitems li.tagmenuitem .calendar-actions:checked {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
 }
 ul#menu ul#menuitems li.tagmenuitem i {
   margin: 0px;
@@ -8512,6 +8540,11 @@ ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a {
 }
 ul#menu ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a:hover {
   background: #ffc47f;
+}
+ul#menu ul#menuitems li.tagmenuitem:hover .calendar-actions {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
 }
 ul#menu ul#menuitems li.tagmenuitem:hover .dropdown .dropdown-toggle .caret {
   display: inline-block;
