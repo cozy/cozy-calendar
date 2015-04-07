@@ -28,6 +28,7 @@ module.exports = class MenuItemView extends BaseView
 
     afterRender: ->
         @buildBadge @model.get 'color'
+        @hideLoading()
 
 
     toggleVisible: ->
@@ -173,8 +174,8 @@ module.exports = class MenuItemView extends BaseView
 
 
     showLoading: ->
-        @$('.spinHolder').show()
+        @$('.spinner').show()
 
 
     hideLoading: ->
-        @$('.spinHolder').hide()
+        @$('.spinner').hide()

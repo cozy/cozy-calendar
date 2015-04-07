@@ -5329,7 +5329,8 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.afterRender = function() {
-    return this.buildBadge(this.model.get('color'));
+    this.buildBadge(this.model.get('color'));
+    return this.hideLoading();
   };
 
   MenuItemView.prototype.toggleVisible = function() {
@@ -5465,11 +5466,11 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.showLoading = function() {
-    return this.$('.spinHolder').show();
+    return this.$('.spinner').show();
   };
 
   MenuItemView.prototype.hideLoading = function() {
-    return this.$('.spinHolder').hide();
+    return this.$('.spinner').hide();
   };
 
   return MenuItemView;
@@ -5881,7 +5882,7 @@ var jade_interp;
 var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
 back = visible?color:"transparent"
 border = visible?"transparent":color
-buf.push("<input type=\"checkbox\"" + (jade.attr("value", '' + (label) + '', true, false)) + " name=\"calendar-actions\" class=\"calendar-actions\"/><span class=\"badge\">&nbsp;<img src=\"img/spinner.svg\" class=\"spinHolder\"/></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div>");;return buf.join("");
+buf.push("<input type=\"checkbox\"" + (jade.attr("value", '' + (label) + '', true, false)) + " name=\"calendar-actions\" class=\"calendar-actions\"/><span class=\"badge\">&nbsp;</span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div><img src=\"img/spinner.svg\" class=\"spinner\"/>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
