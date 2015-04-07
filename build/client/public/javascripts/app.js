@@ -5047,16 +5047,11 @@ module.exports = MenuView = (function(_super) {
     var message;
     message = t('confirm delete selected calendars');
     if (confirm(message)) {
-      this.showLoading();
       $('.calendar-actions:checked').each(function() {
         var calendarName, tag;
         calendarName = this.value;
         tag = app.tags.getByName(calendarName);
-        return app.calendars.remove(calendarName, (function(_this) {
-          return function() {
-            return _this.hideLoading();
-          };
-        })(this));
+        return app.calendars.remove(calendarName);
       });
     }
     if ($('#menu-items .calendar-name').length < 2) {
@@ -5662,7 +5657,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul><div id=\"multiple-actions\" class=\"hidden\"><hr/><p>" + (jade.escape(null == (jade_interp = t('multiple actions')) ? "" : jade_interp)) + "</p><i" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove-cals fa fa-trash\"></i><i" + (jade.attr("title", t('export'), true, false)) + " role=\"button\" class=\"export-cals fa fa-download\"></i></div>");;return buf.join("");
+buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul><div id=\"multiple-actions\" class=\"hidden\"><p><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove-cals btn btn-cozy\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</button></p><p><button" + (jade.attr("title", t('export'), true, false)) + " role=\"button\" class=\"export-cals btn btn-cozy\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</button></p></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
