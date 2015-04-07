@@ -1,166 +1,166 @@
 ul#menu
-  float: left
-  left: 0
-  top: 0
-  width: 200px
-  padding 0px
-  list-style-type: none
-  text-align: left
-  background: #F2F2F2
-  font-family: 'Maven Pro', sans-serif
-  font-weight: normal
-
-  a
-    color: #333
+    float: left
+    left: 0
+    top: 0
+    width: 200px
     padding 0px
-    margin 0px
-    text-decoration: none
-
-  a:hover
-    text-decoration: none
-    background-color transparent
-
-  li.active
-    background: #AEDBFF
+    list-style-type: none
+    text-align: left
+    background: #F2F2F2
+    font-family: 'Maven Pro', sans-serif
+    font-weight: normal
 
     a
-        background: transparent
-        display: inline-block
-
-        &.calendar-add
-          width 150px
-
-  li.divider
-    background-color transparent
-    &:hover
-      background-color transparent
-
-
-  li
-    display: block
-    margin: 0
-    padding: 10px 3px 10px 3px
-    cursor: pointer
-
-    i
-        margin-right: 10px
-        margin-left: 10px
-
-    &.calendars
-        position relative
-
-        .calendar-add
-            display none
-            margin-left 10px
-            font-size 15px
-            text-shadow none
-
-        &:hover .calendar-add
-            display inline-block
-
-        .spinner
-            margin-left 10px
-            display none
-            height 15px
-            width 15px
-
-  &> li:hover
-    background #FFC47F
-    text-decoration none
-
-  #multiple-actions
-    padding 15px
-
-    i
-      cursor pointer
-      margin-right 1em
-
-      &.remove-cals
-        &.hidden
-          opacity 0
-
-    &.hidden
-      opacity 0
-
-  ul#menuitems
-    margin-left 0px
-
-    li.tagmenuitem
-      margin-left 0px
-      padding-left 5px
-
-      .calendar-actions
-        opacity 0
-        margin 0 0.5em 0 0.5em
-        &:checked
-          opacity 1
-      i
+        color: #333
+        padding 0px
         margin 0px
+        text-decoration: none
 
-      .badge
-        width 12px
-        padding 1px 3px
-        margin-right 5px
-        border-radius 3px
-        position relative
+    a:hover
+        text-decoration: none
+        background-color transparent
 
-        .spinHolder
-          position absolute
-          left -150%
-          height 15px
-          width 15px
-          display none
+    li.active
+        background: #AEDBFF
 
-      input.calendar-name
-        width 100px
-        margin-bottom 0
-        border-radius 0
-        padding 2px 5px
+        a
+            background: transparent
+            display: inline-block
 
-      .dropdown
-        display inline-block
-        .dropdown-toggle
-          padding 0 5px
-          .caret
-            display none
-            margin-top 0 !important // overrides bootstrap
-            vertical-align middle
-            border-top-color #000
-            border-bottom-color #000
-            opacity 0.2
-            transform scale(1.5, 1.5)
+            &.calendar-add
+                width 150px
 
-        .dropdown-menu
-          border-radius 0
-          padding 0
-          li
-            margin 0
-            padding 0
-            a
-              padding 5px
-              &:hover
-                background #ffc47f
+    li.divider
+        background-color transparent
+
+        &:hover
+            background-color transparent
 
 
-      &:hover
-        .calendar-actions
-          opacity 1
-        .dropdown .dropdown-toggle .caret
-          display inline-block
+    li
+        display: block
+        margin: 0
+        padding: 10px 3px 10px 3px
+        cursor: pointer
 
-          &:hover
-            opacity 1
+        i
+            margin-right: 10px
+            margin-left: 10px
+
+        &.calendars
+            position relative
+
+            .calendar-add
+                    display none
+                    margin-left 10px
+                    font-size 15px
+                    text-shadow none
+
+            &:hover .calendar-add
+                    display inline-block
+
+            .spinner
+                    margin-left 10px
+                    display none
+                    height 15px
+                    width 15px
+
+    &> li:hover
+        background #FFC47F
+        text-decoration none
+
+    #multiple-actions
+        padding 15px
+
+        i
+            cursor pointer
+            margin-right 1em
+
+            &.remove-cals
+                &.hidden
+                    opacity 0
+
+        &.hidden
+            opacity 0
+
+    ul#menuitems
+        margin-left 0px
+
+        li.tagmenuitem
+            margin-left 0px
+            padding-left 5px
+
+            .calendar-actions
+                opacity 0
+                margin 0 0.5em 0 0.5em
+                &:checked
+                    opacity 1
+            i
+                margin 0px
+
+            .badge
+                width 12px
+                padding 1px 3px
+                margin-right 5px
+                border-radius 3px
+                position relative
+
+                .spinHolder
+                    position absolute
+                    left -150%
+                    height 15px
+                    width 15px
+                    display none
+
+            input.calendar-name
+                width 100px
+                margin-bottom 0
+                border-radius 0
+                padding 2px 5px
+
+            .dropdown
+                display inline-block
+                .dropdown-toggle
+                    padding 0 5px
+                    .caret
+                        display none
+                        margin-top 0 !important // overrides bootstrap
+                        vertical-align middle
+                        border-top-color #000
+                        border-bottom-color #000
+                        opacity 0.2
+                        transform scale(1.5, 1.5)
+
+                .dropdown-menu
+                    border-radius 0
+                    padding 0
+                    li
+                        margin 0
+                        padding 0
+                        a
+                            padding 5px
+                            &:hover
+                                background #ffc47f
+
+
+            &:hover
+                .calendar-actions
+                    opacity 1
+                .dropdown .dropdown-toggle .caret
+                    display inline-block
+
+                    &:hover
+                        opacity 1
 
 .color-picker
-  .track
-    display: block
-    background: #EFEFEF url('../img/color-picker.png') no-repeat 50% 50%
-    height: 150px
-    width: 150px
-    margin: 5px
-    //position: absolute
-    cursor: crosshair
-    display: none
+    .track
+        display: block
+        background: #EFEFEF url('../img/color-picker.png') no-repeat 50% 50%
+        height: 150px
+        width: 150px
+        margin: 5px
+        cursor: crosshair
+        display: none
 
-    border: 1px solid #ccc
-    z-index: 10
+        border: 1px solid #ccc
+        z-index: 10
