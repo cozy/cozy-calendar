@@ -73,12 +73,11 @@ module.exports = class MenuView extends ViewCollection
     onCalendarMultipleRemove: ->
         message = t 'confirm delete selected calendars'
         if confirm(message)
-            @showLoading()
             $('.calendar-actions:checked').each ->
                 calendarName = @value
                 tag = app.tags.getByName calendarName
-                app.calendars.remove calendarName, =>
-                    @hideLoading()
+                app.calendars.remove calendarName
+
         # remove additional menu if only 1 calendar is left
         if $('#menu-items .calendar-name').length < 2
             $('#multiple-actions').addClass 'hidden'
