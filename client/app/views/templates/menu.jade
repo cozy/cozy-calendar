@@ -14,8 +14,7 @@ li.calendars
 ul#menuitems
 
 #multiple-actions.hidden
-    hr
     p
-        = t('multiple actions')
-    i.remove-cals.fa.fa-trash(title=t('delete'), role="button")
-    i.export-cals.fa.fa-download(title=t('export'), role="button")
+        button.remove-cals.btn.btn-cozy(title=t('delete'), role="button")=t('delete')
+    p
+        button.export-cals.btn.btn-cozy(title=t('export'), role="button")=t('export')

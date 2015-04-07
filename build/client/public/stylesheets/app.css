@@ -8447,7 +8447,7 @@ ul#menu> li:hover {
   text-decoration: none;
 }
 ul#menu #multiple-actions {
-  text-align: center;
+  padding: 15px;
 }
 ul#menu #multiple-actions i {
   cursor: pointer;
@@ -8468,13 +8468,13 @@ ul#menu ul#menuitems {
 }
 ul#menu ul#menuitems li.tagmenuitem {
   margin-left: 0px;
-  padding-left: 35px;
+  padding-left: 5px;
 }
 ul#menu ul#menuitems li.tagmenuitem .calendar-actions {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
   filter: alpha(opacity=0);
-  margin-right: 1em;
+  margin: 0 0.5em 0 0.5em;
 }
 ul#menu ul#menuitems li.tagmenuitem .calendar-actions:checked {
   opacity: 1;
@@ -8485,6 +8485,7 @@ ul#menu ul#menuitems li.tagmenuitem i {
   margin: 0px;
 }
 ul#menu ul#menuitems li.tagmenuitem .badge {
+  width: 12px;
   padding: 1px 3px;
   margin-right: 5px;
   -webkit-border-radius: 3px;
