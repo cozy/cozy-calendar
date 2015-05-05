@@ -10,7 +10,7 @@ localization = require '../libs/localization_manager'
 
 module.exports.export = (req, res) ->
     calendarId = req.params.calendarid
-    createCalendar calendarId, (calendar) ->
+    createCalendar calendarId, (err, calendar) ->
         res.header 'Content-Type': 'text/calendar'
         res.send calendar.toString()
 
