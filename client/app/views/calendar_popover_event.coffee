@@ -92,8 +92,11 @@ module.exports = class EventPopOver extends PopoverView
         @$('input[type="time"]').attr('type', 'text')
                                 .timepicker defTimePickerOpts
                                 .delegate timepickerEvents
-        @$('input[type="date"]').attr('type', 'text')
-                                .datetimepicker defDatePickerOps
+
+        # Chrome is really bad with HTML5 form so it always get an error of
+        # validation. As a result we don't use a type=date, but a type=text.
+        @$('.input-date').datetimepicker defDatePickerOps
+
         @$('[tabindex=1]').focus()
 
         @calendar = new ComboBox
