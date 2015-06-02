@@ -123,7 +123,7 @@ module.exports =
     "add tags"                          : "Ajouter des tags"
     "change to"                         : "Changer en"
     "change"                            : "Modifier"
-    "change calendar"                   : "Modifier l'agenda"
+    "change calendar"                   : "Changer l'agenda"
     "save changes"                      : "Enregistrer"
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
