@@ -42,7 +42,6 @@ module.exports =
     "Today"                             : "Heute"
     'today'                             : 'heute'
     "What should I remind you ?"        : "An was soll ich Sie erinnern?"
-    "ICalendar import"                  : "ICalendar importieren"
     "select an icalendar file"          : "Auswählen einer ICalendar Datei"
     "import your icalendar file"        : "Ihre ICalender Datei importieren"
     "confirm import"                    : "Importieren bestätigen"
@@ -66,6 +65,7 @@ module.exports =
     "event"                             : "Ereignis"
     "are you sure"                      : "Sind Sie sicher?"
     "confirm delete calendar"           : "Sie sind im Begriff alle Ereignisse in %{calendarName} zu löschen. Sind Sie sicher?"
+    "confirm delete selected calendars":"""Sie sind im Begriff alle Kalender. Sind Sie sicher?"""
     "advanced"                          : "Mehr Details"
     "enter email"                       : "E-Mail anzeigen"
     "ON"                                : "EIN"
@@ -73,6 +73,8 @@ module.exports =
     "no description"                    : "Keine Beschreibung"
     "add calendar"                      : "Kalendar hinzufügen"
     "new calendar"                      : "Neuer Kalendar"
+    "multiple actions"                  : """mehrere Aktionen"""
+
 
 # RRULE related
     "recurrence"                        : "Wiederholung"
@@ -135,7 +137,7 @@ module.exports =
     'Reminders before the event'        : 'Errinnern vor dem Ereignis'
     "reminder"                          : "Erinnerung"
 # CONFIRM MODAL
-    'send mails question'               : 'Eine Mitteilung senden an E-MAil: '
+    'send mails question'               : 'Eine Mitteilung senden an E-MAil:'
     'modal send mails'                  : 'Eine Mitteilung senden'
     'yes'                               : 'Ja'
     'no'                                : 'Nein'
@@ -161,15 +163,15 @@ module.exports =
     "sync headline with data"           : "Um Ihren Kalendar zu synchronisieren, folgende Informationen beachten:"
     "sync url"                          : "URL:"
     "sync login"                        : "Benutzername:"
-    "sync password"                     : "Passwort: "
-    "sync help"                         : "Sind Sie verloren? Folgen Sie der "
+    "sync password"                     : "Passwort:"
+    "sync help"                         : "Sind Sie verloren? Folgen Sie der"
     "sync help link"                    : "Schritt-für-Schritt Anleitung!"
     "install the sync module"           : "Installieren Sie das Sync Module vom dem Cozy App Store"
     "connect to it and follow"          : "Verbinden Sie sich mit ihm und folgend den Anweisungen zu CalDAV."
     "some event fail to save"           : "Ein Ereignis wurde nicht gespeichert (ein Fehler ist aufgetreten)."
     "imported events": "Anzahl der importierten Ereignisse"
     "import finished": "Ihr Import ist nun fertig gestellt"
-    "import error occured for": "Fehler bei Import für folgende Elemente aufgetreten"
+    "import error occured for": "Fehler bei Import für folgende Elemente aufgetreten "
     "export your calendar": "Exportieren Sie Ihren Kalendar"
     'please select existing calendar' : 'Bitte wählen Sie einen bestehenden Kalendar aus.'
 

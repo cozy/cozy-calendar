@@ -110,7 +110,7 @@ module.exports = class ImportView extends BaseView
         addError = (element, templatePath) ->
             if $('.import-errors').html().length is 0
                 $('.import-errors').html """
-                <p>#{t 'import error occured for'}:</p>
+                <p>#{t 'import error occured for'}</p>
                 """
 
             $('.import-errors').append(

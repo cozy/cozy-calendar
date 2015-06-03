@@ -42,7 +42,6 @@ module.exports =
     "Today"                             : "Aujourd'hui"
     'today'                             : 'aujourd\'hui'
     "What should I remind you ?"        : "Que dois-je vous rappeler ?"
-    "ICalendar importer"                : "Importateur ICalendar"
     "import your icalendar file"        : "Importer votre fichier iCalendar"
     "select an icalendar file"          : "Sélectionner un fichier iCalendar"
     "confirm import"                    : "Confirmer l'import"
@@ -91,6 +90,7 @@ module.exports =
     "occurences"                        : "occasions"
     "every"                             : "tous les"
     'minutes'                           : 'minutes'
+    'minute'                            : 'minute'
     'minute '                           : 'minute'
     'hours'                             : 'heures'
     'hour'                              : 'heure'
@@ -123,7 +123,7 @@ module.exports =
     "add tags"                          : "Ajouter des tags"
     "change to"                         : "Changer en"
     "change"                            : "Modifier"
-    "change calendar"                   : "Modifier l'agenda"
+    "change calendar"                   : "Changer l'agenda"
     "save changes"                      : "Enregistrer"
     "save changes and invite guests"    : "Enregistrer et envoyer les invitations"
     "guests"                            : "Invités"
@@ -136,7 +136,7 @@ module.exports =
     "reminder"                          : "Rappel"
 
 # CONFIRM MODAL
-    'send mails question'               : 'Envoyer un email de notification à : '
+    'send mails question'               : 'Envoyer un email de notification à :'
     'modal send mails'                  : 'Envoyer une notification'
     'yes'                               : 'Oui'
     'no'                                : 'Non'
@@ -163,15 +163,15 @@ module.exports =
     "sync headline with data"           : "Pour synchroniser votre agenda, utilisez les identifiants suivant :"
     "sync url"                          : "URL :"
     "sync login"                        : "Nom d'utilisateur :"
-    "sync password"                     : "Mot de passe : "
-    "sync help"                         : "Vous êtes perdu(e) ? Suivez le "
+    "sync password"                     : "Mot de passe :"
+    "sync help"                         : "Vous êtes perdu(e) ? Suivez le"
     "sync help link"                    : "guide pas à pas !"
     "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un évènement a échoué."
     "imported events": "Nombre d'évènements importés"
     "import finished": "Votre importation est terminée !"
-    "import error occured for": "Une erreur est survenue pour un de ces éléments "
+    "import error occured for": "Une erreur est survenue pour un de ces éléments :"
     "export your calendar": "Exporter votre agenda"
     'please select existing calendar' : 'Veuillez sélectionner un agenda existant.'
 
@@ -229,9 +229,7 @@ module.exports =
         %{url}?status=ACCEPTED&key=%{key}
 
         Je ne viens plus
-        %{url}?status=DECLINED&key=%{key}
-
-    """
+        %{url}?status=DECLINED&key=%{key}"""
     'email delete title': 'Cet évènement a été annulé : %{description}'
     'email delete content': """
         Cet évènement a été annulé :

@@ -14,11 +14,11 @@
         ul
             li #{t('sync url')} https://#{account.domain}/public/sync/principals/me
             li #{t('sync login')} #{account.login}
-            li #{t('sync password')}
+            li #{t('sync password') + " "}
                 span#placeholder= account.placeholder
                 button.btn#show-password= t('show')
                 button.btn#hide-password= t('hide')
-    p= t('sync help')
+    p= t('sync help') + " "
         a(href='https://cozy.io/mobile/calendar.html', target="_blank")= t('sync help link')
 
 .helptext

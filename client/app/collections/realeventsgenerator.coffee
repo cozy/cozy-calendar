@@ -20,7 +20,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
 
     _initializeGenerator: ->
         @previousRecurringEvents = []
-        @runningReccuringEvents = []
+        @runningRecurringEvents = []
 
         # Default value. In the particular case of all events > today,
         # then last event is the closest to today.
@@ -48,7 +48,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
                 @previousRecurringEvents.push item
 
                 if item.getLastOccurenceDate().isAfter(today)
-                    @runningReccuringEvents.push item
+                    @runningRecurringEvents.push item
 
         @loadNextPage()
 
@@ -71,7 +71,6 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         start = @lastDate.clone()
         @lastDate.add 1, 'month'
         end = @lastDate.clone()
-
         # pick ponctual event and store newly found recurring ones.
         i = @baseCollection.indexOf @lastGeneratedEvent
         @lastGeneratedEvent = null # reset, before finding the new one.
@@ -88,7 +87,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
                     eventsInRange.push new RealEvent(item)
 
         # generated recurring events.
-        @runningReccuringEvents.forEach (item, index) =>
+        @runningRecurringEvents.forEach (item, index) =>
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
                     return new RealEvent event, instanceStart, instanceEnd
@@ -96,14 +95,14 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
 
             # Remove out of next scope recurring events.
             if item.getLastOccurenceDate().isBefore(end)
-                @runningReccuringEvents.splice index, 1
+                @runningRecurringEvents.splice index, 1
 
 
 
         @add eventsInRange
 
         # No more events condition :
-        noEventsRemaining =  @runningReccuringEvents.length is 0 and
+        noEventsRemaining =  @runningRecurringEvents.length is 0 and
                              @lastGeneratedEvent is null
 
         callback noEventsRemaining

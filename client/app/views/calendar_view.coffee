@@ -154,7 +154,18 @@ module.exports = class CalendarView extends BaseView
         @popover = new EventPopover options
         @popover.render()
 
+
+    # Close the popover, if it's open.
+    closePopover: ->
+        @popover?.close()
+        @onPopoverClose()
+
+
     onChangeView: (view) =>
+
+        # Prevent a popover from staying on screen, if it's open.
+        @closePopover()
+
         @calHeader?.render()
         if @view isnt view.name
             @handleWindowResize()

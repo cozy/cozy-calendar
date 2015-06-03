@@ -28,7 +28,7 @@ module.exports = class MenuView extends ViewCollection
             (tag.get('name') is t "new calendar") and tag.get 'visible'
 
         if calendar?
-            alert 'calendar exist error'
+            alert t('calendar exist error')
 
         else
             @createNewCalendar()

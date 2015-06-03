@@ -72,7 +72,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         if @endDateField
             @_toDateObject @get @endDateField
         else
-            @getDateObject().add('m', 30)
+            @getDateObject().add 30, 'm'
 
     # Format a moment to the string format of the model.
     _formatMoment: (m) ->
@@ -171,7 +171,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             else if diff is -23
                 diff = 1
 
-            mDateRecurrentS.add 'hour', diff
+            mDateRecurrentS.add diff, 'hour'
 
             return mDateRecurrentS
 
@@ -184,7 +184,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
                 # Compute event.end as event.start + event.duration.
                 mDateRecurrentE = mDateRecurrentS.clone()
-                    .add 'seconds', mDateEventE.diff(mDateEventS, 'seconds')
+                    .add mDateEventE.diff(mDateEventS, 'seconds'), 'seconds'
                 fce = generator @, mDateRecurrentS, mDateRecurrentE
                 return fce
 
