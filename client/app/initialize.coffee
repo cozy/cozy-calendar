@@ -1,8 +1,12 @@
 app = require 'application'
+colorSet = require './helpers/color-set'
 
 $ ->
     # If needed, add locales to client/vendor/scripts/lang
     moment.locale window.locale
+
+    ColorHash.addScheme 'cozy', colorSet
+
     app.initialize()
 
     # Initialize Spin JS the lib that displays loading indicators

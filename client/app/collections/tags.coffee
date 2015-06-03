@@ -1,5 +1,4 @@
 Tag = require '../models/tag'
-colorhash = require 'lib/colorhash'
 
 module.exports = class TagCollection extends Backbone.Collection
 
@@ -28,10 +27,10 @@ module.exports = class TagCollection extends Backbone.Collection
     # Get existing or newly created tag with specified name.
     getOrCreateByName: (name) ->
         tag = @getByName name
-        
+
         if not tag
-            tag = new Tag 
+            tag = new Tag
                 name: name
-                color: colorhash name
+                color: ColorHash.getColor(name, 'cozy')
 
         return tag

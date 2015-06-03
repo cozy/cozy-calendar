@@ -1,4 +1,3 @@
-colorhash = require 'lib/colorhash'
 ViewCollection = require '../lib/view_collection'
 ComboBox    = require 'views/widgets/combobox'
 Event       = require 'models/event'

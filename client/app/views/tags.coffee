@@ -1,7 +1,5 @@
 BaseView = require 'lib/base_view'
 
-colorHash = require 'lib/colorhash'
-
 module.exports = class TagsView extends BaseView
 
     initialize: ->
@@ -17,7 +15,7 @@ module.exports = class TagsView extends BaseView
         return this
 
     tagAdded: (ev, ui) ->
-        ui.tag.css 'background-color', colorHash ui.tagLabel
+        ui.tag.css 'background-color', ColorHash.getColor(ui.tagLabel, 'cozy')
 
     getTags: ->
         @$el.tagit 'assignedTags'
