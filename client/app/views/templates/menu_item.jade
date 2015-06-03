@@ -15,8 +15,10 @@ span.calendar-name=label
     ul.dropdown-menu(aria-labelledBy='dLabel')
         li
             a.calendar-color= t('change color')
-            .color-picker(style='display: none;')
-                .track(style="display: block;")
+            ul.color-picker
+                each color in colorSet
+                    li.color(style="background-color: ##{color};")
+                
         li
             a.calendar-rename= t('rename')
         li

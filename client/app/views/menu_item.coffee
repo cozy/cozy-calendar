@@ -1,4 +1,5 @@
 BaseView = require '../lib/base_view'
+colorSet = require '../helpers/color-set'
 
 module.exports = class MenuItemView extends BaseView
 
@@ -16,13 +17,14 @@ module.exports = class MenuItemView extends BaseView
 
         'click .dropdown-toggle': 'hideColorPicker'
         'click .calendar-color': 'showColorPicker'
-        'change .color-picker': 'setColor'
+        'click .color': 'setColor'
         'blur input.calendar-name': 'onRenameValidation'
         'keyup input.calendar-name': 'onRenameValidation'
 
 
     getRenderData: ->
         label: @model.get 'name'
+        colorSet: colorSet
 
 
     afterRender: ->
@@ -45,23 +47,17 @@ module.exports = class MenuItemView extends BaseView
 
     showColorPicker: (ev) ->
         ev?.stopPropagation() # avoid dropdown auto close.
-
         @$('.color-picker').show()
-        @$('.calendar-color').hide()
-
-        # TinyColorPicker seems buggy, refresh it on each open.
-        @colorPicker = @$('.color-picker')
-        @colorPicker.tinycolorpicker()
-        @$('.track').attr 'style', 'display: block;'
+        @$('.calendar-color').parent().attr 'data-picker-visible', true
 
 
     hideColorPicker: =>
         @$('.color-picker').hide()
-        @$('.calendar-color').show()
+        @$('.calendar-color').parent().attr 'data-picker-visible', false
 
 
     setColor: (ev)  ->
-        color = @colorPicker.data()?.plugin_tinycolorpicker?.colorHex
+        color = @$(ev.target).css 'background-color'
         @model.set 'color', color
         @buildBadge color
         @model.save()
@@ -71,6 +67,7 @@ module.exports = class MenuItemView extends BaseView
 
         # Gone after succefull color pick, put it back.
         @$('.dropdown-toggle').on 'click', @hideColorPicker
+
 
     onCalendarMultipleSelect: ->
         actionMenu = $('#multiple-actions')
