@@ -1,5 +1,4 @@
 BaseView = require '../lib/base_view'
-colorhash = require 'lib/colorhash'
 
 module.exports = class MenuItemView extends BaseView
 
@@ -108,7 +107,7 @@ module.exports = class MenuItemView extends BaseView
                 @hideLoading()
                 @hideInput input, calendarName
         else
-            @buildBadge colorhash input.val()
+            @buildBadge ColorHash.getColor(input.val(), 'color')
 
 
     # Replace the calendar's name by an input to edit the name.
