@@ -13,18 +13,38 @@ input-color   = #555
 // TODO: rebuild all styles with relative units. Need to revamp a whole bunch
 //       of the app styles
 .popover
-    width: 400px
+    width: 25em
     max-width: none
     padding: 0
-    font-family: 'Maven Pro', sans-serif
+    font-family: 'Source Sans Pro', sans-serif
 
     label
     .label
-        box-sizing: border-box
-        margin: 0
-        padding: 5px 0 0
-        background-color: transparent
-        border: medium none
+        box-sizing border-box
+        position relative
+        width 100%
+        margin 0
+        padding 0
+        background-color transparent
+        border medium none
+        border-radius 0
+
+        .icon
+            display flex
+            justify-content center
+            align-items center
+            position absolute
+            top 0
+            width 3.2rem
+            height 100%
+
+            span
+                font-size 1rem
+                color #aaa
+                text-shadow none
+
+    .label-row
+        border-bottom 1px solid #ddd
 
     input
         box-sizing: border-box
@@ -32,24 +52,24 @@ input-color   = #555
         border: 1px solid white
         border-radius: 0
         box-shadow: none !important
-
-        &:hover
-            border: 1px solid orange
-
-        &:focus
-            border: 1px solid blue
+        font-family: 'Source Sans Pro', sans-serif
 
         &[type=text]
-            width: 100%
             height: 1.8em
 
-    input[type=text].input-time
-        width: 4em
-        text-align: right
+            .input-time
+                width: 4em
+                text-align: right
 
-    input[type=text].input-date
-        width: 8em
+            .input-date
+                width: 8em
 
+    .input-full-block
+        width 100%
+        padding 1.5em 3em
+        background-color transparent
+        border none
+        font-size: 1rem
 
     .controls
         position absolute
@@ -73,7 +93,7 @@ input-color   = #555
             opacity 0.7
             margin-right 5px
             border none
-            font-size 14px
+            font-size 0.8em
             background-color transparent
 
             &:hover
@@ -85,22 +105,25 @@ input-color   = #555
             cursor wait
 
 .popover-title
-    padding: 15px 0 10px
-    background-color: white
-    border-bottom: 1px solid overlay-color
-    font-size: 18px
+    position relative
+    padding 0
+    background-color #fff
+    border-bottom 1px solid #ddd
+    font-size 1em
 
     .label
         width: 100%
-        padding: 0 44px
+        padding: 0
 
     .label + .label
         margin-top: 4px
 
     .calendar
-        position: absolute
-        top: 20px    // vertical badge alignment with desc input
-        left: 20px
+        z-index 1
+        position absolute
+        top 50%
+        margin-top -0.75em
+        margin-left 1.2em
 
         .badge
             margin: 0
@@ -113,21 +136,20 @@ input-color   = #555
                 margin-left: 5px
 
     .input-desc
-        font-size: 1.4em
+        width 100%
+        padding 1.5em 3em
+        background-color transparent
+        border none
+        font-size: 1.6em
 
 
 .popover-content
     padding: 0
 
-    label
-        float: left
-        clear: left
-        display: flex
-        align-items: baseline
-
     .caption
-        display: inline-block
-        min-width: 3em
+        display inline-block
+        min-width 3em
+        margin-left 3rem
 
     // Specific rules for elements
     .input-allday
@@ -145,31 +167,41 @@ input-color   = #555
 
 
 .popover-content-wrapper
-    padding: 10px 20px
-    overflow: hidden
+    overflow hidden
+    display flex
+    align-items center
+    padding 0
 
-    &.is-same-day .end-date
-    &.is-same-day .end-date input
-        color: opacity-color
+    .item-row
+        width 75%
+        padding .6em 0
 
-        &:hover
-        &:focus
-            color: input-color
+        &:last-child
+            width 25%
 
-    &.is-all-day .end-date
-    &.is-all-day .end-date input
-        color: input-color
+    .time-row
+        display flex
+        align-items baseline
+        padding 0.2em 0
+        font-size 1rem
+        border-right 1px solid #eee
+
+        input[type=text]
+            font-size 1rem
+
+    .all-day
+        display flex
+        align-items center
+        justify-content center
 
 
 .popover-footer
     padding: 10px 12px
     background-color: overlay-color
-    border-top: 1px solid #ddd;
-    box-shadow: inset 0 1px 0 #ffffff;
     border-radius: 0 0 5px 5px
-    display: flex
-    justify-content: flex-end
-    align-items: baseline
+    display flex
+    justify-content space-between
+    align-items baseline
 
     [role=button]
         margin-left: 1em
