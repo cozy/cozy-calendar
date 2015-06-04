@@ -1,0 +1,209 @@
+/**
+ * Vars
+ */
+overlay-color = #F5F5F5
+opacity-color = #C5C5C5
+icon-color    = #333
+input-color   = #555
+
+
+//
+// Styles for the calendar popover (event and alarm creation/edition)
+// ----------------------------------------------------------------------------
+// TODO: rebuild all styles with relative units. Need to revamp a whole bunch
+//       of the app styles
+.popover
+    width: 25em
+    max-width: none
+    padding: 0
+    font-family: 'Source Sans Pro', sans-serif
+
+    label
+    .label
+        box-sizing border-box
+        position relative
+        width 100%
+        margin 0
+        padding 0
+        background-color transparent
+        border medium none
+        border-radius 0
+
+        .icon
+            display flex
+            justify-content center
+            align-items center
+            position absolute
+            top 0
+            width 3.2rem
+            height 100%
+
+            span
+                font-size 1rem
+                color #aaa
+                text-shadow none
+
+    .label-row
+        border-bottom 1px solid #ddd
+
+    input
+        box-sizing: border-box
+        margin: 0px
+        border: 1px solid white
+        border-radius: 0
+        box-shadow: none !important
+        font-family: 'Source Sans Pro', sans-serif
+
+        &[type=text]
+            height: 1.8em
+
+            .input-time
+                width: 4em
+                text-align: right
+
+            .input-date
+                width: 8em
+
+    .input-full-block
+        width 100%
+        padding 1.5em 3em
+        background-color transparent
+        border none
+        font-size: 1rem
+
+    .controls
+        position absolute
+        top 14px
+        right 10px
+
+        [role=button]
+        .remove-spinner
+            display block
+            float right
+            clear right
+            width 14px
+            height 14px
+            line-height 14px
+            padding 0
+            margin 0 5px 10px
+            cursor pointer
+
+        button
+            color icon-color
+            opacity 0.7
+            margin-right 5px
+            border none
+            font-size 0.8em
+            background-color transparent
+
+            &:hover
+                opacity 1
+                color orange
+
+        .remove-spinner
+            display none
+            cursor wait
+
+
+.popover-title
+    position relative
+    padding 0
+    background-color #fff
+    border-bottom 1px solid #ddd
+    font-size 1em
+
+    .label
+        width: 100%
+        padding: 0
+
+    .label + .label
+        margin-top: 4px
+
+    .calendar
+        z-index 1
+        position absolute
+        top 50%
+        margin-top -0.75em
+        margin-left 1.2em
+
+        .badge
+            margin: 0
+
+        .calendarcombo
+            display: none
+
+            &.expanded
+                display: inline-block
+                margin-left: 5px
+
+    .input-desc
+        width 100%
+        padding 1.5em 3em
+        background-color transparent
+        border none
+        font-size: 1.6em
+
+
+.popover-content
+    padding: 0
+
+    .caption
+        display inline-block
+        min-width 3em
+        margin-left 3rem
+
+    // Specific rules for elements
+    .input-allday
+        margin-right: 5px
+
+    .aside
+            float: right
+            clear: none
+
+    .end-date
+        clear: none
+
+        .caption
+            min-width: inherit
+
+
+.popover-content-wrapper
+    overflow hidden
+    display flex
+    align-items center
+    padding 0
+
+    .item-row
+        width 75%
+        padding .6em 0
+
+        &:last-child
+            width 25%
+
+    .time-row
+        display flex
+        align-items baseline
+        padding 0.2em 0
+        font-size 1rem
+        border-right 1px solid #eee
+
+        input[type=text]
+            font-size 1rem
+
+    .all-day
+        display flex
+        align-items center
+        justify-content center
+
+
+.popover-footer
+    padding: 10px 12px
+    background-color: overlay-color
+    border-radius: 0 0 5px 5px
+    display flex
+    justify-content space-between
+    align-items baseline
+
+    [role=button]
+        margin-left: 1em
+        font-size: 0.85em

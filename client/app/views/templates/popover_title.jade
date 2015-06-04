@@ -1,22 +1,15 @@
-span.calendar
+div.calendar
     input.calendarcombo(value=calendar)
 
-span.label
+div.label
     input.input-desc(tabindex="1",
                      type="text",
                      value=description,
-                     placeholder=t("summary"),
+                     placeholder=t("Event Title"),
                      data-tabindex-prev="8")
 
-span.label
-    input.input-place(tabindex="2",
-                      type="text",
-                      value=place,
-                      placeholder=t("Place"))
-
-
-span.controls
-    button.close.fa.fa-close(title=t('close'), role="button")
+div.controls
+    // button.close.fa.fa-close(title=t('close'), role="button")
     button.remove.fa.fa-trash(title=t('delete'), role="button")
     img.remove-spinner(src='img/spinner.svg')
     button.duplicate.fa.fa-copy(title=t('duplicate'), role="button")
