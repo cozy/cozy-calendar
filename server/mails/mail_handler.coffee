@@ -6,6 +6,7 @@ log = require('printit')
     date: true
 
 Event = require '../models/event'
+User = require '../models/user'
 cozydb = require 'cozydb'
 
 localization = require '../libs/localization_manager'
@@ -13,11 +14,14 @@ localization = require '../libs/localization_manager'
 module.exports.sendInvitations = (event, dateChanged, callback) ->
     guests = event.toJSON().attendees
     needSaving = false
-    cozydb.api.getCozyDomain (err, domain) ->
-        if err
-            log.error 'Cannot get Cozy instance'
-            log.error err
-            return callback()
+
+    async.parallel [
+        (cb) -> cozydb.api.getCozyDomain cb
+        (cb) -> User.getUserInfos cb
+    ], (err, results) ->
+        return callback err if err
+
+        [domain, user] = results
 
         async.forEach guests, (guest, done) ->
 
@@ -48,8 +52,10 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
 
 
             {description, place} = event.toJSON()
-            place = if place?.length > 0 then "(#{place})" else ""
+            place = if place?.length > 0 then place else false
             templateOptions =
+                displayName: user.name
+                displayEmail: user.email
                 description: description
                 place: place
                 key: guest.key
@@ -84,32 +90,38 @@ module.exports.sendDeleteNotification = (event, callback) ->
     # only process guests that have accepted to attend the event
     guestsToInform = guests.filter (guest) ->
         return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
-    async.eachSeries guestsToInform, (guest, done) ->
 
-        if event.isAllDayEvent()
-            dateFormatKey = 'email date format allday'
-        else
-            dateFormatKey = 'email date format'
-        dateFormat = localization.t dateFormatKey
-        date = event.formatStart dateFormat
-        {description, place} = event.toJSON()
-        place = if place?.length > 0 then "(#{place})" else ""
-        templateOptions =
-            description: description
-            place: place
-            date: date
-        htmlTemplate = localization.getEmailTemplate 'mail_delete'
-        subjectKey = 'email delete title'
-        mailOptions =
-            to: guest.email
-            subject: localization.t subjectKey, description: event.description
-            content: localization.t 'email delete content', templateOptions
-            html: htmlTemplate templateOptions
-        cozydb.api.sendMailFromUser mailOptions, (err) ->
-            if err?
-                log.error "An error occured while sending email"
-                log.error err
+    User.getUserInfos (err, user) ->
+        return callback err if err
 
-            done err
+        async.eachSeries guestsToInform, (guest, done) ->
 
-    , callback
+            if event.isAllDayEvent()
+                dateFormatKey = 'email date format allday'
+            else
+                dateFormatKey = 'email date format'
+            dateFormat = localization.t dateFormatKey
+            date = event.formatStart dateFormat
+            {description, place} = event.toJSON()
+            place = if place?.length > 0 then place else false
+            templateOptions =
+                displayName: user.name
+                displayEmail: user.email
+                description: description
+                place: place
+                date: date
+            htmlTemplate = localization.getEmailTemplate 'mail_delete'
+            subjectKey = 'email delete title'
+            mailOptions =
+                to: guest.email
+                subject: localization.t subjectKey, description: event.description
+                content: localization.t 'email delete content', templateOptions
+                html: htmlTemplate templateOptions
+            cozydb.api.sendMailFromUser mailOptions, (err) ->
+                if err?
+                    log.error "An error occured while sending email"
+                    log.error err
+
+                done err
+
+        , callback
