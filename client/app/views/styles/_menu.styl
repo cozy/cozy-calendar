@@ -1,8 +1,10 @@
 .sidenav
+    position relative
     float: left
     left: 0
     top: 0
     width: 200px
+    height 100vh !important     // TODO removed importabt once the resize in JS is gone
     padding 0.5em 1em
     background: #F2F2F2
     border-right 1px solid #e2e2e2
@@ -16,8 +18,12 @@
         color: #333
 
         &:hover
-            text-decoration: none
-            background-color transparent
+            text-decoration none
+
+    i
+        position relative
+        top 1px
+        margin-right 0.5em
 
     li.active
         background: #AEDBFF
@@ -47,8 +53,9 @@
             justify-content space-between
             align-items center
 
-        i
-            margin-right: 10px
+            span:first-child
+                font-size 1.3em
+                color #333
 
         .calendar-add
             font-size 1.4em
@@ -58,11 +65,10 @@
             &:hover
                 color #333
 
-        .spinner
-            margin-left 10px
-            display none
-            height 15px
-            width 15px
+    .spinner
+        height 1rem
+        width 1rem
+        float right
 
     #multiple-actions
         padding 15px
@@ -79,12 +85,15 @@
             opacity 0
 
     ul#menuitems
-        margin-left 0.5em
+        margin-left 0
         list-style none
 
         li.tagmenuitem
             margin-left 0
-            padding 0.3em 0.8em
+            padding 0.3em 0.1em
+
+            &:hover
+                cursor pointer
 
             .calendar-actions
                 opacity 0
@@ -104,8 +113,8 @@
                 border-radius 100%
 
             .calendar-name
-                font-size 0.9em
-                color #333
+                font-size 0.85em
+                color #555
 
             input.calendar-name
                 width 100px
@@ -115,8 +124,11 @@
 
             .dropdown
                 display inline-block
+                position absolute
+
                 .dropdown-toggle
                     padding 0 5px
+
                     .caret
                         display none
                         margin-top 0 !important // overrides bootstrap
@@ -129,7 +141,7 @@
                 .dropdown-menu
                     padding 0.4em 0
                     border-color #ddd
-                    shadow 0 5px 10px rgba(0,0,0,.15)
+                    box-shadow 0 5px 16px rgba(0,0,0,0.12)
 
                     li
                         margin 0
@@ -139,7 +151,7 @@
                             padding 0.5em 1em
 
                             &:hover
-                                background #ffc47f
+                                background orange
 
 
             &:hover
