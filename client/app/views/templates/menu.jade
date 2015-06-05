@@ -1,20 +1,15 @@
-li
-    a(href="#sync")
-        i.fa.fa-refresh
-        span
-            = t('Sync')
-
-li.calendars
-    a(href="#calendar")
-        i.fa.fa-calendar
-        span= t('Calendar')
-        span.fa.fa-plus.calendar-add
-        img.spinner(src="img/spinner.svg")
+.calendars
+    a.title(href="#calendar")
+        .title-items
+            i.fa.fa-calendar
+            span= t('Calendar')
+        .title-items
+            span.fa.fa-plus-circle.calendar-add
 
 ul#menuitems
 
-#multiple-actions.hidden
-    p
-        button.remove-cals.btn.btn-cozy(title=t('delete'), role="button")=t('delete')
-    p
-        button.export-cals.btn.btn-cozy(title=t('export'), role="button")=t('export')
+a.btn.btn-full.btn-secondary(href="#sync")
+    i.fa.fa-refresh
+    span
+        = t('Synchronization')
+
