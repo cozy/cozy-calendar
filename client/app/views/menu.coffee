@@ -6,9 +6,9 @@ Tag = require 'models/tag'
 
 module.exports = class MenuView extends ViewCollection
 
-    tagName: 'ul'
+    tagName: 'div'
     id: 'menu'
-    className: 'container nav nav-list'
+    className: 'container nav nav-list sidenav'
     collectionEl: '#menuitems'
     template: require './templates/menu'
     itemview: require 'views/menu_item'
@@ -64,7 +64,6 @@ module.exports = class MenuView extends ViewCollection
 
     activate: (href) ->
         @$('.active').removeClass 'active'
-        @$('a[href="#' + href + '"]').parent().addClass 'active'
 
 
     toggleDropdown: ->
