@@ -7,10 +7,10 @@ icon-color    = #333
 input-color   = #555
 
 
-/**
- * Styles for the fullcalendar plugin
- */
-
+//
+// Styles for the fullcalendar plugin
+// ----------------------------------------------------------------------------
+/*
 .fc-button-prev, .fc-button-next, .fc-button-today,
 .fc-button-month, .fc-button-week, .fc-button-agendaWeek
 .fc-button-day, .fc-button-agendaDay, .fc-button-list
@@ -47,9 +47,13 @@ input-color   = #555
         color: blue + 20%
         border-radius: 4px
         color: blue
+*/
+.fc-ltr
+    padding 0
 
 .fc-view-container
     clear:none
+    padding 1em
 
     thead
         tr
@@ -78,34 +82,63 @@ input-color   = #555
     background: green
 
 
+//
+// HEADER
 .fc-header
-    cursor: default
+    box-sizing border-box
+    display flex
+    align-items center
     width 100%
+    padding 0.8em 1em
+    background-color #f2f2f2
+    border-bottom 1px solid #e2e2e2
 
-.fc-header-title
+    .btn-group > .btn
+        background-color #FFF
+        border 1px solid blue
+        color blue
+        font-weight normal
 
-    h2
-        font-weight: normal
+        .fa
+            font-size 1.2em
 
-.fc-header-title h2
-    margin-top: 0px
-    white-space: nowrap
+        &:active
+            box-shadow none
 
+        &:hover
+            color: orange
 
-.fc-header td
-    border-style: none
+        &.fc-state-active
+            background-color blue
+            color #FFF
 
-.fc-header .fc-button
-    margin-bottom: 1em
-    vertical-align: top
+    .fc-button
+        margin 0
+
+.fc-header-left
+.fc-header-center
+.fc-header-right
+    flex-grow 1
+    width 33.33%
+
+.fc-header-center
+    display flex
+    justify-content center
 
 .fc-header-right
     text-align: right
 
+.fc-header-title h2
+    margin 0
+    font-size 1.6em
+    line-height 1em
+    font-weight normal
+    white-space nowrap
+
 .fc-button
     position: relative
     display: inline-block
-    padding: 0px 0.6em
+    padding: 0 0.6em
     overflow: hidden
     height: 1.9em
     line-height: 1.9em
@@ -116,16 +149,16 @@ input-color   = #555
         font-size: 2em
 
 
+
 .fc-title,
 .fc-view-container
-
     thead
     thead > tr.fc-first
     .fc-day-header
     .fc-widget-header
-        font-family: 'Maven Pro', sans-serif
+        font-family: 'Source Sans Pro', sans-serif
         border-radius: 0
-        color: black
+        color: #555
         cursor: default
         font-weight: normal
 
@@ -133,13 +166,16 @@ input-color   = #555
     background: white
     color: darkgrey
 
-.fc-agenda-axis.fc-first
-    background: white
-    border-radius: 0
-    color: white
+    &.fc-first
+        background: white
+        border-radius: 0
+        color: white
 
 .fc-day-number
-    font-family: 'Maven Pro', sans-serif
+    font-family: 'Source Sans Pro', sans-serif
+
+.fc-bg .fc-other-month
+    background-color rgba(0, 0, 0, 0.02)
 
 .fc-content
     border: 0
@@ -153,9 +189,8 @@ input-color   = #555
         margin-top: 2px
         margin-right: 5px
 
-
 .fc-day:hover
-    background: orange + 80%
+    background: transparent
 
 .event-remove
     cursor: pointer
@@ -167,11 +202,15 @@ input-color   = #555
 .fc-view
     overflow: visible
 
-#view-container .fc-view-container .fc-cell-overlay
-    background: #CBE4FB
+#view-container .fc-view-container
+    .fc-cell-overlay
+        background: #CBE4FB
 
-#view-container .fc-view-container tbody .fc-state-highlight
-    background: #CCF0CC
+    tbody .fc-state-highlight
+        background: blue + 92%
+
+    .fc-today.fc-state-highlight
+        color blue
 
 .fc-event:hover
     background: orange !important
@@ -279,51 +318,16 @@ a.btn:visited
   border-bottom: 0
   padding-bottom: 0
 
-
-// Confirmation page when a user is inviting another user
-// ----------------------------------------------------------------------------
-.public-event-body
-    background-color #F4F4F4
-    font-family Helvetica,Arial,Verdana,sans-serif
-
-    header
-    main
-        width 80%
-        max-width 600px
-        background-color #FFF
-        border 1px solid #DDD
-        box-sizing border-box
-
-    main
-        margin 0 auto 3em
-        padding 2em
-        border-radius 0 0 8px 8px
-
-    header
-        display flex
-        margin 3em auto 0
-        border-bottom none
-        border-radius 8px 8px 0 0
-
-        img
-            padding 12px 0
-            margin 0 auto
-            height 48px
+.public-event-container
+    width: 100%
 
     h2
-        margin-top 0
-        font-weight bold
+    h3
+    h4
+    p
+    a
+    body
+        font-family: 'Maven Pro', sans-serif
 
     h3
-        margin-top 0
-        font-style italic
-    hr
-        border none
-        border-top 1px solid #DDD
-
-    .btn-negative
-        background-color #FF7070
-
-    .special
-        color #999
-        font-style italic
+        margin-top: 0
