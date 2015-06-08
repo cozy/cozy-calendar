@@ -1,7 +1,9 @@
-.helptext
+.modal-header
     h2= t('Synchronization Settings')
 
 .helptext
+    span
+        i.fa.fa-refresh
     h3= t('mobile sync')
 
     if account == null
@@ -22,6 +24,8 @@
         a(href='https://cozy.io/mobile/calendar.html', target="_blank")= t('sync help link')
 
 .helptext
+    span
+        i.fa.fa-upload
     h3= t('icalendar export')
     p
       = t('download a copy of your calendar')
@@ -32,6 +36,8 @@
       a#export.btn= t('export your calendar')
 
 .helptext
+    span
+        i.fa.fa-download
     h3= t('icalendar import')
 
     #importviewplaceholder
