@@ -2,8 +2,6 @@ BaseView = require './base_view'
 module.exports = class PopoverView extends BaseView
 # Backbone view which implements Bootstrap popover tool.
 
-    titleTemplate: ->
-
     initialize: (options) ->
         @target = options.target
         @container = options.container
@@ -16,23 +14,85 @@ module.exports = class PopoverView extends BaseView
         @close()
 
     close: ->
-        @target.popover 'destroy'
+        @popover.remove()
+        @popover = null
         @target.data 'popover', undefined
         @remove()
+
 
     render: ->
         @beforeRender()
 
-        @target.popover(
-            selector: true
-            trigger: 'manual'
-            title: @titleTemplate @getRenderData()
-            html: true
-            placement: @getDirection
-            content: @template @getRenderData()
-            container: @container
-        )
-        .popover 'show'
+        renderData = @getRenderData()
+        template = require '../views/templates/popover'
+        popoverWrapper = template
+            title: @titleTemplate(renderData)
+            content: @template(renderData)
+
+        # Only create it if doesn't exist.
+        @popover ?= $ popoverWrapper
+
+        # If it exist, first detach it from the DOM.
+        @popover.detach()
+            # Reset positioning.
+            .css
+                display: 'block'
+                top: 'auto'
+                left: 'auto'
+                left: 'auto'
+
+        # Append the popover to the DOM so it has height/width/offset.
+        @popover.appendTo @container
+
+        # The popover's height must be retrieved when the popover is expanded.
+        @popover.find('.more').show()
+
+        # Define everything that will be needed for positionning.
+        popoverHeight = @popover.innerHeight()
+        popoverWidth = @popover.innerWidth()
+
+        # Target is the calendar's cell clicked.
+        targetOffset = @target.offset()
+        targetWidth = @target.width()
+        targetHeight = @target.height()
+
+        # Container is the screen, except the sidebar.
+        containerOffset = @container.offset()
+        containerHeight = @container.innerHeight()
+        containerWidth = @container.innerWidth()
+
+        # `popoverHeight` has been computed based on the expanded popover, but
+        # it's collapsed by default.
+        @popover.find('.more').hide()
+
+        # Define default position.
+        position =
+            top: targetOffset.top
+            left: targetOffset.left + 50
+
+        # Check if popover is within viewport's width
+        maxXPosition = position.left + targetWidth + popoverWidth
+        viewportMaxXPosition = containerOffset.left + containerWidth
+        fitRight = maxXPosition < viewportMaxXPosition
+
+        # Check if popover is within viewport's height
+        maxYposition = position.top + popoverHeight
+        viewportMaxYPosition = containerOffset.top + containerHeight
+        fitBottom = maxYposition < viewportMaxYPosition
+
+        # If it's not in viewport's height, position relatively to bottom.
+        unless fitBottom
+            position.bottom = containerHeight - targetOffset.top
+            position.top = 'auto'
+
+        # If it's not in viewport's width, position relatively to right.
+        unless fitRight
+            position.right = containerWidth - targetOffset.left + targetWidth
+            position.left = 'auto'
+
+        # Position the element into the DOM
+        @popover.css position
+
 
         @setElement $("##{@parentView.id} .popover")
 
@@ -44,34 +104,3 @@ module.exports = class PopoverView extends BaseView
 
         @afterRender()
         return @
-
-
-
-    getDirection: (tip) =>
-        # We need to inject the tip to determines its dimensions, then
-        # auto-detect position.
-        # This causes an unexpected reflow, but we can't do this otherwise for
-        # this time. Bootstrap's Hell...
-        $tmp = $(tip).clone().appendTo('body')
-        popoverWidth = $tmp.innerWidth()
-        popoverHeight = $tmp.innerHeight()
-        $tmp.remove()
-
-        pos = @target.offset()
-        ctnOfs = @container.offset()
-        realWidth = pos.left + @target.width() + popoverWidth
-        fitRight = realWidth < ctnOfs.left + @container.width()
-        fitLeft = pos.left - popoverWidth > ctnOfs.left
-
-        realHeight = pos.top + @target.height() + popoverHeight
-        fitBottom = realHeight < ctnOfs.top + @container.height()
-
-        if fitRight
-            return 'right'
-        else if fitLeft
-            return 'left'
-        else if fitBottom
-            return 'bottom'
-        else
-            return 'top'
-
