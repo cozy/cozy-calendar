@@ -53,7 +53,7 @@
             justify-content space-between
             align-items center
 
-            span:first-child
+            span
                 font-size 1.3em
                 color #333
 
@@ -64,6 +64,9 @@
 
             &:hover
                 color orange
+
+    .menu-icon
+        display none        // hidden in desktop view
 
     .spinner
         height 1rem
@@ -89,8 +92,10 @@
         list-style none
 
         li.tagmenuitem
+            display flex
+            align-items center
             margin-left 0
-            padding 0.3em 0.1em
+            padding 0.4em 0.1em
 
             &:hover
                 cursor pointer
@@ -104,8 +109,8 @@
                 margin 0px
 
             .badge
+                flex none
                 display inline-block
-                position relative
                 width 1em
                 height 1em
                 padding 0
@@ -113,7 +118,7 @@
                 border-radius 100%
 
             .calendar-name
-                font-size 0.9em
+                font-size 1em
                 color #555
 
             input.calendar-name

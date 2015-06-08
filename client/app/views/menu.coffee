@@ -6,7 +6,7 @@ Tag = require 'models/tag'
 
 module.exports = class MenuView extends ViewCollection
 
-    tagName: 'div'
+    tagName: 'ul'
     id: 'menu'
     className: 'container nav nav-list sidenav'
     collectionEl: '#menuitems'
