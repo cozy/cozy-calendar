@@ -49,7 +49,6 @@ module.exports = class PopoverView extends BaseView
 
         # Change the DOM with the new screen.
         renderData = @getRenderData()
-        console.log @titleElement
         @titleElement.html screen.title(renderData)
         @contentElement.html screen.content(renderData)
 
