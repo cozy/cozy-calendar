@@ -53,34 +53,35 @@ div.label.label-row
 div.label.label-row
     .icon
         span.fa.fa-users
-    input.input-place.input-full-block(tabindex="8",
+    input.input-people.input-full-block(tabindex="8",
                       type="text",
                       value=people,
                       placeholder=t("People"))
 
-div.label.label-row
-    .icon
-        span.fa.fa-align-left
-    input.input-place.input-full-block(tabindex="9",
-                      type="text",
-                      value=description,
-                      placeholder=t("Description"))
+.more
+    div.label.label-row
+        .icon
+            span.fa.fa-align-left
+        input.input-description.input-full-block(tabindex="9",
+                          type="text",
+                          value=description,
+                          placeholder=t("Description"))
 
-div.label.label-row
-    .icon
-        span.fa.fa-bell
-    select.input-place.input-full-block(tabindex="10",
-                      type="select",
-                      value=alert,
-                      placeholder=t("No Alert"))
+    div.label.label-row
+        .icon
+            span.fa.fa-bell
+        select.input-alarm.input-full-block(tabindex="10",
+                          type="select",
+                          value=alert,
+                          placeholder=t("No Alert"))
 
-div.label.label-row
-    .icon
-        span.fa.fa-repeat
-    select.input-place.input-full-block(tabindex="11",
-                      type="select",
-                      value=repeat,
-                      placeholder=t("No Repeat"))
+    div.label.label-row
+        .icon
+            span.fa.fa-repeat
+        select.input-repeat.input-full-block(tabindex="11",
+                          type="select",
+                          value=repeat,
+                          placeholder=t("No Repeat"))
 
 .popover-footer
     a.advanced-link(role="button",

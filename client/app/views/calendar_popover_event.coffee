@@ -27,32 +27,45 @@ defDatePickerOps        =
 
 module.exports = class EventPopOver extends PopoverView
 
-    titleTemplate: require './templates/popover_title'
-    template: require './templates/popover_event'
+    screens:
+        default:
+            title: require './templates/popover_title'
+            content: require './templates/popover_event'
+            afterRender: -> @afterRenderDefault()
+        description:
+            title: -> '<button class="back">back</a> Description'
+            content: require './templates/popover_event'
 
 
     events:
-        'keyup':                                 'onKeyUp'
-        'change select':                         'onKeyUp'
-        'change input':                          'onKeyUp'
+        # Popover's generic events.
+        'keyup':                'onKeyUp'
+        'change select':        'onKeyUp'
+        'change input':         'onKeyUp'
 
-        'click .add':                            'onAddClicked'
-        'click .advanced-link':                  'onAdvancedClicked'
+        'click .add':           'onAddClicked'
+        'click .advanced-link': 'onAdvancedClicked'
 
-        'click .remove':                         'onRemoveClicked'
-        'click .duplicate':                      'onDuplicateClicked'
-        'click .close':                          'selfclose'
+        'click .remove':        'onRemoveClicked'
+        'click .duplicate':     'onDuplicateClicked'
+        'click .close':         'selfclose'
 
-        'changeTime.timepicker .input-start':    'onSetStart'
-        'changeTime.timepicker .input-end-time': 'onSetEnd'
-        'changeDate .input-end-date':            'onSetEnd'
-        'click .input-allday':                   'toggleAllDay'
+        'click button.back': -> @switchToScreen 'default'
 
-        'input .input-desc':                     'onSetDesc'
-        'input .input-place':                    'onSetPlace'
+        # Default screen's events.
+        'changeTime.timepicker [data-screen="default"] .input-start':    'onSetStart'
+        'changeTime.timepicker [data-screen="default"] .input-end-time': 'onSetEnd'
+        'changeDate [data-screen="default"] .input-end-date':            'onSetEnd'
+        'click [data-screen="default"] .input-allday':                   'toggleAllDay'
 
-        'keydown [data-tabindex-next]':          'onTab'
-        'keydown [data-tabindex-prev]':          'onTab'
+        'input [data-screen="default"] .input-desc':                     'onSetDesc'
+        'input [data-screen="default"] .input-place':                    'onSetPlace'
+
+        'keydown [data-screen="default"] [data-tabindex-next]':          'onTab'
+        'keydown [data-screen="default"] [data-tabindex-prev]':          'onTab'
+
+        'click [data-screen="default"] .input-description': -> @switchToScreen 'description'
+
 
 
     initialize: (options) ->
@@ -77,6 +90,10 @@ module.exports = class EventPopOver extends PopoverView
         @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
 
+        @refresh()
+
+
+    afterRenderDefault: ->
         timepickerEvents =
             'focus': ->
                 $(@).timepicker 'highlightHour'
@@ -107,9 +124,6 @@ module.exports = class EventPopOver extends PopoverView
         # Set default calendar value.
         @model.setCalendar @calendar.value()
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
-
-        @refresh()
-
 
     # Set captions contents, taking care of event state (all-day, same day, etc)
     setCaptions: ->
@@ -219,18 +233,10 @@ module.exports = class EventPopOver extends PopoverView
         @model.set 'place', ev.target.value
 
 
-    onAdvancedClicked: (event) =>
-        if @model.isNew()
-            modal = new EventModal
-                model: @model
-                backurl: window.location.hash
-            $('body').append modal.$el
-            modal.render()
-        else
-            window.location.hash += "/#{@model.id}"
-
+    # Show more fields when triggered.
+    onAdvancedClicked: (event) ->
         event.preventDefault()
-        @selfclose()
+        @$('.more').show()
 
 
     onKeyUp: (event) ->

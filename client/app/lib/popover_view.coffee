@@ -1,6 +1,7 @@
 BaseView = require './base_view'
 module.exports = class PopoverView extends BaseView
-# Backbone view which implements Bootstrap popover tool.
+
+    template: require '../views/templates/popover'
 
     initialize: (options) ->
         @target = options.target
@@ -14,26 +15,85 @@ module.exports = class PopoverView extends BaseView
         @close()
 
     close: ->
-        @popover.remove()
-        @popover = null
+        @$popover.remove()
+        @$popover = null
         @target.data 'popover', undefined
         @remove()
+
+
+    # Get templates for a given screen.
+    getScreen: (screenID = 'default') ->
+
+        screen = @screens?[screenID]
+        # A screen must have a title and content attributes.
+        if screen?.title and screen?.content
+            return screen
+        else
+            error = """
+            Screen '#{screenID}' doesn't exist, or doesn't have a title or a
+            content template function.
+            """
+            throw new Error(error)
+
+
+    # Switch screen.
+    switchToScreen: (screenID) ->
+
+        # Throw if popover has not been rendered yet.
+        unless @$popover?
+            error = 'Popover must be rendered before switching its screen.'
+            throw new Error(error)
+
+        # Get the screen data.
+        screen = @getScreen screenID
+
+        # Change the DOM with the new screen.
+        renderData = @getRenderData()
+        console.log @titleElement
+        @titleElement.html screen.title(renderData)
+        @contentElement.html screen.content(renderData)
+
+        # Change current screen information
+        @screenElement.data 'screen', screenID
+
+        # Execute the screen's callback if it has been defined.
+        screen.afterRender?.call @
 
 
     render: ->
         @beforeRender()
 
-        renderData = @getRenderData()
-        template = require '../views/templates/popover'
-        popoverWrapper = template
-            title: @titleTemplate(renderData)
-            content: @template(renderData)
-
         # Only create it if doesn't exist.
-        @popover ?= $ popoverWrapper
+        unless @$popover?
+            renderData = @getRenderData()
+            defaultScreen = @getScreen 'default'
+            popoverWrapper = @template
+                title: defaultScreen.title(renderData)
+                content: defaultScreen.content(renderData)
 
+            @$popover = $ popoverWrapper
+            @titleElement = @$popover.find '.popover-title'
+            @contentElement = @$popover.find '.popover-content'
+            @screenElement = @$popover.find '.screen-indicator'
+
+        # Compute and et popover's position.
+        @positionPopover()
+
+        @setElement $("##{@parentView.id} .popover")
+
+        # Manage responsive (for smartphones)
+        if $(window).width() <= 500
+            $('.popover').css
+                top: 0
+                left: 0
+
+        @afterRender()
+        return @
+
+
+    positionPopover: ->
         # If it exist, first detach it from the DOM.
-        @popover.detach()
+        @$popover.detach()
             # Reset positioning.
             .css
                 display: 'block'
@@ -42,14 +102,14 @@ module.exports = class PopoverView extends BaseView
                 left: 'auto'
 
         # Append the popover to the DOM so it has height/width/offset.
-        @popover.appendTo @container
+        @$popover.appendTo @container
 
         # The popover's height must be retrieved when the popover is expanded.
-        @popover.find('.more').show()
+        @$popover.find('.more').show()
 
         # Define everything that will be needed for positionning.
-        popoverHeight = @popover.innerHeight()
-        popoverWidth = @popover.innerWidth()
+        popoverHeight = @$popover.innerHeight()
+        popoverWidth = @$popover.innerWidth()
 
         # Target is the calendar's cell clicked.
         targetOffset = @target.offset()
@@ -63,7 +123,7 @@ module.exports = class PopoverView extends BaseView
 
         # `popoverHeight` has been computed based on the expanded popover, but
         # it's collapsed by default.
-        @popover.find('.more').hide()
+        @$popover.find('.more').hide()
 
         # Define default position.
         position =
@@ -91,16 +151,4 @@ module.exports = class PopoverView extends BaseView
             position.left = 'auto'
 
         # Position the element into the DOM
-        @popover.css position
-
-
-        @setElement $("##{@parentView.id} .popover")
-
-        # Manage responsive (for smartphones)
-        if $(window).width() <= 500
-            $('.popover').css
-                top: 0
-                left: 0
-
-        @afterRender()
-        return @
+        @$popover.css position
