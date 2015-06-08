@@ -205,16 +205,28 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'unselect'
         @popover = null
 
-    onEventRender: (event, element) ->
+    onEventRender: (event, $element) ->
+        # TODO: use the new spinner, instead of this.
         if event.isSaving? and event.isSaving
-            spinTarget = $(element).find '.fc-event-time'
+            spinTarget = $element.find '.fc-event-time'
             spinTarget.addClass 'spinning'
             spinTarget.html "&nbsp;"
             spinTarget.spin "tiny"
 
-        $(element).attr 'title', event.title
+        # Title and time are joined in the .fc-title for some reason.
+        # Let's split them to put them in the right element.
+        $displayedElement = $element.find '.fc-title'
+        titleAndTime = $displayedElement.html()
+        [time, title...] = titleAndTime.split ' '
+        title = title.join ' '
 
-        return element
+        # Append the right values to the right elements.
+        $element.find('.fc-time').html time
+        $element.find('.fc-title').html title
+
+        $element.attr 'title', event.title
+
+        return $element
 
     onEventDragStop: (event, jsEvent, ui, view) ->
         event.isSaving = true
