@@ -21,9 +21,12 @@ User.getUserInfos = (callback) ->
         name = if user.public_name?.length
             user.public_name
         else
+            # - Get first part of mail
+            # - Replace '.' and '-' with space
+            # - Split on spaces
+            # - Capitalize string
             words = user.email.split('@')[0]
-                        .replace '.', ' '
-                        .replace '-', ' '
+                        .replace /([\.-]+)/g, ' '
                         .split ' '
             words.map((word) -> word[0].toUpperCase() + word[1...]).join ' '
 
