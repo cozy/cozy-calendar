@@ -8,7 +8,7 @@
                 span.fa.fa-arrow-right
             span.caption= t("From")
             input.input-start-date.input-date(tabindex="3",
-                                              type="date",
+                                              type="text",
                                               size="10"
                                               placeholder=t("From [date]"),
                                               value=start.format(dFormat))
@@ -16,14 +16,15 @@
                                          type="time",
                                          size="5"
                                          placeholder=t("From [hours:minutes]"),
-                                         value=start.format(tFormat))
+                                         value=start.format(tFormat),
+                                         aria-hidden="#{allDay}")
 
-        label.timed.time-row(aria-hidden="#{allDay}")
+        label.timed.time-row
             .icon
                 span.fa.fa-arrow-left
             span.input-end-caption.caption= t("To")
             input.input-end-date.input-date(tabindex="5",
-                                            type="date",
+                                            type="text",
                                             size="10"
                                             placeholder=t("To [date]"),
                                             value=end.format(dFormat))
@@ -31,7 +32,8 @@
                                             type="time",
                                             size="5"
                                             placeholder=t("To [hours:minutes]"),
-                                            value=end.format(tFormat))
+                                            value=end.format(tFormat),
+                                            aria-hidden="#{allDay}")
 
     .item-row
         label.all-day

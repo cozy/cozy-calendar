@@ -90,8 +90,6 @@ module.exports = class EventPopOver extends PopoverView
 
         @listenTo @model, 'change', @refresh
 
-        @options = options
-
 
     afterRender: ->
         @addButton    = @$ '.btn.add'
@@ -99,8 +97,6 @@ module.exports = class EventPopOver extends PopoverView
         @spinner = @$ '.remove-spinner'
         @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
-
-        @refresh()
 
 
     afterRenderDefault: ->
@@ -115,6 +111,7 @@ module.exports = class EventPopOver extends PopoverView
         if @model.isNew()
             @removeButton.hide()
             @duplicateButton.hide()
+
 
         @$('input[type="time"]').attr('type', 'text')
                                 .timepicker defTimePickerOpts
@@ -135,17 +132,7 @@ module.exports = class EventPopOver extends PopoverView
         @model.setCalendar @calendar.value()
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
-    # Set captions contents, taking care of event state (all-day, same day, etc)
-    setCaptions: ->
-        @$('.end-date .caption').html =>
-            if @model.isAllDay()
-                if @model.isSameDay()
-                    str = 'All one day'
-                else
-                    str = 'All day, until'
-            else
-                return ',&nbsp;'
-            t str
+        @refresh()
 
 
     getTitle: ->
@@ -168,7 +155,7 @@ module.exports = class EventPopOver extends PopoverView
         else
             currentCalendar = @model.get('tags')?[0] or defaultCalendar
 
-        data = _.extend {}, @model.toJSON(),
+        return data = _.extend {}, @model.toJSON(),
             tFormat:     tFormat
             dFormat:     dFormat
             editionMode: not @model.isNew()
@@ -202,7 +189,8 @@ module.exports = class EventPopOver extends PopoverView
 
 
     onSetStart: ->
-        @model.setStart @formatDateTime @$('.input-start').val()
+        @model.setStart @formatDateTime @$('.input-start').val(),
+                                        @$('.input-start-date').val()
 
 
     onSetEnd: ->
@@ -212,7 +200,6 @@ module.exports = class EventPopOver extends PopoverView
         # We put or remove a top-level class on the popover body that target if
         # the event is one day long or not
         @$container.toggleClass 'is-same-day', @model.isSameDay()
-        @setCaptions()
 
 
     toggleAllDay: ->
@@ -230,9 +217,8 @@ module.exports = class EventPopOver extends PopoverView
             @model.set 'end', start.hour(13).toISOString()
 
         # Set labels, captions and views states
-        @$('.timed').attr 'aria-hidden', @model.isAllDay()
+        @$('.input-time').attr 'aria-hidden', @model.isAllDay()
         @$container.toggleClass 'is-all-day', @model.isAllDay()
-        @setCaptions()
 
 
     onSetDesc: (ev) ->

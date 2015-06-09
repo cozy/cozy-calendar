@@ -10,9 +10,11 @@ module.exports = class PopoverView extends BaseView
 
         return @
 
+
     selfclose: ->
         @parentView.onPopoverClose?()
         @close()
+
 
     close: ->
         @$popover.remove()
