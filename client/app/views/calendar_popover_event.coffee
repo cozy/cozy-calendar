@@ -107,6 +107,10 @@ module.exports = class EventPopOver extends PopoverView
         'click [data-screen="alert"] input[type="checkbox"]': 'onChangeActionAlert'
 
 
+        # Repeat screen's events.
+        'change [data-screen="repeat"] .input-repeat': 'onSelectRepeat'
+
+
     initialize: (options) ->
         if not @model
             @model = new Event
@@ -127,7 +131,9 @@ module.exports = class EventPopOver extends PopoverView
         @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
 
-
+    ###
+        Default screen.
+    ###
     afterRenderDefault: ->
         timepickerEvents =
             'focus': ->
@@ -164,6 +170,15 @@ module.exports = class EventPopOver extends PopoverView
         @refresh()
 
 
+    # Show more fields when triggered.
+    onAdvancedClicked: (event) ->
+        event.preventDefault()
+        @$('[aria-hidden="true"]').attr 'aria-hidden', false
+
+
+    ###
+        Alert screen.
+    ###
     afterRenderAlert: ->
         $alerts = @$ '.alerts'
         $alerts.empty()
@@ -236,7 +251,7 @@ module.exports = class EventPopOver extends PopoverView
     onNewAlert: ->
         index = parseInt @$('select.new-alert').val()
 
-        # 0 is the default placeholder, it's not bound to any real value.
+        # -1 is the default placeholder, it's not bound to any real value.
         if index isnt -1
 
             # Get the ical-formatted value: relative time.
@@ -256,6 +271,19 @@ module.exports = class EventPopOver extends PopoverView
 
             # Dirty way to refresh the list.
             @afterRenderAlert()
+
+
+    ###
+        Repeat screen.
+    ###
+    onSelectRepeat: ->
+        value = parseInt @$('select.input-repeat').val()
+
+        # -1 is the default placeholder, it's not bound to any real value.
+        if value isnt -1
+            @$('[aria-hidden="true"]').attr 'aria-hidden', false
+
+
 
     getTitle: ->
         if @model.isNew()
@@ -377,13 +405,6 @@ module.exports = class EventPopOver extends PopoverView
 
     onSetPlace: (ev) ->
         @model.set 'place', ev.target.value
-
-
-    # Show more fields when triggered.
-    onAdvancedClicked: (event) ->
-        event.preventDefault()
-        @$('[aria-hidden="true"]').attr 'aria-hidden', false
-
 
     onKeyUp: (event) ->
         if event.keyCode is 13 or event.which is 13 #ENTER

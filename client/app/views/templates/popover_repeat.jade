@@ -1,2 +1,30 @@
-.test
-  | coucou
+label Repeats
+    select.input-repeat
+        option(value="-1", selected) No Repeat
+        option(value="0") Daily
+        option(value="1") Weekly
+        option(value="2") Monthly
+        option(value="3") Yearly
+
+label(aria-hidden="true") Interval
+    input(type="number", min=1, value=1)
+
+
+label(aria-hidden="true") Ends
+    label
+        input(type="radio", name="endMode", value='forever')
+        = t('forever')
+
+    label
+        input(type="radio", name="endMode", value='count')
+        label(for="count")= t('after')
+        input#rrule-count.input-mini(type="number", min=0, value=1)
+        label(for="rrule-count")=t('occurences')
+    
+    label
+        input(type="radio", name="endMode", value='until')
+        label(for="until")= t('until')
+
+
+
+
