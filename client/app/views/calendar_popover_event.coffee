@@ -33,8 +33,14 @@ module.exports = class EventPopOver extends PopoverView
             content: require './templates/popover_event'
             afterRender: -> @afterRenderDefault()
         description:
-            title: -> '<button class="back">back</a> Description'
-            content: require './templates/popover_event'
+            title: -> '<button class="back">back</button> Description'
+            content: require './templates/popover_description'
+        alert:
+            title: -> '<button class="back">back</button> Alerts'
+            content: require './templates/popover_alert'
+        repeat:
+            title: -> '<button class="back">back</button> Repeat'
+            content: require './templates/popover_repeat'
 
 
     events:
@@ -65,6 +71,10 @@ module.exports = class EventPopOver extends PopoverView
         'keydown [data-screen="default"] [data-tabindex-prev]':          'onTab'
 
         'click [data-screen="default"] .input-description': -> @switchToScreen 'description'
+
+        'change [data-screen="default"] .input-alert': -> @switchToScreen 'alert'
+
+        'change [data-screen="default"] .input-repeat': -> @switchToScreen 'repeat'
 
 
 

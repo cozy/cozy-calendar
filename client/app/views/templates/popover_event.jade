@@ -70,18 +70,31 @@ div.label.label-row
     div.label.label-row
         .icon
             span.fa.fa-bell
-        select.input-alarm.input-full-block(tabindex="10",
-                          type="select",
-                          value=alert,
-                          placeholder=t("No Alert"))
+        select.input-alert.input-full-block
+          option No Alert
+          option At time of Event
+          option 5 minutes before
+          option 15 minutes before
+          option 30 minutes before
+          option 1 hour before
+          option 2 hour before
+          option 6 hour before
+          option 12 hour before
+          option 1 day before
+          option 2 day before
+          option 3 day before
+          option 5 day before
+          option 7 day before
 
     div.label.label-row
         .icon
             span.fa.fa-repeat
-        select.input-repeat.input-full-block(tabindex="11",
-                          type="select",
-                          value=repeat,
-                          placeholder=t("No Repeat"))
+        select.input-repeat.input-full-block
+          option No Repeat
+          option Daily
+          option Weekly
+          option Monthly
+          option Yearly
 
 .popover-footer
     a.advanced-link(role="button",
