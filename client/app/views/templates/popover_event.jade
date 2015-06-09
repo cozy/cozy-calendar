@@ -1,5 +1,8 @@
 - popoverClassName  = (allDay ? ' is-all-day' : '')
 - popoverClassName += (sameDay? ' is-same-day' : '')
+- var showDetailsByDefault = details && details.length > 0
+- var showAlertsByDefault = alerts && alerts.length > 0
+- var showRepeatByDefault = repeat != null && repeat != void(0)
 
 .popover-content-wrapper.label-row(class=popoverClassName)
     .item-row
@@ -60,35 +63,34 @@ div.label.label-row
                       value=people,
                       placeholder=t("People"))
 
-.more
-    div.label.label-row
-        .icon
-            span.fa.fa-align-left
-        .icon.right
-            span.fa.fa-angle-right
-        input.input-details-trigger.input-full-block(tabindex="9",
-                          type="text",
-                          value=details,
-                          placeholder=t("Description"))
+div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
+    .icon
+        span.fa.fa-align-left
+    .icon.right
+        span.fa.fa-angle-right
+    input.input-details-trigger.input-full-block(tabindex="9",
+                      type="text",
+                      value=details,
+                      placeholder=t("Description"))
 
-    div.label.label-row.input-alert
-        .icon
-            span.fa.fa-bell
-        .icon.right
-            span.fa.fa-angle-right
-        
-        if !alerts || alerts.length === 0
-            button.button-full-block No alert
-        else
-            button.button-full-block= t('alert label', {numAlerts: alerts.length})
+div.label.label-row.input-alert(aria-hidden="#{!showAlertsByDefault}")
+    .icon
+        span.fa.fa-bell
+    .icon.right
+        span.fa.fa-angle-right
+    
+    if !alerts || alerts.length === 0
+        button.button-full-block No alert
+    else
+        button.button-full-block= t('alert label', {numAlerts: alerts.length})
 
 
-    div.label.label-row.input-repeat
-        .icon
-            span.fa.fa-repeat
-        .icon.right
-            span.fa.fa-angle-right
-        button.button-full-block No repeat
+div.label.label-row.input-repeat(aria-hidden="#{!showRepeatByDefault}")
+    .icon
+        span.fa.fa-repeat
+    .icon.right
+        span.fa.fa-angle-right
+    button.button-full-block No repeat
 
 .popover-footer
     a.advanced-link(role="button",

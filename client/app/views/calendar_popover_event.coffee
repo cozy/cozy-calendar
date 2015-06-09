@@ -382,7 +382,7 @@ module.exports = class EventPopOver extends PopoverView
     # Show more fields when triggered.
     onAdvancedClicked: (event) ->
         event.preventDefault()
-        @$('.more').show()
+        @$('[aria-hidden="true"]').attr 'aria-hidden', false
 
 
     onKeyUp: (event) ->
