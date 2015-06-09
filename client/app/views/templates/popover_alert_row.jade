@@ -1,0 +1,10 @@
+li(data-index=index)
+    .label= label
+    button.fa.fa-close(title=t('close'), role="button")
+    .type
+        .notification-mode
+            input.action-email(id="email-#{index}", type="checkbox", checked=isEmailChecked)
+            label(for="email-#{index}") Email #{isEmailChecked}
+        .notification-mode
+            input.action-display(id="display-#{index}", type="checkbox", checked=isNotifChecked)
+            label(for="dispay-#{index}") Cozy notification #{isNotifChecked}

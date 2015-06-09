@@ -3,6 +3,8 @@ EventModal  = require 'views/event_modal'
 ComboBox    = require 'views/widgets/combobox'
 Event       = require 'models/event'
 
+helpers = require '../helpers'
+
 
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
@@ -24,9 +26,28 @@ defDatePickerOps        =
     minView: 2
     viewSelect: 4
 
+# Define the available options to create alerts.
+# Key is the unit M: minute, H: hour, D: day, and W: week
+# Value is the number of units.
+ALERT_OPTIONS = [
+    {M: 0}
+    {M: 15}
+    {M: 30}
+    {H: 1}
+    {H: 2}
+    {H: 6}
+    {H: 12}
+    {D: 1}
+    {D: 2}
+    {D: 3}
+    {D: 5}
+    {W: 1}
+]
+
 
 module.exports = class EventPopOver extends PopoverView
 
+    # TODO: rework the screen mechanism in order to use separate views.
     screens:
         default:
             title: require './templates/popover_title'
@@ -39,10 +60,13 @@ module.exports = class EventPopOver extends PopoverView
         alert:
             title: -> '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Alerts</h4><div class="btn-done">Done</div></div>'
             content: require './templates/popover_alert'
+            afterRender: -> @afterRenderAlert()
         repeat:
             title: -> '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Repeat</h4><div class="btn-done">Done</div></div>'
             content: require './templates/popover_repeat'
 
+
+    templateAlertRow: require './templates/popover_alert_row'
 
     events:
         # Popover's generic events.
@@ -76,6 +100,11 @@ module.exports = class EventPopOver extends PopoverView
         'click [data-screen="default"] .input-alert': -> @switchToScreen 'alert'
 
         'click [data-screen="default"] .input-repeat': -> @switchToScreen 'repeat'
+
+        # Alert screen's events.
+        'change [data-screen="alert"] .new-alert': 'onNewAlert'
+        'click [data-screen="alert"] .alerts li .fa-close': 'onRemoveAlert'
+        'click [data-screen="alert"] input[type="checkbox"]': 'onChangeActionAlert'
 
 
     initialize: (options) ->
@@ -135,6 +164,99 @@ module.exports = class EventPopOver extends PopoverView
         @refresh()
 
 
+    afterRenderAlert: ->
+        $alerts = @$ '.alerts'
+        $alerts.empty()
+
+        alarms = @model.get('alarms') or []
+        for alarm, index in alarms
+
+            trigger = helpers.iCalDurationToUnitValue alarm.trigg
+            {translationKey, value} = @getAlertTranslationInfo trigger
+            options =
+                index: index
+                label: t(translationKey, smart_count: value)
+                action: alarm.action
+                isEmailChecked: alarm.action in ['EMAIL', 'BOTH']
+                isNotifChecked: alarm.action in ['DISPLAY', 'BOTH']
+
+            row = @templateAlertRow options
+            $alerts.append row
+
+
+    # Handle alert removal.
+    onRemoveAlert: (event) ->
+
+        # Get which alert to remove.
+        index = @$(event.target).parents('li').attr 'data-index'
+
+        # Remove the alert.
+        alerts = @model.get('alarms') or []
+        alerts.splice index, 1
+        @model.set 'alarms', alerts
+
+        # Dirty way to refresh the list.
+        @afterRenderAlert()
+
+
+    # Handle alert action toggle.
+    onChangeActionAlert: (event) ->
+        checkbox = @$ event.target
+
+        # Get action to toggle.
+        isEmailAction = checkbox.hasClass 'action-email'
+        action = if isEmailAction then 'EMAIL' else 'DISPLAY'
+        otherAction = if action is 'EMAIL' then 'DISPLAY' else 'EMAIL'
+
+        # Get alert index.
+        index = checkbox.parents('li').attr 'data-index'
+
+        # Get current action.
+        alerts = @model.get 'alarms'
+        currentAction = alerts[index].action
+
+        # If two actions are selected, unselect this one.
+        if currentAction is 'BOTH'
+            newAction = otherAction
+
+        # If the other action is selected, select this one (both are selected).
+        else if currentAction is otherAction
+            newAction = 'BOTH'
+
+        # Otherwise do nothing, there must be at least one action selected.
+        else
+            event.preventDefault()
+
+        # Update the alert only if it has changed.
+        if newAction?
+            alerts[index].action = newAction
+            @model.set 'alarms', alerts
+
+
+    onNewAlert: ->
+        index = parseInt @$('select.new-alert').val()
+
+        # 0 is the default placeholder, it's not bound to any real value.
+        if index isnt -1
+
+            # Get the ical-formatted value: relative time.
+            alertOption = ALERT_OPTIONS[index]
+            triggerValue = helpers.unitValuesToiCalDuration alertOption
+
+            # Add it to the list of alarms.
+            alarms = @model.get('alarms') or []
+            alarms.push
+                action: 'DISPLAY'
+                trigg: triggerValue
+
+            @model.set 'alarms', alarms
+
+            # Reset selected value
+            @$('select.new-alert').val(-1)
+
+            # Dirty way to refresh the list.
+            @afterRenderAlert()
+
     getTitle: ->
         if @model.isNew()
             title = "#{@type} creation"
@@ -155,6 +277,11 @@ module.exports = class EventPopOver extends PopoverView
         else
             currentCalendar = @model.get('tags')?[0] or defaultCalendar
 
+
+        formattedAlertOptions = ALERT_OPTIONS.map (alert, index) =>
+            translationInfo = @getAlertTranslationInfo alert
+            return _.extend {}, translationInfo, {index}
+
         return data = _.extend {}, @model.toJSON(),
             tFormat:     tFormat
             dFormat:     dFormat
@@ -166,6 +293,24 @@ module.exports = class EventPopOver extends PopoverView
             start:       @model.getStartDateObject()
             end:         @model.getEndDateObject()
                                .add((if @model.isAllDay() then -1 else 0), 'd')
+            alertOptions: formattedAlertOptions
+            alerts: @model.get('alarms')
+
+
+    getAlertTranslationInfo: (alert) ->
+        [unit] = Object.keys(alert)
+        translationKey = switch unit
+            when 'M' then 'alert minute'
+            when 'H' then 'alert hour'
+            when 'D' then 'alert day'
+            when 'W' then 'alert week'
+
+        value = alert[unit]
+
+        if unit is 'M' and value is 0
+            translationKey = 'alert time of event'
+
+        return {translationKey, value}
 
 
     # Loop over controls elements w/o exiting the popover scope

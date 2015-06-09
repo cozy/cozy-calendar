@@ -76,7 +76,11 @@ div.label.label-row
             span.fa.fa-bell
         .icon.right
             span.fa.fa-angle-right
-        button.button-full-block No alert
+        
+        if !alerts || alerts.length === 0
+            button.button-full-block No alert
+        else
+            button.button-full-block= t('alert label', {numAlerts: alerts.length})
 
 
     div.label.label-row.input-repeat
