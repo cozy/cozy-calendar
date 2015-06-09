@@ -32,9 +32,10 @@ module.exports = class EventPopOver extends PopoverView
             title: require './templates/popover_title'
             content: require './templates/popover_event'
             afterRender: -> @afterRenderDefault()
-        description:
+        details:
             title: -> '<button class="back">back</button> Description'
-            content: require './templates/popover_description'
+            content: require './templates/popover_details'
+            onLeave: -> @onLeaveDetailsScreen()
         alert:
             title: -> '<button class="back">back</button> Alerts'
             content: require './templates/popover_alert'
@@ -70,12 +71,11 @@ module.exports = class EventPopOver extends PopoverView
         'keydown [data-screen="default"] [data-tabindex-next]':          'onTab'
         'keydown [data-screen="default"] [data-tabindex-prev]':          'onTab'
 
-        'click [data-screen="default"] .input-description': -> @switchToScreen 'description'
+        'click [data-screen="default"] .input-details-trigger': -> @switchToScreen 'details'
 
-        'change [data-screen="default"] .input-alert': -> @switchToScreen 'alert'
+        'click [data-screen="default"] .input-alert': -> @switchToScreen 'alert'
 
-        'change [data-screen="default"] .input-repeat': -> @switchToScreen 'repeat'
-
+        'click [data-screen="default"] .input-repeat': -> @switchToScreen 'repeat'
 
 
     initialize: (options) ->
@@ -200,6 +200,11 @@ module.exports = class EventPopOver extends PopoverView
         # We put or remove a top-level class on the popover body that target if
         # the event is one day long or not
         @$container.toggleClass 'is-same-day', @model.isSameDay()
+
+
+    onLeaveDetailsScreen: ->
+        value = @$('.input-details').val()
+        @model.set 'details', value
 
 
     toggleAllDay: ->
@@ -359,6 +364,8 @@ module.exports = class EventPopOver extends PopoverView
         @$('.input-start').timepicker 'setTime', @model.getStartDateObject().format(tFormat), true, true
         @$('.input-end-time').timepicker 'setTime', end.format(tFormat), true, true
         @$('.input-end-date').val end.format(dFormat)
+
+        @$('.input-description').val @model.get('details')
 
 
     handleError: (error) ->

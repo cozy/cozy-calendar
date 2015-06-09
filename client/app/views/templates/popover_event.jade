@@ -64,39 +64,21 @@ div.label.label-row
     div.label.label-row
         .icon
             span.fa.fa-align-left
-        input.input-description.input-full-block(tabindex="9",
+        input.input-details-trigger.input-full-block(tabindex="9",
                           type="text",
-                          value=description,
+                          value=details,
                           placeholder=t("Description"))
 
-    div.label.label-row
+    div.label.label-row.input-alert
         .icon
             span.fa.fa-bell
-        select.input-alert.input-full-block
-          option No Alert
-          option At time of Event
-          option 5 minutes before
-          option 15 minutes before
-          option 30 minutes before
-          option 1 hour before
-          option 2 hour before
-          option 6 hour before
-          option 12 hour before
-          option 1 day before
-          option 2 day before
-          option 3 day before
-          option 5 day before
-          option 7 day before
+        button No alert
 
-    div.label.label-row
+
+    div.label.label-row.input-repeat
         .icon
             span.fa.fa-repeat
-        select.input-repeat.input-full-block
-          option No Repeat
-          option Daily
-          option Weekly
-          option Monthly
-          option Yearly
+        button No repeat
 
 .popover-footer
     a.advanced-link(role="button",
