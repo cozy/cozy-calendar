@@ -46,19 +46,25 @@ module.exports = class PopoverView extends BaseView
             error = 'Popover must be rendered before switching its screen.'
             throw new Error(error)
 
+
+        # If the screen is switched back to the default one, call `onLeave` if
+        # it exists.
+        if screenID is 'default' and @screen?
+            @screen.onLeave?.call @
+
         # Get the screen data.
-        screen = @getScreen screenID
+        @screen = @getScreen screenID
 
         # Change the DOM with the new screen.
         renderData = @getRenderData()
-        @titleElement.html screen.title(renderData)
-        @contentElement.html screen.content(renderData)
+        @titleElement.html @screen.title(renderData)
+        @contentElement.html @screen.content(renderData)
 
         # Change current screen information
-        @screenElement.data 'screen', screenID
+        @screenElement.attr 'data-screen', screenID
 
         # Execute the screen's callback if it has been defined.
-        screen.afterRender?.call @
+        @screen.afterRender?.call @
 
 
     render: ->
@@ -67,10 +73,10 @@ module.exports = class PopoverView extends BaseView
         # Only create it if doesn't exist.
         unless @$popover?
             renderData = @getRenderData()
-            defaultScreen = @getScreen 'default'
+            @screen = @getScreen 'default'
             popoverWrapper = @template
-                title: defaultScreen.title(renderData)
-                content: defaultScreen.content(renderData)
+                title: @screen.title(renderData)
+                content: @screen.content(renderData)
 
             @$popover = $ popoverWrapper
             @titleElement = @$popover.find '.popover-title'
@@ -84,7 +90,7 @@ module.exports = class PopoverView extends BaseView
         @afterRender()
 
         # Execute the default screen's callback if it has been defined.
-        defaultScreen.afterRender.call @
+        @screen.afterRender.call @
 
         # Compute and et popover's position.
         @positionPopover()
