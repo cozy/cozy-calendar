@@ -75,21 +75,22 @@ module.exports = class PopoverView extends BaseView
             @contentElement = @$popover.find '.popover-content'
             @screenElement = @$popover.find '.screen-indicator'
 
+            # Reset @el and @$el.
+            @setElement @$popover
+
+        # Generic after render must be called before screen-specific.
+        @afterRender()
+
+        # Execute the default screen's callback if it has been defined.
+        defaultScreen.afterRender.call @
+
         # Compute and et popover's position.
         @positionPopover()
 
-        @setElement $("##{@parentView.id} .popover")
-
-        # Manage responsive (for smartphones)
-        if $(window).width() <= 500
-            $('.popover').css
-                top: 0
-                left: 0
-
-        @afterRender()
         return @
 
 
+    # Set the popover's position so it doesn't overflow out of the screen.
     positionPopover: ->
         # If it exist, first detach it from the DOM.
         @$popover.detach()
