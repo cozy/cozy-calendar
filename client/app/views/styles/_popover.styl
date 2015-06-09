@@ -43,6 +43,13 @@ input-color   = #555
                 color #aaa
                 text-shadow none
 
+            &.right
+                right 0
+
+                span
+                    font-size 2rem
+                    color #ddd
+
     .label-row
         border-bottom 1px solid #ddd
 
@@ -65,11 +72,18 @@ input-color   = #555
                 width: 8em
 
     .input-full-block
+    .button-full-block
         width 100%
         padding 1.5em 3em
         background-color transparent
         border none
-        font-size: 1rem
+        font-size 1rem
+        text-align left
+
+    .button-full-block
+        font-family 'Source Sans Pro', sans-serif
+        color #333
+        line-height 0
 
     .controls
         position absolute
@@ -172,10 +186,15 @@ input-color   = #555
     textarea
         box-sizing border-box
         margin 0
-        padding 0.5em
+        padding 1em
         width 100%
         height 300px
         resize none
+        background-color transparent
+        border none
+        box-shadow none
+        font-size 1rem
+        line-height 1.3rem
 
 
 .popover-content-wrapper
@@ -218,3 +237,43 @@ input-color   = #555
     [role=button]
         margin-left: 1em
         font-size: 0.85em
+
+// header on secondary screen
+.popover-back
+    display flex
+    justify-content space-between
+    align-items center
+    padding 0.8em 1.5em
+    background-color #f5f5f5
+    border-radius 5px 5px 0 0
+
+    h4
+        margin 0
+        font-weight normal
+        font-size 1.2em
+
+        &:hover
+            cursor default
+
+    i
+        width 3rem
+        font-size 2rem
+        line-height 0
+        color #999
+
+        &:hover
+            cursor pointer
+            color orange
+
+    .btn-done
+        width 3rem
+        padding 0.4em 0
+        background-color #bbb
+        border-radius 3px
+        line-height 1
+        text-align center
+        color #fff
+
+        &:hover
+            cursor pointer
+            background-color orange

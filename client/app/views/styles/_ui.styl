@@ -1,6 +1,24 @@
 .ui-menu
     z-index 1200
 
+    .ui-menu-item
+        line-height 0
+
+        &:hover
+            cursor pointer
+
+        a
+            display flex
+            align-items center
+            padding 0.4em 0.6em
+            font-size 1rem
+            line-height 1
+
+        .combobox-badge
+            flex none
+            border 1px solid #fff
+            box-sizing border-box
+
 .combobox-badge
     margin-right 5px
     padding: 0

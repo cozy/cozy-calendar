@@ -33,14 +33,14 @@ module.exports = class EventPopOver extends PopoverView
             content: require './templates/popover_event'
             afterRender: -> @afterRenderDefault()
         details:
-            title: -> '<button class="back">back</button> Description'
+            title: -> '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Description</h4><div class="btn-done">Done</div></div>'
             content: require './templates/popover_details'
             onLeave: -> @onLeaveDetailsScreen()
         alert:
-            title: -> '<button class="back">back</button> Alerts'
+            title: -> '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Alerts</h4><div class="btn-done">Done</div></div>'
             content: require './templates/popover_alert'
         repeat:
-            title: -> '<button class="back">back</button> Repeat'
+            title: -> '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Repeat</h4><div class="btn-done">Done</div></div>'
             content: require './templates/popover_repeat'
 
 
@@ -57,7 +57,7 @@ module.exports = class EventPopOver extends PopoverView
         'click .duplicate':     'onDuplicateClicked'
         'click .close':         'selfclose'
 
-        'click button.back': -> @switchToScreen 'default'
+        'click div.popover-back': -> @switchToScreen 'default'
 
         # Default screen's events.
         'changeTime.timepicker [data-screen="default"] .input-start':    'onSetStart'
