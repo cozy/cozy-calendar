@@ -277,3 +277,51 @@ input-color   = #555
         &:hover
             cursor pointer
             background-color orange
+
+// Alerts screen
+select.new-alert
+    margin 1.5em
+    width calc(100% - 3em)
+    height 2.5rem
+    border-color #ccc
+    font-size 1.1em
+
+ul.alerts
+    margin 0
+
+    li
+        padding 0.5em 1.5em 1.5em
+        border-bottom 1px solid #ddd
+        line-height 1
+
+    .alert-top
+    .type
+    .notification-mode
+        display flex
+        align-items center
+
+    .alert-top
+        justify-content space-between
+
+        button
+            height auto
+            border none
+            background-color transparent
+            font-size 1.2em
+            color #bbb
+
+            &:hover
+                color orange
+
+    .alert-timer
+        font-size 1.4em
+
+    .type
+        margin-top 0.5em
+
+        label
+            padding 0 1.5em 0 0.5em
+            color #999
+
+        input[type=checkbox]
+            flex none

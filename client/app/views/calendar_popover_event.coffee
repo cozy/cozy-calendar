@@ -103,7 +103,7 @@ module.exports = class EventPopOver extends PopoverView
 
         # Alert screen's events.
         'change [data-screen="alert"] .new-alert': 'onNewAlert'
-        'click [data-screen="alert"] .alerts li .fa-close': 'onRemoveAlert'
+        'click [data-screen="alert"] .alerts li .alert-delete': 'onRemoveAlert'
         'click [data-screen="alert"] input[type="checkbox"]': 'onChangeActionAlert'
 
 
