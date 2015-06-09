@@ -113,7 +113,8 @@ module.exports = class PopoverView extends BaseView
         @$popover.appendTo @container
 
         # The popover's height must be retrieved when the popover is expanded.
-        @$popover.find('.more').show()
+        hiddenElements = @$popover.find '[aria-hidden="true"]'
+        hiddenElements.attr 'aria-hidden', false
 
         # Define everything that will be needed for positionning.
         popoverHeight = @$popover.innerHeight()
@@ -131,7 +132,7 @@ module.exports = class PopoverView extends BaseView
 
         # `popoverHeight` has been computed based on the expanded popover, but
         # it's collapsed by default.
-        @$popover.find('.more').hide()
+        hiddenElements.attr 'aria-hidden', true
 
         # Define default position.
         position =
