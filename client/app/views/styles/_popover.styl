@@ -231,16 +231,27 @@ input-color   = #555
 
 
 .popover-footer
-    padding: 10px 12px
-    background-color: overlay-color
-    border-radius: 0 0 5px 5px
     display flex
     justify-content space-between
     align-items baseline
+    padding: 0.6em 0.8em
+    background-color: overlay-color
+    border-radius: 0 0 5px 5px
 
     [role=button]
-        margin-left: 1em
-        font-size: 0.85em
+        font-size: 0.95em
+
+        &:hover
+            text-decoration none
+
+        &:focus
+            color blue
+            text-decoration none
+
+    .icon
+        display inline-block
+        padding 0 0.9em 0 0.4em
+        font-size 1rem
 
 // header on secondary screen
 .popover-back

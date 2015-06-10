@@ -51,17 +51,17 @@ div.label.label-row
     .icon
         span.fa.fa-map-marker
     input.input-place.input-full-block(tabindex="7",
-                      type="text",
-                      value=place,
-                      placeholder=t("Place"))
+                                       type="text",
+                                       value=place,
+                                       placeholder=t("Place"))
 
 div.label.label-row
     .icon
         span.fa.fa-users
     input.input-people.input-full-block(tabindex="8",
-                      type="text",
-                      value=people,
-                      placeholder=t("People"))
+                                        type="text",
+                                        value=people,
+                                        placeholder=t("People"))
 
 div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
     .icon
@@ -69,16 +69,16 @@ div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
     .icon.right
         span.fa.fa-angle-right
     input.input-details-trigger.input-full-block(tabindex="9",
-                      type="text",
-                      value=details,
-                      placeholder=t("Description"))
+                                                 type="text",
+                                                 value=details,
+                                                 placeholder=t("Description"))
 
 div.label.label-row.input-alert(aria-hidden="#{!showAlertsByDefault}")
     .icon
         span.fa.fa-bell
     .icon.right
         span.fa.fa-angle-right
-    
+
     if !alerts || alerts.length === 0
         button.button-full-block No alert
     else
@@ -97,6 +97,8 @@ div.label.label-row.input-repeat(aria-hidden="#{!showRepeatByDefault}")
                     tabindex="8",
                     href='#' + advancedUrl,
                     data-tabindex-next="1")
+      .icon
+          span.fa.fa-caret-down
         = t('advanced')
     a.btn.add(role="button",
               tabindex="7")
