@@ -2,8 +2,8 @@
 
     #alarms, #alarm-list
         width: 100%
-        margin: 0px
-        padding: 5px
+        margin: 2em 0 0
+        padding: 0
         box-sizing: border-box
 
         .fc-header-title
@@ -36,8 +36,6 @@
         h2
             font-size: 22px
 
-
-@media(max-width: 600px)
     ul#menu
         height: 40px
         width: 100%
@@ -51,30 +49,44 @@
             display: inline-block
 
         #import-menu-button, span
-            display: none
+            display: block
 
         li.calendars
-            float right
+            padding 0.5em
+
+        .menu-icon
+            display inline-block
+            padding-right 0.7em
+
+        .calendar-add
+            display none
 
         ul#menuitems
+            z-index 1050
             display none
+            position absolute
+            top 40px
+            right 0
+            left 0
+            margin 0
+            padding 0.5em 0
+            background-color inherit
+            box-shadow 0 10px 12px rgba(0,0,0,.15)
+
             &.visible
                 display block
-            position absolute
-            margin 0px
-            top 40px
-            right 0px
-            z-index 1050
-            background-color inherit
+
             li
-                display list-item
+                padding 0.6em 1.5em
                 list-style-type none
+
             span
                 display inline
+                font-size 1.1em
 
     .main-container
-        margin-left: 0
-        margin-top: 40px
+        margin-left 0
+        margin-top 3rem
 
     #alarms
         .fc-day-header
@@ -108,7 +120,18 @@
 
     #list-container
         top: 0px
+        margin-bottom 0
+        padding-bottom 5em
 
+    .btn.stick-bottom
+        display none        // hide settings button on mobile
+
+    .showafter
+    .showbefore
+        display block
+        box-sizing border-box
+        width 100%
+        padding 0.4em
 
 
 @media(max-width: 500px)

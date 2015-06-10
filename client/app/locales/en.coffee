@@ -221,7 +221,7 @@ module.exports =
         No
         %{url}?status=DECLINED&key=%{key}
     """
-    'email update title': "L'événement \"%{description}\" a changé"
+    'email update title': "Event \"%{description}\" has changed"
     'email update content': """
         An event you were invited to has changed:
         %{description} %{place}

@@ -1,37 +1,43 @@
 doctype
 html
   head
-    title Cozy - Calendar
+    title Cozy Calendar - Upcoming Event
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible",content="IE=edge,chrome=1")
     meta(name="viewport", content="width=device-width,initial-scale=1.0")
     script(src="javascripts/modernizr-2.6.1.js")
     link(rel="stylesheet", href="../stylesheets/app.css")
 
-  body.public
-    #container.container.public-event-container.well
-      h4 Would you be there?
+  body.public.public-event-body
+    header
+      img(src="http://cozy.io/assets/images/cozy-logo-gradient.svg")
+    main#container.container.public-event-container.well
       h2 #{event.description}
+      h3
+        | On #{date}
         if event.place != null && event.place.length != 0
-          &nbsp;(#{event.place})
-      h3 On #{date}
+          | &nbsp; at (#{event.place})
 
       if visitor.status == 'NEEDS-ACTION'
 
-        p: a.btn(href="?status=ACCEPTED&key=" + key) Yes
-        p: a.btn(href="?status=DECLINED&key=" + key) No
+        p: a.btn(href="?status=ACCEPTED&key=" + key) Going
+        p: a.btn.btn-negative(href="?status=DECLINED&key=" + key) Decline
 
       else if visitor.status == 'ACCEPTED'
         p
-            | You declared you will participage to this event.
-        p: a(href="#{event.id}/#{file}.ics?key=" + key) Download this event
-        p
-            a.btn(href="?status=DECLINED&key=" + key)
-                | Decline the invitation
+          | You are attending this event.
+        p: a(href="#{event.id}/#{file}.ics?key=" + key) Download event
+        hr
+        p.special
+          | Changed your mind ?
+        a.btn.btn-negative(href="?status=DECLINED&key=" + key)
+          | Decline
 
       else
         p
-            | You declared you won't participate to this event.
-        p
-            a.btn(href="?status=ACCEPTED&key=" + key)
-                | Accept the invitation
+          | You are not attending this event.
+        hr
+        p.special
+          | Changed your mind ?
+        a.btn(href="?status=ACCEPTED&key=" + key)
+          | Going

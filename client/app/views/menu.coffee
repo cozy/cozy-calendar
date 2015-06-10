@@ -8,7 +8,7 @@ module.exports = class MenuView extends ViewCollection
 
     tagName: 'ul'
     id: 'menu'
-    className: 'container nav nav-list'
+    className: 'container nav nav-list sidenav'
     collectionEl: '#menuitems'
     template: require './templates/menu'
     itemview: require 'views/menu_item'
@@ -28,7 +28,7 @@ module.exports = class MenuView extends ViewCollection
             (tag.get('name') is t "new calendar") and tag.get 'visible'
 
         if calendar?
-            alert 'calendar exist error'
+            alert t('calendar exist error')
 
         else
             @createNewCalendar()
@@ -64,7 +64,6 @@ module.exports = class MenuView extends ViewCollection
 
     activate: (href) ->
         @$('.active').removeClass 'active'
-        @$('a[href="#' + href + '"]').parent().addClass 'active'
 
 
     toggleDropdown: ->

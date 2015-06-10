@@ -1,6 +1,6 @@
-p
-    span.badge(style="background-color:"+color+";") &nbsp;
-    if !allDay
-        | #{start} - #{end}
-    | &nbsp;#{description || t("no description")}
-    i.delete.fa.fa-trash
+if !allDay
+    .fc-time(style="background-color:"+color+";") #{start} - #{end}
+else
+    .fc-time(style="background-color:"+color+";") All Day
+.fc-title #{description || t("no description")}
+i.delete.fa.fa-trash

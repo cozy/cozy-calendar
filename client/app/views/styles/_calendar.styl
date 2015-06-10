@@ -6,180 +6,12 @@ opacity-color = #C5C5C5
 icon-color    = #333
 input-color   = #555
 
-/**
- * Styles for the calendar popover (event and alarm creation/edition)
- */
-// TODO: rebuild all styles with relative units. Need to revamp a whole bunch of
-//       the app styles
-.popover
-    width: 400px
-    max-width: none
-    padding: 0
-    font-family: 'Maven Pro', sans-serif
-
-    label
-    .label
-        box-sizing: border-box
-        margin: 0
-        padding: 5px 0 0
-        background-color: transparent
-        border: medium none
-
-    input
-        box-sizing: border-box
-        margin: 0px
-        border: 1px solid white
-        border-radius: 0
-        box-shadow: none !important
-
-        &:hover
-            border: 1px solid orange
-
-        &:focus
-            border: 1px solid blue
-
-        &[type=text]
-            width: 100%
-            height: 1.8em
-
-    input[type=text].input-time
-        width: 4em
-        text-align: right
-
-    input[type=text].input-date
-        width: 8em
 
 
-    .controls
-        position absolute
-        top 14px
-        right 10px
-
-        [role=button]
-        .remove-spinner
-            display block
-            float right
-            clear right
-            width 14px
-            height 14px
-            line-height 14px
-            padding 0
-            margin 0 5px 10px
-            cursor pointer
-
-        button
-            color icon-color
-            opacity 0.7
-            margin-right 5px
-            border none
-            font-size 14px
-            background-color transparent
-
-            &:hover
-                opacity 1
-                color orange
-
-        .remove-spinner
-            display none
-            cursor wait
-
-
-.popover-title
-    padding: 15px 0 10px
-    background-color: white
-    border-bottom: 1px solid overlay-color
-    font-size: 18px
-
-    .label
-        width: 100%
-        padding: 0 44px
-
-    .label + .label
-        margin-top: 4px
-
-    .calendar
-        position: absolute
-        top: 20px    // vertical badge alignment with desc input
-        left: 20px
-
-        .badge
-            margin: 0
-
-        .calendarcombo
-            display: none
-
-            &.expanded
-                display: inline-block
-                margin-left: 5px
-
-    .input-desc
-        font-size: 1.4em
-
-
-.popover-content
-    padding: 0
-
-    label
-        float: left
-        clear: left
-        display: flex
-        align-items: baseline
-
-    .caption
-        display: inline-block
-        min-width: 3em
-
-    // Specific rules for elements
-    .input-allday
-        margin-right: 5px
-
-    .aside
-            float: right
-            clear: none
-
-    .end-date
-        clear: none
-
-        .caption
-            min-width: inherit
-
-
-.popover-content-wrapper
-    padding: 10px 20px
-    overflow: hidden
-
-    &.is-same-day .end-date
-    &.is-same-day .end-date input
-        color: opacity-color
-
-        &:hover
-        &:focus
-            color: input-color
-
-    &.is-all-day .end-date
-    &.is-all-day .end-date input
-        color: input-color
-
-
-.popover-footer
-    padding: 10px 12px
-    background-color: overlay-color
-    border-top: 1px solid #ddd;
-    box-shadow: inset 0 1px 0 #ffffff;
-    border-radius: 0 0 5px 5px
-    display: flex
-    justify-content: flex-end
-    align-items: baseline
-
-    [role=button]
-        margin-left: 1em
-        font-size: 0.85em
-
-
-/**
- * Styles for the fullcalendar plugin
- */
-
+//
+// Styles for the fullcalendar plugin
+// ----------------------------------------------------------------------------
+/*
 .fc-button-prev, .fc-button-next, .fc-button-today,
 .fc-button-month, .fc-button-week, .fc-button-agendaWeek
 .fc-button-day, .fc-button-agendaDay, .fc-button-list
@@ -216,9 +48,13 @@ input-color   = #555
         color: blue + 20%
         border-radius: 4px
         color: blue
+*/
+.fc-ltr
+    padding 0
 
 .fc-view-container
     clear:none
+    padding 1em
 
     thead
         tr
@@ -234,47 +70,77 @@ input-color   = #555
                     border-radius: 0 10px 0 0
 
     tbody
-            .fc-state-highlight
-                background: lightblue
+        .fc-state-highlight
+            background: lightblue
 
-    .fc-content .fc-time
+    .fc-content .fc-time.spinning
+        display: inline-block
+        margin: 3px
 
-        &.spinning
-            display: inline-block
-            margin: 3px
+    .fc-title
+        font-style italic
 
 .fc-cell-overlay
     background: green
 
 
+//
+// HEADER
 .fc-header
-    cursor: default
+    box-sizing border-box
+    display flex
+    align-items center
     width 100%
+    padding 0.8em 1em
+    background-color #f2f2f2
+    border-bottom 1px solid #e2e2e2
 
-.fc-header-title
+    .btn-group > .btn
+        background-color #FFF
+        border 1px solid blue
+        color blue
+        font-weight normal
 
-    h2
-        font-weight: normal
+        .fa
+            font-size 1.2em
 
-.fc-header-title h2
-    margin-top: 0px
-    white-space: nowrap
+        &:active
+            box-shadow none
 
+        &:hover
+            color: orange
 
-.fc-header td
-    border-style: none
+        &.fc-state-active
+            background-color blue
+            color #FFF
 
-.fc-header .fc-button
-    margin-bottom: 1em
-    vertical-align: top
+    .fc-button
+        margin 0
+
+.fc-header-left
+.fc-header-center
+.fc-header-right
+    flex-grow 1
+    width 33.33%
+
+.fc-header-center
+    display flex
+    justify-content center
 
 .fc-header-right
     text-align: right
 
+.fc-header-title h2
+    margin 0
+    font-size 1.6em
+    line-height 1em
+    font-weight normal
+    white-space nowrap
+
 .fc-button
     position: relative
     display: inline-block
-    padding: 0px 0.6em
+    padding: 0 0.6em
     overflow: hidden
     height: 1.9em
     line-height: 1.9em
@@ -285,16 +151,16 @@ input-color   = #555
         font-size: 2em
 
 
+
 .fc-title,
 .fc-view-container
-
     thead
     thead > tr.fc-first
     .fc-day-header
     .fc-widget-header
-        font-family: 'Maven Pro', sans-serif
+        font-family: 'Source Sans Pro', sans-serif
         border-radius: 0
-        color: black
+        color: #555
         cursor: default
         font-weight: normal
 
@@ -302,29 +168,30 @@ input-color   = #555
     background: white
     color: darkgrey
 
-.fc-agenda-axis.fc-first
-    background: white
-    border-radius: 0
-    color: white
+    &.fc-first
+        background: white
+        border-radius: 0
+        color: white
 
 .fc-day-number
-    font-family: 'Maven Pro', sans-serif
+    font-family: 'Source Sans Pro', sans-serif
+
+.fc-bg .fc-other-month
+    background-color rgba(0, 0, 0, 0.02)
 
 .fc-content
     border: 0
     border-radius: 0
     color: white
     font-family: 'Source Sans Pro', sans-serif
-    font-weight: bold
     padding: 1px
 
     i
         margin-top: 2px
         margin-right: 5px
 
-
 .fc-day:hover
-    background: orange + 80%
+    background: transparent
 
 .event-remove
     cursor: pointer
@@ -336,11 +203,15 @@ input-color   = #555
 .fc-view
     overflow: visible
 
-#view-container .fc-view-container .fc-cell-overlay
-    background: #CBE4FB
+#view-container .fc-view-container
+    .fc-cell-overlay
+        background: #CBE4FB
 
-#view-container .fc-view-container tbody .fc-state-highlight
-    background: #CCF0CC
+    tbody .fc-state-highlight
+        background: blue + 92%
+
+    .fc-today.fc-state-highlight
+        color blue
 
 .fc-event:hover
     background: orange !important
@@ -415,34 +286,49 @@ a.btn:visited
         margin-left: 5px
         margin-top: 10px
 
+// list view
 .dayprogram
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05)
-  padding-bottom: 15px
-  margin-bottom: 15px
+    margin-bottom 3em
 
-  h2
-    i
-      margin-top 10px
-      margin-left 10px
-      display none
-      cursor pointer
-  &:hover h2 i
-      display inline-block
+    h4
+        color #999
+        font-size 1em
+        line-height 1em
+        font-weight normal
+        text-transform uppercase
 
-  .alarms
-    margin-top: 15px
+    .alarms
+        .scheduleElement
+            display flex
+            align-items center
+            margin-bottom 0.5em
+            font-size 1.1em
+            line-height 1.2em
 
-    p
-      line-height: 20px
+            i
+                display none
+                padding: 0 0.5em
+                color #999
+                cursor pointer
 
-      i
-        margin: 3px 5px
-        display: none
-        line-height: 14px
-        height: 14px
-        cursor: pointer
-      &:hover i
-        display: inline-block
+                &:hover
+                    color orange
+
+            &:hover i
+                display inline-block
+
+        .fc-time
+            margin-right 0.5em
+            padding 0.3em 0.5em
+            border-radius 3px
+            color #fff
+            font-size 0.85em
+            flex none
+            align-self stretch
+            vertical-align bottom
+
+        .fc-title
+            font-style italic
 
 .dayprogram:nth-last-child(1)
   border-bottom: 0
@@ -461,3 +347,4 @@ a.btn:visited
 
     h3
         margin-top: 0
+
