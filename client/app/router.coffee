@@ -2,6 +2,7 @@ app = require 'application'
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
+SettingsModal = require 'views/settings_modal'
 ImportView = require 'views/import_view'
 SyncView = require 'views/sync_view'
 # RealEventCollection = require 'collections/realevents'
@@ -22,6 +23,7 @@ module.exports = class Router extends Backbone.Router
         'list/:eventid'                   : 'list_event'
         'sync'                            : 'sync'
         'calendar'                        : 'backToCalendar'
+        'settings'                        : 'settings'
 
     initialize: (options) ->
         super options
@@ -120,4 +122,11 @@ module.exports = class Router extends Backbone.Router
         monday = new Date(year, (month-1)%12, day)
         monday.setDate(monday.getDate() - monday.getDay() + 1)
         return [year, monday.getMonth()+1, monday.getDate()]
+
+
+    settings: ->
+        view = new SettingsModal()
+        $('body').append view.$el
+        view.render()
+        @onCalendar = true
 

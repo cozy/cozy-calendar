@@ -1,24 +1,29 @@
-#menu
+.sidenav
+    position relative
     float: left
     left: 0
     top: 0
     width: 200px
-    padding 0px
+    height 100vh !important     // TODO removed importabt once the resize in JS is gone
+    padding 0.5em 1em
+    background: #F2F2F2
+    border-right 1px solid #e2e2e2
+    box-sizing border-box
     list-style-type: none
     text-align: left
-    background: #F2F2F2
-    font-family: 'Maven Pro', sans-serif
+    font-family: 'Source Sans Pro', sans-serif
     font-weight: normal
 
     a
         color: #333
-        padding 0px
-        margin 0px
-        text-decoration: none
 
-    a:hover
-        text-decoration: none
-        background-color transparent
+        &:hover
+            text-decoration none
+
+    i
+        position relative
+        top 1px
+        margin-right 0.5em
 
     li.active
         background: #AEDBFF
@@ -36,38 +41,37 @@
         &:hover
             background-color transparent
 
-
-    li
+    .calendars
+        position relative
         display: block
         margin: 0
-        padding: 10px 3px 10px 3px
+        padding: 0.5em 0
         cursor: pointer
 
-        i
-            margin-right: 10px
-            margin-left: 10px
+        .title
+            display flex
+            justify-content space-between
+            align-items center
 
-        &.calendars
-            position relative
+            span
+                font-size 1.3em
+                color #333
 
-            .calendar-add
-                    display none
-                    margin-left 10px
-                    font-size 15px
-                    text-shadow none
+        .calendar-add
+            font-size 1.6em
+            text-shadow none
+            color #bbb
 
-            &:hover .calendar-add
-                    display inline-block
+            &:hover
+                color orange
 
-            .spinner
-                    margin-left 10px
-                    display none
-                    height 15px
-                    width 15px
+    .menu-icon
+        display none        // hidden in desktop view
 
-    li:hover
-        background #FFC47F
-        text-decoration none
+    .spinner
+        height 1rem
+        width 1rem
+        float right
 
     #multiple-actions
         padding 15px
@@ -84,11 +88,17 @@
             opacity 0
 
     ul#menuitems
-        margin-left 0px
+        margin-left 0
+        list-style none
 
         li.tagmenuitem
-            margin-left 0px
-            padding-left 5px
+            display flex
+            align-items center
+            margin-left 0
+            padding 0.4em 0.1em
+
+            &:hover
+                cursor pointer
 
             .calendar-actions
                 opacity 0
@@ -99,11 +109,17 @@
                 margin 0px
 
             .badge
-                width 12px
-                padding 1px 3px
-                margin-right 5px
-                border-radius 3px
-                position relative
+                flex none
+                display inline-block
+                width 1em
+                height 1em
+                padding 0
+                margin-right 0.8em
+                border-radius 100%
+
+            .calendar-name
+                font-size 1em
+                color #555
 
             input.calendar-name
                 width 100px
@@ -113,8 +129,11 @@
 
             .dropdown
                 display inline-block
+                position absolute
+
                 .dropdown-toggle
                     padding 0 5px
+
                     .caret
                         display none
                         margin-top 0 !important // overrides bootstrap
@@ -125,17 +144,19 @@
                         transform scale(1.5, 1.5)
 
                 .dropdown-menu
-                    border-radius 0
-                    padding 0
-                    min-width 180px
+                    padding 0.4em 0
+                    border-color #ddd
+                    box-shadow 0 5px 16px rgba(0,0,0,0.12)
 
-                    &> li
+                    li
                         margin 0
                         padding 0
+
                         a
-                            padding 5px
+                            padding 0.5em 1em
+
                             &:hover
-                                background #ffc47f
+                                background orange
 
 
             &:hover
