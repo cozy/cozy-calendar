@@ -1,8 +1,8 @@
-colorhash = require 'lib/colorhash'
 ViewCollection = require '../lib/view_collection'
 ComboBox    = require 'views/widgets/combobox'
 Event       = require 'models/event'
 Tag = require 'models/tag'
+
 
 module.exports = class MenuView extends ViewCollection
 
@@ -18,6 +18,12 @@ module.exports = class MenuView extends ViewCollection
         'click .calendar-add': 'onAddCalendar'
         'click .remove-cals': 'onCalendarMultipleRemove'
         'click .export-cals': 'onCalendarMultipleExport'
+
+
+    afterRender: ->
+        super
+        @$('.main-spinner').hide()
+
 
     # Check if a "New Calendar" already exists. If not, run the calendar
     # creation procedure.
@@ -62,12 +68,14 @@ module.exports = class MenuView extends ViewCollection
                 setTimeout @hideLoading.bind(@), 100
                 setTimeout callback, 150 if callback?
 
+
     activate: (href) ->
         @$('.active').removeClass 'active'
 
 
     toggleDropdown: ->
         @$('#menuitems').toggleClass 'visible'
+
 
     onCalendarMultipleRemove: ->
         message = t 'confirm delete selected calendars'
@@ -81,16 +89,21 @@ module.exports = class MenuView extends ViewCollection
         if $('#menu-items .calendar-name').length < 2
             $('#multiple-actions').addClass 'hidden'
 
-    showLoading: ->
-        @$('.spinner').show()
 
     onCalendarMultipleExport: ->
         calendars = []
         $('.calendar-actions:checked').each ->
-            calendars.push(@value)
+            calendars.push @value
         calendars = JSON.stringify calendars
         window.location = "exportzip/#{calendars}"
 
+
+    showLoading: ->
+        @$('.main-spinner').show()
+        @$('.calendar-add').hide()
+
+
     hideLoading: ->
-        @$('.spinner').hide()
+        @$('.main-spinner').hide()
+        @$('.calendar-add').show()
 

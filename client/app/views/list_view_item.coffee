@@ -1,7 +1,6 @@
 BaseView = require 'lib/base_view'
 PopoverEvent = require './calendar_popover_event'
 Event = require 'models/event'
-colorHash = require 'lib/colorhash'
 
 
 module.exports = class EventItemView extends BaseView

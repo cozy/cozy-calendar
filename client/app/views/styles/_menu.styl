@@ -52,13 +52,11 @@
             display flex
             justify-content space-between
             align-items center
-
-            span
-                font-size 1.3em
-                color #333
+            font-size 1.3em
+            color #333
 
         .calendar-add
-            font-size 1.6em
+            font-size 1.6rem
             text-shadow none
             color #bbb
 
@@ -69,9 +67,13 @@
         display none        // hidden in desktop view
 
     .spinner
+        flex none
+        position absolute
+        top 50%
+        right 0
+        margin-top -0.5rem
         height 1rem
         width 1rem
-        float right
 
     #multiple-actions
         padding 15px
@@ -90,9 +92,11 @@
     ul#menuitems
         margin-left 0
         list-style none
+        padding-bottom 4em
 
         li.tagmenuitem
             display flex
+            position relative
             align-items center
             margin-left 0
             padding 0.4em 0.1em
@@ -130,6 +134,8 @@
             .dropdown
                 display inline-block
                 position absolute
+                top 50%
+                margin-top -10px
 
                 .dropdown-toggle
                     padding 0 5px
@@ -145,15 +151,17 @@
 
                 .dropdown-menu
                     padding 0.4em 0
+                    min-width 180px
                     border-color #ddd
                     box-shadow 0 5px 16px rgba(0,0,0,0.12)
 
-                    li
+                    & > li
                         margin 0
                         padding 0
 
                         a
-                            padding 0.5em 1em
+                            padding 0.4em 1em
+                            margin-bottom 0.2em
 
                             &:hover
                                 background orange
@@ -168,15 +176,18 @@
                     &:hover
                         opacity 1
 
-.color-picker
-    .track
-        display: block
-        background: #EFEFEF url('../img/color-picker.png') no-repeat 50% 50%
-        height: 150px
-        width: 150px
-        margin: 5px
-        cursor: crosshair
-        display: none
+    .btn-settings
+        width calc(200px - 2em)
+        padding 0.4em 0.8em
+        box-sizing border-box
 
-        border: 1px solid #ccc
-        z-index: 10
+.color-picker
+    margin 0 1em
+    list-style none
+
+    li
+        display inline-block
+        width 1.3rem
+        height 1.3rem
+        list-style none
+        margin-right 0.2em

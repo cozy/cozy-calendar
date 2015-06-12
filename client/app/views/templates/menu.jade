@@ -2,11 +2,13 @@ li.calendars
     .title(href="#calendar")
         span.fa.fa-bars.menu-icon
         span= t('Calendars')
+        span.main-spinner
+            img(src="img/spinner.svg")
         span.fa.fa-plus-square-o.calendar-add
 
 ul#menuitems
 
-a.btn.btn-full.btn-secondary.stick-bottom(href="#settings")
+a.btn.btn-settings.stick-bottom(href="#settings")
     i.fa.fa-cog
     span
         = t('Sync Settings')
