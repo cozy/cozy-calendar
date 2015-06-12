@@ -577,7 +577,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   RealEventGeneratorCollection.prototype._initializeGenerator = function() {
     var i, item, today;
     this.previousRecurringEvents = [];
-    this.runningReccuringEvents = [];
+    this.runningRecurringEvents = [];
     this.firstGeneratedEvent = this.baseCollection.at(this.baseCollection.length - 1);
     this.lastGeneratedEvent = null;
     today = moment().startOf('day');
@@ -598,7 +598,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
       if (item.isRecurrent()) {
         this.previousRecurringEvents.push(item);
         if (item.getLastOccurenceDate().isAfter(today)) {
-          this.runningReccuringEvents.push(item);
+          this.runningRecurringEvents.push(item);
         }
       }
     }
@@ -643,7 +643,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
         }
       }
     }
-    this.runningReccuringEvents.forEach((function(_this) {
+    this.runningRecurringEvents.forEach((function(_this) {
       return function(item, index) {
         var evs;
         evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
@@ -651,12 +651,12 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
         });
         eventsInRange = eventsInRange.concat(evs);
         if (item.getLastOccurenceDate().isBefore(end)) {
-          return _this.runningReccuringEvents.splice(index, 1);
+          return _this.runningRecurringEvents.splice(index, 1);
         }
       };
     })(this));
     this.add(eventsInRange);
-    noEventsRemaining = this.runningReccuringEvents.length === 0 && this.lastGeneratedEvent === null;
+    noEventsRemaining = this.runningRecurringEvents.length === 0 && this.lastGeneratedEvent === null;
     return callback(noEventsRemaining);
   };
 
@@ -763,13 +763,11 @@ module.exports = ScheduleItemsCollection = (function(_super) {
 });
 
 ;require.register("collections/tags", function(exports, require, module) {
-var Tag, TagCollection, colorhash,
+var Tag, TagCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Tag = require('../models/tag');
-
-colorhash = require('lib/colorhash');
 
 module.exports = TagCollection = (function(_super) {
   __extends(TagCollection, _super);
@@ -812,7 +810,7 @@ module.exports = TagCollection = (function(_super) {
     if (!tag) {
       tag = new Tag({
         name: name,
-        color: colorhash(name)
+        color: ColorHash.getColor(name, 'cozy')
       });
     }
     return tag;
@@ -927,17 +925,24 @@ exports.toTimezonedMoment = function(d) {
 };
 });
 
+;require.register("helpers/color-set", function(exports, require, module) {
+module.exports = ['304FFE', '2979FF', '00B0FF', '00DCE9', '00D5B8', '00C853', 'E70505', 'FF5700', 'FF7900', 'FFA300', 'B3C51D', '64DD17', 'FF2828', 'F819AA', 'AA00FF', '6200EA', '7190AB', '51658D'];
+});
+
 ;require.register("helpers/timezone", function(exports, require, module) {
 exports.timezones = ["Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau", "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo", "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar", "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun", "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa", "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda", "Africa/Lubumbashi", "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane", "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena", "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo", "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek", "America/Adak", "America/Anchorage", "America/Anguilla", "America/Antigua", "America/Araguaina", "America/Argentina/Buenos_Aires", "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy", "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos", "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis", "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Aruba", "America/Asuncion", "America/Atikokan", "America/Bahia", "America/Barbados", "America/Belem", "America/Belize", "America/Blanc-Sablon", "America/Boa_Vista", "America/Bogota", "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun", "America/Caracas", "America/Cayenne", "America/Cayman", "America/Chicago", "America/Chihuahua", "America/Costa_Rica", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn", "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit", "America/Dominica", "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fortaleza", "America/Glace_Bay", "America/Godthab", "America/Goose_Bay", "America/Grand_Turk", "America/Grenada", "America/Guadeloupe", "America/Guatemala", "America/Guayaquil", "America/Guyana", "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis", "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg", "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes", "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica", "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello", "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Maceio", "America/Managua", "America/Manaus", "America/Martinique", "America/Matamoros", "America/Mazatlan", "America/Menominee", "America/Merida", "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey", "America/Montevideo", "America/Montreal", "America/Montserrat", "America/Nassau", "America/New_York", "America/Nipigon", "America/Nome", "America/Noronha", "America/North_Dakota/Center", "America/North_Dakota/New_Salem", "America/Ojinaga", "America/Panama", "America/Pangnirtung", "America/Paramaribo", "America/Phoenix", "America/Port-au-Prince", "America/Port_of_Spain", "America/Porto_Velho", "America/Puerto_Rico", "America/Rainy_River", "America/Rankin_Inlet", "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco", "America/Santa_Isabel", "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo", "America/Scoresbysund", "America/St_Johns", "America/St_Kitts", "America/St_Lucia", "America/St_Thomas", "America/St_Vincent", "America/Swift_Current", "America/Tegucigalpa", "America/Thule", "America/Thunder_Bay", "America/Tijuana", "America/Toronto", "America/Tortola", "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat", "America/Yellowknife", "Antarctica/Casey", "Antarctica/Davis", "Antarctica/DumontDUrville", "Antarctica/Mawson", "Antarctica/McMurdo", "Antarctica/Palmer", "Antarctica/Rothera", "Antarctica/Syowa", "Antarctica/Vostok", "Asia/Aden", "Asia/Almaty", "Asia/Amman", "Asia/Anadyr", "Asia/Aqtau", "Asia/Aqtobe", "Asia/Ashgabat", "Asia/Baghdad", "Asia/Bahrain", "Asia/Baku", "Asia/Bangkok", "Asia/Beirut", "Asia/Bishkek", "Asia/Brunei", "Asia/Choibalsan", "Asia/Chongqing", "Asia/Colombo", "Asia/Damascus", "Asia/Dhaka", "Asia/Dili", "Asia/Dubai", "Asia/Dushanbe", "Asia/Gaza", "Asia/Harbin", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Hovd", "Asia/Irkutsk", "Asia/Jakarta", "Asia/Jayapura", "Asia/Jerusalem", "Asia/Kabul", "Asia/Kamchatka", "Asia/Karachi", "Asia/Kashgar", "Asia/Kathmandu", "Asia/Kolkata", "Asia/Krasnoyarsk", "Asia/Kuala_Lumpur", "Asia/Kuching", "Asia/Kuwait", "Asia/Macau", "Asia/Magadan", "Asia/Makassar", "Asia/Manila", "Asia/Muscat", "Asia/Nicosia", "Asia/Novokuznetsk", "Asia/Novosibirsk", "Asia/Omsk", "Asia/Oral", "Asia/Phnom_Penh", "Asia/Pontianak", "Asia/Pyongyang", "Asia/Qatar", "Asia/Qyzylorda", "Asia/Rangoon", "Asia/Riyadh", "Asia/Sakhalin", "Asia/Samarkand", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Taipei", "Asia/Tashkent", "Asia/Tbilisi", "Asia/Tehran", "Asia/Thimphu", "Asia/Tokyo", "Asia/Ulaanbaatar", "Asia/Urumqi", "Asia/Vientiane", "Asia/Vladivostok", "Asia/Yakutsk", "Asia/Yekaterinburg", "Asia/Yerevan", "Atlantic/Azores", "Atlantic/Bermuda", "Atlantic/Canary", "Atlantic/Cape_Verde", "Atlantic/Faroe", "Atlantic/Madeira", "Atlantic/Reykjavik", "Atlantic/South_Georgia", "Atlantic/St_Helena", "Atlantic/Stanley", "Australia/Adelaide", "Australia/Brisbane", "Australia/Broken_Hill", "Australia/Currie", "Australia/Darwin", "Australia/Eucla", "Australia/Hobart", "Australia/Lindeman", "Australia/Lord_Howe", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney", "Canada/Atlantic", "Canada/Central", "Canada/Eastern", "Canada/Mountain", "Canada/Newfoundland", "Canada/Pacific", "Europe/Amsterdam", "Europe/Andorra", "Europe/Athens", "Europe/Belgrade", "Europe/Berlin", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Chisinau", "Europe/Copenhagen", "Europe/Dublin", "Europe/Gibraltar", "Europe/Helsinki", "Europe/Istanbul", "Europe/Kaliningrad", "Europe/Kiev", "Europe/Lisbon", "Europe/London", "Europe/Luxembourg", "Europe/Madrid", "Europe/Malta", "Europe/Minsk", "Europe/Monaco", "Europe/Moscow", "Europe/Oslo", "Europe/Paris", "Europe/Prague", "Europe/Riga", "Europe/Rome", "Europe/Samara", "Europe/Simferopol", "Europe/Sofia", "Europe/Stockholm", "Europe/Tallinn", "Europe/Tirane", "Europe/Uzhgorod", "Europe/Vaduz", "Europe/Vienna", "Europe/Vilnius", "Europe/Volgograd", "Europe/Warsaw", "Europe/Zaporozhye", "Europe/Zurich", "GMT", "Indian/Antananarivo", "Indian/Chagos", "Indian/Christmas", "Indian/Cocos", "Indian/Comoro", "Indian/Kerguelen", "Indian/Mahe", "Indian/Maldives", "Indian/Mauritius", "Indian/Mayotte", "Indian/Reunion", "Pacific/Apia", "Pacific/Auckland", "Pacific/Chatham", "Pacific/Easter", "Pacific/Efate", "Pacific/Enderbury", "Pacific/Fakaofo", "Pacific/Fiji", "Pacific/Funafuti", "Pacific/Galapagos", "Pacific/Gambier", "Pacific/Guadalcanal", "Pacific/Guam", "Pacific/Honolulu", "Pacific/Johnston", "Pacific/Kiritimati", "Pacific/Kosrae", "Pacific/Kwajalein", "Pacific/Majuro", "Pacific/Marquesas", "Pacific/Midway", "Pacific/Nauru", "Pacific/Niue", "Pacific/Norfolk", "Pacific/Noumea", "Pacific/Pago_Pago", "Pacific/Palau", "Pacific/Pitcairn", "Pacific/Ponape", "Pacific/Port_Moresby", "Pacific/Rarotonga", "Pacific/Saipan", "Pacific/Tahiti", "Pacific/Tarawa", "Pacific/Tongatapu", "Pacific/Truk", "Pacific/Wake", "Pacific/Wallis", "US/Alaska", "US/Arizona", "US/Central", "US/Eastern", "US/Hawaii", "US/Mountain", "US/Pacific", "UTC"];
 });
 
 ;require.register("initialize", function(exports, require, module) {
-var app;
+var app, colorSet;
 
 app = require('application');
 
+colorSet = require('./helpers/color-set');
+
 $(function() {
   moment.locale(window.locale);
+  ColorHash.addScheme('cozy', colorSet);
   app.initialize();
   return $.fn.spin = function(opts, color) {
     var presets;
@@ -1039,61 +1044,6 @@ module.exports = BaseView = (function(_super) {
   return BaseView;
 
 })(Backbone.View);
-});
-
-;require.register("lib/colorhash", function(exports, require, module) {
-var hslToRgb, hue2rgb;
-
-hue2rgb = function(p, q, t) {
-  if (t < 0) {
-    t += 1;
-  }
-  if (t > 1) {
-    t -= 1;
-  }
-  if (t < 1 / 6) {
-    return p + (q - p) * 6 * t;
-  }
-  if (t < 1 / 2) {
-    return q;
-  }
-  if (t < 2 / 3) {
-    return p + (q - p) * (2 / 3 - t) * 6;
-  }
-  return p;
-};
-
-hslToRgb = function(h, s, l) {
-  var b, color, g, p, q, r;
-  if (s === 0) {
-    r = g = b = l;
-  } else {
-    q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
-  }
-  color = (1 << 24) + (r * 255 << 16) + (g * 255 << 8) + parseInt(b * 255);
-  return "#" + (color.toString(16).slice(1));
-};
-
-module.exports = function(tag) {
-  var colour, h, hash, i, l, s, _i, _ref;
-  if (tag !== t('default calendar name')) {
-    hash = 0;
-    for (i = _i = 0, _ref = tag.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-      hash = tag.charCodeAt(i) + (hash << 5) - hash;
-    }
-    h = (hash % 100) / 100;
-    s = (hash % 1000) / 1000;
-    l = 0.5 + 0.2 * (hash % 2) / 2;
-    colour = hslToRgb(h, s, l);
-    return colour;
-  } else {
-    return '#008AF6';
-  }
-};
 });
 
 ;require.register("lib/modal", function(exports, require, module) {
@@ -1259,7 +1209,6 @@ module.exports = Modal;
 
 ;require.register("lib/popover_view", function(exports, require, module) {
 var BaseView, PopoverView,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1269,11 +1218,10 @@ module.exports = PopoverView = (function(_super) {
   __extends(PopoverView, _super);
 
   function PopoverView() {
-    this.getDirection = __bind(this.getDirection, this);
     return PopoverView.__super__.constructor.apply(this, arguments);
   }
 
-  PopoverView.prototype.titleTemplate = function() {};
+  PopoverView.prototype.template = require('../views/templates/popover');
 
   PopoverView.prototype.initialize = function(options) {
     this.target = options.target;
@@ -1291,55 +1239,106 @@ module.exports = PopoverView = (function(_super) {
   };
 
   PopoverView.prototype.close = function() {
-    this.target.popover('destroy');
+    this.$popover.remove();
+    this.$popover = null;
     this.target.data('popover', void 0);
     return this.remove();
   };
 
+  PopoverView.prototype.getScreen = function(screenID) {
+    var error, screen, _ref;
+    if (screenID == null) {
+      screenID = 'default';
+    }
+    screen = (_ref = this.screens) != null ? _ref[screenID] : void 0;
+    if ((screen != null ? screen.title : void 0) && (screen != null ? screen.content : void 0)) {
+      return screen;
+    } else {
+      error = "Screen '" + screenID + "' doesn't exist, or doesn't have a title or a\ncontent template function.";
+      throw new Error(error);
+    }
+  };
+
+  PopoverView.prototype.switchToScreen = function(screenID) {
+    var error, renderData, _ref, _ref1;
+    if (this.$popover == null) {
+      error = 'Popover must be rendered before switching its screen.';
+      throw new Error(error);
+    }
+    if (screenID === 'default' && (this.screen != null)) {
+      if ((_ref = this.screen.onLeave) != null) {
+        _ref.call(this);
+      }
+    }
+    this.screen = this.getScreen(screenID);
+    renderData = this.getRenderData();
+    this.titleElement.html(this.screen.title(renderData));
+    this.contentElement.html(this.screen.content(renderData));
+    this.screenElement.attr('data-screen', screenID);
+    return (_ref1 = this.screen.afterRender) != null ? _ref1.call(this) : void 0;
+  };
+
   PopoverView.prototype.render = function() {
+    var popoverWrapper, renderData;
     this.beforeRender();
-    this.target.popover({
-      selector: true,
-      trigger: 'manual',
-      title: this.titleTemplate(this.getRenderData()),
-      html: true,
-      placement: this.getDirection,
-      content: this.template(this.getRenderData()),
-      container: this.container
-    }).popover('show');
-    this.setElement($("#" + this.parentView.id + " .popover"));
-    if ($(window).width() <= 500) {
-      $('.popover').css({
-        top: 0,
-        left: 0
+    if (this.$popover == null) {
+      renderData = this.getRenderData();
+      this.screen = this.getScreen('default');
+      popoverWrapper = this.template({
+        title: this.screen.title(renderData),
+        content: this.screen.content(renderData)
       });
+      this.$popover = $(popoverWrapper);
+      this.titleElement = this.$popover.find('.popover-title');
+      this.contentElement = this.$popover.find('.popover-content');
+      this.screenElement = this.$popover.find('.screen-indicator');
+      this.setElement(this.$popover);
     }
     this.afterRender();
+    this.screen.afterRender.call(this);
+    this.positionPopover();
     return this;
   };
 
-  PopoverView.prototype.getDirection = function(tip) {
-    var $tmp, ctnOfs, fitBottom, fitLeft, fitRight, popoverHeight, popoverWidth, pos, realHeight, realWidth;
-    $tmp = $(tip).clone().appendTo('body');
-    popoverWidth = $tmp.innerWidth();
-    popoverHeight = $tmp.innerHeight();
-    $tmp.remove();
-    pos = this.target.offset();
-    ctnOfs = this.container.offset();
-    realWidth = pos.left + this.target.width() + popoverWidth;
-    fitRight = realWidth < ctnOfs.left + this.container.width();
-    fitLeft = pos.left - popoverWidth > ctnOfs.left;
-    realHeight = pos.top + this.target.height() + popoverHeight;
-    fitBottom = realHeight < ctnOfs.top + this.container.height();
-    if (fitRight) {
-      return 'right';
-    } else if (fitLeft) {
-      return 'left';
-    } else if (fitBottom) {
-      return 'bottom';
-    } else {
-      return 'top';
+  PopoverView.prototype.positionPopover = function() {
+    var containerHeight, containerOffset, containerWidth, fitBottom, fitRight, hiddenElements, maxXPosition, maxYposition, popoverHeight, popoverWidth, position, targetHeight, targetOffset, targetWidth, viewportMaxXPosition, viewportMaxYPosition;
+    this.$popover.detach().css({
+      display: 'block',
+      top: 'auto',
+      left: 'auto',
+      left: 'auto'
+    });
+    this.$popover.appendTo(this.container);
+    hiddenElements = this.$popover.find('[aria-hidden="true"]');
+    hiddenElements.attr('aria-hidden', false);
+    popoverHeight = this.$popover.innerHeight();
+    popoverWidth = this.$popover.innerWidth();
+    targetOffset = this.target.offset();
+    targetWidth = this.target.width();
+    targetHeight = this.target.height();
+    containerOffset = this.container.offset();
+    containerHeight = this.container.innerHeight();
+    containerWidth = this.container.innerWidth();
+    hiddenElements.attr('aria-hidden', true);
+    position = {
+      top: targetOffset.top,
+      left: targetOffset.left + 50
+    };
+    maxXPosition = position.left + targetWidth + popoverWidth;
+    viewportMaxXPosition = containerOffset.left + containerWidth;
+    fitRight = maxXPosition < viewportMaxXPosition;
+    maxYposition = position.top + popoverHeight;
+    viewportMaxYPosition = containerOffset.top + containerHeight;
+    fitBottom = maxYposition < viewportMaxYPosition;
+    if (!fitBottom) {
+      position.bottom = containerHeight - targetOffset.top;
+      position.top = 'auto';
     }
+    if (!fitRight) {
+      position.right = containerWidth - targetOffset.left + targetWidth;
+      position.left = 'auto';
+    }
+    return this.$popover.css(position);
   };
 
   return PopoverView;
@@ -1407,17 +1406,23 @@ module.exports = new SocketListener();
 
 ;require.register("lib/today_checker", function(exports, require, module) {
 module.exports = function(router) {
-  var nextDay, nextTick, now;
-  now = moment();
-  nextDay = moment(now).add(1, 'days').startOf('day');
-  nextTick = nextDay.valueOf() - now.valueOf();
-  return setTimeout(function() {
-    var view;
-    view = router.mainView;
-    if (view.cal != null) {
-      return view.cal.fullCalendar('render');
-    }
-  }, nextTick);
+  var waitToChangeToday;
+  return (waitToChangeToday = (function(_this) {
+    return function() {
+      var nextDay, nextTick, now;
+      now = moment();
+      nextDay = moment(now).add(1, 'days').startOf('day');
+      nextTick = nextDay.valueOf() - now.valueOf();
+      return setTimeout(function() {
+        var view;
+        view = router.mainView;
+        if (view.cal != null) {
+          view.cal.fullCalendar('render');
+        }
+        return waitToChangeToday();
+      }, nextTick);
+    };
+  })(this))();
 };
 });
 
@@ -1617,7 +1622,6 @@ module.exports = {
   "Today": "Heute",
   'today': 'heute',
   "What should I remind you ?": "An was soll ich Sie erinnern?",
-  "ICalendar import": "ICalendar importieren",
   "select an icalendar file": "Auswählen einer ICalendar Datei",
   "import your icalendar file": "Ihre ICalender Datei importieren",
   "confirm import": "Importieren bestätigen",
@@ -1641,6 +1645,7 @@ module.exports = {
   "event": "Ereignis",
   "are you sure": "Sind Sie sicher?",
   "confirm delete calendar": "Sie sind im Begriff alle Ereignisse in %{calendarName} zu löschen. Sind Sie sicher?",
+  "confirm delete selected calendars": "Sie sind im Begriff alle Kalender. Sind Sie sicher?",
   "advanced": "Mehr Details",
   "enter email": "E-Mail anzeigen",
   "ON": "EIN",
@@ -1648,6 +1653,7 @@ module.exports = {
   "no description": "Keine Beschreibung",
   "add calendar": "Kalendar hinzufügen",
   "new calendar": "Neuer Kalendar",
+  "multiple actions": "mehrere Aktionen",
   "recurrence": "Wiederholung",
   "recurrence rule": "Wiederholungsregeln rules",
   "make reccurent": "Wiederholung erstellen",
@@ -1705,7 +1711,7 @@ module.exports = {
   "All one day": "Alle Tage",
   'Reminders before the event': 'Errinnern vor dem Ereignis',
   "reminder": "Erinnerung",
-  'send mails question': 'Eine Mitteilung senden an E-MAil: ',
+  'send mails question': 'Eine Mitteilung senden an E-MAil:',
   'modal send mails': 'Eine Mitteilung senden',
   'yes': 'Ja',
   'no': 'Nein',
@@ -1727,15 +1733,15 @@ module.exports = {
   "sync headline with data": "Um Ihren Kalendar zu synchronisieren, folgende Informationen beachten:",
   "sync url": "URL:",
   "sync login": "Benutzername:",
-  "sync password": "Passwort: ",
-  "sync help": "Sind Sie verloren? Folgen Sie der ",
+  "sync password": "Passwort:",
+  "sync help": "Sind Sie verloren? Folgen Sie der",
   "sync help link": "Schritt-für-Schritt Anleitung!",
   "install the sync module": "Installieren Sie das Sync Module vom dem Cozy App Store",
   "connect to it and follow": "Verbinden Sie sich mit ihm und folgend den Anweisungen zu CalDAV.",
   "some event fail to save": "Ein Ereignis wurde nicht gespeichert (ein Fehler ist aufgetreten).",
   "imported events": "Anzahl der importierten Ereignisse",
   "import finished": "Ihr Import ist nun fertig gestellt",
-  "import error occured for": "Fehler bei Import für folgende Elemente aufgetreten",
+  "import error occured for": "Fehler bei Import für folgende Elemente aufgetreten ",
   "export your calendar": "Exportieren Sie Ihren Kalendar",
   'please select existing calendar': 'Bitte wählen Sie einen bestehenden Kalendar aus.',
   "January": "Januar",
@@ -1820,7 +1826,6 @@ module.exports = {
   "Today": "Today",
   'today': 'today',
   "What should I remind you ?": "What should I remind you?",
-  "ICalendar import": "ICalendar import",
   "select an icalendar file": "Select an icalendar file",
   "import your icalendar file": "import your icalendar file",
   "confirm import": "confirm import",
@@ -1868,8 +1873,8 @@ module.exports = {
   "occurences": "occurences",
   "every": "Every",
   'minutes': 'minutes',
-  'minute': 'minute',
   'minute ': 'minute',
+  'minute': 'minute',
   'hours': 'hours',
   'hour': 'hour',
   "days": "days",
@@ -1910,7 +1915,7 @@ module.exports = {
   "All one day": "All day",
   'Reminders before the event': 'Reminders before the event',
   "reminder": "Reminder",
-  'send mails question': 'Send a notification email to: ',
+  'send mails question': 'Send a notification email to:',
   'modal send mails': 'Send a notification',
   'yes': 'Yes',
   'no': 'No',
@@ -1932,15 +1937,15 @@ module.exports = {
   "sync headline with data": "To synchronize your calendar, use the following information:",
   "sync url": "URL:",
   "sync login": "Username:",
-  "sync password": "Password: ",
-  "sync help": "Are you lost? Follow the ",
+  "sync password": "Password:",
+  "sync help": "Are you lost? Follow the",
   "sync help link": "step-by-step guide!",
   "install the sync module": "Install the Sync module from the Cozy App Store",
   "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
   "some event fail to save": "An event was not saved (an error occured).",
   "imported events": "Amount of imported events",
   "import finished": "Your import is now finished",
-  "import error occured for": "Import error occured for following elements",
+  "import error occured for": "Import error occured for following elements:",
   "export your calendar": "Export your calendar",
   'please select existing calendar': 'Please select an existing calendar.',
   "January": "January",
@@ -1973,10 +1978,210 @@ module.exports = {
   'email date format allday': 'MMMM Do YYYY, [all day long]',
   'email invitation title': 'Invitation to "%{description}"',
   'email invitation content': "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
-  'email update title': "L'événement \"%{description}\" a changé",
+  'email update title': "Event \"%{description}\" has changed",
   'email update content': "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
   'email delete title': 'This event has been canceled: %{description}',
   'email delete content': "This event has been canceled:\n%{description} %{place}\nOn %{date}"
+};
+});
+
+;require.register("locales/es", function(exports, require, module) {
+module.exports = {
+  "default calendar name": "mi agenda",
+  "Add": "Añadir",
+  "event": "Evento",
+  "create event": "Creación de un evento",
+  "edit event": "Modificar un evento",
+  "edit": "Mofificar",
+  "create": "Crear",
+  "creation": "Creación",
+  "invite": "Invitar",
+  "close": "Cerrar",
+  "delete": "Suprimir",
+  "change color": "Cambiar el  color",
+  "rename": "Renombrar",
+  "export": "Exportar",
+  "remove": "Suprimir el evento",
+  "duplicate": "Duplicar el evento",
+  "Place": "Lugar",
+  "all day": "día entero",
+  "All day": "Día entero",
+  "description": "Descripción",
+  "date": "fecha",
+  "Day": "Día",
+  "days": "días",
+  "Edit": "Modificar",
+  "Email": "Correo electrónico",
+  "Import": "Importar",
+  "Export": "Exportar",
+  "show": "Mostrar",
+  "hide": "Ocultar",
+  "List": "Lista",
+  "list": "Lista",
+  "Calendar": "Agenda",
+  "calendar": "Agenda",
+  "Sync": "Sincronizar",
+  "ie: 9:00 important meeting": "ej: 9:00 reunión importante",
+  "Month": "Mes",
+  "Popup": "Popup",
+  "Switch to List": "Cambiar a modo Lista",
+  "Switch to Calendar": "Cambiar a modo Agenda",
+  "time": "tiempo",
+  "Today": "Hoy",
+  "today": "hoy",
+  "What should I remind you ?": "¿Qué debo recordarle?",
+  "select an icalendar file": "Seleccionar un archivo icalendar",
+  "import your icalendar file": "importar su archivo icalendar",
+  "confirm import": "confirmar la importación",
+  "cancel": "anular",
+  "Create": "Crear",
+  "Events to import": "Eventos que se han de importar",
+  "Create Event": "Crear un evento",
+  "From [hours:minutes]": "De [horas:minutos]",
+  "To [hours:minutes]": "A [horas:minutos]",
+  "To [date]": "A [fecha]",
+  "Description": "Descripción",
+  "days after": "días después",
+  "days later": "días después",
+  "Week": "Semana",
+  "Display": "Notificación",
+  "DISPLAY": "Notificación",
+  "EMAIL": "Correo electrónico",
+  "BOTH": "Correo electrónico & notificación",
+  "display previous events": "Visualizar los eventos precedentes",
+  "display next events": "Visualizar los eventos siguientes",
+  "are you sure": "¿Está usted seguro(a)?",
+  "confirm delete calendar": "Usted está a punto de suprimir todos los eventos asociados a %{calendarName}. ¿Está seguro(a)?",
+  "confirm delete selected calendars": "Usted está a punto de suprimir todas las agendas seleccionadas. ¿Está seguro(a)?",
+  "advanced": "Más detalles",
+  "enter email": "Escriba la dirección del correo electrónico",
+  "ON": "activada",
+  "OFF": "desactivada",
+  "no description": "Sin descripción",
+  "add calendar": "Añadir agenda",
+  "new calendar": "Nueva agenda",
+  "multiple actions": "Acciones múltiples",
+  "recurrence": "Recurrencia",
+  "recurrence rule": "Reglas de recurrencia",
+  "make reccurent": "Volver recurrente",
+  "repeat every": "Repetir cada",
+  "no recurrence": "No se repite",
+  "repeat on": "Repetir los",
+  "repeat on date": "Repetir los días del mes",
+  "repeat on weekday": "Repetir el día de la semana",
+  "repeat until": "Repetir hasta",
+  "after": "O después",
+  "repeat": "Repetir",
+  "forever": "Siempre",
+  "occurences": "ocasiones",
+  "every": "Cada",
+  "minutes": "minutos",
+  "minute": "minuto",
+  "minute ": "minuto",
+  "hours": "horas",
+  "hour": "hora",
+  "day": "día",
+  "weeks": "semanas",
+  "week": "semana",
+  "months": "meses",
+  "month": "mes",
+  "years": "años",
+  "year": "año",
+  "until": "hasta",
+  "for": "durante",
+  "on": "el",
+  "on the": "el",
+  "th": "º ",
+  "nd": "º ",
+  "rd": "º ",
+  "st": "º ",
+  "last": "último",
+  "and": "y",
+  "times": "veces",
+  "weekday": "día de la semana",
+  "summary": "Título",
+  "start": "Comienzo",
+  "end": "Fin",
+  "tags": "Etiquetas",
+  "add tags": "Añadir etiquetas",
+  "change": "Cambiar",
+  "change to": "Cambiar a",
+  "change calendar": "Cambiar de agenda",
+  "save changes": "Guardar cambios",
+  "save changes and invite guests": "Guardar cambios y enviar las invitaciones",
+  "guests": "Invitados",
+  "cancel Invitation": "Anular la invitación",
+  "From": "De",
+  "To": "A",
+  "All day, until": "Todo el día, hasta",
+  "All one day": "Todo el día",
+  "Reminders before the event": "Recordatorios antes del evento",
+  "reminder": "Recordatorio",
+  "send mails question": "Enviar un correo electrónico de notificación a:",
+  "modal send mails": "Enviar una notificación",
+  "yes": "Si",
+  "no": "No",
+  "no summary": "El título es obligatorio",
+  "start after end": "La fecha del comienzo es posterior a la fecha del final.",
+  "invalid start date": "La fecha del comienzo no es válida",
+  "invalid end date": "La fecha del final no es válida",
+  "invalid trigg date": "La fecha no es válida",
+  "invalid action": "La acción no es válida",
+  "server error occured": "Ha ocurrido un error en el servidor",
+  "synchronization": "Sincronización",
+  "mobile sync": "Sincronización con los móviles (CalDAV)",
+  "link imported events with calendar": "Ligar los eventos a importar con la siguiente agenda:",
+  "import an ical file": "Para importar un archivo ICal a su agenda Cozy, comenzar por hacer clic en este botón para precargarlo:",
+  "download a copy of your calendar": "Seleccionar una agenda y luego hacer clic en el botón para descargar una copia de la agenda como archivo ICal, :",
+  "icalendar export": "Exportar ICalendar",
+  "icalendar import": "Importar ICalendar",
+  "to sync your cal with": "Para sincronizar su agenda con sus periféricos, usted debe seguir los dos siguientes pasos",
+  "sync headline with data": "Para sincronizar su agenda, use la siguiente información:",
+  "sync url": "URL:",
+  "sync login": "Usuario:",
+  "sync password": "Contraseña:",
+  "sync help": "¿Esta usted perdido(a)? siga la",
+  "sync help link": "guía paso a paso!",
+  "install the sync module": "Instalar el módulo Sincronización desde la Apliteca Cozy",
+  "connect to it and follow": "Conectarse y seguir las instrucciones relativas a CalDAV.",
+  "some event fail to save": "No se ha guardado un evento (ha ocurrido un error)",
+  "imported events": "Número de eventos importados",
+  "import finished": "La importación ha terminado",
+  "import error occured for": "Un error ha ocurrido al importar los siguientes elementos :",
+  "export your calendar": "Exportar su agenda",
+  "please select existing calendar": "Por favor seleccionar una agenda existente",
+  "January": "enero",
+  "February": "febrero",
+  "March": "marzo",
+  "April": "abril",
+  "May": "mayo",
+  "June": "junio",
+  "July": "julio",
+  "August": "agosto",
+  "September": "septiembre",
+  "October": "octubre",
+  "November": "noviembre",
+  "December": "diciembre",
+  "Jan": "ene",
+  "Feb": "feb",
+  "Mar": "mar",
+  "Apr": "abr",
+  "Jun": "jun",
+  "Jul": "jul",
+  "Aug": "ago",
+  "Sep": "sep",
+  "Oct": "oct",
+  "Nov": "nov",
+  "Dec": "dic",
+  "calendar exist error": "Una agenda llamada \"Nueva agenda\" ya existe.",
+  "email date format": "DD/MM/AAAA [a] HH[h]mm",
+  "email date format allday": "DD/MM/AAAA [todo el día]",
+  "email invitation title": "Invitación a \"%{description}\"",
+  "email invitation content": "Buenos días, desearía invitarlo(a) al siguiente evento:\n\n%{description} %{place}\nel %{date}\n¿Podríamos contar con su presencia?\n\nSi\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n %{url}?status=DECLINED&key=%{key}",
+  "email update title": "El evento \"%{description}\" ha cambiado",
+  "email update content": "Un evento en el que usted participa se ha cambiado:\n%{description} %{place}\nel %{date}\n\nSeguiré estando presente\n %{url}?status=ACCEPTED&key=%{key}\n\nNo cuenten conmigo\n %{url}?status=ACCEPTED&key=%{key}",
+  "email delete title": "Este evento ha sido anulado: %{description}",
+  "email delete content": "Este evento ha sido anulado:\n%{description} %{place}\nel %{date}"
 };
 });
 
@@ -2007,8 +2212,8 @@ module.exports = {
   'days': 'jours',
   "Edit": "Modifier",
   "Email": "Email",
-  "Import": "Import",
-  "Export": "Export",
+  "Import": "Importation",
+  "Export": "Exportation",
   "show": "Montrer",
   "hide": "Cacher",
   "List": "Liste",
@@ -2022,13 +2227,12 @@ module.exports = {
   "Switch to List": "Basculer en mode Liste",
   "Switch to Calendar": "Basculer en mode Agenda",
   "time": "Heure",
-  "Today": "Aujourd'hui",
-  'today': 'aujourd\'hui',
-  "What should I remind you ?": "Que dois-je vous rappeler ?",
-  "ICalendar importer": "Importateur ICalendar",
+  "Today": "Aujourd’hui",
+  'today': 'aujourd’hui',
+  "What should I remind you ?": "Que dois-je vous rappeler ?",
   "import your icalendar file": "Importer votre fichier iCalendar",
   "select an icalendar file": "Sélectionner un fichier iCalendar",
-  "confirm import": "Confirmer l'import",
+  "confirm import": "Confirmer l'importation",
   "cancel": "Annuler",
   "Create": "Créer",
   "Events to import": "Évènements à importer",
@@ -2046,16 +2250,16 @@ module.exports = {
   "BOTH": "Email & notification",
   "display previous events": "Afficher les évènements précédents",
   "display next events": "Afficher les évènements suivants",
-  "are you sure": "Êtes-vous sûr(e) ?",
-  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
-  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les calendriers sélectionnés. Êtes-vous sûr(e) ?",
+  "are you sure": "Êtes-vous sûr(e) ?",
+  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
+  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les agendas sélectionnés. Êtes-vous sûr(e) ?",
   "advanced": "Détails",
   "enter email": "Entrer l'adresse email",
   "ON": "activée",
   "OFF": "désactivée",
   "no description": "Sans description",
-  "add calendar": "Ajouter un calendrier",
-  "new calendar": "Nouveau calendrier",
+  "add calendar": "Ajouter un agenda",
+  "new calendar": "Nouvel agenda",
   "multiple actions": "Actions multiples",
   "recurrence": "Récurrence",
   "recurrence rule": "Règle de récurrence",
@@ -2072,6 +2276,7 @@ module.exports = {
   "occurences": "occasions",
   "every": "tous les",
   'minutes': 'minutes',
+  'minute': 'minute',
   'minute ': 'minute',
   'hours': 'heures',
   'hour': 'heure',
@@ -2102,7 +2307,7 @@ module.exports = {
   "add tags": "Ajouter des tags",
   "change to": "Changer en",
   "change": "Modifier",
-  "change calendar": "Modifier l'agenda",
+  "change calendar": "Changer l'agenda",
   "save changes": "Enregistrer",
   "save changes and invite guests": "Enregistrer et envoyer les invitations",
   "guests": "Invités",
@@ -2111,9 +2316,9 @@ module.exports = {
   "To": "À",
   "All day, until": "Journée entière, jusqu'au",
   "All one day": "Toute la journée du",
-  'Reminders before the event': 'Rappels avant l\'évènement',
+  'Reminders before the event': 'Rappels avant l’évènement',
   "reminder": "Rappel",
-  'send mails question': 'Envoyer un email de notification à : ',
+  'send mails question': 'Envoyer un email de notification à :',
   'modal send mails': 'Envoyer une notification',
   'yes': 'Oui',
   'no': 'Non',
@@ -2126,24 +2331,24 @@ module.exports = {
   "server error occured": "Une erreur est survenue sur le serveur.",
   "synchronization": "Synchronisation",
   "mobile sync": "Synchro Mobile (CalDAV)",
-  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
-  "link imported events with calendar": "Lier les évènements à importer avec le calendrier suivant :",
-  "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
+  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
+  "link imported events with calendar": "Lier les évènements à importer avec l'agenda suivant :",
+  "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
   "icalendar export": "Exporter ICalendar",
   "icalendar import": "Importer ICalendar",
   "to sync your cal with": "Pour synchroniser votre agenda avec votre mobile vous devez :",
-  "sync headline with data": "Pour synchroniser votre agenda, utilisez les identifiants suivant :",
+  "sync headline with data": "Pour synchroniser votre agenda, utilisez les identifiants suivants :",
   "sync url": "URL :",
   "sync login": "Nom d'utilisateur :",
-  "sync password": "Mot de passe : ",
-  "sync help": "Vous êtes perdu(e) ? Suivez le ",
-  "sync help link": "guide pas à pas !",
+  "sync password": "Mot de passe :",
+  "sync help": "Vous êtes perdu(e) ? Suivez le",
+  "sync help link": "guide pas à pas !",
   "install the sync module": "Installer le module Sync depuis l'applithèque.",
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un évènement a échoué.",
   "imported events": "Nombre d'évènements importés",
   "import finished": "Votre importation est terminée !",
-  "import error occured for": "Une erreur est survenue pour un de ces éléments ",
+  "import error occured for": "Une erreur est survenue pour un de ces éléments :",
   "export your calendar": "Exporter votre agenda",
   'please select existing calendar': 'Veuillez sélectionner un agenda existant.',
   "January": "Janvier",
@@ -2169,15 +2374,15 @@ module.exports = {
   'Oct': 'Oct',
   'Nov': 'Nov',
   'Dec': 'Déc',
-  'calendar exist error': 'Un calendrier "Nouveau Calendrier" existe déjà.',
+  'calendar exist error': 'Un agenda intitulé "Nouvel agenda" existe déjà.',
   'email date format': 'DD/MM/YYYY [à] HH[h]mm',
   'email date format allday': 'DD/MM/YYYY [toute la journée]',
   'email invitation title': "Invitation à l'évènement \"%{description}\"",
-  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'évènement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
+  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'évènement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
   'email update title': "L'évènement \"%{description}\" a changé",
-  'email update content': "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}\n",
+  'email update content': "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}",
   'email delete title': 'Cet évènement a été annulé : %{description}',
-  'email delete content': "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
+  'email delete content': "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
 };
 });
 
@@ -2487,7 +2692,7 @@ module.exports = ScheduleItem = (function(_super) {
     if (this.endDateField) {
       return this._toDateObject(this.get(this.endDateField));
     } else {
-      return this.getDateObject().add('m', 30);
+      return this.getDateObject().add(30, 'm');
     }
   };
 
@@ -2581,7 +2786,7 @@ module.exports = ScheduleItem = (function(_super) {
       } else if (diff === -23) {
         diff = 1;
       }
-      mDateRecurrentS.add('hour', diff);
+      mDateRecurrentS.add(diff, 'hour');
       return mDateRecurrentS;
     };
     fces = rrule.between(jsDateBoundS, jsDateBoundE).map((function(_this) {
@@ -2589,7 +2794,7 @@ module.exports = ScheduleItem = (function(_super) {
         var fce, fixedDate, mDateRecurrentE, mDateRecurrentS;
         fixedDate = fixDSTTroubles(jsDateRecurrentS);
         mDateRecurrentS = H.toTimezonedMoment(fixedDate);
-        mDateRecurrentE = mDateRecurrentS.clone().add('seconds', mDateEventE.diff(mDateEventS, 'seconds'));
+        mDateRecurrentE = mDateRecurrentS.clone().add(mDateEventE.diff(mDateEventS, 'seconds'), 'seconds');
         fce = generator(_this, mDateRecurrentS, mDateRecurrentE);
         return fce;
       };
@@ -2695,11 +2900,9 @@ module.exports = ScheduleItem = (function(_super) {
 });
 
 ;require.register("models/tag", function(exports, require, module) {
-var Tag, colorhash,
+var Tag,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-colorhash = require('lib/colorhash');
 
 module.exports = Tag = (function(_super) {
   __extends(Tag, _super);
@@ -2724,7 +2927,7 @@ module.exports = Tag = (function(_super) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SyncView, app,
+var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SettingsModal, SyncView, app,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2736,6 +2939,8 @@ ListView = require('views/list_view');
 CalendarView = require('views/calendar_view');
 
 EventModal = require('views/event_modal');
+
+SettingsModal = require('views/settings_modal');
 
 ImportView = require('views/import_view');
 
@@ -2767,7 +2972,8 @@ module.exports = Router = (function(_super) {
     'week/:year/:month/:day/:eventid': 'week_event',
     'list/:eventid': 'list_event',
     'sync': 'sync',
-    'calendar': 'backToCalendar'
+    'calendar': 'backToCalendar',
+    'settings': 'settings'
   };
 
   Router.prototype.initialize = function(options) {
@@ -2914,6 +3120,14 @@ module.exports = Router = (function(_super) {
     return [year, monday.getMonth() + 1, monday.getDate()];
   };
 
+  Router.prototype.settings = function() {
+    var view;
+    view = new SettingsModal();
+    $('body').append(view.$el);
+    view.render();
+    return this.onCalendar = true;
+  };
+
   return Router;
 
 })(Backbone.Router);
@@ -3040,7 +3254,7 @@ module.exports = CalendarHeader = (function(_super) {
 });
 
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
-var ComboBox, Event, EventModal, EventPopOver, PopoverView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
+var ALERT_OPTIONS, ComboBox, Event, EventModal, EventPopOver, PopoverView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, helpers, inputDateDTPickerFormat, tFormat,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3052,6 +3266,8 @@ EventModal = require('views/event_modal');
 ComboBox = require('views/widgets/combobox');
 
 Event = require('models/event');
+
+helpers = require('../helpers');
 
 tFormat = 'HH:mm';
 
@@ -3078,18 +3294,77 @@ defDatePickerOps = {
   viewSelect: 4
 };
 
+ALERT_OPTIONS = [
+  {
+    M: 0
+  }, {
+    M: 15
+  }, {
+    M: 30
+  }, {
+    H: 1
+  }, {
+    H: 2
+  }, {
+    H: 6
+  }, {
+    H: 12
+  }, {
+    D: 1
+  }, {
+    D: 2
+  }, {
+    D: 3
+  }, {
+    D: 5
+  }, {
+    W: 1
+  }
+];
+
 module.exports = EventPopOver = (function(_super) {
   __extends(EventPopOver, _super);
 
   function EventPopOver() {
-    this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
     this.onTab = __bind(this.onTab, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
 
-  EventPopOver.prototype.titleTemplate = require('./templates/popover_title');
+  EventPopOver.prototype.screens = {
+    "default": {
+      title: require('./templates/popover_title'),
+      content: require('./templates/popover_event'),
+      afterRender: function() {
+        return this.afterRenderDefault();
+      }
+    },
+    details: {
+      title: function() {
+        return '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Description</h4><div class="btn-done">Done</div></div>';
+      },
+      content: require('./templates/popover_details'),
+      onLeave: function() {
+        return this.onLeaveDetailsScreen();
+      }
+    },
+    alert: {
+      title: function() {
+        return '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Alerts</h4><div class="btn-done">Done</div></div>';
+      },
+      content: require('./templates/popover_alert'),
+      afterRender: function() {
+        return this.afterRenderAlert();
+      }
+    },
+    repeat: {
+      title: function() {
+        return '<div class="popover-back"><i class="fa fa-angle-left"></i><h4>Repeat</h4><div class="btn-done">Done</div></div>';
+      },
+      content: require('./templates/popover_repeat')
+    }
+  };
 
-  EventPopOver.prototype.template = require('./templates/popover_event');
+  EventPopOver.prototype.templateAlertRow = require('./templates/popover_alert_row');
 
   EventPopOver.prototype.events = {
     'keyup': 'onKeyUp',
@@ -3100,14 +3375,30 @@ module.exports = EventPopOver = (function(_super) {
     'click .remove': 'onRemoveClicked',
     'click .duplicate': 'onDuplicateClicked',
     'click .close': 'selfclose',
-    'changeTime.timepicker .input-start': 'onSetStart',
-    'changeTime.timepicker .input-end-time': 'onSetEnd',
-    'changeDate .input-end-date': 'onSetEnd',
-    'click .input-allday': 'toggleAllDay',
-    'input .input-desc': 'onSetDesc',
-    'input .input-place': 'onSetPlace',
-    'keydown [data-tabindex-next]': 'onTab',
-    'keydown [data-tabindex-prev]': 'onTab'
+    'click div.popover-back': function() {
+      return this.switchToScreen('default');
+    },
+    'changeTime.timepicker [data-screen="default"] .input-start': 'onSetStart',
+    'changeTime.timepicker [data-screen="default"] .input-end-time': 'onSetEnd',
+    'changeDate [data-screen="default"] .input-end-date': 'onSetEnd',
+    'click [data-screen="default"] .input-allday': 'toggleAllDay',
+    'input [data-screen="default"] .input-desc': 'onSetDesc',
+    'input [data-screen="default"] .input-place': 'onSetPlace',
+    'keydown [data-screen="default"] [data-tabindex-next]': 'onTab',
+    'keydown [data-screen="default"] [data-tabindex-prev]': 'onTab',
+    'click [data-screen="default"] .input-details-trigger': function() {
+      return this.switchToScreen('details');
+    },
+    'click [data-screen="default"] .input-alert': function() {
+      return this.switchToScreen('alert');
+    },
+    'click [data-screen="default"] .input-repeat': function() {
+      return this.switchToScreen('repeat');
+    },
+    'change [data-screen="alert"] .new-alert': 'onNewAlert',
+    'click [data-screen="alert"] .alerts li .alert-delete': 'onRemoveAlert',
+    'click [data-screen="alert"] input[type="checkbox"]': 'onChangeActionAlert',
+    'change [data-screen="repeat"] .input-repeat': 'onSelectRepeat'
   };
 
   EventPopOver.prototype.initialize = function(options) {
@@ -3120,17 +3411,24 @@ module.exports = EventPopOver = (function(_super) {
       });
     }
     EventPopOver.__super__.initialize.call(this, options);
-    this.listenTo(this.model, 'change', this.refresh);
-    return this.options = options;
+    return this.listenTo(this.model, 'change', this.refresh);
   };
 
   EventPopOver.prototype.afterRender = function() {
-    var timepickerEvents;
     this.addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
     this.spinner = this.$('.remove-spinner');
     this.duplicateButton = this.$('.duplicate');
-    this.$container = this.$('.popover-content-wrapper');
+    return this.$container = this.$('.popover-content-wrapper');
+  };
+
+
+  /*
+      Default screen.
+   */
+
+  EventPopOver.prototype.afterRenderDefault = function() {
+    var timepickerEvents;
     timepickerEvents = {
       'focus': function() {
         return $(this).timepicker('highlightHour');
@@ -3147,7 +3445,7 @@ module.exports = EventPopOver = (function(_super) {
       this.duplicateButton.hide();
     }
     this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
-    this.$('input[type="date"]').attr('type', 'text').datetimepicker(defDatePickerOps);
+    this.$('.input-date').datetimepicker(defDatePickerOps);
     this.$('[tabindex=1]').focus();
     this.calendar = new ComboBox({
       el: this.$('.calendarcombo'),
@@ -3163,22 +3461,100 @@ module.exports = EventPopOver = (function(_super) {
     return this.refresh();
   };
 
-  EventPopOver.prototype.setCaptions = function() {
-    return this.$('.end-date .caption').html((function(_this) {
-      return function() {
-        var str;
-        if (_this.model.isAllDay()) {
-          if (_this.model.isSameDay()) {
-            str = 'All one day';
-          } else {
-            str = 'All day, until';
-          }
-        } else {
-          return ',&nbsp;';
-        }
-        return t(str);
+  EventPopOver.prototype.onAdvancedClicked = function(event) {
+    event.preventDefault();
+    return this.$('[aria-hidden="true"]').attr('aria-hidden', false);
+  };
+
+
+  /*
+      Alert screen.
+   */
+
+  EventPopOver.prototype.afterRenderAlert = function() {
+    var $alerts, alarm, alarms, index, options, row, translationKey, trigger, value, _i, _len, _ref, _ref1, _ref2, _results;
+    $alerts = this.$('.alerts');
+    $alerts.empty();
+    alarms = this.model.get('alarms') || [];
+    _results = [];
+    for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
+      alarm = alarms[index];
+      trigger = helpers.iCalDurationToUnitValue(alarm.trigg);
+      _ref = this.getAlertTranslationInfo(trigger), translationKey = _ref.translationKey, value = _ref.value;
+      options = {
+        index: index,
+        label: t(translationKey, {
+          smart_count: value
+        }),
+        action: alarm.action,
+        isEmailChecked: (_ref1 = alarm.action) === 'EMAIL' || _ref1 === 'BOTH',
+        isNotifChecked: (_ref2 = alarm.action) === 'DISPLAY' || _ref2 === 'BOTH'
       };
-    })(this));
+      row = this.templateAlertRow(options);
+      _results.push($alerts.append(row));
+    }
+    return _results;
+  };
+
+  EventPopOver.prototype.onRemoveAlert = function(event) {
+    var alerts, index;
+    index = this.$(event.target).parents('li').attr('data-index');
+    alerts = this.model.get('alarms') || [];
+    alerts.splice(index, 1);
+    this.model.set('alarms', alerts);
+    return this.afterRenderAlert();
+  };
+
+  EventPopOver.prototype.onChangeActionAlert = function(event) {
+    var action, alerts, checkbox, currentAction, index, isEmailAction, newAction, otherAction;
+    checkbox = this.$(event.target);
+    isEmailAction = checkbox.hasClass('action-email');
+    action = isEmailAction ? 'EMAIL' : 'DISPLAY';
+    otherAction = action === 'EMAIL' ? 'DISPLAY' : 'EMAIL';
+    index = checkbox.parents('li').attr('data-index');
+    alerts = this.model.get('alarms');
+    currentAction = alerts[index].action;
+    if (currentAction === 'BOTH') {
+      newAction = otherAction;
+    } else if (currentAction === otherAction) {
+      newAction = 'BOTH';
+    } else {
+      event.preventDefault();
+    }
+    if (newAction != null) {
+      alerts[index].action = newAction;
+      return this.model.set('alarms', alerts);
+    }
+  };
+
+  EventPopOver.prototype.onNewAlert = function() {
+    var alarms, alertOption, index, triggerValue;
+    index = parseInt(this.$('select.new-alert').val());
+    if (index !== -1) {
+      alertOption = ALERT_OPTIONS[index];
+      triggerValue = helpers.unitValuesToiCalDuration(alertOption);
+      alarms = this.model.get('alarms') || [];
+      alarms.push({
+        action: 'DISPLAY',
+        trigg: triggerValue
+      });
+      this.model.set('alarms', alarms);
+      this.$('select.new-alert').val(-1);
+      return this.afterRenderAlert();
+    }
+  };
+
+
+  /*
+      Repeat screen.
+   */
+
+  EventPopOver.prototype.onSelectRepeat = function() {
+    var value;
+    value = parseInt(this.$('select.input-repeat').val());
+    if (value !== -1) {
+      return this.$('[aria-hidden="true"]').attr('aria-hidden', false);
+    }
   };
 
   EventPopOver.prototype.getTitle = function() {
@@ -3192,7 +3568,7 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.getRenderData = function() {
-    var currentCalendar, data, defaultCalendar, firstCalendar, _ref, _ref1, _ref2;
+    var currentCalendar, data, defaultCalendar, firstCalendar, formattedAlertOptions, _ref, _ref1, _ref2;
     firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
     defaultCalendar = t('default calendar name');
     if (this.model.isNew()) {
@@ -3200,6 +3576,15 @@ module.exports = EventPopOver = (function(_super) {
     } else {
       currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
     }
+    formattedAlertOptions = ALERT_OPTIONS.map((function(_this) {
+      return function(alert, index) {
+        var translationInfo;
+        translationInfo = _this.getAlertTranslationInfo(alert);
+        return _.extend({}, translationInfo, {
+          index: index
+        });
+      };
+    })(this));
     return data = _.extend({}, this.model.toJSON(), {
       tFormat: tFormat,
       dFormat: dFormat,
@@ -3209,8 +3594,35 @@ module.exports = EventPopOver = (function(_super) {
       allDay: this.model.isAllDay(),
       sameDay: this.model.isSameDay(),
       start: this.model.getStartDateObject(),
-      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd')
+      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd'),
+      alertOptions: formattedAlertOptions,
+      alerts: this.model.get('alarms')
     });
+  };
+
+  EventPopOver.prototype.getAlertTranslationInfo = function(alert) {
+    var translationKey, unit, value;
+    unit = Object.keys(alert)[0];
+    translationKey = (function() {
+      switch (unit) {
+        case 'M':
+          return 'alert minute';
+        case 'H':
+          return 'alert hour';
+        case 'D':
+          return 'alert day';
+        case 'W':
+          return 'alert week';
+      }
+    })();
+    value = alert[unit];
+    if (unit === 'M' && value === 0) {
+      translationKey = 'alert time of event';
+    }
+    return {
+      translationKey: translationKey,
+      value: value
+    };
   };
 
   EventPopOver.prototype.onTab = function(ev) {
@@ -3233,13 +3645,18 @@ module.exports = EventPopOver = (function(_super) {
   };
 
   EventPopOver.prototype.onSetStart = function() {
-    return this.model.setStart(this.formatDateTime(this.$('.input-start').val()));
+    return this.model.setStart(this.formatDateTime(this.$('.input-start').val(), this.$('.input-start-date').val()));
   };
 
   EventPopOver.prototype.onSetEnd = function() {
     this.model.setEnd(this.formatDateTime(this.$('.input-end-time').val(), this.$('.input-end-date').val()));
-    this.$container.toggleClass('is-same-day', this.model.isSameDay());
-    return this.setCaptions();
+    return this.$container.toggleClass('is-same-day', this.model.isSameDay());
+  };
+
+  EventPopOver.prototype.onLeaveDetailsScreen = function() {
+    var value;
+    value = this.$('.input-details').val();
+    return this.model.set('details', value);
   };
 
   EventPopOver.prototype.toggleAllDay = function() {
@@ -3253,9 +3670,8 @@ module.exports = EventPopOver = (function(_super) {
       this.model.set('start', start.hour(12).toISOString());
       this.model.set('end', start.hour(13).toISOString());
     }
-    this.$('.timed').attr('aria-hidden', this.model.isAllDay());
-    this.$container.toggleClass('is-all-day', this.model.isAllDay());
-    return this.setCaptions();
+    this.$('.input-time').attr('aria-hidden', this.model.isAllDay());
+    return this.$container.toggleClass('is-all-day', this.model.isAllDay());
   };
 
   EventPopOver.prototype.onSetDesc = function(ev) {
@@ -3264,22 +3680,6 @@ module.exports = EventPopOver = (function(_super) {
 
   EventPopOver.prototype.onSetPlace = function(ev) {
     return this.model.set('place', ev.target.value);
-  };
-
-  EventPopOver.prototype.onAdvancedClicked = function(event) {
-    var modal;
-    if (this.model.isNew()) {
-      modal = new EventModal({
-        model: this.model,
-        backurl: window.location.hash
-      });
-      $('body').append(modal.$el);
-      modal.render();
-    } else {
-      window.location.hash += "/" + this.model.id;
-    }
-    event.preventDefault();
-    return this.selfclose();
   };
 
   EventPopOver.prototype.onKeyUp = function(event) {
@@ -3445,7 +3845,8 @@ module.exports = EventPopOver = (function(_super) {
     end = this.model.getEndDateObject().add(delta, 'd');
     this.$('.input-start').timepicker('setTime', this.model.getStartDateObject().format(tFormat), true, true);
     this.$('.input-end-time').timepicker('setTime', end.format(tFormat), true, true);
-    return this.$('.input-end-date').val(end.format(dFormat));
+    this.$('.input-end-date').val(end.format(dFormat));
+    return this.$('.input-description').val(this.model.get('details'));
   };
 
   EventPopOver.prototype.handleError = function(error) {
@@ -3486,7 +3887,8 @@ module.exports = EventPopOver = (function(_super) {
 var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 app = require('application');
 
@@ -3691,8 +4093,17 @@ module.exports = CalendarView = (function(_super) {
     return this.popover.render();
   };
 
+  CalendarView.prototype.closePopover = function() {
+    var _ref;
+    if ((_ref = this.popover) != null) {
+      _ref.close();
+    }
+    return this.onPopoverClose();
+  };
+
   CalendarView.prototype.onChangeView = function(view) {
     var f, hash, _ref;
+    this.closePopover();
     if ((_ref = this.calHeader) != null) {
       _ref.render();
     }
@@ -3736,16 +4147,22 @@ module.exports = CalendarView = (function(_super) {
     return this.popover = null;
   };
 
-  CalendarView.prototype.onEventRender = function(event, element) {
-    var spinTarget;
+  CalendarView.prototype.onEventRender = function(event, $element) {
+    var $displayedElement, spinTarget, time, title, titleAndTime, _ref;
     if ((event.isSaving != null) && event.isSaving) {
-      spinTarget = $(element).find('.fc-event-time');
+      spinTarget = $element.find('.fc-event-time');
       spinTarget.addClass('spinning');
       spinTarget.html("&nbsp;");
       spinTarget.spin("tiny");
     }
-    $(element).attr('title', event.title);
-    return element;
+    $displayedElement = $element.find('.fc-title');
+    titleAndTime = $displayedElement.html();
+    _ref = titleAndTime.split(' '), time = _ref[0], title = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
+    title = title.join(' ');
+    $element.find('.fc-time').html(time);
+    $element.find('.fc-title').html(title);
+    $element.attr('title', event.title);
+    return $element;
   };
 
   CalendarView.prototype.onEventDragStop = function(event, jsEvent, ui, view) {
@@ -4775,7 +5192,7 @@ module.exports = ImportView = (function(_super) {
     };
     addError = function(element, templatePath) {
       if ($('.import-errors').html().length === 0) {
-        $('.import-errors').html("<p>" + (t('import error occured for')) + ":</p>");
+        $('.import-errors').html("<p>" + (t('import error occured for')) + "</p>");
       }
       return $('.import-errors').append(require(templatePath)(element.attributes));
     };
@@ -5090,7 +5507,7 @@ module.exports = BucketView = (function(_super) {
 });
 
 ;require.register("views/list_view_item", function(exports, require, module) {
-var BaseView, Event, EventItemView, PopoverEvent, colorHash,
+var BaseView, Event, EventItemView, PopoverEvent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -5099,8 +5516,6 @@ BaseView = require('lib/base_view');
 PopoverEvent = require('./calendar_popover_event');
 
 Event = require('models/event');
-
-colorHash = require('lib/colorhash');
 
 module.exports = EventItemView = (function(_super) {
   __extends(EventItemView, _super);
@@ -5171,11 +5586,9 @@ module.exports = EventItemView = (function(_super) {
 });
 
 ;require.register("views/menu", function(exports, require, module) {
-var ComboBox, Event, MenuView, Tag, ViewCollection, colorhash,
+var ComboBox, Event, MenuView, Tag, ViewCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-colorhash = require('lib/colorhash');
 
 ViewCollection = require('../lib/view_collection');
 
@@ -5196,7 +5609,7 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.id = 'menu';
 
-  MenuView.prototype.className = 'container nav nav-list';
+  MenuView.prototype.className = 'container nav nav-list sidenav';
 
   MenuView.prototype.collectionEl = '#menuitems';
 
@@ -5220,7 +5633,7 @@ module.exports = MenuView = (function(_super) {
       return (tag.get('name') === t("new calendar")) && tag.get('visible');
     });
     if (calendar != null) {
-      return alert('calendar exist error');
+      return alert(t('calendar exist error'));
     } else {
       return this.createNewCalendar();
     }
@@ -5257,8 +5670,7 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.activate = function(href) {
-    this.$('.active').removeClass('active');
-    return this.$('a[href="#' + href + '"]').parent().addClass('active');
+    return this.$('.active').removeClass('active');
   };
 
   MenuView.prototype.toggleDropdown = function() {
@@ -5305,14 +5717,14 @@ module.exports = MenuView = (function(_super) {
 });
 
 ;require.register("views/menu_item", function(exports, require, module) {
-var BaseView, MenuItemView, colorhash,
+var BaseView, MenuItemView, colorSet,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-colorhash = require('lib/colorhash');
+colorSet = require('../helpers/color-set');
 
 module.exports = MenuItemView = (function(_super) {
   __extends(MenuItemView, _super);
@@ -5336,14 +5748,15 @@ module.exports = MenuItemView = (function(_super) {
     'click .calendar-actions': 'onCalendarMultipleSelect',
     'click .dropdown-toggle': 'hideColorPicker',
     'click .calendar-color': 'showColorPicker',
-    'change .color-picker': 'setColor',
+    'click .color': 'setColor',
     'blur input.calendar-name': 'onRenameValidation',
     'keyup input.calendar-name': 'onRenameValidation'
   };
 
   MenuItemView.prototype.getRenderData = function() {
     return {
-      label: this.model.get('name')
+      label: this.model.get('name'),
+      colorSet: colorSet
     };
   };
 
@@ -5371,20 +5784,17 @@ module.exports = MenuItemView = (function(_super) {
       ev.stopPropagation();
     }
     this.$('.color-picker').show();
-    this.$('.calendar-color').hide();
-    this.colorPicker = this.$('.color-picker');
-    this.colorPicker.tinycolorpicker();
-    return this.$('.track').attr('style', 'display: block;');
+    return this.$('.calendar-color').parent().attr('data-picker-visible', true);
   };
 
   MenuItemView.prototype.hideColorPicker = function() {
     this.$('.color-picker').hide();
-    return this.$('.calendar-color').show();
+    return this.$('.calendar-color').parent().attr('data-picker-visible', false);
   };
 
   MenuItemView.prototype.setColor = function(ev) {
-    var color, _ref, _ref1;
-    color = (_ref = this.colorPicker.data()) != null ? (_ref1 = _ref.plugin_tinycolorpicker) != null ? _ref1.colorHex : void 0 : void 0;
+    var color;
+    color = this.$(ev.target).css('background-color');
     this.model.set('color', color);
     this.buildBadge(color);
     this.model.save();
@@ -5427,7 +5837,7 @@ module.exports = MenuItemView = (function(_super) {
         };
       })(this));
     } else {
-      return this.buildBadge(colorhash(input.val()));
+      return this.buildBadge(ColorHash.getColor(input.val(), 'color'));
     }
   };
 
@@ -5493,6 +5903,122 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   return MenuItemView;
+
+})(BaseView);
+});
+
+;require.register("views/settings_modal", function(exports, require, module) {
+var BaseView, ComboBox, ImportView, SettingsModals,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+BaseView = require('lib/base_view');
+
+ImportView = require('./import_view');
+
+ComboBox = require('./widgets/combobox');
+
+module.exports = SettingsModals = (function(_super) {
+  __extends(SettingsModals, _super);
+
+  function SettingsModals() {
+    return SettingsModals.__super__.constructor.apply(this, arguments);
+  }
+
+  SettingsModals.prototype.id = 'settings-modal';
+
+  SettingsModals.prototype.className = 'modal fade';
+
+  SettingsModals.prototype.attributes = {
+    'data-keyboard': false
+  };
+
+  SettingsModals.prototype.template = require('./templates/settings_modal');
+
+  SettingsModals.prototype.events = {
+    'click a#export': 'exportCalendar',
+    'click #show-password': 'showPassword',
+    'click #hide-password': 'hidePassword'
+  };
+
+  SettingsModals.prototype.getRenderData = function() {
+    return {
+      account: this.model
+    };
+  };
+
+  SettingsModals.prototype.initialize = function() {
+    this.model = window.webDavAccount;
+    if (this.model != null) {
+      return this.model.placeholder = this.getPlaceholder(this.model.token);
+    }
+  };
+
+  SettingsModals.prototype.afterRender = function() {
+    this.calendar = new ComboBox({
+      el: this.$('#export-calendar'),
+      source: app.calendars.toAutoCompleteSource()
+    });
+    this.$('#importviewplaceholder').append(new ImportView().render().$el);
+    this.$el.modal('show');
+    $(document).on('keydown', this.hideOnEscape);
+    return this.$el.on('hidden', (function(_this) {
+      return function() {
+        var options;
+        $(document).off('keydown', _this.hideOnEscape);
+        options = {
+          trigger: false,
+          replace: true
+        };
+        window.app.router.navigate('', options);
+        return _this.remove();
+      };
+    })(this));
+  };
+
+  SettingsModals.prototype.hideOnEscape = function(e) {
+    if (e.which === 27 && !e.isDefaultPrevented()) {
+      return this.close();
+    }
+  };
+
+  SettingsModals.prototype.close = function() {
+    return this.$el.modal('close');
+  };
+
+  SettingsModals.prototype.exportCalendar = function() {
+    var calendarId;
+    calendarId = this.calendar.value();
+    if (__indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
+      return window.location = "export/" + calendarId + ".ics";
+    } else {
+      return alert(t('please select existing calendar'));
+    }
+  };
+
+  SettingsModals.prototype.getPlaceholder = function(password) {
+    var i, placeholder, _i, _ref;
+    placeholder = [];
+    for (i = _i = 1, _ref = password.length; _i <= _ref; i = _i += 1) {
+      placeholder.push('*');
+    }
+    return placeholder.join('');
+  };
+
+  SettingsModals.prototype.showPassword = function() {
+    this.$('#placeholder').html(this.model.token);
+    this.$('#show-password').hide();
+    return this.$('#hide-password').show();
+  };
+
+  SettingsModals.prototype.hidePassword = function() {
+    this.$('#placeholder').html(this.model.placeholder);
+    this.$('#hide-password').hide();
+    return this.$('#show-password').show();
+  };
+
+  return SettingsModals;
 
 })(BaseView);
 });
@@ -5584,14 +6110,12 @@ module.exports = SyncView = (function(_super) {
 });
 
 ;require.register("views/tags", function(exports, require, module) {
-var BaseView, TagsView, colorHash,
+var BaseView, TagsView,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
-
-colorHash = require('lib/colorhash');
 
 module.exports = TagsView = (function(_super) {
   __extends(TagsView, _super);
@@ -5613,7 +6137,7 @@ module.exports = TagsView = (function(_super) {
   };
 
   TagsView.prototype.tagAdded = function(ev, ui) {
-    return ui.tag.css('background-color', colorHash(ui.tagLabel));
+    return ui.tag.css('background-color', ColorHash.getColor(ui.tagLabel, 'cozy'));
   };
 
   TagsView.prototype.getTags = function() {
@@ -5642,13 +6166,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendarMode = locals_.calendarMode,active = locals_.active,todaytxt = locals_.todaytxt,title = locals_.title;
-buf.push("<tbody><tr><td class=\"fc-header-left\">");
+var locals_ = (locals || {}),active = locals_.active,calendarMode = locals_.calendarMode,todaytxt = locals_.todaytxt,title = locals_.title;
+buf.push("<div class=\"fc-header-left\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
 if ( calendarMode)
 {
-buf.push("<span class=\"fc-button fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"fc-button fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span><span class=\"fc-header-space\"></span><span" + (jade.cls(['fc-button','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div>");
 }
-buf.push("</td><td class=\"fc-header-center\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></td><td class=\"fc-header-right\"><span" + (jade.cls(['fc-button','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span" + (jade.cls(['fc-button','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span" + (jade.cls(['fc-button','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></td></tr></tbody>");;return buf.join("");
+buf.push("</div><div class=\"fc-header-right\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5818,7 +6342,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div id=\"calheader\" class=\"well\"></div><div id=\"list-container\" class=\"well\"><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("<div id=\"calheader\" class=\"well fc-ltr\"></div><div id=\"list-container\" class=\"well\"><a class=\"btn showbefore\">" + (jade.escape(null == (jade_interp = t('display previous events')) ? "" : jade_interp)) + "</a><div id=\"alarm-list\"></div><a class=\"btn showafter\">" + (jade.escape(null == (jade_interp = t('display next events')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5837,7 +6361,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),date = locals_.date;
-buf.push("<h2>" + (jade.escape((jade_interp = date) == null ? '' : jade_interp)) + "</h2><div class=\"alarms\"></div>");;return buf.join("");
+buf.push("<h4>" + (jade.escape((jade_interp = date) == null ? '' : jade_interp)) + "</h4><div class=\"alarms\"></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5855,13 +6379,16 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),color = locals_.color,allDay = locals_.allDay,start = locals_.start,end = locals_.end,description = locals_.description;
-buf.push("<p><span" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"badge\">&nbsp;</span>");
+var locals_ = (locals || {}),allDay = locals_.allDay,color = locals_.color,start = locals_.start,end = locals_.end,description = locals_.description;
 if ( !allDay)
 {
-buf.push("" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "");
+buf.push("<div" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"fc-time\">" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "</div>");
 }
-buf.push("&nbsp;" + (jade.escape((jade_interp = description || t("no description")) == null ? '' : jade_interp)) + "<i class=\"delete fa fa-trash\"></i></p>");;return buf.join("");
+else
+{
+buf.push("<div" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"fc-time\">All Day</div>");
+}
+buf.push("<div class=\"fc-title\">" + (jade.escape((jade_interp = description || t("no description")) == null ? '' : jade_interp)) + "</div><i class=\"delete fa fa-trash\"></i>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5880,7 +6407,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li><a href=\"#sync\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync')) ? "" : jade_interp)) + "</span></a></li><li class=\"calendars\"><a href=\"#calendar\"><i class=\"fa fa-calendar\"></i><span>" + (jade.escape(null == (jade_interp = t('Calendar')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus calendar-add\"></span><img src=\"img/spinner.svg\" class=\"spinner\"/></a></li><ul id=\"menuitems\"></ul><div id=\"multiple-actions\" class=\"hidden\"><p><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove-cals btn btn-cozy\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</button></p><p><button" + (jade.attr("title", t('export'), true, false)) + " role=\"button\" class=\"export-cals btn btn-cozy\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</button></p></div>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('Calendars')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync Settings')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5898,10 +6425,132 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label;
+var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label,colorSet = locals_.colorSet;
 back = visible?color:"transparent"
-border = visible?"transparent":color
-buf.push("<input type=\"checkbox\"" + (jade.attr("value", '' + (label) + '', true, false)) + " name=\"calendar-actions\" class=\"calendar-actions\"/><span class=\"badge\">&nbsp;</span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><div style=\"display: none;\" class=\"color-picker\"><div style=\"display: block;\" class=\"track\"></div></div></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div><img src=\"img/spinner.svg\" class=\"spinner\"/>");;return buf.join("");
+border = visible?color:"transparent"
+buf.push("<span class=\"badge\"></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><ul class=\"color-picker\">");
+// iterate colorSet
+;(function(){
+  var $$obj = colorSet;
+  if ('number' == typeof $$obj.length) {
+
+    for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
+      var color = $$obj[$index];
+
+buf.push("<li" + (jade.attr("style", "background-color: #" + (color) + ";", true, false)) + " class=\"color\"></li>");
+    }
+
+  } else {
+    var $$l = 0;
+    for (var $index in $$obj) {
+      $$l++;      var color = $$obj[$index];
+
+buf.push("<li" + (jade.attr("style", "background-color: #" + (color) + ";", true, false)) + " class=\"color\"></li>");
+    }
+
+  }
+}).call(this);
+
+buf.push("</ul></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div><img src=\"img/spinner.svg\" class=\"spinner\"/>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),title = locals_.title,content = locals_.content;
+buf.push("<div class=\"popover\"><div data-screen=\"default\" class=\"screen-indicator\"><div class=\"arrow\"></div><h3 class=\"popover-title\">" + (null == (jade_interp = title) ? "" : jade_interp) + "</h3><div class=\"popover-content\">" + (null == (jade_interp = content) ? "" : jade_interp) + "</div></div></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_alert", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),alertOptions = locals_.alertOptions;
+buf.push("<ul class=\"alerts\"></ul><select class=\"new-alert\"><option value=\"-1\" selected=\"true\">Add a new alert</option>");
+// iterate alertOptions
+;(function(){
+  var $$obj = alertOptions;
+  if ('number' == typeof $$obj.length) {
+
+    for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
+      var alertOption = $$obj[$index];
+
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+    }
+
+  } else {
+    var $$l = 0;
+    for (var $index in $$obj) {
+      $$l++;      var alertOption = $$obj[$index];
+
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+    }
+
+  }
+}).call(this);
+
+buf.push("</select>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_alert_row", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),index = locals_.index,label = locals_.label,isEmailChecked = locals_.isEmailChecked,isNotifChecked = locals_.isNotifChecked;
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button></div><div class=\"type\"><div class=\"notification-mode\"><input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/><label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">Email</label></div><div class=\"notification-mode\"><input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">Cozy notification</label></div></div></li>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_details", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),details = locals_.details;
+buf.push("<textarea autofocus=\"autofocus\" class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5919,10 +6568,41 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,start = locals_.start,tFormat = locals_.tFormat,end = locals_.end,dFormat = locals_.dFormat,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
+var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,details = locals_.details,alerts = locals_.alerts,repeat = locals_.repeat,start = locals_.start,dFormat = locals_.dFormat,tFormat = locals_.tFormat,end = locals_.end,place = locals_.place,people = locals_.people,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
 popoverClassName  = (allDay ? ' is-all-day' : '')
 popoverClassName += (sameDay? ' is-same-day' : '')
-buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : "-") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"date\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('save changes') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+var showDetailsByDefault = details && details.length > 0
+var showAlertsByDefault = alerts && alerts.length > 0
+var showRepeatByDefault = repeat != null && repeat != void(0)
+buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"3\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("From [date]"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"2\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><input tabindex=\"8\" type=\"text\"" + (jade.attr("value", people, true, false)) + (jade.attr("placeholder", t("People"), true, false)) + " class=\"input-people input-full-block\"/></div><div" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("Description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+if ( !alerts || alerts.length === 0)
+{
+buf.push("<button class=\"button-full-block\">No alert</button>");
+}
+else
+{
+buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {numAlerts: alerts.length})) ? "" : jade_interp)) + "</button>");
+}
+buf.push("</div><div" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">No repeat</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('Save') : t('Create Event')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_repeat", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+
+buf.push("<label>Repeats<select class=\"input-repeat\"><option value=\"-1\" selected=\"selected\">No Repeat</option><option value=\"0\">Daily</option><option value=\"1\">Weekly</option><option value=\"2\">Monthly</option><option value=\"3\">Yearly</option></select></label><label aria-hidden=\"true\">Interval<input type=\"number\" min=\"1\" value=\"1\"/></label><label aria-hidden=\"true\">Ends<label><input type=\"radio\" name=\"endMode\" value=\"forever\"/>" + (jade.escape(null == (jade_interp = t('forever')) ? "" : jade_interp)) + "</label><label><input type=\"radio\" name=\"endMode\" value=\"count\"/><label for=\"count\">" + (jade.escape(null == (jade_interp = t('after')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" type=\"number\" min=\"0\" value=\"1\" class=\"input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('occurences')) ? "" : jade_interp)) + "</label></label><label><input type=\"radio\" name=\"endMode\" value=\"until\"/><label for=\"until\">" + (jade.escape(null == (jade_interp = t('until')) ? "" : jade_interp)) + "</label></label></label>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5940,8 +6620,36 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close fa fa-close\"></button><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></span>");;return buf.join("");
+var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description;
+buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("Event Title"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></div><div class=\"controls\"><!-- button.close.fa.fa-close(title=t('close'), role=\"button\")--><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/settings_modal", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),account = locals_.account,calendar = locals_.calendar;
+buf.push("<div class=\"modal-header\"><h2>" + (jade.escape(null == (jade_interp = t('Synchronization Settings')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><span><i class=\"fa fa-refresh\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
+if ( account == null)
+{
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the sync module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol>");
+}
+else
+{
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
+}
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5967,9 +6675,9 @@ buf.push("<p>" + (jade.escape(null == (jade_interp = t('to sync your cal with'))
 }
 else
 {
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password')) == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
 }
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help')) ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6052,12 +6760,10 @@ module.exports = Toggle = (function(_super) {
 });
 
 ;require.register("views/widgets/combobox", function(exports, require, module) {
-var BaseView, ComboBox, Tag, TagCollection, colorhash,
+var BaseView, ComboBox, Tag, TagCollection,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-colorhash = require('lib/colorhash');
 
 BaseView = require('lib/base_view');
 
@@ -6174,9 +6880,10 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onChange = function(ev, ui) {
-    var value, _ref;
+    var generatedColor, value, _ref;
     value = (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value();
-    this.buildBadge(colorhash(value));
+    generatedColor = ColorHash.getColor(value, 'cozy');
+    this.buildBadge(generatedColor);
     this.trigger('change', value);
     _.debounce(this.onEditionComplete(value), 500);
     return true;
