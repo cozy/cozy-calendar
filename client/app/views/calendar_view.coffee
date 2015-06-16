@@ -217,9 +217,12 @@ module.exports = class CalendarView extends BaseView
         # Let's split them to put them in the right element.
         $displayedElement = $element.find '.fc-title'
         titleAndTime = $displayedElement.html()
-        [time, title...] = titleAndTime.split ' '
-        title = title.join ' '
-
+        if event.allDay
+            time = ''
+            title = titleAndTime
+        else
+            [time, title...] = titleAndTime.split ' '
+            title = title.join ' '
         # Append the right values to the right elements.
         $element.find('.fc-time').html time
         $element.find('.fc-title').html title
