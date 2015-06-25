@@ -1,6 +1,6 @@
 if !allDay
     .fc-time(style="background-color:"+color+";") #{start} - #{end}
 else
-    .fc-time(style="background-color:"+color+";") All Day
+    .fc-time(style="background-color:"+color+";") #{t("All day")}
 .fc-title #{description || t("no description")}
 i.delete.fa.fa-trash
