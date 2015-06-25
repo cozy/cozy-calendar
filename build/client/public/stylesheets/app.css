@@ -8686,7 +8686,7 @@ textarea:active {
   margin: 3px;
 }
 .fc-view-container .fc-title {
-  font-style: italic;
+  font-weight: 700;
 }
 .fc-cell-overlay {
   background: #5c5;
