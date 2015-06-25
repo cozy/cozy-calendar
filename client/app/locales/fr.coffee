@@ -24,8 +24,8 @@ module.exports =
     'days'                              : 'jours'
     "Edit"                              : "Modifier"
     "Email"                             : "Email"
-    "Import"                            : "Import"
-    "Export"                            : "Export"
+    "Import"                            : "Importation"
+    "Export"                            : "Exportation"
     "show"                              : "Montrer"
     "hide"                              : "Cacher"
     "List"                              : "Liste"
@@ -39,12 +39,12 @@ module.exports =
     "Switch to List"                    : "Basculer en mode Liste"
     "Switch to Calendar"                : "Basculer en mode Agenda"
     "time"                              : "Heure"
-    "Today"                             : "Aujourd'hui"
-    'today'                             : 'aujourd\'hui'
-    "What should I remind you ?"        : "Que dois-je vous rappeler ?"
+    "Today"                             : "Aujourd’hui"
+    'today'                             : 'aujourd’hui'
+    "What should I remind you ?"        : "Que dois-je vous rappeler ?"
     "import your icalendar file"        : "Importer votre fichier iCalendar"
     "select an icalendar file"          : "Sélectionner un fichier iCalendar"
-    "confirm import"                    : "Confirmer l'import"
+    "confirm import"                    : "Confirmer l'importation"
     "cancel"                            : "Annuler"
     "Create"                            : "Créer"
     "Events to import"                  : "Évènements à importer"
@@ -62,16 +62,16 @@ module.exports =
     "BOTH"                              : "Email & notification"
     "display previous events"           : "Afficher les évènements précédents"
     "display next events"           : "Afficher les évènements suivants"
-    "are you sure"                      : "Êtes-vous sûr(e) ?"
-    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
-    "confirm delete selected calendars" : "Vous êtes sur le point de supprimer tous les calendriers sélectionnés. Êtes-vous sûr(e) ?"
+    "are you sure"                      : "Êtes-vous sûr(e) ?"
+    "confirm delete calendar"           : "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?"
+    "confirm delete selected calendars" : "Vous êtes sur le point de supprimer tous les agendas sélectionnés. Êtes-vous sûr(e) ?"
     "advanced"                          : "Détails"
     "enter email"                       : "Entrer l'adresse email"
     "ON"                                : "activée"
     "OFF"                               : "désactivée"
     "no description"                    : "Sans description"
-    "add calendar"                      : "Ajouter un calendrier"
-    "new calendar"                      : "Nouveau calendrier"
+    "add calendar"                      : "Ajouter un agenda"
+    "new calendar"                      : "Nouvel agenda"
     "multiple actions"                  : "Actions multiples"
 
 # RULE related
@@ -132,11 +132,11 @@ module.exports =
     "To"                                : "À"
     "All day, until"                    : "Journée entière, jusqu'au"
     "All one day"                       : "Toute la journée du"
-    'Reminders before the event'        : 'Rappels avant l\'évènement'
+    'Reminders before the event'        : 'Rappels avant l’évènement'
     "reminder"                          : "Rappel"
 
 # CONFIRM MODAL
-    'send mails question'               : 'Envoyer un email de notification à :'
+    'send mails question'               : 'Envoyer un email de notification à :'
     'modal send mails'                  : 'Envoyer une notification'
     'yes'                               : 'Oui'
     'no'                                : 'Non'
@@ -154,18 +154,18 @@ module.exports =
 # SYNC
     "synchronization"                   : "Synchronisation"
     "mobile sync"                       : "Synchro Mobile (CalDAV)"
-    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :"
-    "link imported events with calendar": "Lier les évènements à importer avec le calendrier suivant :"
-    "download a copy of your calendar"  : "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :"
+    "import an ical file"               : "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :"
+    "link imported events with calendar": "Lier les évènements à importer avec l'agenda suivant :"
+    "download a copy of your calendar"  : "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :"
     "icalendar export"                  : "Exporter ICalendar"
     "icalendar import"                  : "Importer ICalendar"
     "to sync your cal with"             : "Pour synchroniser votre agenda avec votre mobile vous devez :"
-    "sync headline with data"           : "Pour synchroniser votre agenda, utilisez les identifiants suivant :"
+    "sync headline with data"           : "Pour synchroniser votre agenda, utilisez les identifiants suivants :"
     "sync url"                          : "URL :"
     "sync login"                        : "Nom d'utilisateur :"
     "sync password"                     : "Mot de passe :"
-    "sync help"                         : "Vous êtes perdu(e) ? Suivez le"
-    "sync help link"                    : "guide pas à pas !"
+    "sync help"                         : "Vous êtes perdu(e) ? Suivez le"
+    "sync help link"                    : "guide pas à pas !"
     "install the sync module"           : "Installer le module Sync depuis l'applithèque."
     "connect to it and follow"          : "Vous connecter et suivre les instructions relatives à CalDAV."
     "some event fail to save"           : "La sauvegarde d'un évènement a échoué."
@@ -201,17 +201,17 @@ module.exports =
     'Nov'                               : 'Nov'
     'Dec'                               : 'Déc'
 
-    'calendar exist error': 'Un calendrier "Nouveau Calendrier" existe déjà.'
+    'calendar exist error': 'Un agenda intitulé "Nouvel agenda" existe déjà.'
 
 # Emails
     'email date format': 'DD/MM/YYYY [à] HH[h]mm'
     'email date format allday': 'DD/MM/YYYY [toute la journée]'
     'email invitation title': "Invitation à l'évènement \"%{description}\""
     'email invitation content': """
-        Bonjour, je souhaiterais vous inviter à l'évènement suivant :
+        Bonjour, je souhaiterais vous inviter à l'évènement suivant :
         %{description} %{place}
         Le %{date}
-        Serez-vous présent ?
+        Serez-vous présent ?
 
         Oui
         %{url}?status=ACCEPTED&key=%{key}
@@ -221,7 +221,7 @@ module.exports =
     """
     'email update title': "L'évènement \"%{description}\" a changé"
     'email update content': """
-        Un évènement auquel vous participez a changé :
+        Un évènement auquel vous participez a changé :
         %{description} %{place}
         Le %{date}
 
@@ -232,7 +232,7 @@ module.exports =
         %{url}?status=DECLINED&key=%{key}"""
     'email delete title': 'Cet évènement a été annulé : %{description}'
     'email delete content': """
-        Cet évènement a été annulé :
+        Cet évènement a été annulé :
         %{description} %{place}
         Le %{date}
     """

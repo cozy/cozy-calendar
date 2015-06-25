@@ -8000,16 +8000,6 @@ a:focus,
   -webkit-border-radius: 4px;
   border-radius: 4px;
 }
-.btn-full {
-  width: calc(100% - 2em);
-  padding: 0.4em 0.8em;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-.btn-secondary {
-  background-color: #bbb;
-}
 .badge {
   background: #f5f5f5;
 }
@@ -8085,7 +8075,7 @@ input[type="time"] {
   width: 75px;
 }
 .stick-bottom {
-  position: absolute;
+  position: fixed;
   bottom: 1em;
 }
 a {
@@ -8483,13 +8473,11 @@ textarea:active {
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center;
-}
-.sidenav .calendars .title span {
   font-size: 1.3em;
   color: #333;
 }
 .sidenav .calendars .calendar-add {
-  font-size: 1.6em;
+  font-size: 1.6rem;
   text-shadow: none;
   color: #bbb;
 }
@@ -8500,9 +8488,19 @@ textarea:active {
   display: none;
 }
 .sidenav .spinner {
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -o-box-flex: 0;
+  box-flex: 0;
+  -webkit-flex: none;
+  -ms-flex: none;
+  flex: none;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  margin-top: -0.5rem;
   height: 1rem;
   width: 1rem;
-  float: right;
 }
 .sidenav #multiple-actions {
   padding: 15px;
@@ -8524,6 +8522,7 @@ textarea:active {
 .sidenav ul#menuitems {
   margin-left: 0;
   list-style: none;
+  padding-bottom: 4em;
 }
 .sidenav ul#menuitems li.tagmenuitem {
   display: -webkit-box;
@@ -8532,6 +8531,7 @@ textarea:active {
   display: -ms-flexbox;
   display: box;
   display: flex;
+  position: relative;
   -webkit-box-align: center;
   -moz-box-align: center;
   -o-box-align: center;
@@ -8588,6 +8588,8 @@ textarea:active {
 .sidenav ul#menuitems li.tagmenuitem .dropdown {
   display: inline-block;
   position: absolute;
+  top: 50%;
+  margin-top: -10px;
 }
 .sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-toggle {
   padding: 0 5px;
@@ -8609,18 +8611,20 @@ textarea:active {
 }
 .sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu {
   padding: 0.4em 0;
+  min-width: 180px;
   border-color: #ddd;
   -webkit-box-shadow: 0 5px 16px rgba(0,0,0,0.12);
   box-shadow: 0 5px 16px rgba(0,0,0,0.12);
 }
-.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li {
+.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu > li {
   margin: 0;
   padding: 0;
 }
-.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a {
-  padding: 0.5em 1em;
+.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu > li a {
+  padding: 0.4em 1em;
+  margin-bottom: 0.2em;
 }
-.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu li a:hover {
+.sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu > li a:hover {
   background: #fe8800;
 }
 .sidenav ul#menuitems li.tagmenuitem:hover .calendar-actions {
@@ -8636,33 +8640,23 @@ textarea:active {
   -ms-filter: none;
   filter: none;
 }
-ul#menu #menuitems li.tagmenuitem ul.dropdown-menu li:first-of-type[data-picker-visible=true]:hover {
-  background: #fff;
+.sidenav .btn-settings {
+  width: calc(200px - 2em);
+  padding: 0.4em 0.8em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
-ul#menu #menuitems li.tagmenuitem ul.dropdown-menu li:first-of-type[data-picker-visible=true]:hover a:hover {
-  background: #fff;
+.color-picker {
+  margin: 0 1em;
+  list-style: none;
 }
-ul#menu #menuitems li.tagmenuitem ul.color-picker {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  text-align: center;
-}
-ul#menu #menuitems li.tagmenuitem ul.color-picker li.color {
-  padding: 0;
-  margin: 0;
+.color-picker li {
   display: inline-block;
-  width: 25px;
-  height: 25px;
-  margin-left: 2px;
-}
-ul#menu #menuitems li.tagmenuitem ul.color-picker li.color:hover {
-  -webkit-transform: scale(1.1);
-  -moz-transform: scale(1.1);
-  -o-transform: scale(1.1);
-  -ms-transform: scale(1.1);
-  transform: scale(1.1);
+  width: 1.3rem;
+  height: 1.3rem;
+  list-style: none;
+  margin-right: 0.2em;
 }
 .fc-ltr {
   padding: 0;
@@ -9006,6 +9000,9 @@ a.btn:visited {
 }
 .public-event-container h3 {
   margin-top: 0;
+}
+.fc-view-container .fc-day-grid tr:first-child td.fc-axis.fc-widget-content:first-child span {
+  display: none;
 }
 .popover {
   width: 400px;

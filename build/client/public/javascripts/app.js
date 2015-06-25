@@ -926,7 +926,7 @@ exports.toTimezonedMoment = function(d) {
 });
 
 ;require.register("helpers/color-set", function(exports, require, module) {
-module.exports = ['304FFE', '2979FF', '00B0FF', '00E5FF', '00D5B8', '00C853', '64DD17', 'AEEA00', 'FFD000', 'FFAB00', 'FF6D00', 'E70505', 'FF2828', 'F819AA', 'AA00FF', '6200EA', '7190AB', '51658D'];
+module.exports = ['304FFE', '2979FF', '00B0FF', '00DCE9', '00D5B8', '00C853', 'E70505', 'FF5700', 'FF7900', 'FFA300', 'B3C51D', '64DD17', 'FF2828', 'F819AA', 'AA00FF', '6200EA', '7190AB', '51658D'];
 });
 
 ;require.register("helpers/timezone", function(exports, require, module) {
@@ -2163,8 +2163,8 @@ module.exports = {
   'days': 'jours',
   "Edit": "Modifier",
   "Email": "Email",
-  "Import": "Import",
-  "Export": "Export",
+  "Import": "Importation",
+  "Export": "Exportation",
   "show": "Montrer",
   "hide": "Cacher",
   "List": "Liste",
@@ -2178,12 +2178,12 @@ module.exports = {
   "Switch to List": "Basculer en mode Liste",
   "Switch to Calendar": "Basculer en mode Agenda",
   "time": "Heure",
-  "Today": "Aujourd'hui",
-  'today': 'aujourd\'hui',
-  "What should I remind you ?": "Que dois-je vous rappeler ?",
+  "Today": "Aujourd’hui",
+  'today': 'aujourd’hui',
+  "What should I remind you ?": "Que dois-je vous rappeler ?",
   "import your icalendar file": "Importer votre fichier iCalendar",
   "select an icalendar file": "Sélectionner un fichier iCalendar",
-  "confirm import": "Confirmer l'import",
+  "confirm import": "Confirmer l'importation",
   "cancel": "Annuler",
   "Create": "Créer",
   "Events to import": "Évènements à importer",
@@ -2201,16 +2201,16 @@ module.exports = {
   "BOTH": "Email & notification",
   "display previous events": "Afficher les évènements précédents",
   "display next events": "Afficher les évènements suivants",
-  "are you sure": "Êtes-vous sûr(e) ?",
-  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
-  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les calendriers sélectionnés. Êtes-vous sûr(e) ?",
+  "are you sure": "Êtes-vous sûr(e) ?",
+  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
+  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les agendas sélectionnés. Êtes-vous sûr(e) ?",
   "advanced": "Détails",
   "enter email": "Entrer l'adresse email",
   "ON": "activée",
   "OFF": "désactivée",
   "no description": "Sans description",
-  "add calendar": "Ajouter un calendrier",
-  "new calendar": "Nouveau calendrier",
+  "add calendar": "Ajouter un agenda",
+  "new calendar": "Nouvel agenda",
   "multiple actions": "Actions multiples",
   "recurrence": "Récurrence",
   "recurrence rule": "Règle de récurrence",
@@ -2267,9 +2267,9 @@ module.exports = {
   "To": "À",
   "All day, until": "Journée entière, jusqu'au",
   "All one day": "Toute la journée du",
-  'Reminders before the event': 'Rappels avant l\'évènement',
+  'Reminders before the event': 'Rappels avant l’évènement',
   "reminder": "Rappel",
-  'send mails question': 'Envoyer un email de notification à :',
+  'send mails question': 'Envoyer un email de notification à :',
   'modal send mails': 'Envoyer une notification',
   'yes': 'Oui',
   'no': 'Non',
@@ -2282,18 +2282,18 @@ module.exports = {
   "server error occured": "Une erreur est survenue sur le serveur.",
   "synchronization": "Synchronisation",
   "mobile sync": "Synchro Mobile (CalDAV)",
-  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
-  "link imported events with calendar": "Lier les évènements à importer avec le calendrier suivant :",
-  "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
+  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
+  "link imported events with calendar": "Lier les évènements à importer avec l'agenda suivant :",
+  "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
   "icalendar export": "Exporter ICalendar",
   "icalendar import": "Importer ICalendar",
   "to sync your cal with": "Pour synchroniser votre agenda avec votre mobile vous devez :",
-  "sync headline with data": "Pour synchroniser votre agenda, utilisez les identifiants suivant :",
+  "sync headline with data": "Pour synchroniser votre agenda, utilisez les identifiants suivants :",
   "sync url": "URL :",
   "sync login": "Nom d'utilisateur :",
   "sync password": "Mot de passe :",
-  "sync help": "Vous êtes perdu(e) ? Suivez le",
-  "sync help link": "guide pas à pas !",
+  "sync help": "Vous êtes perdu(e) ? Suivez le",
+  "sync help link": "guide pas à pas !",
   "install the sync module": "Installer le module Sync depuis l'applithèque.",
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un évènement a échoué.",
@@ -2325,15 +2325,15 @@ module.exports = {
   'Oct': 'Oct',
   'Nov': 'Nov',
   'Dec': 'Déc',
-  'calendar exist error': 'Un calendrier "Nouveau Calendrier" existe déjà.',
+  'calendar exist error': 'Un agenda intitulé "Nouvel agenda" existe déjà.',
   'email date format': 'DD/MM/YYYY [à] HH[h]mm',
   'email date format allday': 'DD/MM/YYYY [toute la journée]',
   'email invitation title': "Invitation à l'évènement \"%{description}\"",
-  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'évènement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
+  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'évènement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
   'email update title': "L'évènement \"%{description}\" a changé",
-  'email update content': "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}",
+  'email update content': "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}",
   'email delete title': 'Cet évènement a été annulé : %{description}',
-  'email delete content': "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
+  'email delete content': "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
 };
 });
 
@@ -5390,6 +5390,11 @@ module.exports = MenuView = (function(_super) {
     };
   };
 
+  MenuView.prototype.afterRender = function() {
+    MenuView.__super__.afterRender.apply(this, arguments);
+    return this.$('.main-spinner').hide();
+  };
+
   MenuView.prototype.onAddCalendar = function() {
     var calendar;
     this.tag = app.tags.getOrCreateByName("new calendar");
@@ -5457,10 +5462,6 @@ module.exports = MenuView = (function(_super) {
     }
   };
 
-  MenuView.prototype.showLoading = function() {
-    return this.$('.spinner').show();
-  };
-
   MenuView.prototype.onCalendarMultipleExport = function() {
     var calendars;
     calendars = [];
@@ -5471,8 +5472,14 @@ module.exports = MenuView = (function(_super) {
     return window.location = "exportzip/" + calendars;
   };
 
+  MenuView.prototype.showLoading = function() {
+    this.$('.main-spinner').show();
+    return this.$('.calendar-add').hide();
+  };
+
   MenuView.prototype.hideLoading = function() {
-    return this.$('.spinner').hide();
+    this.$('.main-spinner').hide();
+    return this.$('.calendar-add').show();
   };
 
   return MenuView;
@@ -5930,13 +5937,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendarMode = locals_.calendarMode,active = locals_.active,todaytxt = locals_.todaytxt,title = locals_.title;
-buf.push("<div class=\"fc-header-left\">");
+var locals_ = (locals || {}),active = locals_.active,calendarMode = locals_.calendarMode,todaytxt = locals_.todaytxt,title = locals_.title;
+buf.push("<div class=\"fc-header-left\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
 if ( calendarMode)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div>");
 }
-buf.push("</div><div class=\"fc-header-center\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div></div><div class=\"fc-header-right\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></div>");;return buf.join("");
+buf.push("</div><div class=\"fc-header-right\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6171,7 +6178,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('Calendars')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-full btn-secondary stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync Settings')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('Calendars')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync Settings')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
