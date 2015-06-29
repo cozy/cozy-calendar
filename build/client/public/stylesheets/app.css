@@ -8613,8 +8613,10 @@ textarea:active {
   border-radius: 100%;
 }
 .sidenav ul#menuitems li.tagmenuitem .calendar-name {
+  width: 100%;
   font-size: 1em;
   color: #555;
+  word-break: break-all;
 }
 .sidenav ul#menuitems li.tagmenuitem input.calendar-name {
   width: 100px;
