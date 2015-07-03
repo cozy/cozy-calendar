@@ -19,7 +19,9 @@ start = (port, callback) ->
             Event = require './server/models/event'
             Alarm = require './server/models/alarm'
             Event.migrateAll -> Alarm.migrateAll ->
-                callback err, app, server
+
+                Event.initializeData (err2, event) ->
+                    callback err, app, server
 
 
 if not module.parent
