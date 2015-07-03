@@ -3,25 +3,32 @@
 
 module.exports = class RealEvent extends Backbone.Model
     # TODO : re-think class hierarchy, or way to construct this object.
-    constructor: (event, start, end) ->
+    constructor: (options) ->
         super
-        @event = event
 
-        if event.isRecurrent()
-            @start = start
-            @end = end
-            @set 'id', event.get('id') + start.toISOString()
+        @event = options.event
+        @start = options.start
+        @end = options.start
+        @counter = options.counter
+
+
+        if @event.isRecurrent()
+            @set 'id', @event.get('id') + @start.toISOString()
+
+        else if @event.isMultipleDays()
+            @set 'id', "#{@event.get('id')} #{@start}"
+
         else
-            @set 'id', event.get 'id'
-            @start = event.getStartDateObject()
-            @end = event.getEndDateObject()
+            @set 'id', @event.get('id')
+            @start = @event.getStartDateObject()
+            @end = @event.getEndDateObject()
 
     getCalendar: -> @event.getCalendar()
     getColor: -> @event.getColor()
     getDateHash: ->
         return @start.format 'YYYYMMDD'
 
-    isAllDay: -> @event.isAllDay()
+    isAllDay: -> @event.isAllDay() or @event.isMultipleDays()
 
     getFormattedStartDate: (format) ->
         return @start.format format

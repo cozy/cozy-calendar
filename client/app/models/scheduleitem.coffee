@@ -51,6 +51,14 @@ module.exports = class ScheduleItem extends Backbone.Model
                                       @getEndDateObject()
         endDate.isSame @getStartDateObject(), 'day'
 
+    # Return true if the events is running on more than one day.
+    isMultipleDays: ->
+        startDate = @getStartDateObject()
+        endDate = @getEndDateObject()
+
+        difference = endDate.diff(startDate, 'days', true)
+        return difference > 1
+
     # Convert the date string from cozy, to moment with cozy's timezone.
     _toDateObject: (modelDateStr) ->
         if @isAllDay()
@@ -212,6 +220,41 @@ module.exports = class ScheduleItem extends Backbone.Model
                 return moment().add 10, 'years'
         else
             return @getStartDateObject()
+
+    # Generate one event per day for multiple-days event.
+    generateMultipleDaysEvents: ->
+        #"start":"2015-07-04","end":"2015-07-05"
+
+        # Return this model if the event is single-day.
+        unless @isMultipleDays()
+            return [@]
+
+        # Generate one event per day if it's a multiple-days event.
+        else
+            startDate = @getStartDateObject()
+            endDate = @getEndDateObject()
+
+            # Compute the difference to know how many events to create.
+            difference = endDate.diff(startDate, 'days')
+
+            # Create one all-day event for each day.
+            fakeEvents = []
+            for i in [0..difference] by 1
+                fakeEvent = _.clone @attributes
+
+                # Make up a date for the i-th day.
+                date = moment(startDate).add(i, 'days')
+                fakeEvent =
+                    start: date
+                    end: date
+                    counter:
+                        current: i + 1
+                        total: difference + 1
+                fakeEvents.push fakeEvent
+
+            return fakeEvents
+
+
 
     toPunctualFullCalendarEvent : ->
         return @_toFullCalendarEvent @getStartDateObject(), @getEndDateObject()
