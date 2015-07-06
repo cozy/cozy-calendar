@@ -7,7 +7,7 @@ module.exports = Tag = cozydb.getModel 'Tag',
     color : type: String
 
 Tag.byName = (name, callback) ->
-    Tag.request 'all', key: name, callback
+    Tag.request 'byName', key: name, callback
 
 Tag.getOrCreate = (data, callback) ->
     # Name is a primary key.
