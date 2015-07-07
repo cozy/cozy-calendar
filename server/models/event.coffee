@@ -153,7 +153,8 @@ Event.migrateAll = (callback) ->
             callback()
         else
             async.eachLimit events, 10, (event, done) ->
-                event.migrateDoctype -> event.patchTag done
+                event.migrateDoctype -> event.patchTag ->
+                    setImmediate done
             , callback
 
 Event.bulkCalendarRename = (oldName, newName, callback) ->
