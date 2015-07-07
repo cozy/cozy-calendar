@@ -18,3 +18,4 @@ deploy_config.coffee
 node_modules
 npm-debug.log
 *.transifex.coffee
+test/fixtures/events_generated.json
