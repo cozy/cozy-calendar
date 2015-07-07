@@ -17,10 +17,10 @@ tagsView = {
 
 module.exports = {
   tag: {
-    all: cozydb.defaultRequests.by('name')
+    byName: cozydb.defaultRequests.by('name')
   },
   alarm: {
-    all: cozydb.defaultRequests.by('title'),
+    all: cozydb.defaultRequests.all,
     byDate: function(doc) {
       return emit(new Date(doc.trigg), doc);
     },
