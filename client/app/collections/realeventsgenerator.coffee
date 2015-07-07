@@ -74,6 +74,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         # pick ponctual event and store newly found recurring ones.
         i = @baseCollection.indexOf @lastGeneratedEvent
         @lastGeneratedEvent = null # reset, before finding the new one.
+        multipleDaysEvents = []
         unless i is -1
             while i < @baseCollection.length and @lastGeneratedEvent is null
                 item = @baseCollection. at i
@@ -83,20 +84,35 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
                 #     @lastGeneratedEvent = item # end loop condition
                 else if item.isRecurrent()
                     @runningRecurringEvents.push item
+                else if item.isMultipleDays()
+                    multipleDaysEvents.push item
                 else
-                    eventsInRange.push new RealEvent(item)
+                    eventsInRange.push new RealEvent(event: item)
 
-        # generated recurring events.
+        # Generated recurring events.
         @runningRecurringEvents.forEach (item, index) =>
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    return new RealEvent event, instanceStart, instanceEnd
+                    options =
+                        event: event
+                        start: instanceStart
+                        end: instanceEnd
+                    return new RealEvent options
                 eventsInRange = eventsInRange.concat evs
 
             # Remove out of next scope recurring events.
             if item.getLastOccurenceDate().isBefore(end)
                 @runningRecurringEvents.splice index, 1
 
+        # Generate one event for each day multiple-days events are running.
+        multipleDaysEvents.forEach (item, index) ->
+            fakeEvents = item
+                .generateMultipleDaysEvents()
+                .map (rawEvent) ->
+                    options = _.extend rawEvent, {event: item}
+                    return new RealEvent options
+
+            eventsInRange = eventsInRange.concat fakeEvents
 
 
         @add eventsInRange

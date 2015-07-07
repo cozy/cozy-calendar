@@ -37,11 +37,13 @@ module.exports = class EventItemView extends BaseView
 
     getRenderData: ->
         data = @model.event.toJSON()
+
         _.extend data,
             type: 'event'
             start: @model.getFormattedStartDate 'HH:mm'
             end: @model.getFormattedEndDate 'HH:mm'
             allDay: @model.isAllDay()
             color: @model.getColor()
+            counter: @model.counter
 
         return data

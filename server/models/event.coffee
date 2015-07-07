@@ -1,9 +1,10 @@
 cozydb = require 'cozydb'
-momentTz = require 'moment-timezone'
+moment = require 'moment-timezone'
 async = require 'async'
 log = require('printit')
     prefix: 'event:model'
 
+localization = require '../libs/localization_manager'
 User = require './user'
 
 module.exports = Event = cozydb.getModel 'Event',
@@ -64,9 +65,9 @@ Event::isAllDayEvent = -> return @start.length is 10
 
 Event::formatStart = (dateFormat) ->
     if @rrule
-        date = momentTz.tz @start, @timezone
+        date = moment.tz @start, @timezone
     else
-        date = momentTz @start
+        date = moment @start
 
     date.tz User.timezone
     formattedDate = date.format dateFormat
@@ -128,7 +129,7 @@ Event::migrateDateTime = (dateField) ->
     if "GMT" not in dateStr
         d = d + " GMT+0000"
 
-    m = momentTz.tz d, 'UTC'
+    m = moment.tz d, 'UTC'
 
     if @rrule
         timezone = User.timezone or "Europe/Paris"
@@ -169,3 +170,28 @@ Event.bulkDelete = (calendarName, callback) ->
         async.eachLimit events, 10, (event, done) ->
             event.destroy done
         , (err) -> callback err, events
+
+
+# Create a placeholder event if there are no event at all, so there is a default
+# calendar the first time the user opens the application.
+Event.initializeData = (callback) ->
+    Event.all {}, (err, events) ->
+        return callback err if err?
+
+        if events.length is 0
+            # Very old arbitrary date.
+            rawDate = "1901-01-01T00:00:00.000Z"
+            formattedDate = moment(rawDate).format "YYYY-MM-DD"
+            formattedNow = moment().tz('UTC').toISOString()
+            data =
+                start: formattedDate
+                end: formattedDate
+                description: ''
+                place: ''
+                tags: [localization.t("new calendar")]
+                created: formattedNow
+                lastModification: formattedNow
+            Event.create data, callback
+
+        else
+            callback()
