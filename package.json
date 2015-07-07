@@ -35,7 +35,7 @@
     "should": "4.1.0",
     "mocha": "2.0.1",
     "request-json": "0.4.13",
-    "coffee-script": "1.8.0"
+    "coffee-script": "1.9.3"
   },
   "scripts": {
     "test": "cake --use-js tests",
