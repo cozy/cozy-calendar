@@ -31,7 +31,9 @@ start = function(port, callback) {
         Alarm = require('./server/models/alarm');
         return Event.migrateAll(function() {
           return Alarm.migrateAll(function() {
-            return callback(err, app, server);
+            return Event.initializeData(function(err2, event) {
+              return callback(err, app, server);
+            });
           });
         });
       });

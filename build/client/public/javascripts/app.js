@@ -622,7 +622,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   };
 
   RealEventGeneratorCollection.prototype.loadNextPage = function(callback) {
-    var end, eventsInRange, i, item, noEventsRemaining, start;
+    var end, eventsInRange, i, item, multipleDaysEvents, noEventsRemaining, start;
     callback = callback || function() {};
     eventsInRange = [];
     start = this.lastDate.clone();
@@ -630,6 +630,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
     end = this.lastDate.clone();
     i = this.baseCollection.indexOf(this.lastGeneratedEvent);
     this.lastGeneratedEvent = null;
+    multipleDaysEvents = [];
     if (i !== -1) {
       while (i < this.baseCollection.length && this.lastGeneratedEvent === null) {
         item = this.baseCollection.at(i);
@@ -638,8 +639,12 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
           continue;
         } else if (item.isRecurrent()) {
           this.runningRecurringEvents.push(item);
+        } else if (item.isMultipleDays()) {
+          multipleDaysEvents.push(item);
         } else {
-          eventsInRange.push(new RealEvent(item));
+          eventsInRange.push(new RealEvent({
+            event: item
+          }));
         }
       }
     }
@@ -647,7 +652,13 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
       return function(item, index) {
         var evs;
         evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
-          return new RealEvent(event, instanceStart, instanceEnd);
+          var options;
+          options = {
+            event: event,
+            start: instanceStart,
+            end: instanceEnd
+          };
+          return new RealEvent(options);
         });
         eventsInRange = eventsInRange.concat(evs);
         if (item.getLastOccurenceDate().isBefore(end)) {
@@ -655,6 +666,17 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
         }
       };
     })(this));
+    multipleDaysEvents.forEach(function(item, index) {
+      var fakeEvents;
+      fakeEvents = item.generateMultipleDaysEvents().map(function(rawEvent) {
+        var options;
+        options = _.extend(rawEvent, {
+          event: item
+        });
+        return new RealEvent(options);
+      });
+      return eventsInRange = eventsInRange.concat(fakeEvents);
+    });
     this.add(eventsInRange);
     noEventsRemaining = this.runningRecurringEvents.length === 0 && this.lastGeneratedEvent === null;
     return callback(noEventsRemaining);
@@ -1417,7 +1439,8 @@ module.exports = function(router) {
         var view;
         view = router.mainView;
         if (view.cal != null) {
-          view.cal.fullCalendar('render');
+          view.cal.fullCalendar('destroy');
+          view.afterRender();
         }
         return waitToChangeToday();
       }, nextTick);
@@ -2542,17 +2565,20 @@ var RealEvent,
 module.exports = RealEvent = (function(_super) {
   __extends(RealEvent, _super);
 
-  function RealEvent(event, start, end) {
+  function RealEvent(options) {
     RealEvent.__super__.constructor.apply(this, arguments);
-    this.event = event;
-    if (event.isRecurrent()) {
-      this.start = start;
-      this.end = end;
-      this.set('id', event.get('id') + start.toISOString());
+    this.event = options.event;
+    this.start = options.start;
+    this.end = options.start;
+    this.counter = options.counter;
+    if (this.event.isRecurrent()) {
+      this.set('id', this.event.get('id') + this.start.toISOString());
+    } else if (this.event.isMultipleDays()) {
+      this.set('id', "" + (this.event.get('id')) + " " + this.start);
     } else {
-      this.set('id', event.get('id'));
-      this.start = event.getStartDateObject();
-      this.end = event.getEndDateObject();
+      this.set('id', this.event.get('id'));
+      this.start = this.event.getStartDateObject();
+      this.end = this.event.getEndDateObject();
     }
   }
 
@@ -2569,7 +2595,7 @@ module.exports = RealEvent = (function(_super) {
   };
 
   RealEvent.prototype.isAllDay = function() {
-    return this.event.isAllDay();
+    return this.event.isAllDay() || this.event.isMultipleDays();
   };
 
   RealEvent.prototype.getFormattedStartDate = function(format) {
@@ -2668,6 +2694,14 @@ module.exports = ScheduleItem = (function(_super) {
     var endDate;
     endDate = this.isAllDay() ? this.getEndDateObject().add(-1, 'd') : this.getEndDateObject();
     return endDate.isSame(this.getStartDateObject(), 'day');
+  };
+
+  ScheduleItem.prototype.isMultipleDays = function() {
+    var difference, endDate, startDate;
+    startDate = this.getStartDateObject();
+    endDate = this.getEndDateObject();
+    difference = endDate.diff(startDate, 'days', true);
+    return difference > 1;
   };
 
   ScheduleItem.prototype._toDateObject = function(modelDateStr) {
@@ -2826,6 +2860,32 @@ module.exports = ScheduleItem = (function(_super) {
       }
     } else {
       return this.getStartDateObject();
+    }
+  };
+
+  ScheduleItem.prototype.generateMultipleDaysEvents = function() {
+    var date, difference, endDate, fakeEvent, fakeEvents, i, startDate, _i;
+    if (!this.isMultipleDays()) {
+      return [this];
+    } else {
+      startDate = this.getStartDateObject();
+      endDate = this.getEndDateObject();
+      difference = endDate.diff(startDate, 'days');
+      fakeEvents = [];
+      for (i = _i = 0; _i <= difference; i = _i += 1) {
+        fakeEvent = _.clone(this.attributes);
+        date = moment(startDate).add(i, 'days');
+        fakeEvent = {
+          start: date,
+          end: date,
+          counter: {
+            current: i + 1,
+            total: difference + 1
+          }
+        };
+        fakeEvents.push(fakeEvent);
+      }
+      return fakeEvents;
     }
   };
 
@@ -5580,7 +5640,8 @@ module.exports = EventItemView = (function(_super) {
       start: this.model.getFormattedStartDate('HH:mm'),
       end: this.model.getFormattedEndDate('HH:mm'),
       allDay: this.model.isAllDay(),
-      color: this.model.getColor()
+      color: this.model.getColor(),
+      counter: this.model.counter
     });
     return data;
   };
@@ -6309,7 +6370,12 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),start = locals_.start,end = locals_.end,description = locals_.description,place = locals_.place;
-buf.push("<p>" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "\n" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = place) == null ? '' : jade_interp)) + ")</p>");;return buf.join("");
+buf.push("<p>" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "\n" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + " ");
+if (place != void(0) && place != null && place.length > 0)
+{
+buf.push("(" + (jade.escape((jade_interp = place) == null ? '' : jade_interp)) + ")");
+}
+buf.push("</p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6384,7 +6450,7 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),allDay = locals_.allDay,color = locals_.color,start = locals_.start,end = locals_.end,description = locals_.description;
+var locals_ = (locals || {}),allDay = locals_.allDay,color = locals_.color,start = locals_.start,end = locals_.end,description = locals_.description,counter = locals_.counter;
 if ( !allDay)
 {
 buf.push("<div" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"fc-time\">" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "</div>");
@@ -6393,7 +6459,12 @@ else
 {
 buf.push("<div" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"fc-time\">" + (jade.escape((jade_interp = t("All day")) == null ? '' : jade_interp)) + "</div>");
 }
-buf.push("<div class=\"fc-title\">" + (jade.escape((jade_interp = description || t("no description")) == null ? '' : jade_interp)) + "</div><i class=\"delete fa fa-trash\"></i>");;return buf.join("");
+buf.push("<div class=\"fc-title\">" + (jade.escape((jade_interp = description || t("no description")) == null ? '' : jade_interp)) + "");
+if(counter != void(0) && counter != null)
+{
+buf.push("&nbsp;(" + (jade.escape((jade_interp = counter.current) == null ? '' : jade_interp)) + " / " + (jade.escape((jade_interp = counter.total) == null ? '' : jade_interp)) + ")");
+}
+buf.push("</div><i class=\"delete fa fa-trash\"></i>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

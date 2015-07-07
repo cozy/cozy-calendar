@@ -25,7 +25,7 @@ module.exports = Tag = cozydb.getModel('Tag', {
 });
 
 Tag.byName = function(name, callback) {
-  return Tag.request('all', {
+  return Tag.request('byName', {
     key: name
   }, callback);
 };
