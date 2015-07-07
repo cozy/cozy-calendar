@@ -215,7 +215,9 @@ Event.migrateAll = function(callback) {
     } else {
       return async.eachLimit(events, 10, function(event, done) {
         return event.migrateDoctype(function() {
-          return event.patchTag(done);
+          return event.patchTag(function() {
+            return setImmediate(done);
+          });
         });
       }, callback);
     }
