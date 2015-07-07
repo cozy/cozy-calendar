@@ -46,7 +46,9 @@
     "lint:client": "coffeelint client/app -f coffeelint.json",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && brunch b",
-    "build:server": "cake build"
+    "build:server": "cake build",
+    "fixtures:generate": "coffee test/fixtures/generator.coffee",
+    "fixtures:load": "cozy-fixtures load test/fixtures"
   },
   "cozy-permissions": {
     "Alarm": {
