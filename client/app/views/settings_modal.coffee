@@ -61,7 +61,8 @@ module.exports = class SettingsModals extends BaseView
     exportCalendar: ->
         calendarId = @calendar.value()
         if calendarId in app.calendars.toArray()
-            window.location = "export/#{calendarId}.ics"
+            encodedName = encodeURIComponent calendarId
+            window.location = "export/#{encodedName}.ics"
 
         else
             alert t 'please select existing calendar'
