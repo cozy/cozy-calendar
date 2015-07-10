@@ -2987,7 +2987,7 @@ module.exports = Tag = (function(_super) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SettingsModal, SyncView, app,
+var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SettingsModal, app,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3003,8 +3003,6 @@ EventModal = require('views/event_modal');
 SettingsModal = require('views/settings_modal');
 
 ImportView = require('views/import_view');
-
-SyncView = require('views/sync_view');
 
 DayBucketCollection = require('collections/daybuckets');
 
@@ -3031,7 +3029,6 @@ module.exports = Router = (function(_super) {
     'month/:year/:month/:eventid': 'month_event',
     'week/:year/:month/:day/:eventid': 'week_event',
     'list/:eventid': 'list_event',
-    'sync': 'sync',
     'calendar': 'backToCalendar',
     'settings': 'settings'
   };
@@ -3088,12 +3085,6 @@ module.exports = Router = (function(_super) {
     }));
     app.menu.activate('calendar');
     return this.onCalendar = true;
-  };
-
-  Router.prototype.sync = function() {
-    this.displayView(new SyncView);
-    app.menu.activate('sync');
-    return this.onCalendar = false;
   };
 
   Router.prototype.auto_event = function(id) {
@@ -5943,9 +5934,10 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.onExportCalendar = function() {
-    var calendarName;
+    var calendarName, encodedName;
     calendarName = this.model.get('name');
-    return window.location = "export/" + calendarName + ".ics";
+    encodedName = encodeURIComponent(calendarName);
+    return window.location = "export/" + encodedName + ".ics";
   };
 
   MenuItemView.prototype.buildBadge = function(color) {
@@ -6054,10 +6046,11 @@ module.exports = SettingsModals = (function(_super) {
   };
 
   SettingsModals.prototype.exportCalendar = function() {
-    var calendarId;
+    var calendarId, encodedName;
     calendarId = this.calendar.value();
     if (__indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
-      return window.location = "export/" + calendarId + ".ics";
+      encodedName = encodeURIComponent(calendarId);
+      return window.location = "export/" + encodedName + ".ics";
     } else {
       return alert(t('please select existing calendar'));
     }
@@ -6085,92 +6078,6 @@ module.exports = SettingsModals = (function(_super) {
   };
 
   return SettingsModals;
-
-})(BaseView);
-});
-
-;require.register("views/sync_view", function(exports, require, module) {
-var BaseView, ComboBox, ImportView, SyncView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-BaseView = require('../lib/base_view');
-
-ImportView = require('./import_view');
-
-ComboBox = require('./widgets/combobox');
-
-module.exports = SyncView = (function(_super) {
-  __extends(SyncView, _super);
-
-  function SyncView() {
-    return SyncView.__super__.constructor.apply(this, arguments);
-  }
-
-  SyncView.prototype.id = 'view-container';
-
-  SyncView.prototype.template = require('./templates/sync_view');
-
-  SyncView.prototype.events = {
-    'click a#export': 'exportCalendar',
-    'click #show-password': 'showPassword',
-    'click #hide-password': 'hidePassword'
-  };
-
-  SyncView.prototype.getRenderData = function() {
-    return {
-      account: this.model
-    };
-  };
-
-  SyncView.prototype.initialize = function() {
-    this.model = window.webDavAccount;
-    if (this.model != null) {
-      return this.model.placeholder = this.getPlaceholder(this.model.token);
-    }
-  };
-
-  SyncView.prototype.afterRender = function() {
-    this.calendar = new ComboBox({
-      el: this.$('#export-calendar'),
-      source: app.calendars.toAutoCompleteSource()
-    });
-    return this.$('#importviewplaceholder').append(new ImportView().render().$el);
-  };
-
-  SyncView.prototype.exportCalendar = function() {
-    var calendarId;
-    calendarId = this.calendar.value();
-    if (__indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
-      return window.location = "export/" + calendarId + ".ics";
-    } else {
-      return alert(t('please select existing calendar'));
-    }
-  };
-
-  SyncView.prototype.getPlaceholder = function(password) {
-    var i, placeholder, _i, _ref;
-    placeholder = [];
-    for (i = _i = 1, _ref = password.length; _i <= _ref; i = _i += 1) {
-      placeholder.push('*');
-    }
-    return placeholder.join('');
-  };
-
-  SyncView.prototype.showPassword = function() {
-    this.$('#placeholder').html(this.model.token);
-    this.$('#show-password').hide();
-    return this.$('#hide-password').show();
-  };
-
-  SyncView.prototype.hidePassword = function() {
-    this.$('#placeholder').html(this.model.placeholder);
-    this.$('#hide-password').hide();
-    return this.$('#show-password').show();
-  };
-
-  return SyncView;
 
 })(BaseView);
 });
@@ -6726,34 +6633,6 @@ else
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
 }
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("views/templates/sync_view", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),account = locals_.account,calendar = locals_.calendar;
-buf.push("<div class=\"helptext\"><h2>" + (jade.escape(null == (jade_interp = t('synchronization')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
-if ( account == null)
-{
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the sync module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol>");
-}
-else
-{
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
-}
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
