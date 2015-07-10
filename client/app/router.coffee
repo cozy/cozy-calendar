@@ -4,7 +4,6 @@ CalendarView = require 'views/calendar_view'
 EventModal = require 'views/event_modal'
 SettingsModal = require 'views/settings_modal'
 ImportView = require 'views/import_view'
-SyncView = require 'views/sync_view'
 # RealEventCollection = require 'collections/realevents'
 DayBucketCollection = require 'collections/daybuckets'
 
@@ -21,7 +20,6 @@ module.exports = class Router extends Backbone.Router
         'month/:year/:month/:eventid'     : 'month_event'
         'week/:year/:month/:day/:eventid' : 'week_event'
         'list/:eventid'                   : 'list_event'
-        'sync'                            : 'sync'
         'calendar'                        : 'backToCalendar'
         'settings'                        : 'settings'
 
@@ -61,10 +59,6 @@ module.exports = class Router extends Backbone.Router
         app.menu.activate 'calendar'
         @onCalendar = true
 
-    sync: ->
-        @displayView new SyncView
-        app.menu.activate 'sync'
-        @onCalendar = false
 
     auto_event: (id) ->
         model = app.events.get(id)

@@ -155,7 +155,8 @@ module.exports = class MenuItemView extends BaseView
 
     onExportCalendar: ->
         calendarName = @model.get 'name'
-        window.location = "export/#{calendarName}.ics"
+        encodedName = encodeURIComponent calendarName
+        window.location = "export/#{encodedName}.ics"
 
 
     buildBadge: (color) ->
