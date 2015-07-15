@@ -11,7 +11,7 @@
                 span.fa.fa-arrow-right
             span.caption= t("From")
             input.input-start-date.input-date(tabindex="3",
-                                              type="date",
+                                              type="text",
                                               size="10"
                                               placeholder=t("From [date]"),
                                               value=start.format(dFormat))
@@ -19,14 +19,15 @@
                                          type="time",
                                          size="5"
                                          placeholder=t("From [hours:minutes]"),
-                                         value=start.format(tFormat))
+                                         value=start.format(tFormat),
+                                         aria-hidden="#{allDay}")
 
-        label.timed.time-row(aria-hidden="#{allDay}")
+        label.timed.time-row
             .icon
                 span.fa.fa-arrow-left
             span.input-end-caption.caption= t("To")
             input.input-end-date.input-date(tabindex="5",
-                                            type="date",
+                                            type="text",
                                             size="10"
                                             placeholder=t("To [date]"),
                                             value=end.format(dFormat))
@@ -34,7 +35,8 @@
                                             type="time",
                                             size="5"
                                             placeholder=t("To [hours:minutes]"),
-                                            value=end.format(tFormat))
+                                            value=end.format(tFormat),
+                                            aria-hidden="#{allDay}")
 
     .item-row
         label.all-day
@@ -49,41 +51,46 @@ div.label.label-row
     .icon
         span.fa.fa-map-marker
     input.input-place.input-full-block(tabindex="7",
-                      type="text",
-                      value=place,
-                      placeholder=t("Place"))
+                                       type="text",
+                                       value=place,
+                                       placeholder=t("Place"))
 
 div.label.label-row
     .icon
         span.fa.fa-users
-    input.input-place.input-full-block(tabindex="8",
-                      type="text",
-                      value=people,
-                      placeholder=t("People"))
+    input.input-people.input-full-block(tabindex="8",
+                                        type="text",
+                                        value=people,
+                                        placeholder=t("People"))
 
-div.label.label-row
+div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
     .icon
         span.fa.fa-align-left
-    input.input-place.input-full-block(tabindex="9",
-                      type="text",
-                      value=description,
-                      placeholder=t("Description"))
+    .icon.right
+        span.fa.fa-angle-right
+    input.input-details-trigger.input-full-block(tabindex="9",
+                                                 type="text",
+                                                 value=details,
+                                                 placeholder=t("Description"))
 
-div.label.label-row
+div.label.label-row.input-alert(aria-hidden="#{!showAlertsByDefault}")
     .icon
         span.fa.fa-bell
-    select.input-place.input-full-block(tabindex="10",
-                      type="select",
-                      value=alert,
-                      placeholder=t("No Alert"))
+    .icon.right
+        span.fa.fa-angle-right
 
-div.label.label-row
+    if !alerts || alerts.length === 0
+        button.button-full-block No alert
+    else
+        button.button-full-block= t('alert label', {numAlerts: alerts.length})
+
+
+div.label.label-row.input-repeat(aria-hidden="#{!showRepeatByDefault}")
     .icon
         span.fa.fa-repeat
-    select.input-place.input-full-block(tabindex="11",
-                      type="select",
-                      value=repeat,
-                      placeholder=t("No Repeat"))
+    .icon.right
+        span.fa.fa-angle-right
+    button.button-full-block No repeat
 
 .popover-footer
     a.advanced-link(role="button",

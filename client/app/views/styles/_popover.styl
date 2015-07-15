@@ -43,6 +43,13 @@ input-color   = #555
                 color #aaa
                 text-shadow none
 
+            &.right
+                right 0
+
+                span
+                    font-size 2rem
+                    color #ddd
+
     .label-row
         border-bottom 1px solid #ddd
 
@@ -65,28 +72,39 @@ input-color   = #555
                 width: 8em
 
     .input-full-block
+    .button-full-block
         width 100%
         padding 1.5em 3em
         background-color transparent
         border none
-        font-size: 1rem
+        font-size 1rem
+        text-align left
+
+    .button-full-block
+        font-family 'Source Sans Pro', sans-serif
+        color #333
+        line-height 0
 
     .controls
         position absolute
-        top 14px
-        right 10px
+        top 0
+        right 0
+        padding 0.2em
 
         [role=button]
         .remove-spinner
+            box-sizing border-box
             display block
-            float right
-            clear right
-            width 14px
-            height 14px
-            line-height 14px
-            padding 0
-            margin 0 5px 10px
+            width 2em
+            height 1.5em
+            padding 0 0.2em
+            margin 0
+            border-left 1px solid #e2e2e2
+            font-size 1em
             cursor pointer
+
+        .remove-spinner
+            padding 0 0.5em
 
         button
             color icon-color
@@ -103,6 +121,10 @@ input-color   = #555
         .remove-spinner
             display none
             cursor wait
+
+    [aria-hidden="true"]
+        display none
+
 
 .popover-title
     position relative
@@ -165,6 +187,19 @@ input-color   = #555
         .caption
             min-width: inherit
 
+    textarea
+        box-sizing border-box
+        margin 0
+        padding 1em
+        width 100%
+        height 300px
+        resize none
+        background-color transparent
+        border none
+        box-shadow none
+        font-size 1rem
+        line-height 1.3rem
+
 
 .popover-content-wrapper
     overflow hidden
@@ -196,14 +231,112 @@ input-color   = #555
 
 
 .popover-footer
-    padding: 10px 12px
-    background-color: overlay-color
-    border-radius: 0 0 5px 5px
     display flex
     justify-content space-between
     align-items baseline
+    padding: 0.6em 0.8em
+    background-color: overlay-color
+    border-radius: 0 0 5px 5px
 
     [role=button]
-        margin-left: 1em
-        font-size: 0.85em
+        font-size: 0.95em
 
+        &:hover
+            text-decoration none
+
+        &:focus
+            color blue
+            text-decoration none
+
+    .icon
+        display inline-block
+        padding 0 0.9em 0 0.4em
+        font-size 1rem
+
+// header on secondary screen
+.popover-back
+    display flex
+    justify-content space-between
+    align-items center
+    padding 0.8em 1.5em
+    background-color #f5f5f5
+    border-radius 5px 5px 0 0
+
+    h4
+        margin 0
+        font-weight normal
+        font-size 1.2em
+
+        &:hover
+            cursor default
+
+    i
+        width 3rem
+        font-size 2rem
+        line-height 0
+        color #999
+
+        &:hover
+            cursor pointer
+            color orange
+
+    .btn-done
+        width 3rem
+        padding 0.4em 0
+        background-color #bbb
+        border-radius 3px
+        line-height 1
+        text-align center
+        color #fff
+
+        &:hover
+            cursor pointer
+            background-color orange
+
+// Alerts screen
+select.new-alert
+    margin 1.5em
+    width calc(100% - 3em)
+    height 2.5rem
+    border-color #ccc
+    font-size 1.1em
+
+ul.alerts
+    margin 0
+
+    li
+        padding 0.5em 1.5em 1.5em
+        border-bottom 1px solid #ddd
+        line-height 1
+
+    .alert-top
+    .type
+    .notification-mode
+        display flex
+        align-items center
+
+    .alert-top
+        justify-content space-between
+
+        button
+            height auto
+            border none
+            background-color transparent
+            font-size 1.2em
+            color #bbb
+
+            &:hover
+                color orange
+
+    .alert-timer
+        font-size 1.4em
+
+    .type
+        margin-top 0.5em
+
+        label
+            padding 0 1.5em 0 0.5em
+            color #999
+
+        input[type=checkbox]
+            flex none
