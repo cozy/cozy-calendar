@@ -1,77 +1,83 @@
-label Repeats
-    select.input-repeat
-        option(value="-1", selected) No Repeat
-        option(value="0") Daily
-        option(value="1") Weekly
-        option(value="2") Monthly
-        option(value="3") Yearly
-
-label.generic(aria-hidden="true") Interval
-    input(type="number", min=1, value=1)
-    | days
-
-label.weekly-only(aria-hidden="true") Each
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('monday')
+.repeat-screen
 
     label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('tuesday')
+        select.input-repeat.select-big
+            option(value="-1", selected) No Repeat
+            option(value="0") Daily
+            option(value="1") Weekly
+            option(value="2") Monthly
+            option(value="3") Yearly
 
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('wednesday')
+    label.inline-input.generic(aria-hidden="true") 
+        span.first-input=t('Interval')
+        input.special(type="number", min=1, value=1)
+        span=t('days')
 
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('thursday')
+    label.inline-input.weekly-only(aria-hidden="true")
+        span.first-input=t('On days')
+        .space-between
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('M')
 
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('friday')
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('saturday')
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('T')
 
-    label
-        input(type="radio", name="weekly-repeat-type", value="monday")
-        = t('sunday')
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('W')
 
-label.monthly-only(aria-hidden="true")
-    label
-        input(type="radio", name="monthly-repeat-type", value="repeat-day")
-        | Repeat on dates
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('T')
 
-    label
-        input(type="radio", name="monthly-repeat-type", value="repeat-weekday")
-        | Repeat on weekday
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('F')
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('S')
 
+            label
+                input(type="checkbox", name="weekly-repeat-type", value="monday")
+                span=t('S')
 
-label.generic(aria-hidden="true") Ends
-    label
-        input(type="radio", name="endMode", value='forever')
-        = t('forever')
+    label.inline-input.monthly-only(aria-hidden="true")
+        span.first-input.align-top=t('Repeat by')
+        div
+            label
+                input(type="radio", name="monthly-repeat-type", value="repeat-day", checked='checked')
+                | Day of the month
 
-    label
-        input(type="radio", name="endMode", value='count')
-        label(for="count")= t('after')
-        input#rrule-count.input-mini(type="number", min=0, value=1)
-        label(for="rrule-count")=t('occurences')
-    
-    label
-        input(type="radio", name="endMode", value='until')
-        label(for="until")= t('until')
-        input.input-until-date.input-date(tabindex="3",
-                              type="text",
-                              size="10"
-                              placeholder=t("Until [date]"),
-                              value=start.format(dFormat))
-
-
-div.generic.summary(aria-hidden="true") Summary:
-    span the summary
+            label
+                input(type="radio", name="monthly-repeat-type", value="repeat-weekday")
+                | Day of the week
 
 
+    label.inline-input.generic(aria-hidden="true")
+        span.first-input.align-top=t('Ends')
+        div
+            label.inline-input
+                input(type="radio", name="endMode", value='never', checked='checked')
+                = t('Never')
+
+            label.inline-input
+                input(type="radio", name="endMode", value='count')
+                label(for="count")= t('after')
+                input#rrule-count.special.input-mini(type="number", min=0, value=1)
+                label(for="rrule-count")=t('occurences')
+            
+            label.inline-input
+                input(type="radio", name="endMode", value='until')
+                label(for="until")= t('until')
+                input.special.input-until-date.input-date(tabindex="3",
+                                      type="text",
+                                      size="10"
+                                      placeholder=t("Until [date]"),
+                                      value=start.format(dFormat))
 
 
+    div.inline-input.generic.summary(aria-hidden="true")
+        span.first-input.align-top=t('Summary')
+        span The summary comes here

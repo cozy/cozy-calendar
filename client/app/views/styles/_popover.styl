@@ -22,7 +22,6 @@ input-color   = #555
     .label
         box-sizing border-box
         position relative
-        width 100%
         margin 0
         padding 0
         background-color transparent
@@ -51,6 +50,7 @@ input-color   = #555
                     color #ddd
 
     .label-row
+        width         100%
         border-bottom 1px solid #ddd
 
     input
@@ -293,14 +293,19 @@ input-color   = #555
             cursor pointer
             background-color orange
 
-// Alerts screen
-select.new-alert
-    margin 1.5em
-    width calc(100% - 3em)
-    height 2.5rem
-    border-color #ccc
-    font-size 1.1em
+// select special
+select.select-big
+    margin-bottom 1.5em
+    width         100%
+    height        2.5rem
+    border-color  #ccc
+    font-size     1.1em
 
+    &.with-margin
+        margin 1.5em
+        width         calc(100% - 3em)
+
+// Alerts screen
 ul.alerts
     margin 0
 
@@ -340,3 +345,49 @@ ul.alerts
 
         input[type=checkbox]
             flex none
+
+// repeat screen
+.repeat-screen
+    padding 1.5em
+
+    label
+    .label
+        width auto
+
+    input.special
+        margin-right 0.4em
+        width        5rem
+        height       2em
+        border       1px solid #e5e5e5
+
+    .inline-input
+        display         flex
+        justify-content flex-start
+        align-items     center
+        margin-bottom   1.4em
+
+        label.inline-input
+            margin-bottom   0.2em
+
+            input.special
+                margin-left 0.4em
+
+    .first-input
+        flex             none
+        width            5rem
+        text-transform   uppercase
+        color            #999
+
+        &.align-top
+            align-self flex-start
+
+    input[type="radio"],
+    input[type="checkbox"]
+        flex         none
+        margin-right 0.5em
+
+    .space-between
+        display         flex
+        align-items     center
+        justify-content space-between
+        width           100%
