@@ -9,7 +9,7 @@ module.exports.fetch = (req, res, next, id) ->
             next()
 
 module.exports.all = (req, res, next) ->
-    Tag.all (err, results) ->
+    Tag.byName (err, results) ->
         return next err if err
 
         res.send 200, results
