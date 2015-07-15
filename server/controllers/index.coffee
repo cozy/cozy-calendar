@@ -14,7 +14,7 @@ module.exports.index = (req, res) ->
                 contacts[index] = contact.asNameAndEmails()
             done null, contacts
 
-        (cb) -> Tag.byName cb
+        (cb) -> Tag.byName {}, cb
         (cb) -> Event.all cb
         (cb) -> cozydb.api.getCozyInstance cb
         (cb) -> WebDavAccount.first cb
