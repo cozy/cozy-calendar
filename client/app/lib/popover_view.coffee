@@ -73,7 +73,7 @@ module.exports = class PopoverView extends BaseView
         # Only create it if doesn't exist.
         unless @$popover?
             renderData = @getRenderData()
-            @screen = @getScreen 'default'
+            @screen = @getScreen 'repeat' # 'default'
             popoverWrapper = @template
                 title: @screen.title(renderData)
                 content: @screen.content(renderData)
@@ -90,7 +90,7 @@ module.exports = class PopoverView extends BaseView
         @afterRender()
 
         # Execute the default screen's callback if it has been defined.
-        @screen.afterRender.call @
+        @screen.afterRender?.call @
 
         # Compute and et popover's position.
         @positionPopover()

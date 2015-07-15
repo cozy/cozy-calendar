@@ -131,6 +131,7 @@ module.exports = class EventPopOver extends PopoverView
         @duplicateButton = @$ '.duplicate'
         @$container   = @$ '.popover-content-wrapper'
 
+
     ###
         Default screen.
     ###
@@ -281,7 +282,20 @@ module.exports = class EventPopOver extends PopoverView
 
         # -1 is the default placeholder, it's not bound to any real value.
         if value isnt -1
-            @$('[aria-hidden="true"]').attr 'aria-hidden', false
+
+            # Reset the specific fields' visibility.
+            @$('[aria-hidden="false"]:not(.generic)').attr 'aria-hidden', true
+
+            # Turn repeat type into a selector.
+            repeatTypeSelector = switch value
+                when 0 then '.daily-only'
+                when 1 then '.weekly-only'
+                when 2 then '.monthly-only'
+                when 3 then '.yearly-only'
+
+            # Show fields based on repeat type.
+            @$('[aria-hidden="true"].generic').attr 'aria-hidden', false
+            @$(repeatTypeSelector).attr 'aria-hidden', false
 
 
 

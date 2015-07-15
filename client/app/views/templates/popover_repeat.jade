@@ -6,11 +6,49 @@ label Repeats
         option(value="2") Monthly
         option(value="3") Yearly
 
-label(aria-hidden="true") Interval
+label.generic(aria-hidden="true") Interval
     input(type="number", min=1, value=1)
+    | days
+
+label.weekly-only(aria-hidden="true") Each
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('monday')
+
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('tuesday')
+
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('wednesday')
+
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('thursday')
+
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('friday')
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('saturday')
+
+    label
+        input(type="radio", name="weekly-repeat-type", value="monday")
+        = t('sunday')
+
+label.monthly-only(aria-hidden="true")
+    label
+        input(type="radio", name="monthly-repeat-type", value="repeat-day")
+        | Repeat on dates
+
+    label
+        input(type="radio", name="monthly-repeat-type", value="repeat-weekday")
+        | Repeat on weekday
 
 
-label(aria-hidden="true") Ends
+label.generic(aria-hidden="true") Ends
     label
         input(type="radio", name="endMode", value='forever')
         = t('forever')
@@ -24,6 +62,15 @@ label(aria-hidden="true") Ends
     label
         input(type="radio", name="endMode", value='until')
         label(for="until")= t('until')
+        input.input-until-date.input-date(tabindex="3",
+                              type="text",
+                              size="10"
+                              placeholder=t("Until [date]"),
+                              value=start.format(dFormat))
+
+
+div.generic.summary(aria-hidden="true") Summary:
+    span the summary
 
 
 
