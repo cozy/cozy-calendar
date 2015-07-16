@@ -13,10 +13,12 @@ module.exports = class ComboBox extends BaseView
     initialize: (options) ->
         super()
 
+        @source = options.source
+
         @$el.autocomplete
             delay: 0
             minLength: 0
-            source: options.source
+            source: @source
             close: @onClose
             open: @onOpen
             select: @onSelect
@@ -38,9 +40,8 @@ module.exports = class ComboBox extends BaseView
             caret.click @openMenu
             @$el.after caret
 
-        # Select the first calendar by default
-        firstCalendar = options.source[0].label
-        @onEditionComplete firstCalendar
+        value = options.current or @getDefaultValue()
+        @onEditionComplete value
 
     openMenu: =>
         @menuOpen = true
@@ -49,6 +50,11 @@ module.exports = class ComboBox extends BaseView
         # when clicking on menu, auto selecting the input so that it
         # can be updated when typing
         @$el[0].setSelectionRange 0, @value().length
+
+
+    getDefaultValue: ->
+        # Select the first calendar by default
+        return @source[0].label
 
     setValue: (value) =>
         @$el.val value

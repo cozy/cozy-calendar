@@ -123,9 +123,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             el: @$ '.calendarcombo'
             small: true
             source: app.calendars.toAutoCompleteSource()
+            current: @model.getCalendar()?.get('name')
 
-        # Set default calendar value.
-        @model.setCalendar @calendar.value()
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
         @refresh()
