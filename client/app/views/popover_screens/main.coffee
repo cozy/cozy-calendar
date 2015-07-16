@@ -50,6 +50,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'keydown [data-tabindex-prev]':          'onTab'
 
         # Screen switches.
+        'click .input-people': -> @switchToScreen('guests')
         'click .input-details-trigger': -> @switchToScreen('details')
         'click .input-alert': -> @switchToScreen('alert')
         'click .input-repeat': -> @switchToScreen('repeat')
@@ -79,6 +80,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             end:         @model.getEndDateObject()
                                .add((if @model.isAllDay() then -1 else 0), 'd')
             alerts: @model.get('alarms')
+            guestsButtonText: @getGuestsButtonText()
             buttonText: @getButtonText()
 
     afterRender: ->
@@ -324,6 +326,18 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     getButtonText: ->
         if @model.isNew() then t('create') else t('edit')
+
+
+    getGuestsButtonText: ->
+        guests = @model.get('attendees') or []
+
+        if guests.length is 0
+            return "Add people"
+        else if guests.length is 1
+            return guests[0].email
+        else
+            numOthers = guests.length - 1
+            return "#{guests[0].email} and #{numOthers} other(s)"
 
 
     # Show more fields when triggered.

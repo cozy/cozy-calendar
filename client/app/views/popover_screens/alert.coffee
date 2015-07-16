@@ -40,7 +40,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
             translationInfo = @getAlertTranslationInfo alert
             return _.extend {}, translationInfo, {index}
 
-        return _.extend {}, @model.toJSON(),
+        return _.extend super(),
             alertOptions: formattedAlertOptions
             alerts: @model.get('alarms')
 

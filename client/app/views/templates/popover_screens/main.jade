@@ -55,13 +55,12 @@ div.label.label-row
                                        value=place,
                                        placeholder=t("Place"))
 
-div.label.label-row
+div.label.label-row.input-people
     .icon
         span.fa.fa-users
-    input.input-people.input-full-block(tabindex="8",
-                                        type="text",
-                                        value=people,
-                                        placeholder=t("People"))
+    .icon.right
+        span.fa.fa-angle-right
+    button.button-full-block= guestsButtonText
 
 div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
     .icon

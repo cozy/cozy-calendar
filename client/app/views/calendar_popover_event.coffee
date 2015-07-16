@@ -8,6 +8,7 @@ module.exports = class EventPopOver extends PopoverView
     # lib/PopoverScreenView.
     screens:
         main: require 'views/popover_screens/main'
+        guests: require 'views/popover_screens/guests'
         details: require 'views/popover_screens/details'
         alert: require 'views/popover_screens/alert'
         repeat: require 'views/popover_screens/repeat'

@@ -305,9 +305,40 @@ select.select-big
         margin 1.5em
         width         calc(100% - 3em)
 
+// Guest screen
+ul.guests
+    margin 0
+    list-style-type none
+
+    li
+        padding 0.5em 1.5em 1.5em
+        border-bottom 1px solid #ddd
+        line-height 1
+
+    .guest-top
+        display flex
+        align-items center
+
+    .guest-top
+        justify-content space-between
+
+        button
+            height auto
+            border none
+            background-color transparent
+            font-size 1.2em
+            color #bbb
+
+            &:hover
+                color orange
+
+    .guest-label
+        font-size 1.4em
+
 // Alerts screen
 ul.alerts
     margin 0
+    list-style-type none
 
     li
         padding 0.5em 1.5em 1.5em
