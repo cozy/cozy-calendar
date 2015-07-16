@@ -63,7 +63,7 @@ div.label.label-row
                                         value=people,
                                         placeholder=t("People"))
 
-div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
+div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
     .icon
         span.fa.fa-align-left
     .icon.right
@@ -73,7 +73,7 @@ div.label.label-row(aria-hidden="#{!showDetailsByDefault}")
                                                  value=details,
                                                  placeholder=t("Description"))
 
-div.label.label-row.input-alert(aria-hidden="#{!showAlertsByDefault}")
+div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlertsByDefault}")
     .icon
         span.fa.fa-bell
     .icon.right
@@ -85,7 +85,7 @@ div.label.label-row.input-alert(aria-hidden="#{!showAlertsByDefault}")
         button.button-full-block= t('alert label', {numAlerts: alerts.length})
 
 
-div.label.label-row.input-repeat(aria-hidden="#{!showRepeatByDefault}")
+div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepeatByDefault}")
     .icon
         span.fa.fa-repeat
     .icon.right
@@ -102,4 +102,4 @@ div.label.label-row.input-repeat(aria-hidden="#{!showRepeatByDefault}")
         = t('advanced')
     a.btn.add(role="button",
               tabindex="7")
-        = editionMode ? t('Save') : t('Create Event')
+        = buttonText

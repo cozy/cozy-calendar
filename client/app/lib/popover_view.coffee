@@ -1,7 +1,8 @@
-BaseView = require './base_view'
+BaseView = require 'lib/base_view'
+
 module.exports = class PopoverView extends BaseView
 
-    template: require '../views/templates/popover'
+    template: require 'views/templates/popover'
 
     initialize: (options) ->
         @target = options.target
@@ -25,17 +26,13 @@ module.exports = class PopoverView extends BaseView
 
     # Get templates for a given screen.
     getScreen: (screenID = 'default') ->
-
         screen = @screens?[screenID]
-        # A screen must have a title and content attributes.
-        if screen?.title and screen?.content
+
+        # The requested screen must be defined.
+        if screen?
             return screen
         else
-            error = """
-            Screen '#{screenID}' doesn't exist, or doesn't have a title or a
-            content template function.
-            """
-            throw new Error(error)
+            throw new Error("Screen '#{screenID}' is not defined.")
 
 
     # Switch screen.
@@ -46,25 +43,37 @@ module.exports = class PopoverView extends BaseView
             error = 'Popover must be rendered before switching its screen.'
             throw new Error(error)
 
-
         # If the screen is switched back to the default one, call `onLeave` if
         # it exists.
-        if screenID is 'default' and @screen?
-            @screen.onLeave?.call @
+        if screenID is @mainScreen and @screen?
+            @screen.onLeaveScreen()
 
+        # Destroy the previous screen.
+        if @screen?
+            @screen.destroy()
+
+        # Build the screen object and render it.
+        @renderScreen screenID
+
+
+    # Render a specific screen.
+    renderScreen: (screenID) ->
         # Get the screen data.
-        @screen = @getScreen screenID
+        ScreenBuilder = @getScreen screenID
 
-        # Change the DOM with the new screen.
-        renderData = @getRenderData()
-        @titleElement.html @screen.title(renderData)
-        @contentElement.html @screen.content(renderData)
+        # Build it.
+        @screen = new ScreenBuilder
+            model: @model
+            el: @$popover
+            titleElement: @titleElement
+            contentElement: @contentElement
+            popover: @
 
-        # Change current screen information
+        # Render it.
+        @screen.render()
+
+        # Change current screen information.
         @screenElement.attr 'data-screen', screenID
-
-        # Execute the screen's callback if it has been defined.
-        @screen.afterRender?.call @
 
 
     render: ->
@@ -72,12 +81,13 @@ module.exports = class PopoverView extends BaseView
 
         # Only create it if doesn't exist.
         unless @$popover?
-            renderData = @getRenderData()
-            @screen = @getScreen 'repeat' # 'default'
+            # Empty screen by default, will be populated afterwards.
             popoverWrapper = @template
-                title: @screen.title(renderData)
-                content: @screen.content(renderData)
+                title: ''
+                content: ''
 
+            # Keep references of the main elements to allow each screen to
+            # render themselves.
             @$popover = $ popoverWrapper
             @titleElement = @$popover.find '.popover-title'
             @contentElement = @$popover.find '.popover-content'
@@ -86,11 +96,11 @@ module.exports = class PopoverView extends BaseView
             # Reset @el and @$el.
             @setElement @$popover
 
-        # Generic after render must be called before screen-specific.
+        # Generic after render must be called before screen-specific stuff.
         @afterRender()
 
-        # Execute the default screen's callback if it has been defined.
-        @screen.afterRender?.call @
+        # Render the screen itself.
+        @renderScreen(@mainScreen)
 
         # Compute and et popover's position.
         @positionPopover()
