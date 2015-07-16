@@ -38,7 +38,9 @@ module.exports = class ComboBox extends BaseView
             caret.click @openMenu
             @$el.after caret
 
-        @onEditionComplete @value()
+        # Select the first calendar by default
+        firstCalendar = options.source[0].label
+        @onEditionComplete firstCalendar
 
     openMenu: =>
         @menuOpen = true
