@@ -12,6 +12,7 @@ module.exports = class EventPopOver extends PopoverView
         details: require 'views/popover_screens/details'
         alert: require 'views/popover_screens/alert'
         repeat: require 'views/popover_screens/repeat'
+        delete: require 'views/popover_screens/delete'
 
 
     # Key of the screen that will be shown first.

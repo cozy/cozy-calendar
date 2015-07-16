@@ -34,7 +34,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'change input':         'onKeyUp'
         'click .add':           'onAddClicked'
         'click .advanced-link': 'onAdvancedClicked'
-        'click .remove':        'onRemoveClicked'
+        'click .remove':        -> @switchToScreen('delete')
         'click .duplicate':     'onDuplicateClicked'
 
 
