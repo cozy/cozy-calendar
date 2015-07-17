@@ -12,9 +12,9 @@ module.exports = class PopoverView extends BaseView
         return @
 
 
-    selfclose: ->
+    selfclose: (checkoutChanges = true) ->
         @parentView.onPopoverClose?()
-        @close()
+        @close(checkoutChanges)
 
 
     close: ->

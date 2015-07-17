@@ -39,4 +39,4 @@ module.exports = class DeletePopoverScreen extends PopoverScreenView
                 @$errors.show()
             success: =>
                 @$spinner.hide()
-                @popover.selfclose()
+                @popover.selfclose(false)

@@ -45,25 +45,35 @@ module.exports = class EventPopOver extends PopoverView
             @selfclose()
 
 
-    selfclose: ->
+    selfclose: (checkoutChanges = true) ->
         # Revert if not just saved with addButton.
         if @model.isNew()
             super()
         else
-            @model.fetch complete: super
+            # Flag to checkout or not the un-persisted changes. Useful when the
+            # event is actually deleted.
+            if checkoutChanges
+                @model.fetch complete: -> super(checkoutChanges)
+            else
+                super(checkoutChanges)
 
         # Popover is closed so the extended status must be reset.
         window.popoverExtended = false
 
 
-    close: ->
+    close: (checkoutChanges = true) ->
         # we don't reuse @selfclose because both are doing mostly the same thing
         # but are a little bit different (see parent class).
         # Revert if not just saved with addButton.
         if @model.isNew()
             super()
         else
-            @model.fetch complete: super
+            # Flag to checkout or not the un-persisted changes. Useful when the
+            # event is actually deleted.
+            if checkoutChanges
+                @model.fetch complete: super
+            else
+                super()
 
         # Popover is closed so the extended status must be reset.
         window.popoverExtended = false

@@ -302,7 +302,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                     @addButton.spin false
                     @addButton.html @getButtonText()
                     @addButton.children().show()
-                    @popover.selfclose()
+                    @popover.selfclose(false)
 
     handleError: (error) ->
         switch error.field
