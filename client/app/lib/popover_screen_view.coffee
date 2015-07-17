@@ -51,7 +51,8 @@ module.exports = class PopoverScreenView extends Backbone.View
 
     # Subrender routine. Render the title element.
     _renderTitle: ->
-        @titleElement.html @templateTitle(title: @screenTitle)
+        renderData = @getRenderData()
+        @titleElement.html @templateTitle(renderData)
 
 
     # Subrender routine. Render the content element.
@@ -63,7 +64,7 @@ module.exports = class PopoverScreenView extends Backbone.View
     # Data to be passed to the template content. Can be overriden.
     # Returns a JS key/value object.
     getRenderData: ->
-        return _.extend {}, @model.toJSON()
+        return _.extend {}, @model.toJSON(), title: @screenTitle
 
 
     # Perform stuff after the element is in the DOM here. Defined in subclasses.
