@@ -243,19 +243,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         ev.preventDefault()
 
 
-    onRemoveClicked: ->
-        if confirm t('are you sure')
-            @spinner.show()
-            @removeButton.hide()
-            @model.destroy
-                wait: true
-                error: ->
-                    alert t('server error occured')
-                complete: =>
-                    @spinner.hide()
-                    @popover.selfclose()
-
-
     # When duplicate button is clicked, an new event with exact same date
     # is created.
     onDuplicateClicked: ->
