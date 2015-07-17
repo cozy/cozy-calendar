@@ -313,7 +313,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getButtonText: ->
-        if @model.isNew() then t('create') else t('edit')
+        if @model.isNew() then t('create') else t('save')
 
 
     getGuestsButtonText: ->

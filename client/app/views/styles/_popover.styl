@@ -166,7 +166,10 @@ input-color   = #555
 
 
 .popover-content
-    padding: 0
+    padding 0
+
+    .fixed-height
+        height 24rem
 
     .caption
         display inline-block
@@ -192,7 +195,7 @@ input-color   = #555
         margin 0
         padding 1em
         width 100%
-        height 300px
+        height 100%
         resize none
         background-color transparent
         border none
@@ -234,9 +237,10 @@ input-color   = #555
     display flex
     justify-content space-between
     align-items baseline
-    padding: 0.6em 0.8em
-    background-color: overlay-color
-    border-radius: 0 0 5px 5px
+    flex-direction row-reverse
+    padding 0.6em 0.8em
+    background-color overlay-color
+    border-radius 0 0 5px 5px
 
     [role=button]
         font-size: 0.95em
@@ -252,6 +256,12 @@ input-color   = #555
         display inline-block
         padding 0 0.9em 0 0.4em
         font-size 1rem
+
+    .btn.add
+        order 1
+
+    .advanced-link
+        order 2
 
 // header on secondary screen
 .popover-back
@@ -306,14 +316,29 @@ select.select-big
         width         calc(100% - 3em)
 
 // Guest screen
+.guests-action
+    display flex
+    align-items center
+    padding 1em 1.5em
+
+    input[type=text]
+        flex 1
+        height 2.1em
+        margin-right 0.5em
+        border 1px solid #ddd
+        font-size 1rem
+
 ul.guests
     margin 0
     list-style-type none
 
     li
-        padding 0.5em 1.5em 1.5em
-        border-bottom 1px solid #ddd
+        padding 1em 1.5em
+        border-top 1px solid #ddd
         line-height 1
+
+        &:last-child
+            border-bottom 1px solid #ddd
 
     .guest-top
         display flex
@@ -333,7 +358,7 @@ ul.guests
                 color orange
 
     .guest-label
-        font-size 1.4em
+        font-size 1.1em
 
 // Alerts screen
 ul.alerts
@@ -341,7 +366,7 @@ ul.alerts
     list-style-type none
 
     li
-        padding 0.5em 1.5em 1.5em
+        padding 1.5em
         border-bottom 1px solid #ddd
         line-height 1
 
@@ -379,7 +404,8 @@ ul.alerts
 
 // repeat screen
 .repeat-screen
-    padding 1.5em
+    box-sizing border-box
+    padding    1.5em
 
     label
     .label

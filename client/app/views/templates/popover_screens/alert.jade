@@ -1,7 +1,8 @@
-ul.alerts
+.fixed-height
 
-select.new-alert.select-big.with-margin
-    option(value="-1", selected="true") Add a new alert
-    each alertOption in alertOptions
-        option(value=alertOption.index)= t(alertOption.translationKey, {smart_count: alertOption.value})
-    
+    ul.alerts
+
+    select.new-alert.select-big.with-margin
+        option(value="-1", selected="true") Add a new alert
+        each alertOption in alertOptions
+            option(value=alertOption.index)= t(alertOption.translationKey, {smart_count: alertOption.value})
