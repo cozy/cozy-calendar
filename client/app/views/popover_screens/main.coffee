@@ -92,15 +92,16 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @spinner = @$ '.remove-spinner'
         @duplicateButton = @$ '.duplicate'
         @$optionalFields = @$ '[data-optional="true"]'
+        @$moreDetailsButton = @$ '.advanced-link'
 
         # If this is a new unsaved event, hide the irrelevant buttons.
         if @model.isNew()
             @removeButton.hide()
             @duplicateButton.hide()
 
-        # Apply the extended status if it has been previously set.
+        # Apply the expanded status if it has been previously set.
         if window.popoverExtended
-            @showOptionalFields()
+            @expandPopover()
 
         timepickerEvents =
             'focus': ->
@@ -344,11 +345,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     onAdvancedClicked: (event) ->
         event.preventDefault()
 
-        # Toggle optional fields' visibility.
-        if window.popoverExtended
-            @hideOptionalFields()
-        else
-            @showOptionalFields()
+        # Show all the fields, and hide the button.
+        @expandPopover()
 
         # Mark the popover has extended so the information is not lost when
         # screen is left.
@@ -356,10 +354,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     # Show the optional fields of the screen (the ones hidden by default).
-    showOptionalFields: ->
+    expandPopover: ->
         @$optionalFields.attr 'aria-hidden', false
-
-
-    # Hide the optional fields of the screen (the ones hidden by default).
-    hideOptionalFields: ->
-        @$optionalFields.attr 'aria-hidden', true
+        @$moreDetailsButton.hide()
