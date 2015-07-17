@@ -1,5 +1,4 @@
 PopoverView = require 'lib/popover_view'
-Event       = require 'models/event'
 
 module.exports = class EventPopOver extends PopoverView
 

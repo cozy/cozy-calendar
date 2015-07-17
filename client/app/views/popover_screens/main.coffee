@@ -1,5 +1,6 @@
 PopoverScreenView = require 'lib/popover_screen_view'
 ComboBox    = require 'views/widgets/combobox'
+Event       = require 'models/event'
 
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
