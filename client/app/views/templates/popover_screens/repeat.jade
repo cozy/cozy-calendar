@@ -1,83 +1,61 @@
 .fixed-height.repeat-screen
 
     label
-        select.input-repeat.select-big
-            option(value="-1", selected) No Repeat
-            option(value="0") Daily
-            option(value="1") Weekly
-            option(value="2") Monthly
-            option(value="3") Yearly
+        select.input-repeat.select-big(name="frequency")
+            option(value=NO_REPEAT, selected=isFreqSelected(NO_REPEAT)) No Repeat
+            option(value=RRule.DAILY, selected=isFreqSelected(RRule.DAILY)) Daily
+            option(value=RRule.WEEKLY, selected=isFreqSelected(RRule.WEEKLY)) Weekly
+            option(value=RRule.MONTHLY, selected=isFreqSelected(RRule.MONTHLY)) Monthly
+            option(value=RRule.YEARLY, selected=isFreqSelected(RRule.YEARLY)) Yearly
 
-    label.inline-input.generic(aria-hidden="true") 
+    label.inline-input.generic(aria-hidden=genericLimitedVisibility()) 
         span.first-input=t('Interval')
-        input.special(type="number", min=1, value=1)
+        input.special(type="number", min=1, value=rrule.interval, name="interval")
         span=t('days')
 
-    label.inline-input.weekly-only(aria-hidden="true")
+    label.inline-input.weekly-only(aria-hidden=limitedVisibility(RRule.WEEKLY))
         span.first-input=t('On days')
         .space-between
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('M')
+            - each weekday, index in weekDays
+                label
+                    input(type="checkbox", name="weekly-repeat-type", value="#{index}", checked=isWeekdaySelected(weekday))
+                    span= weekday[0]
 
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('T')
-
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('W')
-
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('T')
-
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('F')
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('S')
-
-            label
-                input(type="checkbox", name="weekly-repeat-type", value="monday")
-                span=t('S')
-
-    label.inline-input.monthly-only(aria-hidden="true")
+    label.inline-input.monthly-only(aria-hidden=limitedVisibility(RRule.MONTHLY))
         span.first-input.align-top=t('Repeat by')
         div
             label
-                input(type="radio", name="monthly-repeat-type", value="repeat-day", checked='checked')
+                input(type="radio", name="monthly-repeat-type", value="repeat-day", checked=monthlyRepeatBy('repeat-day'))
                 | Day of the month
 
             label
-                input(type="radio", name="monthly-repeat-type", value="repeat-weekday")
+                input(type="radio", name="monthly-repeat-type", value="repeat-weekday", checked=monthlyRepeatBy('repeat-weekday'))
                 | Day of the week
 
 
-    label.inline-input.generic(aria-hidden="true")
+    label.inline-input.generic(aria-hidden=genericLimitedVisibility())
         span.first-input.align-top=t('Ends')
         div
             label.inline-input
-                input(type="radio", name="endMode", value='never', checked='checked')
+                input(type="radio", name="endMode", value='never', checked=isEndModeSelected('never'))
                 = t('Never')
 
             label.inline-input
-                input(type="radio", name="endMode", value='count')
+                input(type="radio", name="endMode", value='count', checked=isEndModeSelected('count'))
                 label(for="count")= t('after')
-                input#rrule-count.special.input-mini(type="number", min=0, value=1)
+                input#rrule-count.special.input-mini(name="count", type="number", min=0, value=rrule.count)
                 label(for="rrule-count")=t('occurences')
             
             label.inline-input
-                input(type="radio", name="endMode", value='until')
+                input(type="radio", name="endMode", value='until', checked=isEndModeSelected('until'))
                 label(for="until")= t('until')
                 input.special.input-until-date.input-date(tabindex="3",
                                       type="text",
-                                      size="10"
+                                      size="10",
+                                      name="until-date",
                                       placeholder=t("Until [date]"),
-                                      value=start.format(dFormat))
+                                      value=rrule.until)
 
-
-    div.inline-input.generic.summary(aria-hidden="true")
+    div.inline-input.summary.generic(aria-hidden=genericLimitedVisibility())
         span.first-input.align-top=t('Summary')
-        span The summary comes here
+        span#summary

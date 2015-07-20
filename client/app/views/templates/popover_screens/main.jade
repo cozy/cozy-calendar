@@ -2,7 +2,7 @@
 - popoverClassName += (sameDay? ' is-same-day' : '')
 - var showDetailsByDefault = details && details.length > 0
 - var showAlertsByDefault = alerts && alerts.length > 0
-- var showRepeatByDefault = repeat != null && repeat != void(0)
+- var showRepeatByDefault = rrule != null && rrule != void(0)
 
 .popover-content-wrapper.label-row(class=popoverClassName)
     .item-row
@@ -89,7 +89,11 @@ div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepea
         span.fa.fa-repeat
     .icon.right
         span.fa.fa-angle-right
-    button.button-full-block No repeat
+
+    if showRepeatByDefault
+        button.button-full-block= getReccuringSummary()
+    else
+        button.button-full-block No repeat
 
 .popover-footer
     a.advanced-link(role="button",

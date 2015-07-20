@@ -71,7 +71,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         else
             currentCalendar = @model.get('tags')?[0] or defaultCalendar
 
-        return data = _.extend {}, @model.toJSON(),
+        return data = _.extend super(),
             tFormat:     tFormat
             dFormat:     dFormat
             calendar:    currentCalendar
@@ -83,6 +83,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             alerts: @model.get('alarms')
             guestsButtonText: @getGuestsButtonText()
             buttonText: @getButtonText()
+            getReccuringSummary: =>
+                rrule = RRule.fromString @model.get('rrule')
+                # Handle localization.
+                locale = moment.localeData()
+                language =
+                    dayNames: locale._weekdays
+                    monthNames: locale._months
+
+                return rrule.toText(window.t, language)
 
     afterRender: ->
         # Cache jQuery selectors.
