@@ -11,6 +11,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
     events:
         "click .add-new-guest": "onNewGuest"
         "click .guest-delete": "onRemoveGuest"
+        'keyup input[name="guest-name"]': "onKeyup"
 
 
     getRenderData: ->
@@ -63,4 +64,14 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             # Inefficient way to refresh the list, but it's okay since it will
             # never be a big list.
             @afterRender()
+
+            # Reset form field.
+            @$('input[name="guest-name"]').val ''
+            @$('input[name="guest-name"]').focus()
+
+
+    onKeyup: (event) ->
+        key = event.keyCode
+        if key is 13 # enter
+            @onNewGuest()
 
