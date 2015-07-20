@@ -82,15 +82,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             alerts: @model.get('alarms')
             guestsButtonText: @getGuestsButtonText()
             buttonText: @getButtonText()
-            getReccuringSummary: =>
-                rrule = RRule.fromString @model.get('rrule')
-                # Handle localization.
-                locale = moment.localeData()
-                language =
-                    dayNames: locale._weekdays
-                    monthNames: locale._months
+            recurrenceButtonText: @getRecurrenceButtonText()
 
-                return rrule.toText(window.t, language)
 
     afterRender: ->
         # Cache jQuery selectors.
@@ -335,6 +328,23 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         else
             numOthers = guests.length - 1
             return "#{guests[0].email} and #{numOthers} other(s)"
+
+
+    getRecurrenceButtonText: ->
+        rrule = @model.get('rrule')
+
+        if rrule?
+            rrule = RRule.fromString @model.get('rrule')
+            # Handle localization.
+            locale = moment.localeData()
+            language =
+                dayNames: locale._weekdays
+                monthNames: locale._months
+
+            return rrule.toText(window.t, language)
+        else
+            return t('no repeat button')
+
 
 
     # Show more fields when triggered.

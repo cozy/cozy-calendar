@@ -89,11 +89,7 @@ div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepea
         span.fa.fa-repeat
     .icon.right
         span.fa.fa-angle-right
-
-    if showRepeatByDefault
-        button.button-full-block= getReccuringSummary()
-    else
-        button.button-full-block No repeat
+    button.button-full-block= recurrenceButtonText
 
 .popover-footer
     a.advanced-link(role="button",
