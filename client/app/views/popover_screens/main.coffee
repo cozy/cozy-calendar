@@ -140,6 +140,12 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @refresh()
 
+        # If all the optional fields are shown by default (they all have a
+        # value), then hide the "more details" button.
+        if @$("[aria-hidden=true]").length is 0
+            @$moreDetailsButton.hide()
+
+
     onLeaveScreen: ->
         value = @$('.input-details').val()
         @model.set 'details', value
