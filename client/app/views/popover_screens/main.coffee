@@ -38,7 +38,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .remove':        -> @switchToScreen('delete')
         'click .duplicate':     'onDuplicateClicked'
 
-
         'changeTime.timepicker .input-start':    'onSetStart'
         'changeTime.timepicker .input-end-time': 'onSetEnd'
         'changeDate .input-end-date':            'onSetEnd'
@@ -144,11 +143,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # value), then hide the "more details" button.
         if @$("[aria-hidden=true]").length is 0
             @$moreDetailsButton.hide()
-
-
-    onLeaveScreen: ->
-        value = @$('.input-details').val()
-        @model.set 'details', value
 
 
     refresh: ->
