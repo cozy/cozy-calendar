@@ -116,6 +116,82 @@ module.exports =
     "times"                             : "fois"
     "weekday"                           : "jours de la semaine"
 
+# POPOVER
+
+    # Generic
+    'screen title done button': 'Fait'
+
+    # Main screen
+    "placeholder event title": "Titre de l'événement"
+    "from": "De"
+    "placeholder from date": "De [date]"
+    "placeholder from time": "De [heures:minutes]"
+    "to": "Jusqu'à"
+    "placeholder to date": "Jusqu'à [date]"
+    "placeholder to time": "Jusqu'à [hours:minutes]"
+    "all day": "Toute la journée"
+    "placeholder place": "Lieu"
+    "add guest button": "Ajouter un invité"
+    "guests list": "%{first} et %{smart_count} autre |||| %{first} et %{smart_count} autres"
+    "placeholder description": "Description"
+    "no alert button": "Pas d'alerte"
+    "alert label": "%{smart_count} alerte programmée |||| %{smart_count} alertes programmées"
+    "no repeat button": "Pas de répétition"
+    "more details button": "Plus de détails"
+    "save button": "Sauvegarder"
+    "create button": "Créer"
+
+    "duplicate event tooltip": "Dupliquer l'événement"
+    "delete event tooltip": "Supprimer l'événement"
+
+    # Delete screen
+    "screen delete title": "Supprimer l'événement"
+    "screen delete description": "Vous êtes sur le point de supprimer l'événement \"%{description}\". Êtes-vous sûr ?"
+    "screen delete yes button": "Oui"
+    "screen delete no button": "Non"
+
+    # Guest title
+    "screen guest title": "Invités"
+    "screen guest input placeholder": "Adresse email"
+    "screen guest add button": "Ajouter"
+    "screen guest remove tooltip": "Annuler l'invitation"
+
+    # Description screen
+    "screen description title": "Description"
+
+    # Alert title
+    "screen alert title": "Alertes"
+    "screen alert default value": "Ajouter une nouvelle alerte"
+    "screen alert time of event": "Heure de l'événement"
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes"
+    "screen alert hour": "%{smart_count} heure |||| %{smart_count} heures"
+    "screen alert day": "%{smart_count} jour |||| %{smart_count} jours"
+    "screen alert week": "%{smart_count} semaine |||| %{smart_count} semaines"
+    "screen alert delete tooltip": "Supprimer l'alerte"
+    "screen alert type email": "Email"
+    "screen alert type notification": "Notification Cozy"
+
+    # Recurrence title
+    "screen recurrence title": "Répétition"
+    "screen recurrence no repeat": "Pas de répétition"
+    "screen recurrence daily": "Quotidienne"
+    "screen recurrence weekly": "Hebdomadaire"
+    "screen recurrence monthly": "Mensuelle"
+    "screen recurrence yearly": "Annuelle"
+    "screen recurrence interval label": "Interval"
+    "screen recurrence interval unit": "jours"
+    "screen recurrence days list label": "Seulement les jours suivant :"
+    "screen recurrence repeat by label": "Répéter par :"
+    "screen recurrence repeat by month": "Jour du mois"
+    "screen recurrence repeat by week": "Jour de la semaine"
+    "screen recurrence ends label": "Fin :"
+    "screen recurrence ends never label": "Jamais"
+    "screen recurrence ends count label": "Après"
+    "screen recurrence ends count unit": "occurrences"
+    "screen recurrence ends until label": "Jusqu'à"
+    "screen recurrence ends until placeholder": "Jusqu'à [date]"
+    "screen recurrence summary label": "Résumé"
+
 # MODAL
     "summary"                           : "Titre"
     "start"                             : "Début"

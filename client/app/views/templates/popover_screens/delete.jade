@@ -1,8 +1,8 @@
 .fixed-height.delete-screen
 
-    p You are about to delete the event "#{description}". Are you sure?
+    p=t('screen delete description', {description: description})
     img.remove-spinner(src='img/spinner.svg')
     p.errors
     .remove-choices
-        button.btn.answer-yes Yes
-        button.btn.answer-no No
+        button.btn.answer-yes=t('screen delete yes button')
+        button.btn.answer-no=t('screen delete no button')

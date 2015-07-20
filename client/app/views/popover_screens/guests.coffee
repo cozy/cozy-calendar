@@ -3,7 +3,7 @@ random = require 'lib/random'
 
 module.exports = class GuestPopoverScreen extends PopoverScreenView
 
-    screenTitle: 'Guests'
+    screenTitle: t('screen guest title')
     templateContent: require 'views/templates/popover_screens/guests'
 
     templateGuestRow: require 'views/templates/popover_screens/guest_row'

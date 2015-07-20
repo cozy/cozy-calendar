@@ -21,7 +21,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         {W: 1}
     ]
 
-    screenTitle: 'Alert'
+    screenTitle: t('screen alert title')
     templateContent: require 'views/templates/popover_screens/alert'
 
     templateAlertRow: require 'views/templates/popover_screens/alert_row'
@@ -148,14 +148,14 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
     getAlertTranslationInfo: (alert) ->
         [unit] = Object.keys(alert)
         translationKey = switch unit
-            when 'M' then 'alert minute'
-            when 'H' then 'alert hour'
-            when 'D' then 'alert day'
-            when 'W' then 'alert week'
+            when 'M' then 'screen alert minute'
+            when 'H' then 'screen alert hour'
+            when 'D' then 'screen alert day'
+            when 'W' then 'screen alert week'
 
-        value = alert[unit]
+        value = parseInt(alert[unit])
 
         if unit is 'M' and value is 0
-            translationKey = 'alert time of event'
+            translationKey = 'screen alert time of event'
 
         return {translationKey, value}

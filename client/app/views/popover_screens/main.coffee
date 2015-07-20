@@ -315,19 +315,22 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getButtonText: ->
-        if @model.isNew() then t('create') else t('save')
+        if @model.isNew() then t('create button') else t('save button')
 
 
     getGuestsButtonText: ->
         guests = @model.get('attendees') or []
 
         if guests.length is 0
-            return "Add people"
+            return t("add guest button")
         else if guests.length is 1
             return guests[0].email
         else
             numOthers = guests.length - 1
-            return "#{guests[0].email} and #{numOthers} other(s)"
+            options =
+                first: guests[0].email,
+                smart_count: numOthers
+            return t("guests list", options)
 
 
     getRecurrenceButtonText: ->

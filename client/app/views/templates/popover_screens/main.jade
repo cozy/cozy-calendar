@@ -9,32 +9,32 @@
         label.timed.time-row(aria-hidden="#{allDay}")
             .icon
                 span.fa.fa-arrow-right
-            span.caption= t("From")
+            span.caption= t("from")
             input.input-start-date.input-date(tabindex="3",
                                               type="text",
                                               size="10"
-                                              placeholder=t("From [date]"),
+                                              placeholder=t("placeholder from date"),
                                               value=start.format(dFormat))
             input.input-start.input-time(tabindex="2",
                                          type="time",
                                          size="5"
-                                         placeholder=t("From [hours:minutes]"),
+                                         placeholder=t("placeholder from time"),
                                          value=start.format(tFormat),
                                          aria-hidden="#{allDay}")
 
         label.timed.time-row
             .icon
                 span.fa.fa-arrow-left
-            span.input-end-caption.caption= t("To")
+            span.input-end-caption.caption= t("to")
             input.input-end-date.input-date(tabindex="5",
                                             type="text",
                                             size="10"
-                                            placeholder=t("To [date]"),
+                                            placeholder=t("placeholder to date"),
                                             value=end.format(dFormat))
             input.input-end-time.input-time(tabindex="4",
                                             type="time",
                                             size="5"
-                                            placeholder=t("To [hours:minutes]"),
+                                            placeholder=t("placeholder to time"),
                                             value=end.format(tFormat),
                                             aria-hidden="#{allDay}")
 
@@ -44,7 +44,7 @@
                                type="checkbox",
                                value='checked',
                                checked=allDay)
-            span= t('All day')
+            span= t('all day')
 
 
 div.label.label-row
@@ -53,7 +53,7 @@ div.label.label-row
     input.input-place.input-full-block(tabindex="7",
                                        type="text",
                                        value=place,
-                                       placeholder=t("Place"))
+                                       placeholder=t("placeholder place"))
 
 div.label.label-row.input-people
     .icon
@@ -70,7 +70,7 @@ div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}"
     input.input-details-trigger.input-full-block(tabindex="9",
                                                  type="text",
                                                  value=details,
-                                                 placeholder=t("Description"))
+                                                 placeholder=t("placeholder description"))
 
 div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlertsByDefault}")
     .icon
@@ -79,9 +79,9 @@ div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlerts
         span.fa.fa-angle-right
 
     if !alerts || alerts.length === 0
-        button.button-full-block No alert
+        button.button-full-block=t('no alert button')
     else
-        button.button-full-block= t('alert label', {numAlerts: alerts.length})
+        button.button-full-block= t('alert label', {smart_count: alerts.length})
 
 
 div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepeatByDefault}")
@@ -98,7 +98,7 @@ div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepea
                     data-tabindex-next="1")
       .icon
           span.fa.fa-caret-down
-        = t('advanced')
+        = t('more details button')
     a.btn.add(role="button",
               tabindex="7")
         = buttonText

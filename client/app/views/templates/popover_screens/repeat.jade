@@ -2,19 +2,19 @@
 
     label
         select.input-repeat.select-big(name="frequency")
-            option(value=NO_REPEAT, selected=isFreqSelected(NO_REPEAT)) No Repeat
-            option(value=RRule.DAILY, selected=isFreqSelected(RRule.DAILY)) Daily
-            option(value=RRule.WEEKLY, selected=isFreqSelected(RRule.WEEKLY)) Weekly
-            option(value=RRule.MONTHLY, selected=isFreqSelected(RRule.MONTHLY)) Monthly
-            option(value=RRule.YEARLY, selected=isFreqSelected(RRule.YEARLY)) Yearly
+            option(value=NO_REPEAT, selected=isFreqSelected(NO_REPEAT))=t('screen recurrence no repeat')
+            option(value=RRule.DAILY, selected=isFreqSelected(RRule.DAILY))=t('screen recurrence daily')
+            option(value=RRule.WEEKLY, selected=isFreqSelected(RRule.WEEKLY))=t('screen recurrence weekly')
+            option(value=RRule.MONTHLY, selected=isFreqSelected(RRule.MONTHLY))=t('screen recurrence monthly')
+            option(value=RRule.YEARLY, selected=isFreqSelected(RRule.YEARLY))=t('screen recurrence yearly')
 
     label.inline-input.generic(aria-hidden=genericLimitedVisibility()) 
-        span.first-input=t('Interval')
+        span.first-input=t('screen recurrence interval label')
         input.special(type="number", min=1, value=rrule.interval, name="interval")
-        span=t('days')
+        span=t('screen recurrence interval unit')
 
     label.inline-input.weekly-only(aria-hidden=limitedVisibility(RRule.WEEKLY))
-        span.first-input=t('On days')
+        span.first-input=t('screen recurrence days list label')
         .space-between
             - each weekday, index in weekDays
                 label
@@ -22,40 +22,40 @@
                     span= weekday[0]
 
     label.inline-input.monthly-only(aria-hidden=limitedVisibility(RRule.MONTHLY))
-        span.first-input.align-top=t('Repeat by')
+        span.first-input.align-top=t('screen recurrence repeat by label')
         div
             label
                 input(type="radio", name="monthly-repeat-type", value="repeat-day", checked=monthlyRepeatBy('repeat-day'))
-                | Day of the month
+                | #{t('screen recurrence repeat by month')}
 
             label
                 input(type="radio", name="monthly-repeat-type", value="repeat-weekday", checked=monthlyRepeatBy('repeat-weekday'))
-                | Day of the week
+                | #{t('screen recurrence repeat by week')}
 
 
     label.inline-input.generic(aria-hidden=genericLimitedVisibility())
-        span.first-input.align-top=t('Ends')
+        span.first-input.align-top=t('screen recurrence ends label')
         div
             label.inline-input
                 input(type="radio", name="endMode", value='never', checked=isEndModeSelected('never'))
-                = t('Never')
+                = t('screen recurrence ends never label')
 
             label.inline-input
                 input(type="radio", name="endMode", value='count', checked=isEndModeSelected('count'))
-                label(for="count")= t('after')
+                label(for="count")= t('screen recurrence ends count label')
                 input#rrule-count.special.input-mini(name="count", type="number", min=0, value=rrule.count)
-                label(for="rrule-count")=t('occurences')
+                label(for="rrule-count")=t('screen recurrence ends count unit')
             
             label.inline-input
                 input(type="radio", name="endMode", value='until', checked=isEndModeSelected('until'))
-                label(for="until")= t('until')
+                label(for="until")= t('screen recurrence ends until label')
                 input.special.input-until-date.input-date(tabindex="3",
                                       type="text",
                                       size="10",
                                       name="until-date",
-                                      placeholder=t("Until [date]"),
+                                      placeholder=t("screen recurrence ends until placeholder"),
                                       value=rrule.until)
 
     div.inline-input.summary.generic(aria-hidden=genericLimitedVisibility())
-        span.first-input.align-top=t('Summary')
+        span.first-input.align-top=t("screen recurrence summary label")
         span#summary

@@ -2,7 +2,7 @@ PopoverScreenView = require 'lib/popover_screen_view'
 
 module.exports = class DeletePopoverScreen extends PopoverScreenView
 
-    screenTitle: "Delete"
+    screenTitle: t('screen delete title')
 
     # Override title template.
     templateTitle: require 'views/templates/popover_screens/delete_title'
