@@ -1,4 +1,6 @@
 module.exports =
+    "calendar list title"               : "Calendars"
+    "sync settings button label"        : "Synchronization settings"
     "default calendar name"             : "my calendar"
     "Add"                               : "Add"
     "event"                             : "Event"
