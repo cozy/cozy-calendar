@@ -21,7 +21,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         {W: 1}
     ]
 
-    screenTitle: t('screen alert title')
+    screenTitle: t('screen alert title empty')
     templateContent: require 'views/templates/popover_screens/alert'
 
     templateAlertRow: require 'views/templates/popover_screens/alert_row'
@@ -33,6 +33,14 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
 
 
     getRenderData: ->
+
+        # Override the screen title based on the model's value.
+        alerts = @model.get('alarms') or []
+        numAlerts = alerts.length
+        if numAlerts > 0
+            @screenTitle = t('screen alert title', smart_count: numAlerts)
+        else
+            @screenTitle = t('screen alert title empty')
 
         # Get a formatted list based on defined options.
         alertOptions = AlertPopoverScreen.ALERT_OPTIONS
@@ -80,7 +88,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
 
         # Inefficient way to refresh the list, but it's okay since it will never
         # be a big list.
-        @afterRender()
+        @render()
 
 
     # Handle alert action toggle.
@@ -141,7 +149,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
 
             # Inefficient way to refresh the list, but it's okay since it will
             # never be a big list.
-            @afterRender()
+            @render()
 
 
     # Extract translation information based of an ALERT_OPTIONS item.

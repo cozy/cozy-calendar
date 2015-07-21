@@ -153,7 +153,8 @@ module.exports =
     "screen delete no button": "Non"
 
     # Guest title
-    "screen guest title": "Invités"
+    "screen guest title empty": "Invité"
+    "screen guest title": "%{smart_count} invité |||| %{smart_count} invités"
     "screen guest input placeholder": "Adresse email"
     "screen guest add button": "Ajouter"
     "screen guest remove tooltip": "Annuler l'invitation"
@@ -162,7 +163,8 @@ module.exports =
     "screen description title": "Description"
 
     # Alert title
-    "screen alert title": "Alertes"
+    "screen alert title empty": "Alerte"
+    "screen alert title": "%{smart_count} alerte |||| %{smart_count} alertes"
     "screen alert default value": "Ajouter une nouvelle alerte"
     "screen alert time of event": "Heure de l'événement"
     "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes"

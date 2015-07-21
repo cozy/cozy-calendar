@@ -3,7 +3,7 @@ random = require 'lib/random'
 
 module.exports = class GuestPopoverScreen extends PopoverScreenView
 
-    screenTitle: t('screen guest title')
+    screenTitle: ''
     templateContent: require 'views/templates/popover_screens/guests'
 
     templateGuestRow: require 'views/templates/popover_screens/guest_row'
@@ -15,6 +15,15 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
 
 
     getRenderData: ->
+
+        # Override the screen title based on the model's value.
+        guests = @model.get('attendees') or []
+        numGuests = guests.length
+        if numGuests > 0
+            @screenTitle = t('screen guest title', smart_count: numGuests)
+        else
+            @screenTitle = t('screen guest title empty')
+
         return _.extend super(),
             guests: @model.get('attendes') or []
 
@@ -44,7 +53,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
 
         # Inefficient way to refresh the list, but it's okay since it will never
         # be a big list.
-        @afterRender()
+        @render()
 
 
     onNewGuest: ->
@@ -63,7 +72,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
 
             # Inefficient way to refresh the list, but it's okay since it will
             # never be a big list.
-            @afterRender()
+            @render()
 
             # Reset form field.
             @$('input[name="guest-name"]').val ''
