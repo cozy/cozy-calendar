@@ -43,7 +43,7 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
                 monthlyRepeatBy: 'repeat-day'
 
         # Override default rrule value if the event has a rrule.
-        if @model.has('rrule')
+        if @model.has('rrule') and @model.get('rrule').length > 0
 
             # Extract rules from the rrule string.
             rruleOptions = RRule.fromString(@model.get('rrule')).options
@@ -129,16 +129,18 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
     renderSummary: ->
         rrule = @buildRRuleFromDOM()
 
-        # Handle localization.
-        locale = moment.localeData()
-        language =
-            dayNames: locale._weekdays
-            monthNames: locale._months
+        # If there is a valid rrule.
+        if rrule?.length > 0
+            # Handle localization.
+            locale = moment.localeData()
+            language =
+                dayNames: locale._weekdays
+                monthNames: locale._months
 
-        summary = rrule.toText(window.t, language)
+            summary = rrule.toText(window.t, language)
 
-        # Perform the actualchange.
-        @$('#summary').html summary
+            # Perform the actualchange.
+            @$('#summary').html summary
 
 
     # When the user leaves the screen, save the model.

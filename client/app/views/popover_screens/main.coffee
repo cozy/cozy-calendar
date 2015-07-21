@@ -336,7 +336,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     getRecurrenceButtonText: ->
         rrule = @model.get('rrule')
 
-        if rrule?
+        # If there is a valid rrule.
+        if rrule?.length > 0
             rrule = RRule.fromString @model.get('rrule')
             # Handle localization.
             locale = moment.localeData()

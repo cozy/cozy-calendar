@@ -2,7 +2,7 @@
 - popoverClassName += (sameDay? ' is-same-day' : '')
 - var showDetailsByDefault = details && details.length > 0
 - var showAlertsByDefault = alerts && alerts.length > 0
-- var showRepeatByDefault = rrule != null && rrule != void(0)
+- var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
 
 .popover-content-wrapper.label-row(class=popoverClassName)
     .item-row
