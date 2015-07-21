@@ -11,7 +11,13 @@
     label.inline-input.generic(aria-hidden=genericLimitedVisibility()) 
         span.first-input=t('screen recurrence interval label')
         input.special(type="number", min=1, value=rrule.interval, name="interval")
-        span=t('screen recurrence interval unit')
+        
+        // By default the value is -1 and triggers a polyglot warning, so it's left empty.
+        - if (rrule.freq >= 0)
+            - var localizationKey = "screen recurrence interval unit " + rrule.freq
+            span#intervalUnit=t(localizationKey, {smart_count: rrule.interval})
+        - else
+            span#intervalUnit
 
     label.inline-input.weekly-only(aria-hidden=limitedVisibility(RRule.WEEKLY))
         span.first-input=t('screen recurrence days list label')

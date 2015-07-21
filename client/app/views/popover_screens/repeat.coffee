@@ -172,6 +172,9 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
             freq: +@$('select[name="frequency"]').val()
             interval: +@$('input[name="interval"]').val()
 
+        # Updates the interval unit to take plurals into account.
+        @updateIntervalUnit options.freq, options.interval
+
         # The selection of specific day is only relevant for weekly events.
         if options.freq is RRule.WEEKLY
             options.byweekday = []
@@ -225,7 +228,23 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
             @$(repeatTypeSelector).attr 'aria-hidden', false
 
             @renderSummary()
+            @updateIntervalUnit value
 
         # Hide all the fields if 'no repeat' is selected.
         else
             @$('[aria-hidden="false"]').attr 'aria-hidden', true
+
+
+    # Update the interval unit string.
+    updateIntervalUnit: (unit = null, numberOfUnits = null) ->
+        unless unit?
+            unit = parseInt @$('select.input-repeat').val()
+        unless numberOfUnits?
+            numberOfUnits = parseInt @$('input[name="interval"]').val()
+
+        # It doesn't make sense to add the unit when there is no repeation.
+        # Prevent a polyglot warning.
+        if unit isnt NO_REPEAT
+            localizationKey = "screen recurrence interval unit #{unit}"
+            unitString = t(localizationKey, smart_count: numberOfUnits)
+            @$('#intervalUnit').html unitString
