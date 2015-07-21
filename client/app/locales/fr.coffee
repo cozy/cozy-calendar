@@ -121,17 +121,17 @@ module.exports =
 # POPOVER
 
     # Generic
-    'screen title done button': 'Fait'
+    'screen title done button': 'OK'
 
     # Main screen
     "placeholder event title": "Titre de l'événement"
     "from": "De"
     "placeholder from date": "De [date]"
     "placeholder from time": "De [heures:minutes]"
-    "to": "Jusqu'à"
+    "to": "Au"
     "placeholder to date": "Jusqu'à [date]"
     "placeholder to time": "Jusqu'à [hours:minutes]"
-    "all day": "Toute la journée"
+    "all day": "Jour Entier"
     "placeholder place": "Lieu"
     "add guest button": "Ajouter un invité"
     "guests list": "%{first} et %{smart_count} autre |||| %{first} et %{smart_count} autres"
@@ -182,16 +182,16 @@ module.exports =
     "screen recurrence yearly": "Annuelle"
     "screen recurrence interval label": "Interval"
     "screen recurrence interval unit": "jours"
-    "screen recurrence days list label": "Seulement les jours suivant :"
-    "screen recurrence repeat by label": "Répéter par :"
+    "screen recurrence days list label": "jours"
+    "screen recurrence repeat by label": "Répéter par"
     "screen recurrence repeat by month": "Jour du mois"
     "screen recurrence repeat by week": "Jour de la semaine"
-    "screen recurrence ends label": "Fin :"
+    "screen recurrence ends label": "Fin"
     "screen recurrence ends never label": "Jamais"
     "screen recurrence ends count label": "Après"
     "screen recurrence ends count unit": "occurrences"
-    "screen recurrence ends until label": "Jusqu'à"
-    "screen recurrence ends until placeholder": "Jusqu'à [date]"
+    "screen recurrence ends until label": "au"
+    "screen recurrence ends until placeholder": "au [date]"
     "screen recurrence summary label": "Résumé"
 
 # MODAL
