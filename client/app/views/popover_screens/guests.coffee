@@ -14,6 +14,11 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         'keyup input[name="guest-name"]': "onKeyup"
 
 
+    # Flag used in order to prevent the typeahead from being reinitialized at
+    # each render.
+    _configured: false
+
+
     getRenderData: ->
 
         # Override the screen title based on the model's value.
@@ -42,6 +47,41 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             $guests.append row
 
 
+        @configureGuestTypeahead()
+
+
+    # Configure the auto-complete on contacts.
+    configureGuestTypeahead: ->
+        # If it's already configured, no need to do it again.
+        unless @_configured
+            @_configured = true
+            @$('input[name="guest-name"]').typeahead
+                source: app.contacts.asTypeaheadSource()
+                matcher: (contact) ->
+                    old = $.fn.typeahead.Constructor::matcher
+                    return old.call this, contact.display
+                sorter: (contacts) ->
+                    beginswith = []
+                    caseSensitive = []
+                    caseInsensitive = []
+
+                    while (contact = contacts.shift())
+                        item = contact.display
+                        if not item.toLowerCase().indexOf(this.query.toLowerCase())
+                            beginswith.push contact
+                        else if ~item.indexOf this.query
+                            caseSensitive.push contact
+                        else caseInsensitive.push contact
+
+                    return beginswith.concat caseSensitive, caseInsensitive
+
+                highlighter: (contact) ->
+                    old = $.fn.typeahead.Constructor::highlighter
+                    return old.call this, contact.display
+
+                updater: @onNewGuest.bind(@)
+
+
     onRemoveGuest: (event) ->
         # Get which guest to remove.
         index = @$(event.target).parents('li').attr 'data-index'
@@ -56,8 +96,15 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         @render()
 
 
-    onNewGuest: ->
-        email = @$('input[name="guest-name"]').val()
+    # Handle guest addition. `userInfo` is passed when called by the typeahead.
+    onNewGuest: (userInfo = null) ->
+
+        if userInfo?
+            [email, contactID] = userInfo.split(';')
+        else
+            email = @$('input[name="guest-name"]').val()
+            contactID = null
+
         guests = @model.get('attendees') or []
         if not _.findWhere(guests, email: email)
             # Clone the source array, otherwise it's not considered as
@@ -67,16 +114,16 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
                 key: random.randomString()
                 status: 'INVITATION-NOT-SENT'
                 email: email
-                contactid: null #id or null
+                contactid: contactID
             @model.set 'attendees', guests
 
             # Inefficient way to refresh the list, but it's okay since it will
             # never be a big list.
             @render()
 
-            # Reset form field.
-            @$('input[name="guest-name"]').val ''
-            @$('input[name="guest-name"]').focus()
+        # Reset form field.
+        @$('input[name="guest-name"]').val ''
+        @$('input[name="guest-name"]').focus()
 
 
     onKeyup: (event) ->
