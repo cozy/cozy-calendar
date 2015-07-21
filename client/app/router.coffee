@@ -1,7 +1,6 @@
 app = require 'application'
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
-EventModal = require 'views/event_modal'
 SettingsModal = require 'views/settings_modal'
 ImportView = require 'views/import_view'
 # RealEventCollection = require 'collections/realevents'
@@ -82,11 +81,9 @@ module.exports = class Router extends Backbone.Router
         @event id, 'list'
 
     event: (id, backurl) ->
-        model = app.events.get(id)
-        view = new EventModal(model: model, backurl: backurl)
-        $('body').append view.$el
-        view.render()
-        @onCalendar = true
+        # @TODO: bring back that feature in the future
+        console.log 'This feature has been temporarily disabled. Let us ' + \
+                     'know if you miss it!'
 
     backToCalendar: =>
         #@TODO, go back to same view we left
