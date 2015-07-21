@@ -117,57 +117,40 @@ module.exports = class PopoverView extends BaseView
                 display: 'block'
                 top: 'auto'
                 left: 'auto'
-                left: 'auto'
 
         # Append the popover to the DOM so it has height/width/offset.
         @$popover.appendTo @container
 
-        # The popover's height must be retrieved when the popover is expanded.
-        hiddenElements = @$popover.find '[aria-hidden="true"]'
-        hiddenElements.attr 'aria-hidden', false
-
         # Define everything that will be needed for positionning.
-        popoverHeight = @$popover.innerHeight()
         popoverWidth = @$popover.innerWidth()
 
         # Target is the calendar's cell clicked.
         targetOffset = @target.offset()
         targetWidth = @target.width()
-        targetHeight = @target.height()
 
         # Container is the screen, except the sidebar.
-        containerOffset = @container.offset()
         containerHeight = @container.innerHeight()
         containerWidth = @container.innerWidth()
 
-        # `popoverHeight` has been computed based on the expanded popover, but
-        # it's collapsed by default.
-        hiddenElements.attr 'aria-hidden', true
+        # Cell is on the left side
+        if targetOffset.left < (containerWidth / 2)
+            left = targetOffset.left + 50
 
-        # Define default position.
-        position =
-            top: targetOffset.top
-            left: targetOffset.left + 50
+        # Cell is on the right side
+        else
+            left = targetOffset.left - popoverWidth - targetWidth + 25
 
-        # Check if popover is within viewport's width
-        maxXPosition = position.left + targetWidth + popoverWidth
-        viewportMaxXPosition = containerOffset.left + containerWidth
-        fitRight = maxXPosition < viewportMaxXPosition
+        # Cell is on the upper side
+        if targetOffset.top < (containerHeight / 2)
+            top = '10vh'
+            bottom = 'auto'
 
-        # Check if popover is within viewport's height
-        maxYposition = position.top + popoverHeight
-        viewportMaxYPosition = containerOffset.top + containerHeight
-        fitBottom = maxYposition < viewportMaxYPosition
+        # Cell is on the lower side
+        else
+            top = 'auto'
+            bottom = '5vh'
 
-        # If it's not in viewport's height, position relatively to bottom.
-        unless fitBottom
-            position.bottom = containerHeight - targetOffset.top
-            position.top = 'auto'
-
-        # If it's not in viewport's width, position relatively to right.
-        unless fitRight
-            position.right = containerWidth - targetOffset.left + targetWidth
-            position.left = 'auto'
+        position = {top, bottom, left}
 
         # Position the element into the DOM
         @$popover.css position
