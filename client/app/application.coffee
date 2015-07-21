@@ -1,16 +1,11 @@
 module.exports =
 
     initialize: ->
-        # @TODO improve that
-        # Initialize timezone with the Cozy User's one.
-        # Need page refresh to realod it.
-        $.get "users/current?keys=timezone", (data) =>
-            @timezone = data
-            @_initialize()
-
-    _initialize: ->
 
         window.app = @
+
+        @timezone = window.timezone
+        delete window.timezone
 
         @locale = window.locale
         delete window.locale
@@ -66,9 +61,9 @@ module.exports =
         todayChecker @router
 
         Object.freeze this if typeof Object.freeze is 'function'
-    
+
     isMobile: ->
-        # Test agains't property changed by css @media, 
+        # Test agains't property changed by css @media,
         # instead of direct windows.width .
         return $('ul#menu').height() is 40
-        
+
