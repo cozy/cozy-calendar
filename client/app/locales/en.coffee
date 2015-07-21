@@ -145,6 +145,7 @@ module.exports =
 
     "duplicate event tooltip": "Duplicate event"
     "delete event tooltip": "Delete event"
+    "change calendar" : "Change calendar"
 
     # Delete screen
     "screen delete title": "Delete event"
@@ -200,26 +201,6 @@ module.exports =
     "screen recurrence ends until placeholder": "Until [date]"
     "screen recurrence summary label": "Summary"
 
-
-# MODAL
-    "summary"                           : "Summary"
-    "start"                             : "Start"
-    "end"                               : "End"
-    "tags"                              : "Tags"
-    "add tags"                          : "Add tags"
-    "change"                            : "Change"
-    "change to"                         : "Change to"
-    "change calendar"                   : "Change calendar"
-    "save changes"                      : "Save changes"
-    "save changes and invite guests"    : "Save changes and invite guests"
-    "guests"                            : "Guests"
-    "cancel Invitation"                 : "Cancel the invitation"
-    "From"                              : "From"
-    "To"                                : "To"
-    "All day, until"                    : "All day, until"
-    "All one day"                       : "All day"
-    'Reminders before the event'        : 'Reminders before the event'
-    "reminder"                          : "Reminder"
 # CONFIRM MODAL
     'send mails question'               : 'Send a notification email to:'
     'modal send mails'                  : 'Send a notification'
