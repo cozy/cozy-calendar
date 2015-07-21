@@ -1,0 +1,67 @@
+.fixed-height.repeat-screen
+
+    label
+        select.input-repeat.select-big(name="frequency")
+            option(value=NO_REPEAT, selected=isFreqSelected(NO_REPEAT))=t('screen recurrence no repeat')
+            option(value=RRule.DAILY, selected=isFreqSelected(RRule.DAILY))=t('screen recurrence daily')
+            option(value=RRule.WEEKLY, selected=isFreqSelected(RRule.WEEKLY))=t('screen recurrence weekly')
+            option(value=RRule.MONTHLY, selected=isFreqSelected(RRule.MONTHLY))=t('screen recurrence monthly')
+            option(value=RRule.YEARLY, selected=isFreqSelected(RRule.YEARLY))=t('screen recurrence yearly')
+
+    label.inline-input.generic(aria-hidden=genericLimitedVisibility()) 
+        span.first-input=t('screen recurrence interval label')
+        input.special(type="number", min=1, value=rrule.interval, name="interval")
+        
+        // By default the value is -1 and triggers a polyglot warning, so it's left empty.
+        - if (rrule.freq >= 0)
+            - var localizationKey = "screen recurrence interval unit " + rrule.freq
+            span#intervalUnit=t(localizationKey, {smart_count: rrule.interval})
+        - else
+            span#intervalUnit
+
+    label.inline-input.weekly-only(aria-hidden=limitedVisibility(RRule.WEEKLY))
+        span.first-input=t('screen recurrence days list label')
+        .space-between
+            - each weekday, index in weekDays
+                label
+                    input(type="checkbox", name="weekly-repeat-type", value="#{index}", checked=isWeekdaySelected(weekday))
+                    span= weekday[0]
+
+    label.inline-input.monthly-only(aria-hidden=limitedVisibility(RRule.MONTHLY))
+        span.first-input.align-top=t('screen recurrence repeat by label')
+        div
+            label
+                input(type="radio", name="monthly-repeat-type", value="repeat-day", checked=monthlyRepeatBy('repeat-day'))
+                | #{t('screen recurrence repeat by month')}
+
+            label
+                input(type="radio", name="monthly-repeat-type", value="repeat-weekday", checked=monthlyRepeatBy('repeat-weekday'))
+                | #{t('screen recurrence repeat by week')}
+
+
+    label.inline-input.generic(aria-hidden=genericLimitedVisibility())
+        span.first-input.align-top=t('screen recurrence ends label')
+        div
+            label.inline-input
+                input(type="radio", name="endMode", value='never', checked=isEndModeSelected('never'))
+                = t('screen recurrence ends never label')
+
+            label.inline-input
+                input(type="radio", name="endMode", value='count', checked=isEndModeSelected('count'))
+                label(for="count")= t('screen recurrence ends count label')
+                input#rrule-count.special.input-mini(name="count", type="number", min=0, value=rrule.count)
+                label(for="rrule-count")=t('screen recurrence ends count unit')
+            
+            label.inline-input
+                input(type="radio", name="endMode", value='until', checked=isEndModeSelected('until'))
+                label(for="until")= t('screen recurrence ends until label')
+                input.special.input-until-date.input-date(tabindex="3",
+                                      type="text",
+                                      size="10",
+                                      name="until-date",
+                                      placeholder=t("screen recurrence ends until placeholder"),
+                                      value=rrule.until)
+
+    div.inline-input.summary.generic(aria-hidden=genericLimitedVisibility())
+        span.first-input.align-top=t("screen recurrence summary label")
+        span#summary

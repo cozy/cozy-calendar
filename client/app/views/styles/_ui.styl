@@ -1,31 +1,53 @@
 .ui-menu
     z-index 1200
 
+    .ui-menu-item
+        line-height 0
+
+        &:hover
+            cursor pointer
+
+        a
+            display flex
+            align-items center
+            padding 0.4em 0.6em
+            font-size 1rem
+            line-height 1
+
+        .combobox-badge
+            flex none
+            border 1px solid #fff
+            box-sizing border-box
+
 .combobox-badge
     margin-right 5px
     padding: 0
-    width: 1em
-    height: 1em
+    width: 1.5em
+    height: 1.5em
+    border-radius 100%
 
 .surrounded-combobox
     .combobox
-        padding-left 20px
-        margin-left -11px
+        padding-left 30px
+        margin-left  -20px
+        height       1.5rem
+
     .combobox-caret
         padding 4px
         position relative
         left -20px
+
         .caret
             margin-top 8px
+
     .combobox-badge
         margin-right 0px
         position relative
         left 3px
 
+
 #event-modal
     padding: 0
-
-
 
     .btn
         border-radius 5px
@@ -168,7 +190,6 @@
     input
     select
     textarea
-        font-family: 'Maven Pro', sans-serif
         box-shadow: none
         border: 1px solid #CCC
         color #111
