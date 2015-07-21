@@ -200,7 +200,6 @@ module.exports =
     "screen recurrence ends until placeholder": "au [date]"
     "screen recurrence summary label": "Résumé"
 
-
 # CONFIRM MODAL
     'send mails question'               : 'Envoyer un email de notification à :'
     'modal send mails'                  : 'Envoyer une notification'
