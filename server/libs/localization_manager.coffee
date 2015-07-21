@@ -44,9 +44,14 @@ class LocalizationManager
     t: (key, params = {}) -> return @polyglot?.t key, params
 
     buildEmailTemplate: (name) ->
-        filePath = "../mails/#{@polyglot.currentLocale}/#{name}.jade"
-        templatefile = require('path').join __dirname, filePath
-        return jade.compile fs.readFileSync templatefile, 'utf8'
+        try
+            filePath = "../mails/#{@polyglot.currentLocale}/#{name}.jade"
+            templatefile = require('path').join __dirname, filePath
+            return jade.compile fs.readFileSync templatefile, 'utf8'
+        catch err
+            filePath = "../mails/en/#{name}.jade"
+            templatefile = require('path').join __dirname, filePath
+            return jade.compile fs.readFileSync templatefile, 'utf8'
 
     getEmailTemplate: (name) ->
         cacheKey = "#{name}_#{@getLocale()}"
