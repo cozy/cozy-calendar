@@ -53,7 +53,13 @@ input-color   = #555
         width         100%
         border-bottom 1px solid #ddd
 
-        input
+        input[type=text]
+            height 3em
+
+        &.is-same-day input[type=text]
+            height: 1.8em
+
+        .button-full-block
             height 3em
 
     input
@@ -65,8 +71,6 @@ input-color   = #555
         font-family: 'Source Sans Pro', sans-serif
 
         &[type=text]
-            height: 1.8em
-
             .input-time
                 width: 4em
                 text-align: right
@@ -77,7 +81,7 @@ input-color   = #555
     .input-full-block
     .button-full-block
         width 100%
-        padding 1.5em 3em
+        padding 0 3em
         background-color transparent
         border none
         font-size 1rem
@@ -164,7 +168,8 @@ input-color   = #555
 
     .input-desc
         width 100%
-        padding 1.5em 3em
+        padding 0 3em
+        height 3em
         background-color transparent
         border none
         font-size: 1.6em
@@ -268,6 +273,11 @@ input-color   = #555
 
     .advanced-link
         order 2
+
+.input-details-trigger
+.input-place
+    overflow      hidden
+    text-overflow ellipsis
 
 // header on secondary screen
 .popover-back
@@ -442,7 +452,7 @@ ul.alerts
 
     .first-input
         flex             none
-        width            5rem
+        width            6rem
         text-transform   uppercase
         color            #999
 
