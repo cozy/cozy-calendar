@@ -17,6 +17,7 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
 
     events:
         'change select[name="frequency"]': 'onSelectRepeat'
+        'keyup select[name="frequency"]': 'onSelectRepeat'
 
         'input input[name="interval"]': "renderSummary"
         'change input[name="weekly-repeat-type"]': "renderSummary"
