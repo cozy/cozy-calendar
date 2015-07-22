@@ -12,7 +12,7 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
     inputDateFormat: 'DD/MM/YYYY'
     inputDateDTPickerFormat: 'dd/mm/yyyy'
 
-    screenTitle: 'Repeat'
+    screenTitle: t('screen recurrence title')
     templateContent: require 'views/templates/popover_screens/repeat'
 
     events:
