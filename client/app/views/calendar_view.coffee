@@ -120,7 +120,10 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'removeEvents', model.cid
 
     refreshOne: (model) =>
-        return @refresh() if model.isRecurrent()
+
+        previousRRule = model.previous('rrule')
+        modelWasRecurrent = previousRRule? and previousRRule isnt ''
+        return @refresh() if model.isRecurrent() or modelWasRecurrent
 
         # fullCalendar('updateEvent') eats end of allDay events!(?),
         # perform a full refresh as a workaround.

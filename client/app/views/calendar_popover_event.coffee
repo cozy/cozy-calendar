@@ -54,7 +54,7 @@ module.exports = class EventPopOver extends PopoverView
             # Flag to checkout or not the un-persisted changes. Useful when the
             # event is actually deleted.
             if checkoutChanges
-                @model.fetch complete: -> super(checkoutChanges)
+                @model.fetch complete: => super(checkoutChanges)
             else
                 super(checkoutChanges)
 

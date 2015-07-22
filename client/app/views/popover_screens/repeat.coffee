@@ -12,11 +12,12 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
     inputDateFormat: 'DD/MM/YYYY'
     inputDateDTPickerFormat: 'dd/mm/yyyy'
 
-    screenTitle: 'Repeat'
+    screenTitle: t('screen recurrence title')
     templateContent: require 'views/templates/popover_screens/repeat'
 
     events:
         'change select[name="frequency"]': 'onSelectRepeat'
+        'keyup select[name="frequency"]': 'onSelectRepeat'
 
         'input input[name="interval"]': "renderSummary"
         'change input[name="weekly-repeat-type"]': "renderSummary"
@@ -129,8 +130,10 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
     renderSummary: ->
         rrule = @buildRRuleFromDOM()
 
-        # If there is a valid rrule.
-        if rrule?.length > 0
+        try
+            # If this is a valid rrule, it will not throw.
+            rrule.toString()
+
             # Handle localization.
             locale = moment.localeData()
             language =
