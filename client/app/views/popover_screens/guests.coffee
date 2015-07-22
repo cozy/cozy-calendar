@@ -107,7 +107,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
     # Handle guest addition. `userInfo` is passed when called by the typeahead.
     onNewGuest: (userInfo = null) ->
 
-        if userInfo?
+        if userInfo? and typeof(userInfo) is "string"
             [email, contactID] = userInfo.split(';')
         else
             email = @$('input[name="guest-name"]').val()
