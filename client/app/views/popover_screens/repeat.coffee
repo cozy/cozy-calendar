@@ -129,8 +129,10 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
     renderSummary: ->
         rrule = @buildRRuleFromDOM()
 
-        # If there is a valid rrule.
-        if rrule?.length > 0
+        try
+            # If this is a valid rrule, it will not throw.
+            rrule.toString()
+
             # Handle localization.
             locale = moment.localeData()
             language =
