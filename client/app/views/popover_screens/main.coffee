@@ -88,7 +88,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     afterRender: ->
         # Cache jQuery selectors.
         @$container   = @$ '.popover-content-wrapper'
-        @addButton    = @$ '.btn.add'
+        @$addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
         @spinner = @$ '.remove-spinner'
         @duplicateButton = @$ '.duplicate'
@@ -169,9 +169,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetStart()
             @onSetEnd()
 
-            @addButton.click()
+            @$addButton.click()
         else
-            @addButton.removeClass 'disabled'
+            @$addButton.removeClass 'disabled'
 
 
     toggleAllDay: ->
@@ -274,14 +274,14 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
-        @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        @addButton.spin 'small'
+        spinner = '<img src="img/spinner.svg" alt="spinner" />'
+        @$addButton.empty()
+        @$addButton.append spinner
+
         errors = @model.validate @model.attributes
         if errors
-            @addButton.html @getButtonText()
-            @addButton.children().show()
+            @$addButton.html @getButtonText()
 
-            @addButton.spin()
             @$('.alert').remove()
             @$('input').css 'border-color', ''
             @handleError err for err in errors
@@ -295,9 +295,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 error: ->
                     alert 'server error occured'
                 complete: =>
-                    @addButton.spin false
-                    @addButton.html @getButtonText()
-                    @addButton.children().show()
+                    @$addButton.html @getButtonText()
                     @popover.selfclose(false)
 
     handleError: (error) ->
