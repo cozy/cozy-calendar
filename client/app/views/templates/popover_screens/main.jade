@@ -10,12 +10,12 @@
             .icon
                 span.fa.fa-arrow-right
             span.caption= t("from")
-            input.input-start-date.input-date(tabindex="3",
+            input.input-start-date.input-date(tabindex="2",
                                               type="text",
                                               size="10"
                                               placeholder=t("placeholder from date"),
                                               value=start.format(dFormat))
-            input.input-start.input-time(tabindex="2",
+            input.input-start.input-time(tabindex="3",
                                          type="time",
                                          size="5"
                                          placeholder=t("placeholder from time"),
@@ -26,12 +26,12 @@
             .icon
                 span.fa.fa-arrow-left
             span.input-end-caption.caption= t("to")
-            input.input-end-date.input-date(tabindex="5",
+            input.input-end-date.input-date(tabindex="4",
                                             type="text",
                                             size="10"
                                             placeholder=t("placeholder to date"),
                                             value=end.format(dFormat))
-            input.input-end-time.input-time(tabindex="4",
+            input.input-end-time.input-time(tabindex="5",
                                             type="time",
                                             size="5"
                                             placeholder=t("placeholder to time"),
