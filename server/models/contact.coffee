@@ -13,3 +13,4 @@ Contact::asNameAndEmails = ->
         id: @id
         name: name or '?'
         emails: emails or []
+        hasPicture: @_attachments?.picture?
