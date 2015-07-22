@@ -3616,9 +3616,11 @@ module.exports = EventPopOver = (function(_super) {
     } else {
       if (checkoutChanges) {
         this.model.fetch({
-          complete: function() {
-            return EventPopOver.__super__.selfclose.call(this, checkoutChanges);
-          }
+          complete: (function(_this) {
+            return function() {
+              return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+            };
+          })(this)
         });
       } else {
         EventPopOver.__super__.selfclose.call(this, checkoutChanges);
@@ -3829,8 +3831,10 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.refreshOne = function(model) {
-    var data, fcEvent;
-    if (model.isRecurrent()) {
+    var data, fcEvent, modelWasRecurrent, previousRRule;
+    previousRRule = model.previous('rrule');
+    modelWasRecurrent = (previousRRule != null) && previousRRule !== '';
+    if (model.isRecurrent() || modelWasRecurrent) {
       return this.refresh();
     }
     if (model.isAllDay()) {
@@ -5221,8 +5225,6 @@ module.exports = GuestPopoverScreen = (function(_super) {
     'keyup input[name="guest-name"]': "onKeyup"
   };
 
-  GuestPopoverScreen.prototype._configured = false;
-
   GuestPopoverScreen.prototype.getRenderData = function() {
     var guests, numGuests;
     guests = this.model.get('attendees') || [];
@@ -5257,42 +5259,39 @@ module.exports = GuestPopoverScreen = (function(_super) {
   };
 
   GuestPopoverScreen.prototype.configureGuestTypeahead = function() {
-    if (!this._configured) {
-      this._configured = true;
-      return this.$('input[name="guest-name"]').typeahead({
-        source: app.contacts.asTypeaheadSource(),
-        matcher: function(contact) {
-          var old;
-          old = $.fn.typeahead.Constructor.prototype.matcher;
-          return old.call(this, contact.display);
-        },
-        sorter: function(contacts) {
-          var beginswith, caseInsensitive, caseSensitive, contact, item;
-          beginswith = [];
-          caseSensitive = [];
-          caseInsensitive = [];
-          while ((contact = contacts.shift())) {
-            item = contact.display;
-            if (!item.toLowerCase().indexOf(this.query.toLowerCase())) {
-              beginswith.push(contact);
-            } else if (~item.indexOf(this.query)) {
-              caseSensitive.push(contact);
-            } else {
-              caseInsensitive.push(contact);
-            }
+    return this.$('input[name="guest-name"]').typeahead({
+      source: app.contacts.asTypeaheadSource(),
+      matcher: function(contact) {
+        var old;
+        old = $.fn.typeahead.Constructor.prototype.matcher;
+        return old.call(this, contact.display);
+      },
+      sorter: function(contacts) {
+        var beginswith, caseInsensitive, caseSensitive, contact, item;
+        beginswith = [];
+        caseSensitive = [];
+        caseInsensitive = [];
+        while ((contact = contacts.shift())) {
+          item = contact.display;
+          if (!item.toLowerCase().indexOf(this.query.toLowerCase())) {
+            beginswith.push(contact);
+          } else if (~item.indexOf(this.query)) {
+            caseSensitive.push(contact);
+          } else {
+            caseInsensitive.push(contact);
           }
-          return beginswith.concat(caseSensitive, caseInsensitive);
-        },
-        highlighter: function(contact) {
-          var img, imgPath, old;
-          old = $.fn.typeahead.Constructor.prototype.highlighter;
-          imgPath = contact.hasPicture ? "contacts/" + contact.id + ".jpg" : "img/defaultpicture.png";
-          img = '<img width="40px" src="' + imgPath + '" />&nbsp;';
-          return img + old.call(this, contact.display);
-        },
-        updater: this.onNewGuest.bind(this)
-      });
-    }
+        }
+        return beginswith.concat(caseSensitive, caseInsensitive);
+      },
+      highlighter: function(contact) {
+        var img, imgPath, old;
+        old = $.fn.typeahead.Constructor.prototype.highlighter;
+        imgPath = contact.hasPicture ? "contacts/" + contact.id + ".jpg" : "img/defaultpicture.png";
+        img = '<img width="40px" src="' + imgPath + '" />&nbsp;';
+        return img + old.call(this, contact.display);
+      },
+      updater: this.onNewGuest.bind(this)
+    });
   };
 
   GuestPopoverScreen.prototype.onRemoveGuest = function(event) {
@@ -5309,7 +5308,7 @@ module.exports = GuestPopoverScreen = (function(_super) {
     if (userInfo == null) {
       userInfo = null;
     }
-    if (userInfo != null) {
+    if ((userInfo != null) && typeof userInfo === "string") {
       _ref = userInfo.split(';'), email = _ref[0], contactID = _ref[1];
     } else {
       email = this.$('input[name="guest-name"]').val();
@@ -5592,7 +5591,6 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.onTab = function(ev) {
     var $this, index;
-    console.log("on tab");
     if (ev.keyCode !== 9) {
       return;
     }
@@ -5790,12 +5788,13 @@ module.exports = RepeatPopoverScreen = (function(_super) {
 
   RepeatPopoverScreen.prototype.inputDateDTPickerFormat = 'dd/mm/yyyy';
 
-  RepeatPopoverScreen.prototype.screenTitle = 'Repeat';
+  RepeatPopoverScreen.prototype.screenTitle = t('screen recurrence title');
 
   RepeatPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/repeat');
 
   RepeatPopoverScreen.prototype.events = {
     'change select[name="frequency"]': 'onSelectRepeat',
+    'keyup select[name="frequency"]': 'onSelectRepeat',
     'input input[name="interval"]': "renderSummary",
     'change input[name="weekly-repeat-type"]': "renderSummary",
     'change input[name="monthly-repeat-type"]': "renderSummary",
@@ -5924,7 +5923,8 @@ module.exports = RepeatPopoverScreen = (function(_super) {
   RepeatPopoverScreen.prototype.renderSummary = function() {
     var language, locale, rrule, summary;
     rrule = this.buildRRuleFromDOM();
-    if ((rrule != null ? rrule.length : void 0) > 0) {
+    try {
+      rrule.toString();
       locale = moment.localeData();
       language = {
         dayNames: locale._weekdays,
@@ -5932,7 +5932,7 @@ module.exports = RepeatPopoverScreen = (function(_super) {
       };
       summary = rrule.toText(window.t, language);
       return this.$('#summary').html(summary);
-    }
+    } catch (_error) {}
   };
 
   RepeatPopoverScreen.prototype.onLeaveScreen = function() {
@@ -6646,7 +6646,7 @@ popoverClassName += (sameDay? ' is-same-day' : '')
 var showDetailsByDefault = details && details.length > 0
 var showAlertsByDefault = alerts && alerts.length > 0
 var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
-buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"3\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"2\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
 if ( !alerts || alerts.length === 0)
 {
 buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
@@ -6726,7 +6726,7 @@ buf.push("<label><input type=\"checkbox\" name=\"weekly-repeat-type\"" + (jade.a
   }
 }).call(this);
 
-buf.push("</div></label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.MONTHLY), true, false)) + " class=\"inline-input monthly-only\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence repeat by label')) ? "" : jade_interp)) + "</span><div><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-day\"" + (jade.attr("checked", monthlyRepeatBy('repeat-day'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by month')) == null ? '' : jade_interp)) + "</label><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-weekday\"" + (jade.attr("checked", monthlyRepeatBy('repeat-weekday'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by week')) == null ? '' : jade_interp)) + "</label></div></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends label')) ? "" : jade_interp)) + "</span><div><label class=\"inline-input\"><input type=\"radio\" name=\"endMode\" value=\"never\"" + (jade.attr("checked", isEndModeSelected('never'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('screen recurrence ends never label')) ? "" : jade_interp)) + "</label><label class=\"inline-input\"><input type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", isEndModeSelected('count'), true, false)) + "/><label for=\"count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count label')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" name=\"count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"special input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count unit')) ? "" : jade_interp)) + "</label></label><label class=\"inline-input\"><input type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", isEndModeSelected('until'), true, false)) + "/><label for=\"until\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends until label')) ? "" : jade_interp)) + "</label><input tabindex=\"3\" type=\"text\" size=\"10\" name=\"until-date\"" + (jade.attr("placeholder", t("screen recurrence ends until placeholder"), true, false)) + (jade.attr("value", rrule.until, true, false)) + " class=\"special input-until-date input-date\"/></label></div></label><div" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input summary generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t("screen recurrence summary label")) ? "" : jade_interp)) + "</span><span id=\"summary\"></span></div></div>");;return buf.join("");
+buf.push("</div></label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.MONTHLY), true, false)) + " class=\"inline-input monthly-only\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence repeat by label')) ? "" : jade_interp)) + "</span><div><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-day\"" + (jade.attr("checked", monthlyRepeatBy('repeat-day'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by month')) == null ? '' : jade_interp)) + "</label><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-weekday\"" + (jade.attr("checked", monthlyRepeatBy('repeat-weekday'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by week')) == null ? '' : jade_interp)) + "</label></div></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends label')) ? "" : jade_interp)) + "</span><div><label for=\"never-end\" class=\"inline-input\"><input id=\"never-end\" type=\"radio\" name=\"endMode\" value=\"never\"" + (jade.attr("checked", isEndModeSelected('never'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('screen recurrence ends never label')) ? "" : jade_interp)) + "</label><label class=\"inline-input\"><input id=\"end-after-num\" type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", isEndModeSelected('count'), true, false)) + "/><label for=\"end-after-num\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count label')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" name=\"count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"special input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count unit')) ? "" : jade_interp)) + "</label></label><label class=\"inline-input\"><input id=\"end-until-date\" type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", isEndModeSelected('until'), true, false)) + "/><label for=\"end-until-date\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends until label')) ? "" : jade_interp)) + "</label><input tabindex=\"3\" type=\"text\" size=\"10\" name=\"until-date\"" + (jade.attr("placeholder", t("screen recurrence ends until placeholder"), true, false)) + (jade.attr("value", rrule.until, true, false)) + " class=\"special input-until-date input-date\"/></label></div></label><div" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input summary generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t("screen recurrence summary label")) ? "" : jade_interp)) + "</span><span id=\"summary\"></span></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

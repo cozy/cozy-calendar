@@ -9246,7 +9246,7 @@ a.btn:visited {
 }
 .popover-content .fixed-height {
   height: 24rem;
-  overflow: scroll;
+  overflow: auto;
 }
 .popover-content .caption {
   display: inline-block;
