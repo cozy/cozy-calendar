@@ -14,11 +14,6 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         'keyup input[name="guest-name"]': "onKeyup"
 
 
-    # Flag used in order to prevent the typeahead from being reinitialized at
-    # each render.
-    _configured: false
-
-
     getRenderData: ->
 
         # Override the screen title based on the model's value.
@@ -55,39 +50,36 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
 
     # Configure the auto-complete on contacts.
     configureGuestTypeahead: ->
-        # If it's already configured, no need to do it again.
-        unless @_configured
-            @_configured = true
-            @$('input[name="guest-name"]').typeahead
-                source: app.contacts.asTypeaheadSource()
-                matcher: (contact) ->
-                    old = $.fn.typeahead.Constructor::matcher
-                    return old.call this, contact.display
-                sorter: (contacts) ->
-                    beginswith = []
-                    caseSensitive = []
-                    caseInsensitive = []
+        @$('input[name="guest-name"]').typeahead
+            source: app.contacts.asTypeaheadSource()
+            matcher: (contact) ->
+                old = $.fn.typeahead.Constructor::matcher
+                return old.call this, contact.display
+            sorter: (contacts) ->
+                beginswith = []
+                caseSensitive = []
+                caseInsensitive = []
 
-                    while (contact = contacts.shift())
-                        item = contact.display
-                        if not item.toLowerCase().indexOf(this.query.toLowerCase())
-                            beginswith.push contact
-                        else if ~item.indexOf this.query
-                            caseSensitive.push contact
-                        else caseInsensitive.push contact
+                while (contact = contacts.shift())
+                    item = contact.display
+                    if not item.toLowerCase().indexOf(this.query.toLowerCase())
+                        beginswith.push contact
+                    else if ~item.indexOf this.query
+                        caseSensitive.push contact
+                    else caseInsensitive.push contact
 
-                    return beginswith.concat caseSensitive, caseInsensitive
+                return beginswith.concat caseSensitive, caseInsensitive
 
-                highlighter: (contact) ->
-                    old = $.fn.typeahead.Constructor::highlighter
-                    imgPath = if contact.hasPicture
-                        "contacts/#{contact.id}.jpg"
-                    else
-                        "img/defaultpicture.png"
-                    img = '<img width="40px" src="' + imgPath + '" />&nbsp;'
-                    return img + old.call this, contact.display
+            highlighter: (contact) ->
+                old = $.fn.typeahead.Constructor::highlighter
+                imgPath = if contact.hasPicture
+                    "contacts/#{contact.id}.jpg"
+                else
+                    "img/defaultpicture.png"
+                img = '<img width="40px" src="' + imgPath + '" />&nbsp;'
+                return img + old.call this, contact.display
 
-                updater: @onNewGuest.bind(@)
+            updater: @onNewGuest.bind(@)
 
 
     onRemoveGuest: (event) ->
