@@ -42,19 +42,19 @@
     label.inline-input.generic(aria-hidden=genericLimitedVisibility())
         span.first-input.align-top=t('screen recurrence ends label')
         div
-            label.inline-input
-                input(type="radio", name="endMode", value='never', checked=isEndModeSelected('never'))
+            label.inline-input(for="never-end")
+                input#never-end(type="radio", name="endMode", value='never', checked=isEndModeSelected('never'))
                 = t('screen recurrence ends never label')
 
             label.inline-input
-                input(type="radio", name="endMode", value='count', checked=isEndModeSelected('count'))
-                label(for="count")= t('screen recurrence ends count label')
+                input#end-after-num(type="radio", name="endMode", value='count', checked=isEndModeSelected('count'))
+                label(for="end-after-num")= t('screen recurrence ends count label')
                 input#rrule-count.special.input-mini(name="count", type="number", min=0, value=rrule.count)
                 label(for="rrule-count")=t('screen recurrence ends count unit')
             
             label.inline-input
-                input(type="radio", name="endMode", value='until', checked=isEndModeSelected('until'))
-                label(for="until")= t('screen recurrence ends until label')
+                input#end-until-date(type="radio", name="endMode", value='until', checked=isEndModeSelected('until'))
+                label(for="end-until-date")= t('screen recurrence ends until label')
                 input.special.input-until-date.input-date(tabindex="3",
                                       type="text",
                                       size="10",
