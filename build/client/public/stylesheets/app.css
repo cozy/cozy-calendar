@@ -8891,6 +8891,7 @@ textarea:active {
 }
 #view-container .fc-view-container .fc-today.fc-state-highlight {
   color: #34a6ff;
+  background-color: #d7eeff;
 }
 .fc-event:hover {
   background: #fe8800 !important;
@@ -9508,6 +9509,11 @@ select.select-big.with-margin {
   margin-right: 0.5em;
   border: 1px solid #ddd;
   font-size: 1rem;
+}
+.guests-action .dropdown-menu > li > a {
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 ul.guests {
   margin: 0;

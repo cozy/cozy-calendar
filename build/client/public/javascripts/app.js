@@ -363,6 +363,7 @@ module.exports = ContactCollection = (function(_super) {
       return contact.get('emails').forEach(function(email) {
         return items.push({
           id: contact.id,
+          hasPicture: contact.get('hasPicture'),
           display: "" + (contact.get('name')) + " &lt;" + email.value + "&gt;",
           toString: function() {
             return "" + email.value + ";" + contact.id;
@@ -5177,6 +5178,10 @@ module.exports = DetailsPopoverScreen = (function(_super) {
 
   DetailsPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/details');
 
+  DetailsPopoverScreen.prototype.afterRender = function() {
+    return this.$('.input-details').focus();
+  };
+
   DetailsPopoverScreen.prototype.onLeaveScreen = function() {
     var value;
     value = this.$('.input-details').val();
@@ -5247,7 +5252,8 @@ module.exports = GuestPopoverScreen = (function(_super) {
       row = this.templateGuestRow(guest);
       $guests.append(row);
     }
-    return this.configureGuestTypeahead();
+    this.configureGuestTypeahead();
+    return this.$('input[name="guest-name"]').focus();
   };
 
   GuestPopoverScreen.prototype.configureGuestTypeahead = function() {
@@ -5278,9 +5284,11 @@ module.exports = GuestPopoverScreen = (function(_super) {
           return beginswith.concat(caseSensitive, caseInsensitive);
         },
         highlighter: function(contact) {
-          var old;
+          var img, imgPath, old;
           old = $.fn.typeahead.Constructor.prototype.highlighter;
-          return old.call(this, contact.display);
+          imgPath = contact.hasPicture ? "contacts/" + contact.id + ".jpg" : "img/defaultpicture.png";
+          img = '<img width="40px" src="' + imgPath + '" />&nbsp;';
+          return img + old.call(this, contact.display);
         },
         updater: this.onNewGuest.bind(this)
       });
@@ -5450,7 +5458,7 @@ module.exports = MainPopoverScreen = (function(_super) {
   MainPopoverScreen.prototype.afterRender = function() {
     var timepickerEvents, _ref;
     this.$container = this.$('.popover-content-wrapper');
-    this.addButton = this.$('.btn.add');
+    this.$addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
     this.spinner = this.$('.remove-spinner');
     this.duplicateButton = this.$('.duplicate');
@@ -5459,9 +5467,6 @@ module.exports = MainPopoverScreen = (function(_super) {
     if (this.model.isNew()) {
       this.removeButton.hide();
       this.duplicateButton.hide();
-    }
-    if (window.popoverExtended) {
-      this.expandPopover();
     }
     timepickerEvents = {
       'focus': function() {
@@ -5476,7 +5481,6 @@ module.exports = MainPopoverScreen = (function(_super) {
     };
     this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
     this.$('.input-date').datetimepicker(defDatePickerOps);
-    this.$('[tabindex=1]').focus();
     this.calendar = new ComboBox({
       el: this.$('.calendarcombo'),
       small: true,
@@ -5489,9 +5493,17 @@ module.exports = MainPopoverScreen = (function(_super) {
       };
     })(this));
     this.refresh();
-    if (this.$("[aria-hidden=true]").length === 0) {
-      return this.$moreDetailsButton.hide();
+    if (window.popoverExtended) {
+      this.expandPopover();
     }
+    if (this.$("[aria-hidden=true]").length === 0) {
+      this.$moreDetailsButton.hide();
+    }
+    return setTimeout((function(_this) {
+      return function() {
+        return _this.$('[tabindex="1"]').focus();
+      };
+    })(this), 1);
   };
 
   MainPopoverScreen.prototype.refresh = function() {
@@ -5509,9 +5521,9 @@ module.exports = MainPopoverScreen = (function(_super) {
       this.calendar.onBlur();
       this.onSetStart();
       this.onSetEnd();
-      return this.addButton.click();
+      return this.$addButton.click();
     } else {
-      return this.addButton.removeClass('disabled');
+      return this.$addButton.removeClass('disabled');
     }
   };
 
@@ -5580,6 +5592,7 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.onTab = function(ev) {
     var $this, index;
+    console.log("on tab");
     if (ev.keyCode !== 9) {
       return;
     }
@@ -5628,17 +5641,16 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
-    var err, errors, _i, _len, _results;
+    var err, errors, spinner, _i, _len, _results;
     if (this.$('.btn.add').hasClass('disabled')) {
       return;
     }
-    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-    this.addButton.spin('small');
+    spinner = '<img src="img/spinner.svg" alt="spinner" />';
+    this.$addButton.empty();
+    this.$addButton.append(spinner);
     errors = this.model.validate(this.model.attributes);
     if (errors) {
-      this.addButton.html(this.getButtonText());
-      this.addButton.children().show();
-      this.addButton.spin();
+      this.$addButton.html(this.getButtonText());
       this.$('.alert').remove();
       this.$('input').css('border-color', '');
       _results = [];
@@ -5661,9 +5673,7 @@ module.exports = MainPopoverScreen = (function(_super) {
         },
         complete: (function(_this) {
           return function() {
-            _this.addButton.spin(false);
-            _this.addButton.html(_this.getButtonText());
-            _this.addButton.children().show();
+            _this.$addButton.html(_this.getButtonText());
             return _this.popover.selfclose(false);
           };
         })(this)
@@ -6542,7 +6552,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),details = locals_.details;
-buf.push("<div class=\"fixed-height\"><textarea autofocus=\"autofocus\" class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");;return buf.join("");
+buf.push("<div class=\"fixed-height\"><textarea class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6612,7 +6622,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"fixed-height\"><div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + " autofocus=\"autofocus\"/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div><ul class=\"guests\"></ul></div>");;return buf.join("");
+buf.push("<div class=\"fixed-height\"><div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + "/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div><ul class=\"guests\"></ul></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
