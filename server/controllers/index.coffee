@@ -18,6 +18,14 @@ module.exports.index = (req, res) ->
         (cb) -> Event.all cb
         (cb) -> cozydb.api.getCozyInstance cb
         (cb) -> WebDavAccount.first cb
+        (cb) ->
+            # Handle the case there User.timezone data is not cached yet.
+            if User.timezone?
+                cb null, User.timezone
+            else
+                User.updateUser ->
+                    cb User.timezone
+
 
     ], (err, results) ->
 
@@ -26,11 +34,15 @@ module.exports.index = (req, res) ->
             stack : err.stack
         else
 
-            [contacts, tags, events, instance, webDavAccount] = results
+            [
+                contacts, tags, events, instance, webDavAccount, timezone
+            ] = results
 
             locale = instance?.locale or 'en'
             if webDavAccount?
                 webDavAccount.domain = instance?.domain or ''
+
+            timezone = timezone or 'UTC'
 
             res.render 'index.jade', imports: """
                 window.locale = "#{locale}";
@@ -38,11 +50,5 @@ module.exports.index = (req, res) ->
                 window.initevents = #{JSON.stringify events};
                 window.initcontacts = #{JSON.stringify contacts};
                 window.webDavAccount = #{JSON.stringify webDavAccount};
+                window.timezone = #{JSON.stringify timezone};
             """
-
-module.exports.userTimezone = (req, res) ->
-
-    if req.query.keys isnt "timezone"
-        res.send 403, "keys not exposed"
-    else
-        res.send User.timezone

@@ -7,7 +7,6 @@ ical   = require './ical'
 module.exports =
 
     '' : get : index.index
-    'users/current': get : index.userTimezone
 
     # Tag management
     'tags':
