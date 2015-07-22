@@ -232,7 +232,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Loop over controls elements w/o exiting the popover scope
     onTab: (ev) =>
-        console.log "on tab"
         # Early return if the key pressed isn't `tab` (keyCode == 9)
         return unless ev.keyCode is 9
         # Find if the element has an explicit next/prev control, and if it fits
