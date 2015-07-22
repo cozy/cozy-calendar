@@ -100,10 +100,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @removeButton.hide()
             @duplicateButton.hide()
 
-        # Apply the expanded status if it has been previously set.
-        if window.popoverExtended
-            @expandPopover()
-
         timepickerEvents =
             'focus': ->
                 $(@).timepicker 'highlightHour'
@@ -121,7 +117,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # validation. As a result we don't use a type=date, but a type=text.
         @$('.input-date').datetimepicker defDatePickerOps
 
-        @$('[tabindex=1]').focus()
         @calendar = new ComboBox
             el: @$ '.calendarcombo'
             small: true
@@ -132,10 +127,20 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @refresh()
 
+        # Apply the expanded status if it has been previously set.
+        if window.popoverExtended
+            @expandPopover()
+
         # If all the optional fields are shown by default (they all have a
         # value), then hide the "more details" button.
         if @$("[aria-hidden=true]").length is 0
             @$moreDetailsButton.hide()
+
+        # Focus the short description field by default. It's done in a timeout
+        # because otherwise it loses focus for some reason.
+        setTimeout =>
+            @$('[tabindex="1"]').focus()
+        , 1
 
 
     refresh: ->
@@ -227,6 +232,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Loop over controls elements w/o exiting the popover scope
     onTab: (ev) =>
+        console.log "on tab"
         # Early return if the key pressed isn't `tab` (keyCode == 9)
         return unless ev.keyCode is 9
         # Find if the element has an explicit next/prev control, and if it fits

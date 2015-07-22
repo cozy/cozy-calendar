@@ -46,8 +46,11 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             row = @templateGuestRow guest
             $guests.append row
 
-
         @configureGuestTypeahead()
+
+        # Focus the form field. Must be done after the typeahead configuration,
+        # otherwise bootstrap bugs somehow.
+        @$('input[name="guest-name"]').focus()
 
 
     # Configure the auto-complete on contacts.
