@@ -46,8 +46,11 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             row = @templateGuestRow guest
             $guests.append row
 
-
         @configureGuestTypeahead()
+
+        # Focus the form field. Must be done after the typeahead configuration,
+        # otherwise bootstrap bugs somehow.
+        @$('input[name="guest-name"]').focus()
 
 
     # Configure the auto-complete on contacts.
@@ -77,7 +80,12 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
 
                 highlighter: (contact) ->
                     old = $.fn.typeahead.Constructor::highlighter
-                    return old.call this, contact.display
+                    imgPath = if contact.hasPicture
+                        "contacts/#{contact.id}.jpg"
+                    else
+                        "img/defaultpicture.png"
+                    img = '<img width="40px" src="' + imgPath + '" />&nbsp;'
+                    return img + old.call this, contact.display
 
                 updater: @onNewGuest.bind(@)
 

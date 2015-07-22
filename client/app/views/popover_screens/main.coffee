@@ -88,7 +88,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     afterRender: ->
         # Cache jQuery selectors.
         @$container   = @$ '.popover-content-wrapper'
-        @addButton    = @$ '.btn.add'
+        @$addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
         @spinner = @$ '.remove-spinner'
         @duplicateButton = @$ '.duplicate'
@@ -99,10 +99,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         if @model.isNew()
             @removeButton.hide()
             @duplicateButton.hide()
-
-        # Apply the expanded status if it has been previously set.
-        if window.popoverExtended
-            @expandPopover()
 
         timepickerEvents =
             'focus': ->
@@ -121,7 +117,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # validation. As a result we don't use a type=date, but a type=text.
         @$('.input-date').datetimepicker defDatePickerOps
 
-        @$('[tabindex=1]').focus()
         @calendar = new ComboBox
             el: @$ '.calendarcombo'
             small: true
@@ -132,10 +127,20 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @refresh()
 
+        # Apply the expanded status if it has been previously set.
+        if window.popoverExtended
+            @expandPopover()
+
         # If all the optional fields are shown by default (they all have a
         # value), then hide the "more details" button.
         if @$("[aria-hidden=true]").length is 0
             @$moreDetailsButton.hide()
+
+        # Focus the short description field by default. It's done in a timeout
+        # because otherwise it loses focus for some reason.
+        setTimeout =>
+            @$('[tabindex="1"]').focus()
+        , 1
 
 
     refresh: ->
@@ -164,9 +169,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetStart()
             @onSetEnd()
 
-            @addButton.click()
+            @$addButton.click()
         else
-            @addButton.removeClass 'disabled'
+            @$addButton.removeClass 'disabled'
 
 
     toggleAllDay: ->
@@ -227,6 +232,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Loop over controls elements w/o exiting the popover scope
     onTab: (ev) =>
+        console.log "on tab"
         # Early return if the key pressed isn't `tab` (keyCode == 9)
         return unless ev.keyCode is 9
         # Find if the element has an explicit next/prev control, and if it fits
@@ -268,14 +274,14 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
-        @addButton.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        @addButton.spin 'small'
+        spinner = '<img src="img/spinner.svg" alt="spinner" />'
+        @$addButton.empty()
+        @$addButton.append spinner
+
         errors = @model.validate @model.attributes
         if errors
-            @addButton.html @getButtonText()
-            @addButton.children().show()
+            @$addButton.html @getButtonText()
 
-            @addButton.spin()
             @$('.alert').remove()
             @$('input').css 'border-color', ''
             @handleError err for err in errors
@@ -289,9 +295,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 error: ->
                     alert 'server error occured'
                 complete: =>
-                    @addButton.spin false
-                    @addButton.html @getButtonText()
-                    @addButton.children().show()
+                    @$addButton.html @getButtonText()
                     @popover.selfclose(false)
 
     handleError: (error) ->

@@ -13,6 +13,7 @@ module.exports = class ContactCollection extends Backbone.Collection
             contact.get('emails').forEach (email) ->
                 items.push
                     id: contact.id
+                    hasPicture: contact.get('hasPicture')
                     display: "#{contact.get 'name'} &lt;#{email.value}&gt;"
                     toString: -> "#{email.value};#{contact.id}"
 
