@@ -82,10 +82,17 @@ LocalizationManager = (function() {
   };
 
   LocalizationManager.prototype.buildEmailTemplate = function(name) {
-    var filePath, templatefile;
-    filePath = "../mails/" + this.polyglot.currentLocale + "/" + name + ".jade";
-    templatefile = require('path').join(__dirname, filePath);
-    return jade.compile(fs.readFileSync(templatefile, 'utf8'));
+    var err, filePath, templatefile;
+    try {
+      filePath = "../mails/" + this.polyglot.currentLocale + "/" + name + ".jade";
+      templatefile = require('path').join(__dirname, filePath);
+      return jade.compile(fs.readFileSync(templatefile, 'utf8'));
+    } catch (_error) {
+      err = _error;
+      filePath = "../mails/en/" + name + ".jade";
+      templatefile = require('path').join(__dirname, filePath);
+      return jade.compile(fs.readFileSync(templatefile, 'utf8'));
+    }
   };
 
   LocalizationManager.prototype.getEmailTemplate = function(name) {

@@ -16,14 +16,14 @@ module.exports = Tag = cozydb.getModel('Tag', {
   }
 });
 
-Tag.byName = function(name, callback) {
-  return Tag.request('byName', {
-    key: name
-  }, callback);
+Tag.byName = function(options, callback) {
+  return Tag.request('byName', options, callback);
 };
 
 Tag.getOrCreate = function(data, callback) {
-  return Tag.byName(data.name, function(err, tags) {
+  return Tag.byName({
+    key: data.name
+  }, function(err, tags) {
     if (err) {
       log.error(err);
       return Tag.create(data, callback);

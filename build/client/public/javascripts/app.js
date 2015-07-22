@@ -112,16 +112,10 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    return $.get("users/current?keys=timezone", (function(_this) {
-      return function(data) {
-        _this.timezone = data;
-        return _this._initialize();
-      };
-    })(this));
-  },
-  _initialize: function() {
     var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, locales, todayChecker;
     window.app = this;
+    this.timezone = window.timezone;
+    delete window.timezone;
     this.locale = window.locale;
     delete window.locale;
     this.polyglot = new Polyglot();
@@ -4628,6 +4622,11 @@ module.exports = MenuView = (function(_super) {
     };
   };
 
+  MenuView.prototype.afterRender = function() {
+    MenuView.__super__.afterRender.apply(this, arguments);
+    return this.$('.main-spinner').hide();
+  };
+
   MenuView.prototype.onAddCalendar = function() {
     var calendar;
     this.tag = app.tags.getOrCreateByName("new calendar");
@@ -4695,10 +4694,6 @@ module.exports = MenuView = (function(_super) {
     }
   };
 
-  MenuView.prototype.showLoading = function() {
-    return this.$('.spinner').show();
-  };
-
   MenuView.prototype.onCalendarMultipleExport = function() {
     var calendars;
     calendars = [];
@@ -4709,8 +4704,14 @@ module.exports = MenuView = (function(_super) {
     return window.location = "exportzip/" + calendars;
   };
 
+  MenuView.prototype.showLoading = function() {
+    this.$('.main-spinner').show();
+    return this.$('.calendar-add').hide();
+  };
+
   MenuView.prototype.hideLoading = function() {
-    return this.$('.spinner').hide();
+    this.$('.main-spinner').hide();
+    return this.$('.calendar-add').show();
   };
 
   return MenuView;
@@ -6360,7 +6361,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

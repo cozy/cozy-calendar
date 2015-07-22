@@ -8417,7 +8417,7 @@ textarea:active {
   border-radius: 0px;
   padding: 5px;
 }
-@media( min-width: 1100px) {
+@media (min-width: 1100px) {
   #event-modal {
     width: 1000px;
     margin-left: -500px;
@@ -8463,6 +8463,9 @@ textarea:active {
 }
 .sidenav a:hover {
   text-decoration: none;
+}
+.sidenav .btn {
+  color: #fff;
 }
 .sidenav i {
   position: relative;
@@ -9107,6 +9110,15 @@ a.btn:visited {
   width: 100%;
   border-bottom: 1px solid #ddd;
 }
+.popover .label-row input[type=text] {
+  height: 3em;
+}
+.popover .label-row.is-same-day input[type=text] {
+  height: 1.8em;
+}
+.popover .label-row .button-full-block {
+  height: 3em;
+}
 .popover input {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -9119,9 +9131,6 @@ a.btn:visited {
   box-shadow: none !important;
   font-family: 'Source Sans Pro', sans-serif;
 }
-.popover input[type=text] {
-  height: 1.8em;
-}
 .popover input[type=text] .input-time {
   width: 4em;
   text-align: right;
@@ -9132,7 +9141,7 @@ a.btn:visited {
 .popover .input-full-block,
 .popover .button-full-block {
   width: 100%;
-  padding: 1.5em 3em;
+  padding: 0 3em;
   background-color: transparent;
   border: none;
   font-size: 1rem;
@@ -9225,7 +9234,8 @@ a.btn:visited {
 }
 .popover-title .input-desc {
   width: 100%;
-  padding: 1.5em 3em;
+  padding: 0 3em;
+  height: 3em;
   background-color: transparent;
   border: none;
   font-size: 1.6em;
@@ -9397,6 +9407,12 @@ a.btn:visited {
   -ms-flex-order: 2;
   -webkit-order: 2;
   order: 2;
+}
+.input-details-trigger,
+.input-place {
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 .popover-back {
   display: -webkit-box;
@@ -9659,7 +9675,7 @@ ul.alerts .type input[type=checkbox] {
   -webkit-flex: none;
   -ms-flex: none;
   flex: none;
-  width: 5rem;
+  width: 6rem;
   text-transform: uppercase;
   color: #999;
 }
@@ -9925,7 +9941,7 @@ body.error-404 .error-frame .headline {
   font-size: 30px;
   color: #34a6ff;
 }
-@media( max-width: 1000px) {
+@media (max-width: 1000px) {
   #alarms,
   #alarm-list {
     width: 100%;
@@ -9954,7 +9970,7 @@ body.error-404 .error-frame .headline {
     margin-bottom: 10px;
   }
 }
-@media( max-width: 700px) {
+@media (max-width: 700px) {
   #alarms .fc-day-header {
     font-size: 12px;
     text-align: center;
@@ -10059,7 +10075,7 @@ body.error-404 .error-frame .headline {
     padding: 0.4em;
   }
 }
-@media( max-width: 500px) {
+@media (max-width: 500px) {
   #alarms .fc-day-header {
     font-size: 10px;
   }

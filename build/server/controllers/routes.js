@@ -15,9 +15,6 @@ module.exports = {
   '': {
     get: index.index
   },
-  'users/current': {
-    get: index.userTimezone
-  },
   'tags': {
     get: tags.all,
     post: tags.create
