@@ -155,7 +155,7 @@ module.exports = class PopoverView extends BaseView
             bottom = 'auto'
         # Cell is on the 3rd row.
         else if targetOffset.top < oneRowHeight * 3
-            top = '20vh'
+            top = '30vh'
             bottom = 'auto'
         # Cell is on the 4th row.
         else if targetOffset.top < oneRowHeight * 4
