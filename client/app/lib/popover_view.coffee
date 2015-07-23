@@ -124,21 +124,26 @@ module.exports = class PopoverView extends BaseView
         # Define everything that will be needed for positionning.
         popoverWidth = @$popover.innerWidth()
 
-        # Target is the calendar's cell clicked.
-        targetOffset = @target.offset()
-        targetWidth = @target.width()
-
         # Container is the screen, except the sidebar.
+        containerOffset = @container.offset()
         containerHeight = @container.innerHeight()
         containerWidth = @container.innerWidth()
 
+        # Target is the calendar's cell clicked.
+        targetOffset = @target.offset()
+        targetWidth = @target.width()
+        targetLeftBorder = targetOffset.left - containerOffset.left
+
+        # Margin between the popover and the cell.
+        popoverMargin = 15
+
         # Cell is on the left side
         if targetOffset.left < (containerWidth / 2)
-            left = targetOffset.left + 50
+            left = targetLeftBorder + targetWidth + popoverMargin
 
         # Cell is on the right side
         else
-            left = targetOffset.left - popoverWidth - targetWidth + 25
+            left = targetLeftBorder - popoverWidth - popoverMargin
 
         # Cell is on the upper side
         if targetOffset.top < (containerHeight / 2)
