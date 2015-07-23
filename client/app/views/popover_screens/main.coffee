@@ -273,7 +273,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
-        spinner = '<img src="img/spinner.svg" alt="spinner" />'
+        spinner = '<img src="img/spinner-white.svg" alt="spinner" />'
         @$addButton.empty()
         @$addButton.append spinner
 
