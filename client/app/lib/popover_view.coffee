@@ -1,5 +1,4 @@
 BaseView = require 'lib/base_view'
-
 module.exports = class PopoverView extends BaseView
 
     template: require 'views/templates/popover'
@@ -8,6 +7,7 @@ module.exports = class PopoverView extends BaseView
         @target = options.target
         @container = options.container
         @parentView = options.parentView
+        @$tabCells = $ '.fc-day-grid-container'
 
         return @
 
@@ -125,32 +125,43 @@ module.exports = class PopoverView extends BaseView
         popoverWidth = @$popover.innerWidth()
 
         # Container is the screen, except the sidebar.
-        containerOffset = @container.offset()
-        containerHeight = @container.innerHeight()
-        containerWidth = @container.innerWidth()
+        containerOffset = @$tabCells.offset()
+        containerHeight = @$tabCells.innerHeight()
+        containerWidth = @$tabCells.innerWidth()
 
         # Target is the calendar's cell clicked.
         targetOffset = @target.offset()
         targetWidth = @target.width()
-        targetLeftBorder = targetOffset.left - containerOffset.left
+        targetLeftBorder = targetOffset.left - @container.offset().left
 
         # Margin between the popover and the cell.
         popoverMargin = 15
 
         # Cell is on the left side
-        if targetOffset.left < (containerWidth / 2)
+        if targetOffset.left <= (containerWidth / 2)
             left = targetLeftBorder + targetWidth + popoverMargin
 
         # Cell is on the right side
         else
             left = targetLeftBorder - popoverWidth - popoverMargin
 
-        # Cell is on the upper side
-        if targetOffset.top < (containerHeight / 2)
+
+        # Compute the height of one row.
+        oneRowHeight = (containerHeight / 6)
+
+        # Cell is on the first two rows.
+        if targetOffset.top < oneRowHeight * 2
             top = '10vh'
             bottom = 'auto'
-
-        # Cell is on the lower side
+        # Cell is on the 3rd row.
+        else if targetOffset.top < oneRowHeight * 3
+            top = '20vh'
+            bottom = 'auto'
+        # Cell is on the 4th row.
+        else if targetOffset.top < oneRowHeight * 4
+            top = 'auto'
+            bottom = '15vh'
+        # Cell is on the two last rows.
         else
             top = 'auto'
             bottom = '5vh'
