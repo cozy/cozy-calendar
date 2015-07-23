@@ -105,21 +105,24 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             email = @$('input[name="guest-name"]').val()
             contactID = null
 
-        guests = @model.get('attendees') or []
-        if not _.findWhere(guests, email: email)
-            # Clone the source array, otherwise it's not considered as
-            # changed because it changes the model's attributes
-            guests = _.clone guests
-            guests.push
-                key: random.randomString()
-                status: 'INVITATION-NOT-SENT'
-                email: email
-                contactid: contactID
-            @model.set 'attendees', guests
+        # An empty value should not be submitted.
+        email = email.trim()
+        if email.length > 0
+            guests = @model.get('attendees') or []
+            if not _.findWhere(guests, email: email)
+                # Clone the source array, otherwise it's not considered as
+                # changed because it changes the model's attributes
+                guests = _.clone guests
+                guests.push
+                    key: random.randomString()
+                    status: 'INVITATION-NOT-SENT'
+                    email: email
+                    contactid: contactID
+                @model.set 'attendees', guests
 
-            # Inefficient way to refresh the list, but it's okay since it will
-            # never be a big list.
-            @render()
+                # Inefficient way to refresh the list, but it's okay since it will
+                # never be a big list.
+                @render()
 
         # Reset form field.
         @$('input[name="guest-name"]').val ''
