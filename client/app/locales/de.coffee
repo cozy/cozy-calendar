@@ -138,7 +138,7 @@ module.exports =
     "no alert button": "No alert"
     "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled"
     "no repeat button": "No repeat"
-    "more details button": "More details"
+    "more details button": "More options"
     "save button": "Save"
     "create button": "Create"
 
