@@ -69,7 +69,7 @@ module.exports =
     "are you sure"                      : "Are you sure?"
     "confirm delete calendar"           : "You are about to delete all the events related to %{calendarName}. Are you sure?"
     "confirm delete selected calendars" : "You are about to delete all the selected calendars. Are you sure?"
-    "advanced"                          : "More details"
+    "advanced"                          : "More options"
     "enter email"                       : "Enter email"
     "ON"                                : "on"
     "OFF"                               : "off"
@@ -139,7 +139,7 @@ module.exports =
     "no alert button": "No alert"
     "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled"
     "no repeat button": "No repeat"
-    "more details button": "More details"
+    "more details button": "More options"
     "save button": "Save"
     "create button": "Create"
 
