@@ -59,7 +59,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
       dateFormat = localization.t(dateFormatKey);
       dateFormatKey = event.isAllDayEvent() ? 'email date format allday' : 'email date format';
       _ref = event.toJSON(), description = _ref.description, place = _ref.place;
-      place = (place != null ? place.length : void 0) > 0 ? place : false;
+      place = (place != null ? place.length : void 0) > 0 ? place : "";
       templateOptions = {
         displayName: user.name,
         displayEmail: user.email,
