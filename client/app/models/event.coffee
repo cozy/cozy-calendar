@@ -8,10 +8,11 @@ module.exports = class Event extends ScheduleItem
     urlRoot: 'events'
 
     defaults: ->
+        defaultCalendar =  window.app.tags.at(0) or t('default calendar name')
         details: ''
         description: ''
         place: ''
-        tags: [t('default calendar name')]
+        tags: [defaultCalendar]
 
     getDiff: ->
         return @getEndDateObject().diff @getStartDateObject(), 'days'

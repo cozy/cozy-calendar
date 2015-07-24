@@ -112,16 +112,10 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    return $.get("users/current?keys=timezone", (function(_this) {
-      return function(data) {
-        _this.timezone = data;
-        return _this._initialize();
-      };
-    })(this));
-  },
-  _initialize: function() {
     var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, locales, todayChecker;
     window.app = this;
+    this.timezone = window.timezone;
+    delete window.timezone;
     this.locale = window.locale;
     delete window.locale;
     this.polyglot = new Polyglot();
@@ -369,6 +363,7 @@ module.exports = ContactCollection = (function(_super) {
       return contact.get('emails').forEach(function(email) {
         return items.push({
           id: contact.id,
+          hasPicture: contact.get('hasPicture'),
           display: "" + (contact.get('name')) + " &lt;" + email.value + "&gt;",
           toString: function() {
             return "" + email.value + ";" + contact.id;
@@ -1229,23 +1224,92 @@ Modal.error = function(text, cb) {
 module.exports = Modal;
 });
 
-;require.register("lib/popover_view", function(exports, require, module) {
-var BaseView, PopoverView,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+;require.register("lib/popover_screen_view", function(exports, require, module) {
+var PopoverScreenView,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-BaseView = require('./base_view');
+module.exports = PopoverScreenView = (function(_super) {
+  __extends(PopoverScreenView, _super);
+
+  PopoverScreenView.prototype.screenTitle = null;
+
+  PopoverScreenView.prototype.templateTitle = require('views/templates/popover_screens/generic_title');
+
+  PopoverScreenView.prototype.templateContent = function() {
+    return console.log('Warning, no template has been defined for content.');
+  };
+
+  function PopoverScreenView(options) {
+    PopoverScreenView.__super__.constructor.call(this, options);
+    if (options.titleElement == null) {
+      throw new Error('options.titleElement must be defined.');
+    }
+    if (options.contentElement == null) {
+      throw new Error('options.contentElement must be defined.');
+    }
+    if (options.popover == null) {
+      throw new Error('options.popover must be defined.');
+    }
+    this.titleElement = options.titleElement;
+    this.contentElement = options.contentElement;
+    this.popover = options.popover;
+    this.switchToScreen = this.popover.switchToScreen.bind(this.popover);
+  }
+
+  PopoverScreenView.prototype.render = function() {
+    this._renderTitle();
+    this._renderContent();
+    return this.afterRender();
+  };
+
+  PopoverScreenView.prototype._renderTitle = function() {
+    var renderData;
+    renderData = this.getRenderData();
+    return this.titleElement.html(this.templateTitle(renderData));
+  };
+
+  PopoverScreenView.prototype._renderContent = function() {
+    var renderData;
+    renderData = this.getRenderData();
+    return this.contentElement.html(this.templateContent(renderData));
+  };
+
+  PopoverScreenView.prototype.getRenderData = function() {
+    return _.extend({}, this.model.toJSON(), {
+      title: this.screenTitle
+    });
+  };
+
+  PopoverScreenView.prototype.afterRender = function() {};
+
+  PopoverScreenView.prototype.onLeaveScreen = function() {};
+
+  PopoverScreenView.prototype.destroy = function() {
+    this.setElement(null);
+    return this.remove();
+  };
+
+  return PopoverScreenView;
+
+})(Backbone.View);
+});
+
+;require.register("lib/popover_view", function(exports, require, module) {
+var BaseView, PopoverView,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('lib/base_view');
 
 module.exports = PopoverView = (function(_super) {
   __extends(PopoverView, _super);
 
   function PopoverView() {
-    this.getDirection = __bind(this.getDirection, this);
     return PopoverView.__super__.constructor.apply(this, arguments);
   }
 
-  PopoverView.prototype.titleTemplate = function() {};
+  PopoverView.prototype.template = require('views/templates/popover');
 
   PopoverView.prototype.initialize = function(options) {
     this.target = options.target;
@@ -1254,64 +1318,117 @@ module.exports = PopoverView = (function(_super) {
     return this;
   };
 
-  PopoverView.prototype.selfclose = function() {
+  PopoverView.prototype.selfclose = function(checkoutChanges) {
     var _base;
+    if (checkoutChanges == null) {
+      checkoutChanges = true;
+    }
     if (typeof (_base = this.parentView).onPopoverClose === "function") {
       _base.onPopoverClose();
     }
-    return this.close();
+    return this.close(checkoutChanges);
   };
 
   PopoverView.prototype.close = function() {
-    this.target.popover('destroy');
+    this.$popover.remove();
+    this.$popover = null;
     this.target.data('popover', void 0);
     return this.remove();
   };
 
+  PopoverView.prototype.getScreen = function(screenID) {
+    var screen, _ref;
+    if (screenID == null) {
+      screenID = 'default';
+    }
+    screen = (_ref = this.screens) != null ? _ref[screenID] : void 0;
+    if (screen != null) {
+      return screen;
+    } else {
+      throw new Error("Screen '" + screenID + "' is not defined.");
+    }
+  };
+
+  PopoverView.prototype.switchToScreen = function(screenID) {
+    var error;
+    if (this.$popover == null) {
+      error = 'Popover must be rendered before switching its screen.';
+      throw new Error(error);
+    }
+    if (screenID === this.mainScreen && (this.screen != null)) {
+      this.screen.onLeaveScreen();
+    }
+    if (this.screen != null) {
+      this.screen.destroy();
+    }
+    return this.renderScreen(screenID);
+  };
+
+  PopoverView.prototype.renderScreen = function(screenID) {
+    var ScreenBuilder;
+    ScreenBuilder = this.getScreen(screenID);
+    this.screen = new ScreenBuilder({
+      model: this.model,
+      el: this.$popover,
+      titleElement: this.titleElement,
+      contentElement: this.contentElement,
+      popover: this
+    });
+    this.screen.render();
+    return this.screenElement.attr('data-screen', screenID);
+  };
+
   PopoverView.prototype.render = function() {
+    var popoverWrapper;
     this.beforeRender();
-    this.target.popover({
-      selector: true,
-      trigger: 'manual',
-      title: this.titleTemplate(this.getRenderData()),
-      html: true,
-      placement: this.getDirection,
-      content: this.template(this.getRenderData()),
-      container: this.container
-    }).popover('show');
-    this.setElement($("#" + this.parentView.id + " .popover"));
-    if ($(window).width() <= 500) {
-      $('.popover').css({
-        top: 0,
-        left: 0
+    if (this.$popover == null) {
+      popoverWrapper = this.template({
+        title: '',
+        content: ''
       });
+      this.$popover = $(popoverWrapper);
+      this.titleElement = this.$popover.find('.popover-title');
+      this.contentElement = this.$popover.find('.popover-content');
+      this.screenElement = this.$popover.find('.screen-indicator');
+      this.setElement(this.$popover);
     }
     this.afterRender();
+    this.renderScreen(this.mainScreen);
+    this.positionPopover();
     return this;
   };
 
-  PopoverView.prototype.getDirection = function(tip) {
-    var $tmp, ctnOfs, fitBottom, fitLeft, fitRight, popoverHeight, popoverWidth, pos, realHeight, realWidth;
-    $tmp = $(tip).clone().appendTo('body');
-    popoverWidth = $tmp.innerWidth();
-    popoverHeight = $tmp.innerHeight();
-    $tmp.remove();
-    pos = this.target.offset();
-    ctnOfs = this.container.offset();
-    realWidth = pos.left + this.target.width() + popoverWidth;
-    fitRight = realWidth < ctnOfs.left + this.container.width();
-    fitLeft = pos.left - popoverWidth > ctnOfs.left;
-    realHeight = pos.top + this.target.height() + popoverHeight;
-    fitBottom = realHeight < ctnOfs.top + this.container.height();
-    if (fitRight) {
-      return 'right';
-    } else if (fitLeft) {
-      return 'left';
-    } else if (fitBottom) {
-      return 'bottom';
+  PopoverView.prototype.positionPopover = function() {
+    var bottom, containerHeight, containerWidth, left, popoverWidth, position, targetOffset, targetWidth, top;
+    this.$popover.detach().css({
+      display: 'block',
+      top: 'auto',
+      left: 'auto'
+    });
+    this.$popover.appendTo(this.container);
+    popoverWidth = this.$popover.innerWidth();
+    targetOffset = this.target.offset();
+    targetWidth = this.target.width();
+    containerHeight = this.container.innerHeight();
+    containerWidth = this.container.innerWidth();
+    if (targetOffset.left < (containerWidth / 2)) {
+      left = targetOffset.left + 50;
     } else {
-      return 'top';
+      left = targetOffset.left - popoverWidth - targetWidth + 25;
     }
+    if (targetOffset.top < (containerHeight / 2)) {
+      top = '10vh';
+      bottom = 'auto';
+    } else {
+      top = 'auto';
+      bottom = '5vh';
+    }
+    position = {
+      top: top,
+      bottom: bottom,
+      left: left
+    };
+    return this.$popover.css(position);
   };
 
   return PopoverView;
@@ -1667,28 +1784,72 @@ module.exports = {
   "and": "und",
   "times": "mal",
   "weekday": "Wochentag",
-  "summary": "Titel",
-  "start": "Start",
-  "end": "Ende",
-  "tags": "Tags",
-  "add tags": "Tags hinzufügen",
-  "change": "Wechsel",
-  "change to": "wechseln zu",
+  'screen title done button': 'Done',
+  "placeholder event title": "Event title",
+  "from": "From",
+  "placeholder from date": "From [date]",
+  "placeholder from time": "From [hours:minutes]",
+  "to": "To",
+  "placeholder to date": "To [date]",
+  "placeholder to time": "To [hours:minutes]",
+  "all day": "All day",
+  "placeholder place": "Place",
+  "add guest button": "Add guest",
+  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+  "placeholder description": "Description",
+  "no alert button": "No alert",
+  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+  "no repeat button": "No repeat",
+  "more details button": "More details",
+  "save button": "Save",
+  "create button": "Create",
+  "duplicate event tooltip": "Duplicate event",
+  "delete event tooltip": "Delete event",
   "change calendar": "Kalendar wechseln",
-  "save changes": "Änderungen speichern",
-  "save changes and invite guests": "Änderungen speichern und Gäste einladen",
-  "guests": "Gäste",
-  "cancel Invitation": "Einladung abbrechen",
-  "From": "Von",
-  "To": "Zu",
-  "All day, until": "Alle Tage, bis",
-  "All one day": "Alle Tage",
-  'Reminders before the event': 'Errinnern vor dem Ereignis',
-  "reminder": "Erinnerung",
-  'send mails question': 'Eine Mitteilung senden an E-MAil:',
-  'modal send mails': 'Eine Mitteilung senden',
-  'yes': 'Ja',
-  'no': 'Nein',
+  "screen delete title": "Delete event",
+  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+  "screen delete yes button": "Yes",
+  "screen delete no button": "No",
+  "screen guest title empty": "Guest",
+  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+  "screen guest input placeholder": "Email address",
+  "screen guest add button": "Add",
+  "screen guest remove tooltip": "Cancel the invitation",
+  "screen description title": "Description",
+  "screen alert title empty": "Alert",
+  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+  "screen alert default value": "Add new alert",
+  "screen alert time of event": "Time of the event",
+  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+  "screen alert delete tooltip": "Delete alert",
+  "screen alert type email": "Email",
+  "screen alert type notification": "Cozy notification",
+  "screen recurrence title": "Repeat",
+  "screen recurrence no repeat": "No repeat",
+  "screen recurrence daily": "Daily",
+  "screen recurrence weekly": "Weekly",
+  "screen recurrence monthly": "Monthly",
+  "screen recurrence yearly": "Yearly",
+  "screen recurrence interval label": "Interval",
+  "screen recurrence interval unit 0": "year |||| years",
+  "screen recurrence interval unit 1": "month |||| months",
+  "screen recurrence interval unit 2": "week |||| weeks",
+  "screen recurrence interval unit 3": "day |||| days",
+  "screen recurrence interval unit": "days",
+  "screen recurrence days list label": "On days",
+  "screen recurrence repeat by label": "Repeat by",
+  "screen recurrence repeat by month": "Day of the month",
+  "screen recurrence repeat by week": "Day of the week",
+  "screen recurrence ends label": "Ends:",
+  "screen recurrence ends never label": "Never",
+  "screen recurrence ends count label": "After",
+  "screen recurrence ends count unit": "occurrences",
+  "screen recurrence ends until label": "Until",
+  "screen recurrence ends until placeholder": "Until [date]",
+  "screen recurrence summary label": "Summary",
   "no summary": "Ein Titel muss vergeben werden.",
   "start after end": "Das Start-Datum liegt nach dem End-Datum.",
   "invalid start date": "Das Start-Datum ist ungültig.",
@@ -1757,12 +1918,15 @@ module.exports = {
 
 ;require.register("locales/en", function(exports, require, module) {
 module.exports = {
+  "calendar list title": "Calendars",
+  "sync settings button label": "Synchronization settings",
   "default calendar name": "my calendar",
   "Add": "Add",
   "event": "Event",
   "create event": "Event creation",
   "edit event": "Event edition",
   "edit": "Edit",
+  "save": "Save",
   "create": "Create",
   "creation": "Creation",
   "invite": "Invite",
@@ -1871,24 +2035,72 @@ module.exports = {
   "and": "and",
   "times": "times",
   "weekday": "weekday",
-  "summary": "Summary",
-  "start": "Start",
-  "end": "End",
-  "tags": "Tags",
-  "add tags": "Add tags",
-  "change": "Change",
-  "change to": "Change to",
+  'screen title done button': 'Done',
+  "placeholder event title": "Event title",
+  "from": "From",
+  "placeholder from date": "From [date]",
+  "placeholder from time": "From [hours:minutes]",
+  "to": "To",
+  "placeholder to date": "To [date]",
+  "placeholder to time": "To [hours:minutes]",
+  "all day": "All day",
+  "placeholder place": "Place",
+  "add guest button": "Add guest",
+  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+  "placeholder description": "Description",
+  "no alert button": "No alert",
+  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+  "no repeat button": "No repeat",
+  "more details button": "More details",
+  "save button": "Save",
+  "create button": "Create",
+  "duplicate event tooltip": "Duplicate event",
+  "delete event tooltip": "Delete event",
   "change calendar": "Change calendar",
-  "save changes": "Save changes",
-  "save changes and invite guests": "Save changes and invite guests",
-  "guests": "Guests",
-  "cancel Invitation": "Cancel the invitation",
-  "From": "From",
-  "To": "To",
-  "All day, until": "All day, until",
-  "All one day": "All day",
-  'Reminders before the event': 'Reminders before the event',
-  "reminder": "Reminder",
+  "screen delete title": "Delete event",
+  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+  "screen delete yes button": "Yes",
+  "screen delete no button": "No",
+  "screen guest title empty": "Guest",
+  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+  "screen guest input placeholder": "Email address",
+  "screen guest add button": "Add",
+  "screen guest remove tooltip": "Cancel the invitation",
+  "screen description title": "Description",
+  "screen alert title empty": "Alert",
+  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+  "screen alert default value": "Add new alert",
+  "screen alert time of event": "Time of the event",
+  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+  "screen alert delete tooltip": "Delete alert",
+  "screen alert type email": "Email",
+  "screen alert type notification": "Cozy notification",
+  "screen recurrence title": "Repeat",
+  "screen recurrence no repeat": "No repeat",
+  "screen recurrence daily": "Daily",
+  "screen recurrence weekly": "Weekly",
+  "screen recurrence monthly": "Monthly",
+  "screen recurrence yearly": "Yearly",
+  "screen recurrence interval label": "Interval",
+  "screen recurrence interval unit 0": "year |||| years",
+  "screen recurrence interval unit 1": "month |||| months",
+  "screen recurrence interval unit 2": "week |||| weeks",
+  "screen recurrence interval unit 3": "day |||| days",
+  "screen recurrence interval unit": "days",
+  "screen recurrence days list label": "On days",
+  "screen recurrence repeat by label": "Repeat by",
+  "screen recurrence repeat by month": "Day of the month",
+  "screen recurrence repeat by week": "Day of the week",
+  "screen recurrence ends label": "Ends:",
+  "screen recurrence ends never label": "Never",
+  "screen recurrence ends count label": "After",
+  "screen recurrence ends count unit": "occurrences",
+  "screen recurrence ends until label": "Until",
+  "screen recurrence ends until placeholder": "Until [date]",
+  "screen recurrence summary label": "Summary",
   'send mails question': 'Send a notification email to:',
   'modal send mails': 'Send a notification',
   'yes': 'Yes',
@@ -2073,24 +2285,72 @@ module.exports = {
   "and": "y",
   "times": "veces",
   "weekday": "día de la semana",
-  "summary": "Título",
-  "start": "Comienzo",
-  "end": "Fin",
-  "tags": "Etiquetas",
-  "add tags": "Añadir etiquetas",
-  "change": "Cambiar",
-  "change to": "Cambiar a",
+  'screen title done button': 'Done',
+  "placeholder event title": "Event title",
+  "from": "From",
+  "placeholder from date": "From [date]",
+  "placeholder from time": "From [hours:minutes]",
+  "to": "To",
+  "placeholder to date": "To [date]",
+  "placeholder to time": "To [hours:minutes]",
+  "all day": "All day",
+  "placeholder place": "Place",
+  "add guest button": "Add guest",
+  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+  "placeholder description": "Description",
+  "no alert button": "No alert",
+  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+  "no repeat button": "No repeat",
+  "more details button": "More details",
+  "save button": "Save",
+  "create button": "Create",
+  "duplicate event tooltip": "Duplicate event",
+  "delete event tooltip": "Delete event",
   "change calendar": "Cambiar de agenda",
-  "save changes": "Guardar cambios",
-  "save changes and invite guests": "Guardar cambios y enviar las invitaciones",
-  "guests": "Invitados",
-  "cancel Invitation": "Anular la invitación",
-  "From": "De",
-  "To": "A",
-  "All day, until": "Todo el día, hasta",
-  "All one day": "Todo el día",
-  "Reminders before the event": "Recordatorios antes del evento",
-  "reminder": "Recordatorio",
+  "screen delete title": "Delete event",
+  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+  "screen delete yes button": "Yes",
+  "screen delete no button": "No",
+  "screen guest title empty": "Guest",
+  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+  "screen guest input placeholder": "Email address",
+  "screen guest add button": "Add",
+  "screen guest remove tooltip": "Cancel the invitation",
+  "screen description title": "Description",
+  "screen alert title empty": "Alert",
+  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+  "screen alert default value": "Add new alert",
+  "screen alert time of event": "Time of the event",
+  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+  "screen alert delete tooltip": "Delete alert",
+  "screen alert type email": "Email",
+  "screen alert type notification": "Cozy notification",
+  "screen recurrence title": "Repeat",
+  "screen recurrence no repeat": "No repeat",
+  "screen recurrence daily": "Daily",
+  "screen recurrence weekly": "Weekly",
+  "screen recurrence monthly": "Monthly",
+  "screen recurrence yearly": "Yearly",
+  "screen recurrence interval label": "Interval",
+  "screen recurrence interval unit 0": "year |||| years",
+  "screen recurrence interval unit 1": "month |||| months",
+  "screen recurrence interval unit 2": "week |||| weeks",
+  "screen recurrence interval unit 3": "day |||| days",
+  "screen recurrence interval unit": "days",
+  "screen recurrence days list label": "On days",
+  "screen recurrence repeat by label": "Repeat by",
+  "screen recurrence repeat by month": "Day of the month",
+  "screen recurrence repeat by week": "Day of the week",
+  "screen recurrence ends label": "Ends:",
+  "screen recurrence ends never label": "Never",
+  "screen recurrence ends count label": "After",
+  "screen recurrence ends count unit": "occurrences",
+  "screen recurrence ends until label": "Until",
+  "screen recurrence ends until placeholder": "Until [date]",
+  "screen recurrence summary label": "Summary",
   "send mails question": "Enviar un correo electrónico de notificación a:",
   "modal send mails": "Enviar una notificación",
   "yes": "Si",
@@ -2161,13 +2421,16 @@ module.exports = {
 
 ;require.register("locales/fr", function(exports, require, module) {
 module.exports = {
+  "calendar list title": "Agendas",
+  "sync settings button label": "Options de synchronisation",
   "default calendar name": "mon agenda",
   "Add": "Ajouter",
   "event": "évènement",
   "create event": "Création d'un évènement",
   "edit event": "Modification d'un évènement",
-  "edit": "Enregistrer",
-  "create": "Enregistrer",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "create": "Créer",
   "creation": "Création",
   "invite": "Inviter",
   "close": "Fermer",
@@ -2274,24 +2537,71 @@ module.exports = {
   "and": "et",
   "times": "fois",
   "weekday": "jours de la semaine",
-  "summary": "Titre",
-  "start": "Début",
-  "end": "Fin",
-  "tags": "Tags",
-  "add tags": "Ajouter des tags",
-  "change to": "Changer en",
-  "change": "Modifier",
+  'screen title done button': 'OK',
+  "placeholder event title": "Titre de l'événement",
+  "from": "De",
+  "placeholder from date": "De [date]",
+  "placeholder from time": "De [heures:minutes]",
+  "to": "Au",
+  "placeholder to date": "Jusqu'à [date]",
+  "placeholder to time": "Jusqu'à [hours:minutes]",
+  "all day": "Jour Entier",
+  "placeholder place": "Lieu",
+  "add guest button": "Ajouter un invité",
+  "guests list": "%{first} et %{smart_count} autre |||| %{first} et %{smart_count} autres",
+  "placeholder description": "Description",
+  "no alert button": "Pas d'alerte",
+  "alert label": "%{smart_count} alerte programmée |||| %{smart_count} alertes programmées",
+  "no repeat button": "Pas de répétition",
+  "more details button": "Plus de détails",
+  "save button": "Sauvegarder",
+  "create button": "Créer",
+  "duplicate event tooltip": "Dupliquer l'événement",
+  "delete event tooltip": "Supprimer l'événement",
   "change calendar": "Changer l'agenda",
-  "save changes": "Enregistrer",
-  "save changes and invite guests": "Enregistrer et envoyer les invitations",
-  "guests": "Invités",
-  "cancel Invitation": "Annuler l'invitation",
-  "From": "De",
-  "To": "À",
-  "All day, until": "Journée entière, jusqu'au",
-  "All one day": "Toute la journée du",
-  'Reminders before the event': 'Rappels avant l’évènement',
-  "reminder": "Rappel",
+  "screen delete title": "Supprimer l'événement",
+  "screen delete description": "Vous êtes sur le point de supprimer l'événement \"%{description}\". Êtes-vous sûr ?",
+  "screen delete yes button": "Oui",
+  "screen delete no button": "Non",
+  "screen guest title empty": "Invité",
+  "screen guest title": "%{smart_count} invité |||| %{smart_count} invités",
+  "screen guest input placeholder": "Adresse email",
+  "screen guest add button": "Ajouter",
+  "screen guest remove tooltip": "Annuler l'invitation",
+  "screen description title": "Description",
+  "screen alert title empty": "Alerte",
+  "screen alert title": "%{smart_count} alerte |||| %{smart_count} alertes",
+  "screen alert default value": "Ajouter une nouvelle alerte",
+  "screen alert time of event": "Heure de l'événement",
+  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+  "screen alert hour": "%{smart_count} heure |||| %{smart_count} heures",
+  "screen alert day": "%{smart_count} jour |||| %{smart_count} jours",
+  "screen alert week": "%{smart_count} semaine |||| %{smart_count} semaines",
+  "screen alert delete tooltip": "Supprimer l'alerte",
+  "screen alert type email": "Email",
+  "screen alert type notification": "Notification Cozy",
+  "screen recurrence title": "Répétition",
+  "screen recurrence no repeat": "Pas de répétition",
+  "screen recurrence daily": "Quotidienne",
+  "screen recurrence weekly": "Hebdomadaire",
+  "screen recurrence monthly": "Mensuelle",
+  "screen recurrence yearly": "Annuelle",
+  "screen recurrence interval label": "Interval",
+  "screen recurrence interval unit 0": "année |||| années",
+  "screen recurrence interval unit 1": "mois",
+  "screen recurrence interval unit 2": "semaine |||| semaines",
+  "screen recurrence interval unit 3": "jour |||| jours",
+  "screen recurrence days list label": "jours",
+  "screen recurrence repeat by label": "Répéter par",
+  "screen recurrence repeat by month": "Jour du mois",
+  "screen recurrence repeat by week": "Jour de la semaine",
+  "screen recurrence ends label": "Fin",
+  "screen recurrence ends never label": "Jamais",
+  "screen recurrence ends count label": "Après",
+  "screen recurrence ends count unit": "occurrences",
+  "screen recurrence ends until label": "au",
+  "screen recurrence ends until placeholder": "au [date]",
+  "screen recurrence summary label": "Résumé",
   'send mails question': 'Envoyer un email de notification à :',
   'modal send mails': 'Envoyer une notification',
   'yes': 'Oui',
@@ -2686,8 +2996,7 @@ module.exports = ScheduleItem = (function(_super) {
     if (this.isAllDay()) {
       s = H.momentToDateString(m);
     } else if (this.isRecurrent()) {
-      m = moment(m).tz(this.get('timezone'));
-      s = H.momentToAmbiguousString(m);
+      s = moment.tz(m, this.get('timezone')).toISOString();
     } else {
       s = m.toISOString();
     }
@@ -2938,7 +3247,7 @@ module.exports = Tag = (function(_super) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var CalendarView, DayBucketCollection, EventModal, ImportView, ListView, Router, SettingsModal, app,
+var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2948,8 +3257,6 @@ app = require('application');
 ListView = require('views/list_view');
 
 CalendarView = require('views/calendar_view');
-
-EventModal = require('views/event_modal');
 
 SettingsModal = require('views/settings_modal');
 
@@ -3073,15 +3380,7 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.event = function(id, backurl) {
-    var model, view;
-    model = app.events.get(id);
-    view = new EventModal({
-      model: model,
-      backurl: backurl
-    });
-    $('body').append(view.$el);
-    view.render();
-    return this.onCalendar = true;
+    return console.log('This feature has been temporarily disabled. Let us ' + 'know if you miss it!');
   };
 
   Router.prototype.backToCalendar = function() {
@@ -3256,74 +3555,38 @@ module.exports = CalendarHeader = (function(_super) {
 });
 
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
-var ComboBox, Event, EventModal, EventPopOver, PopoverView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+var Event, EventPopOver, PopoverView,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-PopoverView = require('../lib/popover_view');
-
-EventModal = require('views/event_modal');
-
-ComboBox = require('views/widgets/combobox');
+PopoverView = require('lib/popover_view');
 
 Event = require('models/event');
-
-tFormat = 'HH:mm';
-
-dFormat = 'DD/MM/YYYY';
-
-inputDateDTPickerFormat = 'dd/mm/yyyy';
-
-allDayDateFieldFormat = 'YYYY-MM-DD';
-
-defTimePickerOpts = {
-  template: false,
-  minuteStep: 5,
-  showMeridian: false
-};
-
-defDatePickerOps = {
-  language: window.app.locale,
-  fontAwesome: true,
-  autoclose: true,
-  pickerPosition: 'bottom-right',
-  keyboardNavigation: false,
-  format: inputDateDTPickerFormat,
-  minView: 2,
-  viewSelect: 4
-};
 
 module.exports = EventPopOver = (function(_super) {
   __extends(EventPopOver, _super);
 
   function EventPopOver() {
-    this.onAdvancedClicked = __bind(this.onAdvancedClicked, this);
-    this.onTab = __bind(this.onTab, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
 
-  EventPopOver.prototype.titleTemplate = require('./templates/popover_title');
+  EventPopOver.prototype.screens = {
+    main: require('views/popover_screens/main'),
+    guests: require('views/popover_screens/guests'),
+    details: require('views/popover_screens/details'),
+    alert: require('views/popover_screens/alert'),
+    repeat: require('views/popover_screens/repeat'),
+    "delete": require('views/popover_screens/delete')
+  };
 
-  EventPopOver.prototype.template = require('./templates/popover_event');
+  EventPopOver.prototype.mainScreen = 'main';
 
   EventPopOver.prototype.events = {
     'keyup': 'onKeyUp',
-    'change select': 'onKeyUp',
-    'change input': 'onKeyUp',
-    'click .add': 'onAddClicked',
-    'click .advanced-link': 'onAdvancedClicked',
-    'click .remove': 'onRemoveClicked',
-    'click .duplicate': 'onDuplicateClicked',
     'click .close': 'selfclose',
-    'changeTime.timepicker .input-start': 'onSetStart',
-    'changeTime.timepicker .input-end-time': 'onSetEnd',
-    'changeDate .input-end-date': 'onSetEnd',
-    'click .input-allday': 'toggleAllDay',
-    'input .input-desc': 'onSetDesc',
-    'input .input-place': 'onSetPlace',
-    'keydown [data-tabindex-next]': 'onTab',
-    'keydown [data-tabindex-prev]': 'onTab'
+    'click div.popover-back': function() {
+      return this.switchToScreen(this.mainScreen);
+    }
   };
 
   EventPopOver.prototype.initialize = function(options) {
@@ -3335,362 +3598,53 @@ module.exports = EventPopOver = (function(_super) {
         place: ''
       });
     }
-    EventPopOver.__super__.initialize.call(this, options);
-    this.listenTo(this.model, 'change', this.refresh);
-    return this.options = options;
-  };
-
-  EventPopOver.prototype.afterRender = function() {
-    var timepickerEvents;
-    this.addButton = this.$('.btn.add');
-    this.removeButton = this.$('.remove');
-    this.spinner = this.$('.remove-spinner');
-    this.duplicateButton = this.$('.duplicate');
-    this.$container = this.$('.popover-content-wrapper');
-    timepickerEvents = {
-      'focus': function() {
-        return $(this).timepicker('highlightHour');
-      },
-      'timepicker.next': function() {
-        return $("[tabindex=" + (+$(this).attr('tabindex') + 1) + "]").focus();
-      },
-      'timepicker.prev': function() {
-        return $("[tabindex=" + (+$(this).attr('tabindex') - 1) + "]").focus();
-      }
-    };
-    if (this.model.isNew()) {
-      this.removeButton.hide();
-      this.duplicateButton.hide();
-    }
-    this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
-    this.$('.input-date').datetimepicker(defDatePickerOps);
-    this.$('[tabindex=1]').focus();
-    this.calendar = new ComboBox({
-      el: this.$('.calendarcombo'),
-      small: true,
-      source: app.calendars.toAutoCompleteSource()
-    });
-    this.model.setCalendar(this.calendar.value());
-    this.calendar.on('edition-complete', (function(_this) {
-      return function(value) {
-        return _this.model.setCalendar(value);
-      };
-    })(this));
-    return this.refresh();
-  };
-
-  EventPopOver.prototype.setCaptions = function() {
-    return this.$('.end-date .caption').html((function(_this) {
-      return function() {
-        var str;
-        if (_this.model.isAllDay()) {
-          if (_this.model.isSameDay()) {
-            str = 'All one day';
-          } else {
-            str = 'All day, until';
-          }
-        } else {
-          return ',&nbsp;';
-        }
-        return t(str);
-      };
-    })(this));
-  };
-
-  EventPopOver.prototype.getTitle = function() {
-    var title;
-    if (this.model.isNew()) {
-      title = "" + this.type + " creation";
-    } else {
-      title = "edit " + this.type;
-    }
-    return t(title);
-  };
-
-  EventPopOver.prototype.getRenderData = function() {
-    var currentCalendar, data, defaultCalendar, firstCalendar, _ref, _ref1, _ref2;
-    firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
-    defaultCalendar = t('default calendar name');
-    if (this.model.isNew()) {
-      currentCalendar = firstCalendar || defaultCalendar;
-    } else {
-      currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
-    }
-    return data = _.extend({}, this.model.toJSON(), {
-      tFormat: tFormat,
-      dFormat: dFormat,
-      editionMode: !this.model.isNew(),
-      advancedUrl: "" + (this.parentView.getUrlHash()) + "/" + this.model.id,
-      calendar: currentCalendar,
-      allDay: this.model.isAllDay(),
-      sameDay: this.model.isSameDay(),
-      start: this.model.getStartDateObject(),
-      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd')
-    });
-  };
-
-  EventPopOver.prototype.onTab = function(ev) {
-    var $this, index;
-    if (ev.keyCode !== 9) {
-      return;
-    }
-    $this = $(ev.target);
-    if (!ev.shiftKey && $this.is('[data-tabindex-next]')) {
-      index = $this.data('tabindex-next');
-    }
-    if (ev.shiftKey && $this.is('[data-tabindex-prev]')) {
-      index = $this.data('tabindex-prev');
-    }
-    if (!index) {
-      return;
-    }
-    this.$("[tabindex=" + index + "]").focus();
-    return ev.preventDefault();
-  };
-
-  EventPopOver.prototype.onSetStart = function() {
-    return this.model.setStart(this.formatDateTime(this.$('.input-start').val()));
-  };
-
-  EventPopOver.prototype.onSetEnd = function() {
-    this.model.setEnd(this.formatDateTime(this.$('.input-end-time').val(), this.$('.input-end-date').val()));
-    this.$container.toggleClass('is-same-day', this.model.isSameDay());
-    return this.setCaptions();
-  };
-
-  EventPopOver.prototype.toggleAllDay = function() {
-    var end, start;
-    start = this.model.getStartDateObject();
-    end = this.model.getEndDateObject();
-    if (this.$('.input-allday').is(':checked')) {
-      this.model.set('start', start.format(allDayDateFieldFormat));
-      this.model.set('end', end.add(1, 'd').format(allDayDateFieldFormat));
-    } else {
-      this.model.set('start', start.hour(12).toISOString());
-      this.model.set('end', start.hour(13).toISOString());
-    }
-    this.$('.timed').attr('aria-hidden', this.model.isAllDay());
-    this.$container.toggleClass('is-all-day', this.model.isAllDay());
-    return this.setCaptions();
-  };
-
-  EventPopOver.prototype.onSetDesc = function(ev) {
-    return this.model.set('description', ev.target.value);
-  };
-
-  EventPopOver.prototype.onSetPlace = function(ev) {
-    return this.model.set('place', ev.target.value);
-  };
-
-  EventPopOver.prototype.onAdvancedClicked = function(event) {
-    var modal;
-    if (this.model.isNew()) {
-      modal = new EventModal({
-        model: this.model,
-        backurl: window.location.hash
-      });
-      $('body').append(modal.$el);
-      modal.render();
-    } else {
-      window.location.hash += "/" + this.model.id;
-    }
-    event.preventDefault();
-    return this.selfclose();
+    return EventPopOver.__super__.initialize.call(this, options);
   };
 
   EventPopOver.prototype.onKeyUp = function(event) {
-    if (event.keyCode === 13 || event.which === 13) {
-      this.calendar.onBlur();
-      this.onSetStart();
-      this.onSetEnd();
-      return this.addButton.click();
-    } else if (event.keyCode === 27) {
+    if (event.keyCode === 27) {
       return this.selfclose();
+    }
+  };
+
+  EventPopOver.prototype.selfclose = function(checkoutChanges) {
+    if (checkoutChanges == null) {
+      checkoutChanges = true;
+    }
+    if (this.model.isNew()) {
+      EventPopOver.__super__.selfclose.call(this);
     } else {
-      return this.addButton.removeClass('disabled');
-    }
-  };
-
-  EventPopOver.prototype.formatDateTime = function(timeStr, dateStr) {
-    var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
-    if (timeStr == null) {
-      timeStr = '';
-    }
-    if (dateStr == null) {
-      dateStr = '';
-    }
-    t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
-    d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
-    if (t != null ? t[0] : void 0) {
-      _ref = t.slice(1, 3), hour = _ref[0], minute = _ref[1];
-    }
-    if (d != null ? d[0] : void 0) {
-      _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
-    }
-    if (date && this.model.isAllDay()) {
-      date = +date + 1;
-    }
-    if (month) {
-      month = +month - 1;
-    }
-    return setObj = {
-      hour: hour,
-      minute: minute,
-      date: date,
-      month: month,
-      year: year
-    };
-  };
-
-  EventPopOver.prototype.onRemoveClicked = function() {
-    if (confirm(t('are you sure'))) {
-      this.spinner.show();
-      this.removeButton.hide();
-      return this.model.destroy({
-        wait: true,
-        error: function() {
-          return alert(t('server error occured'));
-        },
-        complete: (function(_this) {
-          return function() {
-            _this.spinner.hide();
-            return _this.selfclose();
-          };
-        })(this)
-      });
-    }
-  };
-
-  EventPopOver.prototype.onDuplicateClicked = function() {
-    var attrs, calendarEvent, key, value, _ref;
-    attrs = [];
-    _ref = this.model.attributes;
-    for (key in _ref) {
-      value = _ref[key];
-      attrs[key] = value;
-    }
-    delete attrs.id;
-    delete attrs._id;
-    calendarEvent = new Event(attrs);
-    this.duplicateButton.hide();
-    this.spinner.show();
-    return calendarEvent.save(null, {
-      wait: true,
-      success: (function(_this) {
-        return function() {
-          _this.duplicateButton.show();
-          return _this.spinner.hide();
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          _this.duplicateButton.show();
-          return _this.spinner.hide();
-        };
-      })(this)
-    });
-  };
-
-  EventPopOver.prototype.onAddClicked = function() {
-    var err, errors, _i, _len, _results;
-    if (this.$('.btn.add').hasClass('disabled')) {
-      return;
-    }
-    this.addButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-    this.addButton.spin('small');
-    errors = this.model.validate(this.model.attributes);
-    if (errors) {
-      this.addButton.html(this.getButtonText());
-      this.addButton.children().show();
-      this.addButton.spin();
-      this.$('.alert').remove();
-      this.$('input').css('border-color', '');
-      _results = [];
-      for (_i = 0, _len = errors.length; _i < _len; _i++) {
-        err = errors[_i];
-        _results.push(this.handleError(err));
+      if (checkoutChanges) {
+        this.model.fetch({
+          complete: (function(_this) {
+            return function() {
+              return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+            };
+          })(this)
+        });
+      } else {
+        EventPopOver.__super__.selfclose.call(this, checkoutChanges);
       }
-      return _results;
-    } else {
-      return this.model.save({}, {
-        wait: true,
-        success: (function(_this) {
-          return function() {
-            _this.calendar.save();
-            return app.events.add(_this.model);
-          };
-        })(this),
-        error: function() {
-          return alert('server error occured');
-        },
-        complete: (function(_this) {
-          return function() {
-            _this.addButton.spin(false);
-            _this.addButton.html(_this.getButtonText());
-            _this.addButton.children().show();
-            return _this.selfclose();
-          };
-        })(this)
-      });
     }
+    return window.popoverExtended = false;
   };
 
-  EventPopOver.prototype.selfclose = function() {
+  EventPopOver.prototype.close = function(checkoutChanges) {
+    if (checkoutChanges == null) {
+      checkoutChanges = true;
+    }
     if (this.model.isNew()) {
-      return EventPopOver.__super__.selfclose.call(this);
+      EventPopOver.__super__.close.call(this);
     } else {
-      return this.model.fetch({
-        complete: EventPopOver.__super__.selfclose.apply(this, arguments)
-      });
+      if (checkoutChanges) {
+        this.model.fetch({
+          complete: EventPopOver.__super__.close.apply(this, arguments)
+        });
+      } else {
+        EventPopOver.__super__.close.call(this);
+      }
     }
-  };
-
-  EventPopOver.prototype.close = function() {
-    if (this.model.isNew()) {
-      return EventPopOver.__super__.close.call(this);
-    } else {
-      return this.model.fetch({
-        complete: EventPopOver.__super__.close.apply(this, arguments)
-      });
-    }
-  };
-
-  EventPopOver.prototype.refresh = function() {
-    var delta, end;
-    delta = this.model.isAllDay() ? -1 : 0;
-    end = this.model.getEndDateObject().add(delta, 'd');
-    this.$('.input-start').timepicker('setTime', this.model.getStartDateObject().format(tFormat), true, true);
-    this.$('.input-end-time').timepicker('setTime', end.format(tFormat), true, true);
-    return this.$('.input-end-date').val(end.format(dFormat));
-  };
-
-  EventPopOver.prototype.handleError = function(error) {
-    var alertMsg, guiltyFields;
-    switch (error.field) {
-      case 'description':
-        guiltyFields = '.input-desc';
-        break;
-      case 'startdate':
-        guiltyFields = '.input-start';
-        break;
-      case 'enddate':
-        guiltyFields = '.input-end-time, .input-end-date';
-        break;
-      case 'date':
-        guiltyFields = '.input-start, .input-end-time, .input-end-date';
-    }
-    this.$(guiltyFields).css('border-color', 'red');
-    this.$(guiltyFields).focus();
-    alertMsg = $('<div class="alert"></div>').text(t(error.value));
-    return this.$('.popover-content').before(alertMsg);
-  };
-
-  EventPopOver.prototype.getButtonText = function() {
-    if (this.model.isNew()) {
-      return t('create');
-    } else {
-      return t('edit');
-    }
+    return window.popoverExtended = false;
   };
 
   return EventPopOver;
@@ -3877,8 +3831,10 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.refreshOne = function(model) {
-    var data, fcEvent;
-    if (model.isRecurrent()) {
+    var data, fcEvent, modelWasRecurrent, previousRRule;
+    previousRRule = model.previous('rrule');
+    modelWasRecurrent = (previousRRule != null) && previousRRule !== '';
+    if (model.isRecurrent() || modelWasRecurrent) {
       return this.refresh();
     }
     if (model.isAllDay()) {
@@ -4046,782 +4002,6 @@ module.exports = CalendarView = (function(_super) {
   };
 
   return CalendarView;
-
-})(BaseView);
-});
-
-;require.register("views/event_modal", function(exports, require, module) {
-var ComboBox, Event, EventModal, H, RRuleFormView, ReminderView, TagsView, ViewCollection, app, random,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-ViewCollection = require('lib/view_collection');
-
-ReminderView = require('views/event_modal_reminder');
-
-RRuleFormView = require('views/event_modal_rrule');
-
-TagsView = require('views/tags');
-
-ComboBox = require('views/widgets/combobox');
-
-Event = require('models/event');
-
-random = require('lib/random');
-
-app = require('application');
-
-H = require('helpers');
-
-module.exports = EventModal = (function(_super) {
-  __extends(EventModal, _super);
-
-  function EventModal() {
-    this.remove = __bind(this.remove, this);
-    this.close = __bind(this.close, this);
-    this.configureGuestTypeahead = __bind(this.configureGuestTypeahead, this);
-    this.handleError = __bind(this.handleError, this);
-    this.save = __bind(this.save, this);
-    this.resizeDescription = __bind(this.resizeDescription, this);
-    this.addReminder = __bind(this.addReminder, this);
-    this.refreshGuestList = __bind(this.refreshGuestList, this);
-    this.onGuestAdded = __bind(this.onGuestAdded, this);
-    this.toggleAllDay = __bind(this.toggleAllDay, this);
-    this.hideOnEscape = __bind(this.hideOnEscape, this);
-    return EventModal.__super__.constructor.apply(this, arguments);
-  }
-
-  EventModal.prototype.template = require('./templates/event_modal');
-
-  EventModal.prototype.id = 'event-modal';
-
-  EventModal.prototype.className = 'modal fade';
-
-  EventModal.prototype.attributes = {
-    'data-keyboard': 'false'
-  };
-
-  EventModal.prototype.inputDateTimeFormat = 'DD/MM/YYYY H:mm';
-
-  EventModal.prototype.inputDateTimeDTPickerFormat = 'dd/mm/yyyy hh:ii';
-
-  EventModal.prototype.inputDateFormat = 'DD/MM/YYYY';
-
-  EventModal.prototype.inputDateDTPickerFormat = 'dd/mm/yyyy';
-
-  EventModal.prototype.exportDateFormat = 'YYYY-MM-DD';
-
-  EventModal.prototype.collectionEl = '#guests-list';
-
-  EventModal.prototype.itemview = require('./event_modal_guest');
-
-  EventModal.prototype.initialize = function(options) {
-    var guests;
-    guests = this.model.get('attendees') || [];
-    this.collection = new Backbone.Collection(guests);
-    this.listenTo(this.collection, 'remove', this.onGuestRemoved);
-    this.backurl = options.backurl;
-    return EventModal.__super__.initialize.apply(this, arguments);
-  };
-
-  EventModal.prototype.events = function() {
-    return {
-      'click  #confirm-btn': 'save',
-      'click  #cancel-btn': 'close',
-      'click  .close': 'close',
-      'click #addguest': (function(_this) {
-        return function() {
-          return _this.onGuestAdded(_this.$('#addguest-field').val());
-        };
-      })(this),
-      'keydown #basic-description': 'resizeDescription',
-      'keypress #basic-description': 'resizeDescription',
-      'click .addreminder': (function(_this) {
-        return function() {
-          return _this.addReminder({
-            action: 'DISPLAY',
-            trigg: '-PT10M'
-          });
-        };
-      })(this),
-      'click #allday': 'toggleAllDay'
-    };
-  };
-
-  EventModal.prototype.afterRender = function() {
-    var end, _ref;
-    EventModal.__super__.afterRender.apply(this, arguments);
-    this.addGuestField = this.configureGuestTypeahead();
-    this.startField = this.$('#basic-start').attr('type', 'text');
-    this.endField = this.$('#basic-end').attr('type', 'text');
-    this.startField.val(this.model.getStartDateObject().format(this.inputDateTimeFormat));
-    end = this.model.getEndDateObject();
-    if (this.model.isAllDay()) {
-      end.add(-1, 'days');
-    }
-    this.endField.val(end.format(this.inputDateTimeFormat));
-    this.toggleAllDay();
-    this.descriptionField = this.$('#basic-description');
-    this.reminders = [];
-    if ((_ref = this.model.get('alarms')) != null) {
-      _ref.forEach(this.addReminder);
-    }
-    this.rruleForm = new RRuleFormView({
-      model: this.model
-    });
-    this.rruleForm.render();
-    this.$('#rrule-container').append(this.rruleForm.$el);
-    this.tags = new TagsView({
-      model: this.model,
-      el: this.$('#basic-tags')
-    });
-    this.calendar = new ComboBox({
-      el: this.$('#basic-calendar'),
-      source: app.calendars.toAutoCompleteSource()
-    });
-    this.$el.modal('show');
-    $(document).on('keydown', this.hideOnEscape);
-    this.$el.on('hidden', (function(_this) {
-      return function() {
-        $(document).off('keydown', _this.hideOnEscape);
-        window.app.router.navigate(_this.backurl || '', {
-          trigger: false,
-          replace: true
-        });
-        return _this.remove();
-      };
-    })(this));
-    return this.$('#basic-summary').focus();
-  };
-
-  EventModal.prototype.hideOnEscape = function(e) {
-    if (e.which === 27 && !e.isDefaultPrevented()) {
-      return this.close();
-    }
-  };
-
-  EventModal.prototype.toggleAllDay = function() {
-    var dtFormat, end, options, start;
-    this.startField.datetimepicker('remove');
-    this.endField.datetimepicker('remove');
-    start = moment(this.startField.val(), this.inputDateTimeFormat);
-    end = moment(this.endField.val(), this.inputDateTimeFormat);
-    options = {
-      language: window.app.locale,
-      fontAwesome: true,
-      autoclose: true,
-      pickerPosition: 'bottom-right',
-      keyboardNavigation: false
-    };
-    if (this.$('#allday').is(':checked')) {
-      dtFormat = this.inputDateFormat;
-      _.extend(options, {
-        format: this.inputDateDTPickerFormat,
-        minView: 2,
-        viewSelect: 4
-      });
-    } else {
-      dtFormat = this.inputDateTimeFormat;
-      _.extend(options, {
-        format: this.inputDateTimeDTPickerFormat,
-        viewSelect: 4
-      });
-    }
-    this.startField.val(start.format(dtFormat));
-    this.endField.val(end.format(dtFormat));
-    this.startField.datetimepicker(options);
-    return this.endField.datetimepicker(options);
-  };
-
-  EventModal.prototype.onGuestAdded = function(info) {
-    var email, guests, id, _ref;
-    _ref = info.split(';'), email = _ref[0], id = _ref[1];
-    if (!email) {
-      return "";
-    }
-    guests = this.model.get('attendees') || [];
-    if (!_.findWhere(guests, {
-      email: email
-    })) {
-      guests = _.clone(guests);
-      guests.push({
-        key: random.randomString(),
-        status: 'INVITATION-NOT-SENT',
-        email: email,
-        contactid: id || null
-      });
-      this.model.set('attendees', guests);
-      this.refreshGuestList();
-      this.$('#confirm-btn').text(t('save changes and invite guests'));
-    }
-    this.addGuestField.val('');
-    return "";
-  };
-
-  EventModal.prototype.refreshGuestList = function() {
-    return this.collection.reset(this.model.get('attendees'));
-  };
-
-  EventModal.prototype.onGuestRemoved = function(removed) {
-    var attendee, attendees, index, _i, _len;
-    attendees = this.model.get('attendees') || [];
-    for (index = _i = 0, _len = attendees.length; _i < _len; index = ++_i) {
-      attendee = attendees[index];
-      if (attendee.email === removed.get('email')) {
-        attendees.splice(index, 1);
-        break;
-      }
-    }
-    return this.model.set('attendees', attendees);
-  };
-
-  EventModal.prototype.addReminder = function(reminderM) {
-    var reminder, _ref;
-    if ((_ref = reminderM.action) === 'EMAIL' || _ref === 'DISPLAY' || _ref === 'BOTH') {
-      this.$('#reminder-explanation').removeClass('hide');
-      reminder = new ReminderView({
-        model: reminderM
-      });
-      this.reminders.push(reminder);
-      reminder.on('remove', (function(_this) {
-        return function(removedReminder) {
-          return _this.reminders.splice(_this.reminders.indexOf(removedReminder), 1);
-        };
-      })(this));
-      reminder.render();
-      return this.$('#reminder-container').append(reminder.$el);
-    }
-  };
-
-  EventModal.prototype.resizeDescription = function() {
-    var loc, notes, rows;
-    notes = this.descriptionField.val();
-    rows = loc = 0;
-    while (loc = notes.indexOf("\n", loc) + 1) {
-      rows++;
-    }
-    return this.descriptionField.prop('rows', rows + 2);
-  };
-
-  EventModal.prototype.getRenderData = function() {
-    var data, day, desc, f, specialCharacters, _ref, _ref1;
-    specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi;
-    desc = this.model.get('description').replace(specialCharacters, '');
-    desc = desc.replace(/\ /g, '-');
-    day = moment(this.model.get('start')).format(this.exportDateFormat);
-    data = _.extend({}, this.model.toJSON(), {
-      summary: this.model.get('description'),
-      description: this.model.get('details'),
-      allDay: this.model.isAllDay(),
-      file: "" + day + "-" + desc
-    });
-    f = this.model.isAllDay() ? this.inputDateFormat : this.inputDateTimeFormat;
-    data.start = this.model.getStartDateObject().format(f);
-    data.end = this.model.getEndDateObject().format(f);
-    data.calendar = ((_ref = data.tags) != null ? _ref[0] : void 0) || '';
-    data.tags = ((_ref1 = data.tags) != null ? _ref1.slice(1) : void 0) || [];
-    return data;
-  };
-
-  EventModal.prototype.save = function() {
-    var data, dtE, dtS, error, rruleStr, validModel, validationErrors, _i, _len, _results;
-    data = {
-      details: this.descriptionField.val(),
-      description: this.$('#basic-summary').val(),
-      place: this.$('#basic-place').val(),
-      tags: [this.$('#basic-calendar').val()].concat(this.tags.getTags())
-    };
-    data.alarms = this.reminders.map(function(v) {
-      return v.getModelAttributes();
-    });
-    data.rrule = this.rruleForm.hasRRule() ? (rruleStr = this.rruleForm.getRRule().toString(), data.rrule = rruleStr.split(';').filter(function(s) {
-      return s.indexOf('DTSTART' !== 0);
-    }).join(';')) : void 0;
-    if (this.$('#allday').is(':checked')) {
-      dtS = moment.tz(this.startField.val(), this.inputDateFormat, window.app.timezone);
-      dtE = moment.tz(this.endField.val(), this.inputDateFormat, window.app.timezone);
-      dtE.add('day', 1);
-      data.start = H.momentToDateString(dtS);
-      data.end = H.momentToDateString(dtE);
-    } else {
-      dtS = moment.tz(this.startField.val(), this.inputDateTimeFormat, window.app.timezone);
-      dtE = moment.tz(this.endField.val(), this.inputDateTimeFormat, window.app.timezone);
-      if (this.rruleForm.hasRRule()) {
-        data.timezone = window.app.timezone;
-        data.start = H.momentToAmbiguousString(dtS);
-        data.end = H.momentToAmbiguousString(dtE);
-      } else {
-        data.start = dtS.toISOString();
-        data.end = dtE.toISOString();
-      }
-    }
-    if (data.start !== this.model.get(this.model.startDateField)) {
-      this.model.startDateChanged = true;
-    }
-    validModel = this.model.save(data, {
-      success: (function(_this) {
-        return function() {
-          _this.calendar.save();
-          app.events.add(_this.model);
-          return _this.close();
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          alert('server error');
-          return _this.close();
-        };
-      })(this)
-    });
-    if (!validModel) {
-      this.$('.alert').remove();
-      this.$('.control-group').removeClass('error');
-      validationErrors = this.model.validationError;
-      if (validationErrors != null) {
-        _results = [];
-        for (_i = 0, _len = validationErrors.length; _i < _len; _i++) {
-          error = validationErrors[_i];
-          _results.push(this.handleError(error));
-        }
-        return _results;
-      }
-    }
-  };
-
-  EventModal.prototype.handleError = function(error) {
-    var alertMsg, guiltyFields;
-    switch (error.field) {
-      case 'description':
-        guiltyFields = '#basic-summary';
-        break;
-      case 'startdate':
-        guiltyFields = '#basic-start';
-        break;
-      case 'enddate':
-        guiltyFields = '#basic-end';
-        break;
-      case 'date':
-        guiltyFields = '#basic-start, #basic-end';
-    }
-    this.$(guiltyFields).parents('.control-group').addClass('error');
-    alertMsg = $('<div class="alert"></div>').text(t(error.value));
-    return this.$('.modal-body').before(alertMsg);
-  };
-
-  EventModal.prototype.configureGuestTypeahead = function() {
-    return this.$('#addguest-field').typeahead({
-      source: app.contacts.asTypeaheadSource(),
-      matcher: function(contact) {
-        var old;
-        old = $.fn.typeahead.Constructor.prototype.matcher;
-        return old.call(this, contact.display);
-      },
-      sorter: function(contacts) {
-        var beginswith, caseInsensitive, caseSensitive, contact, item;
-        beginswith = [];
-        caseSensitive = [];
-        caseInsensitive = [];
-        while ((contact = contacts.shift())) {
-          item = contact.display;
-          if (!item.toLowerCase().indexOf(this.query.toLowerCase())) {
-            beginswith.push(contact);
-          } else if (~item.indexOf(this.query)) {
-            caseSensitive.push(contact);
-          } else {
-            caseInsensitive.push(contact);
-          }
-        }
-        return beginswith.concat(caseSensitive, caseInsensitive);
-      },
-      highlighter: function(contact) {
-        var old;
-        old = $.fn.typeahead.Constructor.prototype.highlighter;
-        return old.call(this, contact.display);
-      },
-      updater: this.onGuestAdded
-    });
-  };
-
-  EventModal.prototype.close = function() {
-    return this.$el.modal('hide');
-  };
-
-  EventModal.prototype.remove = function() {
-    this.tags.remove();
-    this.calendar.remove();
-    this.startField.data('datetimepicker').remove();
-    this.endField.data('datetimepicker').remove();
-    return EventModal.__super__.remove.apply(this, arguments);
-  };
-
-  return EventModal;
-
-})(ViewCollection);
-});
-
-;require.register("views/event_modal_guest", function(exports, require, module) {
-var BaseView, GuestView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-module.exports = GuestView = (function(_super) {
-  __extends(GuestView, _super);
-
-  function GuestView() {
-    return GuestView.__super__.constructor.apply(this, arguments);
-  }
-
-  GuestView.prototype.template = require('./templates/event_modal_guest');
-
-  GuestView.prototype.events = {
-    'click .remove-guest': 'onRemoveGuest'
-  };
-
-  GuestView.prototype.onRemoveGuest = function() {
-    return this.model.collection.remove(this.model);
-  };
-
-  return GuestView;
-
-})(BaseView);
-});
-
-;require.register("views/event_modal_reminder", function(exports, require, module) {
-var BaseView, H, ReminderView, Toggle,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-Toggle = require('views/toggle');
-
-H = require('../../helpers');
-
-module.exports = ReminderView = (function(_super) {
-  __extends(ReminderView, _super);
-
-  function ReminderView() {
-    this.getRenderData = __bind(this.getRenderData, this);
-    return ReminderView.__super__.constructor.apply(this, arguments);
-  }
-
-  ReminderView.prototype.className = 'reminder';
-
-  ReminderView.prototype.template = require('./templates/event_modal_reminder');
-
-  ReminderView.prototype.events = function() {
-    return {
-      'click .removereminder': 'remove'
-    };
-  };
-
-  ReminderView.prototype.afterRender = function() {
-    var inputDuration, _ref, _ref1;
-    this.actionMail = new Toggle({
-      icon: 'envelope',
-      label: 'email notification',
-      value: (_ref = this.model.action) === 'EMAIL' || _ref === 'BOTH'
-    });
-    this.actionNotif = new Toggle({
-      icon: 'exclamation',
-      label: 'home notification',
-      value: (_ref1 = this.model.action) === 'DISPLAY' || _ref1 === 'BOTH'
-    });
-    this.actionMail.on('toggle', (function(_this) {
-      return function(mailIsOn) {
-        if (!mailIsOn) {
-          return _this.actionNotif.toggle(true);
-        }
-      };
-    })(this));
-    this.actionNotif.on('toggle', (function(_this) {
-      return function(notifIsOn) {
-        if (!notifIsOn) {
-          return _this.actionMail.toggle(true);
-        }
-      };
-    })(this));
-    inputDuration = this.$('.triggervalue');
-    inputDuration.before(this.actionMail.$el);
-    return inputDuration.before(this.actionNotif.$el);
-  };
-
-  ReminderView.prototype.remove = function() {
-    this.trigger('remove', this);
-    return ReminderView.__super__.remove.apply(this, arguments);
-  };
-
-  ReminderView.prototype.getRenderData = function() {
-    var data, unit, uv, value;
-    if (!this.model.isNew) {
-      uv = H.iCalDurationToUnitValue(this.model.trigg);
-      unit = Object.keys(uv)[0];
-      value = uv[unit];
-    } else {
-      unit = 'M';
-      value = 10;
-    }
-    data = {
-      isNew: this.model.isNew,
-      isSelectedUnit: function(u) {
-        return u === unit;
-      },
-      durationValue: value,
-      model: this.model
-    };
-    return data;
-  };
-
-  ReminderView.prototype.getModelAttributes = function() {
-    var action, data, uv;
-    action = this.actionNotif.value && this.actionMail.value ? 'BOTH' : this.actionMail.value ? 'EMAIL' : 'DISPLAY';
-    uv = {};
-    uv[this.$('.triggerunit').val()] = this.$('.triggervalue').val();
-    data = {
-      action: action,
-      trigg: H.unitValuesToiCalDuration(uv)
-    };
-    return data;
-  };
-
-  return ReminderView;
-
-})(BaseView);
-});
-
-;require.register("views/event_modal_rrule", function(exports, require, module) {
-var BaseView, RRuleView,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-BaseView = require('../lib/base_view');
-
-module.exports = RRuleView = (function(_super) {
-  __extends(RRuleView, _super);
-
-  function RRuleView() {
-    this.updateHelp = __bind(this.updateHelp, this);
-    this.toggleCountUntil = __bind(this.toggleCountUntil, this);
-    this.showRRule = __bind(this.showRRule, this);
-    this.getRRule = __bind(this.getRRule, this);
-    this.hasRRule = __bind(this.hasRRule, this);
-    return RRuleView.__super__.constructor.apply(this, arguments);
-  }
-
-  RRuleView.prototype.template = require('./templates/event_modal_rrule');
-
-  RRuleView.prototype.inputDateFormat = 'DD/MM/YYYY';
-
-  RRuleView.prototype.inputDateDTPickerFormat = 'dd/mm/yyyy';
-
-  RRuleView.prototype.events = function() {
-    return {
-      'click  .rrule-show': 'showRRule',
-      'change #rrule': 'updateHelp',
-      'changeDate #rrule-until': 'toggleCountUntil',
-      'input  #rrule-until': 'toggleCountUntil',
-      'change #rrule-count': 'toggleCountUntil'
-    };
-  };
-
-  RRuleView.prototype.afterRender = function() {
-    this.$('#rrule').hide();
-    this.updateHelp();
-    return this.$('#rrule-until').attr('type', 'text').datetimepicker({
-      language: window.app.locale,
-      fontAwesome: true,
-      autoclose: true,
-      format: this.inputDateDTPickerFormat,
-      minView: 2,
-      viewSelect: 4,
-      keyboardNavigation: false,
-      pickerPosition: 'top-right'
-    }).on('changeDate', this.updateHelp);
-  };
-
-  RRuleView.prototype.getRenderData = function() {
-    var data, options, rrule;
-    data = {
-      weekDays: moment.localeData()._weekdays
-    };
-    if (!this.model.has('rrule')) {
-      return _.extend(data, {
-        rrule: {
-          freq: 'NOREPEAT',
-          interval: 1,
-          count: 4,
-          until: ""
-        },
-        freqSelected: function(value) {
-          if (value === 'NOREPEAT') {
-            return 'selected';
-          }
-        },
-        wkdaySelected: function() {
-          return false;
-        },
-        endModeSelected: function(value) {
-          if (value === 'forever') {
-            return 'selected';
-          }
-        },
-        yearModeIs: function(value) {
-          if (value === 'date') {
-            return "checked";
-          }
-        }
-      });
-    }
-    options = RRule.fromString(this.model.get('rrule')).options;
-    rrule = {
-      freq: options.freq,
-      interval: options.interval
-    };
-    if (options.until) {
-      rrule.endMode = 'until';
-      rrule.until = moment.tz(options.until, 'UTC').format(this.inputDateFormat);
-      rrule.count = '';
-    } else if (options.count) {
-      rrule.endMode = 'count';
-      rrule.count = options.count;
-      rrule.until = '';
-    } else {
-      rrule.endMode = 'forever';
-      rrule.count = '';
-      rrule.until = '';
-    }
-    return _.extend(data, {
-      rrule: rrule,
-      freqSelected: function(value) {
-        var result;
-        result = value === rrule.freq;
-        if (result) {
-          return 'selected';
-        }
-      },
-      wkdaySelected: function(value) {
-        var result, _ref;
-        result = options.byweekday && (_ref = (value + 6) % 7, __indexOf.call(options.byweekday, _ref) >= 0);
-        if (result) {
-          return 'checked';
-        }
-      },
-      endModeSelected: function(value) {
-        if (value === rrule.endMode) {
-          return 'selected';
-        }
-      },
-      yearModeIs: function(value) {
-        var result, _ref, _ref1;
-        result = (value === 'weekdate' && ((_ref = options.bynweekday) != null ? _ref.length : void 0)) || (value === 'date' && ((_ref1 = options.bymonthday) != null ? _ref1.length : void 0));
-        if (result) {
-          return 'checked';
-        }
-      }
-    });
-  };
-
-  RRuleView.prototype.hasRRule = function() {
-    return this.$('#rrule-freq').val() !== 'NOREPEAT';
-  };
-
-  RRuleView.prototype.getRRule = function() {
-    var RRuleWdays, day, monthmode, options, rawDate, start, wk;
-    start = this.model.getStartDateObject();
-    RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
-    options = {
-      freq: +this.$('#rrule-freq').val(),
-      interval: +this.$('#rrule-interval').val()
-    };
-    if (options.freq === RRule.WEEKLY) {
-      options.byweekday = [];
-      this.$('#rrule-weekdays :checked').each(function(idx, box) {
-        return options.byweekday.push(RRuleWdays[box.value]);
-      });
-      if (options.byweekday.length === 7) {
-        delete options.byweekday;
-      }
-    } else if (options.freq === RRule.MONTHLY) {
-      monthmode = this.$('#rrule-monthdays :radio:checked').val();
-      if (monthmode === "date") {
-        options.bymonthday = start.date();
-      } else if (monthmode === 'weekdate') {
-        day = RRuleWdays[start.day()];
-        wk = Math.ceil(start.date() / 7);
-        if (wk > 4) {
-          wk = -1;
-        }
-        options.byweekday = day.nth(wk);
-      }
-    }
-    switch (this.$('input:radio[name=endMode]:checked').val()) {
-      case 'count':
-        options.count = +this.$('#rrule-count').val();
-        break;
-      case 'until':
-        rawDate = this.$('#rrule-until').val();
-        options.until = moment.tz(rawDate, this.inputDateFormat, 'UTC').toDate();
-    }
-    return new RRule(options);
-  };
-
-  RRuleView.prototype.showRRule = function() {
-    this.updateHelp();
-    this.$('#rrule-action').hide();
-    return this.$('#rrule-short').slideDown((function(_this) {
-      return function() {
-        return _this.$('#rrule').slideDown();
-      };
-    })(this));
-  };
-
-  RRuleView.prototype.toggleCountUntil = function(event) {
-    var radio;
-    radio = this.$('input:radio[name=endMode]');
-    if (event.target.id === 'rrule-count') {
-      this.$('#rrule-until').val('');
-      radio[1].checked = true;
-    } else if (event.target.id === 'rrule-until') {
-      this.$('#rrule-count').val('');
-      radio[2].checked = true;
-    }
-    return this.updateHelp();
-  };
-
-  RRuleView.prototype.updateHelp = function() {
-    var freq, language, locale;
-    freq = this.$('#rrule-freq').val();
-    if (freq === 'NOREPEAT') {
-      this.$('#rrule-action').show();
-      this.$('#rrule-help').html(t('no recurrence'));
-      this.$('#rrule-interval').toggle(false);
-      this.$('#rrule-monthdays').toggle(false);
-      this.$('#rrule-weekdays').toggle(false);
-      this.$('#rrule-repeat').toggle(false);
-      return;
-    } else {
-      freq = +freq;
-    }
-    this.$('#rrule-interval').toggle(true);
-    this.$('#rrule-repeat').toggle(true);
-    this.$('#rrule-monthdays').toggle(freq === RRule.MONTHLY);
-    this.$('#rrule-weekdays').toggle(freq === RRule.WEEKLY);
-    locale = moment.localeData();
-    language = {
-      dayNames: locale._weekdays,
-      monthNames: locale._months
-    };
-    this.$('#rrule-help').html(this.getRRule().toText(window.t, language));
-    return true;
-  };
-
-  return RRuleView;
 
 })(BaseView);
 });
@@ -5736,6 +4916,1130 @@ module.exports = MenuItemView = (function(_super) {
 })(BaseView);
 });
 
+;require.register("views/popover_screens/alert", function(exports, require, module) {
+var AlertPopoverScreen, PopoverScreenView, helpers,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+helpers = require('helpers');
+
+module.exports = AlertPopoverScreen = (function(_super) {
+  __extends(AlertPopoverScreen, _super);
+
+  function AlertPopoverScreen() {
+    return AlertPopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  AlertPopoverScreen.ALERT_OPTIONS = [
+    {
+      M: 0
+    }, {
+      M: 15
+    }, {
+      M: 30
+    }, {
+      H: 1
+    }, {
+      H: 2
+    }, {
+      H: 6
+    }, {
+      H: 12
+    }, {
+      D: 1
+    }, {
+      D: 2
+    }, {
+      D: 3
+    }, {
+      D: 5
+    }, {
+      W: 1
+    }
+  ];
+
+  AlertPopoverScreen.prototype.screenTitle = t('screen alert title empty');
+
+  AlertPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/alert');
+
+  AlertPopoverScreen.prototype.templateAlertRow = require('views/templates/popover_screens/alert_row');
+
+  AlertPopoverScreen.prototype.events = {
+    'change .new-alert': 'onNewAlert',
+    'click .alerts li .alert-delete': 'onRemoveAlert',
+    'click input[type="checkbox"]': 'onChangeActionAlert'
+  };
+
+  AlertPopoverScreen.prototype.getRenderData = function() {
+    var alertOptions, alerts, formattedAlertOptions, numAlerts;
+    alerts = this.model.get('alarms') || [];
+    numAlerts = alerts.length;
+    if (numAlerts > 0) {
+      this.screenTitle = t('screen alert title', {
+        smart_count: numAlerts
+      });
+    } else {
+      this.screenTitle = t('screen alert title empty');
+    }
+    alertOptions = AlertPopoverScreen.ALERT_OPTIONS;
+    formattedAlertOptions = alertOptions.map((function(_this) {
+      return function(alert, index) {
+        var translationInfo;
+        translationInfo = _this.getAlertTranslationInfo(alert);
+        return _.extend({}, translationInfo, {
+          index: index
+        });
+      };
+    })(this));
+    return _.extend(AlertPopoverScreen.__super__.getRenderData.call(this), {
+      alertOptions: formattedAlertOptions,
+      alerts: this.model.get('alarms')
+    });
+  };
+
+  AlertPopoverScreen.prototype.afterRender = function() {
+    var $alerts, alarm, alarms, index, options, row, translationKey, trigger, value, _i, _len, _ref, _ref1, _ref2, _results;
+    $alerts = this.$('.alerts');
+    $alerts.empty();
+    alarms = this.model.get('alarms') || [];
+    _results = [];
+    for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
+      alarm = alarms[index];
+      trigger = helpers.iCalDurationToUnitValue(alarm.trigg);
+      _ref = this.getAlertTranslationInfo(trigger), translationKey = _ref.translationKey, value = _ref.value;
+      options = {
+        index: index,
+        label: t(translationKey, {
+          smart_count: value
+        }),
+        action: alarm.action,
+        isEmailChecked: (_ref1 = alarm.action) === 'EMAIL' || _ref1 === 'BOTH',
+        isNotifChecked: (_ref2 = alarm.action) === 'DISPLAY' || _ref2 === 'BOTH'
+      };
+      row = this.templateAlertRow(options);
+      _results.push($alerts.append(row));
+    }
+    return _results;
+  };
+
+  AlertPopoverScreen.prototype.onRemoveAlert = function(event) {
+    var alerts, index;
+    index = this.$(event.target).parents('li').attr('data-index');
+    alerts = this.model.get('alarms') || [];
+    alerts.splice(index, 1);
+    this.model.set('alarms', alerts);
+    return this.render();
+  };
+
+  AlertPopoverScreen.prototype.onChangeActionAlert = function(event) {
+    var action, alerts, checkbox, currentAction, index, isEmailAction, newAction, otherAction;
+    checkbox = this.$(event.target);
+    isEmailAction = checkbox.hasClass('action-email');
+    action = isEmailAction ? 'EMAIL' : 'DISPLAY';
+    otherAction = action === 'EMAIL' ? 'DISPLAY' : 'EMAIL';
+    index = checkbox.parents('li').attr('data-index');
+    alerts = this.model.get('alarms');
+    currentAction = alerts[index].action;
+    if (currentAction === 'BOTH') {
+      newAction = otherAction;
+    } else if (currentAction === otherAction) {
+      newAction = 'BOTH';
+    } else {
+      event.preventDefault();
+    }
+    if (newAction != null) {
+      alerts[index].action = newAction;
+      return this.model.set('alarms', alerts);
+    }
+  };
+
+  AlertPopoverScreen.prototype.onNewAlert = function() {
+    var alarms, alertOption, index, triggerValue;
+    index = parseInt(this.$('select.new-alert').val());
+    if (index !== -1) {
+      alertOption = AlertPopoverScreen.ALERT_OPTIONS[index];
+      triggerValue = helpers.unitValuesToiCalDuration(alertOption);
+      alarms = this.model.get('alarms') || [];
+      alarms.push({
+        action: 'DISPLAY',
+        trigg: triggerValue
+      });
+      this.model.set('alarms', alarms);
+      this.$('select.new-alert').val(-1);
+      return this.render();
+    }
+  };
+
+  AlertPopoverScreen.prototype.getAlertTranslationInfo = function(alert) {
+    var translationKey, unit, value;
+    unit = Object.keys(alert)[0];
+    translationKey = (function() {
+      switch (unit) {
+        case 'M':
+          return 'screen alert minute';
+        case 'H':
+          return 'screen alert hour';
+        case 'D':
+          return 'screen alert day';
+        case 'W':
+          return 'screen alert week';
+      }
+    })();
+    value = parseInt(alert[unit]);
+    if (unit === 'M' && value === 0) {
+      translationKey = 'screen alert time of event';
+    }
+    return {
+      translationKey: translationKey,
+      value: value
+    };
+  };
+
+  return AlertPopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/delete", function(exports, require, module) {
+var DeletePopoverScreen, PopoverScreenView,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+module.exports = DeletePopoverScreen = (function(_super) {
+  __extends(DeletePopoverScreen, _super);
+
+  function DeletePopoverScreen() {
+    return DeletePopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  DeletePopoverScreen.prototype.screenTitle = t('screen delete title');
+
+  DeletePopoverScreen.prototype.templateTitle = require('views/templates/popover_screens/delete_title');
+
+  DeletePopoverScreen.prototype.templateContent = require('views/templates/popover_screens/delete');
+
+  DeletePopoverScreen.prototype.events = {
+    'click .answer-yes': 'onDelete',
+    'click .answer-no': function() {
+      return this.switchToScreen('main');
+    }
+  };
+
+  DeletePopoverScreen.prototype.afterRender = function() {
+    this.$spinner = this.$('.remove-spinner');
+    this.$removeChoices = this.$('.remove-choices');
+    this.$errors = this.$('.errors');
+    this.$spinner.hide();
+    return this.$errors.hide();
+  };
+
+  DeletePopoverScreen.prototype.onDelete = function() {
+    this.$errors.hide();
+    this.$spinner.show();
+    this.$removeChoices.hide();
+    return this.model.destroy({
+      wait: true,
+      error: (function(_this) {
+        return function() {
+          _this.$removeChoices.show();
+          _this.$errors.html(t('server error occured'));
+          return _this.$errors.show();
+        };
+      })(this),
+      success: (function(_this) {
+        return function() {
+          _this.$spinner.hide();
+          return _this.popover.selfclose(false);
+        };
+      })(this)
+    });
+  };
+
+  return DeletePopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/details", function(exports, require, module) {
+var DetailsPopoverScreen, PopoverScreenView,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+module.exports = DetailsPopoverScreen = (function(_super) {
+  __extends(DetailsPopoverScreen, _super);
+
+  function DetailsPopoverScreen() {
+    return DetailsPopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  DetailsPopoverScreen.prototype.screenTitle = t('screen description title');
+
+  DetailsPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/details');
+
+  DetailsPopoverScreen.prototype.afterRender = function() {
+    return this.$('.input-details').focus();
+  };
+
+  DetailsPopoverScreen.prototype.onLeaveScreen = function() {
+    var value;
+    value = this.$('.input-details').val();
+    return this.model.set('details', value);
+  };
+
+  return DetailsPopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/guests", function(exports, require, module) {
+var GuestPopoverScreen, PopoverScreenView, random,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+random = require('lib/random');
+
+module.exports = GuestPopoverScreen = (function(_super) {
+  __extends(GuestPopoverScreen, _super);
+
+  function GuestPopoverScreen() {
+    return GuestPopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  GuestPopoverScreen.prototype.screenTitle = '';
+
+  GuestPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/guests');
+
+  GuestPopoverScreen.prototype.templateGuestRow = require('views/templates/popover_screens/guest_row');
+
+  GuestPopoverScreen.prototype.events = {
+    "click .add-new-guest": "onNewGuest",
+    "click .guest-delete": "onRemoveGuest",
+    'keyup input[name="guest-name"]': "onKeyup"
+  };
+
+  GuestPopoverScreen.prototype.getRenderData = function() {
+    var guests, numGuests;
+    guests = this.model.get('attendees') || [];
+    numGuests = guests.length;
+    if (numGuests > 0) {
+      this.screenTitle = t('screen guest title', {
+        smart_count: numGuests
+      });
+    } else {
+      this.screenTitle = t('screen guest title empty');
+    }
+    return _.extend(GuestPopoverScreen.__super__.getRenderData.call(this), {
+      guests: this.model.get('attendes') || []
+    });
+  };
+
+  GuestPopoverScreen.prototype.afterRender = function() {
+    var $guests, guest, guests, index, options, row, _i, _len;
+    $guests = this.$('.guests');
+    $guests.empty();
+    guests = this.model.get('attendees') || [];
+    for (index = _i = 0, _len = guests.length; _i < _len; index = ++_i) {
+      guest = guests[index];
+      options = _.extend(guest, {
+        index: index
+      });
+      row = this.templateGuestRow(guest);
+      $guests.append(row);
+    }
+    this.configureGuestTypeahead();
+    return this.$('input[name="guest-name"]').focus();
+  };
+
+  GuestPopoverScreen.prototype.configureGuestTypeahead = function() {
+    return this.$('input[name="guest-name"]').typeahead({
+      source: app.contacts.asTypeaheadSource(),
+      matcher: function(contact) {
+        var old;
+        old = $.fn.typeahead.Constructor.prototype.matcher;
+        return old.call(this, contact.display);
+      },
+      sorter: function(contacts) {
+        var beginswith, caseInsensitive, caseSensitive, contact, item;
+        beginswith = [];
+        caseSensitive = [];
+        caseInsensitive = [];
+        while ((contact = contacts.shift())) {
+          item = contact.display;
+          if (!item.toLowerCase().indexOf(this.query.toLowerCase())) {
+            beginswith.push(contact);
+          } else if (~item.indexOf(this.query)) {
+            caseSensitive.push(contact);
+          } else {
+            caseInsensitive.push(contact);
+          }
+        }
+        return beginswith.concat(caseSensitive, caseInsensitive);
+      },
+      highlighter: function(contact) {
+        var img, imgPath, old;
+        old = $.fn.typeahead.Constructor.prototype.highlighter;
+        imgPath = contact.hasPicture ? "contacts/" + contact.id + ".jpg" : "img/defaultpicture.png";
+        img = '<img width="40px" src="' + imgPath + '" />&nbsp;';
+        return img + old.call(this, contact.display);
+      },
+      updater: this.onNewGuest.bind(this)
+    });
+  };
+
+  GuestPopoverScreen.prototype.onRemoveGuest = function(event) {
+    var guests, index;
+    index = this.$(event.target).parents('li').attr('data-index');
+    guests = this.model.get('attendees') || [];
+    guests.splice(index, 1);
+    this.model.set('attendees', guests);
+    return this.render();
+  };
+
+  GuestPopoverScreen.prototype.onNewGuest = function(userInfo) {
+    var contactID, email, guests, _ref;
+    if (userInfo == null) {
+      userInfo = null;
+    }
+    if ((userInfo != null) && typeof userInfo === "string") {
+      _ref = userInfo.split(';'), email = _ref[0], contactID = _ref[1];
+    } else {
+      email = this.$('input[name="guest-name"]').val();
+      contactID = null;
+    }
+    guests = this.model.get('attendees') || [];
+    if (!_.findWhere(guests, {
+      email: email
+    })) {
+      guests = _.clone(guests);
+      guests.push({
+        key: random.randomString(),
+        status: 'INVITATION-NOT-SENT',
+        email: email,
+        contactid: contactID
+      });
+      this.model.set('attendees', guests);
+      this.render();
+    }
+    this.$('input[name="guest-name"]').val('');
+    return this.$('input[name="guest-name"]').focus();
+  };
+
+  GuestPopoverScreen.prototype.onKeyup = function(event) {
+    var key;
+    key = event.keyCode;
+    if (key === 13) {
+      return this.onNewGuest();
+    }
+  };
+
+  return GuestPopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/main", function(exports, require, module) {
+var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+ComboBox = require('views/widgets/combobox');
+
+Event = require('models/event');
+
+tFormat = 'HH:mm';
+
+dFormat = 'DD/MM/YYYY';
+
+inputDateDTPickerFormat = 'dd/mm/yyyy';
+
+allDayDateFieldFormat = 'YYYY-MM-DD';
+
+defTimePickerOpts = {
+  template: false,
+  minuteStep: 5,
+  showMeridian: false
+};
+
+defDatePickerOps = {
+  language: window.app.locale,
+  fontAwesome: true,
+  autoclose: true,
+  pickerPosition: 'bottom-right',
+  keyboardNavigation: false,
+  format: inputDateDTPickerFormat,
+  minView: 2,
+  viewSelect: 4
+};
+
+module.exports = MainPopoverScreen = (function(_super) {
+  __extends(MainPopoverScreen, _super);
+
+  function MainPopoverScreen() {
+    this.onTab = __bind(this.onTab, this);
+    return MainPopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  MainPopoverScreen.prototype.templateTitle = require('views/templates/popover_screens/main_title');
+
+  MainPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/main');
+
+  MainPopoverScreen.prototype.events = {
+    'keyup': 'onKeyUp',
+    'change select': 'onKeyUp',
+    'change input': 'onKeyUp',
+    'click .add': 'onAddClicked',
+    'click .advanced-link': 'onAdvancedClicked',
+    'click .remove': function() {
+      return this.switchToScreen('delete');
+    },
+    'click .duplicate': 'onDuplicateClicked',
+    'changeTime.timepicker .input-start': 'onSetStart',
+    'changeTime.timepicker .input-end-time': 'onSetEnd',
+    'changeDate .input-end-date': 'onSetEnd',
+    'click .input-allday': 'toggleAllDay',
+    'input .input-desc': 'onSetDesc',
+    'input .input-place': 'onSetPlace',
+    'keydown [data-tabindex-next]': 'onTab',
+    'keydown [data-tabindex-prev]': 'onTab',
+    'click .input-people': function() {
+      return this.switchToScreen('guests');
+    },
+    'click .input-details-trigger': function() {
+      return this.switchToScreen('details');
+    },
+    'click .input-alert': function() {
+      return this.switchToScreen('alert');
+    },
+    'click .input-repeat': function() {
+      return this.switchToScreen('repeat');
+    }
+  };
+
+  MainPopoverScreen.prototype.initialize = function() {
+    return this.listenTo(this.model, 'change', this.refresh);
+  };
+
+  MainPopoverScreen.prototype.getRenderData = function() {
+    var currentCalendar, data, defaultCalendar, firstCalendar, _ref, _ref1, _ref2;
+    firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
+    defaultCalendar = t('default calendar name');
+    if (this.model.isNew()) {
+      currentCalendar = firstCalendar || defaultCalendar;
+    } else {
+      currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
+    }
+    return data = _.extend(MainPopoverScreen.__super__.getRenderData.call(this), {
+      tFormat: tFormat,
+      dFormat: dFormat,
+      calendar: currentCalendar,
+      allDay: this.model.isAllDay(),
+      sameDay: this.model.isSameDay(),
+      start: this.model.getStartDateObject(),
+      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd'),
+      alerts: this.model.get('alarms'),
+      guestsButtonText: this.getGuestsButtonText(),
+      buttonText: this.getButtonText(),
+      recurrenceButtonText: this.getRecurrenceButtonText()
+    });
+  };
+
+  MainPopoverScreen.prototype.afterRender = function() {
+    var timepickerEvents, _ref;
+    this.$container = this.$('.popover-content-wrapper');
+    this.$addButton = this.$('.btn.add');
+    this.removeButton = this.$('.remove');
+    this.spinner = this.$('.remove-spinner');
+    this.duplicateButton = this.$('.duplicate');
+    this.$optionalFields = this.$('[data-optional="true"]');
+    this.$moreDetailsButton = this.$('.advanced-link');
+    if (this.model.isNew()) {
+      this.removeButton.hide();
+      this.duplicateButton.hide();
+    }
+    timepickerEvents = {
+      'focus': function() {
+        return $(this).timepicker('highlightHour');
+      },
+      'timepicker.next': function() {
+        return $("[tabindex=" + (+$(this).attr('tabindex') + 1) + "]").focus();
+      },
+      'timepicker.prev': function() {
+        return $("[tabindex=" + (+$(this).attr('tabindex') - 1) + "]").focus();
+      }
+    };
+    this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
+    this.$('.input-date').datetimepicker(defDatePickerOps);
+    this.calendar = new ComboBox({
+      el: this.$('.calendarcombo'),
+      small: true,
+      source: app.calendars.toAutoCompleteSource(),
+      current: (_ref = this.model.getCalendar()) != null ? _ref.get('name') : void 0
+    });
+    this.calendar.on('edition-complete', (function(_this) {
+      return function(value) {
+        return _this.model.setCalendar(value);
+      };
+    })(this));
+    this.refresh();
+    if (window.popoverExtended) {
+      this.expandPopover();
+    }
+    if (this.$("[aria-hidden=true]").length === 0) {
+      this.$moreDetailsButton.hide();
+    }
+    return setTimeout((function(_this) {
+      return function() {
+        return _this.$('[tabindex="1"]').focus();
+      };
+    })(this), 1);
+  };
+
+  MainPopoverScreen.prototype.refresh = function() {
+    var delta, end;
+    delta = this.model.isAllDay() ? -1 : 0;
+    end = this.model.getEndDateObject().add(delta, 'd');
+    this.$('.input-start').timepicker('setTime', this.model.getStartDateObject().format(tFormat), true, true);
+    this.$('.input-end-time').timepicker('setTime', end.format(tFormat), true, true);
+    this.$('.input-end-date').val(end.format(dFormat));
+    return this.$('.input-description').val(this.model.get('details'));
+  };
+
+  MainPopoverScreen.prototype.onKeyUp = function(event) {
+    if (event.keyCode === 13 || event.which === 13) {
+      this.calendar.onBlur();
+      this.onSetStart();
+      this.onSetEnd();
+      return this.$addButton.click();
+    } else {
+      return this.$addButton.removeClass('disabled');
+    }
+  };
+
+  MainPopoverScreen.prototype.toggleAllDay = function() {
+    var end, start;
+    start = this.model.getStartDateObject();
+    end = this.model.getEndDateObject();
+    if (this.$('.input-allday').is(':checked')) {
+      this.model.set('start', start.format(allDayDateFieldFormat));
+      this.model.set('end', end.add(1, 'd').format(allDayDateFieldFormat));
+    } else {
+      this.model.set('start', start.hour(12).toISOString());
+      this.model.set('end', start.hour(13).toISOString());
+    }
+    this.$('.input-time').attr('aria-hidden', this.model.isAllDay());
+    return this.$container.toggleClass('is-all-day', this.model.isAllDay());
+  };
+
+  MainPopoverScreen.prototype.onSetDesc = function(ev) {
+    return this.model.set('description', ev.target.value);
+  };
+
+  MainPopoverScreen.prototype.onSetPlace = function(ev) {
+    return this.model.set('place', ev.target.value);
+  };
+
+  MainPopoverScreen.prototype.onSetStart = function() {
+    return this.model.setStart(this.formatDateTime(this.$('.input-start').val(), this.$('.input-start-date').val()));
+  };
+
+  MainPopoverScreen.prototype.onSetEnd = function() {
+    this.model.setEnd(this.formatDateTime(this.$('.input-end-time').val(), this.$('.input-end-date').val()));
+    return this.$container.toggleClass('is-same-day', this.model.isSameDay());
+  };
+
+  MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr) {
+    var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
+    if (timeStr == null) {
+      timeStr = '';
+    }
+    if (dateStr == null) {
+      dateStr = '';
+    }
+    t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
+    d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
+    if (t != null ? t[0] : void 0) {
+      _ref = t.slice(1, 3), hour = _ref[0], minute = _ref[1];
+    }
+    if (d != null ? d[0] : void 0) {
+      _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
+    }
+    if (date && this.model.isAllDay()) {
+      date = +date + 1;
+    }
+    if (month) {
+      month = +month - 1;
+    }
+    return setObj = {
+      hour: hour,
+      minute: minute,
+      date: date,
+      month: month,
+      year: year
+    };
+  };
+
+  MainPopoverScreen.prototype.onTab = function(ev) {
+    var $this, index;
+    if (ev.keyCode !== 9) {
+      return;
+    }
+    $this = $(ev.target);
+    if (!ev.shiftKey && $this.is('[data-tabindex-next]')) {
+      index = $this.data('tabindex-next');
+    }
+    if (ev.shiftKey && $this.is('[data-tabindex-prev]')) {
+      index = $this.data('tabindex-prev');
+    }
+    if (!index) {
+      return;
+    }
+    this.$("[tabindex=" + index + "]").focus();
+    return ev.preventDefault();
+  };
+
+  MainPopoverScreen.prototype.onDuplicateClicked = function() {
+    var attrs, calendarEvent, key, value, _ref;
+    attrs = [];
+    _ref = this.model.attributes;
+    for (key in _ref) {
+      value = _ref[key];
+      attrs[key] = value;
+    }
+    delete attrs.id;
+    delete attrs._id;
+    calendarEvent = new Event(attrs);
+    this.duplicateButton.hide();
+    this.spinner.show();
+    return calendarEvent.save(null, {
+      wait: true,
+      success: (function(_this) {
+        return function() {
+          _this.duplicateButton.show();
+          return _this.spinner.hide();
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          _this.duplicateButton.show();
+          return _this.spinner.hide();
+        };
+      })(this)
+    });
+  };
+
+  MainPopoverScreen.prototype.onAddClicked = function() {
+    var err, errors, spinner, _i, _len, _results;
+    if (this.$('.btn.add').hasClass('disabled')) {
+      return;
+    }
+    spinner = '<img src="img/spinner.svg" alt="spinner" />';
+    this.$addButton.empty();
+    this.$addButton.append(spinner);
+    errors = this.model.validate(this.model.attributes);
+    if (errors) {
+      this.$addButton.html(this.getButtonText());
+      this.$('.alert').remove();
+      this.$('input').css('border-color', '');
+      _results = [];
+      for (_i = 0, _len = errors.length; _i < _len; _i++) {
+        err = errors[_i];
+        _results.push(this.handleError(err));
+      }
+      return _results;
+    } else {
+      return this.model.save({}, {
+        wait: true,
+        success: (function(_this) {
+          return function() {
+            _this.calendar.save();
+            return app.events.add(_this.model);
+          };
+        })(this),
+        error: function() {
+          return alert('server error occured');
+        },
+        complete: (function(_this) {
+          return function() {
+            _this.$addButton.html(_this.getButtonText());
+            return _this.popover.selfclose(false);
+          };
+        })(this)
+      });
+    }
+  };
+
+  MainPopoverScreen.prototype.handleError = function(error) {
+    var alertMsg, guiltyFields;
+    switch (error.field) {
+      case 'description':
+        guiltyFields = '.input-desc';
+        break;
+      case 'startdate':
+        guiltyFields = '.input-start';
+        break;
+      case 'enddate':
+        guiltyFields = '.input-end-time, .input-end-date';
+        break;
+      case 'date':
+        guiltyFields = '.input-start, .input-end-time, .input-end-date';
+    }
+    this.$(guiltyFields).css('border-color', 'red');
+    this.$(guiltyFields).focus();
+    alertMsg = $('<div class="alert"></div>').text(t(error.value));
+    return this.$('.popover-content').before(alertMsg);
+  };
+
+  MainPopoverScreen.prototype.getButtonText = function() {
+    if (this.model.isNew()) {
+      return t('create button');
+    } else {
+      return t('save button');
+    }
+  };
+
+  MainPopoverScreen.prototype.getGuestsButtonText = function() {
+    var guests, numOthers, options;
+    guests = this.model.get('attendees') || [];
+    if (guests.length === 0) {
+      return t("add guest button");
+    } else if (guests.length === 1) {
+      return guests[0].email;
+    } else {
+      numOthers = guests.length - 1;
+      options = {
+        first: guests[0].email,
+        smart_count: numOthers
+      };
+      return t("guests list", options);
+    }
+  };
+
+  MainPopoverScreen.prototype.getRecurrenceButtonText = function() {
+    var language, locale, rrule;
+    rrule = this.model.get('rrule');
+    if ((rrule != null ? rrule.length : void 0) > 0) {
+      rrule = RRule.fromString(this.model.get('rrule'));
+      locale = moment.localeData();
+      language = {
+        dayNames: locale._weekdays,
+        monthNames: locale._months
+      };
+      return rrule.toText(window.t, language);
+    } else {
+      return t('no repeat button');
+    }
+  };
+
+  MainPopoverScreen.prototype.onAdvancedClicked = function(event) {
+    event.preventDefault();
+    this.expandPopover();
+    return window.popoverExtended = !window.popoverExtended;
+  };
+
+  MainPopoverScreen.prototype.expandPopover = function() {
+    this.$optionalFields.attr('aria-hidden', false);
+    return this.$moreDetailsButton.hide();
+  };
+
+  return MainPopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/repeat", function(exports, require, module) {
+var NO_REPEAT, PopoverScreenView, RepeatPopoverScreen, allDayDateFieldFormat, dFormat, inputDateDTPickerFormat, tFormat,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+tFormat = 'HH:mm';
+
+dFormat = 'DD/MM/YYYY';
+
+inputDateDTPickerFormat = 'dd/mm/yyyy';
+
+allDayDateFieldFormat = 'YYYY-MM-DD';
+
+NO_REPEAT = -1;
+
+module.exports = RepeatPopoverScreen = (function(_super) {
+  __extends(RepeatPopoverScreen, _super);
+
+  function RepeatPopoverScreen() {
+    this.buildRRuleFromDOM = __bind(this.buildRRuleFromDOM, this);
+    return RepeatPopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  RepeatPopoverScreen.prototype.inputDateFormat = 'DD/MM/YYYY';
+
+  RepeatPopoverScreen.prototype.inputDateDTPickerFormat = 'dd/mm/yyyy';
+
+  RepeatPopoverScreen.prototype.screenTitle = t('screen recurrence title');
+
+  RepeatPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/repeat');
+
+  RepeatPopoverScreen.prototype.events = {
+    'change select[name="frequency"]': 'onSelectRepeat',
+    'keyup select[name="frequency"]': 'onSelectRepeat',
+    'input input[name="interval"]': "renderSummary",
+    'change input[name="weekly-repeat-type"]': "renderSummary",
+    'change input[name="monthly-repeat-type"]': "renderSummary",
+    'change input[name="endMode"]': "renderSummary",
+    'input input[name="count"]': "renderSummary",
+    'changeDate input[name="until-date"]': "renderSummary"
+  };
+
+  RepeatPopoverScreen.prototype.getRenderData = function() {
+    var data, endMode, functions, monthlyRepeatBy, rrule, rruleOptions, _ref, _ref1;
+    data = _.extend(RepeatPopoverScreen.__super__.getRenderData.call(this), {
+      NO_REPEAT: NO_REPEAT,
+      weekDays: moment.localeData()._weekdays,
+      rrule: {
+        freq: NO_REPEAT,
+        interval: 1,
+        endMode: 'never',
+        count: 4,
+        until: moment().format(this.inputDateFormat),
+        weekdays: [],
+        monthlyRepeatBy: 'repeat-day'
+      }
+    });
+    if (this.model.has('rrule') && this.model.get('rrule').length > 0) {
+      rruleOptions = RRule.fromString(this.model.get('rrule')).options;
+      rrule = _.extend(data.rrule, {
+        freq: rruleOptions.freq,
+        interval: rruleOptions.interval,
+        weekdays: rruleOptions.byweekday
+      });
+      if (rruleOptions.freq === RRule.MONTHLY) {
+        if (((_ref = rruleOptions.bymonthday) != null ? _ref.length : void 0) > 0) {
+          monthlyRepeatBy = 'repeat-day';
+        } else if (((_ref1 = rruleOptions.bynweekday) != null ? _ref1.length : void 0) > 0) {
+          monthlyRepeatBy = 'repeat-weekday';
+        } else {
+          monthlyRepeatBy = 'repeat-day';
+        }
+        rrule.monthlyRepeatBy = monthlyRepeatBy;
+      }
+      if (rruleOptions.until) {
+        endMode = {
+          endMode: 'until',
+          until: moment.tz(rruleOptions.until, 'UTC').format(this.inputDateFormat)
+        };
+      } else if (rruleOptions.count) {
+        endMode = {
+          endMode: 'count',
+          count: rruleOptions.count
+        };
+      } else {
+        endMode = {
+          endMode: 'never'
+        };
+      }
+      rrule = _.extend(rrule, endMode);
+      data.rrule = rrule;
+    }
+    functions = {
+      limitedVisibility: (function(_this) {
+        return function(freq) {
+          if (data.rrule.freq !== freq) {
+            return "true";
+          } else {
+            return "false";
+          }
+        };
+      })(this),
+      genericLimitedVisibility: (function(_this) {
+        return function() {
+          if (data.rrule.freq === NO_REPEAT) {
+            return "true";
+          } else {
+            return "false";
+          }
+        };
+      })(this),
+      isFreqSelected: (function(_this) {
+        return function(value) {
+          if (value === data.rrule.freq) {
+            return 'selected';
+          }
+        };
+      })(this),
+      isWeekdaySelected: (function(_this) {
+        return function(value) {
+          var isSelected, _ref2;
+          isSelected = data.rrule.byweekday && (_ref2 = (value + 6) % 7, __indexOf.call(data.rrule.byweekday, _ref2) >= 0);
+          if (isSelected) {
+            return 'checked';
+          }
+        };
+      })(this),
+      monthlyRepeatBy: (function(_this) {
+        return function(value) {
+          if (value === data.rrule.monthlyRepeatBy) {
+            return 'checked';
+          }
+        };
+      })(this),
+      isEndModeSelected: (function(_this) {
+        return function(value) {
+          if (value === data.rrule.endMode) {
+            return 'checked';
+          }
+        };
+      })(this)
+    };
+    return _.extend(data, functions);
+  };
+
+  RepeatPopoverScreen.prototype.afterRender = function() {
+    this.$('[name="until-date"]').attr('type', 'text').datetimepicker({
+      language: window.app.locale,
+      fontAwesome: true,
+      autoclose: true,
+      format: this.inputDateDTPickerFormat,
+      minView: 2,
+      viewSelect: 4,
+      keyboardNavigation: false,
+      pickerPosition: 'top-right'
+    }).on('changeDate', this.renderSummary.bind(this));
+    return this.renderSummary();
+  };
+
+  RepeatPopoverScreen.prototype.renderSummary = function() {
+    var language, locale, rrule, summary;
+    rrule = this.buildRRuleFromDOM();
+    try {
+      rrule.toString();
+      locale = moment.localeData();
+      language = {
+        dayNames: locale._weekdays,
+        monthNames: locale._months
+      };
+      summary = rrule.toText(window.t, language);
+      return this.$('#summary').html(summary);
+    } catch (_error) {}
+  };
+
+  RepeatPopoverScreen.prototype.onLeaveScreen = function() {
+    var rrule, rruleString;
+    rrule = this.buildRRuleFromDOM();
+    if (rrule.options.freq !== NO_REPEAT) {
+      rruleString = rrule.toString();
+      rruleString = rruleString.split(';').filter(function(s) {
+        return s.indexOf('DTSTART' !== 0);
+      }).join(';');
+    } else {
+      rruleString = null;
+    }
+    return this.model.set('rrule', rruleString);
+  };
+
+  RepeatPopoverScreen.prototype.buildRRuleFromDOM = function() {
+    var RRuleWdays, day, monthmode, options, rawDate, start, wk;
+    start = this.model.getStartDateObject();
+    RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA];
+    options = {
+      freq: +this.$('select[name="frequency"]').val(),
+      interval: +this.$('input[name="interval"]').val()
+    };
+    this.updateIntervalUnit(options.freq, options.interval);
+    if (options.freq === RRule.WEEKLY) {
+      options.byweekday = [];
+      this.$('[name="weekly-repeat-type"]:checked').each(function(idx, box) {
+        return options.byweekday.push(RRuleWdays[box.value]);
+      });
+      if (options.byweekday.length === 7) {
+        delete options.byweekday;
+      }
+    } else if (options.freq === RRule.MONTHLY) {
+      monthmode = this.$('[name="monthly-repeat-type"]:checked').val();
+      if (monthmode === "repeat-day") {
+        options.bymonthday = start.date();
+      } else if (monthmode === 'repeat-weekday') {
+        day = RRuleWdays[start.day()];
+        wk = Math.ceil(start.date() / 7);
+        if (wk > 4) {
+          wk = -1;
+        }
+        options.byweekday = day.nth(wk);
+      }
+    }
+    switch (this.$('[name="endMode"]:checked').val()) {
+      case 'count':
+        options.count = +this.$('[name="count"]').val();
+        break;
+      case 'until':
+        rawDate = this.$('[name="until-date"]').val();
+        options.until = moment.tz(rawDate, this.inputDateFormat, 'UTC').toDate();
+    }
+    return new RRule(options);
+  };
+
+  RepeatPopoverScreen.prototype.onSelectRepeat = function() {
+    var repeatTypeSelector, value;
+    value = parseInt(this.$('select.input-repeat').val());
+    if (value !== NO_REPEAT) {
+      this.$('[aria-hidden="false"]:not(.generic)').attr('aria-hidden', true);
+      repeatTypeSelector = (function() {
+        switch (value) {
+          case RRule.WEEKLY:
+            return '.weekly-only';
+          case RRule.MONTHLY:
+            return '.monthly-only';
+        }
+      })();
+      this.$('[aria-hidden="true"].generic').attr('aria-hidden', false);
+      this.$(repeatTypeSelector).attr('aria-hidden', false);
+      this.renderSummary();
+      return this.updateIntervalUnit(value);
+    } else {
+      return this.$('[aria-hidden="false"]').attr('aria-hidden', true);
+    }
+  };
+
+  RepeatPopoverScreen.prototype.updateIntervalUnit = function(unit, numberOfUnits) {
+    var localizationKey, unitString;
+    if (unit == null) {
+      unit = null;
+    }
+    if (numberOfUnits == null) {
+      numberOfUnits = null;
+    }
+    if (unit == null) {
+      unit = parseInt(this.$('select.input-repeat').val());
+    }
+    if (numberOfUnits == null) {
+      numberOfUnits = parseInt(this.$('input[name="interval"]').val());
+    }
+    if (unit !== NO_REPEAT) {
+      localizationKey = "screen recurrence interval unit " + unit;
+      unitString = t(localizationKey, {
+        smart_count: numberOfUnits
+      });
+      return this.$('#intervalUnit').html(unitString);
+    }
+  };
+
+  return RepeatPopoverScreen;
+
+})(PopoverScreenView);
+});
+
 ;require.register("views/settings_modal", function(exports, require, module) {
 var BaseView, ComboBox, ImportView, SettingsModals,
   __hasProp = {}.hasOwnProperty,
@@ -5948,100 +6252,6 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/event_modal", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),id = locals_.id,file = locals_.file,summary = locals_.summary,start = locals_.start,end = locals_.end,allDay = locals_.allDay,place = locals_.place,calendar = locals_.calendar,tags = locals_.tags,description = locals_.description;
-buf.push("<div class=\"modal-header\"><span>" + (jade.escape(null == (jade_interp = t('edit event')) ? "" : jade_interp)) + "</span>&nbsp;");
-if ( typeof id != "undefined")
-{
-buf.push("<a" + (jade.attr("href", "events/" + (id) + "/" + (file) + ".ics", true, false)) + "><i class=\"fa fa-download fa-1\"></i></a>");
-}
-buf.push("<button class=\"close\">&times;</button></div><div class=\"modal-body\"><form id=\"basic\" class=\"form-inline\"><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-summary\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('summary')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-summary\" type=\"text\"" + (jade.attr("value", summary, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span4 date\"><label for=\"basic-start\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('start')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-start\" type=\"datetime-local\"" + (jade.attr("value", start, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4 date\"><label for=\"basic-end\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('end')) ? "" : jade_interp)) + "</label><br/><input id=\"basic-end\" type=\"datetime-local\"" + (jade.attr("value", end, true, false)) + " class=\"span12\"/></div><div class=\"control-group span4\"><label for=\"allday\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</label><br/><input id=\"allday\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + "/></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-place\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('Place')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-place\" type=\"text\"" + (jade.attr("value", place, true, false)) + " class=\"span12\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-calendar\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('calendar')) ? "" : jade_interp)) + "</label><div class=\"surrounded-combobox controls\"><input id=\"basic-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></div></div><div style=\"display:none;\" class=\"control-group span8\"><label for=\"basic-tags\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('tags')) ? "" : jade_interp)) + "</label><div class=\"controls\"><input id=\"basic-tags\"" + (jade.attr("value", tags.join(','), true, false)) + " class=\"span12 tagit\"/></div></div></div><div class=\"row-fluid\"><div class=\"control-group span12\"><label for=\"basic-description\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('description')) ? "" : jade_interp)) + "</label><div class=\"controls\"><textarea id=\"basic-description\" class=\"span12\">" + (jade.escape(null == (jade_interp = description) ? "" : jade_interp)) + "</textarea></div></div></div></form><div id=\"guests-block\"><h4>" + (jade.escape(null == (jade_interp = t('guests')) ? "" : jade_interp)) + "</h4><form id=\"guests\" class=\"form-inline\"><div class=\"control-group\"><div class=\"controls\"><input id=\"addguest-field\" type=\"text\"" + (jade.attr("placeholder", t('enter email'), true, false)) + "/><a id=\"addguest\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('invite')) ? "" : jade_interp)) + "</a></div></div></form><div id=\"guests-list\"></div><h4>" + (jade.escape(null == (jade_interp = t('reminder')) ? "" : jade_interp)) + "&nbsp;<a class=\"btn addreminder fa fa-plus\"></a></h4><label id=\"reminder-explanation\" class=\"control-label hide\">" + (jade.escape(null == (jade_interp = t('Reminders before the event')) ? "" : jade_interp)) + "</label><div id=\"reminder-container\"></div><h4>" + (jade.escape(null == (jade_interp = t('recurrence')) ? "" : jade_interp)) + "</h4><div id=\"rrule-container\"></div></div></div><div class=\"modal-footer\"><a id=\"cancel-btn\">" + (jade.escape(null == (jade_interp = t("cancel")) ? "" : jade_interp)) + "</a>&nbsp;<a id=\"confirm-btn\" class=\"btn\">" + (jade.escape(null == (jade_interp = t("save changes")) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("views/templates/event_modal_guest", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),model = locals_.model;
-buf.push("<p>");
-if ( model.status == 'ACCEPTED')
-{
-buf.push("<i class=\"fa fa-check-circle-o green\"></i>");
-}
-else if ( model.status == 'DECLINED')
-{
-buf.push("<i class=\"fa fa-times-circle-o red\"></i>");
-}
-else if ( model.status == 'NEED-ACTION')
-{
-buf.push("<i class=\"fa fa-exclamation-circle blue\"></i>");
-}
-buf.push(" " + (jade.escape((jade_interp = model.email) == null ? '' : jade_interp)) + " <a" + (jade.attr("title", "" + (t('cancel Invitation')) + "", true, false)) + " class=\"remove-guest fa fa-trash\"></a></p>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("views/templates/event_modal_reminder", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),durationValue = locals_.durationValue,isSelectedUnit = locals_.isSelectedUnit;
-buf.push("<form class=\"form-inline\"><div class=\"control-group\"><input type=\"number\" min=\"1\"" + (jade.attr("value", durationValue, true, false)) + " class=\"input-mini triggervalue\"/><select class=\"triggerunit\"><option value=\"M\"" + (jade.attr("selected", isSelectedUnit('M'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('minute')) ? "" : jade_interp)) + "</option><option value=\"H\"" + (jade.attr("selected", isSelectedUnit('H'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('hour')) ? "" : jade_interp)) + "</option><option value=\"D\"" + (jade.attr("selected", isSelectedUnit('D'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option value=\"W\"" + (jade.attr("selected", isSelectedUnit('W'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option></select><i" + (jade.attr("title", t('delete'), true, false)) + " class=\"removereminder fa fa-trash\"></i></div></form>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("views/templates/event_modal_rrule", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-var locals_ = (locals || {}),rrule = locals_.rrule,freqSelected = locals_.freqSelected,weekDays = locals_.weekDays,wkdaySelected = locals_.wkdaySelected,yearModeIs = locals_.yearModeIs,endModeSelected = locals_.endModeSelected;
-buf.push("<p id=\"rrule-short\"><span id=\"rrule-help\"></span><span id=\"rrule-action\">&nbsp;-&nbsp;<a class=\"rrule-show\">" + (jade.escape(null == (jade_interp = t('Edit')) ? "" : jade_interp)) + "</a></span></p><form id=\"rrule\" class=\"form-inline\"><label for=\"rrule-interval\" class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat every')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><input id=\"rrule-interval\" type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " class=\"col-xs2 input-mini\"/><select id=\"rrule-freq\"><option value=\"NOREPEAT\"" + (jade.attr("selected", freqSelected('NOREPEAT'), true, false)) + ">" + (jade.escape(null == (jade_interp = t('no recurrence')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", freqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('day')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", freqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", freqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", freqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('year')) ? "" : jade_interp)) + "</option></select></div><div id=\"rrule-weekdays\"><label class=\"control-label\">" + (jade.escape(null == (jade_interp = t('repeat on')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[1]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"1\"" + (jade.attr("checked", wkdaySelected(1), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[2]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"2\"" + (jade.attr("checked", wkdaySelected(2), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[3]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"3\"" + (jade.attr("checked", wkdaySelected(3), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[4]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"4\"" + (jade.attr("checked", wkdaySelected(4), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[5]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"5\"" + (jade.attr("checked", wkdaySelected(5), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[6]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"6\"" + (jade.attr("checked", wkdaySelected(6), true, false)) + "/></label><label class=\"checkbox inline\">" + (jade.escape(null == (jade_interp = weekDays[0]) ? "" : jade_interp)) + "<input type=\"checkbox\" value=\"0\"" + (jade.attr("checked", wkdaySelected(0), true, false)) + "/></label></div></div><div id=\"rrule-monthdays\" class=\"control-group\"><div class=\"controls\"><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('date'), true, false)) + " name=\"rrule-month-option\" value=\"date\"/>" + (jade.escape(null == (jade_interp = t('repeat on date')) ? "" : jade_interp)) + "</label><label class=\"checkbox inline\"><input type=\"radio\"" + (jade.attr("checked", yearModeIs('weekdate'), true, false)) + " name=\"rrule-month-option\" value=\"weekdate\"/>" + (jade.escape(null == (jade_interp = t('repeat on weekday')) ? "" : jade_interp)) + "</label></div></div><div id=\"rrule-repeat\"><label for=\"rrule-until\">" + (jade.escape(null == (jade_interp = t('repeat')) ? "" : jade_interp)) + "</label><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"forever\"" + (jade.attr("checked", endModeSelected('forever'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('forever')) ? "" : jade_interp)) + "</label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", endModeSelected('count'), true, false)) + "/><label for=\"count\">" + (jade.escape(null == (jade_interp = t('after')) ? "" : jade_interp)) + "</label></label><input id=\"rrule-count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('occurences')) ? "" : jade_interp)) + "</label></div><div class=\"control-group\"><label class=\"radio\"><input type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", endModeSelected('until'), true, false)) + "/><label for=\"until\">" + (jade.escape(null == (jade_interp = t('until')) ? "" : jade_interp)) + "</label></label><input id=\"rrule-until\" type=\"date\"" + (jade.attr("value", rrule.until, true, false)) + "/></div></div></form>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
 ;require.register("views/templates/import_event", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
@@ -6161,7 +6371,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('Calendars')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('Sync Settings')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6218,15 +6428,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_event", function(exports, require, module) {
+;require.register("views/templates/popover", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,start = locals_.start,tFormat = locals_.tFormat,end = locals_.end,dFormat = locals_.dFormat,advancedUrl = locals_.advancedUrl,editionMode = locals_.editionMode;
-popoverClassName  = (allDay ? ' is-all-day' : '')
-popoverClassName += (sameDay? ' is-same-day' : '')
-buf.push("<div" + (jade.cls(['popover-content-wrapper',popoverClassName], [null,true])) + "><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("From")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("From [hours:minutes]"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + " class=\"input-start input-time\"/></label><label class=\"aside\"><input tabindex=\"3\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span class=\"caption\">" + (jade.escape(null == (jade_interp = t('All day')) ? "" : jade_interp)) + "</span></label><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed\"><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("To")) ? "" : jade_interp)) + "</span><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("To [hours:minutes]"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + " class=\"input-end-time input-time\"/></label><label class=\"end-date\"><span class=\"caption\">" + (jade.escape(null == (jade_interp = allDay? t(sameDay? "All one day" : "All day, until") : "-") ? "" : jade_interp)) + "&nbsp;</span><input tabindex=\"6\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("To [date]"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/></label></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\">" + (jade.escape(null == (jade_interp = t('advanced')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = editionMode ? t('save changes') : t('Create')) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+var locals_ = (locals || {}),title = locals_.title,content = locals_.content;
+buf.push("<div class=\"popover\"><div class=\"screen-indicator\"><div class=\"arrow\"></div><h3 class=\"popover-title\">" + (null == (jade_interp = title) ? "" : jade_interp) + "</h3><div class=\"popover-content\">" + (null == (jade_interp = content) ? "" : jade_interp) + "</div></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6239,13 +6447,286 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_title", function(exports, require, module) {
+;require.register("views/templates/popover_screens/alert", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description,place = locals_.place;
-buf.push("<span class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></span><span class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("summary"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></span><span class=\"label\"><input tabindex=\"2\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("Place"), true, false)) + " class=\"input-place\"/></span><span class=\"controls\"><button" + (jade.attr("title", t('close'), true, false)) + " role=\"button\" class=\"close fa fa-close\"></button><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></span>");;return buf.join("");
+var locals_ = (locals || {}),alertOptions = locals_.alertOptions;
+buf.push("<div class=\"fixed-height\"><select class=\"new-alert select-big with-margin\"><option value=\"-1\" selected=\"true\">" + (jade.escape(null == (jade_interp = t('screen alert default value')) ? "" : jade_interp)) + "</option>");
+// iterate alertOptions
+;(function(){
+  var $$obj = alertOptions;
+  if ('number' == typeof $$obj.length) {
+
+    for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
+      var alertOption = $$obj[$index];
+
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+    }
+
+  } else {
+    var $$l = 0;
+    for (var $index in $$obj) {
+      $$l++;      var alertOption = $$obj[$index];
+
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+    }
+
+  }
+}).call(this);
+
+buf.push("</select><ul class=\"alerts\"></ul></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/alert_row", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),index = locals_.index,label = locals_.label,isEmailChecked = locals_.isEmailChecked,isNotifChecked = locals_.isNotifChecked;
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen alert delete tooltip'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button></div><div class=\"type\"><div class=\"notification-mode\"><input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/><label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp)) + "</label></div><div class=\"notification-mode\"><input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp)) + "</label></div></div></li>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/delete", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),description = locals_.description;
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/delete_title", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),title = locals_.title;
+buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"empty\"></div></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/details", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),details = locals_.details;
+buf.push("<div class=\"fixed-height\"><textarea class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/generic_title", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),title = locals_.title;
+buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</div></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/guest_row", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),index = locals_.index,status = locals_.status,email = locals_.email;
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"guest-top\">");
+if ( status == 'ACCEPTED')
+{
+buf.push("<i class=\"fa fa-check-circle-o green\"></i>");
+}
+else if ( status == 'DECLINED')
+{
+buf.push("<i class=\"fa fa-times-circle-o red\"></i>");
+}
+else if ( status == 'NEED-ACTION')
+{
+buf.push("<i class=\"fa fa-exclamation-circle blue\"></i>");
+}
+buf.push("<div class=\"guest-label\">" + (jade.escape(null == (jade_interp = email) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></div></li>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/guests", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+
+buf.push("<div class=\"fixed-height\"><div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + "/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div><ul class=\"guests\"></ul></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/main", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,details = locals_.details,alerts = locals_.alerts,rrule = locals_.rrule,start = locals_.start,dFormat = locals_.dFormat,tFormat = locals_.tFormat,end = locals_.end,place = locals_.place,guestsButtonText = locals_.guestsButtonText,recurrenceButtonText = locals_.recurrenceButtonText,advancedUrl = locals_.advancedUrl,buttonText = locals_.buttonText;
+popoverClassName  = (allDay ? ' is-all-day' : '')
+popoverClassName += (sameDay? ' is-same-day' : '')
+var showDetailsByDefault = details && details.length > 0
+var showAlertsByDefault = alerts && alerts.length > 0
+var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
+buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+if ( !alerts || alerts.length === 0)
+{
+buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
+}
+else
+{
+buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
+}
+buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/main_title", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description;
+buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("placeholder event title"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></div><div class=\"controls\"><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/repeat", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+var locals_ = (locals || {}),NO_REPEAT = locals_.NO_REPEAT,isFreqSelected = locals_.isFreqSelected,genericLimitedVisibility = locals_.genericLimitedVisibility,rrule = locals_.rrule,limitedVisibility = locals_.limitedVisibility,weekDays = locals_.weekDays,isWeekdaySelected = locals_.isWeekdaySelected,monthlyRepeatBy = locals_.monthlyRepeatBy,isEndModeSelected = locals_.isEndModeSelected;
+buf.push("<div class=\"fixed-height repeat-screen\"><label><select name=\"frequency\" class=\"input-repeat select-big\"><option" + (jade.attr("value", NO_REPEAT, true, false)) + (jade.attr("selected", isFreqSelected(NO_REPEAT), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence no repeat')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence daily')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence weekly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence monthly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence yearly')) ? "" : jade_interp)) + "</option></select></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input\">" + (jade.escape(null == (jade_interp = t('screen recurrence interval label')) ? "" : jade_interp)) + "</span><input type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " name=\"interval\" class=\"special\"/><!-- By default the value is -1 and triggers a polyglot warning, so it's left empty.-->");
+if (rrule.freq >= 0)
+{
+var localizationKey = "screen recurrence interval unit " + rrule.freq
+buf.push("<span id=\"intervalUnit\">" + (jade.escape(null == (jade_interp = t(localizationKey, {smart_count: rrule.interval})) ? "" : jade_interp)) + "</span>");
+}
+else
+{
+buf.push("<span id=\"intervalUnit\"></span>");
+}
+buf.push("</label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.WEEKLY), true, false)) + " class=\"inline-input weekly-only\"><span class=\"first-input\">" + (jade.escape(null == (jade_interp = t('screen recurrence days list label')) ? "" : jade_interp)) + "</span><div class=\"space-between\">");
+// iterate weekDays
+;(function(){
+  var $$obj = weekDays;
+  if ('number' == typeof $$obj.length) {
+
+    for (var index = 0, $$l = $$obj.length; index < $$l; index++) {
+      var weekday = $$obj[index];
+
+buf.push("<label><input type=\"checkbox\" name=\"weekly-repeat-type\"" + (jade.attr("value", "" + (index) + "", true, false)) + (jade.attr("checked", isWeekdaySelected(weekday), true, false)) + "/><span>" + (jade.escape(null == (jade_interp = weekday[0]) ? "" : jade_interp)) + "</span></label>");
+    }
+
+  } else {
+    var $$l = 0;
+    for (var index in $$obj) {
+      $$l++;      var weekday = $$obj[index];
+
+buf.push("<label><input type=\"checkbox\" name=\"weekly-repeat-type\"" + (jade.attr("value", "" + (index) + "", true, false)) + (jade.attr("checked", isWeekdaySelected(weekday), true, false)) + "/><span>" + (jade.escape(null == (jade_interp = weekday[0]) ? "" : jade_interp)) + "</span></label>");
+    }
+
+  }
+}).call(this);
+
+buf.push("</div></label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.MONTHLY), true, false)) + " class=\"inline-input monthly-only\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence repeat by label')) ? "" : jade_interp)) + "</span><div><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-day\"" + (jade.attr("checked", monthlyRepeatBy('repeat-day'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by month')) == null ? '' : jade_interp)) + "</label><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-weekday\"" + (jade.attr("checked", monthlyRepeatBy('repeat-weekday'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by week')) == null ? '' : jade_interp)) + "</label></div></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends label')) ? "" : jade_interp)) + "</span><div><label for=\"never-end\" class=\"inline-input\"><input id=\"never-end\" type=\"radio\" name=\"endMode\" value=\"never\"" + (jade.attr("checked", isEndModeSelected('never'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('screen recurrence ends never label')) ? "" : jade_interp)) + "</label><label class=\"inline-input\"><input id=\"end-after-num\" type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", isEndModeSelected('count'), true, false)) + "/><label for=\"end-after-num\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count label')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" name=\"count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"special input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count unit')) ? "" : jade_interp)) + "</label></label><label class=\"inline-input\"><input id=\"end-until-date\" type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", isEndModeSelected('until'), true, false)) + "/><label for=\"end-until-date\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends until label')) ? "" : jade_interp)) + "</label><input tabindex=\"3\" type=\"text\" size=\"10\" name=\"until-date\"" + (jade.attr("placeholder", t("screen recurrence ends until placeholder"), true, false)) + (jade.attr("value", rrule.until, true, false)) + " class=\"special input-until-date input-date\"/></label></div></label><div" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input summary generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t("screen recurrence summary label")) ? "" : jade_interp)) + "</span><span id=\"summary\"></span></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6264,7 +6745,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),account = locals_.account,calendar = locals_.calendar;
-buf.push("<div class=\"modal-header\"><h2>" + (jade.escape(null == (jade_interp = t('Synchronization Settings')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><span><i class=\"fa fa-refresh\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
+buf.push("<div class=\"modal-header\"><h2>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><span><i class=\"fa fa-refresh\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
 if ( account == null)
 {
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the sync module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol>");
@@ -6392,12 +6873,13 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.initialize = function(options) {
-    var caret, isInput, method;
+    var caret, isInput, method, value;
     ComboBox.__super__.initialize.call(this);
+    this.source = options.source;
     this.$el.autocomplete({
       delay: 0,
       minLength: 0,
-      source: options.source,
+      source: this.source,
       close: this.onClose,
       open: this.onOpen,
       select: this.onSelect
@@ -6420,7 +6902,8 @@ module.exports = ComboBox = (function(_super) {
       caret.click(this.openMenu);
       this.$el.after(caret);
     }
-    return this.onEditionComplete(this.value());
+    value = options.current || this.getDefaultValue();
+    return this.onEditionComplete(value);
   };
 
   ComboBox.prototype.openMenu = function() {
@@ -6428,6 +6911,10 @@ module.exports = ComboBox = (function(_super) {
     this.$el.addClass('expanded');
     this.$el.focus().val(this.value()).autocomplete('search', '');
     return this.$el[0].setSelectionRange(0, this.value().length);
+  };
+
+  ComboBox.prototype.getDefaultValue = function() {
+    return this.source[0].label;
   };
 
   ComboBox.prototype.setValue = function(value) {

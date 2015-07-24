@@ -52,7 +52,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                 'email date format'
 
             {description, place} = event.toJSON()
-            place = if place?.length > 0 then place else false
+            place = if place?.length > 0 then place else ""
 
             # Build mails
             templateOptions =

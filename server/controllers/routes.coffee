@@ -1,13 +1,17 @@
+{SimpleController} = require 'cozydb'
 tags = require './tags'
 events = require './events'
-contacts = require './contacts'
 index  = require './index'
 ical   = require './ical'
+ContactsController = new SimpleController
+    model: require('../models/contact')
+    reqProp: 'contact'
+    reqParamID: 'contactid'
+
 
 module.exports =
 
     '' : get : index.index
-    'users/current': get : index.userTimezone
 
     # Tag management
     'tags':
@@ -57,4 +61,7 @@ module.exports =
 
     # Contacts
     'contacts':
-        get: contacts.list
+        get: ContactsController.listAll
+
+    'contacts/:contactid.jpg':
+        get: ContactsController.sendAttachment(filename: 'picture')
