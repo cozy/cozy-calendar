@@ -1315,6 +1315,7 @@ module.exports = PopoverView = (function(_super) {
     this.target = options.target;
     this.container = options.container;
     this.parentView = options.parentView;
+    this.$tabCells = $('.fc-day-grid-container');
     return this;
   };
 
@@ -1399,7 +1400,7 @@ module.exports = PopoverView = (function(_super) {
   };
 
   PopoverView.prototype.positionPopover = function() {
-    var bottom, containerHeight, containerWidth, left, popoverWidth, position, targetOffset, targetWidth, top;
+    var bottom, containerHeight, containerOffset, containerWidth, left, oneRowHeight, popoverMargin, popoverWidth, position, targetLeftBorder, targetOffset, targetWidth, top;
     this.$popover.detach().css({
       display: 'block',
       top: 'auto',
@@ -1407,18 +1408,28 @@ module.exports = PopoverView = (function(_super) {
     });
     this.$popover.appendTo(this.container);
     popoverWidth = this.$popover.innerWidth();
+    containerOffset = this.$tabCells.offset();
+    containerHeight = this.$tabCells.innerHeight();
+    containerWidth = this.$tabCells.innerWidth();
     targetOffset = this.target.offset();
     targetWidth = this.target.width();
-    containerHeight = this.container.innerHeight();
-    containerWidth = this.container.innerWidth();
-    if (targetOffset.left < (containerWidth / 2)) {
-      left = targetOffset.left + 50;
+    targetLeftBorder = targetOffset.left - this.container.offset().left;
+    popoverMargin = 15;
+    if (targetOffset.left <= (containerWidth / 2)) {
+      left = targetLeftBorder + targetWidth + popoverMargin;
     } else {
-      left = targetOffset.left - popoverWidth - targetWidth + 25;
+      left = targetLeftBorder - popoverWidth - popoverMargin;
     }
-    if (targetOffset.top < (containerHeight / 2)) {
+    oneRowHeight = containerHeight / 6;
+    if (targetOffset.top < oneRowHeight * 2) {
       top = '10vh';
       bottom = 'auto';
+    } else if (targetOffset.top < oneRowHeight * 3) {
+      top = '30vh';
+      bottom = 'auto';
+    } else if (targetOffset.top < oneRowHeight * 4) {
+      top = 'auto';
+      bottom = '15vh';
     } else {
       top = 'auto';
       bottom = '5vh';
@@ -1800,7 +1811,7 @@ module.exports = {
   "no alert button": "No alert",
   "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
   "no repeat button": "No repeat",
-  "more details button": "More details",
+  "more details button": "More options",
   "save button": "Save",
   "create button": "Create",
   "duplicate event tooltip": "Duplicate event",
@@ -1988,7 +1999,7 @@ module.exports = {
   "are you sure": "Are you sure?",
   "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
   "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
-  "advanced": "More details",
+  "advanced": "More options",
   "enter email": "Enter email",
   "ON": "on",
   "OFF": "off",
@@ -2051,7 +2062,7 @@ module.exports = {
   "no alert button": "No alert",
   "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
   "no repeat button": "No repeat",
-  "more details button": "More details",
+  "more details button": "More options",
   "save button": "Save",
   "create button": "Create",
   "duplicate event tooltip": "Duplicate event",
@@ -2301,7 +2312,7 @@ module.exports = {
   "no alert button": "No alert",
   "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
   "no repeat button": "No repeat",
-  "more details button": "More details",
+  "more details button": "More options",
   "save button": "Save",
   "create button": "Create",
   "duplicate event tooltip": "Duplicate event",
@@ -2553,7 +2564,7 @@ module.exports = {
   "no alert button": "Pas d'alerte",
   "alert label": "%{smart_count} alerte programmée |||| %{smart_count} alertes programmées",
   "no repeat button": "Pas de répétition",
-  "more details button": "Plus de détails",
+  "more details button": "Plus d'options",
   "save button": "Sauvegarder",
   "create button": "Créer",
   "duplicate event tooltip": "Dupliquer l'événement",
@@ -2718,11 +2729,13 @@ module.exports = Event = (function(_super) {
   Event.prototype.urlRoot = 'events';
 
   Event.prototype.defaults = function() {
+    var defaultCalendar;
+    defaultCalendar = window.app.tags.at(0) || t('default calendar name');
     return {
       details: '',
       description: '',
       place: '',
-      tags: [t('default calendar name')]
+      tags: [defaultCalendar]
     };
   };
 
@@ -5314,19 +5327,22 @@ module.exports = GuestPopoverScreen = (function(_super) {
       email = this.$('input[name="guest-name"]').val();
       contactID = null;
     }
-    guests = this.model.get('attendees') || [];
-    if (!_.findWhere(guests, {
-      email: email
-    })) {
-      guests = _.clone(guests);
-      guests.push({
-        key: random.randomString(),
-        status: 'INVITATION-NOT-SENT',
-        email: email,
-        contactid: contactID
-      });
-      this.model.set('attendees', guests);
-      this.render();
+    email = email.trim();
+    if (email.length > 0) {
+      guests = this.model.get('attendees') || [];
+      if (!_.findWhere(guests, {
+        email: email
+      })) {
+        guests = _.clone(guests);
+        guests.push({
+          key: random.randomString(),
+          status: 'INVITATION-NOT-SENT',
+          email: email,
+          contactid: contactID
+        });
+        this.model.set('attendees', guests);
+        this.render();
+      }
     }
     this.$('input[name="guest-name"]').val('');
     return this.$('input[name="guest-name"]').focus();
@@ -5643,7 +5659,7 @@ module.exports = MainPopoverScreen = (function(_super) {
     if (this.$('.btn.add').hasClass('disabled')) {
       return;
     }
-    spinner = '<img src="img/spinner.svg" alt="spinner" />';
+    spinner = '<img src="img/spinner-white.svg" alt="spinner" />';
     this.$addButton.empty();
     this.$addButton.append(spinner);
     errors = this.model.validate(this.model.attributes);
@@ -5702,7 +5718,7 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.getButtonText = function() {
     if (this.model.isNew()) {
-      return t('create button');
+      return '+ ' + t('create button');
     } else {
       return t('save button');
     }
