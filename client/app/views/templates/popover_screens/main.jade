@@ -93,12 +93,17 @@ div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepea
 
 .popover-footer
     a.advanced-link(role="button",
-                    tabindex="8",
+                    tabindex="7",
                     href='#' + advancedUrl,
                     data-tabindex-next="1")
       .icon
           span.fa.fa-caret-down
         = t('more details button')
-    a.btn.add(role="button",
-              tabindex="7")
-        = buttonText
+    .buttons
+        a.btn.btn-link.cancel(role="button",
+                              tabindex="8")
+            = t('cancel')
+        a.btn.add(role="button",
+                  tabindex="9")
+            = buttonText
+
