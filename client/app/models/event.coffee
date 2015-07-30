@@ -8,7 +8,8 @@ module.exports = class Event extends ScheduleItem
     urlRoot: 'events'
 
     defaults: ->
-        defaultCalendar =  window.app.tags.at(0) or t('default calendar name')
+        defaultCalendar =  window.app.calendars?.at(0)?.get('name') or
+            t('default calendar name')
         details: ''
         description: ''
         place: ''
