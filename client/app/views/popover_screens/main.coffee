@@ -70,6 +70,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         else
             currentCalendar = @model.get('tags')?[0] or defaultCalendar
 
+
+        endOffset = if @model.isAllDay() then -1 else 0
         return data = _.extend super(),
             tFormat:     tFormat
             dFormat:     dFormat
@@ -77,8 +79,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             allDay:      @model.isAllDay()
             sameDay:     @model.isSameDay()
             start:       @model.getStartDateObject()
-            end:         @model.getEndDateObject()
-                               .add((if @model.isAllDay() then -1 else 0), 'd')
+            end:         @model.getEndDateObject().add(endOffset, 'd')
             alerts: @model.get('alarms')
             guestsButtonText: @getGuestsButtonText()
             buttonText: @getButtonText()
@@ -154,8 +155,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         delta = if @model.isAllDay() then -1 else 0
         end = @model.getEndDateObject().add(delta, 'd')
 
-        @$('.input-start').timepicker 'setTime', @model.getStartDateObject().format(tFormat), true, true
-        @$('.input-end-time').timepicker 'setTime', end.format(tFormat), true, true
+        @$('.input-start').timepicker 'setTime',
+            @model.getStartDateObject().format(tFormat), true, true
+        @$('.input-end-time').timepicker 'setTime',
+            end.format(tFormat), true, true
         @$('.input-end-date').val end.format(dFormat)
 
         @$('.input-description').val @model.get('details')
