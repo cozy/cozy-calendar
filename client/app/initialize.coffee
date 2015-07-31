@@ -32,9 +32,8 @@ $ ->
 
         ColorHash.addScheme 'cozy', colorSet
 
-        app.initialize()
-
         # Initialize Spin JS the lib that displays loading indicators
+        # /!\ this must be done before app init to prevent $().spin() to be undefined
         $.fn.spin = (opts, color) ->
             presets =
                 tiny:
@@ -77,6 +76,8 @@ $ ->
             else
                 console.log "Spinner class not available."
                 null
+
+        app.initialize()
 
     catch e
         console.error e, e?.stack
