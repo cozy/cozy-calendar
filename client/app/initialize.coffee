@@ -78,10 +78,6 @@ $ ->
                 console.log "Spinner class not available."
                 null
 
-        setTimeout ->
-            console.log titi
-        , 5000
-
     catch e
         console.error e, e?.stack
         exception = e.toString()
