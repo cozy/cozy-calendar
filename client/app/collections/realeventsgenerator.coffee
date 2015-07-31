@@ -3,7 +3,7 @@ RealEvent = require '../models/realevent'
 module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     model = RealEvent
     comparator: (re1, re2) ->
-        return re1.start.isBefore re2.start
+        return re1.start?.isBefore re2.start
 
     initialize: ->
 
@@ -54,9 +54,9 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
 
     resetFromBase: (sync)->
         resetProc = =>
-                @reset []
-                @_initializeGenerator()
-                @trigger 'reset'
+            @reset []
+            @_initializeGenerator()
+            @trigger 'reset'
         if sync
             resetProc()
         else
@@ -157,7 +157,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             # else: generate realevents
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    return new RealEvent event, instanceStart, instanceEnd
+                    return new RealEvent event: event, start: instanceStart, end: instanceEnd
                 eventsInRange = eventsInRange.concat evs
 
         @add eventsInRange
