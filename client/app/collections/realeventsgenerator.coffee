@@ -131,7 +131,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @firstDate.add -1, 'month'
         start = @firstDate.clone()
 
-    # pick ponctual event and store newly found recurring ones.
+        # pick ponctual event and store newly found recurring ones.
         i = @baseCollection.indexOf @firstGeneratedEvent
         @firstGeneratedEvent = null # reset, before finding the new one.
         while i >= 0 and @firstGeneratedEvent is null
@@ -142,7 +142,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             else if item.getStartDateObject().isBefore(start)
                 @firstGeneratedEvent = item # end loop condition
             else unless item.isRecurrent() # pick ponctual events.
-                eventsInRange.push new RealEvent item
+                eventsInRange.push new RealEvent event: item
 
         # generated recurring events.
         @previousRecurringEvents.forEach (item, index) =>
