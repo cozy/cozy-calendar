@@ -40,6 +40,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         'changeTime.timepicker .input-start':    'onSetStart'
         'changeTime.timepicker .input-end-time': 'onSetEnd'
+        'changeDate .input-start-date':          'onSetStart'
         'changeDate .input-end-date':            'onSetEnd'
         'click .input-allday':                   'toggleAllDay'
 
