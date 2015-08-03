@@ -24,9 +24,11 @@ module.exports = class CalendarHeader extends BaseView
 
         if view.name is 'month'
             res = view.intervalStart.format 'MMMM YYYY'
-          
+
         else
-            res = $.fullCalendar.formatRange view.start, view.end, 'MMM D YYYY'
+            range = $.fullCalendar.formatRange view.start, view.end, 'MMM D YYYY'
+            res = "#{t 'week'} #{view.start.format 'w'} | #{range}"
+
 
         return res
 

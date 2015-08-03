@@ -73,6 +73,7 @@ module.exports = class CalendarView extends BaseView
             eventResizeStop: @onEventResizeStop
             eventResize: @onEventResize
             handleWindowResize: false
+            weekNumbers: true
 
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
