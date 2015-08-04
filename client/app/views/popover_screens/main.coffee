@@ -57,10 +57,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-repeat': -> @switchToScreen('repeat')
 
 
-    initialize: ->
-        @listenTo @model, 'change', @refresh
-
-
     getRenderData: ->
         # A new event's calendar is the first calendar in alphabetical order
         # It fallbacks to the default calendar name if anything goes wrong
@@ -127,8 +123,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
-        @refresh()
-
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
             @expandPopover()
@@ -143,26 +137,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         setTimeout =>
             @$('[tabindex="1"]').focus()
         , 1
-
-
-    refresh: ->
-        # We must apply a delta when an event is all-day long, because it starts
-        # one day, and finishes the day after (if its duration is one day). But
-        # we don't want to display the day afteras endDate, but the start day.
-        #
-        # e.g.: you set a all-day long event on 15/01/2015. The event starts at
-        # 15/01/2015 and finishes at 16/01/2015, but we want to display the
-        # event as starting and finishing on 15/01/2015.
-        delta = if @model.isAllDay() then -1 else 0
-        end = @model.getEndDateObject().add(delta, 'd')
-
-        @$('.input-start').timepicker 'setTime',
-            @model.getStartDateObject().format(tFormat), true, true
-        @$('.input-end-time').timepicker 'setTime',
-            end.format(tFormat), true, true
-        @$('.input-end-date').val end.format(dFormat)
-
-        @$('.input-description').val @model.get('details')
 
 
     onKeyUp: (event) ->
