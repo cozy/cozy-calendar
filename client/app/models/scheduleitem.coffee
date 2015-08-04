@@ -47,7 +47,7 @@ module.exports = class ScheduleItem extends Backbone.Model
     #
     # @see https://tools.ietf.org/html/rfc5545#section-3.3.9
     isSameDay: ->
-        endDate = if @isAllDay() then @getEndDateObject().add -1, 'd' else
+        endDate = if @isAllDay() then @getEndDateObject().add -1, 'd' else \
                                       @getEndDateObject()
         endDate.isSame @getStartDateObject(), 'day'
 
@@ -289,8 +289,8 @@ module.exports = class ScheduleItem extends Backbone.Model
             return callback false
 
         # Kind of changes which doesn't need mails.
-        if method in ['update', 'patch'] and not (
-                @startDateChanged or @attendeesChanged)
+        if method in ['update', 'patch'] and
+           not ( @startDateChanged or @attendeesChanged)
             return callback false
 
         # else: look state of each guest.
@@ -300,7 +300,7 @@ module.exports = class ScheduleItem extends Backbone.Model
                 return true
 
             else if method is 'delete'
-                 return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
+                return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
 
             else if method in ['update', 'patch']
                 return guest.status is 'INVITATION-NOT-SENT' or (
