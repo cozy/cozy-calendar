@@ -40,10 +40,10 @@ module.exports = class MenuItemView extends BaseView
         # make asynchronous to allow the spinner to show up, before make.set
         # and it's heavy load events chain block the UI for à while.
         setTimeout =>
-                @model.set 'visible', not @model.get 'visible'
-                @hideLoading()
-                @render()
-            , 1
+            @model.set 'visible', not @model.get 'visible'
+            @hideLoading()
+            @render()
+        , 1
 
 
     showColorPicker: (ev) ->
@@ -81,7 +81,7 @@ module.exports = class MenuItemView extends BaseView
         else
             actionMenu.addClass 'hidden'
         # We hide the trash icon if all calendars are selected
-        if nbCalendarsChecked == nbCalendars
+        if nbCalendarsChecked is nbCalendars
             trashButton.addClass 'hidden'
         else
             trashButton.removeClass 'hidden'

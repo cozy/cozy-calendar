@@ -3,7 +3,7 @@
 module.exports = (router) ->
 
     # Define `waitToChangeToday`, and run it.
-    do waitToChangeToday = =>
+    do waitToChangeToday = ->
 
         now = moment()
         nextDay = moment(now).add(1, 'days').startOf 'day'

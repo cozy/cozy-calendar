@@ -93,12 +93,13 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @runningRecurringEvents.forEach (item, index) =>
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    options =
-                        event: event
-                        start: instanceStart
-                        end: instanceEnd
-                    return new RealEvent options
-                eventsInRange = eventsInRange.concat evs
+                options =
+                    event: event
+                    start: instanceStart
+                    end: instanceEnd
+                return new RealEvent options
+
+            eventsInRange = eventsInRange.concat evs
 
             # Remove out of next scope recurring events.
             if item.getLastOccurenceDate().isBefore(end)
@@ -157,8 +158,9 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             # else: generate realevents
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    return new RealEvent event: event, start: instanceStart, end: instanceEnd
-                eventsInRange = eventsInRange.concat evs
+                return new RealEvent event: event, start: instanceStart, end: instanceEnd
+
+            eventsInRange = eventsInRange.concat evs
 
         @add eventsInRange
 

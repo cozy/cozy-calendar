@@ -56,10 +56,10 @@ module.exports = class MenuView extends ViewCollection
         # saving the event, creating calendar
         calendarEvent.save null,
             wait: true
-            success: =>
+            success: ->
                 # a timeout is needed for the created calendar to appear on
                 # bottom of the menu items
-                setTimeout =>
+                setTimeout ->
                     $("#menuitems li.tagmenuitem[data-name='#{t "new calendar"}'] .calendar-rename")
                         .trigger("click")
                 , 100
