@@ -87,7 +87,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         if @isAllDay()
             s = H.momentToDateString(m)
 
-        else if @isRecurrent()
+        else if @isRecurrent() and not @has('timezone')
             s = moment.tz(m, @get('timezone')).toISOString()
 
         else
