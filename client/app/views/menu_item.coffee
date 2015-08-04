@@ -28,6 +28,7 @@ module.exports = class MenuItemView extends BaseView
 
 
     afterRender: ->
+        @el.dataset.name = @model.get 'name' # for renaming new calendars
         @buildBadge @model.get 'color'
         @hideLoading()
 
