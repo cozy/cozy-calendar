@@ -9032,7 +9032,21 @@ a.btn:visited {
   padding-bottom: 0;
 }
 .public-event-container {
+  margin: auto;
   width: 100%;
+  max-width: 40em;
+  padding: 1.5em;
+  border: 1px solid #ddd;
+  border-top: 0;
+  -webkit-border-radius: 0 0 8px 8px;
+  border-radius: 0 0 8px 8px;
+}
+@media (max-width: 480px) {
+  .public-event-container {
+    border: 0;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+  }
 }
 .public-event-container h2,
 .public-event-container h3,
@@ -9040,10 +9054,32 @@ a.btn:visited {
 .public-event-container p,
 .public-event-container a,
 .public-event-container body {
-  font-family: 'Maven Pro', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 .public-event-container h3 {
   margin-top: 0;
+}
+.public-event-body header {
+  width: 100%;
+  max-width: 40em;
+  margin: 5em auto 0;
+  padding: 1em 1.5em;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  -webkit-border-radius: 8px 8px 0 0;
+  border-radius: 8px 8px 0 0;
+  text-align: center;
+}
+@media (max-width: 480px) {
+  .public-event-body header {
+    margin: 0;
+    border: 0;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+  }
+}
+.public-event-body header img {
+  width: 68px;
 }
 .fc-view-container .fc-day-grid tr:first-child td.fc-axis.fc-widget-content:first-child span {
   display: none;
