@@ -48,8 +48,8 @@ module.exports = class ListView extends ViewCollection
                         return previous
 
                     else if previous?
-                        dPrevious = view.model.get('date').diff previous.model.date
-                        return if dCurrent < dPrevious then current else previous
+                        dPrev = view.model.get('date').diff previous.model.date
+                        return if dCurrent < dPrev then current else previous
                     else
                         return current
                 if prevView?

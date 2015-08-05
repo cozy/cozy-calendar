@@ -65,3 +65,7 @@ module.exports =
 
     'contacts/:contactid.jpg':
         get: ContactsController.sendAttachment(filename: 'picture')
+
+    # log client errors
+    'log':
+        post: index.logClient

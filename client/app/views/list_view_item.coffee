@@ -18,7 +18,7 @@ module.exports = class EventItemView extends BaseView
     deleteModel: ->
         return unless confirm t "are you sure"
         @$el.spin 'tiny'
-        @model.destroy
+        @model.event.destroy
             error: ->
                 alert 'server error'
                 @$el.spin()
