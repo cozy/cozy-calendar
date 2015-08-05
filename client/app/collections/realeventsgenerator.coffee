@@ -158,7 +158,11 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             # else: generate realevents
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                return new RealEvent event: event, start: instanceStart, end: instanceEnd
+                options =
+                    event: event
+                    start: instanceStart
+                    end: instanceEnd
+                return new RealEvent options
 
             eventsInRange = eventsInRange.concat evs
 

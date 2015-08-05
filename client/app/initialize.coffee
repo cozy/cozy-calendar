@@ -33,7 +33,8 @@ $ ->
         ColorHash.addScheme 'cozy', colorSet
 
         # Initialize Spin JS the lib that displays loading indicators
-        # /!\ this must be done before app init to prevent $().spin() to be undefined
+        # /!\ this must be done before app init to prevent $().spin()
+        # to be undefined
         $.fn.spin = (opts, color) ->
             presets =
                 tiny:
