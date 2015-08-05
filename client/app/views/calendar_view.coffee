@@ -196,6 +196,9 @@ module.exports = class CalendarView extends BaseView
             endDate.subtract 1, 'days'
             startDate = startDate.format() + 'T10:00:00.000'
             endDate = endDate.format() + 'T11:00:00.000'
+        else if @view is 'agendaWeek'
+            # set default event duration to 1h
+            endDate = startDate.clone().add 1, 'hour'
 
         start = helpers.ambiguousToTimezoned startDate
         end = helpers.ambiguousToTimezoned endDate
