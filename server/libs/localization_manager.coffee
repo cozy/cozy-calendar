@@ -16,16 +16,21 @@ class LocalizationManager
     initialize: (callback = () ->) ->
         @retrieveLocale (err, locale) =>
             if err?
-                @polyglot = @getPolyglotByLocale null
+                @updateLocale null
             else
-                @polyglot = @getPolyglotByLocale locale
-                @prepareEmailsTemplate()
+                @updateLocale locale
             callback null, @polyglot
 
     retrieveLocale: (callback) ->
         cozydb.api.getCozyLocale (err, locale) ->
             if err? or not locale then locale = 'en' # default value
             callback err, locale
+
+
+    updateLocale: (locale) ->
+        @polyglot = @getPolyglotByLocale locale
+        @prepareEmailsTemplate()
+
 
     getPolyglotByLocale: (locale) ->
         try
