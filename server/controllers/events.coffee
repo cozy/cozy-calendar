@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+async = require 'async'
 moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
@@ -45,6 +46,33 @@ module.exports.create = (req, res) ->
             else
                 MailHandler.sendInvitations event, false, (err, updatedEvent) ->
                     res.send (updatedEvent or event), 201
+
+
+# Expect a list of events as body and create an event in database for each
+# entry. When it's done, it returns the list of created events and events for
+# which an error occured.
+module.exports.createBulk = (req, res) ->
+    events = req.body
+    newEvents = []
+    errors = []
+
+    async.eachSeries events, (event, done) ->
+        event.created = moment().tz('UTC').toISOString()
+        event.lastModification = moment().tz('UTC').toISOString()
+        event.id = null
+
+        Event.createOrGetIfImport event, (err, newEvent) ->
+            if err
+                errors.push event
+            else
+                newEvents.push newEvent
+
+            setTimeout done, 10
+
+    , (err) ->
+        res.send
+            events: newEvents
+            errors: errors
 
 
 module.exports.update = (req, res) ->
