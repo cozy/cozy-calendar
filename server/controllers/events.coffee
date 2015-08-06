@@ -70,7 +70,7 @@ module.exports.createBulk = (req, res) ->
             setTimeout done, 10
 
     , (err) ->
-        res.send
+        res.status(201).send
             events: newEvents
             errors: errors
 
