@@ -57,23 +57,10 @@ module.exports = class ImportView extends BaseView
             contentType: false
             success: (result) =>
                 if result?.calendar?.name
-                    # @$('#import-calendar-combo').val result.calendar.name
                     @calendarCombo.setValue result.calendar.name
 
                 if result?.events?
-                    events = []
-                    for vevent in result.events
-                        events.push new Event vevent
-                    # Speed optimisation: add all events at once is MUCH faster
-                    # than one by one.
-                    @eventList.collection.add events
-
-                @$(".import-form").fadeOut =>
-                    @resetUploader()
-                    @importButton.spin()
-                    @importButton.find('span').html t 'select an icalendar file'
-                    @$(".results").slideDown()
-                    @$(".confirmation").fadeIn()
+                    @showEventsPreview result.events
 
             error: (xhr) =>
                 msg = JSON.parse(xhr.responseText).msg
@@ -83,6 +70,26 @@ module.exports = class ImportView extends BaseView
                 @resetUploader()
                 @importButton.spin()
                 @importButton.find('span').html t 'select an icalendar file'
+
+
+    # Show the event preview list. It doesn't display all events at the same
+    # time because Firefox cannot handle it and freezes.
+    showEventsPreview: (events) ->
+        eventLists = helpers.getLists events, 100
+        async.eachSeries eventLists, (eventList, done) =>
+            @eventList.collection.add eventList, sort: false
+            setTimeout done, 500
+        , =>
+            @eventList.collection.sort()
+            @$(".import-form").fadeOut =>
+                @resetUploader()
+                @importButton.spin()
+                buttonText = t 'select an icalendar file'
+                @importButton.find('span').html buttonText
+                @$(".confirmation").fadeIn()
+
+            @$(".results").slideDown()
+
 
     # When import confirmation is clicked, all events and alarm loaded are
     # saved to the backend and linked with the selected calendar.
