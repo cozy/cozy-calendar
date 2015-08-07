@@ -25,24 +25,37 @@ module.exports = class MenuView extends ViewCollection
         @$('.main-spinner').hide()
 
 
-    # Check if a "New Calendar" already exists. If not, run the calendar
-    # creation procedure.
+    # Get a name for the new calendar. If "new calendar" already exists,
+    # ad a number at the end
     onAddCalendar: ->
-        @tag = app.tags.getOrCreateByName "new calendar"
+        n = 0
+        name = "new calendar"
 
-        calendar = app.calendars.find (tag) ->
-            (tag.get('name') is t "new calendar") and tag.get 'visible'
+        # check if a calendar with this name already exists
+        checkCalendar = ->
+            @tag = app.tags.getOrCreateByName name
+            console.log @tag
 
-        if calendar?
-            alert t('calendar exist error')
+            calendar = app.calendars.find (tag) ->
+                localName = t name
+                localName = "#{localName} #{n}" if n > 0
+                (tag.get('name') is localName) and tag.get 'visible'
 
-        else
-            @createNewCalendar()
+            return calendar?
+
+        exists = checkCalendar()
+        while exists
+            n++
+            exists = checkCalendar()
+
+        localName = t name
+        localName = "#{localName} #{n}" if n > 0
+        @createNewCalendar localName
 
 
     # Create a new event by adding a very old event with New Calendar as name.
     # Then activate renaming on this new calendar.
-    createNewCalendar: (callback) ->
+    createNewCalendar: (name) ->
         @showLoading()
 
         # Since an event is needed to create a calendar, let's make a false one
@@ -51,25 +64,25 @@ module.exports = class MenuView extends ViewCollection
             end: moment "19010101", "YYYYMMDD"
             description: ''
             place: ''
-            tags: [t "new calendar"]
+            tags: [name]
 
         # saving the event, creating calendar
         calendarEvent.save null,
             wait: true
             success: ->
-                # a timeout is needed for the created calendar to appear on
-                # bottom of the menu items
-                setTimeout ->
+                # wait for the newly created calendar to appear in the DOM
+                wait = setInterval ->
                     newCalSel = """
-                     #menuitems li.tagmenuitem[data-name='#{t "new calendar"}']
+                     #menuitems li.tagmenuitem[data-name='#{name}']
                     """
-                    $("#{newCalSel} .calendar-rename")
-                        .trigger("click")
+                    rename = $("#{newCalSel} .calendar-rename")
+                    if rename.length > 0
+                        clearInterval wait
+                        rename.trigger("click")
                 , 100
             complete: =>
                 # Crappy timeout to match the input selection in `success`
                 setTimeout @hideLoading.bind(@), 100
-                setTimeout callback, 150 if callback?
 
 
     activate: (href) ->
