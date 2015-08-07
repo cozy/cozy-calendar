@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+async = require 'async'
 moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
@@ -47,6 +48,33 @@ module.exports.create = (req, res) ->
                     res.send (updatedEvent or event), 201
 
 
+# Expect a list of events as body and create an event in database for each
+# entry. When it's done, it returns the list of created events and events for
+# which an error occured.
+module.exports.createBulk = (req, res) ->
+    events = req.body
+    newEvents = []
+    errors = []
+
+    async.eachSeries events, (event, done) ->
+        event.created = moment().tz('UTC').toISOString()
+        event.lastModification = moment().tz('UTC').toISOString()
+        event.id = null
+
+        Event.createOrGetIfImport event, (err, newEvent) ->
+            if err
+                errors.push event
+            else
+                newEvents.push newEvent
+
+            setTimeout done, 10
+
+    , (err) ->
+        res.status(201).send
+            events: newEvents
+            errors: errors
+
+
 module.exports.update = (req, res) ->
     start = req.event.start
     data = req.body
@@ -77,8 +105,10 @@ module.exports.delete = (req, res) ->
 module.exports.public = (req, res, next) ->
     id = req.params.publiceventid
     key = req.query.key
+
     # Retrieve event
     Event.find id, (err, event) ->
+
         # If event doesn't exist or visitor hasn't access display 404 page
         if err or not event or not visitor = event.getGuest key
             # Retreive user localization
@@ -87,10 +117,12 @@ module.exports.public = (req, res, next) ->
             # Display 404 page
             fileName = "404_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
+
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
                 fileName = '404_en.jade'
+
             res.status 404
             res.render fileName
 
@@ -105,7 +137,7 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
-            # Retrive event data
+            # Retrieve event data
             if event.isAllDayEvent()
                 dateFormatKey = 'email date format allday'
             else
@@ -119,6 +151,7 @@ module.exports.public = (req, res, next) ->
             # Display event
             fileName = "event_public_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
+
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)

@@ -27,12 +27,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     # Override generic template title.
     templateTitle: require 'views/templates/popover_screens/main_title'
     templateContent: require 'views/templates/popover_screens/main'
+    attributes:
+        tabindex: "0"
 
 
     events:
         'keyup':                'onKeyUp'
         'change select':        'onKeyUp'
         'change input':         'onKeyUp'
+        'click .cancel':        'onCancelClicked'
         'click .add':           'onAddClicked'
         'click .advanced-link': 'onAdvancedClicked'
         'click .remove':        -> @switchToScreen('delete')
@@ -84,6 +87,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     afterRender: ->
+        # Required for keyup event
+        @$el.attr 'tabindex', 0
+
         # Cache jQuery selectors.
         @$container   = @$ '.popover-content-wrapper'
         @$addButton    = @$ '.btn.add'
@@ -148,6 +154,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetEnd()
 
             @$addButton.click()
+
+        else if event.keyCode is 27 or event.which is 27 # escape
+            @popover.selfclose false
+
         else
             @$addButton.removeClass 'disabled'
 
@@ -249,6 +259,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @spinner.hide()
 
 
+    # Hides popover.
+    onCancelClicked: ->
+        @popover.selfclose(false)
+
+
     onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
         spinner = '<img src="img/spinner-white.svg" alt="spinner" />'
@@ -296,7 +311,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getButtonText: ->
-        if @model.isNew() then '+ ' + t('create button') else t('save button')
+        if @model.isNew() then t('create button') else t('save button')
 
 
     getGuestsButtonText: ->
@@ -324,6 +339,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             locale = moment.localeData()
             language =
                 dayNames: locale._weekdays
+
                 monthNames: locale._months
 
             return rrule.toText(window.t, language)

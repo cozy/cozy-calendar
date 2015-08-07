@@ -335,19 +335,48 @@ a.btn:visited
   padding-bottom: 0
 
 .public-event-container
-    width: 100%
+  margin        auto
+  width         100%
+  max-width     40em
+  padding       1.5em
+  border        1px solid #ddd
+  border-top    0
+  border-radius 0 0 8px 8px
 
-    h2
-    h3
-    h4
-    p
-    a
-    body
-        font-family: 'Maven Pro', sans-serif
+  @media (max-width: 480px)
+    border 0
+    border-radius 0
 
-    h3
-        margin-top: 0
+  h2
+  h3
+  h4
+  p
+  a
+  body
+      font-family: 'Source Sans Pro', sans-serif
 
+  h3
+      margin-top: 0
+
+//special style for invitation page
+.public-event-body
+  header
+    width             100%
+    max-width         40em
+    margin:           5em auto 0
+    padding:          1em 1.5em
+    background-color: #fff
+    border:           1px solid #ddd
+    border-radius:    8px 8px 0 0
+    text-align:       center
+
+    @media (max-width: 480px)
+      margin 0
+      border 0
+      border-radius 0
+
+    img
+      width: 68px
 
 // To hide Todo a dia label
 .fc-view-container
