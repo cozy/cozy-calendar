@@ -265,3 +265,38 @@ describe "Events management", ->
                 should.exist isExist
                 isExist.should.be.false
                 done()
+
+    describe "POST events/bulk", ->
+
+        before helpers.cleanDb
+        after -> delete @events
+
+        it "should return the event json objects", (done) ->
+            @events = []
+
+            for i in [1..20]
+                @events.push
+                    description: "Title #{i}"
+                    start: "2013-04-15T15:30:00.000Z"
+                    end: "2013-04-15T16:30:00.000Z"
+                    place: "place"
+
+            client.post "events/bulk", @events, (error, response, body) =>
+
+                should.not.exist error
+                should.exist response
+                response.should.have.property 'statusCode', 201
+                should.exist body
+                should.exist body.events
+
+                body.events.length.should.equal 20
+
+                for event in body.events
+                    event.should.have.property 'id'
+                    event.should.have.property 'start'
+                    event.should.have.property 'end'
+                    event.should.have.property 'description'
+                    event.should.have.property 'place'
+
+                done()
+

@@ -31,6 +31,8 @@ module.exports =
         post  : events.create
     'eventid':
         param : events.fetch
+    'events/bulk':
+        post  : events.createBulk
 
     'events/rename-calendar':
         post: events.bulkCalendarRename
