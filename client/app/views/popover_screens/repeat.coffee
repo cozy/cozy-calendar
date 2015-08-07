@@ -70,7 +70,8 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
             if rruleOptions.until
                 endMode =
                     endMode: 'until'
-                    until: moment.tz(rruleOptions.until, 'UTC').format(@inputDateFormat)
+                    until: moment.tz(rruleOptions.until, 'UTC')
+                        .format(@inputDateFormat)
             else if rruleOptions.count
                 endMode =
                     endMode: 'count'
@@ -85,24 +86,24 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
 
         # Template will use those functions to mark as checked relevant fields.
         functions =
-            limitedVisibility: (freq) =>
+            limitedVisibility: (freq) ->
                 if data.rrule.freq isnt freq then "true" else "false"
 
-            genericLimitedVisibility: =>
+            genericLimitedVisibility: ->
                 if data.rrule.freq is NO_REPEAT then "true" else "false"
 
-            isFreqSelected: (value) =>
+            isFreqSelected: (value) ->
                 return 'selected' if value is data.rrule.freq
 
-            isWeekdaySelected: (value) =>
+            isWeekdaySelected: (value) ->
                 isSelected = data.rrule.byweekday and \
                              (value + 6) % 7 in data.rrule.byweekday
                 return 'checked' if isSelected
 
-            monthlyRepeatBy: (value) =>
+            monthlyRepeatBy: (value) ->
                 return 'checked' if value is data.rrule.monthlyRepeatBy
 
-            isEndModeSelected: (value) =>
+            isEndModeSelected: (value) ->
                 return 'checked' if value is data.rrule.endMode
 
         # Merge functions into data.

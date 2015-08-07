@@ -554,7 +554,8 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   model = RealEvent;
 
   RealEventGeneratorCollection.prototype.comparator = function(re1, re2) {
-    return re1.start.isBefore(re2.start);
+    var _ref;
+    return (_ref = re1.start) != null ? _ref.isBefore(re2.start) : void 0;
   };
 
   RealEventGeneratorCollection.prototype.initialize = function() {
@@ -645,16 +646,14 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
     }
     this.runningRecurringEvents.forEach((function(_this) {
       return function(item, index) {
-        var evs;
-        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
-          var options;
-          options = {
-            event: event,
-            start: instanceStart,
-            end: instanceEnd
-          };
-          return new RealEvent(options);
-        });
+        var evs, options;
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {});
+        options = {
+          event: event,
+          start: instanceStart,
+          end: instanceEnd
+        };
+        return new RealEvent(options);
         eventsInRange = eventsInRange.concat(evs);
         if (item.getLastOccurenceDate().isBefore(end)) {
           return _this.runningRecurringEvents.splice(index, 1);
@@ -694,12 +693,14 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
       } else if (item.getStartDateObject().isBefore(start)) {
         this.firstGeneratedEvent = item;
       } else if (!item.isRecurrent()) {
-        eventsInRange.push(new RealEvent(item));
+        eventsInRange.push(new RealEvent({
+          event: item
+        }));
       }
     }
     this.previousRecurringEvents.forEach((function(_this) {
       return function(item, index) {
-        var evs;
+        var evs, options;
         if (item.getLastOccurenceDate().isBefore(start)) {
           return;
         }
@@ -707,9 +708,13 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
           _this.previousRecurringEvents.splice(index, 1);
           return;
         }
-        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
-          return new RealEvent(event, instanceStart, instanceEnd);
-        });
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {});
+        options = {
+          event: event,
+          start: instanceStart,
+          end: instanceEnd
+        };
+        return new RealEvent(options);
         return eventsInRange = eventsInRange.concat(evs);
       };
     })(this));
@@ -940,6 +945,15 @@ exports.toTimezonedMoment = function(d) {
   m.tz(window.app.timezone);
   return m;
 };
+
+exports.getLists = function(list, length) {
+  var lists;
+  lists = [];
+  while (list.length > 0) {
+    lists.push(list.splice(0, length));
+  }
+  return lists;
+};
 });
 
 ;require.register("helpers/color-set", function(exports, require, module) {
@@ -957,63 +971,120 @@ app = require('application');
 
 colorSet = require('./helpers/color-set');
 
-$(function() {
-  moment.locale(window.locale);
-  ColorHash.addScheme('cozy', colorSet);
-  app.initialize();
-  return $.fn.spin = function(opts, color) {
-    var presets;
-    presets = {
-      tiny: {
-        lines: 8,
-        length: 2,
-        width: 2,
-        radius: 3
-      },
-      small: {
-        lines: 8,
-        length: 1,
-        width: 2,
-        radius: 5
-      },
-      large: {
-        lines: 10,
-        length: 8,
-        width: 4,
-        radius: 8
+window.onerror = function(msg, url, line, col, error) {
+  var data, exception, xhr;
+  console.error(msg, url, line, col, error, error != null ? error.stack : void 0);
+  exception = (error != null ? error.toString() : void 0) || msg;
+  if (exception !== window.lastError) {
+    data = {
+      data: {
+        type: 'error',
+        error: {
+          msg: msg,
+          name: error != null ? error.name : void 0,
+          full: exception,
+          stack: error != null ? error.stack : void 0
+        },
+        url: url,
+        line: line,
+        col: col,
+        href: window.location.href
       }
     };
-    if (Spinner) {
-      return this.each(function() {
-        var $this, spinner;
-        $this = $(this);
-        spinner = $this.data('spinner');
-        if (spinner != null) {
-          spinner.stop();
-          return $this.data('spinner', null);
-        } else if (opts !== false) {
-          if (typeof opts === 'string') {
-            if (opts in presets) {
-              opts = presets[opts];
-            } else {
-              opts = {};
-            }
-            if (color) {
-              opts.color = color;
-            }
-          }
-          spinner = new Spinner($.extend({
-            color: $this.css("color")
-          }, opts));
-          spinner.spin(this);
-          return $this.data("spinner", spinner);
+    xhr = new XMLHttpRequest();
+    xhr.open('POST', 'log', true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(data));
+    return window.lastError = exception;
+  }
+};
+
+$(function() {
+  var data, e, exception, xhr;
+  try {
+    moment.locale(window.locale);
+    ColorHash.addScheme('cozy', colorSet);
+    $.fn.spin = function(opts, color) {
+      var presets;
+      presets = {
+        tiny: {
+          lines: 8,
+          length: 2,
+          width: 2,
+          radius: 3
+        },
+        small: {
+          lines: 8,
+          length: 1,
+          width: 2,
+          radius: 5
+        },
+        large: {
+          lines: 10,
+          length: 8,
+          width: 4,
+          radius: 8
         }
-      });
-    } else {
-      console.log("Spinner class not available.");
-      return null;
+      };
+      if (Spinner) {
+        return this.each(function() {
+          var $this, spinner;
+          $this = $(this);
+          spinner = $this.data('spinner');
+          if (spinner != null) {
+            spinner.stop();
+            return $this.data('spinner', null);
+          } else if (opts !== false) {
+            if (typeof opts === 'string') {
+              if (opts in presets) {
+                opts = presets[opts];
+              } else {
+                opts = {};
+              }
+              if (color) {
+                opts.color = color;
+              }
+            }
+            spinner = new Spinner($.extend({
+              color: $this.css("color")
+            }, opts));
+            spinner.spin(this);
+            return $this.data("spinner", spinner);
+          }
+        });
+      } else {
+        console.log("Spinner class not available.");
+        return null;
+      }
+    };
+    return app.initialize();
+  } catch (_error) {
+    e = _error;
+    console.error(e, e != null ? e.stack : void 0);
+    exception = e.toString();
+    if (exception !== window.lastError) {
+      data = {
+        data: {
+          type: 'error',
+          error: {
+            msg: e.message,
+            name: e != null ? e.name : void 0,
+            full: exception,
+            stack: e != null ? e.stack : void 0
+          },
+          file: e != null ? e.fileName : void 0,
+          line: e != null ? e.lineNumber : void 0,
+          col: e != null ? e.columnNumber : void 0,
+          href: window.location.href
+        }
+      };
+      xhr = new XMLHttpRequest();
+      xhr.open('POST', 'log', true);
+      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xhr.send(JSON.stringify(data));
+      return window.lastError = exception;
     }
-  };
+  }
 });
 });
 
@@ -1162,15 +1233,18 @@ Modal = (function(_super) {
   };
 
   Modal.prototype.render = function() {
-    var body, close, container, foot, head, title, yesBtn;
-    close = $('<button class="close" type="button" data-dismiss="modal" aria-hidden="true">×</button>');
+    var body, close, closeMarkup, container, foot, head, noMarkup, title, yesBtn, yesMarkup;
+    closeMarkup = "<button class=\"close\" type=\"button\" data-dismiss=\"modal\"\n        aria-hidden=\"true\">\n    ×\n</button>";
+    close = $(closeMarkup);
     title = $('<h4 class="model-title">').text(this.title);
     head = $('<div class="modal-header">').append(close, title);
     body = $('<div class="modal-body">').append(this.renderContent());
-    yesBtn = $('<button id="modal-dialog-yes" class="btn btn-cozy">').text(this.yes);
+    yesMarkup = '<button id="modal-dialog-yes" class="btn btn-cozy">';
+    yesBtn = $(yesMarkup).text(this.yes);
     foot = $('<div class="modal-footer">').append(yesBtn);
+    noMarkup = '<button id="modal-dialog-no" class="btn btn-link">';
     if (this.no) {
-      foot.prepend($('<button id="modal-dialog-no" class="btn btn-link">').text(this.no));
+      foot.prepend($(noMarkup).text(this.no));
     }
     container = $('<div class="modal-content">').append(head, body, foot);
     container = $('<div class="modal-dialog">').append(container);
@@ -1461,10 +1535,89 @@ module.exports.randomString = function(length) {
 };
 });
 
+;require.register("lib/request", function(exports, require, module) {
+exports.request = function(type, url, data, callback) {
+  var body, fired, req;
+  body = data != null ? JSON.stringify(data) : null;
+  fired = false;
+  req = $.ajax({
+    type: type,
+    url: url,
+    data: body,
+    contentType: "application/json",
+    dataType: "json",
+    success: function(data) {
+      fired = true;
+      if (callback != null) {
+        return callback(null, data);
+      }
+    },
+    error: function(data) {
+      fired = true;
+      if (data != null) {
+        data = JSON.parse(data.responseText);
+        if ((data.msg != null) && (callback != null)) {
+          return callback(new Error(data.msg, data));
+        } else if ((data.error != null) && (callback != null)) {
+          data.msg = data.error;
+          return callback(new Error(data.msg, data));
+        }
+      } else if (callback != null) {
+        return callback(new Error("Server error occured", data));
+      }
+    }
+  });
+  return req.always(function() {
+    if (!fired) {
+      return callback(new Error("Server error occured", data));
+    }
+  });
+};
+
+exports.get = function(url, callback) {
+  return exports.request("GET", url, null, callback);
+};
+
+exports.post = function(url, data, callback) {
+  return exports.request("POST", url, data, callback);
+};
+
+exports.put = function(url, data, callback) {
+  return exports.request("PUT", url, data, callback);
+};
+
+exports.del = function(url, callback) {
+  return exports.request("DELETE", url, null, callback);
+};
+});
+
 ;require.register("lib/socket_listener", function(exports, require, module) {
-var SocketListener,
+var SocketListener, addModel,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+addModel = (function(_this) {
+  return function(model, callback) {
+    return model.fetch({
+      success: function(fetched) {
+        var collection, _i, _len, _ref;
+        if (model.collections != null) {
+          _ref = model.collections;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            collection = _ref[_i];
+            if (model instanceof collection.model) {
+              collection.add(model);
+            }
+          }
+        }
+        return setTimeout(callback, 50);
+      },
+      error: function() {
+        return setTimeout(callback, 50);
+      }
+    });
+  };
+})(this);
 
 SocketListener = (function(_super) {
   __extends(SocketListener, _super);
@@ -1479,19 +1632,65 @@ SocketListener = (function(_super) {
 
   SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete'];
 
-  SocketListener.prototype.onRemoteCreate = function(model) {
-    var collection, _i, _len, _ref, _results;
-    _ref = this.collections;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      collection = _ref[_i];
-      if (model instanceof collection.model) {
-        _results.push(collection.add(model));
-      } else {
-        _results.push(void 0);
-      }
+  SocketListener.prototype.queue = async.queue(addModel, 1);
+
+  SocketListener.prototype.process = function(event) {
+    var doctype, id, model, operation;
+    doctype = event.doctype, operation = event.operation, id = event.id;
+    switch (operation) {
+      case 'create':
+        return this.onRemoteCreate(doctype, id);
+      case 'update':
+        if (model = this.singlemodels.get(id)) {
+          model.fetch({
+            success: (function(_this) {
+              return function(fetched) {
+                if (fetched.changedAttributes()) {
+                  return _this.onRemoteUpdate(fetched, null);
+                }
+              };
+            })(this)
+          });
+        }
+        return this.collections.forEach((function(_this) {
+          return function(collection) {
+            if (!(model = collection.get(id))) {
+              return;
+            }
+            return model.fetch({
+              success: function(fetched) {
+                if (fetched.changedAttributes()) {
+                  return _this.onRemoteUpdate(fetched, collection);
+                }
+              }
+            });
+          };
+        })(this));
+      case 'delete':
+        if (model = this.singlemodels.get(id)) {
+          this.onRemoteDelete(model, this.singlemodels);
+        }
+        return this.collections.forEach((function(_this) {
+          return function(collection) {
+            if (!(model = collection.get(id))) {
+              return;
+            }
+            return _this.onRemoteDelete(model, collection);
+          };
+        })(this));
     }
-    return _results;
+  };
+
+  SocketListener.prototype.onRemoteCreate = function(docType, id) {
+    var model;
+    if (!this.shouldFetchCreated(id)) {
+      return;
+    }
+    model = new this.models[docType]({
+      id: id
+    });
+    model.collections = this.collections;
+    return this.queue.push(model);
   };
 
   SocketListener.prototype.onRemoteDelete = function(model) {
@@ -1508,23 +1707,21 @@ module.exports = new SocketListener();
 ;require.register("lib/today_checker", function(exports, require, module) {
 module.exports = function(router) {
   var waitToChangeToday;
-  return (waitToChangeToday = (function(_this) {
-    return function() {
-      var nextDay, nextTick, now;
-      now = moment();
-      nextDay = moment(now).add(1, 'days').startOf('day');
-      nextTick = nextDay.valueOf() - now.valueOf();
-      return setTimeout(function() {
-        var view;
-        view = router.mainView;
-        if (view.cal != null) {
-          view.cal.fullCalendar('destroy');
-          view.afterRender();
-        }
-        return waitToChangeToday();
-      }, nextTick);
-    };
-  })(this))();
+  return (waitToChangeToday = function() {
+    var nextDay, nextTick, now;
+    now = moment();
+    nextDay = moment(now).add(1, 'days').startOf('day');
+    nextTick = nextDay.valueOf() - now.valueOf();
+    return setTimeout(function() {
+      var view;
+      view = router.mainView;
+      if (view.cal != null) {
+        view.cal.fullCalendar('destroy');
+        view.afterRender();
+      }
+      return waitToChangeToday();
+    }, nextTick);
+  })();
 };
 });
 
@@ -1612,6 +1809,7 @@ module.exports = ViewCollection = (function(_super) {
     this.listenTo(this.collection, "reset", this.onReset);
     this.listenTo(this.collection, "add", this.addItem);
     this.listenTo(this.collection, "remove", this.removeItem);
+    this.listenTo(this.collection, "sort", this.onReset);
     if (this.collectionEl == null) {
       this.collectionEl = this.el;
       return this.$collectionEl = this.$el;
@@ -2141,7 +2339,8 @@ module.exports = {
   "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
   "some event fail to save": "An event was not saved (an error occured).",
   "imported events": "Amount of imported events",
-  "import finished": "Your import is now finished",
+  "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+  "import error": "A server error occured, the import failed.",
   "import error occured for": "Import error occured for following elements:",
   "export your calendar": "Export your calendar",
   'please select existing calendar': 'Please select an existing calendar.',
@@ -2642,7 +2841,8 @@ module.exports = {
   "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
   "some event fail to save": "La sauvegarde d'un évènement a échoué.",
   "imported events": "Nombre d'évènements importés",
-  "import finished": "Votre importation est terminée !",
+  "import finished": "Votre import est terminé ! L'affichage des nouveaux événements prend du temps. Si vous voulez les voir apparaitre plus rapidement, rafraichissez la page.",
+  "import error": "Une erreur serveur s'est produite, l'import a échoué.",
   "import error occured for": "Une erreur est survenue pour un de ces éléments :",
   "export your calendar": "Exporter votre agenda",
   'please select existing calendar': 'Veuillez sélectionner un agenda existant.',
@@ -2729,8 +2929,8 @@ module.exports = Event = (function(_super) {
   Event.prototype.urlRoot = 'events';
 
   Event.prototype.defaults = function() {
-    var defaultCalendar;
-    defaultCalendar = window.app.tags.at(0) || t('default calendar name');
+    var defaultCalendar, _ref, _ref1;
+    defaultCalendar = ((_ref = window.app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0) || t('default calendar name');
     return {
       details: '',
       description: '',
@@ -2865,7 +3065,8 @@ module.exports = RealEvent = (function(_super) {
   };
 
   RealEvent.prototype.getDateHash = function() {
-    return this.start.format('YYYYMMDD');
+    var _ref;
+    return (_ref = this.start) != null ? _ref.format('YYYYMMDD') : void 0;
   };
 
   RealEvent.prototype.isAllDay = function() {
@@ -2873,11 +3074,13 @@ module.exports = RealEvent = (function(_super) {
   };
 
   RealEvent.prototype.getFormattedStartDate = function(format) {
-    return this.start.format(format);
+    var _ref;
+    return (_ref = this.start) != null ? _ref.format(format) : void 0;
   };
 
   RealEvent.prototype.getFormattedEndDate = function(format) {
-    return this.end.format(format);
+    var _ref;
+    return (_ref = this.end) != null ? _ref.format(format) : void 0;
   };
 
   return RealEvent;
@@ -3008,7 +3211,7 @@ module.exports = ScheduleItem = (function(_super) {
     var s;
     if (this.isAllDay()) {
       s = H.momentToDateString(m);
-    } else if (this.isRecurrent()) {
+    } else if (this.isRecurrent() && !this.has('timezone')) {
       s = moment.tz(m, this.get('timezone')).toISOString();
     } else {
       s = m.toISOString();
@@ -3486,7 +3689,7 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   CalendarHeader.prototype.getTitle = function() {
-    var res, view;
+    var range, res, view;
     if (!this.cal) {
       return t('List');
     }
@@ -3494,7 +3697,8 @@ module.exports = CalendarHeader = (function(_super) {
     if (view.name === 'month') {
       res = view.intervalStart.format('MMMM YYYY');
     } else {
-      res = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
+      range = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
+      res = "" + (t('week')) + " " + (view.start.format('w')) + " | " + range;
     }
     return res;
   };
@@ -3760,7 +3964,8 @@ module.exports = CalendarView = (function(_super) {
       eventClick: this.onEventClick,
       eventResizeStop: this.onEventResizeStop,
       eventResize: this.onEventResize,
-      handleWindowResize: false
+      handleWindowResize: false,
+      weekNumbers: true
     });
     source = this.eventCollection.getFCEventSource(this.calendarsCollection);
     this.cal.fullCalendar('addEventSource', source);
@@ -3915,6 +4120,8 @@ module.exports = CalendarView = (function(_super) {
       endDate.subtract(1, 'days');
       startDate = startDate.format() + 'T10:00:00.000';
       endDate = endDate.format() + 'T11:00:00.000';
+    } else if (this.view === 'agendaWeek') {
+      endDate = startDate.clone().add(1, 'hour');
     }
     start = helpers.ambiguousToTimezoned(startDate);
     end = helpers.ambiguousToTimezoned(endDate);
@@ -4079,7 +4286,8 @@ module.exports = EventView = (function(_super) {
 });
 
 ;require.register("views/import_view", function(exports, require, module) {
-var BaseView, ComboBox, Event, EventList, ImportView, helpers,
+var BaseView, ComboBox, Event, EventList, ImportView, helpers, request,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -4089,6 +4297,8 @@ ComboBox = require('views/widgets/combobox');
 
 helpers = require('../helpers');
 
+request = require('../lib/request');
+
 Event = require('../models/event');
 
 EventList = require('./import_event_list');
@@ -4097,6 +4307,7 @@ module.exports = ImportView = (function(_super) {
   __extends(ImportView, _super);
 
   function ImportView() {
+    this.importEvents = __bind(this.importEvents, this);
     return ImportView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4152,26 +4363,13 @@ module.exports = ImportView = (function(_super) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var events, vevent, _i, _len, _ref, _ref1;
+          var _ref;
           if (result != null ? (_ref = result.calendar) != null ? _ref.name : void 0 : void 0) {
             _this.calendarCombo.setValue(result.calendar.name);
           }
           if ((result != null ? result.events : void 0) != null) {
-            events = [];
-            _ref1 = result.events;
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              vevent = _ref1[_i];
-              events.push(new Event(vevent));
-            }
-            _this.eventList.collection.add(events);
+            return _this.showEventsPreview(result.events);
           }
-          return _this.$(".import-form").fadeOut(function() {
-            _this.resetUploader();
-            _this.importButton.spin();
-            _this.importButton.find('span').html(t('select an icalendar file'));
-            _this.$(".results").slideDown();
-            return _this.$(".confirmation").fadeIn();
-          });
         };
       })(this),
       error: (function(_this) {
@@ -4190,45 +4388,44 @@ module.exports = ImportView = (function(_super) {
     });
   };
 
+  ImportView.prototype.showEventsPreview = function(events) {
+    this.eventLists = helpers.getLists(events, 100);
+    return async.eachSeries(this.eventLists, (function(_this) {
+      return function(eventList, done) {
+        _this.eventList.collection.add(eventList, {
+          sort: false
+        });
+        return setTimeout(done, 500);
+      };
+    })(this), (function(_this) {
+      return function() {
+        _this.eventList.collection.sort();
+        _this.$(".import-form").fadeOut(function() {
+          var buttonText;
+          _this.resetUploader();
+          _this.importButton.spin();
+          buttonText = t('select an icalendar file');
+          _this.importButton.find('span').html(buttonText);
+          return _this.$(".confirmation").fadeIn();
+        });
+        return _this.$(".results").slideDown();
+      };
+    })(this));
+  };
+
   ImportView.prototype.onConfirmImportClicked = function() {
-    var addError, calendar, counter, events, finalizeImport, importEvent, total, updateCounter;
-    calendar = this.calendarCombo.value();
-    if ((calendar == null) || calendar === '') {
-      calendar = t('default calendar name');
+    var events;
+    this.targetCalendar = this.calendarCombo.value();
+    if ((typeof calendar === "undefined" || calendar === null) || calendar === '') {
+      this.targetCalendar = t('default calendar name');
     }
-    total = this.eventList.collection.length;
-    counter = 0;
-    $('.import-progress').html("<p>" + (t('imported events')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
-    updateCounter = function() {
-      counter++;
-      return $('.import-counter').html(counter);
-    };
-    addError = function(element, templatePath) {
-      if ($('.import-errors').html().length === 0) {
-        $('.import-errors').html("<p>" + (t('import error occured for')) + "</p>");
-      }
-      return $('.import-errors').append(require(templatePath)(element.attributes));
-    };
+    this.calendarCombo.save();
+    events = this.eventList.collection.models.reverse();
+    this.eventLists = helpers.getLists(events, 20);
+    this.initCounter();
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
-    importEvent = function(event, callback) {
-      event.set('tags', [calendar]);
-      event.set('id', null);
-      event.set('import', true);
-      return event.save(null, {
-        success: function(model) {
-          app.events.add(model);
-          updateCounter();
-          return callback();
-        },
-        error: function() {
-          addEventError(event, './templates/import_event');
-          updateCounter();
-          return callback();
-        }
-      });
-    };
-    finalizeImport = (function(_this) {
+    return async.eachSeries(this.eventLists, this.importEvents, (function(_this) {
       return function(err) {
         alert(t('import finished'));
         _this.$(".confirmation").fadeOut();
@@ -4240,10 +4437,58 @@ module.exports = ImportView = (function(_super) {
           }
         });
       };
-    })(this);
-    this.calendarCombo.save();
-    events = this.eventList.collection.models;
-    return async.eachSeries(events, importEvent, finalizeImport);
+    })(this));
+  };
+
+  ImportView.prototype.importEvents = function(events, callback) {
+    var event, _i, _len;
+    for (_i = 0, _len = events.length; _i < _len; _i++) {
+      event = events[_i];
+      event.tags = [this.targetCalendar];
+      event.id = null;
+      event["import"] = true;
+    }
+    return request.post("events/bulk", events, (function(_this) {
+      return function(err, result) {
+        var msg, _j, _len1, _ref;
+        if (err) {
+          if (result != null) {
+            msg = result.msg;
+          }
+          if (msg == null) {
+            msg = t('import error');
+          }
+          alert(msg);
+        } else {
+          _ref = result.errors;
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            event = _ref[_j];
+            _this.addImportError(event, './templates/import_event');
+          }
+        }
+        _this.updateCounter(events.length);
+        return setTimeout(callback, 200);
+      };
+    })(this));
+  };
+
+  ImportView.prototype.addImportError = function(event, templatePath) {
+    if ($('.import-errors').html().length === 0) {
+      $('.import-errors').html("<p>" + (t('import error occured for')) + "</p>");
+    }
+    return $('.import-errors').append(require(templatePath)(event));
+  };
+
+  ImportView.prototype.initCounter = function() {
+    var total;
+    total = this.eventList.collection.length;
+    this.counter = 0;
+    return $('.import-progress').html("<p>" + (t('imported events')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
+  };
+
+  ImportView.prototype.updateCounter = function(increment) {
+    this.counter += increment;
+    return $('.import-counter').html(this.counter);
   };
 
   ImportView.prototype.onCancelImportClicked = function() {
@@ -4339,13 +4584,13 @@ module.exports = ListView = (function(_super) {
         return this.views[prevCid].$el.after(el);
       } else {
         prevView = _.values(this.views).reduce(function(previous, current) {
-          var dCurrent, dPrevious;
+          var dCurrent, dPrev;
           dCurrent = view.model.get('date').diff(current.model.date);
           if (dCurrent < 0) {
             return previous;
           } else if (previous != null) {
-            dPrevious = view.model.get('date').diff(previous.model.date);
-            if (dCurrent < dPrevious) {
+            dPrev = view.model.get('date').diff(previous.model.date);
+            if (dCurrent < dPrev) {
               return current;
             } else {
               return previous;
@@ -4555,7 +4800,7 @@ module.exports = EventItemView = (function(_super) {
       return;
     }
     this.$el.spin('tiny');
-    return this.model.destroy({
+    return this.model.event.destroy({
       error: function() {
         alert('server error');
         return this.$el.spin();
@@ -4670,13 +4915,13 @@ module.exports = MenuView = (function(_super) {
     });
     return calendarEvent.save(null, {
       wait: true,
-      success: (function(_this) {
-        return function() {
-          return setTimeout(function() {
-            return $('#menuitems li.tagmenuitem:last-of-type .calendar-rename').trigger("click");
-          }, 100);
-        };
-      })(this),
+      success: function() {
+        return setTimeout(function() {
+          var newCalSel;
+          newCalSel = "#menuitems li.tagmenuitem[data-name='" + (t("new calendar")) + "']";
+          return $("" + newCalSel + " .calendar-rename").trigger("click");
+        }, 100);
+      },
       complete: (function(_this) {
         return function() {
           setTimeout(_this.hideLoading.bind(_this), 100);
@@ -4782,6 +5027,7 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.afterRender = function() {
+    this.el.dataset.name = this.model.get('name');
     this.buildBadge(this.model.get('color'));
     return this.hideLoading();
   };
@@ -5410,10 +5656,15 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.templateContent = require('views/templates/popover_screens/main');
 
+  MainPopoverScreen.prototype.attributes = {
+    tabindex: "0"
+  };
+
   MainPopoverScreen.prototype.events = {
     'keyup': 'onKeyUp',
     'change select': 'onKeyUp',
     'change input': 'onKeyUp',
+    'click .cancel': 'onCancelClicked',
     'click .add': 'onAddClicked',
     'click .advanced-link': 'onAdvancedClicked',
     'click .remove': function() {
@@ -5422,6 +5673,7 @@ module.exports = MainPopoverScreen = (function(_super) {
     'click .duplicate': 'onDuplicateClicked',
     'changeTime.timepicker .input-start': 'onSetStart',
     'changeTime.timepicker .input-end-time': 'onSetEnd',
+    'changeDate .input-start-date': 'onSetStart',
     'changeDate .input-end-date': 'onSetEnd',
     'click .input-allday': 'toggleAllDay',
     'input .input-desc': 'onSetDesc',
@@ -5442,12 +5694,8 @@ module.exports = MainPopoverScreen = (function(_super) {
     }
   };
 
-  MainPopoverScreen.prototype.initialize = function() {
-    return this.listenTo(this.model, 'change', this.refresh);
-  };
-
   MainPopoverScreen.prototype.getRenderData = function() {
-    var currentCalendar, data, defaultCalendar, firstCalendar, _ref, _ref1, _ref2;
+    var currentCalendar, data, defaultCalendar, endOffset, firstCalendar, _ref, _ref1, _ref2;
     firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
     defaultCalendar = t('default calendar name');
     if (this.model.isNew()) {
@@ -5455,6 +5703,7 @@ module.exports = MainPopoverScreen = (function(_super) {
     } else {
       currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
     }
+    endOffset = this.model.isAllDay() ? -1 : 0;
     return data = _.extend(MainPopoverScreen.__super__.getRenderData.call(this), {
       tFormat: tFormat,
       dFormat: dFormat,
@@ -5462,7 +5711,7 @@ module.exports = MainPopoverScreen = (function(_super) {
       allDay: this.model.isAllDay(),
       sameDay: this.model.isSameDay(),
       start: this.model.getStartDateObject(),
-      end: this.model.getEndDateObject().add((this.model.isAllDay() ? -1 : 0), 'd'),
+      end: this.model.getEndDateObject().add(endOffset, 'd'),
       alerts: this.model.get('alarms'),
       guestsButtonText: this.getGuestsButtonText(),
       buttonText: this.getButtonText(),
@@ -5472,6 +5721,7 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.afterRender = function() {
     var timepickerEvents, _ref;
+    this.$el.attr('tabindex', 0);
     this.$container = this.$('.popover-content-wrapper');
     this.$addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
@@ -5507,7 +5757,6 @@ module.exports = MainPopoverScreen = (function(_super) {
         return _this.model.setCalendar(value);
       };
     })(this));
-    this.refresh();
     if (window.popoverExtended) {
       this.expandPopover();
     }
@@ -5521,22 +5770,14 @@ module.exports = MainPopoverScreen = (function(_super) {
     })(this), 1);
   };
 
-  MainPopoverScreen.prototype.refresh = function() {
-    var delta, end;
-    delta = this.model.isAllDay() ? -1 : 0;
-    end = this.model.getEndDateObject().add(delta, 'd');
-    this.$('.input-start').timepicker('setTime', this.model.getStartDateObject().format(tFormat), true, true);
-    this.$('.input-end-time').timepicker('setTime', end.format(tFormat), true, true);
-    this.$('.input-end-date').val(end.format(dFormat));
-    return this.$('.input-description').val(this.model.get('details'));
-  };
-
   MainPopoverScreen.prototype.onKeyUp = function(event) {
     if (event.keyCode === 13 || event.which === 13) {
       this.calendar.onBlur();
       this.onSetStart();
       this.onSetEnd();
       return this.$addButton.click();
+    } else if (event.keyCode === 27 || event.which === 27) {
+      return this.popover.selfclose(false);
     } else {
       return this.$addButton.removeClass('disabled');
     }
@@ -5654,6 +5895,10 @@ module.exports = MainPopoverScreen = (function(_super) {
     });
   };
 
+  MainPopoverScreen.prototype.onCancelClicked = function() {
+    return this.popover.selfclose(false);
+  };
+
   MainPopoverScreen.prototype.onAddClicked = function() {
     var err, errors, spinner, _i, _len, _results;
     if (this.$('.btn.add').hasClass('disabled')) {
@@ -5718,7 +5963,7 @@ module.exports = MainPopoverScreen = (function(_super) {
 
   MainPopoverScreen.prototype.getButtonText = function() {
     if (this.model.isNew()) {
-      return '+ ' + t('create button');
+      return t('create button');
     } else {
       return t('save button');
     }
@@ -5870,54 +6115,42 @@ module.exports = RepeatPopoverScreen = (function(_super) {
       data.rrule = rrule;
     }
     functions = {
-      limitedVisibility: (function(_this) {
-        return function(freq) {
-          if (data.rrule.freq !== freq) {
-            return "true";
-          } else {
-            return "false";
-          }
-        };
-      })(this),
-      genericLimitedVisibility: (function(_this) {
-        return function() {
-          if (data.rrule.freq === NO_REPEAT) {
-            return "true";
-          } else {
-            return "false";
-          }
-        };
-      })(this),
-      isFreqSelected: (function(_this) {
-        return function(value) {
-          if (value === data.rrule.freq) {
-            return 'selected';
-          }
-        };
-      })(this),
-      isWeekdaySelected: (function(_this) {
-        return function(value) {
-          var isSelected, _ref2;
-          isSelected = data.rrule.byweekday && (_ref2 = (value + 6) % 7, __indexOf.call(data.rrule.byweekday, _ref2) >= 0);
-          if (isSelected) {
-            return 'checked';
-          }
-        };
-      })(this),
-      monthlyRepeatBy: (function(_this) {
-        return function(value) {
-          if (value === data.rrule.monthlyRepeatBy) {
-            return 'checked';
-          }
-        };
-      })(this),
-      isEndModeSelected: (function(_this) {
-        return function(value) {
-          if (value === data.rrule.endMode) {
-            return 'checked';
-          }
-        };
-      })(this)
+      limitedVisibility: function(freq) {
+        if (data.rrule.freq !== freq) {
+          return "true";
+        } else {
+          return "false";
+        }
+      },
+      genericLimitedVisibility: function() {
+        if (data.rrule.freq === NO_REPEAT) {
+          return "true";
+        } else {
+          return "false";
+        }
+      },
+      isFreqSelected: function(value) {
+        if (value === data.rrule.freq) {
+          return 'selected';
+        }
+      },
+      isWeekdaySelected: function(value) {
+        var isSelected, _ref2;
+        isSelected = data.rrule.byweekday && (_ref2 = (value + 6) % 7, __indexOf.call(data.rrule.byweekday, _ref2) >= 0);
+        if (isSelected) {
+          return 'checked';
+        }
+      },
+      monthlyRepeatBy: function(value) {
+        if (value === data.rrule.monthlyRepeatBy) {
+          return 'checked';
+        }
+      },
+      isEndModeSelected: function(value) {
+        if (value === data.rrule.endMode) {
+          return 'checked';
+        }
+      }
     };
     return _.extend(data, functions);
   };
@@ -6058,6 +6291,7 @@ module.exports = RepeatPopoverScreen = (function(_super) {
 
 ;require.register("views/settings_modal", function(exports, require, module) {
 var BaseView, ComboBox, ImportView, SettingsModals,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -6072,6 +6306,7 @@ module.exports = SettingsModals = (function(_super) {
   __extends(SettingsModals, _super);
 
   function SettingsModals() {
+    this.hideOnEscape = __bind(this.hideOnEscape, this);
     return SettingsModals.__super__.constructor.apply(this, arguments);
   }
 
@@ -6086,9 +6321,11 @@ module.exports = SettingsModals = (function(_super) {
   SettingsModals.prototype.template = require('./templates/settings_modal');
 
   SettingsModals.prototype.events = {
+    'keyup': 'hideOnEscape',
     'click a#export': 'exportCalendar',
     'click #show-password': 'showPassword',
-    'click #hide-password': 'hidePassword'
+    'click #hide-password': 'hidePassword',
+    'click .close-settings': 'close'
   };
 
   SettingsModals.prototype.getRenderData = function() {
@@ -6105,6 +6342,7 @@ module.exports = SettingsModals = (function(_super) {
   };
 
   SettingsModals.prototype.afterRender = function() {
+    this.$el.attr('tabindex', '0');
     this.calendar = new ComboBox({
       el: this.$('#export-calendar'),
       source: app.calendars.toAutoCompleteSource()
@@ -6126,14 +6364,14 @@ module.exports = SettingsModals = (function(_super) {
     })(this));
   };
 
-  SettingsModals.prototype.hideOnEscape = function(e) {
-    if (e.which === 27 && !e.isDefaultPrevented()) {
+  SettingsModals.prototype.hideOnEscape = function(event) {
+    if (27 === event.which || 27 === event.keyCode) {
       return this.close();
     }
   };
 
   SettingsModals.prototype.close = function() {
-    return this.$el.modal('close');
+    return this.$el.modal('hide');
   };
 
   SettingsModals.prototype.exportCalendar = function() {
@@ -6662,7 +6900,7 @@ popoverClassName += (sameDay? ' is-same-day' : '')
 var showDetailsByDefault = details && details.length > 0
 var showAlertsByDefault = alerts && alerts.length > 0
 var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
-buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label" + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
 if ( !alerts || alerts.length === 0)
 {
 buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
@@ -6671,7 +6909,7 @@ else
 {
 buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
 }
-buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"8\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"7\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div>");;return buf.join("");
+buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"7\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"8\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"9\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6770,7 +7008,7 @@ else
 {
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
 }
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div>");;return buf.join("");
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div><div class=\"modal-footer\"><button class=\"btn btn-link close-settings\">" + (jade.escape(null == (jade_interp = t('close')) ? "" : jade_interp)) + "</button></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

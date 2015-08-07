@@ -10,20 +10,27 @@ module.exports = class SettingsModals extends BaseView
 
     template: require('./templates/settings_modal')
 
+
     events:
+        'keyup': 'hideOnEscape'
         'click a#export': 'exportCalendar'
         'click #show-password': 'showPassword'
         'click #hide-password': 'hidePassword'
+        'click .close-settings': 'close'
+
 
     getRenderData: ->
         account: @model
+
 
     initialize: ->
         @model = window.webDavAccount
         if @model?
             @model.placeholder = @getPlaceholder @model.token
 
+
     afterRender: ->
+        @$el.attr 'tabindex', '0'
 
         @calendar = new ComboBox
             el: @$('#export-calendar')
@@ -48,14 +55,15 @@ module.exports = class SettingsModals extends BaseView
             # bound to behaviours managed by Bootsrap.
             @remove()
 
+
     # Close the modal when key `ESCAPE` is pressed.
-    hideOnEscape: (e) ->
-        # escape from outside a datetimepicker
-        @close() if e.which is 27 and not e.isDefaultPrevented()
+    hideOnEscape: (event) =>
+        @close() if 27 in [event.which, event.keyCode]
 
 
     # Close the modal.
-    close: -> @$el.modal 'close'
+    close: ->
+        @$el.modal 'hide'
 
 
     exportCalendar: ->
@@ -74,10 +82,12 @@ module.exports = class SettingsModals extends BaseView
         placeholder.push '*' for i in [1..password.length] by 1
         return placeholder.join ''
 
+
     showPassword: ->
         @$('#placeholder').html @model.token
         @$('#show-password').hide()
         @$('#hide-password').show()
+
 
     hidePassword: ->
         @$('#placeholder').html @model.placeholder

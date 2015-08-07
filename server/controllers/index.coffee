@@ -5,6 +5,8 @@ Contact = require '../models/contact'
 User  = require '../models/user'
 cozydb = require 'cozydb'
 WebDavAccount = require '../models/webdavaccount'
+log = require('printit')
+    prefix: 'calendar:client'
 
 module.exports.index = (req, res) ->
     async.parallel [
@@ -52,3 +54,7 @@ module.exports.index = (req, res) ->
                 window.webDavAccount = #{JSON.stringify webDavAccount};
                 window.timezone = #{JSON.stringify timezone};
             """
+module.exports.logClient = (req, res) ->
+    log.error req.body.data
+    log.error req.body.data.error?.stack
+    res.send 'ok'

@@ -26,11 +26,11 @@ module.exports = class RealEvent extends Backbone.Model
     getCalendar: -> @event.getCalendar()
     getColor: -> @event.getColor()
     getDateHash: ->
-        return @start.format 'YYYYMMDD'
+        return @start?.format 'YYYYMMDD'
 
     isAllDay: -> @event.isAllDay() or @event.isMultipleDays()
 
     getFormattedStartDate: (format) ->
-        return @start.format format
+        return @start?.format format
     getFormattedEndDate: (format) ->
-        return @end.format format
+        return @end?.format format

@@ -3,7 +3,7 @@ RealEvent = require '../models/realevent'
 module.exports = class RealEventGeneratorCollection extends Backbone.Collection
     model = RealEvent
     comparator: (re1, re2) ->
-        return re1.start.isBefore re2.start
+        return re1.start?.isBefore re2.start
 
     initialize: ->
 
@@ -54,9 +54,9 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
 
     resetFromBase: (sync)->
         resetProc = =>
-                @reset []
-                @_initializeGenerator()
-                @trigger 'reset'
+            @reset []
+            @_initializeGenerator()
+            @trigger 'reset'
         if sync
             resetProc()
         else
@@ -93,12 +93,13 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @runningRecurringEvents.forEach (item, index) =>
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    options =
-                        event: event
-                        start: instanceStart
-                        end: instanceEnd
-                    return new RealEvent options
-                eventsInRange = eventsInRange.concat evs
+                options =
+                    event: event
+                    start: instanceStart
+                    end: instanceEnd
+                return new RealEvent options
+
+            eventsInRange = eventsInRange.concat evs
 
             # Remove out of next scope recurring events.
             if item.getLastOccurenceDate().isBefore(end)
@@ -131,7 +132,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         @firstDate.add -1, 'month'
         start = @firstDate.clone()
 
-    # pick ponctual event and store newly found recurring ones.
+        # pick ponctual event and store newly found recurring ones.
         i = @baseCollection.indexOf @firstGeneratedEvent
         @firstGeneratedEvent = null # reset, before finding the new one.
         while i >= 0 and @firstGeneratedEvent is null
@@ -142,7 +143,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             else if item.getStartDateObject().isBefore(start)
                 @firstGeneratedEvent = item # end loop condition
             else unless item.isRecurrent() # pick ponctual events.
-                eventsInRange.push new RealEvent item
+                eventsInRange.push new RealEvent event: item
 
         # generated recurring events.
         @previousRecurringEvents.forEach (item, index) =>
@@ -157,8 +158,13 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
             # else: generate realevents
             evs = item.generateRecurrentInstancesBetween start, end, \
                 (event, instanceStart, instanceEnd) ->
-                    return new RealEvent event, instanceStart, instanceEnd
-                eventsInRange = eventsInRange.concat evs
+                options =
+                    event: event
+                    start: instanceStart
+                    end: instanceEnd
+                return new RealEvent options
+
+            eventsInRange = eventsInRange.concat evs
 
         @add eventsInRange
 

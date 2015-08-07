@@ -27,12 +27,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     # Override generic template title.
     templateTitle: require 'views/templates/popover_screens/main_title'
     templateContent: require 'views/templates/popover_screens/main'
+    attributes:
+        tabindex: "0"
 
 
     events:
         'keyup':                'onKeyUp'
         'change select':        'onKeyUp'
         'change input':         'onKeyUp'
+        'click .cancel':        'onCancelClicked'
         'click .add':           'onAddClicked'
         'click .advanced-link': 'onAdvancedClicked'
         'click .remove':        -> @switchToScreen('delete')
@@ -40,6 +43,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         'changeTime.timepicker .input-start':    'onSetStart'
         'changeTime.timepicker .input-end-time': 'onSetEnd'
+        'changeDate .input-start-date':          'onSetStart'
         'changeDate .input-end-date':            'onSetEnd'
         'click .input-allday':                   'toggleAllDay'
 
@@ -56,10 +60,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-repeat': -> @switchToScreen('repeat')
 
 
-    initialize: ->
-        @listenTo @model, 'change', @refresh
-
-
     getRenderData: ->
         # A new event's calendar is the first calendar in alphabetical order
         # It fallbacks to the default calendar name if anything goes wrong
@@ -70,6 +70,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         else
             currentCalendar = @model.get('tags')?[0] or defaultCalendar
 
+
+        endOffset = if @model.isAllDay() then -1 else 0
         return data = _.extend super(),
             tFormat:     tFormat
             dFormat:     dFormat
@@ -77,8 +79,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             allDay:      @model.isAllDay()
             sameDay:     @model.isSameDay()
             start:       @model.getStartDateObject()
-            end:         @model.getEndDateObject()
-                               .add((if @model.isAllDay() then -1 else 0), 'd')
+            end:         @model.getEndDateObject().add(endOffset, 'd')
             alerts: @model.get('alarms')
             guestsButtonText: @getGuestsButtonText()
             buttonText: @getButtonText()
@@ -86,6 +87,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     afterRender: ->
+        # Required for keyup event
+        @$el.attr 'tabindex', 0
+
         # Cache jQuery selectors.
         @$container   = @$ '.popover-content-wrapper'
         @$addButton    = @$ '.btn.add'
@@ -125,8 +129,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @calendar.on 'edition-complete', (value) => @model.setCalendar value
 
-        @refresh()
-
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
             @expandPopover()
@@ -143,24 +145,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         , 1
 
 
-    refresh: ->
-        # We must apply a delta when an event is all-day long, because it starts
-        # one day, and finishes the day after (if its duration is one day). But
-        # we don't want to display the day afteras endDate, but the start day.
-        #
-        # e.g.: you set a all-day long event on 15/01/2015. The event starts at
-        # 15/01/2015 and finishes at 16/01/2015, but we want to display the
-        # event as starting and finishing on 15/01/2015.
-        delta = if @model.isAllDay() then -1 else 0
-        end = @model.getEndDateObject().add(delta, 'd')
-
-        @$('.input-start').timepicker 'setTime', @model.getStartDateObject().format(tFormat), true, true
-        @$('.input-end-time').timepicker 'setTime', end.format(tFormat), true, true
-        @$('.input-end-date').val end.format(dFormat)
-
-        @$('.input-description').val @model.get('details')
-
-
     onKeyUp: (event) ->
         if event.keyCode is 13 or event.which is 13 #ENTER
             # Forces the combobox to blur to save the calendar if it has changed
@@ -170,6 +154,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetEnd()
 
             @$addButton.click()
+
+        else if event.keyCode is 27 or event.which is 27 # escape
+            @popover.selfclose false
+
         else
             @$addButton.removeClass 'disabled'
 
@@ -271,6 +259,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @spinner.hide()
 
 
+    # Hides popover.
+    onCancelClicked: ->
+        @popover.selfclose(false)
+
+
     onAddClicked: ->
         return if @$('.btn.add').hasClass 'disabled'
         spinner = '<img src="img/spinner-white.svg" alt="spinner" />'
@@ -318,7 +311,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getButtonText: ->
-        if @model.isNew() then '+ ' + t('create button') else t('save button')
+        if @model.isNew() then t('create button') else t('save button')
 
 
     getGuestsButtonText: ->
@@ -346,6 +339,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             locale = moment.localeData()
             language =
                 dayNames: locale._weekdays
+
                 monthNames: locale._months
 
             return rrule.toText(window.t, language)

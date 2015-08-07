@@ -120,8 +120,8 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
                     contactid: contactID
                 @model.set 'attendees', guests
 
-                # Inefficient way to refresh the list, but it's okay since it will
-                # never be a big list.
+                # Inefficient way to refresh the list, but it's okay since
+                # it will never be a big list.
                 @render()
 
         # Reset form field.

@@ -28,11 +28,12 @@ html(style="height:100%;")
                             | &nbsp; at #{place}
                     tr
                       td(style="padding: 1.5em 1.5em 2.5em; color: #34A6FF;")
-                        ul(style="margin: 0; padding: 0 2em; list-style: none;")
-                              li(style="display: inline-block; width: 48%; margin: 0 2% 0 0;")
-                                  a(href="#{url}?status=ACCEPTED&key=#{key}", style="display: block; width: 100%; margin: 0 auto; padding: 0.8em 2em; background-color: #34A6FF; border-radius: 5px; color: #FFF; text-decoration: none; text-align: center; font-size: 1em; font-weight: bold; cursor:pointer; box-sizing: border-box;") Going
-                              li(style="display: inline-block; width: 48%; margin: 0;")
-                                  a(href="#{url}?status=DECLINED&key=#{key}", style="display: block; width: 100%; margin: 0 auto; padding: 0.8em 2em; background-color: #FF7070; border-radius: 5px; color: #FFF; text-decoration: none; text-align: center; font-size: 1em; font-weight: bold; cursor:pointer; box-sizing: border-box;") Decline
+                        table(style="margin: auto;")
+                          tr(style="margin: 0;")
+                                td(style="width: 12em;")
+                                    a(href="#{url}?status=ACCEPTED&key=#{key}", style="display: block; width: 100%; margin: 0 auto; margin-right: 0.1em; padding: 0.8em 2em; background-color: #34A6FF; border-radius: 5px; color: #FFF; text-decoration: none; text-align: center; font-size: 1em; font-weight: bold; cursor:pointer; box-sizing: border-box;") Going
+                                td(style="width: 12em;")
+                                    a(href="#{url}?status=DECLINED&key=#{key}", style="display: block; width: 100%; margin: 0 auto; margin-left: 0.1em; padding: 0.8em 2em; background-color: #FF7070; border-radius: 5px; color: #FFF; text-decoration: none; text-align: center; font-size: 1em; font-weight: bold; cursor:pointer; box-sizing: border-box;") Decline
             tr(style="padding-top: 10px; text-align: center; font-size: 0.85em; font-style: italic; color: #999;")
               td
                 p

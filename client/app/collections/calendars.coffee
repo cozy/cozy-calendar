@@ -96,6 +96,6 @@ module.exports = class CalendarCollection extends TagCollection
     toAutoCompleteSource: ->
         return @map (tag) ->
             return _.extend
-                    label: tag.get 'name'
-                    value: tag.get 'name'
-                , tag.attributes
+                label: tag.get 'name'
+                value: tag.get 'name'
+            , tag.attributes

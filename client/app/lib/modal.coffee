@@ -51,13 +51,21 @@ class Modal extends Backbone.View
         super
 
     render: ->
-        close = $('<button class="close" type="button" data-dismiss="modal" aria-hidden="true">×</button>')
-        title = $('<h4 class="model-title">').text @title
-        head  = $('<div class="modal-header">').append close, title
-        body  = $('<div class="modal-body">').append @renderContent()
-        yesBtn= $('<button id="modal-dialog-yes" class="btn btn-cozy">').text @yes
-        foot  = $('<div class="modal-footer">').append yesBtn
-        foot.prepend $('<button id="modal-dialog-no" class="btn btn-link">').text(@no) if @no
+        closeMarkup = """
+            <button class="close" type="button" data-dismiss="modal"
+                    aria-hidden="true">
+                ×
+            </button>
+            """
+        close     = $ closeMarkup
+        title     = $('<h4 class="model-title">').text @title
+        head      = $('<div class="modal-header">').append close, title
+        body      = $('<div class="modal-body">').append @renderContent()
+        yesMarkup = '<button id="modal-dialog-yes" class="btn btn-cozy">'
+        yesBtn    = $(yesMarkup).text @yes
+        foot      = $('<div class="modal-footer">').append yesBtn
+        noMarkup  = '<button id="modal-dialog-no" class="btn btn-link">'
+        foot.prepend $(noMarkup).text(@no) if @no
 
         container = $('<div class="modal-content">').append head, body, foot
         container = $('<div class="modal-dialog">').append container

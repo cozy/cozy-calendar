@@ -31,6 +31,8 @@ module.exports =
         post  : events.create
     'eventid':
         param : events.fetch
+    'events/bulk':
+        post  : events.createBulk
 
     'events/rename-calendar':
         post: events.bulkCalendarRename
@@ -65,3 +67,7 @@ module.exports =
 
     'contacts/:contactid.jpg':
         get: ContactsController.sendAttachment(filename: 'picture')
+
+    # log client errors
+    'log':
+        post: index.logClient

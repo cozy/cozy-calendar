@@ -235,7 +235,8 @@ module.exports =
     "connect to it and follow"          : "Connect to it and follow the instructions related to CalDAV."
     "some event fail to save"           : "An event was not saved (an error occured)."
     "imported events": "Amount of imported events"
-    "import finished": "Your import is now finished"
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page."
+    "import error": "A server error occured, the import failed."
     "import error occured for": "Import error occured for following elements:"
     "export your calendar": "Export your calendar"
     'please select existing calendar' : 'Please select an existing calendar.'
