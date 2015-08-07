@@ -44,12 +44,12 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
             subject = localization.t subjectKey, description: event.description
             url     = "#{domain}public/calendar/events/#{event.id}"
 
-            date          = event.formatStart dateFormat
-            dateFormat    = localization.t dateFormatKey
             dateFormatKey = if event.isAllDayEvent()
                 'email date format allday'
             else
                 'email date format'
+            dateFormat    = localization.t dateFormatKey
+            date          = event.formatStart dateFormat
 
             {description, place} = event.toJSON()
             place = if place?.length > 0 then place else ""

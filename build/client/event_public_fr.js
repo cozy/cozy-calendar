@@ -16,11 +16,11 @@ buf.push("<p><a" + (jade.attr("href", "?status=ACCEPTED&key=" + key, true, true)
 }
 else if ( visitor.status == 'ACCEPTED')
 {
-buf.push("<p>Vous participerez à cet événement</p><p><a" + (jade.attr("href", "" + (event.id) + "/" + (file) + ".ics?key=" + key, true, true)) + ">Télécharger cet événement</a></p><hr><p class=\"special\">Avez-vous changer d'avis ?</p><a" + (jade.attr("href", "?status=DECLINED&key=" + key, true, true)) + " class=\"btn btn-negative\">Décliner</a>");
+buf.push("<p>Vous participerez à cet événement</p><p><a" + (jade.attr("href", "" + (event.id) + "/" + (file) + ".ics?key=" + key, true, true)) + ">Télécharger cet événement</a></p><hr><p class=\"special\">Avez-vous changé d'avis ?</p><a" + (jade.attr("href", "?status=DECLINED&key=" + key, true, true)) + " class=\"btn btn-negative\">Décliner</a>");
 }
 else
 {
-buf.push("<p>Vous ne participerez pas à cet événement.</p><hr><p class=\"special\">Avez-vous changer d'avis ?</p><a" + (jade.attr("href", "?status=ACCEPTED&key=" + key, true, true)) + " class=\"btn\">Assister</a>");
+buf.push("<p>Vous ne participerez pas à cet événement.</p><hr><p class=\"special\">Avez-vous changé d'avis ?</p><a" + (jade.attr("href", "?status=ACCEPTED&key=" + key, true, true)) + " class=\"btn\">Assister</a>");
 }
 buf.push("</main></body></html>");}.call(this,"event" in locals_for_with?locals_for_with.event:typeof event!=="undefined"?event:undefined,"date" in locals_for_with?locals_for_with.date:typeof date!=="undefined"?date:undefined,"visitor" in locals_for_with?locals_for_with.visitor:typeof visitor!=="undefined"?visitor:undefined,"key" in locals_for_with?locals_for_with.key:typeof key!=="undefined"?key:undefined,"file" in locals_for_with?locals_for_with.file:typeof file!=="undefined"?file:undefined));;return buf.join("");
 }

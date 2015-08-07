@@ -55,9 +55,9 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
         description: event.description
       });
       url = domain + "public/calendar/events/" + event.id;
-      date = event.formatStart(dateFormat);
-      dateFormat = localization.t(dateFormatKey);
       dateFormatKey = event.isAllDayEvent() ? 'email date format allday' : 'email date format';
+      dateFormat = localization.t(dateFormatKey);
+      date = event.formatStart(dateFormat);
       ref = event.toJSON(), description = ref.description, place = ref.place;
       place = (place != null ? place.length : void 0) > 0 ? place : "";
       templateOptions = {

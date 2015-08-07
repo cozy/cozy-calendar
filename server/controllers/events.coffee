@@ -105,8 +105,10 @@ module.exports.delete = (req, res) ->
 module.exports.public = (req, res, next) ->
     id = req.params.publiceventid
     key = req.query.key
+
     # Retrieve event
     Event.find id, (err, event) ->
+
         # If event doesn't exist or visitor hasn't access display 404 page
         if err or not event or not visitor = event.getGuest key
             # Retreive user localization
@@ -115,10 +117,12 @@ module.exports.public = (req, res, next) ->
             # Display 404 page
             fileName = "404_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
+
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
                 fileName = '404_en.jade'
+
             res.status 404
             res.render fileName
 
@@ -133,7 +137,7 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
-            # Retrive event data
+            # Retrieve event data
             if event.isAllDayEvent()
                 dateFormatKey = 'email date format allday'
             else
@@ -147,6 +151,7 @@ module.exports.public = (req, res, next) ->
             # Display event
             fileName = "event_public_#{locale}.jade"
             filePath = path.resolve __dirname, '../../client/', fileName
+
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)

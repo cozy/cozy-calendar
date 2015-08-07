@@ -33,8 +33,10 @@ Event.alarmTriggRegex = /(\+?|-)PT?(\d+)(W|D|H|M|S)/
 
 require('cozy-ical').decorateEvent Event
 
+
 Event.byCalendar = (calendarId, callback) ->
     Event.request 'byCalendar', key: calendarId, callback
+
 
 Event.tags = (callback) ->
     Event.rawRequest "tags", group: true, (err, results) ->
@@ -44,6 +46,7 @@ Event.tags = (callback) ->
             [type, tag] = result.key
             out[type].push tag
         callback null, out
+
 
 Event.createOrGetIfImport = (data, callback) ->
     if data.import
@@ -61,7 +64,9 @@ Event.createOrGetIfImport = (data, callback) ->
     else
         Event.create data, callback
 
+
 Event::isAllDayEvent = -> return @start.length is 10
+
 
 Event::formatStart = (dateFormat) ->
     if @rrule
@@ -75,10 +80,12 @@ Event::formatStart = (dateFormat) ->
 
     return formattedDate
 
+
 # @TODO : this doesn't handle merge correctly
 Event::getGuest = (key) ->
     guests = @attendees or []
     currentguest = guests.filter((guest) -> guest.key is key)[0]
+
     if currentguest
         currentguest.setStatus = (status, callback) =>
             currentguest.status = status
@@ -86,10 +93,12 @@ Event::getGuest = (key) ->
 
     return currentguest
 
+
 # Return the emails to alert if action is EMAIL, or BOTH on the alarms.
 # Actualy the attendee is the cozy's user.
 Event::getAlarmAttendeesEmail = ->
     return [User.email]
+
 
 # November 2014 Migration :
 # Migrate from v1.0.4 to next-gen doctypes.
@@ -140,11 +149,13 @@ Event::migrateDateTime = (dateField) ->
 
     return true
 
+
 Event::patchTag = (callback) ->
     if not @tags? or not @tags[0]?
         @updateAttributes tags: ['my-calendar'], callback
     else
         callback()
+
 
 Event.migrateAll = (callback) ->
     Event.all {}, (err, events) ->
@@ -157,6 +168,7 @@ Event.migrateAll = (callback) ->
                     setImmediate done
             , callback
 
+
 Event.bulkCalendarRename = (oldName, newName, callback) ->
     Event.request 'byCalendar', key: oldName, (err, events) ->
         async.eachLimit events, 10, (event, done) ->
@@ -165,6 +177,7 @@ Event.bulkCalendarRename = (oldName, newName, callback) ->
             tags[0] = newName
             event.updateAttributes {tags}, done
         , (err) -> callback err, events
+
 
 Event.bulkDelete = (calendarName, callback) ->
     Event.request 'byCalendar', key: calendarName, (err, events) ->
@@ -196,3 +209,4 @@ Event.initializeData = (callback) ->
 
         else
             callback()
+
