@@ -19,7 +19,7 @@ log = require('printit')({
   prefix: 'calendar:client'
 });
 
-module.exports.index = function(req, res) {
+module.exports.index = function(req, res, next) {
   return async.parallel([
     function(done) {
       return Contact.all(function(err, contacts) {
@@ -46,28 +46,24 @@ module.exports.index = function(req, res) {
         return cb(null, User.timezone);
       } else {
         return User.updateUser(function() {
-          return cb(User.timezone);
+          return cb(null, User.timezone);
         });
       }
     }
   ], function(err, results) {
     var contacts, events, instance, locale, tags, timezone, webDavAccount;
     if (err) {
-      return res.send({
-        error: 'Server error occurred while retrieving data',
-        stack: err.stack
-      });
-    } else {
-      contacts = results[0], tags = results[1], events = results[2], instance = results[3], webDavAccount = results[4], timezone = results[5];
-      locale = (instance != null ? instance.locale : void 0) || 'en';
-      if (webDavAccount != null) {
-        webDavAccount.domain = (instance != null ? instance.domain : void 0) || '';
-      }
-      timezone = timezone || 'UTC';
-      return res.render('index.jade', {
-        imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (JSON.stringify(tags)) + ";\nwindow.initevents = " + (JSON.stringify(events)) + ";\nwindow.initcontacts = " + (JSON.stringify(contacts)) + ";\nwindow.webDavAccount = " + (JSON.stringify(webDavAccount)) + ";\nwindow.timezone = " + (JSON.stringify(timezone)) + ";"
-      });
+      return next(err);
     }
+    contacts = results[0], tags = results[1], events = results[2], instance = results[3], webDavAccount = results[4], timezone = results[5];
+    locale = (instance != null ? instance.locale : void 0) || 'en';
+    if (webDavAccount != null) {
+      webDavAccount.domain = (instance != null ? instance.domain : void 0) || '';
+    }
+    timezone = timezone || 'UTC';
+    return res.render('index.jade', {
+      imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (JSON.stringify(tags)) + ";\nwindow.initevents = " + (JSON.stringify(events)) + ";\nwindow.initcontacts = " + (JSON.stringify(contacts)) + ";\nwindow.webDavAccount = " + (JSON.stringify(webDavAccount)) + ";\nwindow.timezone = " + (JSON.stringify(timezone)) + ";"
+    });
   });
 };
 

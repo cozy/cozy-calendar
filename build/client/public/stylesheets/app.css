@@ -9151,6 +9151,7 @@ a.btn:visited {
   top: 0;
   width: 3.2rem;
   height: 100%;
+  cursor: pointer;
 }
 .popover label .icon span,
 .popover .label .icon span {
