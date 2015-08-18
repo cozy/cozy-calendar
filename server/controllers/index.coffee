@@ -8,7 +8,7 @@ WebDavAccount = require '../models/webdavaccount'
 log = require('printit')
     prefix: 'calendar:client'
 
-module.exports.index = (req, res) ->
+module.exports.index = (req, res, next) ->
     async.parallel [
         (done) -> Contact.all (err, contacts) ->
             return done err if err
@@ -26,34 +26,33 @@ module.exports.index = (req, res) ->
                 cb null, User.timezone
             else
                 User.updateUser ->
-                    cb User.timezone
+                    cb null, User.timezone
 
 
     ], (err, results) ->
 
-        if err then res.send
-            error: 'Server error occurred while retrieving data'
-            stack : err.stack
-        else
+        return next err if err
 
-            [
-                contacts, tags, events, instance, webDavAccount, timezone
-            ] = results
 
-            locale = instance?.locale or 'en'
-            if webDavAccount?
-                webDavAccount.domain = instance?.domain or ''
+        [
+            contacts, tags, events, instance, webDavAccount, timezone
+        ] = results
 
-            timezone = timezone or 'UTC'
+        locale = instance?.locale or 'en'
+        if webDavAccount?
+            webDavAccount.domain = instance?.domain or ''
 
-            res.render 'index.jade', imports: """
-                window.locale = "#{locale}";
-                window.inittags = #{JSON.stringify tags};
-                window.initevents = #{JSON.stringify events};
-                window.initcontacts = #{JSON.stringify contacts};
-                window.webDavAccount = #{JSON.stringify webDavAccount};
-                window.timezone = #{JSON.stringify timezone};
-            """
+        timezone = timezone or 'UTC'
+
+        res.render 'index.jade', imports: """
+            window.locale = "#{locale}";
+            window.inittags = #{JSON.stringify tags};
+            window.initevents = #{JSON.stringify events};
+            window.initcontacts = #{JSON.stringify contacts};
+            window.webDavAccount = #{JSON.stringify webDavAccount};
+            window.timezone = #{JSON.stringify timezone};
+        """
+
 module.exports.logClient = (req, res) ->
     log.error req.body.data
     log.error req.body.data.error?.stack
