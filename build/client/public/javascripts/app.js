@@ -646,14 +646,16 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
     }
     this.runningRecurringEvents.forEach((function(_this) {
       return function(item, index) {
-        var evs, options;
-        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {});
-        options = {
-          event: event,
-          start: instanceStart,
-          end: instanceEnd
-        };
-        return new RealEvent(options);
+        var evs;
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
+          var options;
+          options = {
+            event: event,
+            start: instanceStart,
+            end: instanceEnd
+          };
+          return new RealEvent(options);
+        });
         eventsInRange = eventsInRange.concat(evs);
         if (item.getLastOccurenceDate().isBefore(end)) {
           return _this.runningRecurringEvents.splice(index, 1);
@@ -700,7 +702,7 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
     }
     this.previousRecurringEvents.forEach((function(_this) {
       return function(item, index) {
-        var evs, options;
+        var evs;
         if (item.getLastOccurenceDate().isBefore(start)) {
           return;
         }
@@ -708,13 +710,15 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
           _this.previousRecurringEvents.splice(index, 1);
           return;
         }
-        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {});
-        options = {
-          event: event,
-          start: instanceStart,
-          end: instanceEnd
-        };
-        return new RealEvent(options);
+        evs = item.generateRecurrentInstancesBetween(start, end, function(event, instanceStart, instanceEnd) {
+          var options;
+          options = {
+            event: event,
+            start: instanceStart,
+            end: instanceEnd
+          };
+          return new RealEvent(options);
+        });
         return eventsInRange = eventsInRange.concat(evs);
       };
     })(this));
@@ -4891,19 +4895,36 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.onAddCalendar = function() {
-    var calendar;
-    this.tag = app.tags.getOrCreateByName("new calendar");
-    calendar = app.calendars.find(function(tag) {
-      return (tag.get('name') === t("new calendar")) && tag.get('visible');
-    });
-    if (calendar != null) {
-      return alert(t('calendar exist error'));
-    } else {
-      return this.createNewCalendar();
+    var checkCalendar, exists, localName, n, name;
+    n = 0;
+    name = "new calendar";
+    checkCalendar = function() {
+      var calendar;
+      this.tag = app.tags.getOrCreateByName(name);
+      console.log(this.tag);
+      calendar = app.calendars.find(function(tag) {
+        var localName;
+        localName = t(name);
+        if (n > 0) {
+          localName = "" + localName + " " + n;
+        }
+        return (tag.get('name') === localName) && tag.get('visible');
+      });
+      return calendar != null;
+    };
+    exists = checkCalendar();
+    while (exists) {
+      n++;
+      exists = checkCalendar();
     }
+    localName = t(name);
+    if (n > 0) {
+      localName = "" + localName + " " + n;
+    }
+    return this.createNewCalendar(localName);
   };
 
-  MenuView.prototype.createNewCalendar = function(callback) {
+  MenuView.prototype.createNewCalendar = function(name) {
     var calendarEvent;
     this.showLoading();
     calendarEvent = new Event({
@@ -4911,23 +4932,25 @@ module.exports = MenuView = (function(_super) {
       end: moment("19010101", "YYYYMMDD"),
       description: '',
       place: '',
-      tags: [t("new calendar")]
+      tags: [name]
     });
     return calendarEvent.save(null, {
       wait: true,
       success: function() {
-        return setTimeout(function() {
-          var newCalSel;
-          newCalSel = "#menuitems li.tagmenuitem[data-name='" + (t("new calendar")) + "']";
-          return $("" + newCalSel + " .calendar-rename").trigger("click");
+        var wait;
+        return wait = setInterval(function() {
+          var newCalSel, rename;
+          newCalSel = "#menuitems li.tagmenuitem[data-name='" + name + "']";
+          rename = $("" + newCalSel + " .calendar-rename");
+          if (rename.length > 0) {
+            clearInterval(wait);
+            return rename.trigger("click");
+          }
         }, 100);
       },
       complete: (function(_this) {
         return function() {
-          setTimeout(_this.hideLoading.bind(_this), 100);
-          if (callback != null) {
-            return setTimeout(callback, 150);
-          }
+          return setTimeout(_this.hideLoading.bind(_this), 100);
         };
       })(this)
     });
@@ -6625,7 +6648,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
