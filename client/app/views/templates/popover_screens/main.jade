@@ -48,7 +48,7 @@
 
 
 div.label.label-row
-    .icon
+    .icon(title=t("placeholder place"))
         span.fa.fa-map-marker
     input.input-place.input-full-block(tabindex="7",
                                        type="text",
@@ -56,14 +56,14 @@ div.label.label-row
                                        placeholder=t("placeholder place"))
 
 div.label.label-row.input-people
-    .icon
+    .icon(title=t("add guest button"))
         span.fa.fa-users
     .icon.right
         span.fa.fa-angle-right
     button.button-full-block= guestsButtonText
 
 div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
-    .icon
+    .icon(title=t("placeholder description"))
         span.fa.fa-align-left
     .icon.right
         span.fa.fa-angle-right
@@ -73,7 +73,7 @@ div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}"
                                                  placeholder=t("placeholder description"))
 
 div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlertsByDefault}")
-    .icon
+    .icon(title=t("alert tooltip"))
         span.fa.fa-bell
     .icon.right
         span.fa.fa-angle-right
@@ -85,7 +85,7 @@ div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlerts
 
 
 div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepeatByDefault}")
-    .icon
+    .icon(title=t("repeat tooltip"))
         span.fa.fa-repeat
     .icon.right
         span.fa.fa-angle-right

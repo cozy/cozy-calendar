@@ -9,11 +9,19 @@ start = (port, callback) ->
     , (app, server) ->
 
 
+        cozydb = require 'cozydb'
         User = require './server/models/user'
         localization = require './server/libs/localization_manager'
         Realtimer = require 'cozy-realtime-adapter'
         realtime = Realtimer server, ['event.*']
         realtime.on 'user.*', -> User.updateUser()
+
+        # Update localization engine if the language changes.
+        realtime.on 'cozyinstance.*', ->
+            cozydb.api.getCozyInstance (err, instance) ->
+                locale = instance?.locale or null
+                localization.updateLocale locale
+
         User.updateUser (err) -> localization.initialize ->
             # Migration scripts. Relies on User.
             Event = require './server/models/event'
