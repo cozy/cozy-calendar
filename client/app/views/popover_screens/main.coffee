@@ -60,6 +60,19 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-repeat': -> @switchToScreen('repeat')
 
 
+    initialize: ->
+        # Listen to the model's change to update the view accordingly.
+        # `start` and `end` are updated when one changed to prevent overlapping
+        # times.
+        @listenTo @model, "change:start", @onStartChange
+        @listenTo @model, "change:end", @onEndChange
+
+
+    # Remove the listeners when the screen is left.
+    onLeaveScreen: ->
+        @stopListening @model
+
+
     getRenderData: ->
         # A new event's calendar is the first calendar in alphabetical order
         # It fallbacks to the default calendar name if anything goes wrong
@@ -187,7 +200,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     onSetPlace: (ev) ->
         @model.set 'place', ev.target.value
-
 
 
     onSetStart: ->
@@ -364,3 +376,18 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     expandPopover: ->
         @$optionalFields.attr 'aria-hidden', false
         @$moreDetailsButton.hide()
+
+
+    # Handle model's change for field `start`
+    onStartChange: ->
+        newValue = @model.getStartDateObject().format tFormat
+        @$('.input-start').val newValue
+
+
+    # Handle model's change for field `end`
+    onEndChange: ->
+        endOffset = if @model.isAllDay() then -1 else 0
+        newValue = @model.getEndDateObject()
+            .add endOffset, 'd'
+            .format tFormat
+        @$('.input-end-time').val newValue
