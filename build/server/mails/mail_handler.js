@@ -43,7 +43,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
     }
     domain = results[0], user = results[1];
     return async.forEach(guests, function(guest, done) {
-      var calendar, calendarOptions, date, dateFormat, dateFormatKey, description, htmlTemplate, icsPath, mailOptions, place, shouldSend, subject, subjectKey, templateKey, templateOptions, url, _ref;
+      var calendar, calendarOptions, date, dateFormat, dateFormatKey, description, htmlTemplate, icsPath, mailOptions, place, shouldSend, subject, subjectKey, templateKey, templateOptions, url, vEvent, _ref;
       shouldSend = guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged);
       if (!shouldSend) {
         return done();
@@ -87,7 +87,13 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
         method: 'REQUEST'
       };
       calendar = new VCalendar(calendarOptions);
-      calendar.add(event.toIcal());
+      vEvent = event.toIcal();
+      vEvent.model.organizer = {
+        displayName: user.name,
+        email: user.email
+      };
+      vEvent.build();
+      calendar.add(vEvent);
       icsPath = path.join(os.tmpdir(), 'invite.ics');
       return fs.writeFile(icsPath, calendar.toString(), function(err) {
         if (err) {
