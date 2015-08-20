@@ -381,7 +381,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     # Handle model's change for field `start`
     onStartChange: ->
         newValue = @model.getStartDateObject().format tFormat
-        @$('.input-start').val newValue
+        @$('.input-start').timepicker('setTime', newValue)
 
 
     # Handle model's change for field `end`
@@ -390,4 +390,4 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         newValue = @model.getEndDateObject()
             .add endOffset, 'd'
             .format tFormat
-        @$('.input-end-time').val newValue
+        @$('.input-end-time').timepicker('setTime', newValue)
