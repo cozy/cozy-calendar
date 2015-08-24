@@ -145,6 +145,16 @@ module.exports = class PopoverView extends BaseView
         else
             left = targetLeftBorder - popoverWidth - popoverMargin
 
+        # Fix edge cases: popover is outside of the container (too much
+        # on the right).
+        if left + popoverWidth >= containerWidth
+            left = containerWidth - 2 * (popoverWidth - popoverMargin)
+
+        # Fix edge cases: popover is outside of the container (too much on the
+        # left).
+        if left <= 0
+            left = targetLeftBorder + (popoverWidth / 2) + popoverMargin
+
 
         # Compute the height of one row.
         oneRowHeight = (containerHeight / 6)
