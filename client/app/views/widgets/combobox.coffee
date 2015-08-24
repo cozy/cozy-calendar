@@ -10,6 +10,7 @@ module.exports = class ComboBox extends BaseView
         'change': 'onChange'
         'blur': 'onBlur'
 
+
     initialize: (options) ->
         super()
 
@@ -30,7 +31,6 @@ module.exports = class ComboBox extends BaseView
 
         isInput = @$el[0].nodeName.toLowerCase() is 'input'
         method = @$el[if isInput then "val" else "text"]
-        @value = => method.apply @$el, arguments
 
         @on 'edition-complete', @onEditionComplete
 
@@ -42,6 +42,7 @@ module.exports = class ComboBox extends BaseView
 
         value = options.current or @getDefaultValue()
         @onEditionComplete value
+
 
     openMenu: =>
         @menuOpen = true
@@ -56,9 +57,15 @@ module.exports = class ComboBox extends BaseView
         # Select the first calendar by default
         return @source[0].label
 
+
+    value: =>
+        @$el.val()
+
+
     setValue: (value) =>
         @$el.val value
         @onSelect()
+
 
     save: ->
         if @tag and @tag.isNew()
@@ -66,24 +73,31 @@ module.exports = class ComboBox extends BaseView
                 success: ->
                     @tags.add @tag
 
-    onOpen: => @menuOpen = true
+
+    onOpen: =>
+        @menuOpen = true
+
 
     onClose: =>
         @menuOpen = false
         @$el.removeClass 'expanded' unless @$el.is ':focus'
 
+
     onBlur: =>
         @$el.removeClass 'expanded' unless @menuOpen
         @trigger 'edition-complete', @value()
+
 
     onSelect: (ev, ui) =>
         @$el.blur().removeClass 'expanded'
         @onChange ev, ui
         @trigger 'edition-complete', ui?.item?.value or @value()
 
+
     onEditionComplete: (name) =>
         @tag = app.tags.getOrCreateByName name
         @buildBadge @tag.get('color')
+
 
     onChange: (ev, ui) =>
         value = ui?.item?.value or @value()
@@ -94,14 +108,17 @@ module.exports = class ComboBox extends BaseView
         _.debounce @onEditionComplete(value), 500
         return true
 
+
     renderItem: (ul, item) =>
         link = $("<a>").text(item.label).prepend @makeBadge item.color
         ul.append $('<li>').append(link).data 'ui-autocomplete-item', item
+
 
     buildBadge: (color) ->
         @badge?.remove()
         @badge = @makeBadge color
         @$el.before @badge
+
 
     makeBadge: (color) ->
         badge = $ '<span class="badge combobox-badge">'
@@ -114,6 +131,8 @@ module.exports = class ComboBox extends BaseView
             badge.attr 'title', t 'change calendar'
         return badge
 
+
     remove: =>
         @autocompleteWidget.destroy()
         super
+
