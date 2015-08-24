@@ -7,10 +7,12 @@ timezones = require('helpers/timezone').timezones
 
 Event = require 'models/event'
 
+
 module.exports = class CalendarView extends BaseView
 
     id: 'view-container'
     template: require './templates/calendarview'
+
 
     initialize: (@options) ->
 
@@ -23,6 +25,7 @@ module.exports = class CalendarView extends BaseView
 
         @calendarsCollection = app.calendars
         @listenTo @calendarsCollection, 'change', @refresh
+
 
     afterRender: ->
         locale = moment.localeData()
@@ -92,6 +95,7 @@ module.exports = class CalendarView extends BaseView
         debounced = _.debounce @handleWindowResize, 10
         $(window).resize (ev) -> debounced() if ev.target is window
 
+
     remove: ->
         @popover?.close()
         super
@@ -114,11 +118,14 @@ module.exports = class CalendarView extends BaseView
         fcViewContainreHeight = @$('.fc-view-container').height()
         @cal.height fcHeaderHeight + fcViewContainreHeight
 
+
     refresh: (collection) ->
         @cal.fullCalendar 'refetchEvents'
 
+
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
+
 
     refreshOne: (model) =>
 
@@ -136,6 +143,7 @@ module.exports = class CalendarView extends BaseView
         if fcEvent?
             _.extend fcEvent, data
             @cal.fullCalendar 'updateEvent', fcEvent
+
 
     showPopover: (options) ->
         options.container = @cal
@@ -181,10 +189,12 @@ module.exports = class CalendarView extends BaseView
 
         app.router.navigate hash
 
+
     getUrlHash: =>
         switch @cal.fullCalendar('getView').name
             when 'month' then 'calendar'
             when 'agendaWeek' then 'calendarweek'
+
 
     onSelect: (startDate, endDate, jsEvent, view) =>
         # In month view, default to 10:00 - 11:00 instead of fullday event.
@@ -208,9 +218,11 @@ module.exports = class CalendarView extends BaseView
             end: end
             target: $ jsEvent.target
 
+
     onPopoverClose: ->
         @cal.fullCalendar 'unselect'
         @popover = null
+
 
     onEventRender: (event, $element) ->
         # TODO: use the new spinner, instead of this.
@@ -238,8 +250,10 @@ module.exports = class CalendarView extends BaseView
 
         return $element
 
+
     onEventDragStop: (event, jsEvent, ui, view) ->
         event.isSaving = true
+
 
     onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
         evt = @eventCollection.get fcEvent.id
@@ -254,8 +268,10 @@ module.exports = class CalendarView extends BaseView
                 fcEvent.isSaving = false
                 revertFunc()
 
+
     onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
         fcEvent.isSaving = true
+
 
     onEventResize: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
 
@@ -282,3 +298,4 @@ module.exports = class CalendarView extends BaseView
             type: model.fcEventType
             model: model
             target: $(jsEvent.currentTarget)
+
