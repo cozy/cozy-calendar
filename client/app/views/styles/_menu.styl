@@ -59,12 +59,13 @@
             color #333
 
         .calendar-add
+            margin-top 1px
             font-size 1.6rem
             text-shadow none
             color #bbb
 
             &:hover
-                color orange
+                color darkblue
 
     .menu-icon
         display none        // hidden in desktop view
@@ -125,7 +126,8 @@
                 border-radius 100%
 
             .calendar-name
-                width 100%
+                width 95%
+                padding-right 1em
                 font-size 1em
                 color #555
                 word-break break-all
@@ -135,24 +137,28 @@
                 margin-bottom 0
                 border-radius 0
                 padding 2px 5px
+                box-shadow none
 
             .dropdown
-                display inline-block
-                position absolute
-                top 50%
-                margin-top -10px
+                display flex
+                align-items center
 
                 .dropdown-toggle
-                    padding 0 5px
 
                     .caret
-                        display none
                         margin-top 0 !important // overrides bootstrap
                         vertical-align middle
+                        margin-right 4px
                         border-top-color #000
                         border-bottom-color #000
                         opacity 0.2
                         transform scale(1.5, 1.5)
+
+                        &:hover
+                            color darkblue
+                            border-top-color darkblue
+                            border-bottom-color darkblue
+
 
                 .dropdown-menu
                     padding 0.4em 0
@@ -169,7 +175,7 @@
                             margin-bottom 0.2em
 
                             &:hover
-                                background orange
+                                background blue
 
 
             &:hover
