@@ -11,6 +11,7 @@ Event = require '../models/event'
 MailHandler = require '../mails/mail_handler'
 localization = require '../libs/localization_manager'
 
+
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
         if err or not event
@@ -216,6 +217,7 @@ module.exports.bulkCalendarRename = (req, res) ->
                 res.send 500, error: err
             else
                 res.send 200, events
+
 
 module.exports.bulkDelete = (req, res) ->
     {calendarName} = req.body

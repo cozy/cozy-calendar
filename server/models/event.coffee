@@ -8,19 +8,19 @@ localization = require '../libs/localization_manager'
 User = require './user'
 
 module.exports = Event = cozydb.getModel 'Event',
-    start       : type: String
-    end         : type: String
-    place       : type: String
-    details     : type: String
-    description : type: String
-    rrule       : type: String
-    tags        : [String]
-    attendees   : type: [Object]
-    related     : type: String, default: null
-    timezone    : type: String
-    alarms      : type: [Object]
-    created     : type: String
-    lastModification: type: String
+    start           : String
+    end             : String
+    place           : String
+    details         : String
+    description     : String
+    rrule           : String
+    tags            : [String]
+    attendees       : [Object]
+    related         : type: String, default: null
+    timezone        : String
+    alarms          : [Object]
+    created         : String
+    lastModification: String
 
 # 'start' and 'end' use those format,
 # According to allDay or rrules.
