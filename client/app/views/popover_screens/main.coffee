@@ -119,7 +119,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         timepickerEvents =
             'focus': ->
-                $(@).timepicker 'highlightHour'
+                 $(@).timepicker 'highlightHour'
             'timepicker.next': ->
                 $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
             'timepicker.prev': ->
@@ -204,7 +204,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     onSetStart: ->
         @model.setStart @formatDateTime @$('.input-start').val(),
-                                        @$('.input-start-date').val()
+                                        @$('.input-start-date').val(),
+                                        false
 
 
     onSetEnd: ->
@@ -216,15 +217,17 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$container.toggleClass 'is-same-day', @model.isSameDay()
 
 
-    formatDateTime: (timeStr = '', dateStr = '') ->
+    formatDateTime: (timeStr = '', dateStr = '', end=true) ->
         t = timeStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
         d = splitted = dateStr.match /([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/
 
         [hour, minute] = t[1..2] if t?[0]
         [date, month, year] = d[1..3] if d?[0]
 
-        date = +date + 1 if date and @model.isAllDay() # Add a day later if
-                                                       # event is all-day long
+        # Add a day later if event is all-day long and if it's and end date.
+        if end
+            date = +date + 1 if date and @model.isAllDay()
+
         month = +month - 1 if month # Months are 0 indexed in moment.js
 
         setObj = { hour, minute, date, month, year }
@@ -391,3 +394,4 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
+
