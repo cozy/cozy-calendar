@@ -3707,7 +3707,7 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   CalendarHeader.prototype.getTitle = function() {
-    var range, res, view;
+    var from, range, res, to, view;
     if (!this.cal) {
       return t('List');
     }
@@ -3715,7 +3715,9 @@ module.exports = CalendarHeader = (function(_super) {
     if (view.name === 'month') {
       res = view.intervalStart.format('MMMM YYYY');
     } else {
-      range = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
+      from = view.start;
+      to = view.end.subtract(1, 'days');
+      range = $.fullCalendar.formatRange(from, to, 'MMM D YYYY');
       res = range;
     }
     return res;
