@@ -1,5 +1,10 @@
 language: node_js
+matrix:
+    fast_finish: true
+    allow_failures:
+        - node_js: "0.12"
 node_js:
+    - "0.12"
     - "0.10"
 services:
     - couchdb
@@ -7,7 +12,7 @@ env:
     global:
         - NODE_ENV=test
 before_install:
-    - git clone git://github.com/mycozycloud/cozy-data-system.git
+    - git clone git://github.com/cozy/cozy-data-system.git
     - cd cozy-data-system
     - npm install forever coffee-script -g
     - npm install # data-system
