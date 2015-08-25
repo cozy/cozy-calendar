@@ -166,7 +166,7 @@ module.exports = {
     }
   },
   isMobile: function() {
-    return $(window).width() <= 600;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 };
 });
@@ -3682,7 +3682,7 @@ module.exports = CalendarHeader = (function(_super) {
     return CalendarHeader.__super__.constructor.apply(this, arguments);
   }
 
-  CalendarHeader.prototype.tagName = 'table';
+  CalendarHeader.prototype.tagName = 'div';
 
   CalendarHeader.prototype.id = 'calendarHeader';
 
@@ -4043,18 +4043,13 @@ module.exports = CalendarView = (function(_super) {
   CalendarView.prototype.handleWindowResize = function(initial) {
     var targetHeight;
     if ($(window).width() > 1000) {
-      targetHeight = $(window).height() - 75;
-      $("#menu").height(targetHeight + 90);
+      targetHeight = $(window).height() - 85;
     } else if ($(window).width() > 600) {
       targetHeight = $(window).height() - 100;
-      $("#menu").height(targetHeight + 100);
     } else {
       targetHeight = $(window).height() - 50;
-      $("#menu").height(40);
     }
-    if (initial !== 'initial') {
-      return this.cal.fullCalendar('option', 'height', targetHeight);
-    }
+    return this.cal.fullCalendar('option', 'height', targetHeight);
   };
 
   CalendarView.prototype.refresh = function(collection) {
@@ -6536,7 +6531,7 @@ if ( calendarMode)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn fc-state-active title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span></div>");
 }
-buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div></div>");;return buf.join("");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6687,7 +6682,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

@@ -8726,13 +8726,6 @@ textarea:active {
   -ms-filter: none;
   filter: none;
 }
-.sidenav .btn-settings {
-  width: calc(200px - 2em);
-  padding: 0.4em 0.8em;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
 .color-picker {
   margin: 0 1em;
   list-style: none;
@@ -8750,7 +8743,6 @@ textarea:active {
 .fc-view-container {
   clear: none;
   padding: 0.5em 1em;
-  height: 100%;
 }
 .fc-view-container thead tr th {
   height: 30px;
@@ -8833,6 +8825,12 @@ textarea:active {
 .fc-header .btn-group > .btn:hover.fc-state-active {
   text-decoration: none;
   cursor: default;
+}
+.fc-header .btn-group > .btn.btn-settings i {
+  margin-right: 0.4em;
+}
+.fc-header .btn-group > .btn.btn-settings:hover i {
+  text-decoration: none;
 }
 .fc-header .fc-button {
   margin: 0;
@@ -8963,6 +8961,9 @@ td.fc-widget-header {
 .fc-row .fc-content-skeleton td,
 .fc-row .fc-helper-skeleton td {
   border-color: #ddd;
+}
+#alarms {
+  height: 100%;
 }
 #alarms thead .fc-first .fc-day-header,
 #alarms thead .fc-first .fc-widget-header {
@@ -9985,6 +9986,9 @@ h3 {
   height: 1.2rem;
   -webkit-border-radius: 100%;
   border-radius: 100%;
+}
+#alarm-list .dayprogram:first-child {
+  margin-top: 2em;
 }
 .active.btn {
   background: #008af6;
