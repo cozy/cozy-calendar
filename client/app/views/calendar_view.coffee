@@ -102,18 +102,18 @@ module.exports = class CalendarView extends BaseView
 
 
     handleWindowResize: (initial) =>
+
         if $(window).width() > 1000
-            targetHeight = $(window).height() - 75
-            $("#menu").height targetHeight + 90
+            targetHeight = $(window).height() - 85
+
         else if $(window).width() > 600
             targetHeight = $(window).height() - 100
-            $("#menu").height targetHeight + 100
+
         else
             targetHeight = $(window).height() - 50
-            $("#menu").height 40
 
-        unless initial is 'initial'
-            @cal.fullCalendar 'option', 'height', targetHeight
+        @cal.fullCalendar 'option', 'height', targetHeight
+
 
     refresh: (collection) ->
         @cal.fullCalendar 'refetchEvents'

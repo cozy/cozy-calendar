@@ -28,7 +28,7 @@ module.exports = class Router extends Backbone.Router
         # Only listview on mobile devices.
         $(window).resize =>
             if window.app.isMobile()
-                @navigate 'list', trigger:true
+                @navigate 'list', trigger: true
 
     navigate: (route, options) ->
         # Only listview on mobile devices.

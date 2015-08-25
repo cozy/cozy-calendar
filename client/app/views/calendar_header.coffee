@@ -3,7 +3,7 @@ BaseView = require '../lib/base_view'
 
 module.exports = class CalendarHeader extends BaseView
 
-    tagName: 'table'
+    tagName: 'div'
     id: 'calendarHeader'
     className: 'fc-header'
     template: require './templates/calendar_header'

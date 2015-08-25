@@ -63,5 +63,7 @@ module.exports =
         Object.freeze this if typeof Object.freeze is 'function'
 
     isMobile: ->
-        return $(window).width() <= 600
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+            .test(navigator.userAgent)
+
 
