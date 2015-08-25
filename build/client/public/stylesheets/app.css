@@ -8491,6 +8491,10 @@ textarea:active {
 }
 .sidenav .btn {
   color: #fff;
+  background: #888;
+}
+.sidenav .btn:hover {
+  background: #34a6ff;
 }
 .sidenav i {
   position: relative;
@@ -8549,7 +8553,7 @@ textarea:active {
   color: #bbb;
 }
 .sidenav .calendars .calendar-add:hover {
-  color: #008af6;
+  color: #34a6ff;
 }
 .sidenav .menu-icon {
   display: none;
@@ -8687,9 +8691,9 @@ textarea:active {
   transform: scale(1.5, 1.5);
 }
 .sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-toggle .caret:hover {
-  color: #008af6;
-  border-top-color: #008af6;
-  border-bottom-color: #008af6;
+  color: #34a6ff;
+  border-top-color: #34a6ff;
+  border-bottom-color: #34a6ff;
 }
 .sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-menu {
   padding: 0.4em 0;
@@ -8745,7 +8749,8 @@ textarea:active {
 }
 .fc-view-container {
   clear: none;
-  padding: 1em;
+  padding: 0.5em 1em;
+  height: 100%;
 }
 .fc-view-container thead tr th {
   height: 30px;
@@ -8795,9 +8800,10 @@ textarea:active {
   border-bottom: 1px solid #e2e2e2;
 }
 .fc-header .btn-group > .btn {
-  background-color: #fff;
-  border: 1px solid #34a6ff;
-  color: #34a6ff;
+  font-weight: bold;
+  background-color: #b0bac7;
+  border: 1px solid #6c7f97;
+  color: #fff;
   font-weight: normal;
 }
 .fc-header .btn-group > .btn .fa {
@@ -8808,12 +8814,21 @@ textarea:active {
   box-shadow: none;
 }
 .fc-header .btn-group > .btn:hover {
-  color: #008af6;
+  text-decoration: underline;
+}
+.fc-header .btn-group > .btn:hover i {
   text-decoration: underline;
 }
 .fc-header .btn-group > .btn.fc-state-active {
-  background-color: #34a6ff;
+  background-color: #7f8fa5;
   color: #fff;
+}
+.fc-header .btn-group > .btn.fc-state-active.title {
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: capitalize;
+  text-align: center;
+  min-width: 200px;
 }
 .fc-header .btn-group > .btn:hover.fc-state-active {
   text-decoration: none;
@@ -8853,10 +8868,12 @@ textarea:active {
 }
 .fc-header-title h2 {
   margin: 0;
-  font-size: 2em;
+  font-size: 1.5em;
   line-height: 1em;
   font-weight: bold;
   white-space: nowrap;
+  display: inline;
+  text-transform: capitalize;
 }
 .fc-button {
   position: relative;
@@ -9936,6 +9953,12 @@ h3 {
   bottom: 0;
   margin: 0;
 }
+#list-container .btn {
+  background-color: #aaa;
+}
+#list-container .btn:hover {
+  background-color: #34a6ff;
+}
 #alarm-list {
   width: auto;
 }
@@ -10101,7 +10124,7 @@ body.error-404 .error-frame .headline {
     display: block;
   }
   ul#menu li.calendars {
-    padding: 0.5em;
+    padding: 0.4em 0;
   }
   ul#menu .menu-icon {
     display: inline-block;
@@ -10163,9 +10186,9 @@ body.error-404 .error-frame .headline {
     display: none;
   }
   #list-container {
-    top: 57px;
-    margin-bottom: 0;
-    padding-bottom: 5em;
+    position: inherit;
+    padding-top: 0;
+    padding-bottom: 1em;
   }
   .btn.stick-bottom {
     display: none;
@@ -10180,7 +10203,11 @@ body.error-404 .error-frame .headline {
     padding: 0.4em;
   }
 }
-@media (max-width: 500px) {
+@media (max-width: 600px) {
+  #calendarHeader,
+  #calheader {
+    display: none;
+  }
   #alarms .fc-day-header {
     font-size: 10px;
   }
@@ -10202,6 +10229,15 @@ body.error-404 .error-frame .headline {
   }
   #alarms .popover button {
     display: block;
+  }
+  #list-container {
+    position: inherit;
+    top: 0;
+    margin-bottom: 0;
+    padding-bottom: 1em;
+  }
+  ul#menu ul#menuitems li.tagmenuitem {
+    padding: 0.6em 1em;
   }
 }
 

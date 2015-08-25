@@ -166,7 +166,7 @@ module.exports = {
     }
   },
   isMobile: function() {
-    return $('ul#menu').height() === 40;
+    return $(window).width() <= 600;
   }
 };
 });
@@ -4041,9 +4041,9 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.handleWindowResize = function(initial) {
-    var fcHeaderHeight, fcViewContainreHeight, targetHeight;
+    var targetHeight;
     if ($(window).width() > 1000) {
-      targetHeight = $(window).height() - 90;
+      targetHeight = $(window).height() - 75;
       $("#menu").height(targetHeight + 90);
     } else if ($(window).width() > 600) {
       targetHeight = $(window).height() - 100;
@@ -4053,11 +4053,8 @@ module.exports = CalendarView = (function(_super) {
       $("#menu").height(40);
     }
     if (initial !== 'initial') {
-      this.cal.fullCalendar('option', 'height', targetHeight);
+      return this.cal.fullCalendar('option', 'height', targetHeight);
     }
-    fcHeaderHeight = this.$('.fc-header').height();
-    fcViewContainreHeight = this.$('.fc-view-container').height();
-    return this.cal.height(fcHeaderHeight + fcViewContainreHeight);
   };
 
   CalendarView.prototype.refresh = function(collection) {
@@ -6533,13 +6530,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),active = locals_.active,calendarMode = locals_.calendarMode,todaytxt = locals_.todaytxt,title = locals_.title;
-buf.push("<div class=\"fc-header-left\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
+var locals_ = (locals || {}),calendarMode = locals_.calendarMode,title = locals_.title,active = locals_.active,todaytxt = locals_.todaytxt;
+buf.push("<div class=\"fc-header-left\">");
 if ( calendarMode)
 {
-buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn fc-state-active title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span></div>");
 }
-buf.push("</div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></div>");;return buf.join("");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
