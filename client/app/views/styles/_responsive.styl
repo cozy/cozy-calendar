@@ -55,7 +55,7 @@
             display: block
 
         li.calendars
-            padding 0.5em
+            padding 0.4em 0
 
         .menu-icon
             display inline-block
@@ -122,9 +122,9 @@
 
 
     #list-container
-        top: 57px
-        margin-bottom 0
-        padding-bottom 5em
+        position inherit
+        padding-top 0
+        padding-bottom 1em
 
     .btn.stick-bottom
         display none        // hide settings button on mobile
@@ -137,8 +137,13 @@
         padding 0.4em
 
 
-@media(max-width: 500px)
+@media(max-width: 600px)
+    #calendarHeader
+    #calheader
+        display none
+
     #alarms
+
         .fc-day-header
             font-size: 10px
 
@@ -161,3 +166,14 @@
 
             button
                 display: block
+
+    #list-container
+        position inherit
+        top 0
+        margin-bottom 0
+        padding-bottom 1em
+
+    ul#menu
+        ul#menuitems
+            li.tagmenuitem
+                padding 0.6em 1em

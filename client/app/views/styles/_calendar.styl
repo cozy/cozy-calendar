@@ -15,7 +15,8 @@ input-color   = #555
 
 .fc-view-container
     clear:none
-    padding 1em
+    padding 0.5em 1em
+    height 100%
 
     thead
         tr
@@ -58,9 +59,10 @@ input-color   = #555
     border-bottom 1px solid #e2e2e2
 
     .btn-group > .btn
-        background-color #FFF
-        border 1px solid blue
-        color blue
+        font-weight bold
+        background-color lightgreyblue - 10%
+        border 1px solid darkgreyblue - 20%
+        color white
         font-weight normal
 
         .fa
@@ -70,12 +72,21 @@ input-color   = #555
             box-shadow none
 
         &:hover
-            color darkblue
             text-decoration underline
 
+            i
+                text-decoration underline
+
         &.fc-state-active
-            background-color blue
+            background-color darkgreyblue - 10%
             color #FFF
+
+        &.fc-state-active.title
+            font-size 22px
+            font-weight bold
+            text-transform capitalize
+            text-align center
+            min-width 200px
 
         &:hover.fc-state-active
             text-decoration none
@@ -100,10 +111,12 @@ input-color   = #555
 
 .fc-header-title h2
     margin 0
-    font-size 2em
+    font-size 1.5em
     line-height 1em
     font-weight bold
     white-space nowrap
+    display inline
+    text-transform capitalize
 
 .fc-button
     position: relative
