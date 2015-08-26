@@ -3,19 +3,22 @@ BaseView = require '../lib/base_view'
 
 module.exports = class CalendarHeader extends BaseView
 
-    tagName: 'table'
+    tagName: 'div'
     id: 'calendarHeader'
     className: 'fc-header'
     template: require './templates/calendar_header'
 
+
     initialize: (options) ->
         @cal = options?.cal
+
 
     getViewName: ->
         return 'list' unless @cal?
         view = @cal.fullCalendar 'getView'
         return 'week' if view.name is 'agendaWeek'
         return 'month'
+
 
     getTitle: ->
         return t('List') unless @cal
@@ -26,20 +29,23 @@ module.exports = class CalendarHeader extends BaseView
             res = view.intervalStart.format 'MMMM YYYY'
 
         else
-            range = $.fullCalendar.formatRange view.start, view.end, \
-                'MMM D YYYY'
-            res = "#{t 'week'} #{view.start.format 'w'} | #{range}"
-
+            from = view.start
+            to = view.end.subtract 1, 'days'
+            range = $.fullCalendar.formatRange from, to, 'MMM D YYYY'
+            res = range
 
         return res
+
 
     getDates: ->
         view = @cal.fullCalendar 'getView'
         return [view.start, view.end]
 
+
     isToday: ->
         [start, end] = @getDates()
         return start < moment() < end
+
 
     getRenderData: ->
         return data =
@@ -49,6 +55,7 @@ module.exports = class CalendarHeader extends BaseView
             active: (item) =>
                 if item is 'today' and @isToday() or item is @getViewName()
                     return 'fc-state-active'
+
 
     events: ->
         'click .fc-button-next': => @trigger 'next'

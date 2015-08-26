@@ -61,6 +61,12 @@ h3
     bottom: 0
     margin: 0
 
+    .btn
+        background-color grey
+
+        &:hover
+            background-color blue
+
 #alarm-list
     width: auto
     div
@@ -78,6 +84,9 @@ h3
         width 1.2rem
         height 1.2rem
         border-radius 100%
+
+    .dayprogram:first-child
+        margin-top 2em 
 
 .active.btn
     background: blue - 20%
@@ -99,6 +108,7 @@ h3
     #import-button
         position relative
         overflow hidden
+
         input
             opacity 0.01
             cursor pointer

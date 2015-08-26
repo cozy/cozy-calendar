@@ -34,8 +34,7 @@ module.exports = class MenuItemView extends BaseView
 
 
     toggleVisible: ->
-        unless app.router.onCalendar
-            app.router.navigate 'calendar', true
+        app.router.navigate 'calendar', true unless app.router.onCalendar
         @showLoading()
         # make asynchronous to allow the spinner to show up, before make.set
         # and it's heavy load events chain block the UI for à while.
@@ -46,8 +45,8 @@ module.exports = class MenuItemView extends BaseView
         , 1
 
 
-    showColorPicker: (ev) ->
-        ev?.stopPropagation() # avoid dropdown auto close.
+    showColorPicker: (event) ->
+        event?.stopPropagation() # avoid dropdown auto close.
         @$('.color-picker').show()
         @$('.calendar-color').parent().attr 'data-picker-visible', true
 
@@ -85,6 +84,8 @@ module.exports = class MenuItemView extends BaseView
             trashButton.addClass 'hidden'
         else
             trashButton.removeClass 'hidden'
+
+
     # Handle `blur` and `keyup` (`enter` and `esc` keys) events in order to
     # rename a calendar.
     onRenameValidation: (event) ->
@@ -173,7 +174,9 @@ module.exports = class MenuItemView extends BaseView
 
     showLoading: ->
         @$('.spinner').show()
-
+        @$('.caret').addClass 'hidden'
 
     hideLoading: ->
         @$('.spinner').hide()
+        @$('.caret').removeClass 'hidden'
+

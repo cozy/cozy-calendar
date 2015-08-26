@@ -1,51 +1,55 @@
 // Base Styles
 
 blue = #34A6FF
+darkblue = blue - 20%
 lightblue = #CBE4FB
 greyblue = #34A6BB
+darkgreyblue = #92A0B2
+lightgreyblue = #C8CFD8
 green = #5C5
 orange = #fe8800
 lightorange = #FFC47F
 darkgrey = #333
 lightgrey = #CCC
 grey = #AAA
+midgrey = #888
 red = #DD3333
 
 
 html,
 body
-    height: 100%
-    width: 100%
-    padding: 0
+    height 100%
+    width 100%
+    padding 0
 
 body
-    text-rendering: optimizeLegibility
+    text-rendering optimizeLegibility
     background #f2f2f2
 
 body,
 input
-    color: darkgrey
+    color darkgrey
     font 300 16px Geneva, Verdana, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif
     line-height 1.2
 
 h2
-    font-family: 'Maven Pro', sans-serif
+    font-family 'Maven Pro', sans-serif
 
 a,
-a:visited
+avisited
     color #0086cc
     text-decoration none
 
-    &:hover
+    &hover
         text-decoration underline
 
 [aria-hidden=true]
-    display: none !important
+    display none !important
 
 /* fixing bootstrap */
 
 body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
-  margin-right: 0
+  margin-right 0
 
 .modal
     position absolute
@@ -53,33 +57,40 @@ body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
     padding 0
     box-sizing border-box
 
-textarea:hover,
-input[type="text"]:hover,
-textarea:active,
-input[type="text"]:active,
-textarea:focus,
-input[type="text"]:focus
-a:focus,
-.btn:focus
-     outline:0px !important
-     -webkit-appearance:none
+textareahover,
+input[type="text"]hover,
+textareaactive,
+input[type="text"]active,
+textareafocus,
+input[type="text"]focus
+afocus,
+.btnfocus
+     outline0px !important
+     -webkit-appearancenone
 
 .well
-    border-radius: 0
-    background: white
-    box-shadow: none
-    border: 0
+    border-radius 0
+    background white
+    box-shadow none
+    border 0
 
 .btn
-    border: 0
-    background: blue
-    color: white
-    box-shadow: none
-    text-shadow: none
-    border-radius: 0
-    font-family: 'Source Sans Pro', sans-serif
-    font-weight: bold
-    border-radius: 4px
+    border 0
+    background blue
+    color white
+    box-shadow none
+    text-shadow none
+    border-radius 0
+    font-family 'Source Sans Pro', sans-serif
+    font-weight bold
+    border-radius 4px
+    transition background 0.2s
+    transition color 0.2s
+
+    &:hover
+        background darkblue
+        border-color darkblue
+        color white
 
 .badge
     background #f5f5f5
@@ -88,27 +99,27 @@ a:focus,
     background blue
     color white
 
-.btn:hover
-.btn:focus
-    background: orange
-    color: white
-    border-color: orange
-    text-shadow: none
+.btnhover
+.btnfocus
+    color white
+    background darkblue
+    border-color darkblue
+    text-shadow none
 
 .form-horizontal
     .control-group
-        margin-bottom: 10px
+        margin-bottom 10px
 
-    margin-bottom: 0 !important
+    margin-bottom 0 !important
 
     .control-label
-        font-size: 13px
-        width: 100px
+        font-size 13px
+        width 100px
     .controls
-        margin-left: 120px
+        margin-left 120px
 
         .add-on i
-            margin-top: 2px !important
+            margin-top 2px !important
 
 .helptext
     margin 1.5em 2em
@@ -127,31 +138,31 @@ a:focus,
 
 
 .info
-    font-size: 12px
-    color: #777
+    font-size 12px
+    color #777
 
 .datepicker
     z-index 1150
 
 .showafter
 .showbefore
-    margin: 1em 0
+    margin 1em 0
 
 .main-container
-    box-sizing: border-box
-    margin-left: 200px
-    border: 0
-    width: auto
-    background: white
+    box-sizing border-box
+    margin-left 200px
+    border 0
+    width auto
+    background white
 
 .container
-    margin: 0
+    margin 0
 
 input[type="date"]
-  width: 150px
+  width 150px
 
 input[type="time"]
-  width: 75px
+  width 75px
 
 .stick-bottom
     position fixed

@@ -9,50 +9,13 @@ input-color   = #555
 //
 // Styles for the fullcalendar plugin
 // ----------------------------------------------------------------------------
-/*
-.fc-button-prev, .fc-button-next, .fc-button-today,
-.fc-button-month, .fc-button-week, .fc-button-agendaWeek
-.fc-button-day, .fc-button-agendaDay, .fc-button-list
 
-    border-color: transparent
-    background: transparent
-    color: blue
-    box-shadow: none
-    text-shadow: none
-    padding-bottom: 3px
-    font-family: 'Source Sans Pro', sans-serif
-
-    &:hover
-        background: transparent
-        color: orange
-
-        &.fc-state-disabled
-            background: blue
-
-    &:active
-        background: blue + 80%
-        cursor: default
-        color: blue
-
-    &.fc-button-today.fc-state-disabled
-    &.fc-state-active
-        background: blue + 80%
-        color: blue + 20%
-        border-radius: 4px
-        cursor: default
-
-    &.fc-button-today.fc-state-disabled:hover
-    &.fc-state-active:hover
-        color: blue + 20%
-        border-radius: 4px
-        color: blue
-*/
 .fc-ltr
     padding 0
 
 .fc-view-container
     clear:none
-    padding 1em
+    padding 0.5em 1em
 
     thead
         tr
@@ -90,15 +53,15 @@ input-color   = #555
     display flex
     align-items center
     width 100%
-    padding 0.8em 1em
+    padding 0.75em 1em
     background-color #f2f2f2
     border-bottom 1px solid #e2e2e2
 
     .btn-group > .btn
-        background-color #FFF
-        border 1px solid blue
-        color blue
         font-weight normal
+        border 1px solid darkgreyblue
+        background-color lightgrey + 60%
+        color darkgreyblue - 40%
 
         .fa
             font-size 1.2em
@@ -107,11 +70,32 @@ input-color   = #555
             box-shadow none
 
         &:hover
-            color: orange
+            color darkblue
 
         &.fc-state-active
-            background-color blue
-            color #FFF
+            font-weight bold
+            background-color darkgreyblue + 10%
+            color white
+
+        &.fc-state-active.title
+            font-size 22px
+            font-weight bold
+            text-transform capitalize
+            text-align center
+            min-width 200px
+
+        &:hover.fc-state-active
+            text-decoration none
+            cursor default
+
+        &.btn-settings
+
+            i
+                margin-right 0.4em
+
+            &:hover
+                i
+                    text-decoration none
 
     .fc-button
         margin 0
@@ -131,10 +115,12 @@ input-color   = #555
 
 .fc-header-title h2
     margin 0
-    font-size 2em
+    font-size 1.5em
     line-height 1em
     font-weight bold
     white-space nowrap
+    display inline
+    text-transform capitalize
 
 .fc-button
     position: relative
@@ -224,6 +210,8 @@ td.fc-widget-header
     border-color: #DDD
 
 #alarms
+    height 100%
+
     thead
         .fc-first
             .fc-day-header
@@ -248,7 +236,7 @@ a.btn:visited
 
     input:hover
     select:hover
-        border: 1px solid orange
+        border: 1px solid darkblue
         border-radius: 0px
         shadow: inset 1px 1px 2px rgba(100, 100, 100, 0.1)
         color: #333
@@ -264,10 +252,10 @@ a.btn:visited
         border-radius: 0
 
     .datepicker td.day:hover
-        background: lightorange
+        background: lightblue
 
     .bootstrap-timepicker-widget table td a:hover
-        background: lightorange
+        background: lightblue
         border: 1px solid transparent
 
     #alarm-description-input
@@ -312,7 +300,8 @@ a.btn:visited
                 cursor pointer
 
                 &:hover
-                    color orange
+                    color darkblue
+                    text-decoration underline
 
             &:hover i
                 display inline-block

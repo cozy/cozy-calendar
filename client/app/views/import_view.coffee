@@ -79,7 +79,9 @@ module.exports = class ImportView extends BaseView
     # Show the event preview list. It doesn't display all events at the same
     # time because Firefox cannot handle it and freezes.
     showEventsPreview: (events) ->
+        # Break event to import in smaller lists
         @eventLists = helpers.getLists events, 100
+
         async.eachSeries @eventLists, (eventList, done) =>
             @eventList.collection.add eventList, sort: false
             setTimeout done, 500
@@ -102,13 +104,9 @@ module.exports = class ImportView extends BaseView
         # The user selects the calendar that will be set on all imported events
         # and alarms.
         @targetCalendar = @calendarCombo.value()
-        if not calendar? or calendar is ''
+        if not @targetCalendar? or @targetCalendar is ''
             @targetCalendar = t('default calendar name')
         @calendarCombo.save()
-
-        # Break event to import in smaller lists
-        events = @eventList.collection.models.reverse()
-        @eventLists = helpers.getLists events, 20
 
         # Initialize counter.
         @initCounter()

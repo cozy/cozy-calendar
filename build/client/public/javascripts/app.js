@@ -166,7 +166,7 @@ module.exports = {
     }
   },
   isMobile: function() {
-    return $('ul#menu').height() === 40;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 };
 });
@@ -1498,6 +1498,12 @@ module.exports = PopoverView = (function(_super) {
     } else {
       left = targetLeftBorder - popoverWidth - popoverMargin;
     }
+    if (left + popoverWidth >= containerWidth) {
+      left = containerWidth - 2 * (popoverWidth - popoverMargin);
+    }
+    if (left <= 0) {
+      left = targetLeftBorder + (popoverWidth / 2) + popoverMargin;
+    }
     oneRowHeight = containerHeight / 6;
     if (targetOffset.top < oneRowHeight * 2) {
       top = '10vh';
@@ -2134,7 +2140,7 @@ module.exports = {
 ;require.register("locales/en", function(exports, require, module) {
 module.exports = {
   "calendar list title": "Calendars",
-  "sync settings button label": "Synchronization settings",
+  "sync settings button label": "Synchronization",
   "default calendar name": "my calendar",
   "Add": "Add",
   "event": "Event",
@@ -2642,7 +2648,7 @@ module.exports = {
 ;require.register("locales/fr", function(exports, require, module) {
 module.exports = {
   "calendar list title": "Agendas",
-  "sync settings button label": "Options de synchronisation",
+  "sync settings button label": "Synchronisation",
   "default calendar name": "mon agenda",
   "Add": "Ajouter",
   "event": "évènement",
@@ -3676,7 +3682,7 @@ module.exports = CalendarHeader = (function(_super) {
     return CalendarHeader.__super__.constructor.apply(this, arguments);
   }
 
-  CalendarHeader.prototype.tagName = 'table';
+  CalendarHeader.prototype.tagName = 'div';
 
   CalendarHeader.prototype.id = 'calendarHeader';
 
@@ -3701,7 +3707,7 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   CalendarHeader.prototype.getTitle = function() {
-    var range, res, view;
+    var from, range, res, to, view;
     if (!this.cal) {
       return t('List');
     }
@@ -3709,8 +3715,10 @@ module.exports = CalendarHeader = (function(_super) {
     if (view.name === 'month') {
       res = view.intervalStart.format('MMMM YYYY');
     } else {
-      range = $.fullCalendar.formatRange(view.start, view.end, 'MMM D YYYY');
-      res = "" + (t('week')) + " " + (view.start.format('w')) + " | " + range;
+      from = view.start;
+      to = view.end.subtract(1, 'days');
+      range = $.fullCalendar.formatRange(from, to, 'MMM D YYYY');
+      res = range;
     }
     return res;
   };
@@ -4033,23 +4041,15 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.handleWindowResize = function(initial) {
-    var fcHeaderHeight, fcViewContainreHeight, targetHeight;
+    var targetHeight;
     if ($(window).width() > 1000) {
-      targetHeight = $(window).height() - 90;
-      $("#menu").height(targetHeight + 90);
+      targetHeight = $(window).height() - 85;
     } else if ($(window).width() > 600) {
       targetHeight = $(window).height() - 100;
-      $("#menu").height(targetHeight + 100);
     } else {
       targetHeight = $(window).height() - 50;
-      $("#menu").height(40);
     }
-    if (initial !== 'initial') {
-      this.cal.fullCalendar('option', 'height', targetHeight);
-    }
-    fcHeaderHeight = this.$('.fc-header').height();
-    fcViewContainreHeight = this.$('.fc-view-container').height();
-    return this.cal.height(fcHeaderHeight + fcViewContainreHeight);
+    return this.cal.fullCalendar('option', 'height', targetHeight);
   };
 
   CalendarView.prototype.refresh = function(collection) {
@@ -4426,14 +4426,11 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.onConfirmImportClicked = function() {
-    var events;
     this.targetCalendar = this.calendarCombo.value();
-    if ((typeof calendar === "undefined" || calendar === null) || calendar === '') {
+    if ((this.targetCalendar == null) || this.targetCalendar === '') {
       this.targetCalendar = t('default calendar name');
     }
     this.calendarCombo.save();
-    events = this.eventList.collection.models.reverse();
-    this.eventLists = helpers.getLists(events, 20);
     this.initCounter();
     this.confirmButton.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
     this.confirmButton.spin('tiny');
@@ -5077,9 +5074,9 @@ module.exports = MenuItemView = (function(_super) {
     })(this), 1);
   };
 
-  MenuItemView.prototype.showColorPicker = function(ev) {
-    if (ev != null) {
-      ev.stopPropagation();
+  MenuItemView.prototype.showColorPicker = function(event) {
+    if (event != null) {
+      event.stopPropagation();
     }
     this.$('.color-picker').show();
     return this.$('.calendar-color').parent().attr('data-picker-visible', true);
@@ -5194,11 +5191,13 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.showLoading = function() {
-    return this.$('.spinner').show();
+    this.$('.spinner').show();
+    return this.$('.caret').addClass('hidden');
   };
 
   MenuItemView.prototype.hideLoading = function() {
-    return this.$('.spinner').hide();
+    this.$('.spinner').hide();
+    return this.$('.caret').removeClass('hidden');
   };
 
   return MenuItemView;
@@ -5847,7 +5846,7 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.onSetStart = function() {
-    return this.model.setStart(this.formatDateTime(this.$('.input-start').val(), this.$('.input-start-date').val()));
+    return this.model.setStart(this.formatDateTime(this.$('.input-start').val(), this.$('.input-start-date').val(), false));
   };
 
   MainPopoverScreen.prototype.onSetEnd = function() {
@@ -5855,13 +5854,16 @@ module.exports = MainPopoverScreen = (function(_super) {
     return this.$container.toggleClass('is-same-day', this.model.isSameDay());
   };
 
-  MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr) {
+  MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr, end) {
     var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
     if (timeStr == null) {
       timeStr = '';
     }
     if (dateStr == null) {
       dateStr = '';
+    }
+    if (end == null) {
+      end = true;
     }
     t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
     d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
@@ -5871,8 +5873,10 @@ module.exports = MainPopoverScreen = (function(_super) {
     if (d != null ? d[0] : void 0) {
       _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
     }
-    if (date && this.model.isAllDay()) {
-      date = +date + 1;
+    if (end) {
+      if (date && this.model.isAllDay()) {
+        date = +date + 1;
+      }
     }
     if (month) {
       month = +month - 1;
@@ -6056,14 +6060,14 @@ module.exports = MainPopoverScreen = (function(_super) {
   MainPopoverScreen.prototype.onStartChange = function() {
     var newValue;
     newValue = this.model.getStartDateObject().format(tFormat);
-    return this.$('.input-start').val(newValue);
+    return this.$('.input-start').timepicker('setTime', newValue);
   };
 
   MainPopoverScreen.prototype.onEndChange = function() {
     var endOffset, newValue;
     endOffset = this.model.isAllDay() ? -1 : 0;
     newValue = this.model.getEndDateObject().add(endOffset, 'd').format(tFormat);
-    return this.$('.input-end-time').val(newValue);
+    return this.$('.input-end-time').timepicker('setTime', newValue);
   };
 
   return MainPopoverScreen;
@@ -6521,13 +6525,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),active = locals_.active,calendarMode = locals_.calendarMode,todaytxt = locals_.todaytxt,title = locals_.title;
-buf.push("<div class=\"fc-header-left\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
+var locals_ = (locals || {}),calendarMode = locals_.calendarMode,title = locals_.title,active = locals_.active,todaytxt = locals_.todaytxt;
+buf.push("<div class=\"fc-header-left\">");
 if ( calendarMode)
 {
-buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn fc-state-active title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span></div>");
 }
-buf.push("</div><div class=\"fc-header-right\"><span class=\"fc-header-title\"><h2>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h2></span></div>");;return buf.join("");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6678,7 +6682,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul><a href=\"#settings\" class=\"btn btn-settings stick-bottom\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
+buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7168,6 +7172,7 @@ module.exports = ComboBox = (function(_super) {
     this.onClose = __bind(this.onClose, this);
     this.onOpen = __bind(this.onOpen, this);
     this.setValue = __bind(this.setValue, this);
+    this.value = __bind(this.value, this);
     this.openMenu = __bind(this.openMenu, this);
     return ComboBox.__super__.constructor.apply(this, arguments);
   }
@@ -7197,11 +7202,6 @@ module.exports = ComboBox = (function(_super) {
     this.autocompleteWidget._renderItem = this.renderItem;
     isInput = this.$el[0].nodeName.toLowerCase() === 'input';
     method = this.$el[isInput ? "val" : "text"];
-    this.value = (function(_this) {
-      return function() {
-        return method.apply(_this.$el, arguments);
-      };
-    })(this);
     this.on('edition-complete', this.onEditionComplete);
     if (!this.small) {
       caret = $('<a class="combobox-caret">');
@@ -7222,6 +7222,10 @@ module.exports = ComboBox = (function(_super) {
 
   ComboBox.prototype.getDefaultValue = function() {
     return this.source[0].label;
+  };
+
+  ComboBox.prototype.value = function() {
+    return this.$el.val();
   };
 
   ComboBox.prototype.setValue = function(value) {

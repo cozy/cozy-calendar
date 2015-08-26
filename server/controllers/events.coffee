@@ -5,10 +5,12 @@ moment = require 'moment-timezone'
 log = require('printit')
     prefix: 'events'
 
+User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
 localization = require '../libs/localization_manager'
+
 
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
@@ -171,22 +173,36 @@ module.exports.public = (req, res, next) ->
 
 
 module.exports.ical = (req, res) ->
-    key = req.query.key
-    calendar = new VCalendar organization:'Cozy Cloud', title: 'Cozy Calendar'
-    calendar.add req.event.toIcal()
-    res.header 'Content-Type': 'text/calendar'
-    res.send calendar.toString()
+
+    User.getUserInfos (err, infos) ->
+
+        calendar = new VCalendar
+            organization:'Cozy Cloud'
+            title: 'Cozy Calendar'
+
+        calendar = new VCalendar calendarOptions
+        vEvent = req.event.toIcal()
+
+        # Force the event to take into account the organizer.
+        if req.event.attendees?.length > 0
+            vEvent.model.organizer =
+                displayName: infos.name
+                email: infos.email
+            vEvent.build()
+
+        calendar.add vEvent
+
+        res.header 'Content-Type': 'text/calendar'
+        res.send calendar.toString()
 
 
 module.exports.publicIcal = (req, res) ->
+
     key = req.query.key
     if not visitor = req.event.getGuest key
         return res.send error: 'invalid key', 401
 
-    calendar = new VCalendar organization: 'Cozy', title: 'Cozy Calendar'
-    calendar.add req.event.toIcal()
-    res.header 'Content-Type': 'text/calendar'
-    res.send calendar.toString()
+    module.exports.ical(req, res)
 
 
 module.exports.bulkCalendarRename = (req, res) ->
@@ -201,6 +217,7 @@ module.exports.bulkCalendarRename = (req, res) ->
                 res.send 500, error: err
             else
                 res.send 200, events
+
 
 module.exports.bulkDelete = (req, res) ->
     {calendarName} = req.body

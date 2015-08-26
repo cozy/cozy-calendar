@@ -1,12 +1,12 @@
 # [Cozy](http://cozy.io) Calendar
 
-Cozy Calendar makes your event management easy. Main features are: 
+Cozy Calendar makes your event management easy. Main features are:
 
 * Simple UI
 * Event tagging
 * Event sharing (via email)
 * ICal import
-* CalDAV sync (require [Cozy Sync](https://github.com/mycozycloud/cozy-sync))
+* CalDAV sync (require [Cozy Sync](https://github.com/cozy/cozy-sync))
 
 ## Install
 
@@ -14,7 +14,7 @@ We assume here that the Cozy platform is correctly [installed](http://cozy.io/ho
  on your server.
 
 You can simply install the Calendar application via the app registry. Click on
-ythe *Chose Your Apps* button located on the right of your Cozy Home
+the *Chose Your Apps* button located on the right of your Cozy Home
 
 From the command line you can type this command:
 
@@ -25,19 +25,21 @@ From the command line you can type this command:
 
 You can contribute to the Cozy Calendar in many ways:
 
-* Pick up an [issue](https://github.com/mycozycloud/cozy-calendar/issues?state=open) and solve it.
-* Translate it in [a new language](https://github.com/mycozycloud/cozy-calendar/tree/master/client/app/locales).
+* Pick up an [issue](https://github.com/cozy/cozy-calendar/issues?state=open) and solve it.
+* Translate it in [a new language](https://github.com/cozy/cozy-calendar/tree/master/client/app/locales).
 * Allow to share calendars
 * Allow to subscribe to a CalDAV Calendar.
 * Add SyncML support
 
-[![Stories in Ready](https://badge.waffle.io/mycozycloud/cozy-calendar.png?label=ready)](https://waffle.io/mycozycloud/cozy-calendar)  
+[![Stories in Ready](https://badge.waffle.io/cozy/cozy-calendar.png?label=ready)](https://waffle.io/cozy/cozy-calendar)
 
 ## Hack
 
 Hacking the Calendar app requires you [setup a dev environment](http://cozy.io/hack/getting-started/). Once it's done you can hack the calendar just like it was your own app.
 
-    git clone https://github.com/mycozycloud/cozy-calendar.git
+    git clone https://github.com/cozy/cozy-calendar.git
+    cd cozy-calendar
+    npm install
 
 Run it with:
 
@@ -51,12 +53,13 @@ build:
 Each modification of the client requires a specific build too.
 
     cd client
+    npm install
     brunch build
 
 ## Tests
 
 ![Build
-Status](https://travis-ci.org/mycozycloud/cozy-calendar.png?branch=master)
+Status](https://travis-ci.org/cozy/cozy-calendar.png?branch=master)
 
 To run tests type the following command into the Cozy Calendar folder:
 
@@ -76,7 +79,7 @@ Cozy Calendar is developed by Cozy Cloud and distributed under the AGPL v3 licen
 
 ## What is Cozy?
 
-![Cozy Logo](https://raw.github.com/mycozycloud/cozy-setup/gh-pages/assets/images/happycloud.png)
+![Cozy Logo](https://raw.github.com/cozy/cozy-setup/gh-pages/assets/images/happycloud.png)
 
 [Cozy](http://cozy.io) is a platform that brings all your web services in the
 same private space.  With it, your web apps and your devices can share data

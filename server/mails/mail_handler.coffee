@@ -79,8 +79,18 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
             calendarOptions =
                 organization:'Cozy Cloud'
                 title: 'Cozy Calendar'
+                method: 'REQUEST'
+
             calendar = new VCalendar calendarOptions
-            calendar.add event.toIcal()
+            vEvent = event.toIcal()
+
+            # Force the event to take into account the organizer
+            vEvent.model.organizer =
+                displayName: user.name
+                email: user.email
+            vEvent.build()
+
+            calendar.add vEvent
             icsPath = path.join os.tmpdir(), 'invite.ics'
             fs.writeFile icsPath, calendar.toString(), (err) ->
                 if (err)
