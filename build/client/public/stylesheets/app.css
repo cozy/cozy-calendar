@@ -7999,6 +7999,16 @@ afocus,
   font-weight: bold;
   -webkit-border-radius: 4px;
   border-radius: 4px;
+  -webkit-transition: background 0.2s;
+  -moz-transition: background 0.2s;
+  -o-transition: background 0.2s;
+  -ms-transition: background 0.2s;
+  transition: background 0.2s;
+  -webkit-transition: color 0.2s;
+  -moz-transition: color 0.2s;
+  -o-transition: color 0.2s;
+  -ms-transition: color 0.2s;
+  transition: color 0.2s;
 }
 .btn:hover {
   background: #008af6;
@@ -8492,6 +8502,11 @@ textarea:active {
 .sidenav .btn {
   color: #fff;
   background: #888;
+  -webkit-transition: background 0.3s;
+  -moz-transition: background 0.3s;
+  -o-transition: background 0.3s;
+  -ms-transition: background 0.3s;
+  transition: background 0.3s;
 }
 .sidenav .btn:hover {
   background: #34a6ff;
@@ -8551,6 +8566,11 @@ textarea:active {
   font-size: 1.6rem;
   text-shadow: none;
   color: #bbb;
+  -webkit-transition: color 0.3s;
+  -moz-transition: color 0.3s;
+  -o-transition: color 0.3s;
+  -ms-transition: color 0.3s;
+  transition: color 0.3s;
 }
 .sidenav .calendars .calendar-add:hover {
   color: #34a6ff;
@@ -8689,6 +8709,11 @@ textarea:active {
   -o-transform: scale(1.5, 1.5);
   -ms-transform: scale(1.5, 1.5);
   transform: scale(1.5, 1.5);
+  -webkit-transition: all 0.2s;
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  -ms-transition: all 0.2s;
+  transition: all 0.2s;
 }
 .sidenav ul#menuitems li.tagmenuitem .dropdown .dropdown-toggle .caret:hover {
   color: #34a6ff;
@@ -8792,11 +8817,10 @@ textarea:active {
   border-bottom: 1px solid #e2e2e2;
 }
 .fc-header .btn-group > .btn {
-  font-weight: bold;
-  background-color: #b0bac7;
-  border: 1px solid #6c7f97;
-  color: #fff;
   font-weight: normal;
+  border: 1px solid #92a0b2;
+  background-color: #ebebeb;
+  color: #505f72;
 }
 .fc-header .btn-group > .btn .fa {
   font-size: 1.2em;
@@ -8806,13 +8830,11 @@ textarea:active {
   box-shadow: none;
 }
 .fc-header .btn-group > .btn:hover {
-  text-decoration: underline;
-}
-.fc-header .btn-group > .btn:hover i {
-  text-decoration: underline;
+  color: #008af6;
 }
 .fc-header .btn-group > .btn.fc-state-active {
-  background-color: #7f8fa5;
+  font-weight: bold;
+  background-color: #9daaba;
   color: #fff;
 }
 .fc-header .btn-group > .btn.fc-state-active.title {
