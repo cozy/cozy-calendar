@@ -58,11 +58,10 @@ input-color   = #555
     border-bottom 1px solid #e2e2e2
 
     .btn-group > .btn
-        font-weight bold
-        background-color lightgreyblue - 10%
-        border 1px solid darkgreyblue - 20%
-        color white
         font-weight normal
+        border 1px solid darkgreyblue
+        background-color lightgrey + 60%
+        color darkgreyblue - 40%
 
         .fa
             font-size 1.2em
@@ -71,14 +70,12 @@ input-color   = #555
             box-shadow none
 
         &:hover
-            text-decoration underline
-
-            i
-                text-decoration underline
+            color darkblue
 
         &.fc-state-active
-            background-color darkgreyblue - 10%
-            color #FFF
+            font-weight bold
+            background-color darkgreyblue + 10%
+            color white
 
         &.fc-state-active.title
             font-size 22px
@@ -92,6 +89,7 @@ input-color   = #555
             cursor default
 
         &.btn-settings
+
             i
                 margin-right 0.4em
 
