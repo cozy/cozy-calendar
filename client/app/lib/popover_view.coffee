@@ -8,6 +8,7 @@ module.exports = class PopoverView extends BaseView
         @container = options.container
         @parentView = options.parentView
         @$tabCells = $ '.fc-day-grid-container'
+        @$tabCells = $ '.fc-time-grid-container' if @$tabCells.length is 0
 
         return @
 
@@ -160,21 +161,27 @@ module.exports = class PopoverView extends BaseView
         oneRowHeight = (containerHeight / 6)
 
         # Cell is on the first two rows.
-        if targetOffset.top < oneRowHeight * 2
-            top = '10vh'
+        if targetOffset.top < oneRowHeight * 1
+            top = '5vh'
+            bottom = 'auto'
+        else if targetOffset.top < oneRowHeight * 2
+            top = '15vh'
+            bottom = 'auto'
+        else if targetOffset.top < oneRowHeight * 3
+            top = '35vh'
             bottom = 'auto'
         # Cell is on the 3rd row.
-        else if targetOffset.top < oneRowHeight * 3
-            top = '30vh'
+        else if targetOffset.top < oneRowHeight * 4
+            top = '45vh'
             bottom = 'auto'
         # Cell is on the 4th row.
-        else if targetOffset.top < oneRowHeight * 4
+        else if targetOffset.top < oneRowHeight * 5
             top = 'auto'
-            bottom = '15vh'
+            bottom = '10vh'
         # Cell is on the two last rows.
         else
             top = 'auto'
-            bottom = '5vh'
+            bottom = '0vh'
 
         position = {top, bottom, left}
 
