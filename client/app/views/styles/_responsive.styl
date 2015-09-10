@@ -137,10 +137,20 @@
         padding 0.4em
 
 
+    .fc-header .btn-group > .btn.fc-state-active.title
+        min-width inherit
+    .fc-header-left, .fc-header-center, .fc-header-right
+        width inherit
+
 @media(max-width: 600px)
-    #calendarHeader
-    #calheader
-        display none
+
+    .fc-header
+        display block
+        text-align center
+
+        .btn-group
+            margin-bottom .25em
+            font-size inherit
 
     #alarms
 
@@ -152,7 +162,8 @@
                 font-size 0.7em
 
         .fc-header-right
-            width 20%
+            width 100%
+            text-align center
 
         .popover
             width: auto
