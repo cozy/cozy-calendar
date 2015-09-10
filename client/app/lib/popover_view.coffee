@@ -18,8 +18,9 @@ module.exports = class PopoverView extends BaseView
 
 
     close: ->
-        @$popover.remove()
-        @$popover = null
+        if @$popover?
+            @$popover.remove()
+            @$popover = null
         @target.data 'popover', undefined
         @remove()
 
