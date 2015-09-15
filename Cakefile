@@ -88,6 +88,7 @@ buildJsInLocales = ->
         # add locales at the end of app.js
     exec "rm -rf build/client/app/locales/*.json"
 
+
 buildJade = ->
     jade = require 'jade'
     jadeFile = new RegExp '\.jade$'
@@ -115,6 +116,7 @@ task 'build', 'Build CoffeeScript to Javascript', ->
               "rm -rf build/client/app/locales/* && " + \
               "cp -R client/public build/client/ && " + \
               "rm -rf client/app/locales/*.coffee"
+
     exec command, (err, stdout, stderr) ->
         if err
             logger.error "An error has occurred while compiling:\n" + err
