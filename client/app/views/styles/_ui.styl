@@ -1,0 +1,228 @@
+.ui-menu
+    z-index 1200
+
+    .ui-menu-item
+        line-height 0
+
+        &:hover
+            cursor pointer
+
+        a
+            display flex
+            align-items center
+            padding 0.4em 0.6em
+            font-size 1rem
+            line-height 1
+
+        .combobox-badge
+            flex none
+            border 1px solid #fff
+            box-sizing border-box
+
+.combobox-badge
+    margin-right 5px
+    padding: 0
+    width: 1.5em
+    height: 1.5em
+    border-radius 100%
+
+.surrounded-combobox
+    .combobox
+        padding-left 30px
+        margin-left  -20px
+        height       1.5rem
+
+    .combobox-caret
+        padding 4px
+        position relative
+        left -20px
+
+        .caret
+            margin-top 8px
+
+    .combobox-badge
+        margin-right 0px
+        position relative
+        left 3px
+
+
+#event-modal
+    padding: 0
+
+    .btn
+        border-radius 5px
+
+    .alert
+        margin-bottom 0px
+
+    .modal-header
+        button.close
+            margin-top -2px
+
+        a
+            font-size: 16px
+            text-decoration: none
+            color: #333
+
+    .modal-body
+        h4
+            margin-top 25px
+            font-size 20px
+            font-family 'Maven Pro', sans-serif
+
+        .rrule-show
+            cursor pointer
+
+        .tagit
+
+            .tagit-close, .tagit-choice
+                color inherit
+                &:hover
+                    text-decoration none
+            .text-icon
+                display inline
+                color inherit
+
+        #reminder-container
+            .reminder
+                .triggervalue
+                .triggerunit
+                    margin: 0px 5px;
+
+                .triggervalue
+                    width: 35px;
+
+                .triggerunit
+                    width: 100px;
+
+                .badge
+                    margin-left 5px
+                    padding 0px
+                    width 24px
+                    height 24px
+                    line-height 24px
+                    border-radius 50%
+                    text-align center
+                    vertical-align middle
+                    cursor pointer
+                    color black
+
+                    &.badge-info
+                        color white
+
+                .removereminder
+                    margin-left: 5px;
+                    line-height: 20px;
+                    vertical-align: middle;
+                    cursor: pointer;
+
+
+        #rrule-short
+            font-size 14px
+
+        #rrule
+            #rrule-interval
+            #rrule-freq
+            #rrule-until
+            #rrule-count
+                margin 0 5px
+
+            #rrule-interval
+            #rrule-count
+                width 35px
+            #rrule-freq
+                width 175px
+
+            #rrule-weekdays
+                label.checkbox
+                        margin-left 5px
+
+        #guests
+            #addguest
+            #addguest-field
+                vertical-align top
+            #addguest
+                margin-left 5px
+
+            #guest-info
+                display inline-block
+                height 30px
+                max-width 200px
+                margin-left 10px
+                margin-top 5px
+                i
+                    display inline-block
+                    width 30px
+                    width 30px
+                    vertical-align text-top
+                    font-size 30px
+                span
+                    display inline-block
+                    max-width 165px
+                    vertical-align middle
+                    text-align center
+                    border-radius 4px
+                    font-size 11px
+
+        #guests-list
+            i
+                vertical-align bottom
+            i.green
+                color green
+            i.red
+                color red
+            i.blue
+                color blue
+
+    .modal-footer
+        #cancel-btn
+            cursor pointer
+            font-size 13px
+            margin-right 10px
+
+    a.btn.rrule-show
+        border-radius: 0px
+        padding: 5px
+
+    label
+        color #666
+
+    input
+    select
+    textarea
+        box-shadow: none
+        border: 1px solid #CCC
+        color #111
+
+        &:focus
+            border: 1px solid blue
+
+        &:hover
+            border: 1px solid orange
+
+    #addguest.btn
+        border-radius: 0px
+        padding: 5px
+
+
+@media(min-width: 1100px)
+    #event-modal
+        width 1000px
+        margin-left -500px
+
+        .modal-body > *
+            width 50%
+
+        .modal-body #guests-block
+            position absolute
+            width 40%
+            top 20px
+            right 20px
+
+            #guests-list
+                border-bottom 1px solid black
+                a.remove-guest
+                    display inline-block
+                    margin-left 15px
+                    cursor pointer
+

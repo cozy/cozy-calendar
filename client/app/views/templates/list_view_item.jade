@@ -1,0 +1,10 @@
+if !allDay
+    .fc-time(style="background-color:"+color+";") #{start} - #{end}
+else
+    .fc-time(style="background-color:"+color+";") #{t("All day")}
+.fc-title
+    | #{description || t("no description")}
+    - if(counter != void(0) && counter != null)
+        | &nbsp;(#{counter.current} / #{counter.total})
+
+i.delete.fa.fa-trash

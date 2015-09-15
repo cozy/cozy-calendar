@@ -1,0 +1,47 @@
+.modal-header
+    h2= t('sync settings button label')
+
+.helptext
+    span
+        i.fa.fa-refresh
+    h3= t('mobile sync')
+
+    if account == null
+        p= t('to sync your cal with')
+        ol
+            li= t('install the sync module')
+            li= t('connect to it and follow')
+    else
+        p= t('sync headline with data')
+        ul
+            li #{t('sync url')} https://#{account.domain}/public/sync/principals/me
+            li #{t('sync login')} #{account.login}
+            li #{t('sync password') + " "}
+                span#placeholder= account.placeholder
+                button.btn#show-password= t('show')
+                button.btn#hide-password= t('hide')
+    p= t('sync help') + " "
+        a(href='https://cozy.io/mobile/calendar.html', target="_blank")= t('sync help link')
+
+.helptext
+    span
+        i.fa.fa-upload
+    h3= t('icalendar export')
+    p
+      = t('download a copy of your calendar')
+    p.line
+      span.surrounded-combobox
+        input#export-calendar(value=calendar)
+      span &nbsp;
+      a#export.btn= t('export your calendar')
+
+.helptext
+    span
+        i.fa.fa-download
+    h3= t('icalendar import')
+
+    #importviewplaceholder
+
+.modal-footer
+    button.btn.btn-link.close-settings= t('close')
+

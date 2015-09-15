@@ -1,0 +1,22 @@
+- back = visible?color:"transparent"
+- border = visible?color:"transparent"
+
+span.badge
+span.calendar-name=label
+.dropdown
+    a#dLabel.dropdown-toggle(data-toggle="dropdown")
+        span.caret
+    ul.dropdown-menu(aria-labelledBy='dLabel')
+        li
+            a.calendar-color= t('change color')
+            ul.color-picker
+                each color in colorSet
+                    li.color(style="background-color: ##{color};")
+                
+        li
+            a.calendar-rename= t('rename')
+        li
+            a.calendar-remove= t('delete')
+        li
+            a.calendar-export= t('export')
+img.spinner(src="img/spinner.svg")

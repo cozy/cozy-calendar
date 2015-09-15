@@ -1,0 +1,23 @@
+.fc-header-left
+    if calendarMode
+        .btn-group(role="group")
+            span.btn.fc-button-prev.fc-corner-left
+                i.fa.fa-angle-left
+            span.btn.title= title
+            span.btn.fc-button-next.fc-corner-right
+                i.fa.fa-angle-right
+        .btn.fc-button-today(class=active('today'))= todaytxt
+    span.fc-header-title
+
+// just preload the image for fast display when used
+img.hidden(src="img/spinner-white.svg")
+
+.fc-header-right
+    .btn-group(role="group")
+        span.btn.fc-button-month(class=active('month') type="button")= t('month')
+        span.btn.fc-button-week(class=active('week') type="button")= t('week')
+        span.btn.fc-button-list(class=active('list') type="button")= t('list')
+    .btn-group(role="group")
+        a.btn.btn-settings(href="#settings")
+            i.fa.fa-cog
+            span= t('sync settings button label')

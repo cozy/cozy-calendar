@@ -1,0 +1,179 @@
+@media(max-width: 1200px)
+
+    #alarms, #alarm-list
+        width: 100%
+        padding: 0
+        box-sizing: border-box
+
+        .fc-header-title
+            h2
+                font-size: 16px
+
+        .fc-header-left
+            width auto
+
+
+    #view-container
+        padding: 0
+
+        .container:before
+        .container:after
+            display: block
+
+
+    #input-time
+    #input-timezone
+    #action
+    #date-control
+        display: block
+        margin-bottom: 10px
+
+@media(max-width: 900px)
+    #alarms
+        .fc-day-header
+            font-size: 12px
+            text-align: center
+            padding-left: 5px
+
+    #alarm-list
+        h2
+            font-size: 22px
+
+    ul#menu
+        height: 40px
+        width: 100%
+        float: none
+        position: absolute
+        top: 0
+        left: 0
+        margin: 0
+
+        li
+            display: inline-block
+
+        #import-menu-button, span
+            display: block
+
+        li.calendars
+            padding 0.4em 0
+
+        .menu-icon
+            display inline-block
+            padding-right 0.7em
+
+        .calendar-add
+            display none
+
+        ul#menuitems
+            z-index 1050
+            display none
+            position absolute
+            top 40px
+            right 0
+            left 0
+            margin 0
+            padding 0.5em 0
+            background-color inherit
+            box-shadow 0 10px 12px rgba(0,0,0,.15)
+
+            &.visible
+                display block
+
+            li
+                padding 0.6em 1.5em
+                list-style-type none
+
+            span
+                display inline
+                font-size 1.1em
+
+    .main-container
+        margin-left 0
+        margin-top 3rem
+
+    #alarms
+        .fc-day-header
+            font-size: 12px
+
+        .fc-button-today
+            display: none
+
+        td.fc-header-right
+            span
+                display: none
+
+        .fc-event-title
+            // display: none
+            white-space nowrap
+
+        .fc-border-separate
+            width: 100%
+
+        .fc-day-number
+            font-size: 12px
+
+    // List view tweaks.
+    li.tagmenuitem
+        .dropdown
+            display: none !important
+
+    #cal-header
+        display: none
+
+
+    #list-container
+        position inherit
+        padding-top 0
+        padding-bottom 1em
+
+    .btn.stick-bottom
+        display none        // hide settings button on mobile
+
+    .showafter
+    .showbefore
+        display block
+        box-sizing border-box
+        width 100%
+        padding 0.4em
+
+
+@media(max-width: 600px)
+    #calendarHeader
+    #calheader
+        display none
+
+    #alarms
+
+        .fc-day-header
+            font-size: 10px
+
+        .fc-header-title
+            h2
+                font-size 0.7em
+
+        .fc-header-right
+            width 20%
+
+        .popover
+            width: auto
+            position: absolute
+            min-width: 320px
+            top: 0
+            left: 0
+
+            input
+                width: 90%
+
+            button
+                display: block
+
+    #list-container
+        position inherit
+        top 0
+        margin-bottom 0
+        padding-bottom 1em
+
+    ul#menu
+        ul#menuitems
+            li.tagmenuitem
+                padding 0.6em 1em

@@ -1,0 +1,23 @@
+#import-form.well
+
+    div.import-form
+        p
+            = t('import an ical file')
+        div#import-button.btn
+            span= t('select an icalendar file')
+            input#import-file-input(type="file")
+
+    div.confirmation
+        div.import-calendar-selection.mb2
+            span= t('link imported events with calendar')
+            br
+            input#import-calendar-combo.mt1
+        button#confirm-import-button.btn= t('confirm import')
+        button#cancel-import-button.btn=t ('cancel')
+
+    div.import-progress.mt3
+    div.import-errors.mt3
+
+    div.results.mt3
+        h4= t('Events to import')
+        #import-event-list

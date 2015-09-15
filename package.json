@@ -1,0 +1,79 @@
+{
+  "name": "calendar",
+  "version": "1.0.23",
+  "displayName": "Calendar",
+  "description": "Manage your events and alarms with your Cozy.",
+  "author": "Cozy Cloud <contact@cozycloud.cc> (http://cozycloud.cc)",
+  "licenses": [
+    {
+      "type": "AGPL v3",
+      "url": "http://www.gnu.org/licenses/agpl-3.0.html"
+    }
+  ],
+  "engines": [
+    "node = 0.10.x"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cozy/cozy-calendar.git"
+  },
+  "main": "server.coffee",
+  "dependencies": {
+    "americano": "0.3.11",
+    "archiver": "0.14.4",
+    "async": "1.3.0",
+    "cozy-ical": "1.1.14",
+    "cozy-realtime-adapter": "1.0.0",
+    "cozydb": "0.0.17",
+    "jade": "1.3.1",
+    "moment-timezone": "0.4.0",
+    "multiparty": "4.1.1",
+    "node-polyglot": "0.4.3",
+    "printit": "0.1.8"
+  },
+  "devDependencies": {
+    "should": "4.1.0",
+    "mocha": "2.0.1",
+    "request-json": "0.4.13",
+    "coffee-script": "1.9.3"
+  },
+  "scripts": {
+    "test": "cake --use-js tests",
+    "start": "node build/server.js",
+    "test:mocha-no-env": "mocha test --reporter spec --colors --globals setImmediate,clearImmediate --compilers coffee:coffee-script/register",
+    "lint": "npm run lint:client && npm run lint:server",
+    "lint:server": "coffeelint server -f coffeelint.json",
+    "lint:client": "coffeelint client/app -f coffeelint.json",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && brunch b",
+    "build:server": "cake build",
+    "fixtures:generate": "coffee test/fixtures/generator.coffee",
+    "fixtures:load": "cozy-fixtures load test/fixtures"
+  },
+  "cozy-permissions": {
+    "Alarm": {
+      "description": "Creates and edits your alarms."
+    },
+    "Event": {
+      "description": "Creates and edits your events."
+    },
+    "User": {
+      "description": "Used to recover your timezone"
+    },
+    "CozyInstance": {
+      "description": "Used to recover your language setting and your cozy's domain"
+    },
+    "Contact": {
+      "description": "Invite your contacts to an event"
+    },
+    "Tag": {
+      "description": "Create new tags and change their color"
+    },
+    "send mail from user": {
+      "description": "Send invitations by mail"
+    },
+    "WebDAVAccount": {
+      "description": "Store webDAV password and sync informations"
+    }
+  }
+}

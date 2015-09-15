@@ -1,0 +1,120 @@
+orange = #fe8800
+blue = #34A6FF
+bluegreen = #34A6BB
+
+
+a
+    color: blue
+
+a:hover
+    color: darkblue
+
+input
+select
+textarea
+    border: 1px solid blue
+    border-radius: 0
+    font-family: 'Source Sans Pro', sans-serif
+
+input:hover
+select:hover
+textarea:hover
+    border: 1px solid darkblue
+
+input:active
+select:active
+textarea:active
+    box-shadow: none
+
+
+.button
+    border 0
+    background blue
+    color white
+    box-shadow none
+    text-shadow none
+    border-radius 0
+    font-family 'Source Sans Pro', sans-serif
+    font-weight bold
+    padding 10px
+    cursor pointer
+
+.btn-link
+    background transparent
+    color blue
+    font-weight normal
+
+.btn-link:hover
+    color darkblue
+    text-decoration underline
+    background transparent
+
+.btn.btn-link:active
+    background darkblue
+    color white
+    text-decoration none
+
+.btn.btn-link:focus
+    background darkblue
+    color white
+    text-decoration none
+
+
+.button:hover
+    background: darkblue
+    border: 0
+    color: white
+    text-decoration: none
+
+.button:active
+    background: darkblue - 3%
+    border: 0
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+    color: white
+
+.button.disabled
+.button.disabled:hover
+.button.disabled:active
+.button.disabled:focus
+    background-color: grey
+    padding: 10px
+    cursor: default
+    text-decoration: none
+
+
+.button.toggled
+    background-color: blue - 20%
+    box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
+
+.minor-button
+    padding: 10px
+
+.modal-header
+    padding: 1.2rem
+    background-color: #f2f2f2
+    border-bottom: 1px solid #e2e2e2
+    border-radius: 6px 6px 0 0
+    color: #333
+
+    h2
+        margin 0
+        font-size 1.5rem
+
+
+.modal-body
+    font-family: 'Source Sans Pro', sans-serif
+
+    input
+    select
+    textarea
+        border: 1px solid #CCC
+        border-radius: 0
+        font-family: 'Maven Pro', sans-serif
+
+        &:hover
+            border: 1px solid darkblue
+
+        &:focus
+        &:active
+            border: 1px solid #CCC
+            box-shadow: none
