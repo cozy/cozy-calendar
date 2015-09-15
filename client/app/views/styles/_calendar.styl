@@ -62,7 +62,6 @@ input-color   = #555
         border 1px solid darkgreyblue
         background-color lightgrey + 60%
         color darkgreyblue - 40%
-        text-transform capitalize
 
         .fa
             font-size 1.2em
@@ -71,29 +70,25 @@ input-color   = #555
             box-shadow none
 
         &:hover
-            background-color darkgreyblue + 60%
+            color darkblue
 
         &.fc-state-active
             font-weight bold
             background-color darkgreyblue + 10%
             color white
 
-            &:hover
-                text-decoration none
-                cursor default
-
-        &.title
-            min-width 8em
+        &.fc-state-active.title
+            font-size 22px
             font-weight bold
-            font-size 1rem
+            text-transform capitalize
+            text-align center
+            min-width 200px
 
-            &:hover
-                background-color lightgrey + 60%
-                color darkgreyblue - 40%
+        &:hover.fc-state-active
+            text-decoration none
+            cursor default
 
         &.btn-settings
-            &:hover
-                background-color darkgreyblue + 60%
 
             i
                 margin-right 0.4em
@@ -101,20 +96,6 @@ input-color   = #555
             &:hover
                 i
                     text-decoration none
-
-    .fc-button-today
-        margin-left 0.625em
-        font-weight normal
-        border 1px solid darkgreyblue
-        background-color lightgrey + 60%
-        color darkgreyblue - 40%
-
-        &:hover
-            background-color darkgreyblue + 60%
-
-        &.fc-state-active
-            background-color darkgreyblue
-            color white
 
     .fc-button
         margin 0

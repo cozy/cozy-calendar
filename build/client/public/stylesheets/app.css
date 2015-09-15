@@ -8821,7 +8821,6 @@ textarea:active {
   border: 1px solid #92a0b2;
   background-color: #ebebeb;
   color: #505f72;
-  text-transform: capitalize;
 }
 .fc-header .btn-group > .btn .fa {
   font-size: 1.2em;
@@ -8831,48 +8830,29 @@ textarea:active {
   box-shadow: none;
 }
 .fc-header .btn-group > .btn:hover {
-  background-color: #d3d9e0;
+  color: #008af6;
 }
 .fc-header .btn-group > .btn.fc-state-active {
   font-weight: bold;
   background-color: #9daaba;
   color: #fff;
 }
-.fc-header .btn-group > .btn.fc-state-active:hover {
+.fc-header .btn-group > .btn.fc-state-active.title {
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: capitalize;
+  text-align: center;
+  min-width: 200px;
+}
+.fc-header .btn-group > .btn:hover.fc-state-active {
   text-decoration: none;
   cursor: default;
-}
-.fc-header .btn-group > .btn.title {
-  min-width: 8em;
-  font-weight: bold;
-  font-size: 1rem;
-}
-.fc-header .btn-group > .btn.title:hover {
-  background-color: #ebebeb;
-  color: #505f72;
-}
-.fc-header .btn-group > .btn.btn-settings:hover {
-  background-color: #d3d9e0;
 }
 .fc-header .btn-group > .btn.btn-settings i {
   margin-right: 0.4em;
 }
 .fc-header .btn-group > .btn.btn-settings:hover i {
   text-decoration: none;
-}
-.fc-header .fc-button-today {
-  margin-left: 0.625em;
-  font-weight: normal;
-  border: 1px solid #92a0b2;
-  background-color: #ebebeb;
-  color: #505f72;
-}
-.fc-header .fc-button-today:hover {
-  background-color: #d3d9e0;
-}
-.fc-header .fc-button-today.fc-state-active {
-  background-color: #92a0b2;
-  color: #fff;
 }
 .fc-header .fc-button {
   margin: 0;
