@@ -1,4 +1,4 @@
-module.exports = {
+{
   "calendar list title": "Calendars",
   "sync settings button label": "Synchronization",
   "default calendar name": "my calendar",
@@ -253,4 +253,3 @@ module.exports = {
   "email delete title": "This event has been canceled: %{description}",
   "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}"
 }
-;

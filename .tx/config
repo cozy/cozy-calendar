@@ -1,0 +1,8 @@
+[main]
+host = https://www.transifex.com
+
+[cozy-calendar.enjson]
+file_filter = client/app/locales/<lang>.json
+source_file = client/app/locales/en.json
+source_lang = en
+type = KEYVALUEJSON
