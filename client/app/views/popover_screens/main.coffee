@@ -119,7 +119,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         timepickerEvents =
             'focus': ->
-                 $(@).timepicker 'highlightHour'
+                $(@).timepicker 'highlightHour'
             'timepicker.next': ->
                 $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
             'timepicker.prev': ->
@@ -230,7 +230,13 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         month = +month - 1 if month # Months are 0 indexed in moment.js
 
-        setObj = { hour, minute, date, month, year }
+        # The order here is *VERY* important. When updating a moment date
+        # by iterating over the properties of this object, we must set month
+        # before day. For all day event ending the last day of the month, date
+        # is superior to the number of days of the month, and setting the
+        # monthe before the day will produce a wrong date.
+        # See #409
+        setObj = { year, month, date, hour, minute}
 
 
     # Loop over controls elements w/o exiting the popover scope
