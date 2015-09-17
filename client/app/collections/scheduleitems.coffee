@@ -17,8 +17,16 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                 return null if calendar and calendar.get('visible') is false
 
                 if item.isRecurrent()
-                    eventsInRange = eventsInRange.concat(
-                        item.getRecurrentFCEventBetween start, end)
+                    try
+                        eventsInRange = eventsInRange.concat(
+                            item.getRecurrentFCEventBetween start, end)
+                    catch e
+                        console.error e
+                        # sometime the RRule is badly formated, so we try to
+                        # at least display the first item
+                        if item.isInRange start, end
+                            eventsInRange.push(
+                                item.toPunctualFullCalendarEvent())
 
                 else if item.isInRange start, end
                     eventsInRange.push item.toPunctualFullCalendarEvent()

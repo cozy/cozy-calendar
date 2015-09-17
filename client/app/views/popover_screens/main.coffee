@@ -355,7 +355,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # If there is a valid rrule.
         if rrule?.length > 0
-            rrule = RRule.fromString @model.get('rrule')
+            try
+                rrule = RRule.fromString @model.get('rrule')
+            catch e
+                console.error e
+                return t('invalid recurring rule')
             # Handle localization.
             locale = moment.localeData()
             language =
