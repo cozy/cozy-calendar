@@ -236,6 +236,10 @@ module.exports = class ScheduleItem extends Backbone.Model
             # Compute the difference to know how many events to create.
             difference = endDate.diff(startDate, 'days')
 
+            # If event is all day, the end date is next day
+            if @isAllDay()
+                difference--
+
             # Create one all-day event for each day.
             fakeEvents = []
             for i in [0..difference] by 1
