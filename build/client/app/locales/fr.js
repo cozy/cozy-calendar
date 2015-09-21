@@ -247,6 +247,7 @@ module.exports = {
   "email update title": "L'évènement \"%{description}\" a changé",
   "email update content": "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}",
   "email delete title": "Cet évènement a été annulé : %{description}",
-  "email delete content": "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
+  "email delete content": "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}",
+  "invalid recurring rule": "La règle de répétition de cet évènement est invalide"
 }
 ;

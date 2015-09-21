@@ -9267,6 +9267,9 @@ a.btn:visited {
 .popover .label-row .button-full-block {
   height: 3em;
 }
+.popover .label-row .button-full-block:focus {
+  background-color: #eef;
+}
 .popover input {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -9837,7 +9840,7 @@ ul.alerts .type input[type=checkbox] {
   -webkit-flex: none;
   -ms-flex: none;
   flex: none;
-  width: 6rem;
+  width: 5rem;
   text-transform: uppercase;
   color: #999;
 }
@@ -9877,6 +9880,13 @@ ul.alerts .type input[type=checkbox] {
   -webkit-justify-content: space-between;
   justify-content: space-between;
   width: 100%;
+}
+.repeat-screen .space-between label {
+  margin-right: 0.75em;
+}
+.repeat-screen .space-between input[type="radio"],
+.repeat-screen .space-between input[type="checkbox"] {
+  margin-right: 0.25em;
 }
 .delete-screen {
   -webkit-box-sizing: border-box;
@@ -10248,11 +10258,23 @@ body.error-404 .error-frame .headline {
     width: 100%;
     padding: 0.4em;
   }
+  .fc-header .btn-group > .btn.fc-state-active.title {
+    min-width: inherit;
+  }
+  .fc-header-left,
+  .fc-header-center,
+  .fc-header-right {
+    width: inherit;
+  }
 }
 @media (max-width: 600px) {
-  #calendarHeader,
-  #calheader {
-    display: none;
+  .fc-header {
+    display: block;
+    text-align: center;
+  }
+  .fc-header .btn-group {
+    margin-bottom: 0.25em;
+    font-size: inherit;
   }
   #alarms .fc-day-header {
     font-size: 10px;
@@ -10261,7 +10283,8 @@ body.error-404 .error-frame .headline {
     font-size: 0.7em;
   }
   #alarms .fc-header-right {
-    width: 20%;
+    width: 100%;
+    text-align: center;
   }
   #alarms .popover {
     width: auto;
