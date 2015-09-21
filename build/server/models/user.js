@@ -8,7 +8,9 @@ module.exports = User = {};
 User.updateUser = function(callback) {
   return cozydb.api.getCozyUser(function(err, user) {
     if (err || !user) {
-      console.log(err);
+      if (err) {
+        console.log(err);
+      }
       User.timezone = 'Europe/Paris';
       User.email = '';
     } else {

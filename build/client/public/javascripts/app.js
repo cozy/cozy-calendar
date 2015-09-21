@@ -173,9 +173,9 @@ module.exports = {
 
 ;require.register("collections/calendars", function(exports, require, module) {
 var CalendarCollection, SocketListener, Tag, TagCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 SocketListener = require('../lib/socket_listener');
 
@@ -183,10 +183,10 @@ Tag = require('models/tag');
 
 TagCollection = require('collections/tags');
 
-module.exports = CalendarCollection = (function(_super) {
+module.exports = CalendarCollection = (function(superClass) {
   var stringify;
 
-  __extends(CalendarCollection, _super);
+  extend(CalendarCollection, superClass);
 
   function CalendarCollection() {
     return CalendarCollection.__super__.constructor.apply(this, arguments);
@@ -217,8 +217,8 @@ module.exports = CalendarCollection = (function(_super) {
   };
 
   CalendarCollection.prototype.onBaseCollectionAdd = function(model) {
-    var calendar, calendarName, tags, _ref;
-    _ref = model.get('tags'), calendarName = _ref[0], tags = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
+    var calendar, calendarName, ref, tags;
+    ref = model.get('tags'), calendarName = ref[0], tags = 2 <= ref.length ? slice.call(ref, 1) : [];
     calendar = app.tags.getOrCreateByName(calendarName);
     calendar.set('visible', true);
     this.add(calendar);
@@ -336,13 +336,13 @@ module.exports = CalendarCollection = (function(_super) {
 
 ;require.register("collections/contacts", function(exports, require, module) {
 var Contact, ContactCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Contact = require('../models/contact');
 
-module.exports = ContactCollection = (function(_super) {
-  __extends(ContactCollection, _super);
+module.exports = ContactCollection = (function(superClass) {
+  extend(ContactCollection, superClass);
 
   function ContactCollection() {
     return ContactCollection.__super__.constructor.apply(this, arguments);
@@ -364,9 +364,9 @@ module.exports = ContactCollection = (function(_super) {
         return items.push({
           id: contact.id,
           hasPicture: contact.get('hasPicture'),
-          display: "" + (contact.get('name')) + " &lt;" + email.value + "&gt;",
+          display: (contact.get('name')) + " &lt;" + email.value + "&gt;",
           toString: function() {
-            return "" + email.value + ";" + contact.id;
+            return email.value + ";" + contact.id;
           }
         });
       });
@@ -381,15 +381,15 @@ module.exports = ContactCollection = (function(_super) {
 
 ;require.register("collections/daybuckets", function(exports, require, module) {
 var DayBucket, DayBucketCollection, RealEventCollection, RealEventGeneratorCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 RealEventCollection = require('./realevents');
 
 RealEventGeneratorCollection = require('./realeventsgenerator');
 
-DayBucket = DayBucket = (function(_super) {
-  __extends(DayBucket, _super);
+DayBucket = DayBucket = (function(superClass) {
+  extend(DayBucket, superClass);
 
   function DayBucket(model) {
     DayBucket.__super__.constructor.call(this, {
@@ -406,8 +406,8 @@ DayBucket = DayBucket = (function(_super) {
 
 })(Backbone.Model);
 
-module.exports = DayBucketCollection = (function(_super) {
-  __extends(DayBucketCollection, _super);
+module.exports = DayBucketCollection = (function(superClass) {
+  extend(DayBucketCollection, superClass);
 
   function DayBucketCollection() {
     return DayBucketCollection.__super__.constructor.apply(this, arguments);
@@ -485,15 +485,15 @@ module.exports = DayBucketCollection = (function(_super) {
 
 ;require.register("collections/events", function(exports, require, module) {
 var Event, EventCollection, ScheduleItemsCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ScheduleItemsCollection = require('./scheduleitems');
 
 Event = require('../models/event');
 
-module.exports = EventCollection = (function(_super) {
-  __extends(EventCollection, _super);
+module.exports = EventCollection = (function(superClass) {
+  extend(EventCollection, superClass);
 
   function EventCollection() {
     return EventCollection.__super__.constructor.apply(this, arguments);
@@ -510,15 +510,15 @@ module.exports = EventCollection = (function(_super) {
 
 ;require.register("collections/realevents", function(exports, require, module) {
 var RealEvent, RealEventCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 RealEvent = require('../models/realevent');
 
-module.exports = RealEventCollection = (function(_super) {
+module.exports = RealEventCollection = (function(superClass) {
   var model;
 
-  __extends(RealEventCollection, _super);
+  extend(RealEventCollection, superClass);
 
   function RealEventCollection() {
     return RealEventCollection.__super__.constructor.apply(this, arguments);
@@ -537,15 +537,15 @@ module.exports = RealEventCollection = (function(_super) {
 
 ;require.register("collections/realeventsgenerator", function(exports, require, module) {
 var RealEvent, RealEventGeneratorCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 RealEvent = require('../models/realevent');
 
-module.exports = RealEventGeneratorCollection = (function(_super) {
+module.exports = RealEventGeneratorCollection = (function(superClass) {
   var model;
 
-  __extends(RealEventGeneratorCollection, _super);
+  extend(RealEventGeneratorCollection, superClass);
 
   function RealEventGeneratorCollection() {
     return RealEventGeneratorCollection.__super__.constructor.apply(this, arguments);
@@ -554,8 +554,8 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
   model = RealEvent;
 
   RealEventGeneratorCollection.prototype.comparator = function(re1, re2) {
-    var _ref;
-    return (_ref = re1.start) != null ? _ref.isBefore(re2.start) : void 0;
+    var ref;
+    return (ref = re1.start) != null ? ref.isBefore(re2.start) : void 0;
   };
 
   RealEventGeneratorCollection.prototype.initialize = function() {
@@ -734,15 +734,15 @@ module.exports = RealEventGeneratorCollection = (function(_super) {
 
 ;require.register("collections/scheduleitems", function(exports, require, module) {
 var ScheduleItemsCollection,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = ScheduleItemsCollection = (function(_super) {
-  __extends(ScheduleItemsCollection, _super);
+module.exports = ScheduleItemsCollection = (function(superClass) {
+  extend(ScheduleItemsCollection, superClass);
 
   function ScheduleItemsCollection() {
-    this.getFCEventSource = __bind(this.getFCEventSource, this);
+    this.getFCEventSource = bind(this.getFCEventSource, this);
     return ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
   }
 
@@ -758,7 +758,7 @@ module.exports = ScheduleItemsCollection = (function(_super) {
         var eventsInRange;
         eventsInRange = [];
         _this.each(function(item) {
-          var calendar, duration, itemEnd, itemStart;
+          var calendar, duration, e, itemEnd, itemStart;
           itemStart = item.getStartDateObject();
           itemEnd = item.getEndDateObject();
           duration = itemEnd - itemStart;
@@ -767,7 +767,15 @@ module.exports = ScheduleItemsCollection = (function(_super) {
             return null;
           }
           if (item.isRecurrent()) {
-            return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
+            try {
+              return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
+            } catch (_error) {
+              e = _error;
+              console.error(e);
+              if (item.isInRange(start, end)) {
+                return eventsInRange.push(item.toPunctualFullCalendarEvent());
+              }
+            }
           } else if (item.isInRange(start, end)) {
             return eventsInRange.push(item.toPunctualFullCalendarEvent());
           }
@@ -790,13 +798,13 @@ module.exports = ScheduleItemsCollection = (function(_super) {
 
 ;require.register("collections/tags", function(exports, require, module) {
 var Tag, TagCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Tag = require('../models/tag');
 
-module.exports = TagCollection = (function(_super) {
-  __extends(TagCollection, _super);
+module.exports = TagCollection = (function(superClass) {
+  extend(TagCollection, superClass);
 
   function TagCollection() {
     return TagCollection.__super__.constructor.apply(this, arguments);
@@ -853,17 +861,17 @@ exports.formatDateISO8601 = function(fullDate) {
   fullDate = fullDate.split(/#/);
   if (fullDate[0].match(/([0-9]{2}\/){2}[0-9]{4}/)) {
     date = fullDate[0].split(/[\/]/);
-    date = "" + date[2] + "-" + date[1] + "-" + date[0];
+    date = date[2] + "-" + date[1] + "-" + date[0];
   } else {
     date = "undefined";
   }
   if (fullDate[1].match(/[0-9]{2}:[0-9]{2}/)) {
     time = fullDate[1].split(/:/);
-    time = "" + time[0] + ":" + time[1] + ":00";
+    time = time[0] + ":" + time[1] + ":00";
   } else {
     time = "undefined";
   }
-  return "" + date + "T" + time;
+  return date + "T" + time;
 };
 
 exports.isDatePartValid = function(date) {
@@ -884,7 +892,7 @@ exports.icalToISO8601 = function(icalDate) {
   day = date[0].slice(6, 8);
   hours = date[1].slice(0, 2);
   minutes = date[1].slice(2, 4);
-  return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
+  return year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
 };
 
 exports.isEvent = function(start, end) {
@@ -912,19 +920,19 @@ exports.momentToDateString = function(m) {
 };
 
 exports.unitValuesToiCalDuration = function(unitsValues) {
-  var s, t, u, _i, _j, _len, _len1, _ref, _ref1;
+  var i, j, len, len1, ref, ref1, s, t, u;
   s = '-P';
-  _ref = ['W', 'D'];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    u = _ref[_i];
+  ref = ['W', 'D'];
+  for (i = 0, len = ref.length; i < len; i++) {
+    u = ref[i];
     if (u in unitsValues) {
       s += unitsValues[u] + u;
     }
   }
   t = '';
-  _ref1 = ['H', 'M', 'S'];
-  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-    u = _ref1[_j];
+  ref1 = ['H', 'M', 'S'];
+  for (j = 0, len1 = ref1.length; j < len1; j++) {
+    u = ref1[j];
     if (u in unitsValues) {
       t += unitsValues[u] + u;
     }
@@ -1094,11 +1102,11 @@ $(function() {
 
 ;require.register("lib/base_view", function(exports, require, module) {
 var BaseView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = BaseView = (function(_super) {
-  __extends(BaseView, _super);
+module.exports = BaseView = (function(superClass) {
+  extend(BaseView, superClass);
 
   function BaseView() {
     return BaseView.__super__.constructor.apply(this, arguments);
@@ -1109,9 +1117,9 @@ module.exports = BaseView = (function(_super) {
   BaseView.prototype.initialize = function() {};
 
   BaseView.prototype.getRenderData = function() {
-    var _ref;
+    var ref;
     return {
-      model: (_ref = this.model) != null ? _ref.toJSON() : void 0
+      model: (ref = this.model) != null ? ref.toJSON() : void 0
     };
   };
 
@@ -1140,15 +1148,15 @@ module.exports = BaseView = (function(_super) {
 
 ;require.register("lib/modal", function(exports, require, module) {
 var Modal,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-Modal = (function(_super) {
-  __extends(Modal, _super);
+Modal = (function(superClass) {
+  extend(Modal, superClass);
 
   function Modal() {
-    this.closeOnEscape = __bind(this.closeOnEscape, this);
+    this.closeOnEscape = bind(this.closeOnEscape, this);
     return Modal.__super__.constructor.apply(this, arguments);
   }
 
@@ -1304,11 +1312,11 @@ module.exports = Modal;
 
 ;require.register("lib/popover_screen_view", function(exports, require, module) {
 var PopoverScreenView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = PopoverScreenView = (function(_super) {
-  __extends(PopoverScreenView, _super);
+module.exports = PopoverScreenView = (function(superClass) {
+  extend(PopoverScreenView, superClass);
 
   PopoverScreenView.prototype.screenTitle = null;
 
@@ -1375,13 +1383,13 @@ module.exports = PopoverScreenView = (function(_super) {
 
 ;require.register("lib/popover_view", function(exports, require, module) {
 var BaseView, PopoverView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
-module.exports = PopoverView = (function(_super) {
-  __extends(PopoverView, _super);
+module.exports = PopoverView = (function(superClass) {
+  extend(PopoverView, superClass);
 
   function PopoverView() {
     return PopoverView.__super__.constructor.apply(this, arguments);
@@ -1394,33 +1402,38 @@ module.exports = PopoverView = (function(_super) {
     this.container = options.container;
     this.parentView = options.parentView;
     this.$tabCells = $('.fc-day-grid-container');
+    if (this.$tabCells.length === 0) {
+      this.$tabCells = $('.fc-time-grid-container');
+    }
     return this;
   };
 
   PopoverView.prototype.selfclose = function(checkoutChanges) {
-    var _base;
+    var base;
     if (checkoutChanges == null) {
       checkoutChanges = true;
     }
-    if (typeof (_base = this.parentView).onPopoverClose === "function") {
-      _base.onPopoverClose();
+    if (typeof (base = this.parentView).onPopoverClose === "function") {
+      base.onPopoverClose();
     }
     return this.close(checkoutChanges);
   };
 
   PopoverView.prototype.close = function() {
-    this.$popover.remove();
-    this.$popover = null;
+    if (this.$popover != null) {
+      this.$popover.remove();
+      this.$popover = null;
+    }
     this.target.data('popover', void 0);
     return this.remove();
   };
 
   PopoverView.prototype.getScreen = function(screenID) {
-    var screen, _ref;
+    var ref, screen;
     if (screenID == null) {
       screenID = 'default';
     }
-    screen = (_ref = this.screens) != null ? _ref[screenID] : void 0;
+    screen = (ref = this.screens) != null ? ref[screenID] : void 0;
     if (screen != null) {
       return screen;
     } else {
@@ -1505,18 +1518,24 @@ module.exports = PopoverView = (function(_super) {
       left = targetLeftBorder + (popoverWidth / 2) + popoverMargin;
     }
     oneRowHeight = containerHeight / 6;
-    if (targetOffset.top < oneRowHeight * 2) {
-      top = '10vh';
+    if (targetOffset.top < oneRowHeight * 1) {
+      top = '5vh';
+      bottom = 'auto';
+    } else if (targetOffset.top < oneRowHeight * 2) {
+      top = '15vh';
       bottom = 'auto';
     } else if (targetOffset.top < oneRowHeight * 3) {
-      top = '30vh';
+      top = '35vh';
       bottom = 'auto';
     } else if (targetOffset.top < oneRowHeight * 4) {
+      top = '45vh';
+      bottom = 'auto';
+    } else if (targetOffset.top < oneRowHeight * 5) {
       top = 'auto';
-      bottom = '15vh';
+      bottom = '10vh';
     } else {
       top = 'auto';
-      bottom = '5vh';
+      bottom = '0vh';
     }
     position = {
       top: top,
@@ -1603,18 +1622,18 @@ exports.del = function(url, callback) {
 
 ;require.register("lib/socket_listener", function(exports, require, module) {
 var SocketListener, addModel,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 addModel = (function(_this) {
   return function(model, callback) {
     return model.fetch({
       success: function(fetched) {
-        var collection, _i, _len, _ref;
+        var collection, i, len, ref;
         if (model.collections != null) {
-          _ref = model.collections;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            collection = _ref[_i];
+          ref = model.collections;
+          for (i = 0, len = ref.length; i < len; i++) {
+            collection = ref[i];
             if (model instanceof collection.model) {
               collection.add(model);
             }
@@ -1629,8 +1648,8 @@ addModel = (function(_this) {
   };
 })(this);
 
-SocketListener = (function(_super) {
-  __extends(SocketListener, _super);
+SocketListener = (function(superClass) {
+  extend(SocketListener, superClass);
 
   function SocketListener() {
     return SocketListener.__super__.constructor.apply(this, arguments);
@@ -1737,11 +1756,11 @@ module.exports = function(router) {
 
 ;require.register("lib/view", function(exports, require, module) {
 var View,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = View = (function(_super) {
-  __extends(View, _super);
+module.exports = View = (function(superClass) {
+  extend(View, superClass);
 
   function View() {
     return View.__super__.constructor.apply(this, arguments);
@@ -1778,18 +1797,18 @@ module.exports = View = (function(_super) {
 
 ;require.register("lib/view_collection", function(exports, require, module) {
 var BaseView, ViewCollection,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
-module.exports = ViewCollection = (function(_super) {
-  __extends(ViewCollection, _super);
+module.exports = ViewCollection = (function(superClass) {
+  extend(ViewCollection, superClass);
 
   function ViewCollection() {
-    this.removeItem = __bind(this.removeItem, this);
-    this.addItem = __bind(this.addItem, this);
+    this.removeItem = bind(this.removeItem, this);
+    this.addItem = bind(this.addItem, this);
     return ViewCollection.__super__.constructor.apply(this, arguments);
   }
 
@@ -1827,23 +1846,23 @@ module.exports = ViewCollection = (function(_super) {
   };
 
   ViewCollection.prototype.render = function() {
-    var id, view, _ref;
-    _ref = this.views;
-    for (id in _ref) {
-      view = _ref[id];
+    var id, ref, view;
+    ref = this.views;
+    for (id in ref) {
+      view = ref[id];
       view.$el.detach();
     }
     return ViewCollection.__super__.render.apply(this, arguments);
   };
 
   ViewCollection.prototype.afterRender = function() {
-    var id, view, _ref;
+    var id, ref, view;
     if (!this.$collectionEl) {
       this.$collectionEl = this.$(this.collectionEl);
     }
-    _ref = this.views;
-    for (id in _ref) {
-      view = _ref[id];
+    ref = this.views;
+    for (id in ref) {
+      view = ref[id];
       this.appendView(view);
     }
     this.onReset(this.collection);
@@ -1856,10 +1875,10 @@ module.exports = ViewCollection = (function(_super) {
   };
 
   ViewCollection.prototype.onReset = function(newcollection) {
-    var id, view, _ref;
-    _ref = this.views;
-    for (id in _ref) {
-      view = _ref[id];
+    var id, ref, view;
+    ref = this.views;
+    for (id in ref) {
+      view = ref[id];
       view.remove();
     }
     return newcollection.forEach(this.addItem);
@@ -2901,11 +2920,11 @@ module.exports = {
 
 ;require.register("models/contact", function(exports, require, module) {
 var Contact,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = Contact = (function(_super) {
-  __extends(Contact, _super);
+module.exports = Contact = (function(superClass) {
+  extend(Contact, superClass);
 
   function Contact() {
     return Contact.__super__.constructor.apply(this, arguments);
@@ -2926,13 +2945,13 @@ module.exports = Contact = (function(_super) {
 
 ;require.register("models/event", function(exports, require, module) {
 var Event, ScheduleItem,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ScheduleItem = require('./scheduleitem');
 
-module.exports = Event = (function(_super) {
-  __extends(Event, _super);
+module.exports = Event = (function(superClass) {
+  extend(Event, superClass);
 
   function Event() {
     return Event.__super__.constructor.apply(this, arguments);
@@ -2947,8 +2966,8 @@ module.exports = Event = (function(_super) {
   Event.prototype.urlRoot = 'events';
 
   Event.prototype.defaults = function() {
-    var defaultCalendar, _ref, _ref1;
-    defaultCalendar = ((_ref = window.app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0) || t('default calendar name');
+    var defaultCalendar, ref, ref1;
+    defaultCalendar = ((ref = window.app.calendars) != null ? (ref1 = ref.at(0)) != null ? ref1.get('name') : void 0 : void 0) || t('default calendar name');
     return {
       details: '',
       description: '',
@@ -3051,11 +3070,11 @@ module.exports = Event = (function(_super) {
 
 ;require.register("models/realevent", function(exports, require, module) {
 var RealEvent,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = RealEvent = (function(_super) {
-  __extends(RealEvent, _super);
+module.exports = RealEvent = (function(superClass) {
+  extend(RealEvent, superClass);
 
   function RealEvent(options) {
     RealEvent.__super__.constructor.apply(this, arguments);
@@ -3066,7 +3085,7 @@ module.exports = RealEvent = (function(_super) {
     if (this.event.isRecurrent()) {
       this.set('id', this.event.get('id') + this.start.toISOString());
     } else if (this.event.isMultipleDays()) {
-      this.set('id', "" + (this.event.get('id')) + " " + this.start);
+      this.set('id', (this.event.get('id')) + " " + this.start);
     } else {
       this.set('id', this.event.get('id'));
       this.start = this.event.getStartDateObject();
@@ -3083,8 +3102,8 @@ module.exports = RealEvent = (function(_super) {
   };
 
   RealEvent.prototype.getDateHash = function() {
-    var _ref;
-    return (_ref = this.start) != null ? _ref.format('YYYYMMDD') : void 0;
+    var ref;
+    return (ref = this.start) != null ? ref.format('YYYYMMDD') : void 0;
   };
 
   RealEvent.prototype.isAllDay = function() {
@@ -3092,13 +3111,13 @@ module.exports = RealEvent = (function(_super) {
   };
 
   RealEvent.prototype.getFormattedStartDate = function(format) {
-    var _ref;
-    return (_ref = this.start) != null ? _ref.format(format) : void 0;
+    var ref;
+    return (ref = this.start) != null ? ref.format(format) : void 0;
   };
 
   RealEvent.prototype.getFormattedEndDate = function(format) {
-    var _ref;
-    return (_ref = this.end) != null ? _ref.format(format) : void 0;
+    var ref;
+    return (ref = this.end) != null ? ref.format(format) : void 0;
   };
 
   return RealEvent;
@@ -3108,15 +3127,15 @@ module.exports = RealEvent = (function(_super) {
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
 var H, Modal, ScheduleItem,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Modal = require('../lib/modal');
 
 H = require('../helpers');
 
-module.exports = ScheduleItem = (function(_super) {
-  __extends(ScheduleItem, _super);
+module.exports = ScheduleItem = (function(superClass) {
+  extend(ScheduleItem, superClass);
 
   function ScheduleItem() {
     return ScheduleItem.__super__.constructor.apply(this, arguments);
@@ -3129,9 +3148,9 @@ module.exports = ScheduleItem = (function(_super) {
   ScheduleItem.prototype.endDateField = false;
 
   ScheduleItem.prototype.initialize = function() {
-    var defaultCalendarName, _ref;
+    var defaultCalendarName, ref;
     defaultCalendarName = t('default calendar name');
-    if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
+    if (!((ref = this.get('tags')) != null ? ref.length : void 0)) {
       this.set('tags', [defaultCalendarName]);
     }
     this.on('change:' + this.startDateField, (function(_this) {
@@ -3147,8 +3166,8 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.getCalendar = function() {
-    var _ref;
-    return app.tags.getByName((_ref = this.get('tags')) != null ? _ref[0] : void 0);
+    var ref;
+    return app.tags.getByName((ref = this.get('tags')) != null ? ref[0] : void 0);
   };
 
   ScheduleItem.prototype.setCalendar = function(cal) {
@@ -3176,13 +3195,13 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.isVisible = function() {
-    var _ref;
-    return (_ref = this.getCalendar()) != null ? _ref.get('visible') : void 0;
+    var ref;
+    return (ref = this.getCalendar()) != null ? ref.get('visible') : void 0;
   };
 
   ScheduleItem.prototype.isAllDay = function() {
-    var _ref;
-    return ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
+    var ref;
+    return ((ref = this.get(this.startDateField)) != null ? ref.length : void 0) === 10;
   };
 
   ScheduleItem.prototype.isSameDay = function() {
@@ -3358,15 +3377,18 @@ module.exports = ScheduleItem = (function(_super) {
   };
 
   ScheduleItem.prototype.generateMultipleDaysEvents = function() {
-    var date, difference, endDate, fakeEvent, fakeEvents, i, startDate, _i;
+    var date, difference, endDate, fakeEvent, fakeEvents, i, j, ref, startDate;
     if (!this.isMultipleDays()) {
       return [this];
     } else {
       startDate = this.getStartDateObject();
       endDate = this.getEndDateObject();
       difference = endDate.diff(startDate, 'days');
+      if (this.isAllDay()) {
+        difference--;
+      }
       fakeEvents = [];
-      for (i = _i = 0; _i <= difference; i = _i += 1) {
+      for (i = j = 0, ref = difference; j <= ref; i = j += 1) {
         fakeEvent = _.clone(this.attributes);
         date = moment(startDate).add(i, 'days');
         fakeEvent = {
@@ -3411,7 +3433,7 @@ module.exports = ScheduleItem = (function(_super) {
 
   ScheduleItem.prototype.sync = function(method, model, options) {
     return this.confirmSendEmails(method, function(sendMails) {
-      options.url = "" + (model.url()) + "?sendMails=" + sendMails;
+      options.url = (model.url()) + "?sendMails=" + sendMails;
       return ScheduleItem.__super__.sync.call(this, method, model, options);
     });
   };
@@ -3426,11 +3448,11 @@ module.exports = ScheduleItem = (function(_super) {
     }
     attendees = this.get('attendees') || [];
     guestsToInform = attendees.filter(function(guest) {
-      var _ref;
+      var ref;
       if (method === 'create') {
         return true;
       } else if (method === 'delete') {
-        return (_ref = guest.status) === 'ACCEPTED' || _ref === 'NEEDS-ACTION';
+        return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
       } else if (method === 'update' || method === 'patch') {
         return guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && this.startDateChanged);
       }
@@ -3441,7 +3463,7 @@ module.exports = ScheduleItem = (function(_super) {
       callback(false);
     } else {
       guestsList = guestsToInform.join(', ');
-      content = "" + (t('send mails question')) + " " + guestsList;
+      content = (t('send mails question')) + " " + guestsList;
       Modal.confirm(t('modal send mails'), content, t('yes'), t('no'), callback);
     }
     this.startDateChanged = false;
@@ -3455,11 +3477,11 @@ module.exports = ScheduleItem = (function(_super) {
 
 ;require.register("models/tag", function(exports, require, module) {
 var Tag,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
-module.exports = Tag = (function(_super) {
-  __extends(Tag, _super);
+module.exports = Tag = (function(superClass) {
+  extend(Tag, superClass);
 
   function Tag() {
     return Tag.__super__.constructor.apply(this, arguments);
@@ -3482,9 +3504,9 @@ module.exports = Tag = (function(_super) {
 
 ;require.register("router", function(exports, require, module) {
 var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 app = require('application');
 
@@ -3498,15 +3520,15 @@ ImportView = require('views/import_view');
 
 DayBucketCollection = require('collections/daybuckets');
 
-module.exports = Router = (function(_super) {
+module.exports = Router = (function(superClass) {
   var getBeginningOfWeek;
 
-  __extends(Router, _super);
+  extend(Router, superClass);
 
   function Router() {
-    this.displayView = __bind(this.displayView, this);
-    this.displayCalendar = __bind(this.displayCalendar, this);
-    this.backToCalendar = __bind(this.backToCalendar, this);
+    this.displayView = bind(this.displayView, this);
+    this.displayCalendar = bind(this.displayCalendar, this);
+    this.backToCalendar = bind(this.backToCalendar, this);
     return Router.__super__.constructor.apply(this, arguments);
   }
 
@@ -3559,9 +3581,9 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.week = function(year, month, day) {
-    var hash, _ref;
+    var hash, ref;
     if (year != null) {
-      _ref = getBeginningOfWeek(year, month, day), year = _ref[0], month = _ref[1], day = _ref[2];
+      ref = getBeginningOfWeek(year, month, day), year = ref[0], month = ref[1], day = ref[2];
       return this.displayCalendar('agendaWeek', year, month, day);
     } else {
       hash = moment().format('[week]/YYYY/M/D');
@@ -3598,8 +3620,8 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.week_event = function(year, month, date, id) {
-    var day, _ref;
-    _ref = getBeginningOfWeek(year, month, day), year = _ref[0], month = _ref[1], day = _ref[2];
+    var day, ref;
+    ref = getBeginningOfWeek(year, month, day), year = ref[0], month = ref[1], day = ref[2];
     if (!(this.mainView instanceof CalendarView)) {
       this.week(year, month, date);
     }
@@ -3646,10 +3668,10 @@ module.exports = Router = (function(_super) {
   };
 
   getBeginningOfWeek = function(year, month, day) {
-    var monday, _ref;
-    _ref = [year, month, day].map(function(x) {
+    var monday, ref;
+    ref = [year, month, day].map(function(x) {
       return parseInt(x);
-    }), year = _ref[0], month = _ref[1], day = _ref[2];
+    }), year = ref[0], month = ref[1], day = ref[2];
     monday = new Date(year, (month - 1) % 12, day);
     monday.setDate(monday.getDate() - monday.getDay() + 1);
     return [year, monday.getMonth() + 1, monday.getDate()];
@@ -3670,13 +3692,13 @@ module.exports = Router = (function(_super) {
 
 ;require.register("views/calendar_header", function(exports, require, module) {
 var BaseView, CalendarHeader,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('../lib/base_view');
 
-module.exports = CalendarHeader = (function(_super) {
-  __extends(CalendarHeader, _super);
+module.exports = CalendarHeader = (function(superClass) {
+  extend(CalendarHeader, superClass);
 
   function CalendarHeader() {
     return CalendarHeader.__super__.constructor.apply(this, arguments);
@@ -3730,9 +3752,9 @@ module.exports = CalendarHeader = (function(_super) {
   };
 
   CalendarHeader.prototype.isToday = function() {
-    var end, start, _ref, _ref1;
-    _ref = this.getDates(), start = _ref[0], end = _ref[1];
-    return (start < (_ref1 = moment()) && _ref1 < end);
+    var end, ref, ref1, start;
+    ref = this.getDates(), start = ref[0], end = ref[1];
+    return (start < (ref1 = moment()) && ref1 < end);
   };
 
   CalendarHeader.prototype.getRenderData = function() {
@@ -3793,15 +3815,15 @@ module.exports = CalendarHeader = (function(_super) {
 
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
 var Event, EventPopOver, PopoverView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverView = require('lib/popover_view');
 
 Event = require('models/event');
 
-module.exports = EventPopOver = (function(_super) {
-  __extends(EventPopOver, _super);
+module.exports = EventPopOver = (function(superClass) {
+  extend(EventPopOver, superClass);
 
   function EventPopOver() {
     return EventPopOver.__super__.constructor.apply(this, arguments);
@@ -3891,10 +3913,10 @@ module.exports = EventPopOver = (function(_super) {
 
 ;require.register("views/calendar_view", function(exports, require, module) {
 var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 app = require('application');
 
@@ -3910,18 +3932,18 @@ timezones = require('helpers/timezone').timezones;
 
 Event = require('models/event');
 
-module.exports = CalendarView = (function(_super) {
-  __extends(CalendarView, _super);
+module.exports = CalendarView = (function(superClass) {
+  extend(CalendarView, superClass);
 
   function CalendarView() {
-    this.onEventClick = __bind(this.onEventClick, this);
-    this.onEventResize = __bind(this.onEventResize, this);
-    this.onEventDrop = __bind(this.onEventDrop, this);
-    this.onSelect = __bind(this.onSelect, this);
-    this.getUrlHash = __bind(this.getUrlHash, this);
-    this.onChangeView = __bind(this.onChangeView, this);
-    this.refreshOne = __bind(this.refreshOne, this);
-    this.handleWindowResize = __bind(this.handleWindowResize, this);
+    this.onEventClick = bind(this.onEventClick, this);
+    this.onEventResize = bind(this.onEventResize, this);
+    this.onEventDrop = bind(this.onEventDrop, this);
+    this.onSelect = bind(this.onSelect, this);
+    this.getUrlHash = bind(this.getUrlHash, this);
+    this.onChangeView = bind(this.onChangeView, this);
+    this.refreshOne = bind(this.refreshOne, this);
+    this.handleWindowResize = bind(this.handleWindowResize, this);
     return CalendarView.__super__.constructor.apply(this, arguments);
   }
 
@@ -3929,8 +3951,8 @@ module.exports = CalendarView = (function(_super) {
 
   CalendarView.prototype.template = require('./templates/calendarview');
 
-  CalendarView.prototype.initialize = function(options) {
-    this.options = options;
+  CalendarView.prototype.initialize = function(options1) {
+    this.options = options1;
     this.eventCollection = this.model.events;
     this.listenTo(this.eventCollection, 'add', this.refresh);
     this.listenTo(this.eventCollection, 'reset', this.refresh);
@@ -3942,19 +3964,27 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.afterRender = function() {
-    var debounced, locale, source;
+    var currDate, debounced, locale, source;
     locale = moment.localeData();
     this.cal = this.$('#alarms');
     this.view = this.options.view;
+    currDate = moment();
+    if (this.options.year != null) {
+      currDate.year(this.options.year);
+    }
+    if (this.options.month != null) {
+      currDate.month(this.options.month);
+    }
+    if (this.options.date != null) {
+      currDate.date(this.options.date);
+    }
     this.cal.fullCalendar({
       lang: window.locale,
       header: false,
       firstDay: 1,
       height: "auto",
       defaultView: this.view,
-      year: this.options.year,
-      month: this.options.month,
-      date: this.options.date,
+      defaultDate: currDate,
       viewRender: this.onChangeView,
       monthNames: locale._months,
       monthNamesShort: locale._monthsShort,
@@ -4033,9 +4063,9 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.remove = function() {
-    var _ref;
-    if ((_ref = this.popover) != null) {
-      _ref.close();
+    var ref;
+    if ((ref = this.popover) != null) {
+      ref.close();
     }
     return CalendarView.__super__.remove.apply(this, arguments);
   };
@@ -4079,12 +4109,12 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    var _ref, _ref1;
+    var ref, ref1;
     options.container = this.cal;
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      if ((this.popover.options != null) && ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.isSame(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type))) {
+      if ((this.popover.options != null) && ((this.popover.options.model != null) && this.popover.options.model === options.model || (((ref = this.popover.options.start) != null ? ref.isSame(options.start) : void 0) && ((ref1 = this.popover.options.end) != null ? ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type))) {
         this.cal.fullCalendar('unselect');
         this.popover = null;
         return;
@@ -4095,18 +4125,18 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.closePopover = function() {
-    var _ref;
-    if ((_ref = this.popover) != null) {
-      _ref.close();
+    var ref;
+    if ((ref = this.popover) != null) {
+      ref.close();
     }
     return this.onPopoverClose();
   };
 
   CalendarView.prototype.onChangeView = function(view) {
-    var f, hash, _ref;
+    var f, hash, ref;
     this.closePopover();
-    if ((_ref = this.calHeader) != null) {
-      _ref.render();
+    if ((ref = this.calHeader) != null) {
+      ref.render();
     }
     if (this.view !== view.name) {
       this.handleWindowResize();
@@ -4151,7 +4181,7 @@ module.exports = CalendarView = (function(_super) {
   };
 
   CalendarView.prototype.onEventRender = function(event, $element) {
-    var $displayedElement, spinTarget, time, title, titleAndTime, _ref;
+    var $displayedElement, ref, spinTarget, time, title, titleAndTime;
     if ((event.isSaving != null) && event.isSaving) {
       spinTarget = $element.find('.fc-event-time');
       spinTarget.addClass('spinning');
@@ -4164,7 +4194,7 @@ module.exports = CalendarView = (function(_super) {
       time = '';
       title = titleAndTime;
     } else {
-      _ref = titleAndTime.split(' '), time = _ref[0], title = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
+      ref = titleAndTime.split(' '), time = ref[0], title = 2 <= ref.length ? slice.call(ref, 1) : [];
       title = title.join(' ');
     }
     $element.find('.fc-time').html(time);
@@ -4240,8 +4270,8 @@ module.exports = CalendarView = (function(_super) {
 
 ;require.register("views/import_event_list", function(exports, require, module) {
 var EventCollection, EventList, EventView, ViewCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4249,8 +4279,8 @@ EventView = require('./import_event_view');
 
 EventCollection = require('../collections/events');
 
-module.exports = EventList = (function(_super) {
-  __extends(EventList, _super);
+module.exports = EventList = (function(superClass) {
+  extend(EventList, superClass);
 
   function EventList() {
     return EventList.__super__.constructor.apply(this, arguments);
@@ -4267,13 +4297,13 @@ module.exports = EventList = (function(_super) {
 
 ;require.register("views/import_event_view", function(exports, require, module) {
 var BaseView, EventView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('../lib/base_view');
 
-module.exports = EventView = (function(_super) {
-  __extends(EventView, _super);
+module.exports = EventView = (function(superClass) {
+  extend(EventView, superClass);
 
   function EventView() {
     return EventView.__super__.constructor.apply(this, arguments);
@@ -4299,9 +4329,9 @@ module.exports = EventView = (function(_super) {
 
 ;require.register("views/import_view", function(exports, require, module) {
 var BaseView, ComboBox, Event, EventList, ImportView, helpers, request,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('../lib/base_view');
 
@@ -4315,11 +4345,11 @@ Event = require('../models/event');
 
 EventList = require('./import_event_list');
 
-module.exports = ImportView = (function(_super) {
-  __extends(ImportView, _super);
+module.exports = ImportView = (function(superClass) {
+  extend(ImportView, superClass);
 
   function ImportView() {
-    this.importEvents = __bind(this.importEvents, this);
+    this.importEvents = bind(this.importEvents, this);
     return ImportView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4375,8 +4405,8 @@ module.exports = ImportView = (function(_super) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var _ref;
-          if (result != null ? (_ref = result.calendar) != null ? _ref.name : void 0 : void 0) {
+          var ref;
+          if (result != null ? (ref = result.calendar) != null ? ref.name : void 0 : void 0) {
             _this.calendarCombo.setValue(result.calendar.name);
           }
           if ((result != null ? result.events : void 0) != null) {
@@ -4450,16 +4480,16 @@ module.exports = ImportView = (function(_super) {
   };
 
   ImportView.prototype.importEvents = function(events, callback) {
-    var event, _i, _len;
-    for (_i = 0, _len = events.length; _i < _len; _i++) {
-      event = events[_i];
+    var event, i, len;
+    for (i = 0, len = events.length; i < len; i++) {
+      event = events[i];
       event.tags = [this.targetCalendar];
       event.id = null;
       event["import"] = true;
     }
     return request.post("events/bulk", events, (function(_this) {
       return function(err, result) {
-        var msg, _j, _len1, _ref;
+        var j, len1, msg, ref;
         if (err) {
           if (result != null) {
             msg = result.msg;
@@ -4469,9 +4499,9 @@ module.exports = ImportView = (function(_super) {
           }
           alert(msg);
         } else {
-          _ref = result.errors;
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            event = _ref[_j];
+          ref = result.errors;
+          for (j = 0, len1 = ref.length; j < len1; j++) {
+            event = ref[j];
             _this.addImportError(event, './templates/import_event');
           }
         }
@@ -4521,9 +4551,9 @@ module.exports = ImportView = (function(_super) {
 
 ;require.register("views/list_view", function(exports, require, module) {
 var Header, ListView, ViewCollection, defaultTimezone, helpers,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4533,12 +4563,12 @@ helpers = require('../helpers');
 
 defaultTimezone = 'timezone';
 
-module.exports = ListView = (function(_super) {
-  __extends(ListView, _super);
+module.exports = ListView = (function(superClass) {
+  extend(ListView, superClass);
 
   function ListView() {
-    this.checkScroll = __bind(this.checkScroll, this);
-    this.keepScreenFull = __bind(this.keepScreenFull, this);
+    this.checkScroll = bind(this.checkScroll, this);
+    this.keepScreenFull = bind(this.keepScreenFull, this);
     return ListView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4688,15 +4718,15 @@ module.exports = ListView = (function(_super) {
 
 ;require.register("views/list_view_bucket", function(exports, require, module) {
 var BucketView, PopoverEvent, ViewCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ViewCollection = require('../lib/view_collection');
 
 PopoverEvent = require('./calendar_popover_event');
 
-module.exports = BucketView = (function(_super) {
-  __extends(BucketView, _super);
+module.exports = BucketView = (function(superClass) {
+  extend(BucketView, superClass);
 
   function BucketView() {
     return BucketView.__super__.constructor.apply(this, arguments);
@@ -4775,8 +4805,8 @@ module.exports = BucketView = (function(_super) {
 
 ;require.register("views/list_view_item", function(exports, require, module) {
 var BaseView, Event, EventItemView, PopoverEvent,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
@@ -4784,8 +4814,8 @@ PopoverEvent = require('./calendar_popover_event');
 
 Event = require('models/event');
 
-module.exports = EventItemView = (function(_super) {
-  __extends(EventItemView, _super);
+module.exports = EventItemView = (function(superClass) {
+  extend(EventItemView, superClass);
 
   function EventItemView() {
     return EventItemView.__super__.constructor.apply(this, arguments);
@@ -4855,8 +4885,8 @@ module.exports = EventItemView = (function(_super) {
 
 ;require.register("views/menu", function(exports, require, module) {
 var ComboBox, Event, MenuView, Tag, ViewCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4866,8 +4896,8 @@ Event = require('models/event');
 
 Tag = require('models/tag');
 
-module.exports = MenuView = (function(_super) {
-  __extends(MenuView, _super);
+module.exports = MenuView = (function(superClass) {
+  extend(MenuView, superClass);
 
   function MenuView() {
     return MenuView.__super__.constructor.apply(this, arguments);
@@ -4911,7 +4941,7 @@ module.exports = MenuView = (function(_super) {
         var localName;
         localName = t(name);
         if (n > 0) {
-          localName = "" + localName + " " + n;
+          localName = localName + " " + n;
         }
         return (tag.get('name') === localName) && tag.get('visible');
       });
@@ -4924,7 +4954,7 @@ module.exports = MenuView = (function(_super) {
     }
     localName = t(name);
     if (n > 0) {
-      localName = "" + localName + " " + n;
+      localName = localName + " " + n;
     }
     return this.createNewCalendar(localName);
   };
@@ -4946,7 +4976,7 @@ module.exports = MenuView = (function(_super) {
         return wait = setInterval(function() {
           var newCalSel, rename;
           newCalSel = "#menuitems li.tagmenuitem[data-name='" + name + "']";
-          rename = $("" + newCalSel + " .calendar-rename");
+          rename = $(newCalSel + " .calendar-rename");
           if (rename.length > 0) {
             clearInterval(wait);
             return rename.trigger("click");
@@ -5012,19 +5042,19 @@ module.exports = MenuView = (function(_super) {
 
 ;require.register("views/menu_item", function(exports, require, module) {
 var BaseView, MenuItemView, colorSet,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('../lib/base_view');
 
 colorSet = require('../helpers/color-set');
 
-module.exports = MenuItemView = (function(_super) {
-  __extends(MenuItemView, _super);
+module.exports = MenuItemView = (function(superClass) {
+  extend(MenuItemView, superClass);
 
   function MenuItemView() {
-    this.hideColorPicker = __bind(this.hideColorPicker, this);
+    this.hideColorPicker = bind(this.hideColorPicker, this);
     return MenuItemView.__super__.constructor.apply(this, arguments);
   }
 
@@ -5207,15 +5237,15 @@ module.exports = MenuItemView = (function(_super) {
 
 ;require.register("views/popover_screens/alert", function(exports, require, module) {
 var AlertPopoverScreen, PopoverScreenView, helpers,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
 
 helpers = require('helpers');
 
-module.exports = AlertPopoverScreen = (function(_super) {
-  __extends(AlertPopoverScreen, _super);
+module.exports = AlertPopoverScreen = (function(superClass) {
+  extend(AlertPopoverScreen, superClass);
 
   function AlertPopoverScreen() {
     return AlertPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5289,28 +5319,28 @@ module.exports = AlertPopoverScreen = (function(_super) {
   };
 
   AlertPopoverScreen.prototype.afterRender = function() {
-    var $alerts, alarm, alarms, index, options, row, translationKey, trigger, value, _i, _len, _ref, _ref1, _ref2, _results;
+    var $alerts, alarm, alarms, i, index, len, options, ref, ref1, ref2, results, row, translationKey, trigger, value;
     $alerts = this.$('.alerts');
     $alerts.empty();
     alarms = this.model.get('alarms') || [];
-    _results = [];
-    for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
+    results = [];
+    for (index = i = 0, len = alarms.length; i < len; index = ++i) {
       alarm = alarms[index];
       trigger = helpers.iCalDurationToUnitValue(alarm.trigg);
-      _ref = this.getAlertTranslationInfo(trigger), translationKey = _ref.translationKey, value = _ref.value;
+      ref = this.getAlertTranslationInfo(trigger), translationKey = ref.translationKey, value = ref.value;
       options = {
         index: index,
         label: t(translationKey, {
           smart_count: value
         }),
         action: alarm.action,
-        isEmailChecked: (_ref1 = alarm.action) === 'EMAIL' || _ref1 === 'BOTH',
-        isNotifChecked: (_ref2 = alarm.action) === 'DISPLAY' || _ref2 === 'BOTH'
+        isEmailChecked: (ref1 = alarm.action) === 'EMAIL' || ref1 === 'BOTH',
+        isNotifChecked: (ref2 = alarm.action) === 'DISPLAY' || ref2 === 'BOTH'
       };
       row = this.templateAlertRow(options);
-      _results.push($alerts.append(row));
+      results.push($alerts.append(row));
     }
-    return _results;
+    return results;
   };
 
   AlertPopoverScreen.prototype.onRemoveAlert = function(event) {
@@ -5393,13 +5423,13 @@ module.exports = AlertPopoverScreen = (function(_super) {
 
 ;require.register("views/popover_screens/delete", function(exports, require, module) {
 var DeletePopoverScreen, PopoverScreenView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
 
-module.exports = DeletePopoverScreen = (function(_super) {
-  __extends(DeletePopoverScreen, _super);
+module.exports = DeletePopoverScreen = (function(superClass) {
+  extend(DeletePopoverScreen, superClass);
 
   function DeletePopoverScreen() {
     return DeletePopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5455,13 +5485,13 @@ module.exports = DeletePopoverScreen = (function(_super) {
 
 ;require.register("views/popover_screens/details", function(exports, require, module) {
 var DetailsPopoverScreen, PopoverScreenView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
 
-module.exports = DetailsPopoverScreen = (function(_super) {
-  __extends(DetailsPopoverScreen, _super);
+module.exports = DetailsPopoverScreen = (function(superClass) {
+  extend(DetailsPopoverScreen, superClass);
 
   function DetailsPopoverScreen() {
     return DetailsPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5488,15 +5518,15 @@ module.exports = DetailsPopoverScreen = (function(_super) {
 
 ;require.register("views/popover_screens/guests", function(exports, require, module) {
 var GuestPopoverScreen, PopoverScreenView, random,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
 
 random = require('lib/random');
 
-module.exports = GuestPopoverScreen = (function(_super) {
-  __extends(GuestPopoverScreen, _super);
+module.exports = GuestPopoverScreen = (function(superClass) {
+  extend(GuestPopoverScreen, superClass);
 
   function GuestPopoverScreen() {
     return GuestPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5531,11 +5561,11 @@ module.exports = GuestPopoverScreen = (function(_super) {
   };
 
   GuestPopoverScreen.prototype.afterRender = function() {
-    var $guests, guest, guests, index, options, row, _i, _len;
+    var $guests, guest, guests, i, index, len, options, row;
     $guests = this.$('.guests');
     $guests.empty();
     guests = this.model.get('attendees') || [];
-    for (index = _i = 0, _len = guests.length; _i < _len; index = ++_i) {
+    for (index = i = 0, len = guests.length; i < len; index = ++i) {
       guest = guests[index];
       options = _.extend(guest, {
         index: index
@@ -5593,12 +5623,12 @@ module.exports = GuestPopoverScreen = (function(_super) {
   };
 
   GuestPopoverScreen.prototype.onNewGuest = function(userInfo) {
-    var contactID, email, guests, _ref;
+    var contactID, email, guests, ref;
     if (userInfo == null) {
       userInfo = null;
     }
     if ((userInfo != null) && typeof userInfo === "string") {
-      _ref = userInfo.split(';'), email = _ref[0], contactID = _ref[1];
+      ref = userInfo.split(';'), email = ref[0], contactID = ref[1];
     } else {
       email = this.$('input[name="guest-name"]').val();
       contactID = null;
@@ -5639,9 +5669,9 @@ module.exports = GuestPopoverScreen = (function(_super) {
 
 ;require.register("views/popover_screens/main", function(exports, require, module) {
 var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
 
@@ -5674,11 +5704,11 @@ defDatePickerOps = {
   viewSelect: 4
 };
 
-module.exports = MainPopoverScreen = (function(_super) {
-  __extends(MainPopoverScreen, _super);
+module.exports = MainPopoverScreen = (function(superClass) {
+  extend(MainPopoverScreen, superClass);
 
   function MainPopoverScreen() {
-    this.onTab = __bind(this.onTab, this);
+    this.onTab = bind(this.onTab, this);
     return MainPopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
@@ -5734,13 +5764,13 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.getRenderData = function() {
-    var currentCalendar, data, defaultCalendar, endOffset, firstCalendar, _ref, _ref1, _ref2;
-    firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
+    var currentCalendar, data, defaultCalendar, endOffset, firstCalendar, ref, ref1, ref2;
+    firstCalendar = (ref = app.calendars) != null ? (ref1 = ref.at(0)) != null ? ref1.get('name') : void 0 : void 0;
     defaultCalendar = t('default calendar name');
     if (this.model.isNew()) {
       currentCalendar = firstCalendar || defaultCalendar;
     } else {
-      currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
+      currentCalendar = ((ref2 = this.model.get('tags')) != null ? ref2[0] : void 0) || defaultCalendar;
     }
     endOffset = this.model.isAllDay() ? -1 : 0;
     return data = _.extend(MainPopoverScreen.__super__.getRenderData.call(this), {
@@ -5759,7 +5789,7 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.afterRender = function() {
-    var timepickerEvents, _ref;
+    var ref, timepickerEvents;
     this.$el.attr('tabindex', 0);
     this.$container = this.$('.popover-content-wrapper');
     this.$addButton = this.$('.btn.add');
@@ -5789,7 +5819,7 @@ module.exports = MainPopoverScreen = (function(_super) {
       el: this.$('.calendarcombo'),
       small: true,
       source: app.calendars.toAutoCompleteSource(),
-      current: (_ref = this.model.getCalendar()) != null ? _ref.get('name') : void 0
+      current: (ref = this.model.getCalendar()) != null ? ref.get('name') : void 0
     });
     this.calendar.on('edition-complete', (function(_this) {
       return function(value) {
@@ -5855,7 +5885,7 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr, end) {
-    var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
+    var d, date, hour, minute, month, ref, ref1, setObj, splitted, t, year;
     if (timeStr == null) {
       timeStr = '';
     }
@@ -5868,10 +5898,10 @@ module.exports = MainPopoverScreen = (function(_super) {
     t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
     d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
     if (t != null ? t[0] : void 0) {
-      _ref = t.slice(1, 3), hour = _ref[0], minute = _ref[1];
+      ref = t.slice(1, 3), hour = ref[0], minute = ref[1];
     }
     if (d != null ? d[0] : void 0) {
-      _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
+      ref1 = d.slice(1, 4), date = ref1[0], month = ref1[1], year = ref1[2];
     }
     if (end) {
       if (date && this.model.isAllDay()) {
@@ -5882,11 +5912,11 @@ module.exports = MainPopoverScreen = (function(_super) {
       month = +month - 1;
     }
     return setObj = {
-      hour: hour,
-      minute: minute,
-      date: date,
+      year: year,
       month: month,
-      year: year
+      date: date,
+      hour: hour,
+      minute: minute
     };
   };
 
@@ -5910,11 +5940,11 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.onDuplicateClicked = function() {
-    var attrs, calendarEvent, key, value, _ref;
+    var attrs, calendarEvent, key, ref, value;
     attrs = [];
-    _ref = this.model.attributes;
-    for (key in _ref) {
-      value = _ref[key];
+    ref = this.model.attributes;
+    for (key in ref) {
+      value = ref[key];
       attrs[key] = value;
     }
     delete attrs.id;
@@ -5944,7 +5974,7 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
-    var err, errors, spinner, _i, _len, _results;
+    var err, errors, i, len, results, spinner;
     if (this.$('.btn.add').hasClass('disabled')) {
       return;
     }
@@ -5956,12 +5986,12 @@ module.exports = MainPopoverScreen = (function(_super) {
       this.$addButton.html(this.getButtonText());
       this.$('.alert').remove();
       this.$('input').css('border-color', '');
-      _results = [];
-      for (_i = 0, _len = errors.length; _i < _len; _i++) {
-        err = errors[_i];
-        _results.push(this.handleError(err));
+      results = [];
+      for (i = 0, len = errors.length; i < len; i++) {
+        err = errors[i];
+        results.push(this.handleError(err));
       }
-      return _results;
+      return results;
     } else {
       return this.model.save({}, {
         wait: true,
@@ -6031,10 +6061,16 @@ module.exports = MainPopoverScreen = (function(_super) {
   };
 
   MainPopoverScreen.prototype.getRecurrenceButtonText = function() {
-    var language, locale, rrule;
+    var e, language, locale, rrule;
     rrule = this.model.get('rrule');
     if ((rrule != null ? rrule.length : void 0) > 0) {
-      rrule = RRule.fromString(this.model.get('rrule'));
+      try {
+        rrule = RRule.fromString(this.model.get('rrule'));
+      } catch (_error) {
+        e = _error;
+        console.error(e);
+        return t('invalid recurring rule');
+      }
       locale = moment.localeData();
       language = {
         dayNames: locale._weekdays,
@@ -6077,10 +6113,10 @@ module.exports = MainPopoverScreen = (function(_super) {
 
 ;require.register("views/popover_screens/repeat", function(exports, require, module) {
 var NO_REPEAT, PopoverScreenView, RepeatPopoverScreen, allDayDateFieldFormat, dFormat, inputDateDTPickerFormat, tFormat,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
@@ -6094,11 +6130,11 @@ allDayDateFieldFormat = 'YYYY-MM-DD';
 
 NO_REPEAT = -1;
 
-module.exports = RepeatPopoverScreen = (function(_super) {
-  __extends(RepeatPopoverScreen, _super);
+module.exports = RepeatPopoverScreen = (function(superClass) {
+  extend(RepeatPopoverScreen, superClass);
 
   function RepeatPopoverScreen() {
-    this.buildRRuleFromDOM = __bind(this.buildRRuleFromDOM, this);
+    this.buildRRuleFromDOM = bind(this.buildRRuleFromDOM, this);
     return RepeatPopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
@@ -6122,7 +6158,7 @@ module.exports = RepeatPopoverScreen = (function(_super) {
   };
 
   RepeatPopoverScreen.prototype.getRenderData = function() {
-    var data, endMode, functions, monthlyRepeatBy, rrule, rruleOptions, _ref, _ref1;
+    var data, e, endMode, functions, monthlyRepeatBy, ref, ref1, rrule, rruleOptions;
     data = _.extend(RepeatPopoverScreen.__super__.getRenderData.call(this), {
       NO_REPEAT: NO_REPEAT,
       weekDays: moment.localeData()._weekdays,
@@ -6137,16 +6173,23 @@ module.exports = RepeatPopoverScreen = (function(_super) {
       }
     });
     if (this.model.has('rrule') && this.model.get('rrule').length > 0) {
-      rruleOptions = RRule.fromString(this.model.get('rrule')).options;
+      try {
+        rruleOptions = RRule.fromString(this.model.get('rrule')).options;
+      } catch (_error) {
+        e = _error;
+        console.error(e);
+      }
+    }
+    if (rruleOptions != null) {
       rrule = _.extend(data.rrule, {
         freq: rruleOptions.freq,
         interval: rruleOptions.interval,
         weekdays: rruleOptions.byweekday
       });
       if (rruleOptions.freq === RRule.MONTHLY) {
-        if (((_ref = rruleOptions.bymonthday) != null ? _ref.length : void 0) > 0) {
+        if (((ref = rruleOptions.bymonthday) != null ? ref.length : void 0) > 0) {
           monthlyRepeatBy = 'repeat-day';
-        } else if (((_ref1 = rruleOptions.bynweekday) != null ? _ref1.length : void 0) > 0) {
+        } else if (((ref1 = rruleOptions.bynweekday) != null ? ref1.length : void 0) > 0) {
           monthlyRepeatBy = 'repeat-weekday';
         } else {
           monthlyRepeatBy = 'repeat-day';
@@ -6192,8 +6235,8 @@ module.exports = RepeatPopoverScreen = (function(_super) {
         }
       },
       isWeekdaySelected: function(value) {
-        var isSelected, _ref2;
-        isSelected = data.rrule.byweekday && (_ref2 = (value + 6) % 7, __indexOf.call(data.rrule.byweekday, _ref2) >= 0);
+        var isSelected, ref2;
+        isSelected = data.rrule.byweekday && (ref2 = (value + 6) % 7, indexOf.call(data.rrule.byweekday, ref2) >= 0);
         if (isSelected) {
           return 'checked';
         }
@@ -6348,10 +6391,10 @@ module.exports = RepeatPopoverScreen = (function(_super) {
 
 ;require.register("views/settings_modal", function(exports, require, module) {
 var BaseView, ComboBox, ImportView, SettingsModals,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 BaseView = require('lib/base_view');
 
@@ -6359,11 +6402,11 @@ ImportView = require('./import_view');
 
 ComboBox = require('./widgets/combobox');
 
-module.exports = SettingsModals = (function(_super) {
-  __extends(SettingsModals, _super);
+module.exports = SettingsModals = (function(superClass) {
+  extend(SettingsModals, superClass);
 
   function SettingsModals() {
-    this.hideOnEscape = __bind(this.hideOnEscape, this);
+    this.hideOnEscape = bind(this.hideOnEscape, this);
     return SettingsModals.__super__.constructor.apply(this, arguments);
   }
 
@@ -6434,7 +6477,7 @@ module.exports = SettingsModals = (function(_super) {
   SettingsModals.prototype.exportCalendar = function() {
     var calendarId, encodedName;
     calendarId = this.calendar.value();
-    if (__indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
+    if (indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
       encodedName = encodeURIComponent(calendarId);
       return window.location = "export/" + encodedName + ".ics";
     } else {
@@ -6443,9 +6486,9 @@ module.exports = SettingsModals = (function(_super) {
   };
 
   SettingsModals.prototype.getPlaceholder = function(password) {
-    var i, placeholder, _i, _ref;
+    var i, j, placeholder, ref;
     placeholder = [];
-    for (i = _i = 1, _ref = password.length; _i <= _ref; i = _i += 1) {
+    for (i = j = 1, ref = password.length; j <= ref; i = j += 1) {
       placeholder.push('*');
     }
     return placeholder.join('');
@@ -6470,17 +6513,17 @@ module.exports = SettingsModals = (function(_super) {
 
 ;require.register("views/tags", function(exports, require, module) {
 var BaseView, TagsView,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
-module.exports = TagsView = (function(_super) {
-  __extends(TagsView, _super);
+module.exports = TagsView = (function(superClass) {
+  extend(TagsView, superClass);
 
   function TagsView() {
-    this.refresh = __bind(this.refresh, this);
+    this.refresh = bind(this.refresh, this);
     return TagsView.__super__.constructor.apply(this, arguments);
   }
 
@@ -6504,12 +6547,12 @@ module.exports = TagsView = (function(_super) {
   };
 
   TagsView.prototype.refresh = function() {
-    var tag, _i, _len, _ref;
+    var i, len, ref, tag;
     this.duringRefresh = true;
     this.$el.tagit('removeAll');
-    _ref = this.model.get('tags');
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tag = _ref[_i];
+    ref = this.model.get('tags');
+    for (i = 0, len = ref.length; i < len; i++) {
+      tag = ref[i];
       this.$el.tagit('createTag', tag);
     }
     return this.duringRefresh = false;
@@ -6529,7 +6572,7 @@ var locals_ = (locals || {}),calendarMode = locals_.calendarMode,title = locals_
 buf.push("<div class=\"fc-header-left\">");
 if ( calendarMode)
 {
-buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn fc-state-active title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span><span" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</span></div>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div>");
 }
 buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
 };
@@ -6882,7 +6925,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),title = locals_.title;
-buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</div></div>");;return buf.join("");
+buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><i class=\"fa fa-angle-left\"></i></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><div class=\"btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</div></a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6957,16 +7000,16 @@ popoverClassName += (sameDay? ' is-same-day' : '')
 var showDetailsByDefault = details && details.length > 0
 var showAlertsByDefault = alerts && alerts.length > 0
 var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
-buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div" + (jade.attr("title", t("placeholder place"), true, false)) + " class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div" + (jade.attr("title", t("add guest button"), true, false)) + " class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div" + (jade.attr("title", t("placeholder description"), true, false)) + " class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div" + (jade.attr("title", t("alert tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div" + (jade.attr("title", t("placeholder place"), true, false)) + " class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div" + (jade.attr("title", t("add guest button"), true, false)) + " class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"8\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row\"><div" + (jade.attr("title", t("placeholder description"), true, false)) + " class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><input tabindex=\"9\" type=\"text\"" + (jade.attr("value", details, true, false)) + (jade.attr("placeholder", t("placeholder description"), true, false)) + " class=\"input-details-trigger input-full-block\"/></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div" + (jade.attr("title", t("alert tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
 if ( !alerts || alerts.length === 0)
 {
-buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
+buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
 }
 else
 {
-buf.push("<button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
+buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
 }
-buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"7\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"1\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"8\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"9\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");;return buf.join("");
+buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"11\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"11\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"13\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"13\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"14\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7080,13 +7123,13 @@ if (typeof define === 'function' && define.amd) {
 
 ;require.register("views/toggle", function(exports, require, module) {
 var BaseView, Toggle,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('../lib/base_view');
 
-module.exports = Toggle = (function(_super) {
-  __extends(Toggle, _super);
+module.exports = Toggle = (function(superClass) {
+  extend(Toggle, superClass);
 
   function Toggle() {
     return Toggle.__super__.constructor.apply(this, arguments);
@@ -7149,9 +7192,9 @@ module.exports = Toggle = (function(_super) {
 
 ;require.register("views/widgets/combobox", function(exports, require, module) {
 var BaseView, ComboBox, Tag, TagCollection,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
@@ -7159,21 +7202,21 @@ TagCollection = require('collections/tags');
 
 Tag = require('models/tag');
 
-module.exports = ComboBox = (function(_super) {
-  __extends(ComboBox, _super);
+module.exports = ComboBox = (function(superClass) {
+  extend(ComboBox, superClass);
 
   function ComboBox() {
-    this.remove = __bind(this.remove, this);
-    this.renderItem = __bind(this.renderItem, this);
-    this.onChange = __bind(this.onChange, this);
-    this.onEditionComplete = __bind(this.onEditionComplete, this);
-    this.onSelect = __bind(this.onSelect, this);
-    this.onBlur = __bind(this.onBlur, this);
-    this.onClose = __bind(this.onClose, this);
-    this.onOpen = __bind(this.onOpen, this);
-    this.setValue = __bind(this.setValue, this);
-    this.value = __bind(this.value, this);
-    this.openMenu = __bind(this.openMenu, this);
+    this.remove = bind(this.remove, this);
+    this.renderItem = bind(this.renderItem, this);
+    this.onChange = bind(this.onChange, this);
+    this.onEditionComplete = bind(this.onEditionComplete, this);
+    this.onSelect = bind(this.onSelect, this);
+    this.onBlur = bind(this.onBlur, this);
+    this.onClose = bind(this.onClose, this);
+    this.onOpen = bind(this.onOpen, this);
+    this.setValue = bind(this.setValue, this);
+    this.value = bind(this.value, this);
+    this.openMenu = bind(this.openMenu, this);
     return ComboBox.__super__.constructor.apply(this, arguments);
   }
 
@@ -7262,10 +7305,10 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onSelect = function(ev, ui) {
-    var _ref;
+    var ref;
     this.$el.blur().removeClass('expanded');
     this.onChange(ev, ui);
-    return this.trigger('edition-complete', (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value());
+    return this.trigger('edition-complete', (ui != null ? (ref = ui.item) != null ? ref.value : void 0 : void 0) || this.value());
   };
 
   ComboBox.prototype.onEditionComplete = function(name) {
@@ -7274,8 +7317,8 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.onChange = function(ev, ui) {
-    var generatedColor, value, _ref;
-    value = (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value();
+    var generatedColor, ref, value;
+    value = (ui != null ? (ref = ui.item) != null ? ref.value : void 0 : void 0) || this.value();
     generatedColor = ColorHash.getColor(value, 'cozy');
     this.buildBadge(generatedColor);
     this.trigger('change', value);
@@ -7290,9 +7333,9 @@ module.exports = ComboBox = (function(_super) {
   };
 
   ComboBox.prototype.buildBadge = function(color) {
-    var _ref;
-    if ((_ref = this.badge) != null) {
-      _ref.remove();
+    var ref;
+    if ((ref = this.badge) != null) {
+      ref.remove();
     }
     this.badge = this.makeBadge(color);
     return this.$el.before(this.badge);

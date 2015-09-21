@@ -60,7 +60,7 @@ div.label.label-row.input-people
         span.fa.fa-users
     .icon.right
         span.fa.fa-angle-right
-    button.button-full-block= guestsButtonText
+    button.button-full-block(tabindex=8)= guestsButtonText
 
 div.label.label-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
     .icon(title=t("placeholder description"))
@@ -79,9 +79,9 @@ div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlerts
         span.fa.fa-angle-right
 
     if !alerts || alerts.length === 0
-        button.button-full-block=t('no alert button')
+        button.button-full-block(tabindex="10")= t('no alert button')
     else
-        button.button-full-block= t('alert label', {smart_count: alerts.length})
+        button.button-full-block(tabindex="10")= t('alert label', {smart_count: alerts.length})
 
 
 div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepeatByDefault}")
@@ -89,21 +89,21 @@ div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepea
         span.fa.fa-repeat
     .icon.right
         span.fa.fa-angle-right
-    button.button-full-block= recurrenceButtonText
+    button.button-full-block(tabindex="11")= recurrenceButtonText
 
 .popover-footer
     a.advanced-link(role="button",
-                    tabindex="7",
+                    tabindex="11",
                     href='#' + advancedUrl,
-                    data-tabindex-next="1")
+                    data-tabindex-next="13")
       .icon
           span.fa.fa-caret-down
         = t('more details button')
     .buttons
         a.btn.btn-link.cancel(role="button",
-                              tabindex="8")
+                              tabindex="13")
             = t('cancel')
         a.btn.add(role="button",
-                  tabindex="9")
+                  tabindex="14")
             = buttonText
 

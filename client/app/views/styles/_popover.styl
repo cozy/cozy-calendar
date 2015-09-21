@@ -66,6 +66,9 @@ input-color   = #555
         .button-full-block
             height 3em
 
+        .button-full-block:focus
+            background-color #EEF
+
     input
         box-sizing: border-box
         margin: 0px
@@ -473,7 +476,7 @@ ul.alerts
 
     .first-input
         flex             none
-        width            6rem
+        width            5rem
         text-transform   uppercase
         color            #999
 
@@ -490,6 +493,13 @@ ul.alerts
         align-items     center
         justify-content space-between
         width           100%
+
+        label
+            margin-right 0.75em
+
+        input[type="radio"],
+        input[type="checkbox"]
+            margin-right 0.25em
 
 // delete screen
 .delete-screen

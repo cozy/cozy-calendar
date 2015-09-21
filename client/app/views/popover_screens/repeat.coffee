@@ -45,10 +45,13 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
 
         # Override default rrule value if the event has a rrule.
         if @model.has('rrule') and @model.get('rrule').length > 0
-
             # Extract rules from the rrule string.
-            rruleOptions = RRule.fromString(@model.get('rrule')).options
+            try
+                rruleOptions = RRule.fromString(@model.get('rrule')).options
+            catch e
+                console.error e
 
+        if rruleOptions?
             # Build the overriden rrule.
             rrule = _.extend data.rrule,
                 freq: rruleOptions.freq

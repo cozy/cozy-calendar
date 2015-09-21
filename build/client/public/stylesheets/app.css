@@ -8821,6 +8821,7 @@ textarea:active {
   border: 1px solid #92a0b2;
   background-color: #ebebeb;
   color: #505f72;
+  text-transform: capitalize;
 }
 .fc-header .btn-group > .btn .fa {
   font-size: 1.2em;
@@ -8830,29 +8831,48 @@ textarea:active {
   box-shadow: none;
 }
 .fc-header .btn-group > .btn:hover {
-  color: #008af6;
+  background-color: #d3d9e0;
 }
 .fc-header .btn-group > .btn.fc-state-active {
   font-weight: bold;
   background-color: #9daaba;
   color: #fff;
 }
-.fc-header .btn-group > .btn.fc-state-active.title {
-  font-size: 22px;
-  font-weight: bold;
-  text-transform: capitalize;
-  text-align: center;
-  min-width: 200px;
-}
-.fc-header .btn-group > .btn:hover.fc-state-active {
+.fc-header .btn-group > .btn.fc-state-active:hover {
   text-decoration: none;
   cursor: default;
+}
+.fc-header .btn-group > .btn.title {
+  min-width: 8em;
+  font-weight: bold;
+  font-size: 1rem;
+}
+.fc-header .btn-group > .btn.title:hover {
+  background-color: #ebebeb;
+  color: #505f72;
+}
+.fc-header .btn-group > .btn.btn-settings:hover {
+  background-color: #d3d9e0;
 }
 .fc-header .btn-group > .btn.btn-settings i {
   margin-right: 0.4em;
 }
 .fc-header .btn-group > .btn.btn-settings:hover i {
   text-decoration: none;
+}
+.fc-header .fc-button-today {
+  margin-left: 0.625em;
+  font-weight: normal;
+  border: 1px solid #92a0b2;
+  background-color: #ebebeb;
+  color: #505f72;
+}
+.fc-header .fc-button-today:hover {
+  background-color: #d3d9e0;
+}
+.fc-header .fc-button-today.fc-state-active {
+  background-color: #92a0b2;
+  color: #fff;
 }
 .fc-header .fc-button {
   margin: 0;
@@ -9246,6 +9266,9 @@ a.btn:visited {
 }
 .popover .label-row .button-full-block {
   height: 3em;
+}
+.popover .label-row .button-full-block:focus {
+  background-color: #eef;
 }
 .popover input {
   -webkit-box-sizing: border-box;
@@ -9817,7 +9840,7 @@ ul.alerts .type input[type=checkbox] {
   -webkit-flex: none;
   -ms-flex: none;
   flex: none;
-  width: 6rem;
+  width: 5rem;
   text-transform: uppercase;
   color: #999;
 }
@@ -9857,6 +9880,13 @@ ul.alerts .type input[type=checkbox] {
   -webkit-justify-content: space-between;
   justify-content: space-between;
   width: 100%;
+}
+.repeat-screen .space-between label {
+  margin-right: 0.75em;
+}
+.repeat-screen .space-between input[type="radio"],
+.repeat-screen .space-between input[type="checkbox"] {
+  margin-right: 0.25em;
 }
 .delete-screen {
   -webkit-box-sizing: border-box;
@@ -10228,11 +10258,23 @@ body.error-404 .error-frame .headline {
     width: 100%;
     padding: 0.4em;
   }
+  .fc-header .btn-group > .btn.fc-state-active.title {
+    min-width: inherit;
+  }
+  .fc-header-left,
+  .fc-header-center,
+  .fc-header-right {
+    width: inherit;
+  }
 }
 @media (max-width: 600px) {
-  #calendarHeader,
-  #calheader {
-    display: none;
+  .fc-header {
+    display: block;
+    text-align: center;
+  }
+  .fc-header .btn-group {
+    margin-bottom: 0.25em;
+    font-size: inherit;
   }
   #alarms .fc-day-header {
     font-size: 10px;
@@ -10241,7 +10283,8 @@ body.error-404 .error-frame .headline {
     font-size: 0.7em;
   }
   #alarms .fc-header-right {
-    width: 20%;
+    width: 100%;
+    text-align: center;
   }
   #alarms .popover {
     width: auto;
