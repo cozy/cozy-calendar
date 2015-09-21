@@ -32,15 +32,20 @@ module.exports = class CalendarView extends BaseView
 
         @cal = @$ '#alarms'
         @view = @options.view
+
+        # set default date
+        currDate = moment()
+        currDate.year(@options.year)   if @options.year?
+        currDate.month(@options.month) if @options.month?
+        currDate.date(@options.date)   if @options.date?
+
         @cal.fullCalendar
             lang: window.locale
             header: false
             firstDay: 1 # first day of the week is monday
             height: "auto"
             defaultView: @view
-            year: @options.year
-            month: @options.month
-            date: @options.date
+            defaultDate: currDate
             viewRender: @onChangeView
             #i18n with momentjs.
             monthNames: locale._months

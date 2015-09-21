@@ -5,7 +5,7 @@ module.exports = User = {}
 User.updateUser = (callback) ->
     cozydb.api.getCozyUser (err, user) ->
         if err or not user
-            console.log err
+            console.log err if err
             User.timezone = 'Europe/Paris'
             User.email = ''
         else
