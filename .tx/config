@@ -5,4 +5,7 @@ host = https://www.transifex.com
 file_filter = client/app/locales/<lang>.json
 source_file = client/app/locales/en.json
 source_lang = en
+trans.fr = client/app/locales/fr.json
+trans.de = client/app/locales/de.json
+trans.es = client/app/locales/es.json
 type = KEYVALUEJSON
