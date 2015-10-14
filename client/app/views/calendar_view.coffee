@@ -32,12 +32,11 @@ module.exports = class CalendarView extends BaseView
 
         @cal = @$ '#alarms'
         @view = @options.view
-
         # set default date
         currDate = moment()
         currDate.year(@options.year)   if @options.year?
         currDate.month(@options.month) if @options.month?
-        currDate.date(@options.date)   if @options.date?
+        currDate.date(@options.date)   if @options.date? and @view isnt 'month'
 
         @cal.fullCalendar
             lang: window.locale
