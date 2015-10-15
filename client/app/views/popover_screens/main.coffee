@@ -389,6 +389,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     expandPopover: ->
         @$optionalFields.attr 'aria-hidden', false
         @$moreDetailsButton.hide()
+        # focus for keyboard navigation
+        setTimeout =>
+            @$('.input-details-trigger').focus()
+        , 100
 
 
     # Handle model's change for field `start`
