@@ -3,7 +3,7 @@ module.exports = class Tag extends Backbone.Model
 
     # idAttribute: 'name'
     defaults:
-        visible: false
+        visible: true
 
 
     toString: -> @get 'name'

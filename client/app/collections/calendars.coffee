@@ -26,7 +26,6 @@ module.exports = class CalendarCollection extends TagCollection
     onBaseCollectionAdd: (model) ->
         [calendarName, tags...] = model.get 'tags'
         calendar = app.tags.getOrCreateByName calendarName
-        calendar.set 'visible', true
         @add calendar
 
         if calendar.isNew()
