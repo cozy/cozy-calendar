@@ -9630,6 +9630,13 @@ a.btn:visited {
   cursor: pointer;
   background-color: #008af6;
 }
+.popover-back .btn-back {
+  background-color: transparent;
+  padding: 0.7em 0;
+}
+.popover-back .btn-back:hover {
+  cursor: pointer;
+}
 select.select-big {
   margin-bottom: 1.5em;
   width: 100%;

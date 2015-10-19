@@ -173,9 +173,9 @@ module.exports = {
 
 ;require.register("collections/calendars", function(exports, require, module) {
 var CalendarCollection, SocketListener, Tag, TagCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  slice = [].slice;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 SocketListener = require('../lib/socket_listener');
 
@@ -183,10 +183,10 @@ Tag = require('models/tag');
 
 TagCollection = require('collections/tags');
 
-module.exports = CalendarCollection = (function(superClass) {
+module.exports = CalendarCollection = (function(_super) {
   var stringify;
 
-  extend(CalendarCollection, superClass);
+  __extends(CalendarCollection, _super);
 
   function CalendarCollection() {
     return CalendarCollection.__super__.constructor.apply(this, arguments);
@@ -217,10 +217,9 @@ module.exports = CalendarCollection = (function(superClass) {
   };
 
   CalendarCollection.prototype.onBaseCollectionAdd = function(model) {
-    var calendar, calendarName, ref, tags;
-    ref = model.get('tags'), calendarName = ref[0], tags = 2 <= ref.length ? slice.call(ref, 1) : [];
+    var calendar, calendarName, tags, _ref;
+    _ref = model.get('tags'), calendarName = _ref[0], tags = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
     calendar = app.tags.getOrCreateByName(calendarName);
-    calendar.set('visible', true);
     this.add(calendar);
     if (calendar.isNew()) {
       app.tags.add(calendar);
@@ -336,13 +335,13 @@ module.exports = CalendarCollection = (function(superClass) {
 
 ;require.register("collections/contacts", function(exports, require, module) {
 var Contact, ContactCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Contact = require('../models/contact');
 
-module.exports = ContactCollection = (function(superClass) {
-  extend(ContactCollection, superClass);
+module.exports = ContactCollection = (function(_super) {
+  __extends(ContactCollection, _super);
 
   function ContactCollection() {
     return ContactCollection.__super__.constructor.apply(this, arguments);
@@ -364,9 +363,9 @@ module.exports = ContactCollection = (function(superClass) {
         return items.push({
           id: contact.id,
           hasPicture: contact.get('hasPicture'),
-          display: (contact.get('name')) + " &lt;" + email.value + "&gt;",
+          display: "" + (contact.get('name')) + " &lt;" + email.value + "&gt;",
           toString: function() {
-            return email.value + ";" + contact.id;
+            return "" + email.value + ";" + contact.id;
           }
         });
       });
@@ -381,15 +380,15 @@ module.exports = ContactCollection = (function(superClass) {
 
 ;require.register("collections/daybuckets", function(exports, require, module) {
 var DayBucket, DayBucketCollection, RealEventCollection, RealEventGeneratorCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 RealEventCollection = require('./realevents');
 
 RealEventGeneratorCollection = require('./realeventsgenerator');
 
-DayBucket = DayBucket = (function(superClass) {
-  extend(DayBucket, superClass);
+DayBucket = DayBucket = (function(_super) {
+  __extends(DayBucket, _super);
 
   function DayBucket(model) {
     DayBucket.__super__.constructor.call(this, {
@@ -406,8 +405,8 @@ DayBucket = DayBucket = (function(superClass) {
 
 })(Backbone.Model);
 
-module.exports = DayBucketCollection = (function(superClass) {
-  extend(DayBucketCollection, superClass);
+module.exports = DayBucketCollection = (function(_super) {
+  __extends(DayBucketCollection, _super);
 
   function DayBucketCollection() {
     return DayBucketCollection.__super__.constructor.apply(this, arguments);
@@ -485,15 +484,15 @@ module.exports = DayBucketCollection = (function(superClass) {
 
 ;require.register("collections/events", function(exports, require, module) {
 var Event, EventCollection, ScheduleItemsCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ScheduleItemsCollection = require('./scheduleitems');
 
 Event = require('../models/event');
 
-module.exports = EventCollection = (function(superClass) {
-  extend(EventCollection, superClass);
+module.exports = EventCollection = (function(_super) {
+  __extends(EventCollection, _super);
 
   function EventCollection() {
     return EventCollection.__super__.constructor.apply(this, arguments);
@@ -510,15 +509,15 @@ module.exports = EventCollection = (function(superClass) {
 
 ;require.register("collections/realevents", function(exports, require, module) {
 var RealEvent, RealEventCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 RealEvent = require('../models/realevent');
 
-module.exports = RealEventCollection = (function(superClass) {
+module.exports = RealEventCollection = (function(_super) {
   var model;
 
-  extend(RealEventCollection, superClass);
+  __extends(RealEventCollection, _super);
 
   function RealEventCollection() {
     return RealEventCollection.__super__.constructor.apply(this, arguments);
@@ -537,15 +536,15 @@ module.exports = RealEventCollection = (function(superClass) {
 
 ;require.register("collections/realeventsgenerator", function(exports, require, module) {
 var RealEvent, RealEventGeneratorCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 RealEvent = require('../models/realevent');
 
-module.exports = RealEventGeneratorCollection = (function(superClass) {
+module.exports = RealEventGeneratorCollection = (function(_super) {
   var model;
 
-  extend(RealEventGeneratorCollection, superClass);
+  __extends(RealEventGeneratorCollection, _super);
 
   function RealEventGeneratorCollection() {
     return RealEventGeneratorCollection.__super__.constructor.apply(this, arguments);
@@ -554,8 +553,8 @@ module.exports = RealEventGeneratorCollection = (function(superClass) {
   model = RealEvent;
 
   RealEventGeneratorCollection.prototype.comparator = function(re1, re2) {
-    var ref;
-    return (ref = re1.start) != null ? ref.isBefore(re2.start) : void 0;
+    var _ref;
+    return (_ref = re1.start) != null ? _ref.isBefore(re2.start) : void 0;
   };
 
   RealEventGeneratorCollection.prototype.initialize = function() {
@@ -734,15 +733,15 @@ module.exports = RealEventGeneratorCollection = (function(superClass) {
 
 ;require.register("collections/scheduleitems", function(exports, require, module) {
 var ScheduleItemsCollection,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = ScheduleItemsCollection = (function(superClass) {
-  extend(ScheduleItemsCollection, superClass);
+module.exports = ScheduleItemsCollection = (function(_super) {
+  __extends(ScheduleItemsCollection, _super);
 
   function ScheduleItemsCollection() {
-    this.getFCEventSource = bind(this.getFCEventSource, this);
+    this.getFCEventSource = __bind(this.getFCEventSource, this);
     return ScheduleItemsCollection.__super__.constructor.apply(this, arguments);
   }
 
@@ -798,13 +797,13 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
 
 ;require.register("collections/tags", function(exports, require, module) {
 var Tag, TagCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Tag = require('../models/tag');
 
-module.exports = TagCollection = (function(superClass) {
-  extend(TagCollection, superClass);
+module.exports = TagCollection = (function(_super) {
+  __extends(TagCollection, _super);
 
   function TagCollection() {
     return TagCollection.__super__.constructor.apply(this, arguments);
@@ -861,17 +860,17 @@ exports.formatDateISO8601 = function(fullDate) {
   fullDate = fullDate.split(/#/);
   if (fullDate[0].match(/([0-9]{2}\/){2}[0-9]{4}/)) {
     date = fullDate[0].split(/[\/]/);
-    date = date[2] + "-" + date[1] + "-" + date[0];
+    date = "" + date[2] + "-" + date[1] + "-" + date[0];
   } else {
     date = "undefined";
   }
   if (fullDate[1].match(/[0-9]{2}:[0-9]{2}/)) {
     time = fullDate[1].split(/:/);
-    time = time[0] + ":" + time[1] + ":00";
+    time = "" + time[0] + ":" + time[1] + ":00";
   } else {
     time = "undefined";
   }
-  return date + "T" + time;
+  return "" + date + "T" + time;
 };
 
 exports.isDatePartValid = function(date) {
@@ -892,7 +891,7 @@ exports.icalToISO8601 = function(icalDate) {
   day = date[0].slice(6, 8);
   hours = date[1].slice(0, 2);
   minutes = date[1].slice(2, 4);
-  return year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
+  return "" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + "Z";
 };
 
 exports.isEvent = function(start, end) {
@@ -920,19 +919,19 @@ exports.momentToDateString = function(m) {
 };
 
 exports.unitValuesToiCalDuration = function(unitsValues) {
-  var i, j, len, len1, ref, ref1, s, t, u;
+  var s, t, u, _i, _j, _len, _len1, _ref, _ref1;
   s = '-P';
-  ref = ['W', 'D'];
-  for (i = 0, len = ref.length; i < len; i++) {
-    u = ref[i];
+  _ref = ['W', 'D'];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    u = _ref[_i];
     if (u in unitsValues) {
       s += unitsValues[u] + u;
     }
   }
   t = '';
-  ref1 = ['H', 'M', 'S'];
-  for (j = 0, len1 = ref1.length; j < len1; j++) {
-    u = ref1[j];
+  _ref1 = ['H', 'M', 'S'];
+  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+    u = _ref1[_j];
     if (u in unitsValues) {
       t += unitsValues[u] + u;
     }
@@ -1102,11 +1101,11 @@ $(function() {
 
 ;require.register("lib/base_view", function(exports, require, module) {
 var BaseView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = BaseView = (function(superClass) {
-  extend(BaseView, superClass);
+module.exports = BaseView = (function(_super) {
+  __extends(BaseView, _super);
 
   function BaseView() {
     return BaseView.__super__.constructor.apply(this, arguments);
@@ -1117,9 +1116,9 @@ module.exports = BaseView = (function(superClass) {
   BaseView.prototype.initialize = function() {};
 
   BaseView.prototype.getRenderData = function() {
-    var ref;
+    var _ref;
     return {
-      model: (ref = this.model) != null ? ref.toJSON() : void 0
+      model: (_ref = this.model) != null ? _ref.toJSON() : void 0
     };
   };
 
@@ -1148,15 +1147,15 @@ module.exports = BaseView = (function(superClass) {
 
 ;require.register("lib/modal", function(exports, require, module) {
 var Modal,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Modal = (function(superClass) {
-  extend(Modal, superClass);
+Modal = (function(_super) {
+  __extends(Modal, _super);
 
   function Modal() {
-    this.closeOnEscape = bind(this.closeOnEscape, this);
+    this.closeOnEscape = __bind(this.closeOnEscape, this);
     return Modal.__super__.constructor.apply(this, arguments);
   }
 
@@ -1312,11 +1311,11 @@ module.exports = Modal;
 
 ;require.register("lib/popover_screen_view", function(exports, require, module) {
 var PopoverScreenView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = PopoverScreenView = (function(superClass) {
-  extend(PopoverScreenView, superClass);
+module.exports = PopoverScreenView = (function(_super) {
+  __extends(PopoverScreenView, _super);
 
   PopoverScreenView.prototype.screenTitle = null;
 
@@ -1383,13 +1382,13 @@ module.exports = PopoverScreenView = (function(superClass) {
 
 ;require.register("lib/popover_view", function(exports, require, module) {
 var BaseView, PopoverView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
-module.exports = PopoverView = (function(superClass) {
-  extend(PopoverView, superClass);
+module.exports = PopoverView = (function(_super) {
+  __extends(PopoverView, _super);
 
   function PopoverView() {
     return PopoverView.__super__.constructor.apply(this, arguments);
@@ -1409,12 +1408,12 @@ module.exports = PopoverView = (function(superClass) {
   };
 
   PopoverView.prototype.selfclose = function(checkoutChanges) {
-    var base;
+    var _base;
     if (checkoutChanges == null) {
       checkoutChanges = true;
     }
-    if (typeof (base = this.parentView).onPopoverClose === "function") {
-      base.onPopoverClose();
+    if (typeof (_base = this.parentView).onPopoverClose === "function") {
+      _base.onPopoverClose();
     }
     return this.close(checkoutChanges);
   };
@@ -1429,11 +1428,11 @@ module.exports = PopoverView = (function(superClass) {
   };
 
   PopoverView.prototype.getScreen = function(screenID) {
-    var ref, screen;
+    var screen, _ref;
     if (screenID == null) {
       screenID = 'default';
     }
-    screen = (ref = this.screens) != null ? ref[screenID] : void 0;
+    screen = (_ref = this.screens) != null ? _ref[screenID] : void 0;
     if (screen != null) {
       return screen;
     } else {
@@ -1622,18 +1621,18 @@ exports.del = function(url, callback) {
 
 ;require.register("lib/socket_listener", function(exports, require, module) {
 var SocketListener, addModel,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 addModel = (function(_this) {
   return function(model, callback) {
     return model.fetch({
       success: function(fetched) {
-        var collection, i, len, ref;
+        var collection, _i, _len, _ref;
         if (model.collections != null) {
-          ref = model.collections;
-          for (i = 0, len = ref.length; i < len; i++) {
-            collection = ref[i];
+          _ref = model.collections;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            collection = _ref[_i];
             if (model instanceof collection.model) {
               collection.add(model);
             }
@@ -1648,8 +1647,8 @@ addModel = (function(_this) {
   };
 })(this);
 
-SocketListener = (function(superClass) {
-  extend(SocketListener, superClass);
+SocketListener = (function(_super) {
+  __extends(SocketListener, _super);
 
   function SocketListener() {
     return SocketListener.__super__.constructor.apply(this, arguments);
@@ -1756,11 +1755,11 @@ module.exports = function(router) {
 
 ;require.register("lib/view", function(exports, require, module) {
 var View,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = View = (function(superClass) {
-  extend(View, superClass);
+module.exports = View = (function(_super) {
+  __extends(View, _super);
 
   function View() {
     return View.__super__.constructor.apply(this, arguments);
@@ -1797,18 +1796,18 @@ module.exports = View = (function(superClass) {
 
 ;require.register("lib/view_collection", function(exports, require, module) {
 var BaseView, ViewCollection,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
-module.exports = ViewCollection = (function(superClass) {
-  extend(ViewCollection, superClass);
+module.exports = ViewCollection = (function(_super) {
+  __extends(ViewCollection, _super);
 
   function ViewCollection() {
-    this.removeItem = bind(this.removeItem, this);
-    this.addItem = bind(this.addItem, this);
+    this.removeItem = __bind(this.removeItem, this);
+    this.addItem = __bind(this.addItem, this);
     return ViewCollection.__super__.constructor.apply(this, arguments);
   }
 
@@ -1846,23 +1845,23 @@ module.exports = ViewCollection = (function(superClass) {
   };
 
   ViewCollection.prototype.render = function() {
-    var id, ref, view;
-    ref = this.views;
-    for (id in ref) {
-      view = ref[id];
+    var id, view, _ref;
+    _ref = this.views;
+    for (id in _ref) {
+      view = _ref[id];
       view.$el.detach();
     }
     return ViewCollection.__super__.render.apply(this, arguments);
   };
 
   ViewCollection.prototype.afterRender = function() {
-    var id, ref, view;
+    var id, view, _ref;
     if (!this.$collectionEl) {
       this.$collectionEl = this.$(this.collectionEl);
     }
-    ref = this.views;
-    for (id in ref) {
-      view = ref[id];
+    _ref = this.views;
+    for (id in _ref) {
+      view = _ref[id];
       this.appendView(view);
     }
     this.onReset(this.collection);
@@ -1875,10 +1874,10 @@ module.exports = ViewCollection = (function(superClass) {
   };
 
   ViewCollection.prototype.onReset = function(newcollection) {
-    var id, ref, view;
-    ref = this.views;
-    for (id in ref) {
-      view = ref[id];
+    var id, view, _ref;
+    _ref = this.views;
+    for (id in _ref) {
+      view = _ref[id];
       view.remove();
     }
     return newcollection.forEach(this.addItem);
@@ -1906,1025 +1905,13 @@ module.exports = ViewCollection = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("locales/de", function(exports, require, module) {
-module.exports = {
-  "default calendar name": "Mein Kalendar",
-  "Add": "Hinzufügen",
-  "event": "Ereignis",
-  "create event": "Ereignis erstellen",
-  "edit event": "Ereignis bearbeiten",
-  "edit": "Bearbeiten",
-  "create": "Erstellen",
-  "creation": "Erstellung",
-  "invite": "Einladen",
-  "close": "Schließen",
-  "delete": "Löschen",
-  "change color": "Farbe ändern",
-  "rename": "Umbennen",
-  "export": "Exportieren",
-  "remove": "Ereignis entfernen",
-  "duplicate": "Ereignis duplizieren",
-  "Place": "Ort",
-  'all day': 'ganztags',
-  'All day': 'Ganztags',
-  "description": "Beschreibung",
-  "date": "Datum",
-  "Day": "Tag",
-  "days": "Tage",
-  "Edit": "Bearbeiten",
-  "Email": "E-Mail",
-  "Import": "Import",
-  "Export": "Export",
-  "show": "Anzeigen",
-  "hide": "Verbergen",
-  "List": "Liste",
-  "list": "auflisten",
-  "Calendar": "Kalendar",
-  "calendar": "Kalendar",
-  "Sync": "Sync",
-  "ie: 9:00 important meeting": "z.B.: 9:00 wichtige Besprechung",
-  "Month": "Monat",
-  "Popup": "Popup",
-  "Switch to List": "Umschalten zu Liste",
-  "Switch to Calendar": "Umschalten zu Kalendar",
-  "time": "Zeit",
-  "Today": "Heute",
-  'today': 'heute',
-  "What should I remind you ?": "An was soll ich Sie erinnern?",
-  "select an icalendar file": "Auswählen einer ICalendar Datei",
-  "import your icalendar file": "Ihre ICalender Datei importieren",
-  "confirm import": "Importieren bestätigen",
-  "cancel": "abbrechen",
-  "Create": "Erstellen",
-  "Events to import": "Ereignisse zum Importieren",
-  "Create Event": "Ereignis erstellen",
-  "From [hours:minutes]": "von [Stunden:Minuten]",
-  "To [hours:minutes]": "bis [Stunden:Minuten]",
-  "To [date]": "bis [Datum]",
-  "Description": "Beschreibung",
-  "days after": "Tage dannach",
-  "days later": "Tage später",
-  "Week": "Woche",
-  "Display": "Mitteilung",
-  "DISPLAY": "Mitteilung",
-  "EMAIL": "E-Mail",
-  "BOTH": "E-Mail & Mitteilung",
-  "display previous events": "vorherige Ereignisse anzeigen",
-  "display next events": "nächste Ereignisse anzeigen",
-  "event": "Ereignis",
-  "are you sure": "Sind Sie sicher?",
-  "confirm delete calendar": "Sie sind im Begriff alle Ereignisse in %{calendarName} zu löschen. Sind Sie sicher?",
-  "confirm delete selected calendars": "Sie sind im Begriff alle Kalender. Sind Sie sicher?",
-  "advanced": "Mehr Details",
-  "enter email": "E-Mail anzeigen",
-  "ON": "EIN",
-  "OFF": "AUS",
-  "no description": "Keine Beschreibung",
-  "add calendar": "Kalendar hinzufügen",
-  "new calendar": "Neuer Kalendar",
-  "multiple actions": "mehrere Aktionen",
-  "recurrence": "Wiederholung",
-  "recurrence rule": "Wiederholungsregeln rules",
-  "make reccurent": "Wiederholung erstellen",
-  "repeat every": "Alle wiederholen",
-  "no recurrence": "Keine Wiederholung",
-  "repeat on": "Wiederholung ein",
-  "repeat on date": "wiederholen an Datum",
-  "repeat on weekday": "Täglich wiederholen",
-  "repeat until": "Wiederholen bis",
-  "after": "Nach",
-  "repeat": "Wiederholen",
-  "forever": "Immer",
-  "occurences": "Ereignis",
-  "every": "Alle",
-  'minutes': 'Minuten',
-  'minute': 'Minute',
-  'minute ': 'Minute',
-  'hours': 'Stunden',
-  'hour': 'Stunde',
-  "days": "Tage",
-  "day": "Tag",
-  "weeks": "Wochen",
-  "week": "Woche",
-  "months": "Monate",
-  "month": "Monat",
-  "years": "Jahre",
-  "year": "Jahr",
-  "until": "bis",
-  "for": "für",
-  "on": "am",
-  "on the": "am",
-  "th": "te",
-  "nd": "te",
-  "rd": "te",
-  "st": "te",
-  "last": "letzter",
-  "and": "und",
-  "times": "mal",
-  "weekday": "Wochentag",
-  'screen title done button': 'Done',
-  "placeholder event title": "Event title",
-  "from": "From",
-  "placeholder from date": "From [date]",
-  "placeholder from time": "From [hours:minutes]",
-  "to": "To",
-  "placeholder to date": "To [date]",
-  "placeholder to time": "To [hours:minutes]",
-  "all day": "All day",
-  "placeholder place": "Place",
-  "add guest button": "Add guest",
-  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
-  "placeholder description": "Description",
-  "no alert button": "No alert",
-  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
-  "alert tooltip": "Manage alerts",
-  "no repeat button": "No repeat",
-  "repeat tooltip": "Manage recurrence",
-  "more details button": "More options",
-  "save button": "Save",
-  "create button": "Create",
-  "duplicate event tooltip": "Duplicate event",
-  "delete event tooltip": "Delete event",
-  "change calendar": "Kalendar wechseln",
-  "screen delete title": "Delete event",
-  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
-  "screen delete yes button": "Yes",
-  "screen delete no button": "No",
-  "screen guest title empty": "Guest",
-  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
-  "screen guest input placeholder": "Email address",
-  "screen guest add button": "Add",
-  "screen guest remove tooltip": "Cancel the invitation",
-  "screen description title": "Description",
-  "screen alert title empty": "Alert",
-  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
-  "screen alert default value": "Add new alert",
-  "screen alert time of event": "Time of the event",
-  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
-  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
-  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
-  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
-  "screen alert delete tooltip": "Delete alert",
-  "screen alert type email": "Email",
-  "screen alert type notification": "Cozy notification",
-  "screen recurrence title": "Repeat",
-  "screen recurrence no repeat": "No repeat",
-  "screen recurrence daily": "Daily",
-  "screen recurrence weekly": "Weekly",
-  "screen recurrence monthly": "Monthly",
-  "screen recurrence yearly": "Yearly",
-  "screen recurrence interval label": "Interval",
-  "screen recurrence interval unit 0": "year |||| years",
-  "screen recurrence interval unit 1": "month |||| months",
-  "screen recurrence interval unit 2": "week |||| weeks",
-  "screen recurrence interval unit 3": "day |||| days",
-  "screen recurrence interval unit": "days",
-  "screen recurrence days list label": "On days",
-  "screen recurrence repeat by label": "Repeat by",
-  "screen recurrence repeat by month": "Day of the month",
-  "screen recurrence repeat by week": "Day of the week",
-  "screen recurrence ends label": "Ends:",
-  "screen recurrence ends never label": "Never",
-  "screen recurrence ends count label": "After",
-  "screen recurrence ends count unit": "occurrences",
-  "screen recurrence ends until label": "Until",
-  "screen recurrence ends until placeholder": "Until [date]",
-  "screen recurrence summary label": "Summary",
-  "no summary": "Ein Titel muss vergeben werden.",
-  "start after end": "Das Start-Datum liegt nach dem End-Datum.",
-  "invalid start date": "Das Start-Datum ist ungültig.",
-  "invalid end date": "Das End-Datum ist ungültig.",
-  "invalid trigg date": "Das Datum ist ungültig.",
-  "invalid action": "Die Aktion ist ungültig..",
-  "server error occured": "EIn Server Fehler ist aufgetreten.",
-  "synchronization": "Synchronisation",
-  "mobile sync": "Mobile Sync (CalDAV)",
-  "link imported events with calendar": "Ereignis auswählen um mit folgendem Kalendar zu importieren:",
-  "import an ical file": "Um eine ICal Datei in Ihren Cozy Kalender zu importieren, bitte erst diese Schaltfläche zum vorladen drücken:",
-  "download a copy of your calendar": "Einen Kalender auswählen und dann die Export Schaltfläche drücken um eine Kopie des Kalenders als ICal Datei zu exportieren :",
-  "icalendar export": "ICalendar Export",
-  "icalendar import": "ICalendar Import",
-  "to sync your cal with": "Um Ihren Kalendar mit Ihren anderen Geräten zu synchronisieren müssen zwei Schritte ausgeführt werden",
-  "sync headline with data": "Um Ihren Kalendar zu synchronisieren, folgende Informationen beachten:",
-  "sync url": "URL:",
-  "sync login": "Benutzername:",
-  "sync password": "Passwort:",
-  "sync help": "Sind Sie verloren? Folgen Sie der",
-  "sync help link": "Schritt-für-Schritt Anleitung!",
-  "install the sync module": "Installieren Sie das Sync Module vom dem Cozy App Store",
-  "connect to it and follow": "Verbinden Sie sich mit ihm und folgend den Anweisungen zu CalDAV.",
-  "some event fail to save": "Ein Ereignis wurde nicht gespeichert (ein Fehler ist aufgetreten).",
-  "imported events": "Anzahl der importierten Ereignisse",
-  "import finished": "Ihr Import ist nun fertig gestellt",
-  "import error occured for": "Fehler bei Import für folgende Elemente aufgetreten ",
-  "export your calendar": "Exportieren Sie Ihren Kalendar",
-  'please select existing calendar': 'Bitte wählen Sie einen bestehenden Kalendar aus.',
-  "January": "Januar",
-  "February": "Februar",
-  "March": "März",
-  "April": "April",
-  "May": "Mai",
-  "June": "Juni",
-  "July": "Juli",
-  "August": "August",
-  "September": "September",
-  "October": "Oktober",
-  "November": "November",
-  "December": "Dezember",
-  "January": "Januar",
-  "February": "Februar",
-  'Jan': 'Jan',
-  'Feb': 'Feb',
-  'Mar': 'Mär',
-  'Apr': 'Apr',
-  'Jun': 'Jun',
-  'Jul': 'Jul',
-  'Aug': 'Aug',
-  'Sep': 'Sep',
-  'Oct': 'Okt',
-  'Nov': 'Nov',
-  'Dec': 'Dez',
-  'calendar exist error': 'Ein Kalendar mit dem Namenn "Neuer Kalendar" existiert bereits.',
-  'email date format': 'DD/MM/YYYY [à] HH[h]mm',
-  'email date format allday': 'DD/MM/YYYY, [ganztags]',
-  'email invitation title': 'Einladung z "%{description}"',
-  'email invitation content': "Hallo, ich lade Sie zu folgendem Ereignis ein:\n%{description} %{place}\nam %{date}\nBitte um Zusage/Absage?\nJa\n%{url}?status=ACCEPTED&key=%{key}\nNein\n%{url}?status=DECLINED&key=%{key}",
-  'email update title': "Betreff \"%{description}\" a changé",
-  'email update content': "Ein Ereignis zu dem Sie eingeladen wurden, hat sich geändert:\n%{description} %{place}\nam %{date}\nWeiterhin; Zusage\n%{url}?status=ACCEPTED&key=%{key}\nNein leider; Absage\n%{url}?status=DECLINED&key=%{key}",
-  'email delete title': 'Diese Ereignis wurde abgesagt: %{description}',
-  'email delete content': "Dieses Ereignis wurde abgesagt:\n%{description} %{place}\nam %{date}"
-};
-});
-
-;require.register("locales/en", function(exports, require, module) {
-module.exports = {
-  "calendar list title": "Calendars",
-  "sync settings button label": "Synchronization",
-  "default calendar name": "my calendar",
-  "Add": "Add",
-  "event": "Event",
-  "create event": "Event creation",
-  "edit event": "Event edition",
-  "edit": "Edit",
-  "save": "Save",
-  "create": "Create",
-  "creation": "Creation",
-  "invite": "Invite",
-  "close": "Close",
-  "delete": "Delete",
-  "change color": "Change color",
-  "rename": "Rename",
-  "export": "Export",
-  "remove": "Remove event",
-  "duplicate": "Duplicate event",
-  "Place": "Place",
-  'all day': 'all day',
-  'All day': 'All day',
-  "description": "Description",
-  "date": "date",
-  "Day": "Day",
-  "days": "days",
-  "Edit": "Edit",
-  "Email": "Email",
-  "Import": "Import",
-  "Export": "Export",
-  "show": "Show",
-  "hide": "Hide",
-  "List": "List",
-  "list": "list",
-  "Calendar": "Calendar",
-  "calendar": "Calendar",
-  "Sync": "Sync",
-  "ie: 9:00 important meeting": "ie: 9:00 important meeting",
-  "Month": "Month",
-  "Popup": "Popup",
-  "Switch to List": "Switch to List",
-  "Switch to Calendar": "Switch to Calendar",
-  "time": "time",
-  "Today": "Today",
-  'today': 'today',
-  "What should I remind you ?": "What should I remind you?",
-  "select an icalendar file": "Select an icalendar file",
-  "import your icalendar file": "import your icalendar file",
-  "confirm import": "confirm import",
-  "cancel": "cancel",
-  "Create": "Create",
-  "Events to import": "Events to import",
-  "Create Event": "Create Event",
-  "From [hours:minutes]": "From [hours:minutes]",
-  "To [hours:minutes]": "To [hours:minutes]",
-  "To [date]": "To [date]",
-  "Description": "Description",
-  "days after": "days after",
-  "days later": "days later",
-  "Week": "Week",
-  "Display": "Notification",
-  "DISPLAY": "Notification",
-  "EMAIL": "E-mail",
-  "BOTH": "E-mail & Notification",
-  "display previous events": "Display previous events",
-  "display next events": "Display next events",
-  "event": "Event",
-  "are you sure": "Are you sure?",
-  "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
-  "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
-  "advanced": "More options",
-  "enter email": "Enter email",
-  "ON": "on",
-  "OFF": "off",
-  "no description": "No description",
-  "add calendar": "Add calendar",
-  "new calendar": "New calendar",
-  "multiple actions": "Multiple actions",
-  "recurrence": "Recurrence",
-  "recurrence rule": "Recurrence rules",
-  "make reccurent": "Make recurrent",
-  "repeat every": "Repeat every",
-  "no recurrence": "No recurrence",
-  "repeat on": "Repeat on",
-  "repeat on date": "Repeat on dates",
-  "repeat on weekday": "Repeat on weekday",
-  "repeat until": "Repeat until",
-  "after": "After",
-  "repeat": "Repeat",
-  "forever": "Forever",
-  "occurences": "occurences",
-  "every": "Every",
-  'minutes': 'minutes',
-  'minute ': 'minute',
-  'minute': 'minute',
-  'hours': 'hours',
-  'hour': 'hour',
-  "days": "days",
-  "day": "day",
-  "weeks": "weeks",
-  "week": "week",
-  "months": "months",
-  "month": "month",
-  "years": "years",
-  "year": "year",
-  "until": "until",
-  "for": "for",
-  "on": "on",
-  "on the": "on the",
-  "th": "th",
-  "nd": "nd",
-  "rd": "rd",
-  "st": "st",
-  "last": "last",
-  "and": "and",
-  "times": "times",
-  "weekday": "weekday",
-  'screen title done button': 'Done',
-  "placeholder event title": "Event title",
-  "from": "From",
-  "placeholder from date": "From [date]",
-  "placeholder from time": "From [hours:minutes]",
-  "to": "To",
-  "placeholder to date": "To [date]",
-  "placeholder to time": "To [hours:minutes]",
-  "all day": "All day",
-  "placeholder place": "Place",
-  "add guest button": "Add guest",
-  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
-  "placeholder description": "Description",
-  "no alert button": "No alert",
-  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
-  "alert tooltip": "Manage alerts",
-  "no repeat button": "No repeat",
-  "repeat tooltip": "Manage recurrence",
-  "more details button": "More options",
-  "save button": "Save",
-  "create button": "Create",
-  "duplicate event tooltip": "Duplicate event",
-  "delete event tooltip": "Delete event",
-  "change calendar": "Change calendar",
-  "screen delete title": "Delete event",
-  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
-  "screen delete yes button": "Yes",
-  "screen delete no button": "No",
-  "screen guest title empty": "Guest",
-  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
-  "screen guest input placeholder": "Email address",
-  "screen guest add button": "Add",
-  "screen guest remove tooltip": "Cancel the invitation",
-  "screen description title": "Description",
-  "screen alert title empty": "Alert",
-  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
-  "screen alert default value": "Add new alert",
-  "screen alert time of event": "Time of the event",
-  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
-  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
-  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
-  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
-  "screen alert delete tooltip": "Delete alert",
-  "screen alert type email": "Email",
-  "screen alert type notification": "Cozy notification",
-  "screen recurrence title": "Repeat",
-  "screen recurrence no repeat": "No repeat",
-  "screen recurrence daily": "Daily",
-  "screen recurrence weekly": "Weekly",
-  "screen recurrence monthly": "Monthly",
-  "screen recurrence yearly": "Yearly",
-  "screen recurrence interval label": "Interval",
-  "screen recurrence interval unit 0": "year |||| years",
-  "screen recurrence interval unit 1": "month |||| months",
-  "screen recurrence interval unit 2": "week |||| weeks",
-  "screen recurrence interval unit 3": "day |||| days",
-  "screen recurrence interval unit": "days",
-  "screen recurrence days list label": "On days",
-  "screen recurrence repeat by label": "Repeat by",
-  "screen recurrence repeat by month": "Day of the month",
-  "screen recurrence repeat by week": "Day of the week",
-  "screen recurrence ends label": "Ends:",
-  "screen recurrence ends never label": "Never",
-  "screen recurrence ends count label": "After",
-  "screen recurrence ends count unit": "occurrences",
-  "screen recurrence ends until label": "Until",
-  "screen recurrence ends until placeholder": "Until [date]",
-  "screen recurrence summary label": "Summary",
-  'send mails question': 'Send a notification email to:',
-  'modal send mails': 'Send a notification',
-  'yes': 'Yes',
-  'no': 'No',
-  "no summary": "A summary must be set.",
-  "start after end": "The start date is after the end date.",
-  "invalid start date": "The start date is invalid.",
-  "invalid end date": "The end date is invalid.",
-  "invalid trigg date": "The date is invalid.",
-  "invalid action": "The action is invalid.",
-  "server error occured": "A server error occured.",
-  "synchronization": "Synchronization",
-  "mobile sync": "Mobile Sync (CalDAV)",
-  "link imported events with calendar": "Link events to import with following calendar:",
-  "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
-  "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
-  "icalendar export": "ICalendar Export",
-  "icalendar import": "ICalendar Import",
-  "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
-  "sync headline with data": "To synchronize your calendar, use the following information:",
-  "sync url": "URL:",
-  "sync login": "Username:",
-  "sync password": "Password:",
-  "sync help": "Are you lost? Follow the",
-  "sync help link": "step-by-step guide!",
-  "install the sync module": "Install the Sync module from the Cozy App Store",
-  "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
-  "some event fail to save": "An event was not saved (an error occured).",
-  "imported events": "Amount of imported events",
-  "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
-  "import error": "A server error occured, the import failed.",
-  "import error occured for": "Import error occured for following elements:",
-  "export your calendar": "Export your calendar",
-  'please select existing calendar': 'Please select an existing calendar.',
-  "January": "January",
-  "February": "February",
-  "March": "March",
-  "April": "April",
-  "May": "May",
-  "June": "June",
-  "July": "July",
-  "August": "August",
-  "September": "September",
-  "October": "October",
-  "November": "November",
-  "December": "December",
-  "January": "January",
-  "February": "February",
-  'Jan': 'Jan',
-  'Feb': 'Feb',
-  'Mar': 'Mar',
-  'Apr': 'Apr',
-  'Jun': 'Jun',
-  'Jul': 'Jul',
-  'Aug': 'Aug',
-  'Sep': 'Sep',
-  'Oct': 'Oct',
-  'Nov': 'Nov',
-  'Dec': 'Dec',
-  'calendar exist error': 'A calendar named "New Calendar" already exists.',
-  'email date format': 'MMMM Do YYYY, h:mm a',
-  'email date format allday': 'MMMM Do YYYY, [all day long]',
-  'email invitation title': 'Invitation to "%{description}"',
-  'email invitation content': "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
-  'email update title': "Event \"%{description}\" has changed",
-  'email update content': "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
-  'email delete title': 'This event has been canceled: %{description}',
-  'email delete content': "This event has been canceled:\n%{description} %{place}\nOn %{date}"
-};
-});
-
-;require.register("locales/es", function(exports, require, module) {
-module.exports = {
-  "default calendar name": "mi agenda",
-  "Add": "Añadir",
-  "event": "Evento",
-  "create event": "Creación de un evento",
-  "edit event": "Modificar un evento",
-  "edit": "Mofificar",
-  "create": "Crear",
-  "creation": "Creación",
-  "invite": "Invitar",
-  "close": "Cerrar",
-  "delete": "Suprimir",
-  "change color": "Cambiar el  color",
-  "rename": "Renombrar",
-  "export": "Exportar",
-  "remove": "Suprimir el evento",
-  "duplicate": "Duplicar el evento",
-  "Place": "Lugar",
-  "all day": "día entero",
-  "All day": "Día entero",
-  "description": "Descripción",
-  "date": "fecha",
-  "Day": "Día",
-  "days": "días",
-  "Edit": "Modificar",
-  "Email": "Correo electrónico",
-  "Import": "Importar",
-  "Export": "Exportar",
-  "show": "Mostrar",
-  "hide": "Ocultar",
-  "List": "Lista",
-  "list": "Lista",
-  "Calendar": "Agenda",
-  "calendar": "Agenda",
-  "Sync": "Sincronizar",
-  "ie: 9:00 important meeting": "ej: 9:00 reunión importante",
-  "Month": "Mes",
-  "Popup": "Popup",
-  "Switch to List": "Cambiar a modo Lista",
-  "Switch to Calendar": "Cambiar a modo Agenda",
-  "time": "tiempo",
-  "Today": "Hoy",
-  "today": "hoy",
-  "What should I remind you ?": "¿Qué debo recordarle?",
-  "select an icalendar file": "Seleccionar un archivo icalendar",
-  "import your icalendar file": "importar su archivo icalendar",
-  "confirm import": "confirmar la importación",
-  "cancel": "anular",
-  "Create": "Crear",
-  "Events to import": "Eventos que se han de importar",
-  "Create Event": "Crear un evento",
-  "From [hours:minutes]": "De [horas:minutos]",
-  "To [hours:minutes]": "A [horas:minutos]",
-  "To [date]": "A [fecha]",
-  "Description": "Descripción",
-  "days after": "días después",
-  "days later": "días después",
-  "Week": "Semana",
-  "Display": "Notificación",
-  "DISPLAY": "Notificación",
-  "EMAIL": "Correo electrónico",
-  "BOTH": "Correo electrónico & notificación",
-  "display previous events": "Visualizar los eventos precedentes",
-  "display next events": "Visualizar los eventos siguientes",
-  "are you sure": "¿Está usted seguro(a)?",
-  "confirm delete calendar": "Usted está a punto de suprimir todos los eventos asociados a %{calendarName}. ¿Está seguro(a)?",
-  "confirm delete selected calendars": "Usted está a punto de suprimir todas las agendas seleccionadas. ¿Está seguro(a)?",
-  "advanced": "Más detalles",
-  "enter email": "Escriba la dirección del correo electrónico",
-  "ON": "activada",
-  "OFF": "desactivada",
-  "no description": "Sin descripción",
-  "add calendar": "Añadir agenda",
-  "new calendar": "Nueva agenda",
-  "multiple actions": "Acciones múltiples",
-  "recurrence": "Recurrencia",
-  "recurrence rule": "Reglas de recurrencia",
-  "make reccurent": "Volver recurrente",
-  "repeat every": "Repetir cada",
-  "no recurrence": "No se repite",
-  "repeat on": "Repetir los",
-  "repeat on date": "Repetir los días del mes",
-  "repeat on weekday": "Repetir el día de la semana",
-  "repeat until": "Repetir hasta",
-  "after": "O después",
-  "repeat": "Repetir",
-  "forever": "Siempre",
-  "occurences": "ocasiones",
-  "every": "Cada",
-  "minutes": "minutos",
-  "minute": "minuto",
-  "minute ": "minuto",
-  "hours": "horas",
-  "hour": "hora",
-  "day": "día",
-  "weeks": "semanas",
-  "week": "semana",
-  "months": "meses",
-  "month": "mes",
-  "years": "años",
-  "year": "año",
-  "until": "hasta",
-  "for": "durante",
-  "on": "el",
-  "on the": "el",
-  "th": "º ",
-  "nd": "º ",
-  "rd": "º ",
-  "st": "º ",
-  "last": "último",
-  "and": "y",
-  "times": "veces",
-  "weekday": "día de la semana",
-  'screen title done button': 'Done',
-  "placeholder event title": "Event title",
-  "from": "From",
-  "placeholder from date": "From [date]",
-  "placeholder from time": "From [hours:minutes]",
-  "to": "To",
-  "placeholder to date": "To [date]",
-  "placeholder to time": "To [hours:minutes]",
-  "all day": "All day",
-  "placeholder place": "Place",
-  "add guest button": "Add guest",
-  "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
-  "placeholder description": "Description",
-  "no alert button": "No alert",
-  "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
-  "alert tooltip": "Manage alerts",
-  "no repeat button": "No repeat",
-  "repeat tooltip": "Manage recurrence",
-  "more details button": "More options",
-  "save button": "Save",
-  "create button": "Create",
-  "duplicate event tooltip": "Duplicate event",
-  "delete event tooltip": "Delete event",
-  "change calendar": "Cambiar de agenda",
-  "screen delete title": "Delete event",
-  "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
-  "screen delete yes button": "Yes",
-  "screen delete no button": "No",
-  "screen guest title empty": "Guest",
-  "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
-  "screen guest input placeholder": "Email address",
-  "screen guest add button": "Add",
-  "screen guest remove tooltip": "Cancel the invitation",
-  "screen description title": "Description",
-  "screen alert title empty": "Alert",
-  "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
-  "screen alert default value": "Add new alert",
-  "screen alert time of event": "Time of the event",
-  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
-  "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
-  "screen alert day": "%{smart_count} day |||| %{smart_count} days",
-  "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
-  "screen alert delete tooltip": "Delete alert",
-  "screen alert type email": "Email",
-  "screen alert type notification": "Cozy notification",
-  "screen recurrence title": "Repeat",
-  "screen recurrence no repeat": "No repeat",
-  "screen recurrence daily": "Daily",
-  "screen recurrence weekly": "Weekly",
-  "screen recurrence monthly": "Monthly",
-  "screen recurrence yearly": "Yearly",
-  "screen recurrence interval label": "Interval",
-  "screen recurrence interval unit 0": "year |||| years",
-  "screen recurrence interval unit 1": "month |||| months",
-  "screen recurrence interval unit 2": "week |||| weeks",
-  "screen recurrence interval unit 3": "day |||| days",
-  "screen recurrence interval unit": "days",
-  "screen recurrence days list label": "On days",
-  "screen recurrence repeat by label": "Repeat by",
-  "screen recurrence repeat by month": "Day of the month",
-  "screen recurrence repeat by week": "Day of the week",
-  "screen recurrence ends label": "Ends:",
-  "screen recurrence ends never label": "Never",
-  "screen recurrence ends count label": "After",
-  "screen recurrence ends count unit": "occurrences",
-  "screen recurrence ends until label": "Until",
-  "screen recurrence ends until placeholder": "Until [date]",
-  "screen recurrence summary label": "Summary",
-  "send mails question": "Enviar un correo electrónico de notificación a:",
-  "modal send mails": "Enviar una notificación",
-  "yes": "Si",
-  "no": "No",
-  "no summary": "El título es obligatorio",
-  "start after end": "La fecha del comienzo es posterior a la fecha del final.",
-  "invalid start date": "La fecha del comienzo no es válida",
-  "invalid end date": "La fecha del final no es válida",
-  "invalid trigg date": "La fecha no es válida",
-  "invalid action": "La acción no es válida",
-  "server error occured": "Ha ocurrido un error en el servidor",
-  "synchronization": "Sincronización",
-  "mobile sync": "Sincronización con los móviles (CalDAV)",
-  "link imported events with calendar": "Ligar los eventos a importar con la siguiente agenda:",
-  "import an ical file": "Para importar un archivo ICal a su agenda Cozy, comenzar por hacer clic en este botón para precargarlo:",
-  "download a copy of your calendar": "Seleccionar una agenda y luego hacer clic en el botón para descargar una copia de la agenda como archivo ICal, :",
-  "icalendar export": "Exportar ICalendar",
-  "icalendar import": "Importar ICalendar",
-  "to sync your cal with": "Para sincronizar su agenda con sus periféricos, usted debe seguir los dos siguientes pasos",
-  "sync headline with data": "Para sincronizar su agenda, use la siguiente información:",
-  "sync url": "URL:",
-  "sync login": "Usuario:",
-  "sync password": "Contraseña:",
-  "sync help": "¿Esta usted perdido(a)? siga la",
-  "sync help link": "guía paso a paso!",
-  "install the sync module": "Instalar el módulo Sincronización desde la Apliteca Cozy",
-  "connect to it and follow": "Conectarse y seguir las instrucciones relativas a CalDAV.",
-  "some event fail to save": "No se ha guardado un evento (ha ocurrido un error)",
-  "imported events": "Número de eventos importados",
-  "import finished": "La importación ha terminado",
-  "import error occured for": "Un error ha ocurrido al importar los siguientes elementos :",
-  "export your calendar": "Exportar su agenda",
-  "please select existing calendar": "Por favor seleccionar una agenda existente",
-  "January": "enero",
-  "February": "febrero",
-  "March": "marzo",
-  "April": "abril",
-  "May": "mayo",
-  "June": "junio",
-  "July": "julio",
-  "August": "agosto",
-  "September": "septiembre",
-  "October": "octubre",
-  "November": "noviembre",
-  "December": "diciembre",
-  "Jan": "ene",
-  "Feb": "feb",
-  "Mar": "mar",
-  "Apr": "abr",
-  "Jun": "jun",
-  "Jul": "jul",
-  "Aug": "ago",
-  "Sep": "sep",
-  "Oct": "oct",
-  "Nov": "nov",
-  "Dec": "dic",
-  "calendar exist error": "Una agenda llamada \"Nueva agenda\" ya existe.",
-  "email date format": "DD/MM/AAAA [a] HH[h]mm",
-  "email date format allday": "DD/MM/AAAA [todo el día]",
-  "email invitation title": "Invitación a \"%{description}\"",
-  "email invitation content": "Buenos días, desearía invitarlo(a) al siguiente evento:\n\n%{description} %{place}\nel %{date}\n¿Podríamos contar con su presencia?\n\nSi\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n %{url}?status=DECLINED&key=%{key}",
-  "email update title": "El evento \"%{description}\" ha cambiado",
-  "email update content": "Un evento en el que usted participa se ha cambiado:\n%{description} %{place}\nel %{date}\n\nSeguiré estando presente\n %{url}?status=ACCEPTED&key=%{key}\n\nNo cuenten conmigo\n %{url}?status=ACCEPTED&key=%{key}",
-  "email delete title": "Este evento ha sido anulado: %{description}",
-  "email delete content": "Este evento ha sido anulado:\n%{description} %{place}\nel %{date}"
-};
-});
-
-;require.register("locales/fr", function(exports, require, module) {
-module.exports = {
-  "calendar list title": "Agendas",
-  "sync settings button label": "Synchronisation",
-  "default calendar name": "mon agenda",
-  "Add": "Ajouter",
-  "event": "évènement",
-  "create event": "Création d'un évènement",
-  "edit event": "Modification d'un évènement",
-  "edit": "Modifier",
-  "save": "Enregistrer",
-  "create": "Créer",
-  "creation": "Création",
-  "invite": "Inviter",
-  "close": "Fermer",
-  "change color": "Changer la couleur",
-  "delete": "Supprimer",
-  "rename": "Renommer",
-  "export": "Exporter",
-  "remove": "Supprimer l'évènement",
-  "duplicate": "Dupliquer l'évènement",
-  "Place": "Lieu",
-  'all day': 'journée entière',
-  'All day': 'Journée entière',
-  "description": "Description",
-  "date": "Date",
-  "Day": "Jour",
-  'days': 'jours',
-  "Edit": "Modifier",
-  "Email": "Email",
-  "Import": "Importation",
-  "Export": "Exportation",
-  "show": "Montrer",
-  "hide": "Cacher",
-  "List": "Liste",
-  "list": "liste",
-  "Calendar": "Agenda",
-  "calendar": "Agenda",
-  "Sync": "Sync",
-  "ie: 9:00 important meeting": "exemple : 9:00 appeler Jacques",
-  "Month": "Mois",
-  "Popup": "Popup",
-  "Switch to List": "Basculer en mode Liste",
-  "Switch to Calendar": "Basculer en mode Agenda",
-  "time": "Heure",
-  "Today": "Aujourd’hui",
-  'today': 'aujourd’hui',
-  "What should I remind you ?": "Que dois-je vous rappeler ?",
-  "import your icalendar file": "Importer votre fichier iCalendar",
-  "select an icalendar file": "Sélectionner un fichier iCalendar",
-  "confirm import": "Confirmer l'importation",
-  "cancel": "Annuler",
-  "Create": "Créer",
-  "Events to import": "Évènements à importer",
-  "Create Event": "Créer un évènement",
-  "From [hours:minutes]": "De [heure:minutes]",
-  "To [hours:minutes]": "À [heure:minutes]",
-  "To [date]": "À [date]",
-  "Description": "Description",
-  "days after": "jours plus tard",
-  "days later": "jours plus tard",
-  "Week": "Semaine",
-  "Display": "Notification",
-  "DISPLAY": "Notification",
-  "EMAIL": "Email",
-  "BOTH": "Email & notification",
-  "display previous events": "Afficher les évènements précédents",
-  "display next events": "Afficher les évènements suivants",
-  "are you sure": "Êtes-vous sûr(e) ?",
-  "confirm delete calendar": "Vous êtes sur le point de supprimer tous les événements associés à %{calendarName}. Êtes-vous sûr(e) ?",
-  "confirm delete selected calendars": "Vous êtes sur le point de supprimer tous les agendas sélectionnés. Êtes-vous sûr(e) ?",
-  "advanced": "Détails",
-  "enter email": "Entrer l'adresse email",
-  "ON": "activée",
-  "OFF": "désactivée",
-  "no description": "Sans description",
-  "add calendar": "Ajouter un agenda",
-  "new calendar": "Nouvel agenda",
-  "multiple actions": "Actions multiples",
-  "recurrence": "Récurrence",
-  "recurrence rule": "Règle de récurrence",
-  "make reccurent": "Rendre récurrent",
-  "repeat every": "Répéter tous les",
-  "no recurrence": "Pas de répétition",
-  "repeat on": "Répéter les",
-  "repeat on date": "Répéter les jours du mois",
-  "repeat on weekday": "Répéter le jour de la semaine",
-  "repeat until": "Répéter jusqu'au",
-  "after": "ou après",
-  "repeat": "Répétition",
-  "forever": "Pour toujours",
-  "occurences": "occasions",
-  "every": "tous les",
-  'minutes': 'minutes',
-  'minute': 'minute',
-  'minute ': 'minute',
-  'hours': 'heures',
-  'hour': 'heure',
-  "days": "jours",
-  "day": "jour",
-  "weeks": "semaines",
-  "week": "semaine",
-  "months": "mois",
-  "month": "mois",
-  "years": "ans",
-  "year": "an",
-  "until": "jusqu'au",
-  "for": "pour",
-  "on": "le",
-  "on the": "le",
-  "th": "ème",
-  "nd": "ème",
-  "rd": "ème",
-  "st": "er",
-  "last": "dernier",
-  "and": "et",
-  "times": "fois",
-  "weekday": "jours de la semaine",
-  'screen title done button': 'OK',
-  "placeholder event title": "Titre de l'événement",
-  "from": "De",
-  "placeholder from date": "De [date]",
-  "placeholder from time": "De [heures:minutes]",
-  "to": "Au",
-  "placeholder to date": "Jusqu'à [date]",
-  "placeholder to time": "Jusqu'à [hours:minutes]",
-  "all day": "Jour Entier",
-  "placeholder place": "Lieu",
-  "add guest button": "Ajouter un invité",
-  "guests list": "%{first} et %{smart_count} autre |||| %{first} et %{smart_count} autres",
-  "placeholder description": "Description",
-  "no alert button": "Pas d'alerte",
-  "alert label": "%{smart_count} alerte programmée |||| %{smart_count} alertes programmées",
-  "alert tooltip": "Gérer les alertes",
-  "no repeat button": "Pas de répétition",
-  "repeat tooltip": "Gérer la récurrence",
-  "more details button": "Plus d'options",
-  "save button": "Sauvegarder",
-  "create button": "Créer",
-  "duplicate event tooltip": "Dupliquer l'événement",
-  "delete event tooltip": "Supprimer l'événement",
-  "change calendar": "Changer l'agenda",
-  "screen delete title": "Supprimer l'événement",
-  "screen delete description": "Vous êtes sur le point de supprimer l'événement \"%{description}\". Êtes-vous sûr ?",
-  "screen delete yes button": "Oui",
-  "screen delete no button": "Non",
-  "screen guest title empty": "Invité",
-  "screen guest title": "%{smart_count} invité |||| %{smart_count} invités",
-  "screen guest input placeholder": "Adresse email",
-  "screen guest add button": "Ajouter",
-  "screen guest remove tooltip": "Annuler l'invitation",
-  "screen description title": "Description",
-  "screen alert title empty": "Alerte",
-  "screen alert title": "%{smart_count} alerte |||| %{smart_count} alertes",
-  "screen alert default value": "Ajouter une nouvelle alerte",
-  "screen alert time of event": "Heure de l'événement",
-  "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
-  "screen alert hour": "%{smart_count} heure |||| %{smart_count} heures",
-  "screen alert day": "%{smart_count} jour |||| %{smart_count} jours",
-  "screen alert week": "%{smart_count} semaine |||| %{smart_count} semaines",
-  "screen alert delete tooltip": "Supprimer l'alerte",
-  "screen alert type email": "Email",
-  "screen alert type notification": "Notification Cozy",
-  "screen recurrence title": "Répétition",
-  "screen recurrence no repeat": "Pas de répétition",
-  "screen recurrence daily": "Quotidienne",
-  "screen recurrence weekly": "Hebdomadaire",
-  "screen recurrence monthly": "Mensuelle",
-  "screen recurrence yearly": "Annuelle",
-  "screen recurrence interval label": "Interval",
-  "screen recurrence interval unit 0": "année |||| années",
-  "screen recurrence interval unit 1": "mois",
-  "screen recurrence interval unit 2": "semaine |||| semaines",
-  "screen recurrence interval unit 3": "jour |||| jours",
-  "screen recurrence days list label": "jours",
-  "screen recurrence repeat by label": "Répéter par",
-  "screen recurrence repeat by month": "Jour du mois",
-  "screen recurrence repeat by week": "Jour de la semaine",
-  "screen recurrence ends label": "Fin",
-  "screen recurrence ends never label": "Jamais",
-  "screen recurrence ends count label": "Après",
-  "screen recurrence ends count unit": "occurrences",
-  "screen recurrence ends until label": "au",
-  "screen recurrence ends until placeholder": "au [date]",
-  "screen recurrence summary label": "Résumé",
-  'send mails question': 'Envoyer un email de notification à :',
-  'modal send mails': 'Envoyer une notification',
-  'yes': 'Oui',
-  'no': 'Non',
-  "no summary": "Le titre est obligatoire.",
-  "start after end": "La fin est après le début.",
-  "invalid start date": "Le début est invalide.",
-  "invalid end date": "La fin est invalide.",
-  "invalid trigg date": "Le moment est invalide.",
-  "invalid action": "L'action est invalide.",
-  "server error occured": "Une erreur est survenue sur le serveur.",
-  "synchronization": "Synchronisation",
-  "mobile sync": "Synchro Mobile (CalDAV)",
-  "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
-  "link imported events with calendar": "Lier les évènements à importer avec l'agenda suivant :",
-  "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
-  "icalendar export": "Exporter ICalendar",
-  "icalendar import": "Importer ICalendar",
-  "to sync your cal with": "Pour synchroniser votre agenda avec votre mobile vous devez :",
-  "sync headline with data": "Pour synchroniser votre agenda, utilisez les identifiants suivants :",
-  "sync url": "URL :",
-  "sync login": "Nom d'utilisateur :",
-  "sync password": "Mot de passe :",
-  "sync help": "Vous êtes perdu(e) ? Suivez le",
-  "sync help link": "guide pas à pas !",
-  "install the sync module": "Installer le module Sync depuis l'applithèque.",
-  "connect to it and follow": "Vous connecter et suivre les instructions relatives à CalDAV.",
-  "some event fail to save": "La sauvegarde d'un évènement a échoué.",
-  "imported events": "Nombre d'évènements importés",
-  "import finished": "Votre import est terminé ! L'affichage des nouveaux événements prend du temps. Si vous voulez les voir apparaitre plus rapidement, rafraichissez la page.",
-  "import error": "Une erreur serveur s'est produite, l'import a échoué.",
-  "import error occured for": "Une erreur est survenue pour un de ces éléments :",
-  "export your calendar": "Exporter votre agenda",
-  'please select existing calendar': 'Veuillez sélectionner un agenda existant.',
-  "January": "Janvier",
-  "February": "Février",
-  "March": "Mars",
-  "April": "Avril",
-  "May": "Mai",
-  "June": "Juin",
-  "July": "Juillet",
-  "August": "Août",
-  "September": "Septembre",
-  "October": "Octobre",
-  "November": "Novembre",
-  "December": "Décembre",
-  'Jan': 'Jan',
-  'Feb': 'Fév',
-  'Mar': 'Mar',
-  'Apr': 'Avr',
-  'Jun': 'Jui',
-  'Jul': 'Jul',
-  'Aug': 'Aou',
-  'Sep': 'Sep',
-  'Oct': 'Oct',
-  'Nov': 'Nov',
-  'Dec': 'Déc',
-  'calendar exist error': 'Un agenda intitulé "Nouvel agenda" existe déjà.',
-  'email date format': 'DD/MM/YYYY [à] HH[h]mm',
-  'email date format allday': 'DD/MM/YYYY [toute la journée]',
-  'email invitation title': "Invitation à l'évènement \"%{description}\"",
-  'email invitation content': "Bonjour, je souhaiterais vous inviter à l'évènement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
-  'email update title': "L'évènement \"%{description}\" a changé",
-  'email update content': "Un évènement auquel vous participez a changé :\n%{description} %{place}\nLe %{date}\n\nJe viens toujours\n%{url}?status=ACCEPTED&key=%{key}\n\nJe ne viens plus\n%{url}?status=DECLINED&key=%{key}",
-  'email delete title': 'Cet évènement a été annulé : %{description}',
-  'email delete content': "Cet évènement a été annulé :\n%{description} %{place}\nLe %{date}"
-};
-});
-
 ;require.register("models/contact", function(exports, require, module) {
 var Contact,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = Contact = (function(superClass) {
-  extend(Contact, superClass);
+module.exports = Contact = (function(_super) {
+  __extends(Contact, _super);
 
   function Contact() {
     return Contact.__super__.constructor.apply(this, arguments);
@@ -2945,13 +1932,13 @@ module.exports = Contact = (function(superClass) {
 
 ;require.register("models/event", function(exports, require, module) {
 var Event, ScheduleItem,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ScheduleItem = require('./scheduleitem');
 
-module.exports = Event = (function(superClass) {
-  extend(Event, superClass);
+module.exports = Event = (function(_super) {
+  __extends(Event, _super);
 
   function Event() {
     return Event.__super__.constructor.apply(this, arguments);
@@ -2966,8 +1953,8 @@ module.exports = Event = (function(superClass) {
   Event.prototype.urlRoot = 'events';
 
   Event.prototype.defaults = function() {
-    var defaultCalendar, ref, ref1;
-    defaultCalendar = ((ref = window.app.calendars) != null ? (ref1 = ref.at(0)) != null ? ref1.get('name') : void 0 : void 0) || t('default calendar name');
+    var defaultCalendar, _ref, _ref1;
+    defaultCalendar = ((_ref = window.app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0) || t('default calendar name');
     return {
       details: '',
       description: '',
@@ -3070,11 +2057,11 @@ module.exports = Event = (function(superClass) {
 
 ;require.register("models/realevent", function(exports, require, module) {
 var RealEvent,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = RealEvent = (function(superClass) {
-  extend(RealEvent, superClass);
+module.exports = RealEvent = (function(_super) {
+  __extends(RealEvent, _super);
 
   function RealEvent(options) {
     RealEvent.__super__.constructor.apply(this, arguments);
@@ -3085,7 +2072,7 @@ module.exports = RealEvent = (function(superClass) {
     if (this.event.isRecurrent()) {
       this.set('id', this.event.get('id') + this.start.toISOString());
     } else if (this.event.isMultipleDays()) {
-      this.set('id', (this.event.get('id')) + " " + this.start);
+      this.set('id', "" + (this.event.get('id')) + " " + this.start);
     } else {
       this.set('id', this.event.get('id'));
       this.start = this.event.getStartDateObject();
@@ -3102,8 +2089,8 @@ module.exports = RealEvent = (function(superClass) {
   };
 
   RealEvent.prototype.getDateHash = function() {
-    var ref;
-    return (ref = this.start) != null ? ref.format('YYYYMMDD') : void 0;
+    var _ref;
+    return (_ref = this.start) != null ? _ref.format('YYYYMMDD') : void 0;
   };
 
   RealEvent.prototype.isAllDay = function() {
@@ -3111,13 +2098,13 @@ module.exports = RealEvent = (function(superClass) {
   };
 
   RealEvent.prototype.getFormattedStartDate = function(format) {
-    var ref;
-    return (ref = this.start) != null ? ref.format(format) : void 0;
+    var _ref;
+    return (_ref = this.start) != null ? _ref.format(format) : void 0;
   };
 
   RealEvent.prototype.getFormattedEndDate = function(format) {
-    var ref;
-    return (ref = this.end) != null ? ref.format(format) : void 0;
+    var _ref;
+    return (_ref = this.end) != null ? _ref.format(format) : void 0;
   };
 
   return RealEvent;
@@ -3127,15 +2114,15 @@ module.exports = RealEvent = (function(superClass) {
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
 var H, Modal, ScheduleItem,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Modal = require('../lib/modal');
 
 H = require('../helpers');
 
-module.exports = ScheduleItem = (function(superClass) {
-  extend(ScheduleItem, superClass);
+module.exports = ScheduleItem = (function(_super) {
+  __extends(ScheduleItem, _super);
 
   function ScheduleItem() {
     return ScheduleItem.__super__.constructor.apply(this, arguments);
@@ -3148,9 +2135,9 @@ module.exports = ScheduleItem = (function(superClass) {
   ScheduleItem.prototype.endDateField = false;
 
   ScheduleItem.prototype.initialize = function() {
-    var defaultCalendarName, ref;
+    var defaultCalendarName, _ref;
     defaultCalendarName = t('default calendar name');
-    if (!((ref = this.get('tags')) != null ? ref.length : void 0)) {
+    if (!((_ref = this.get('tags')) != null ? _ref.length : void 0)) {
       this.set('tags', [defaultCalendarName]);
     }
     this.on('change:' + this.startDateField, (function(_this) {
@@ -3166,8 +2153,8 @@ module.exports = ScheduleItem = (function(superClass) {
   };
 
   ScheduleItem.prototype.getCalendar = function() {
-    var ref;
-    return app.tags.getByName((ref = this.get('tags')) != null ? ref[0] : void 0);
+    var _ref;
+    return app.tags.getByName((_ref = this.get('tags')) != null ? _ref[0] : void 0);
   };
 
   ScheduleItem.prototype.setCalendar = function(cal) {
@@ -3195,13 +2182,13 @@ module.exports = ScheduleItem = (function(superClass) {
   };
 
   ScheduleItem.prototype.isVisible = function() {
-    var ref;
-    return (ref = this.getCalendar()) != null ? ref.get('visible') : void 0;
+    var _ref;
+    return (_ref = this.getCalendar()) != null ? _ref.get('visible') : void 0;
   };
 
   ScheduleItem.prototype.isAllDay = function() {
-    var ref;
-    return ((ref = this.get(this.startDateField)) != null ? ref.length : void 0) === 10;
+    var _ref;
+    return ((_ref = this.get(this.startDateField)) != null ? _ref.length : void 0) === 10;
   };
 
   ScheduleItem.prototype.isSameDay = function() {
@@ -3377,7 +2364,7 @@ module.exports = ScheduleItem = (function(superClass) {
   };
 
   ScheduleItem.prototype.generateMultipleDaysEvents = function() {
-    var date, difference, endDate, fakeEvent, fakeEvents, i, j, ref, startDate;
+    var date, difference, endDate, fakeEvent, fakeEvents, i, startDate, _i;
     if (!this.isMultipleDays()) {
       return [this];
     } else {
@@ -3388,7 +2375,7 @@ module.exports = ScheduleItem = (function(superClass) {
         difference--;
       }
       fakeEvents = [];
-      for (i = j = 0, ref = difference; j <= ref; i = j += 1) {
+      for (i = _i = 0; _i <= difference; i = _i += 1) {
         fakeEvent = _.clone(this.attributes);
         date = moment(startDate).add(i, 'days');
         fakeEvent = {
@@ -3433,7 +2420,7 @@ module.exports = ScheduleItem = (function(superClass) {
 
   ScheduleItem.prototype.sync = function(method, model, options) {
     return this.confirmSendEmails(method, function(sendMails) {
-      options.url = (model.url()) + "?sendMails=" + sendMails;
+      options.url = "" + (model.url()) + "?sendMails=" + sendMails;
       return ScheduleItem.__super__.sync.call(this, method, model, options);
     });
   };
@@ -3448,11 +2435,11 @@ module.exports = ScheduleItem = (function(superClass) {
     }
     attendees = this.get('attendees') || [];
     guestsToInform = attendees.filter(function(guest) {
-      var ref;
+      var _ref;
       if (method === 'create') {
         return true;
       } else if (method === 'delete') {
-        return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
+        return (_ref = guest.status) === 'ACCEPTED' || _ref === 'NEEDS-ACTION';
       } else if (method === 'update' || method === 'patch') {
         return guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && this.startDateChanged);
       }
@@ -3463,7 +2450,7 @@ module.exports = ScheduleItem = (function(superClass) {
       callback(false);
     } else {
       guestsList = guestsToInform.join(', ');
-      content = (t('send mails question')) + " " + guestsList;
+      content = "" + (t('send mails question')) + " " + guestsList;
       Modal.confirm(t('modal send mails'), content, t('yes'), t('no'), callback);
     }
     this.startDateChanged = false;
@@ -3477,11 +2464,11 @@ module.exports = ScheduleItem = (function(superClass) {
 
 ;require.register("models/tag", function(exports, require, module) {
 var Tag,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = Tag = (function(superClass) {
-  extend(Tag, superClass);
+module.exports = Tag = (function(_super) {
+  __extends(Tag, _super);
 
   function Tag() {
     return Tag.__super__.constructor.apply(this, arguments);
@@ -3490,7 +2477,7 @@ module.exports = Tag = (function(superClass) {
   Tag.prototype.urlRoot = 'tags';
 
   Tag.prototype.defaults = {
-    visible: false
+    visible: true
   };
 
   Tag.prototype.toString = function() {
@@ -3504,9 +2491,9 @@ module.exports = Tag = (function(superClass) {
 
 ;require.register("router", function(exports, require, module) {
 var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 app = require('application');
 
@@ -3520,15 +2507,15 @@ ImportView = require('views/import_view');
 
 DayBucketCollection = require('collections/daybuckets');
 
-module.exports = Router = (function(superClass) {
+module.exports = Router = (function(_super) {
   var getBeginningOfWeek;
 
-  extend(Router, superClass);
+  __extends(Router, _super);
 
   function Router() {
-    this.displayView = bind(this.displayView, this);
-    this.displayCalendar = bind(this.displayCalendar, this);
-    this.backToCalendar = bind(this.backToCalendar, this);
+    this.displayView = __bind(this.displayView, this);
+    this.displayCalendar = __bind(this.displayCalendar, this);
+    this.backToCalendar = __bind(this.backToCalendar, this);
     return Router.__super__.constructor.apply(this, arguments);
   }
 
@@ -3581,9 +2568,9 @@ module.exports = Router = (function(superClass) {
   };
 
   Router.prototype.week = function(year, month, day) {
-    var hash, ref;
+    var hash, _ref;
     if (year != null) {
-      ref = getBeginningOfWeek(year, month, day), year = ref[0], month = ref[1], day = ref[2];
+      _ref = getBeginningOfWeek(year, month, day), year = _ref[0], month = _ref[1], day = _ref[2];
       return this.displayCalendar('agendaWeek', year, month, day);
     } else {
       hash = moment().format('[week]/YYYY/M/D');
@@ -3620,8 +2607,8 @@ module.exports = Router = (function(superClass) {
   };
 
   Router.prototype.week_event = function(year, month, date, id) {
-    var day, ref;
-    ref = getBeginningOfWeek(year, month, day), year = ref[0], month = ref[1], day = ref[2];
+    var day, _ref;
+    _ref = getBeginningOfWeek(year, month, day), year = _ref[0], month = _ref[1], day = _ref[2];
     if (!(this.mainView instanceof CalendarView)) {
       this.week(year, month, date);
     }
@@ -3668,10 +2655,10 @@ module.exports = Router = (function(superClass) {
   };
 
   getBeginningOfWeek = function(year, month, day) {
-    var monday, ref;
-    ref = [year, month, day].map(function(x) {
+    var monday, _ref;
+    _ref = [year, month, day].map(function(x) {
       return parseInt(x);
-    }), year = ref[0], month = ref[1], day = ref[2];
+    }), year = _ref[0], month = _ref[1], day = _ref[2];
     monday = new Date(year, (month - 1) % 12, day);
     monday.setDate(monday.getDate() - monday.getDay() + 1);
     return [year, monday.getMonth() + 1, monday.getDate()];
@@ -3692,13 +2679,13 @@ module.exports = Router = (function(superClass) {
 
 ;require.register("views/calendar_header", function(exports, require, module) {
 var BaseView, CalendarHeader,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-module.exports = CalendarHeader = (function(superClass) {
-  extend(CalendarHeader, superClass);
+module.exports = CalendarHeader = (function(_super) {
+  __extends(CalendarHeader, _super);
 
   function CalendarHeader() {
     return CalendarHeader.__super__.constructor.apply(this, arguments);
@@ -3752,9 +2739,9 @@ module.exports = CalendarHeader = (function(superClass) {
   };
 
   CalendarHeader.prototype.isToday = function() {
-    var end, ref, ref1, start;
-    ref = this.getDates(), start = ref[0], end = ref[1];
-    return (start < (ref1 = moment()) && ref1 < end);
+    var end, start, _ref, _ref1;
+    _ref = this.getDates(), start = _ref[0], end = _ref[1];
+    return (start < (_ref1 = moment()) && _ref1 < end);
   };
 
   CalendarHeader.prototype.getRenderData = function() {
@@ -3815,15 +2802,15 @@ module.exports = CalendarHeader = (function(superClass) {
 
 ;require.register("views/calendar_popover_event", function(exports, require, module) {
 var Event, EventPopOver, PopoverView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverView = require('lib/popover_view');
 
 Event = require('models/event');
 
-module.exports = EventPopOver = (function(superClass) {
-  extend(EventPopOver, superClass);
+module.exports = EventPopOver = (function(_super) {
+  __extends(EventPopOver, _super);
 
   function EventPopOver() {
     return EventPopOver.__super__.constructor.apply(this, arguments);
@@ -3913,10 +2900,10 @@ module.exports = EventPopOver = (function(superClass) {
 
 ;require.register("views/calendar_view", function(exports, require, module) {
 var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  slice = [].slice;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 app = require('application');
 
@@ -3932,18 +2919,18 @@ timezones = require('helpers/timezone').timezones;
 
 Event = require('models/event');
 
-module.exports = CalendarView = (function(superClass) {
-  extend(CalendarView, superClass);
+module.exports = CalendarView = (function(_super) {
+  __extends(CalendarView, _super);
 
   function CalendarView() {
-    this.onEventClick = bind(this.onEventClick, this);
-    this.onEventResize = bind(this.onEventResize, this);
-    this.onEventDrop = bind(this.onEventDrop, this);
-    this.onSelect = bind(this.onSelect, this);
-    this.getUrlHash = bind(this.getUrlHash, this);
-    this.onChangeView = bind(this.onChangeView, this);
-    this.refreshOne = bind(this.refreshOne, this);
-    this.handleWindowResize = bind(this.handleWindowResize, this);
+    this.onEventClick = __bind(this.onEventClick, this);
+    this.onEventResize = __bind(this.onEventResize, this);
+    this.onEventDrop = __bind(this.onEventDrop, this);
+    this.onSelect = __bind(this.onSelect, this);
+    this.getUrlHash = __bind(this.getUrlHash, this);
+    this.onChangeView = __bind(this.onChangeView, this);
+    this.refreshOne = __bind(this.refreshOne, this);
+    this.handleWindowResize = __bind(this.handleWindowResize, this);
     return CalendarView.__super__.constructor.apply(this, arguments);
   }
 
@@ -3951,8 +2938,8 @@ module.exports = CalendarView = (function(superClass) {
 
   CalendarView.prototype.template = require('./templates/calendarview');
 
-  CalendarView.prototype.initialize = function(options1) {
-    this.options = options1;
+  CalendarView.prototype.initialize = function(options) {
+    this.options = options;
     this.eventCollection = this.model.events;
     this.listenTo(this.eventCollection, 'add', this.refresh);
     this.listenTo(this.eventCollection, 'reset', this.refresh);
@@ -3975,7 +2962,7 @@ module.exports = CalendarView = (function(superClass) {
     if (this.options.month != null) {
       currDate.month(this.options.month);
     }
-    if (this.options.date != null) {
+    if ((this.options.date != null) && this.view !== 'month') {
       currDate.date(this.options.date);
     }
     this.cal.fullCalendar({
@@ -4063,9 +3050,9 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.remove = function() {
-    var ref;
-    if ((ref = this.popover) != null) {
-      ref.close();
+    var _ref;
+    if ((_ref = this.popover) != null) {
+      _ref.close();
     }
     return CalendarView.__super__.remove.apply(this, arguments);
   };
@@ -4109,12 +3096,12 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    var ref, ref1;
+    var _ref, _ref1;
     options.container = this.cal;
     options.parentView = this;
     if (this.popover) {
       this.popover.close();
-      if ((this.popover.options != null) && ((this.popover.options.model != null) && this.popover.options.model === options.model || (((ref = this.popover.options.start) != null ? ref.isSame(options.start) : void 0) && ((ref1 = this.popover.options.end) != null ? ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type))) {
+      if ((this.popover.options != null) && ((this.popover.options.model != null) && this.popover.options.model === options.model || (((_ref = this.popover.options.start) != null ? _ref.isSame(options.start) : void 0) && ((_ref1 = this.popover.options.end) != null ? _ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type))) {
         this.cal.fullCalendar('unselect');
         this.popover = null;
         return;
@@ -4125,18 +3112,18 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.closePopover = function() {
-    var ref;
-    if ((ref = this.popover) != null) {
-      ref.close();
+    var _ref;
+    if ((_ref = this.popover) != null) {
+      _ref.close();
     }
     return this.onPopoverClose();
   };
 
   CalendarView.prototype.onChangeView = function(view) {
-    var f, hash, ref;
+    var f, hash, _ref;
     this.closePopover();
-    if ((ref = this.calHeader) != null) {
-      ref.render();
+    if ((_ref = this.calHeader) != null) {
+      _ref.render();
     }
     if (this.view !== view.name) {
       this.handleWindowResize();
@@ -4181,7 +3168,7 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.onEventRender = function(event, $element) {
-    var $displayedElement, ref, spinTarget, time, title, titleAndTime;
+    var $displayedElement, spinTarget, time, title, titleAndTime, _ref;
     if ((event.isSaving != null) && event.isSaving) {
       spinTarget = $element.find('.fc-event-time');
       spinTarget.addClass('spinning');
@@ -4194,7 +3181,7 @@ module.exports = CalendarView = (function(superClass) {
       time = '';
       title = titleAndTime;
     } else {
-      ref = titleAndTime.split(' '), time = ref[0], title = 2 <= ref.length ? slice.call(ref, 1) : [];
+      _ref = titleAndTime.split(' '), time = _ref[0], title = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
       title = title.join(' ');
     }
     $element.find('.fc-time').html(time);
@@ -4270,8 +3257,8 @@ module.exports = CalendarView = (function(superClass) {
 
 ;require.register("views/import_event_list", function(exports, require, module) {
 var EventCollection, EventList, EventView, ViewCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4279,8 +3266,8 @@ EventView = require('./import_event_view');
 
 EventCollection = require('../collections/events');
 
-module.exports = EventList = (function(superClass) {
-  extend(EventList, superClass);
+module.exports = EventList = (function(_super) {
+  __extends(EventList, _super);
 
   function EventList() {
     return EventList.__super__.constructor.apply(this, arguments);
@@ -4297,13 +3284,13 @@ module.exports = EventList = (function(superClass) {
 
 ;require.register("views/import_event_view", function(exports, require, module) {
 var BaseView, EventView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-module.exports = EventView = (function(superClass) {
-  extend(EventView, superClass);
+module.exports = EventView = (function(_super) {
+  __extends(EventView, _super);
 
   function EventView() {
     return EventView.__super__.constructor.apply(this, arguments);
@@ -4329,9 +3316,9 @@ module.exports = EventView = (function(superClass) {
 
 ;require.register("views/import_view", function(exports, require, module) {
 var BaseView, ComboBox, Event, EventList, ImportView, helpers, request,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
@@ -4345,11 +3332,11 @@ Event = require('../models/event');
 
 EventList = require('./import_event_list');
 
-module.exports = ImportView = (function(superClass) {
-  extend(ImportView, superClass);
+module.exports = ImportView = (function(_super) {
+  __extends(ImportView, _super);
 
   function ImportView() {
-    this.importEvents = bind(this.importEvents, this);
+    this.importEvents = __bind(this.importEvents, this);
     return ImportView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4405,8 +3392,8 @@ module.exports = ImportView = (function(superClass) {
       contentType: false,
       success: (function(_this) {
         return function(result) {
-          var ref;
-          if (result != null ? (ref = result.calendar) != null ? ref.name : void 0 : void 0) {
+          var _ref;
+          if (result != null ? (_ref = result.calendar) != null ? _ref.name : void 0 : void 0) {
             _this.calendarCombo.setValue(result.calendar.name);
           }
           if ((result != null ? result.events : void 0) != null) {
@@ -4480,16 +3467,16 @@ module.exports = ImportView = (function(superClass) {
   };
 
   ImportView.prototype.importEvents = function(events, callback) {
-    var event, i, len;
-    for (i = 0, len = events.length; i < len; i++) {
-      event = events[i];
+    var event, _i, _len;
+    for (_i = 0, _len = events.length; _i < _len; _i++) {
+      event = events[_i];
       event.tags = [this.targetCalendar];
       event.id = null;
       event["import"] = true;
     }
     return request.post("events/bulk", events, (function(_this) {
       return function(err, result) {
-        var j, len1, msg, ref;
+        var msg, _j, _len1, _ref;
         if (err) {
           if (result != null) {
             msg = result.msg;
@@ -4499,9 +3486,9 @@ module.exports = ImportView = (function(superClass) {
           }
           alert(msg);
         } else {
-          ref = result.errors;
-          for (j = 0, len1 = ref.length; j < len1; j++) {
-            event = ref[j];
+          _ref = result.errors;
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            event = _ref[_j];
             _this.addImportError(event, './templates/import_event');
           }
         }
@@ -4551,9 +3538,9 @@ module.exports = ImportView = (function(superClass) {
 
 ;require.register("views/list_view", function(exports, require, module) {
 var Header, ListView, ViewCollection, defaultTimezone, helpers,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4563,12 +3550,12 @@ helpers = require('../helpers');
 
 defaultTimezone = 'timezone';
 
-module.exports = ListView = (function(superClass) {
-  extend(ListView, superClass);
+module.exports = ListView = (function(_super) {
+  __extends(ListView, _super);
 
   function ListView() {
-    this.checkScroll = bind(this.checkScroll, this);
-    this.keepScreenFull = bind(this.keepScreenFull, this);
+    this.checkScroll = __bind(this.checkScroll, this);
+    this.keepScreenFull = __bind(this.keepScreenFull, this);
     return ListView.__super__.constructor.apply(this, arguments);
   }
 
@@ -4718,15 +3705,15 @@ module.exports = ListView = (function(superClass) {
 
 ;require.register("views/list_view_bucket", function(exports, require, module) {
 var BucketView, PopoverEvent, ViewCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('../lib/view_collection');
 
 PopoverEvent = require('./calendar_popover_event');
 
-module.exports = BucketView = (function(superClass) {
-  extend(BucketView, superClass);
+module.exports = BucketView = (function(_super) {
+  __extends(BucketView, _super);
 
   function BucketView() {
     return BucketView.__super__.constructor.apply(this, arguments);
@@ -4805,8 +3792,8 @@ module.exports = BucketView = (function(superClass) {
 
 ;require.register("views/list_view_item", function(exports, require, module) {
 var BaseView, Event, EventItemView, PopoverEvent,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
@@ -4814,8 +3801,8 @@ PopoverEvent = require('./calendar_popover_event');
 
 Event = require('models/event');
 
-module.exports = EventItemView = (function(superClass) {
-  extend(EventItemView, superClass);
+module.exports = EventItemView = (function(_super) {
+  __extends(EventItemView, _super);
 
   function EventItemView() {
     return EventItemView.__super__.constructor.apply(this, arguments);
@@ -4885,8 +3872,8 @@ module.exports = EventItemView = (function(superClass) {
 
 ;require.register("views/menu", function(exports, require, module) {
 var ComboBox, Event, MenuView, Tag, ViewCollection,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ViewCollection = require('../lib/view_collection');
 
@@ -4896,8 +3883,8 @@ Event = require('models/event');
 
 Tag = require('models/tag');
 
-module.exports = MenuView = (function(superClass) {
-  extend(MenuView, superClass);
+module.exports = MenuView = (function(_super) {
+  __extends(MenuView, _super);
 
   function MenuView() {
     return MenuView.__super__.constructor.apply(this, arguments);
@@ -4941,7 +3928,7 @@ module.exports = MenuView = (function(superClass) {
         var localName;
         localName = t(name);
         if (n > 0) {
-          localName = localName + " " + n;
+          localName = "" + localName + " " + n;
         }
         return (tag.get('name') === localName) && tag.get('visible');
       });
@@ -4954,7 +3941,7 @@ module.exports = MenuView = (function(superClass) {
     }
     localName = t(name);
     if (n > 0) {
-      localName = localName + " " + n;
+      localName = "" + localName + " " + n;
     }
     return this.createNewCalendar(localName);
   };
@@ -4976,7 +3963,7 @@ module.exports = MenuView = (function(superClass) {
         return wait = setInterval(function() {
           var newCalSel, rename;
           newCalSel = "#menuitems li.tagmenuitem[data-name='" + name + "']";
-          rename = $(newCalSel + " .calendar-rename");
+          rename = $("" + newCalSel + " .calendar-rename");
           if (rename.length > 0) {
             clearInterval(wait);
             return rename.trigger("click");
@@ -5042,19 +4029,19 @@ module.exports = MenuView = (function(superClass) {
 
 ;require.register("views/menu_item", function(exports, require, module) {
 var BaseView, MenuItemView, colorSet,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
 colorSet = require('../helpers/color-set');
 
-module.exports = MenuItemView = (function(superClass) {
-  extend(MenuItemView, superClass);
+module.exports = MenuItemView = (function(_super) {
+  __extends(MenuItemView, _super);
 
   function MenuItemView() {
-    this.hideColorPicker = bind(this.hideColorPicker, this);
+    this.hideColorPicker = __bind(this.hideColorPicker, this);
     return MenuItemView.__super__.constructor.apply(this, arguments);
   }
 
@@ -5237,15 +4224,15 @@ module.exports = MenuItemView = (function(superClass) {
 
 ;require.register("views/popover_screens/alert", function(exports, require, module) {
 var AlertPopoverScreen, PopoverScreenView, helpers,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
 helpers = require('helpers');
 
-module.exports = AlertPopoverScreen = (function(superClass) {
-  extend(AlertPopoverScreen, superClass);
+module.exports = AlertPopoverScreen = (function(_super) {
+  __extends(AlertPopoverScreen, _super);
 
   function AlertPopoverScreen() {
     return AlertPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5319,28 +4306,28 @@ module.exports = AlertPopoverScreen = (function(superClass) {
   };
 
   AlertPopoverScreen.prototype.afterRender = function() {
-    var $alerts, alarm, alarms, i, index, len, options, ref, ref1, ref2, results, row, translationKey, trigger, value;
+    var $alerts, alarm, alarms, index, options, row, translationKey, trigger, value, _i, _len, _ref, _ref1, _ref2, _results;
     $alerts = this.$('.alerts');
     $alerts.empty();
     alarms = this.model.get('alarms') || [];
-    results = [];
-    for (index = i = 0, len = alarms.length; i < len; index = ++i) {
+    _results = [];
+    for (index = _i = 0, _len = alarms.length; _i < _len; index = ++_i) {
       alarm = alarms[index];
       trigger = helpers.iCalDurationToUnitValue(alarm.trigg);
-      ref = this.getAlertTranslationInfo(trigger), translationKey = ref.translationKey, value = ref.value;
+      _ref = this.getAlertTranslationInfo(trigger), translationKey = _ref.translationKey, value = _ref.value;
       options = {
         index: index,
         label: t(translationKey, {
           smart_count: value
         }),
         action: alarm.action,
-        isEmailChecked: (ref1 = alarm.action) === 'EMAIL' || ref1 === 'BOTH',
-        isNotifChecked: (ref2 = alarm.action) === 'DISPLAY' || ref2 === 'BOTH'
+        isEmailChecked: (_ref1 = alarm.action) === 'EMAIL' || _ref1 === 'BOTH',
+        isNotifChecked: (_ref2 = alarm.action) === 'DISPLAY' || _ref2 === 'BOTH'
       };
       row = this.templateAlertRow(options);
-      results.push($alerts.append(row));
+      _results.push($alerts.append(row));
     }
-    return results;
+    return _results;
   };
 
   AlertPopoverScreen.prototype.onRemoveAlert = function(event) {
@@ -5423,13 +4410,13 @@ module.exports = AlertPopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/delete", function(exports, require, module) {
 var DeletePopoverScreen, PopoverScreenView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
-module.exports = DeletePopoverScreen = (function(superClass) {
-  extend(DeletePopoverScreen, superClass);
+module.exports = DeletePopoverScreen = (function(_super) {
+  __extends(DeletePopoverScreen, _super);
 
   function DeletePopoverScreen() {
     return DeletePopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5485,13 +4472,13 @@ module.exports = DeletePopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/details", function(exports, require, module) {
 var DetailsPopoverScreen, PopoverScreenView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
-module.exports = DetailsPopoverScreen = (function(superClass) {
-  extend(DetailsPopoverScreen, superClass);
+module.exports = DetailsPopoverScreen = (function(_super) {
+  __extends(DetailsPopoverScreen, _super);
 
   function DetailsPopoverScreen() {
     return DetailsPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5518,15 +4505,15 @@ module.exports = DetailsPopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/guests", function(exports, require, module) {
 var GuestPopoverScreen, PopoverScreenView, random,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
 random = require('lib/random');
 
-module.exports = GuestPopoverScreen = (function(superClass) {
-  extend(GuestPopoverScreen, superClass);
+module.exports = GuestPopoverScreen = (function(_super) {
+  __extends(GuestPopoverScreen, _super);
 
   function GuestPopoverScreen() {
     return GuestPopoverScreen.__super__.constructor.apply(this, arguments);
@@ -5561,11 +4548,11 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   };
 
   GuestPopoverScreen.prototype.afterRender = function() {
-    var $guests, guest, guests, i, index, len, options, row;
+    var $guests, guest, guests, index, options, row, _i, _len;
     $guests = this.$('.guests');
     $guests.empty();
     guests = this.model.get('attendees') || [];
-    for (index = i = 0, len = guests.length; i < len; index = ++i) {
+    for (index = _i = 0, _len = guests.length; _i < _len; index = ++_i) {
       guest = guests[index];
       options = _.extend(guest, {
         index: index
@@ -5623,12 +4610,12 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   };
 
   GuestPopoverScreen.prototype.onNewGuest = function(userInfo) {
-    var contactID, email, guests, ref;
+    var contactID, email, guests, _ref;
     if (userInfo == null) {
       userInfo = null;
     }
     if ((userInfo != null) && typeof userInfo === "string") {
-      ref = userInfo.split(';'), email = ref[0], contactID = ref[1];
+      _ref = userInfo.split(';'), email = _ref[0], contactID = _ref[1];
     } else {
       email = this.$('input[name="guest-name"]').val();
       contactID = null;
@@ -5669,9 +4656,9 @@ module.exports = GuestPopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/main", function(exports, require, module) {
 var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
@@ -5704,11 +4691,11 @@ defDatePickerOps = {
   viewSelect: 4
 };
 
-module.exports = MainPopoverScreen = (function(superClass) {
-  extend(MainPopoverScreen, superClass);
+module.exports = MainPopoverScreen = (function(_super) {
+  __extends(MainPopoverScreen, _super);
 
   function MainPopoverScreen() {
-    this.onTab = bind(this.onTab, this);
+    this.onTab = __bind(this.onTab, this);
     return MainPopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
@@ -5764,13 +4751,13 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.getRenderData = function() {
-    var currentCalendar, data, defaultCalendar, endOffset, firstCalendar, ref, ref1, ref2;
-    firstCalendar = (ref = app.calendars) != null ? (ref1 = ref.at(0)) != null ? ref1.get('name') : void 0 : void 0;
+    var currentCalendar, data, defaultCalendar, endOffset, firstCalendar, _ref, _ref1, _ref2;
+    firstCalendar = (_ref = app.calendars) != null ? (_ref1 = _ref.at(0)) != null ? _ref1.get('name') : void 0 : void 0;
     defaultCalendar = t('default calendar name');
     if (this.model.isNew()) {
       currentCalendar = firstCalendar || defaultCalendar;
     } else {
-      currentCalendar = ((ref2 = this.model.get('tags')) != null ? ref2[0] : void 0) || defaultCalendar;
+      currentCalendar = ((_ref2 = this.model.get('tags')) != null ? _ref2[0] : void 0) || defaultCalendar;
     }
     endOffset = this.model.isAllDay() ? -1 : 0;
     return data = _.extend(MainPopoverScreen.__super__.getRenderData.call(this), {
@@ -5789,7 +4776,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.afterRender = function() {
-    var ref, timepickerEvents;
+    var timepickerEvents, _ref;
     this.$el.attr('tabindex', 0);
     this.$container = this.$('.popover-content-wrapper');
     this.$addButton = this.$('.btn.add');
@@ -5819,7 +4806,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
       el: this.$('.calendarcombo'),
       small: true,
       source: app.calendars.toAutoCompleteSource(),
-      current: (ref = this.model.getCalendar()) != null ? ref.get('name') : void 0
+      current: (_ref = this.model.getCalendar()) != null ? _ref.get('name') : void 0
     });
     this.calendar.on('edition-complete', (function(_this) {
       return function(value) {
@@ -5885,7 +4872,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr, end) {
-    var d, date, hour, minute, month, ref, ref1, setObj, splitted, t, year;
+    var d, date, hour, minute, month, setObj, splitted, t, year, _ref, _ref1;
     if (timeStr == null) {
       timeStr = '';
     }
@@ -5898,10 +4885,10 @@ module.exports = MainPopoverScreen = (function(superClass) {
     t = timeStr.match(/([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/);
     d = splitted = dateStr.match(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/);
     if (t != null ? t[0] : void 0) {
-      ref = t.slice(1, 3), hour = ref[0], minute = ref[1];
+      _ref = t.slice(1, 3), hour = _ref[0], minute = _ref[1];
     }
     if (d != null ? d[0] : void 0) {
-      ref1 = d.slice(1, 4), date = ref1[0], month = ref1[1], year = ref1[2];
+      _ref1 = d.slice(1, 4), date = _ref1[0], month = _ref1[1], year = _ref1[2];
     }
     if (end) {
       if (date && this.model.isAllDay()) {
@@ -5940,11 +4927,11 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.onDuplicateClicked = function() {
-    var attrs, calendarEvent, key, ref, value;
+    var attrs, calendarEvent, key, value, _ref;
     attrs = [];
-    ref = this.model.attributes;
-    for (key in ref) {
-      value = ref[key];
+    _ref = this.model.attributes;
+    for (key in _ref) {
+      value = _ref[key];
       attrs[key] = value;
     }
     delete attrs.id;
@@ -5974,7 +4961,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
-    var err, errors, i, len, results, spinner;
+    var err, errors, spinner, _i, _len, _results;
     if (this.$('.btn.add').hasClass('disabled')) {
       return;
     }
@@ -5986,12 +4973,12 @@ module.exports = MainPopoverScreen = (function(superClass) {
       this.$addButton.html(this.getButtonText());
       this.$('.alert').remove();
       this.$('input').css('border-color', '');
-      results = [];
-      for (i = 0, len = errors.length; i < len; i++) {
-        err = errors[i];
-        results.push(this.handleError(err));
+      _results = [];
+      for (_i = 0, _len = errors.length; _i < _len; _i++) {
+        err = errors[_i];
+        _results.push(this.handleError(err));
       }
-      return results;
+      return _results;
     } else {
       return this.model.save({}, {
         wait: true,
@@ -6090,7 +5077,12 @@ module.exports = MainPopoverScreen = (function(superClass) {
 
   MainPopoverScreen.prototype.expandPopover = function() {
     this.$optionalFields.attr('aria-hidden', false);
-    return this.$moreDetailsButton.hide();
+    this.$moreDetailsButton.hide();
+    return setTimeout((function(_this) {
+      return function() {
+        return _this.$('.input-details-trigger').focus();
+      };
+    })(this), 100);
   };
 
   MainPopoverScreen.prototype.onStartChange = function() {
@@ -6113,10 +5105,10 @@ module.exports = MainPopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/repeat", function(exports, require, module) {
 var NO_REPEAT, PopoverScreenView, RepeatPopoverScreen, allDayDateFieldFormat, dFormat, inputDateDTPickerFormat, tFormat,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 PopoverScreenView = require('lib/popover_screen_view');
 
@@ -6130,11 +5122,11 @@ allDayDateFieldFormat = 'YYYY-MM-DD';
 
 NO_REPEAT = -1;
 
-module.exports = RepeatPopoverScreen = (function(superClass) {
-  extend(RepeatPopoverScreen, superClass);
+module.exports = RepeatPopoverScreen = (function(_super) {
+  __extends(RepeatPopoverScreen, _super);
 
   function RepeatPopoverScreen() {
-    this.buildRRuleFromDOM = bind(this.buildRRuleFromDOM, this);
+    this.buildRRuleFromDOM = __bind(this.buildRRuleFromDOM, this);
     return RepeatPopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
@@ -6158,7 +5150,7 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
   };
 
   RepeatPopoverScreen.prototype.getRenderData = function() {
-    var data, e, endMode, functions, monthlyRepeatBy, ref, ref1, rrule, rruleOptions;
+    var data, e, endMode, functions, monthlyRepeatBy, rrule, rruleOptions, _ref, _ref1;
     data = _.extend(RepeatPopoverScreen.__super__.getRenderData.call(this), {
       NO_REPEAT: NO_REPEAT,
       weekDays: moment.localeData()._weekdays,
@@ -6187,9 +5179,9 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
         weekdays: rruleOptions.byweekday
       });
       if (rruleOptions.freq === RRule.MONTHLY) {
-        if (((ref = rruleOptions.bymonthday) != null ? ref.length : void 0) > 0) {
+        if (((_ref = rruleOptions.bymonthday) != null ? _ref.length : void 0) > 0) {
           monthlyRepeatBy = 'repeat-day';
-        } else if (((ref1 = rruleOptions.bynweekday) != null ? ref1.length : void 0) > 0) {
+        } else if (((_ref1 = rruleOptions.bynweekday) != null ? _ref1.length : void 0) > 0) {
           monthlyRepeatBy = 'repeat-weekday';
         } else {
           monthlyRepeatBy = 'repeat-day';
@@ -6235,8 +5227,8 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
         }
       },
       isWeekdaySelected: function(value) {
-        var isSelected, ref2;
-        isSelected = data.rrule.byweekday && (ref2 = (value + 6) % 7, indexOf.call(data.rrule.byweekday, ref2) >= 0);
+        var isSelected, _ref2;
+        isSelected = data.rrule.byweekday && (_ref2 = (value + 6) % 7, __indexOf.call(data.rrule.byweekday, _ref2) >= 0);
         if (isSelected) {
           return 'checked';
         }
@@ -6391,10 +5383,10 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
 
 ;require.register("views/settings_modal", function(exports, require, module) {
 var BaseView, ComboBox, ImportView, SettingsModals,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 BaseView = require('lib/base_view');
 
@@ -6402,11 +5394,11 @@ ImportView = require('./import_view');
 
 ComboBox = require('./widgets/combobox');
 
-module.exports = SettingsModals = (function(superClass) {
-  extend(SettingsModals, superClass);
+module.exports = SettingsModals = (function(_super) {
+  __extends(SettingsModals, _super);
 
   function SettingsModals() {
-    this.hideOnEscape = bind(this.hideOnEscape, this);
+    this.hideOnEscape = __bind(this.hideOnEscape, this);
     return SettingsModals.__super__.constructor.apply(this, arguments);
   }
 
@@ -6477,7 +5469,7 @@ module.exports = SettingsModals = (function(superClass) {
   SettingsModals.prototype.exportCalendar = function() {
     var calendarId, encodedName;
     calendarId = this.calendar.value();
-    if (indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
+    if (__indexOf.call(app.calendars.toArray(), calendarId) >= 0) {
       encodedName = encodeURIComponent(calendarId);
       return window.location = "export/" + encodedName + ".ics";
     } else {
@@ -6486,9 +5478,9 @@ module.exports = SettingsModals = (function(superClass) {
   };
 
   SettingsModals.prototype.getPlaceholder = function(password) {
-    var i, j, placeholder, ref;
+    var i, placeholder, _i, _ref;
     placeholder = [];
-    for (i = j = 1, ref = password.length; j <= ref; i = j += 1) {
+    for (i = _i = 1, _ref = password.length; _i <= _ref; i = _i += 1) {
       placeholder.push('*');
     }
     return placeholder.join('');
@@ -6513,17 +5505,17 @@ module.exports = SettingsModals = (function(superClass) {
 
 ;require.register("views/tags", function(exports, require, module) {
 var BaseView, TagsView,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
-module.exports = TagsView = (function(superClass) {
-  extend(TagsView, superClass);
+module.exports = TagsView = (function(_super) {
+  __extends(TagsView, _super);
 
   function TagsView() {
-    this.refresh = bind(this.refresh, this);
+    this.refresh = __bind(this.refresh, this);
     return TagsView.__super__.constructor.apply(this, arguments);
   }
 
@@ -6547,12 +5539,12 @@ module.exports = TagsView = (function(superClass) {
   };
 
   TagsView.prototype.refresh = function() {
-    var i, len, ref, tag;
+    var tag, _i, _len, _ref;
     this.duringRefresh = true;
     this.$el.tagit('removeAll');
-    ref = this.model.get('tags');
-    for (i = 0, len = ref.length; i < len; i++) {
-      tag = ref[i];
+    _ref = this.model.get('tags');
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      tag = _ref[_i];
       this.$el.tagit('createTag', tag);
     }
     return this.duringRefresh = false;
@@ -6925,7 +5917,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),title = locals_.title;
-buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><i class=\"fa fa-angle-left\"></i></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><div class=\"btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</div></a></div>");;return buf.join("");
+buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><button class=\"btn btn-back\"><i class=\"fa fa-angle-left\"></i></button></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><button class=\"btn btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</button></a></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7123,13 +6115,13 @@ if (typeof define === 'function' && define.amd) {
 
 ;require.register("views/toggle", function(exports, require, module) {
 var BaseView, Toggle,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-module.exports = Toggle = (function(superClass) {
-  extend(Toggle, superClass);
+module.exports = Toggle = (function(_super) {
+  __extends(Toggle, _super);
 
   function Toggle() {
     return Toggle.__super__.constructor.apply(this, arguments);
@@ -7192,9 +6184,9 @@ module.exports = Toggle = (function(superClass) {
 
 ;require.register("views/widgets/combobox", function(exports, require, module) {
 var BaseView, ComboBox, Tag, TagCollection,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('lib/base_view');
 
@@ -7202,21 +6194,21 @@ TagCollection = require('collections/tags');
 
 Tag = require('models/tag');
 
-module.exports = ComboBox = (function(superClass) {
-  extend(ComboBox, superClass);
+module.exports = ComboBox = (function(_super) {
+  __extends(ComboBox, _super);
 
   function ComboBox() {
-    this.remove = bind(this.remove, this);
-    this.renderItem = bind(this.renderItem, this);
-    this.onChange = bind(this.onChange, this);
-    this.onEditionComplete = bind(this.onEditionComplete, this);
-    this.onSelect = bind(this.onSelect, this);
-    this.onBlur = bind(this.onBlur, this);
-    this.onClose = bind(this.onClose, this);
-    this.onOpen = bind(this.onOpen, this);
-    this.setValue = bind(this.setValue, this);
-    this.value = bind(this.value, this);
-    this.openMenu = bind(this.openMenu, this);
+    this.remove = __bind(this.remove, this);
+    this.renderItem = __bind(this.renderItem, this);
+    this.onChange = __bind(this.onChange, this);
+    this.onEditionComplete = __bind(this.onEditionComplete, this);
+    this.onSelect = __bind(this.onSelect, this);
+    this.onBlur = __bind(this.onBlur, this);
+    this.onClose = __bind(this.onClose, this);
+    this.onOpen = __bind(this.onOpen, this);
+    this.setValue = __bind(this.setValue, this);
+    this.value = __bind(this.value, this);
+    this.openMenu = __bind(this.openMenu, this);
     return ComboBox.__super__.constructor.apply(this, arguments);
   }
 
@@ -7305,10 +6297,10 @@ module.exports = ComboBox = (function(superClass) {
   };
 
   ComboBox.prototype.onSelect = function(ev, ui) {
-    var ref;
+    var _ref;
     this.$el.blur().removeClass('expanded');
     this.onChange(ev, ui);
-    return this.trigger('edition-complete', (ui != null ? (ref = ui.item) != null ? ref.value : void 0 : void 0) || this.value());
+    return this.trigger('edition-complete', (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value());
   };
 
   ComboBox.prototype.onEditionComplete = function(name) {
@@ -7317,8 +6309,8 @@ module.exports = ComboBox = (function(superClass) {
   };
 
   ComboBox.prototype.onChange = function(ev, ui) {
-    var generatedColor, ref, value;
-    value = (ui != null ? (ref = ui.item) != null ? ref.value : void 0 : void 0) || this.value();
+    var generatedColor, value, _ref;
+    value = (ui != null ? (_ref = ui.item) != null ? _ref.value : void 0 : void 0) || this.value();
     generatedColor = ColorHash.getColor(value, 'cozy');
     this.buildBadge(generatedColor);
     this.trigger('change', value);
@@ -7333,9 +6325,9 @@ module.exports = ComboBox = (function(superClass) {
   };
 
   ComboBox.prototype.buildBadge = function(color) {
-    var ref;
-    if ((ref = this.badge) != null) {
-      ref.remove();
+    var _ref;
+    if ((_ref = this.badge) != null) {
+      _ref.remove();
     }
     this.badge = this.makeBadge(color);
     return this.$el.before(this.badge);
