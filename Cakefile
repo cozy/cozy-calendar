@@ -99,7 +99,8 @@ task 'build', 'Build CoffeeScript to Javascript', ->
               "cp server/mails/fr/*.jade build/server/mails/fr/ && " + \
               "cp server/mails/en/*.jade build/server/mails/en/ && " + \
               "rm -rf build/client && mkdir build/client && " + \
-              "coffee -cb --output build/client/app/locales client/app/locales && " + \
+              "mkdir -p build/client/app/ && " + \
+              "cp -R client/app/locales build/client/app/locales && " + \
               "cp -R client/public build/client/"
     exec command, (err, stdout, stderr) ->
         if err
