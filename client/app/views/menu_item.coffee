@@ -58,6 +58,9 @@ module.exports = class MenuItemView extends BaseView
 
     setColor: (ev)  ->
         color = @$(ev.target).css 'background-color'
+        # Since jQuery always returns colors in rgb format, it must be converted
+        # back to hexadecimal.
+        color = @rgbToHex color
         @model.set 'color', color
         @buildBadge color
         @model.save()
@@ -67,6 +70,14 @@ module.exports = class MenuItemView extends BaseView
 
         # Gone after succefull color pick, put it back.
         @$('.dropdown-toggle').on 'click', @hideColorPicker
+
+
+    rgbToHex: (color) ->
+        bg = color.match /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/
+        hex = (x) ->
+            return "0#{parseInt(x).toString(16)}".slice(-2)
+
+        return "##{hex bg[1]}#{hex bg[2]}#{hex bg[3]}"
 
 
     onCalendarMultipleSelect: ->
