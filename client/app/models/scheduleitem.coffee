@@ -1,6 +1,6 @@
 
 Modal = require '../lib/modal'
-H = require '../helpers'
+H = Helpers = require '../helpers'
 
 module.exports = class ScheduleItem extends Backbone.Model
 
@@ -64,10 +64,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         if @isAllDay()
             return moment.tz modelDateStr, 'UTC'
 
-        if @isRecurrent()
-            # Parse with the event timezone
-            modelDateStr = moment.tz modelDateStr, @get 'timezone'
-
         # convert to the cozy's timezone
         return H.toTimezonedMoment modelDateStr
 
@@ -83,17 +79,18 @@ module.exports = class ScheduleItem extends Backbone.Model
             @getDateObject().add 30, 'm'
 
     # Format a moment to the string format of the model.
-    _formatMoment: (m) ->
+    _formatMoment: (momentDate) ->
         if @isAllDay()
-            s = H.momentToDateString(m)
+            formattedDate = Helpers.momentToDateString(momentDate)
 
-        else if @isRecurrent() and not @has('timezone')
-            s = moment.tz(m, @get('timezone')).toISOString()
+        else if @isRecurrent()
+            formattedDate = Helpers.momentToAmbiguousString(momentDate)
 
         else
-            s = m.toISOString()
+            formattedDate = momentDate.toISOString()
 
-        return s
+        return formattedDate
+
 
     addToStart: (duration) ->
         @set @startDateField, @_formatMoment @getStartDateObject().add duration
@@ -263,12 +260,28 @@ module.exports = class ScheduleItem extends Backbone.Model
         return @_toFullCalendarEvent @getStartDateObject(), @getEndDateObject()
 
     _toFullCalendarEvent: (start, end) ->
-        displayedTime = if not @isAllDay() then start.format 'H:mm[ ]' else ''
+
+        # Time is not displayed if the event lasts all day
+        if @isAllDay()
+            displayedTime = ""
+
+        # Recurring event should be displayed without the timezone taken into
+        # account.
+        else if @isRecurrent()
+            # .utc() changes the `start` object, so it's cloned to prevent side
+            # effects.
+            displayedTime = moment(start).utc().format('H:mm')
+
+        # Otherwise time is displayed, and timezoned (.format applies timezone)
+        else
+            displayedTime = start.format 'H:mm'
+
+
         description = @get 'description'
         description = description or t 'no description'
         return fcEvent =
             id: @cid
-            title:  "#{displayedTime}#{description}"
+            title:  "#{displayedTime} #{description}"
             start: start
             end: end
             allDay: @isAllDay()

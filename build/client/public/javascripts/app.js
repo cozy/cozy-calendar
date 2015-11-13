@@ -3389,13 +3389,13 @@ module.exports = RealEvent = (function(superClass) {
 });
 
 ;require.register("models/scheduleitem", function(exports, require, module) {
-var H, Modal, ScheduleItem,
+var H, Helpers, Modal, ScheduleItem,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Modal = require('../lib/modal');
 
-H = require('../helpers');
+H = Helpers = require('../helpers');
 
 module.exports = ScheduleItem = (function(superClass) {
   extend(ScheduleItem, superClass);
@@ -3485,9 +3485,6 @@ module.exports = ScheduleItem = (function(superClass) {
     if (this.isAllDay()) {
       return moment.tz(modelDateStr, 'UTC');
     }
-    if (this.isRecurrent()) {
-      modelDateStr = moment.tz(modelDateStr, this.get('timezone'));
-    }
     return H.toTimezonedMoment(modelDateStr);
   };
 
@@ -3507,16 +3504,16 @@ module.exports = ScheduleItem = (function(superClass) {
     }
   };
 
-  ScheduleItem.prototype._formatMoment = function(m) {
-    var s;
+  ScheduleItem.prototype._formatMoment = function(momentDate) {
+    var formattedDate;
     if (this.isAllDay()) {
-      s = H.momentToDateString(m);
-    } else if (this.isRecurrent() && !this.has('timezone')) {
-      s = moment.tz(m, this.get('timezone')).toISOString();
+      formattedDate = Helpers.momentToDateString(momentDate);
+    } else if (this.isRecurrent()) {
+      formattedDate = Helpers.momentToAmbiguousString(momentDate);
     } else {
-      s = m.toISOString();
+      formattedDate = momentDate.toISOString();
     }
-    return s;
+    return formattedDate;
   };
 
   ScheduleItem.prototype.addToStart = function(duration) {
@@ -3674,12 +3671,18 @@ module.exports = ScheduleItem = (function(superClass) {
 
   ScheduleItem.prototype._toFullCalendarEvent = function(start, end) {
     var description, displayedTime, fcEvent;
-    displayedTime = !this.isAllDay() ? start.format('H:mm[ ]') : '';
+    if (this.isAllDay()) {
+      displayedTime = "";
+    } else if (this.isRecurrent()) {
+      displayedTime = moment(start).utc().format('H:mm');
+    } else {
+      displayedTime = start.format('H:mm');
+    }
     description = this.get('description');
     description = description || t('no description');
     return fcEvent = {
       id: this.cid,
-      title: "" + displayedTime + description,
+      title: displayedTime + " " + description,
       start: start,
       end: end,
       allDay: this.isAllDay(),
@@ -5383,12 +5386,22 @@ module.exports = MenuItemView = (function(superClass) {
   MenuItemView.prototype.setColor = function(ev) {
     var color;
     color = this.$(ev.target).css('background-color');
+    color = this.rgbToHex(color);
     this.model.set('color', color);
     this.buildBadge(color);
     this.model.save();
     this.$('.dropdown-toggle').dropdown('toggle');
     this.hideColorPicker();
     return this.$('.dropdown-toggle').on('click', this.hideColorPicker);
+  };
+
+  MenuItemView.prototype.rgbToHex = function(color) {
+    var bg, hex;
+    bg = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    hex = function(x) {
+      return ("0" + (parseInt(x).toString(16))).slice(-2);
+    };
+    return "#" + (hex(bg[1])) + (hex(bg[2])) + (hex(bg[3]));
   };
 
   MenuItemView.prototype.onCalendarMultipleSelect = function() {

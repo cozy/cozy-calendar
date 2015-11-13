@@ -28,7 +28,7 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
                             eventsInRange.push(
                                 item.toPunctualFullCalendarEvent())
 
-                else if item.isInRange start, end
+                else if item.isInRange(start, end)
                     eventsInRange.push item.toPunctualFullCalendarEvent()
 
             callback eventsInRange
