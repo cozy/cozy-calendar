@@ -13,6 +13,7 @@ User  = require '../models/user'
 
 {VCalendar} = require 'cozy-ical'
 
+logoPath = fs.realpathSync './build/server/mails/assets/cozy-logo.png'
 
 localization = require '../libs/localization_manager'
 
@@ -74,6 +75,11 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                 subject: subject
                 html:    htmlTemplate templateOptions
                 content: localization.t templateKey, templateOptions
+                attachments: [
+                    path: logoPath
+                    filename: 'cozy-logo.png'
+                    cid: 'cozy-logo'
+                ]
 
             # Attach event as ics file
             calendarOptions =
@@ -99,10 +105,9 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                     """
                     log.error err
                 else
-                    mailOptions.attachments = [
+                    mailOptions.attachments.push
                         contentType: 'text/calendar'
                         path: icsPath
-                    ]
 
                 # Send mail through CozyDB API
                 cozydb.api.sendMailFromUser mailOptions, (err) ->
@@ -161,6 +166,11 @@ module.exports.sendDeleteNotification = (event, callback) ->
                 subject: subject
                 content: localization.t 'email delete content', templateOptions
                 html: htmlTemplate templateOptions
+                attachments: [
+                    path: logoPath
+                    filename: 'cozy-logo.png'
+                    cid: 'cozy-logo'
+                ]
             cozydb.api.sendMailFromUser mailOptions, (err) ->
                 if err?
                     log.error "An error occured while sending email"
