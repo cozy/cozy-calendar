@@ -10085,6 +10085,9 @@ h3 {
   width: 100%;
   height: 100%;
 }
+#import-form #import-button input::-webkit-file-upload-button {
+  cursor: pointer;
+}
 #import-form #import-alarm-list {
   margin-top: 20px;
 }
