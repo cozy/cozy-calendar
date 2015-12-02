@@ -55,6 +55,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Screen switches.
         'click .input-people': -> @switchToScreen('guests')
+        'click .input-details-row': -> @switchToScreen('details')
         'click .input-details-trigger': -> @switchToScreen('details')
         'click .input-alert': -> @switchToScreen('alert')
         'click .input-repeat': -> @switchToScreen('repeat')
