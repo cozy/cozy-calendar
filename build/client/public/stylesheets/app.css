@@ -8959,6 +8959,9 @@ textarea:active {
 .fc-bg .fc-other-month {
   background-color: rgba(0,0,0,0.02);
 }
+.fc-bg .fc-past {
+  background-color: rgba(0,0,0,0.08);
+}
 .fc-content {
   border: 0;
   -webkit-border-radius: 0;
@@ -9617,8 +9620,7 @@ a.btn:visited {
   color: #008af6;
 }
 .popover-back .btn-done {
-  width: 3rem;
-  padding: 0.4em 0;
+  padding: 0.4em;
   background-color: #bbb;
   -webkit-border-radius: 3px;
   border-radius: 3px;
