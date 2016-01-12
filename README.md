@@ -1,4 +1,4 @@
-# [Cozy](http://cozy.io) Calendar
+# [Cozy](https://cozy.io) Calendar
 
 Cozy Calendar makes your event management easy. Main features are:
 
@@ -10,7 +10,7 @@ Cozy Calendar makes your event management easy. Main features are:
 
 ## Install
 
-We assume here that the Cozy platform is correctly [installed](http://cozy.io/host/install.html)
+We assume here that the Cozy platform is correctly [installed](https://docs.cozy.io/en/host/install)
  on your server.
 
 You can simply install the Calendar application via the app registry. Click on
@@ -35,7 +35,7 @@ You can contribute to the Cozy Calendar in many ways:
 
 ## Hack
 
-Hacking the Calendar app requires you [setup a dev environment](http://cozy.io/hack/getting-started/). Once it's done you can hack the calendar just like it was your own app.
+Hacking the Calendar app requires you [setup a dev environment](https://docs.cozy.io/en/hack/getting-started/). Once it's done you can hack the calendar just like it was your own app.
 
     git clone https://github.com/cozy/cozy-calendar.git
     cd cozy-calendar
@@ -86,7 +86,7 @@ Cozy Calendar is developed by Cozy Cloud and distributed under the AGPL v3 licen
 
 ![Cozy Logo](https://raw.github.com/cozy/cozy-setup/gh-pages/assets/images/happycloud.png)
 
-[Cozy](http://cozy.io) is a platform that brings all your web services in the
+[Cozy](https://cozy.io) is a platform that brings all your web services in the
 same private space.  With it, your web apps and your devices can share data
 easily, providing you
 with a new experience. You can install Cozy on your own hardware where no one
@@ -99,5 +99,4 @@ You can reach the Cozy Community by:
 * Chatting with us on IRC #cozycloud on irc.freenode.net
 * Posting on our [Forum](https://forum.cozy.io/)
 * Posting issues on the [Github repos](https://github.com/cozy/)
-* Mentioning us on [Twitter](http://twitter.com/mycozycloud)
-
+* Mentioning us on [Twitter](https://twitter.com/mycozycloud)
