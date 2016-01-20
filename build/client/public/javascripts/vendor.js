@@ -30966,6 +30966,36 @@ var ColorHash = (function () {
 }).call(this);
 
 /**
+ * German translation for bootstrap-datetimepicker
+ * Sam Zurcher <sam@orelias.ch>
+ */
+;(function($){
+	$.fn.datetimepicker.dates['de'] = {
+		days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+		daysShort: ["Son", "Mon", "Die", "Mit", "Don", "Fre", "Sam", "Son"],
+		daysMin: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+		months: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+		monthsShort: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+		today: "Heute"
+	};
+}(jQuery));
+
+/**
+ * Spanish translation for bootstrap-datetimepicker
+ * Bruno Bonamin <bruno.bonamin@gmail.com>
+ */
+;(function($){
+	$.fn.datetimepicker.dates['es'] = {
+		days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+		daysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+		daysMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"],
+		months: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+		monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+		today: "Hoy"
+	};
+}(jQuery));
+
+/**
  * French translation for bootstrap-datetimepicker
  * Nico Mollet <nico.mollet@gmail.com>
  */
@@ -30981,6 +31011,20 @@ var ColorHash = (function () {
 		meridiem: ["am", "pm"],
 		weekStart: 1,
 		format: "dd/mm/yyyy"
+	};
+}(jQuery));
+
+/**
+ * Korean translation for bootstrap-datetimepicker
+ * Gu Youn <http://github.com/guyoun>
+ */
+;(function($){
+	$.fn.datetimepicker.dates['kr'] = {
+		days: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
+		daysShort: ["일", "월", "화", "수", "목", "금", "토", "일"],
+		daysMin: ["일", "월", "화", "수", "목", "금", "토", "일"],
+		months: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+		monthsShort: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
 	};
 }(jQuery));
 
@@ -31002,8 +31046,183 @@ var ColorHash = (function () {
 	};
 }(jQuery));
 
+/**
+ * Romanian translation for bootstrap-datetimepicker
+ * Cristian Vasile <cristi.mie@gmail.com>
+ */
+;(function($){
+	$.fn.datetimepicker.dates['ro'] = {
+		days: ["Duminică", "Luni", "Marţi", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"],
+		daysShort: ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm", "Dum"],
+		daysMin: ["Du", "Lu", "Ma", "Mi", "Jo", "Vi", "Sâ", "Du"],
+		months: ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"],
+		monthsShort: ["Ian", "Feb", "Mar", "Apr", "Mai", "Iun", "Iul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+		today: "Astăzi",
+		weekStart: 1
+	};
+}(jQuery));
+
+(function(t){"function"==typeof define&&define.amd?define(["jquery","moment"],t):t(jQuery,moment)})(function(t,e){function n(t,e,n){var i={m:["eine Minute","einer Minute"],h:["eine Stunde","einer Stunde"],d:["ein Tag","einem Tag"],dd:[t+" Tage",t+" Tagen"],M:["ein Monat","einem Monat"],MM:[t+" Monate",t+" Monaten"],y:["ein Jahr","einem Jahr"],yy:[t+" Jahre",t+" Jahren"]};return e?i[n][0]:i[n][1]}(e.defineLocale||e.lang).call(e,"de",{months:"Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember".split("_"),monthsShort:"Jan._Febr._Mrz._Apr._Mai_Jun._Jul._Aug._Sept._Okt._Nov._Dez.".split("_"),weekdays:"Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag".split("_"),weekdaysShort:"So._Mo._Di._Mi._Do._Fr._Sa.".split("_"),weekdaysMin:"So_Mo_Di_Mi_Do_Fr_Sa".split("_"),longDateFormat:{LT:"HH:mm [Uhr]",L:"DD.MM.YYYY",LL:"D. MMMM YYYY",LLL:"D. MMMM YYYY LT",LLLL:"dddd, D. MMMM YYYY LT"},calendar:{sameDay:"[Heute um] LT",sameElse:"L",nextDay:"[Morgen um] LT",nextWeek:"dddd [um] LT",lastDay:"[Gestern um] LT",lastWeek:"[letzten] dddd [um] LT"},relativeTime:{future:"in %s",past:"vor %s",s:"ein paar Sekunden",m:n,mm:"%d Minuten",h:n,hh:"%d Stunden",d:n,dd:n,M:n,MM:n,y:n,yy:n},ordinal:"%d.",week:{dow:1,doy:4}}),t.fullCalendar.datepickerLang("de","de",{closeText:"Schließen",prevText:"&#x3C;Zurück",nextText:"Vor&#x3E;",currentText:"Heute",monthNames:["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],monthNamesShort:["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"],dayNames:["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],dayNamesShort:["So","Mo","Di","Mi","Do","Fr","Sa"],dayNamesMin:["So","Mo","Di","Mi","Do","Fr","Sa"],weekHeader:"KW",dateFormat:"dd.mm.yy",firstDay:1,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),t.fullCalendar.lang("de",{defaultButtonText:{month:"Monat",week:"Woche",day:"Tag",list:"Terminübersicht"},allDayText:"Ganztägig",eventLimitText:function(t){return"+ weitere "+t}})});
+(function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){var n="ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.".split("_"),i="ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic".split("_");(t.defineLocale||t.lang).call(t,"es",{months:"enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre".split("_"),monthsShort:function(e,t){return/-MMM-/.test(t)?i[e.month()]:n[e.month()]},weekdays:"domingo_lunes_martes_miércoles_jueves_viernes_sábado".split("_"),weekdaysShort:"dom._lun._mar._mié._jue._vie._sáb.".split("_"),weekdaysMin:"Do_Lu_Ma_Mi_Ju_Vi_Sá".split("_"),longDateFormat:{LT:"H:mm",L:"DD/MM/YYYY",LL:"D [de] MMMM [del] YYYY",LLL:"D [de] MMMM [del] YYYY LT",LLLL:"dddd, D [de] MMMM [del] YYYY LT"},calendar:{sameDay:function(){return"[hoy a la"+(1!==this.hours()?"s":"")+"] LT"},nextDay:function(){return"[mañana a la"+(1!==this.hours()?"s":"")+"] LT"},nextWeek:function(){return"dddd [a la"+(1!==this.hours()?"s":"")+"] LT"},lastDay:function(){return"[ayer a la"+(1!==this.hours()?"s":"")+"] LT"},lastWeek:function(){return"[el] dddd [pasado a la"+(1!==this.hours()?"s":"")+"] LT"},sameElse:"L"},relativeTime:{future:"en %s",past:"hace %s",s:"unos segundos",m:"un minuto",mm:"%d minutos",h:"una hora",hh:"%d horas",d:"un día",dd:"%d días",M:"un mes",MM:"%d meses",y:"un año",yy:"%d años"},ordinal:"%dº",week:{dow:1,doy:4}}),e.fullCalendar.datepickerLang("es","es",{closeText:"Cerrar",prevText:"&#x3C;Ant",nextText:"Sig&#x3E;",currentText:"Hoy",monthNames:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],monthNamesShort:["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],dayNames:["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],dayNamesShort:["dom","lun","mar","mié","jue","vie","sáb"],dayNamesMin:["D","L","M","X","J","V","S"],weekHeader:"Sm",dateFormat:"dd/mm/yy",firstDay:1,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("es",{defaultButtonText:{month:"Mes",week:"Semana",day:"Día",list:"Agenda"},allDayHtml:"Todo<br/>el día",eventLimitText:"más"})});
 (function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){(t.defineLocale||t.lang).call(t,"fr",{months:"janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre".split("_"),monthsShort:"janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.".split("_"),weekdays:"dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi".split("_"),weekdaysShort:"dim._lun._mar._mer._jeu._ven._sam.".split("_"),weekdaysMin:"Di_Lu_Ma_Me_Je_Ve_Sa".split("_"),longDateFormat:{LT:"HH:mm",L:"DD/MM/YYYY",LL:"D MMMM YYYY",LLL:"D MMMM YYYY LT",LLLL:"dddd D MMMM YYYY LT"},calendar:{sameDay:"[Aujourd'hui à] LT",nextDay:"[Demain à] LT",nextWeek:"dddd [à] LT",lastDay:"[Hier à] LT",lastWeek:"dddd [dernier à] LT",sameElse:"L"},relativeTime:{future:"dans %s",past:"il y a %s",s:"quelques secondes",m:"une minute",mm:"%d minutes",h:"une heure",hh:"%d heures",d:"un jour",dd:"%d jours",M:"un mois",MM:"%d mois",y:"un an",yy:"%d ans"},ordinal:function(e){return e+(1===e?"er":"")},week:{dow:1,doy:4}}),e.fullCalendar.datepickerLang("fr","fr",{closeText:"Fermer",prevText:"Précédent",nextText:"Suivant",currentText:"Aujourd'hui",monthNames:["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"],monthNamesShort:["janv.","févr.","mars","avril","mai","juin","juil.","août","sept.","oct.","nov.","déc."],dayNames:["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"],dayNamesShort:["dim.","lun.","mar.","mer.","jeu.","ven.","sam."],dayNamesMin:["D","L","M","M","J","V","S"],weekHeader:"Sem.",dateFormat:"dd/mm/yy",firstDay:1,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("fr",{defaultButtonText:{month:"Mois",week:"Semaine",day:"Jour",list:"Mon planning"},allDayHtml:"Toute la<br/>journée",eventLimitText:"en plus"})});
+(function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){(t.defineLocale||t.lang).call(t,"ko",{months:"1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),monthsShort:"1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),weekdays:"일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),weekdaysShort:"일_월_화_수_목_금_토".split("_"),weekdaysMin:"일_월_화_수_목_금_토".split("_"),longDateFormat:{LT:"A h시 mm분",L:"YYYY.MM.DD",LL:"YYYY년 MMMM D일",LLL:"YYYY년 MMMM D일 LT",LLLL:"YYYY년 MMMM D일 dddd LT"},meridiem:function(e){return 12>e?"오전":"오후"},calendar:{sameDay:"오늘 LT",nextDay:"내일 LT",nextWeek:"dddd LT",lastDay:"어제 LT",lastWeek:"지난주 dddd LT",sameElse:"L"},relativeTime:{future:"%s 후",past:"%s 전",s:"몇초",ss:"%d초",m:"일분",mm:"%d분",h:"한시간",hh:"%d시간",d:"하루",dd:"%d일",M:"한달",MM:"%d달",y:"일년",yy:"%d년"},ordinal:"%d일",meridiemParse:/(오전|오후)/,isPM:function(e){return"오후"===e}}),e.fullCalendar.datepickerLang("ko","ko",{closeText:"닫기",prevText:"이전달",nextText:"다음달",currentText:"오늘",monthNames:["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"],monthNamesShort:["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"],dayNames:["일요일","월요일","화요일","수요일","목요일","금요일","토요일"],dayNamesShort:["일","월","화","수","목","금","토"],dayNamesMin:["일","월","화","수","목","금","토"],weekHeader:"Wk",dateFormat:"yy-mm-dd",firstDay:0,isRTL:!1,showMonthAfterYear:!0,yearSuffix:"년"}),e.fullCalendar.lang("ko",{defaultButtonText:{month:"월",week:"주",day:"일",list:"일정목록"},allDayText:"종일",eventLimitText:"개"})});
 (function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){(t.defineLocale||t.lang).call(t,"pt",{months:"janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro".split("_"),monthsShort:"jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez".split("_"),weekdays:"domingo_segunda-feira_terça-feira_quarta-feira_quinta-feira_sexta-feira_sábado".split("_"),weekdaysShort:"dom_seg_ter_qua_qui_sex_sáb".split("_"),weekdaysMin:"dom_2ª_3ª_4ª_5ª_6ª_sáb".split("_"),longDateFormat:{LT:"HH:mm",L:"DD/MM/YYYY",LL:"D [de] MMMM [de] YYYY",LLL:"D [de] MMMM [de] YYYY LT",LLLL:"dddd, D [de] MMMM [de] YYYY LT"},calendar:{sameDay:"[Hoje às] LT",nextDay:"[Amanhã às] LT",nextWeek:"dddd [às] LT",lastDay:"[Ontem às] LT",lastWeek:function(){return 0===this.day()||6===this.day()?"[Último] dddd [às] LT":"[Última] dddd [às] LT"},sameElse:"L"},relativeTime:{future:"em %s",past:"há %s",s:"segundos",m:"um minuto",mm:"%d minutos",h:"uma hora",hh:"%d horas",d:"um dia",dd:"%d dias",M:"um mês",MM:"%d meses",y:"um ano",yy:"%d anos"},ordinal:"%dº",week:{dow:1,doy:4}}),e.fullCalendar.datepickerLang("pt","pt",{closeText:"Fechar",prevText:"Anterior",nextText:"Seguinte",currentText:"Hoje",monthNames:["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],monthNamesShort:["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],dayNames:["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"],dayNamesShort:["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],dayNamesMin:["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],weekHeader:"Sem",dateFormat:"dd/mm/yy",firstDay:0,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("pt",{defaultButtonText:{month:"Mês",week:"Semana",day:"Dia",list:"Agenda"},allDayText:"Todo o dia",eventLimitText:"mais"})});
+(function(e){"function"==typeof define&&define.amd?define(["jquery","moment"],e):e(jQuery,moment)})(function(e,t){function n(e,t,n){var i={mm:"minute",hh:"ore",dd:"zile",MM:"luni",yy:"ani"},a=" ";return(e%100>=20||e>=100&&0===e%100)&&(a=" de "),e+a+i[n]}(t.defineLocale||t.lang).call(t,"ro",{months:"ianuarie_februarie_martie_aprilie_mai_iunie_iulie_august_septembrie_octombrie_noiembrie_decembrie".split("_"),monthsShort:"ian._febr._mart._apr._mai_iun._iul._aug._sept._oct._nov._dec.".split("_"),weekdays:"duminică_luni_marți_miercuri_joi_vineri_sâmbătă".split("_"),weekdaysShort:"Dum_Lun_Mar_Mie_Joi_Vin_Sâm".split("_"),weekdaysMin:"Du_Lu_Ma_Mi_Jo_Vi_Sâ".split("_"),longDateFormat:{LT:"H:mm",L:"DD.MM.YYYY",LL:"D MMMM YYYY",LLL:"D MMMM YYYY H:mm",LLLL:"dddd, D MMMM YYYY H:mm"},calendar:{sameDay:"[azi la] LT",nextDay:"[mâine la] LT",nextWeek:"dddd [la] LT",lastDay:"[ieri la] LT",lastWeek:"[fosta] dddd [la] LT",sameElse:"L"},relativeTime:{future:"peste %s",past:"%s în urmă",s:"câteva secunde",m:"un minut",mm:n,h:"o oră",hh:n,d:"o zi",dd:n,M:"o lună",MM:n,y:"un an",yy:n},week:{dow:1,doy:7}}),e.fullCalendar.datepickerLang("ro","ro",{closeText:"Închide",prevText:"&#xAB; Luna precedentă",nextText:"Luna următoare &#xBB;",currentText:"Azi",monthNames:["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"],monthNamesShort:["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"],dayNames:["Duminică","Luni","Marţi","Miercuri","Joi","Vineri","Sâmbătă"],dayNamesShort:["Dum","Lun","Mar","Mie","Joi","Vin","Sâm"],dayNamesMin:["Du","Lu","Ma","Mi","Jo","Vi","Sâ"],weekHeader:"Săpt",dateFormat:"dd.mm.yy",firstDay:1,isRTL:!1,showMonthAfterYear:!1,yearSuffix:""}),e.fullCalendar.lang("ro",{defaultButtonText:{prev:"precedentă",next:"următoare",month:"Lună",week:"Săptămână",day:"Zi",list:"Agendă"},allDayText:"Toată ziua",eventLimitText:function(e){return"+alte "+e}})});
+//! moment.js locale configuration
+//! locale : german (de)
+//! author : lluchs : https://github.com/lluchs
+//! author: Menelion Elensúle: https://github.com/Oire
+//! author : Mikolaj Dadela : https://github.com/mik01aj
+
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['moment'], factory) :
+   factory(global.moment)
+}(this, function (moment) { 'use strict';
+
+
+    function processRelativeTime(number, withoutSuffix, key, isFuture) {
+        var format = {
+            'm': ['eine Minute', 'einer Minute'],
+            'h': ['eine Stunde', 'einer Stunde'],
+            'd': ['ein Tag', 'einem Tag'],
+            'dd': [number + ' Tage', number + ' Tagen'],
+            'M': ['ein Monat', 'einem Monat'],
+            'MM': [number + ' Monate', number + ' Monaten'],
+            'y': ['ein Jahr', 'einem Jahr'],
+            'yy': [number + ' Jahre', number + ' Jahren']
+        };
+        return withoutSuffix ? format[key][0] : format[key][1];
+    }
+
+    var de = moment.defineLocale('de', {
+        months : 'Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
+        monthsShort : 'Jan._Febr._Mrz._Apr._Mai_Jun._Jul._Aug._Sept._Okt._Nov._Dez.'.split('_'),
+        weekdays : 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
+        weekdaysShort : 'So._Mo._Di._Mi._Do._Fr._Sa.'.split('_'),
+        weekdaysMin : 'So_Mo_Di_Mi_Do_Fr_Sa'.split('_'),
+        longDateFormat : {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L : 'DD.MM.YYYY',
+            LL : 'D. MMMM YYYY',
+            LLL : 'D. MMMM YYYY HH:mm',
+            LLLL : 'dddd, D. MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay: '[heute um] LT [Uhr]',
+            sameElse: 'L',
+            nextDay: '[morgen um] LT [Uhr]',
+            nextWeek: 'dddd [um] LT [Uhr]',
+            lastDay: '[gestern um] LT [Uhr]',
+            lastWeek: '[letzten] dddd [um] LT [Uhr]'
+        },
+        relativeTime : {
+            future : 'in %s',
+            past : 'vor %s',
+            s : 'ein paar Sekunden',
+            m : processRelativeTime,
+            mm : '%d Minuten',
+            h : processRelativeTime,
+            hh : '%d Stunden',
+            d : processRelativeTime,
+            dd : processRelativeTime,
+            M : processRelativeTime,
+            MM : processRelativeTime,
+            y : processRelativeTime,
+            yy : processRelativeTime
+        },
+        ordinalParse: /\d{1,2}\./,
+        ordinal : '%d.',
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return de;
+
+}));
+//! moment.js locale configuration
+//! locale : spanish (es)
+//! author : Julio Napurí : https://github.com/julionc
+
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['moment'], factory) :
+   factory(global.moment)
+}(this, function (moment) { 'use strict';
+
+
+    var monthsShortDot = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_'),
+        monthsShort = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
+
+    var es = moment.defineLocale('es', {
+        months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
+        monthsShort : function (m, format) {
+            if (/-MMM-/.test(format)) {
+                return monthsShort[m.month()];
+            } else {
+                return monthsShortDot[m.month()];
+            }
+        },
+        weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
+        weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
+        weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
+        longDateFormat : {
+            LT : 'H:mm',
+            LTS : 'H:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D [de] MMMM [de] YYYY',
+            LLL : 'D [de] MMMM [de] YYYY H:mm',
+            LLLL : 'dddd, D [de] MMMM [de] YYYY H:mm'
+        },
+        calendar : {
+            sameDay : function () {
+                return '[hoy a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+            },
+            nextDay : function () {
+                return '[mañana a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+            },
+            nextWeek : function () {
+                return 'dddd [a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+            },
+            lastDay : function () {
+                return '[ayer a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+            },
+            lastWeek : function () {
+                return '[el] dddd [pasado a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+            },
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : 'en %s',
+            past : 'hace %s',
+            s : 'unos segundos',
+            m : 'un minuto',
+            mm : '%d minutos',
+            h : 'una hora',
+            hh : '%d horas',
+            d : 'un día',
+            dd : '%d días',
+            M : 'un mes',
+            MM : '%d meses',
+            y : 'un año',
+            yy : '%d años'
+        },
+        ordinalParse : /\d{1,2}º/,
+        ordinal : '%dº',
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return es;
+
+}));
 // moment.js locale configuration
 // locale : french (fr)
 // author : John Fischer : https://github.com/jfroffice
@@ -31063,6 +31282,74 @@ var ColorHash = (function () {
     });
 }));
 
+//! moment.js locale configuration
+//! locale : korean (ko)
+//!
+//! authors
+//!
+//! - Kyungwook, Park : https://github.com/kyungw00k
+//! - Jeeeyul Lee <jeeeyul@gmail.com>
+
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['moment'], factory) :
+   factory(global.moment)
+}(this, function (moment) { 'use strict';
+
+
+    var ko = moment.defineLocale('ko', {
+        months : '1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월'.split('_'),
+        monthsShort : '1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월'.split('_'),
+        weekdays : '일요일_월요일_화요일_수요일_목요일_금요일_토요일'.split('_'),
+        weekdaysShort : '일_월_화_수_목_금_토'.split('_'),
+        weekdaysMin : '일_월_화_수_목_금_토'.split('_'),
+        longDateFormat : {
+            LT : 'A h시 m분',
+            LTS : 'A h시 m분 s초',
+            L : 'YYYY.MM.DD',
+            LL : 'YYYY년 MMMM D일',
+            LLL : 'YYYY년 MMMM D일 A h시 m분',
+            LLLL : 'YYYY년 MMMM D일 dddd A h시 m분'
+        },
+        calendar : {
+            sameDay : '오늘 LT',
+            nextDay : '내일 LT',
+            nextWeek : 'dddd LT',
+            lastDay : '어제 LT',
+            lastWeek : '지난주 dddd LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : '%s 후',
+            past : '%s 전',
+            s : '몇초',
+            ss : '%d초',
+            m : '일분',
+            mm : '%d분',
+            h : '한시간',
+            hh : '%d시간',
+            d : '하루',
+            dd : '%d일',
+            M : '한달',
+            MM : '%d달',
+            y : '일년',
+            yy : '%d년'
+        },
+        ordinalParse : /\d{1,2}일/,
+        ordinal : '%d일',
+        meridiemParse : /오전|오후/,
+        isPM : function (token) {
+            return token === '오후';
+        },
+        meridiem : function (hour, minute, isUpper) {
+            return hour < 12 ? '오전' : '오후';
+        }
+    });
+
+    return ko;
+
+}));
 // moment.js locale configuration
 // locale : portuguese (pt)
 // author : Jefferson : https://github.com/jalex79
@@ -31124,6 +31411,80 @@ var ColorHash = (function () {
     });
 }));
 
+//! moment.js locale configuration
+//! locale : romanian (ro)
+//! author : Vlad Gurdiga : https://github.com/gurdiga
+//! author : Valentin Agachi : https://github.com/avaly
+
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['moment'], factory) :
+   factory(global.moment)
+}(this, function (moment) { 'use strict';
+
+
+    function relativeTimeWithPlural(number, withoutSuffix, key) {
+        var format = {
+                'mm': 'minute',
+                'hh': 'ore',
+                'dd': 'zile',
+                'MM': 'luni',
+                'yy': 'ani'
+            },
+            separator = ' ';
+        if (number % 100 >= 20 || (number >= 100 && number % 100 === 0)) {
+            separator = ' de ';
+        }
+        return number + separator + format[key];
+    }
+
+    var ro = moment.defineLocale('ro', {
+        months : 'ianuarie_februarie_martie_aprilie_mai_iunie_iulie_august_septembrie_octombrie_noiembrie_decembrie'.split('_'),
+        monthsShort : 'ian._febr._mart._apr._mai_iun._iul._aug._sept._oct._nov._dec.'.split('_'),
+        weekdays : 'duminică_luni_marți_miercuri_joi_vineri_sâmbătă'.split('_'),
+        weekdaysShort : 'Dum_Lun_Mar_Mie_Joi_Vin_Sâm'.split('_'),
+        weekdaysMin : 'Du_Lu_Ma_Mi_Jo_Vi_Sâ'.split('_'),
+        longDateFormat : {
+            LT : 'H:mm',
+            LTS : 'H:mm:ss',
+            L : 'DD.MM.YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY H:mm',
+            LLLL : 'dddd, D MMMM YYYY H:mm'
+        },
+        calendar : {
+            sameDay: '[azi la] LT',
+            nextDay: '[mâine la] LT',
+            nextWeek: 'dddd [la] LT',
+            lastDay: '[ieri la] LT',
+            lastWeek: '[fosta] dddd [la] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'peste %s',
+            past : '%s în urmă',
+            s : 'câteva secunde',
+            m : 'un minut',
+            mm : relativeTimeWithPlural,
+            h : 'o oră',
+            hh : relativeTimeWithPlural,
+            d : 'o zi',
+            dd : relativeTimeWithPlural,
+            M : 'o lună',
+            MM : relativeTimeWithPlural,
+            y : 'un an',
+            yy : relativeTimeWithPlural
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 7  // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    return ro;
+
+}));
 //     (c) 2012 Airbnb, Inc.
 //
 //     polyglot.js may be freely distributed under the terms of the BSD
