@@ -33,6 +33,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
 
             # only process relevant guests, quits otherwise
             shouldSend = guest.status is 'INVITATION-NOT-SENT' or \
+                         guest.status is 'NEEDS-ACTION' or \
                         (guest.status is 'ACCEPTED' and dateChanged)
             return done() unless shouldSend
 
