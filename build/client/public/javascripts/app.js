@@ -3716,16 +3716,18 @@ module.exports = ScheduleItem = (function(superClass) {
       return callback(false);
     }
     attendees = this.get('attendees') || [];
-    guestsToInform = attendees.filter(function(guest) {
-      var ref;
-      if (method === 'create') {
-        return true;
-      } else if (method === 'delete') {
-        return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
-      } else if (method === 'update' || method === 'patch') {
-        return guest.status === 'INVITATION-NOT-SENT' || guest.status === 'NEEDS-ACTION' || (guest.status === 'ACCEPTED' && this.startDateChanged);
-      }
-    }).map(function(guest) {
+    guestsToInform = attendees.filter((function(_this) {
+      return function(guest) {
+        var ref;
+        if (method === 'create') {
+          return true;
+        } else if (method === 'delete') {
+          return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
+        } else if (method === 'update' || method === 'patch') {
+          return guest.status === 'INVITATION-NOT-SENT' || guest.status === 'NEEDS-ACTION' || (guest.status === 'ACCEPTED' && _this.startDateChanged);
+        }
+      };
+    })(this)).map(function(guest) {
       return guest.email;
     });
     if (guestsToInform.length === 0) {
