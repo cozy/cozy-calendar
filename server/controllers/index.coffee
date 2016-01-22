@@ -44,13 +44,20 @@ module.exports.index = (req, res, next) ->
 
         timezone = timezone or 'UTC'
 
+        # Objects returned by the database may contain characters that need to
+        # be escaped to prevent error in some browsers
+        sanitize = (obj) ->
+            return """
+              JSON.parse(decodeURI("#{encodeURI(JSON.stringify(obj))}"));
+            """
+
         res.render 'index.jade', imports: """
             window.locale = "#{locale}";
-            window.inittags = #{JSON.stringify tags};
-            window.initevents = #{JSON.stringify events};
-            window.initcontacts = #{JSON.stringify contacts};
-            window.webDavAccount = #{JSON.stringify webDavAccount};
-            window.timezone = #{JSON.stringify timezone};
+            window.inittags = #{sanitize tags};
+            window.initevents = #{sanitize events}
+            window.initcontacts = #{sanitize contacts};
+            window.webDavAccount = #{sanitize webDavAccount};
+            window.timezone = #{sanitize timezone};
         """
 
 module.exports.logClient = (req, res) ->
