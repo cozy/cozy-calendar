@@ -51,7 +51,7 @@ module.exports.index = function(req, res, next) {
       }
     }
   ], function(err, results) {
-    var contacts, events, instance, locale, tags, timezone, webDavAccount;
+    var contacts, events, instance, locale, sanitize, tags, timezone, webDavAccount;
     if (err) {
       return next(err);
     }
@@ -61,8 +61,11 @@ module.exports.index = function(req, res, next) {
       webDavAccount.domain = (instance != null ? instance.domain : void 0) || '';
     }
     timezone = timezone || 'UTC';
+    sanitize = function(obj) {
+      return "JSON.parse(decodeURI(\"" + (encodeURI(JSON.stringify(obj))) + "\"));";
+    };
     return res.render('index.jade', {
-      imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (JSON.stringify(tags)) + ";\nwindow.initevents = " + (JSON.stringify(events)) + ";\nwindow.initcontacts = " + (JSON.stringify(contacts)) + ";\nwindow.webDavAccount = " + (JSON.stringify(webDavAccount)) + ";\nwindow.timezone = " + (JSON.stringify(timezone)) + ";"
+      imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (sanitize(tags)) + ";\nwindow.initevents = " + (sanitize(events)) + "\nwindow.initcontacts = " + (sanitize(contacts)) + ";\nwindow.webDavAccount = " + (sanitize(webDavAccount)) + ";\nwindow.timezone = " + (sanitize(timezone)) + ";"
     });
   });
 };
