@@ -121,6 +121,8 @@ input-color   = #555
 
         .remove-spinner
             padding 0 0.5em
+            display none
+            cursor wait
 
         button
             color icon-color
@@ -133,10 +135,6 @@ input-color   = #555
             &:hover
                 opacity 1
                 color darkblue
-
-        .remove-spinner
-            display none
-            cursor wait
 
     [aria-hidden="true"]
         display none
@@ -517,3 +515,13 @@ ul.alerts
 
         .btn
             margin 0.5em
+
+    .spinner-block
+        width 100%
+        display flex
+        justify-content center
+
+        .remove-spinner
+            width 2em
+            height 2em
+            margin 2em 0
