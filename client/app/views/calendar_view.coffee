@@ -39,7 +39,7 @@ module.exports = class CalendarView extends BaseView
         currDate.date(@options.date)   if @options.date? and @view isnt 'month'
 
         @cal.fullCalendar
-            lang: window.locale
+            lang: window.app.locale
             header: false
             firstDay: 1 # first day of the week is monday
             height: "auto"
