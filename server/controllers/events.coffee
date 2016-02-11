@@ -3,6 +3,7 @@ path = require 'path'
 async = require 'async'
 moment = require 'moment-timezone'
 log = require('printit')
+    date: true
     prefix: 'events'
 
 User = require '../models/user'

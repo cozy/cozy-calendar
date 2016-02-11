@@ -42,7 +42,7 @@ module.exports.import = (req, res, next) ->
                 for file in arrfile
                     fs.unlink file.path, (err) ->
                         if err
-                            console.log "failed to cleanup file", file.path, err
+                            log.error "failed to cleanup file", file.path, err
 
         unless file = files['file']?[0]
             res.send error: 'no file sent', 400
@@ -52,8 +52,8 @@ module.exports.import = (req, res, next) ->
         options = defaultTimezone: User.timezone
         parser.parseFile file.path, options, (err, result) ->
             if err
-                console.log err
-                console.log err.message
+                log.error err
+                log.error err.message
                 res.send 500, error: 'error occured while saving file'
                 cleanUp()
             else
