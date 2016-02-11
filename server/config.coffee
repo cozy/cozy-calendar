@@ -1,7 +1,17 @@
 americano = require 'americano'
+path = require 'path'
+fs = require 'fs'
 
 publicPath = "#{__dirname}/../client/public"
 staticMiddleware = americano.static publicPath, maxAge: 86400000
+
+
+console.log "***************************************************************"
+console.log __dirname
+viewsDir = path.resolve __dirname, 'views'
+useBuildView = fs.existsSync path.resolve viewsDir, 'index.js'
+console.log useBuildView
+
 publicStatic = (req, res, next) ->
 
     # Allows assets to be loaded from any route
@@ -25,12 +35,15 @@ module.exports =
             app.use americano.errorHandler
                 dumpExceptions: true
                 showStack: true
+
         set:
-            views: './client'
+            'view engine': if useBuildView then 'js' else 'jade'
+            'views': viewsDir
 
         engine:
             js: (path, locales, callback) ->
                 callback null, require(path)(locales)
+
 
     development: [
         americano.logger 'dev'
@@ -43,3 +56,4 @@ module.exports =
     plugins: [
         'cozydb'
     ]
+

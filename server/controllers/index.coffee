@@ -51,7 +51,7 @@ module.exports.index = (req, res, next) ->
               JSON.parse(decodeURI("#{encodeURI(JSON.stringify(obj))}"));
             """
 
-        res.render 'index.jade', imports: """
+        res.render 'index', imports: """
             window.locale = "#{locale}";
             window.inittags = #{sanitize tags};
             window.initevents = #{sanitize events}

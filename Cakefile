@@ -85,7 +85,7 @@ buildJade = ->
         output = "var jade = require('jade/runtime');\n"
         output += "module.exports = " + jade.compileClient template, {filename}
         name = file.replace '.jade', '.js'
-        fs.writeFileSync "./build/client/#{name}", output
+        fs.writeFileSync "./build/server/views/#{name}", output
 
 task 'build', 'Build CoffeeScript to Javascript', ->
     logger.options.prefix = 'cake:build'

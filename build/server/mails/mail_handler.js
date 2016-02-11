@@ -24,7 +24,7 @@ User = require('../models/user');
 
 VCalendar = require('cozy-ical').VCalendar;
 
-logoPath = fs.realpathSync('./build/server/mails/assets/cozy-logo.png');
+logoPath = './assets/cozy-logo.png';
 
 localization = require('../libs/localization_manager');
 

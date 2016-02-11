@@ -8,21 +8,14 @@ start = function(port, callback) {
     host: process.env.HOST || "0.0.0.0",
     root: __dirname
   }, function(app, server) {
-    var Realtimer, User, cozydb, localization, realtime;
+    var User, cozydb, localization;
     cozydb = require('cozydb');
     User = require('./server/models/user');
     localization = require('./server/libs/localization_manager');
-    Realtimer = require('cozy-realtime-adapter');
-    realtime = Realtimer(server, ['event.*']);
-    realtime.on('user.*', function() {
-      return User.updateUser();
-    });
-    realtime.on('cozyinstance.*', function() {
-      return cozydb.api.getCozyInstance(function(err, instance) {
-        var locale;
-        locale = (instance != null ? instance.locale : void 0) || null;
-        return localization.updateLocale(locale);
-      });
+    cozydb.api.getCozyInstance(function(err, instance) {
+      var locale;
+      locale = (instance != null ? instance.locale : void 0) || null;
+      return localization.updateLocale(locale);
     });
     return User.updateUser(function(err) {
       return localization.initialize(function() {
