@@ -17,7 +17,6 @@
     "type": "git",
     "url": "https://github.com/cozy/cozy-calendar.git"
   },
-  "main": "server.coffee",
   "dependencies": {
     "americano": "0.3.11",
     "archiver": "0.14.4",
@@ -31,6 +30,7 @@
     "node-polyglot": "0.4.3",
     "printit": "0.1.8"
   },
+  "main": "build/server.js",
   "devDependencies": {
     "should": "4.1.0",
     "mocha": "2.0.1",
