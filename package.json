@@ -29,7 +29,7 @@
     "moment-timezone": "0.4.0",
     "multiparty": "4.1.1",
     "node-polyglot": "0.4.3",
-    "printit": "0.1.8"
+    "printit": "0.1.15"
   },
   "devDependencies": {
     "should": "4.1.0",
