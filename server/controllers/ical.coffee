@@ -7,6 +7,9 @@ fs = require 'fs'
 archiver = require 'archiver'
 async = require 'async'
 localization = require '../libs/localization_manager'
+log = require('printit')
+    date: true
+    prefix: 'calendar:ical'
 
 module.exports.export = (req, res) ->
     calendarId = req.params.calendarid
@@ -59,10 +62,16 @@ module.exports.import = (req, res, next) ->
                     key = 'default calendar name'
                     defaultCalendar = calendars?[0] or localization.t key
                     calendarName = result?.model?.name or defaultCalendar
-                    res.send 200,
-                        events: Event.extractEvents result, calendarName
-                        calendar:
-                            name: calendarName
+                    try
+                        events = Event.extractEvents result, calendarName
+                        res.send 200,
+                            events: Event.extractEvents result, calendarName
+                            calendar:
+                                name: calendarName
+                    catch e
+                        log.error e.stack
+                        log.error result
+                        res.send 500, error: 'error occured while parsing file'
                     cleanUp()
 
 module.exports.zipExport = (req, res, next) ->

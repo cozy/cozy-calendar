@@ -67,7 +67,11 @@ module.exports = class ImportView extends BaseView
                     @showEventsPreview result.events
 
             error: (xhr) =>
-                msg = JSON.parse(xhr.responseText).msg
+                try
+                    msg = JSON.parse(xhr.responseText).msg
+                catch e
+                    console.error e
+                    console.error xhr.responseText
                 unless msg?
                     msg = 'An error occured while importing your calendar.'
                 alert msg
