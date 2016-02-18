@@ -1,21 +1,3 @@
-// Base Styles
-
-blue = #34A6FF
-darkblue = blue - 20%
-lightblue = #CBE4FB
-greyblue = #34A6BB
-darkgreyblue = #92A0B2
-lightgreyblue = #C8CFD8
-green = #5C5
-orange = #fe8800
-lightorange = #FFC47F
-darkgrey = #333
-lightgrey = #CCC
-grey = #AAA
-midgrey = #888
-red = #DD3333
-
-
 html,
 body
     height 100%
@@ -24,23 +6,19 @@ body
 
 body
     text-rendering optimizeLegibility
-    background #f2f2f2
+    background grey-01
 
 body,
 input
     color darkgrey
-    font 300 16px Geneva, Verdana, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif
     line-height 1.2
 
-h2
-    font-family 'Maven Pro', sans-serif
-
 a,
-avisited
-    color #0086cc
+a:visited
+    color blue
     text-decoration none
 
-    &hover
+    &:hover
         text-decoration underline
 
 [aria-hidden=true]
@@ -83,7 +61,7 @@ afocus,
     border-radius 0
     font-family 'Source Sans Pro', sans-serif
     font-weight bold
-    border-radius 4px
+    border-radius 3px
     transition background 0.2s
     transition color 0.2s
 
@@ -93,7 +71,7 @@ afocus,
         color white
 
 .badge
-    background #f5f5f5
+    background grey-01
 
 .badge-info
     background blue
@@ -139,7 +117,7 @@ afocus,
 
 .info
     font-size 12px
-    color #777
+    color grey-06
 
 .datepicker
     z-index 1150

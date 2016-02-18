@@ -6,8 +6,8 @@
     width: 200px
     height 100vh !important     // TODO removed importabt once the resize in JS is gone
     padding 0.5em 1em
-    background: #F2F2F2
-    border-right 1px solid #e2e2e2
+    background: grey-01
+    border-right 1px solid grey-03
     box-sizing border-box
     list-style-type: none
     text-align: left
@@ -15,14 +15,14 @@
     font-weight: normal
 
     a
-        color: #333
+        color: grey-08
 
         &:hover
             text-decoration none
 
     .btn
-        color #fff
-        background midgrey
+        color white
+        background grey-04
         transition background 0.3s
 
         &:hover
@@ -32,22 +32,6 @@
         position relative
         top 1px
         margin-right 0.5em
-
-    li.active
-        background: #AEDBFF
-
-        a
-            background: transparent
-            display: inline-block
-
-            &.calendar-add
-                width 150px
-
-    li.divider
-        background-color transparent
-
-        &:hover
-            background-color transparent
 
     .calendars
         position relative
@@ -61,13 +45,13 @@
             justify-content space-between
             align-items center
             font-size 1.3em
-            color #333
+            color darkcolor
 
         .calendar-add
             margin-top 1px
             font-size 1.6rem
             text-shadow none
-            color #bbb
+            color grey-04
             transition color 0.3s
 
             &:hover
@@ -135,7 +119,7 @@
                 width 95%
                 padding-right 1em
                 font-size 1em
-                color #555
+                color grey-07
                 word-break break-all
 
             input.calendar-name
@@ -150,19 +134,16 @@
                 align-items center
 
                 .dropdown-toggle
-
                     .caret
                         margin-top 0 !important // overrides bootstrap
                         vertical-align middle
                         margin-right 4px
-                        border-top-color #000
-                        border-bottom-color #000
-                        opacity 0.2
+                        border-top-color grey-04
+                        border-bottom-color grey-04
                         transform scale(1.5, 1.5)
                         transition all 0.2s
 
                         &:hover
-                            color blue
                             border-top-color blue
                             border-bottom-color blue
 
@@ -170,7 +151,7 @@
                 .dropdown-menu
                     padding 0.4em 0
                     min-width 180px
-                    border-color #ddd
+                    border-color grey-03
                     box-shadow 0 5px 16px rgba(0,0,0,0.12)
 
                     & > li
