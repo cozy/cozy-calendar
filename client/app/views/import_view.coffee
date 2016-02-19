@@ -88,7 +88,10 @@ module.exports = class ImportView extends BaseView
         # length for the total number of events to import
         @eventsCount = events.length
         # Break event to import in smaller lists
-        @eventLists = helpers.getLists events, 100
+        # Reduced the number to 50 because sometime the request was too big
+        # and some events not imported
+        @eventLists  = helpers.getLists events, 50
+        window.eventList = @eventList
 
         async.eachSeries @eventLists, (eventList, done) =>
             @eventList.collection.add eventList, sort: false
