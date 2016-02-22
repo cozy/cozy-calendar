@@ -2,11 +2,11 @@
 
 start = (port, callback) ->
     require('americano').start
-            name: 'Calendar'
-            port: port
-            host: process.env.HOST or "0.0.0.0"
-            root: __dirname
-    , (app, server) ->
+        name: 'Calendar'
+        port: port
+        host: process.env.HOST or "0.0.0.0"
+        root: __dirname
+    , (err, app, server) ->
 
 
         cozydb = require 'cozydb'
