@@ -1907,8 +1907,8 @@ module.exports = ViewCollection = (function(superClass) {
 
 ;require.register("locales/de", function(exports, require, module) {
 module.exports = {
-    "calendar list title": "Calendars",
-    "sync settings button label": "Synchronization",
+    "calendar list title": "Kalender",
+    "sync settings button label": "Synchronisierung",
     "default calendar name": "Mein Kalender",
     "Add": "Hinzufügen",
     "event": "Ereignis",
@@ -1983,7 +1983,7 @@ module.exports = {
     "no description": "Keine Beschreibung",
     "add calendar": "Kalendar hinzufügen",
     "new calendar": "Neuer Kalendar",
-    "multiple actions": "mehrere  Aktionen ",
+    "multiple actions": "mehrere  Aktionen",
     "recurrence": "Wiederholung",
     "recurrence rule": "Wiederholungsregeln",
     "make reccurent": "Wiederholung erstellen",
@@ -2156,8 +2156,7 @@ module.exports = {
     "email delete title": "Diese Ereignis wurde abgesagt: %{description}",
     "email delete content": "Dieses Ereignis wurde abgesagt:\n%{description} %{place}\nam %{date}",
     "invalid recurring rule": "The recurring rule is invalid"
-}
-;
+};
 });
 
 require.register("locales/en", function(exports, require, module) {
@@ -2917,7 +2916,7 @@ module.exports = {
     "Dec": "Déc",
     "calendar exist error": "Un  agenda nommé \"Nouvel agenda\" existe déjà.",
     "email date format": "MMMM Do YYYY, h:mm a",
-    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email date format allday": "MMMM Do YYYY, [toute la journée]",
     "email invitation title": "Invitation à '%{description}'",
     "email invitation content": "Bonjour, je souhaiterais vous inviter à l’événement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
     "email update title": "L’événement \"%{description}\" a changé",
@@ -2925,8 +2924,7 @@ module.exports = {
     "email delete title": "Cet événement a été annulé : %{description}",
     "email delete content": "Cet événement a été annulé :\n%{description} %{place}\nLe %{date}",
     "invalid recurring rule": "La règle de récursion est invalide"
-}
-;
+};
 });
 
 require.register("locales/ro", function(exports, require, module) {
@@ -4250,7 +4248,7 @@ module.exports = CalendarView = (function(superClass) {
       currDate.date(this.options.date);
     }
     this.cal.fullCalendar({
-      lang: window.locale,
+      lang: window.app.locale,
       header: false,
       firstDay: 1,
       height: "auto",
@@ -4687,8 +4685,14 @@ module.exports = ImportView = (function(superClass) {
       })(this),
       error: (function(_this) {
         return function(xhr) {
-          var msg;
-          msg = JSON.parse(xhr.responseText).msg;
+          var e, msg;
+          try {
+            msg = JSON.parse(xhr.responseText).msg;
+          } catch (_error) {
+            e = _error;
+            console.error(e);
+            console.error(xhr.responseText);
+          }
           if (msg == null) {
             msg = 'An error occured while importing your calendar.';
           }
@@ -4702,7 +4706,9 @@ module.exports = ImportView = (function(superClass) {
   };
 
   ImportView.prototype.showEventsPreview = function(events) {
-    this.eventLists = helpers.getLists(events, 100);
+    this.eventsCount = events.length;
+    this.eventLists = helpers.getLists(events, 50);
+    window.eventList = this.eventList;
     return async.eachSeries(this.eventLists, (function(_this) {
       return function(eventList, done) {
         _this.eventList.collection.add(eventList, {
@@ -4790,10 +4796,8 @@ module.exports = ImportView = (function(superClass) {
   };
 
   ImportView.prototype.initCounter = function() {
-    var total;
-    total = this.eventList.collection.length;
     this.counter = 0;
-    return $('.import-progress').html("<p>" + (t('imported events')) + ":\n    <span class=\"import-counter\">0</span>/" + total + "</p>");
+    return $('.import-progress').html("<p>" + (t('imported events')) + ":\n    <span class=\"import-counter\">0</span>/" + this.eventsCount + "</p>");
   };
 
   ImportView.prototype.updateCounter = function(increment) {
@@ -5207,7 +5211,6 @@ module.exports = MenuView = (function(superClass) {
     checkCalendar = function() {
       var calendar;
       this.tag = app.tags.getOrCreateByName(name);
-      console.log(this.tag);
       calendar = app.calendars.find(function(tag) {
         var localName;
         localName = t(name);
@@ -6863,7 +6866,7 @@ if ( calendarMode)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div>");
 }
-buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7157,7 +7160,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),description = locals_.description;
-buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");;return buf.join("");
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><div class=\"spinner-block\"><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></div><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7553,7 +7556,8 @@ module.exports = ComboBox = (function(superClass) {
   };
 
   ComboBox.prototype.getDefaultValue = function() {
-    return this.source[0].label;
+    var ref;
+    return ((ref = this.source[0]) != null ? ref.label : void 0) || t('default calendar name');
   };
 
   ComboBox.prototype.value = function() {

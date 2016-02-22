@@ -16,6 +16,7 @@ cozydb = require('cozydb');
 WebDavAccount = require('../models/webdavaccount');
 
 log = require('printit')({
+  date: true,
   prefix: 'calendar:client'
 });
 

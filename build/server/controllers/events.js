@@ -10,6 +10,7 @@ async = require('async');
 moment = require('moment-timezone');
 
 log = require('printit')({
+  date: true,
   prefix: 'events'
 });
 

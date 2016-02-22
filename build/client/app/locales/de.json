@@ -1,6 +1,6 @@
 {
-    "calendar list title": "Calendars",
-    "sync settings button label": "Synchronization",
+    "calendar list title": "Kalender",
+    "sync settings button label": "Synchronisierung",
     "default calendar name": "Mein Kalender",
     "Add": "Hinzufügen",
     "event": "Ereignis",
@@ -75,7 +75,7 @@
     "no description": "Keine Beschreibung",
     "add calendar": "Kalendar hinzufügen",
     "new calendar": "Neuer Kalendar",
-    "multiple actions": "mehrere  Aktionen ",
+    "multiple actions": "mehrere  Aktionen",
     "recurrence": "Wiederholung",
     "recurrence rule": "Wiederholungsregeln",
     "make reccurent": "Wiederholung erstellen",

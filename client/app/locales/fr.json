@@ -240,7 +240,7 @@
     "Dec": "Déc",
     "calendar exist error": "Un  agenda nommé \"Nouvel agenda\" existe déjà.",
     "email date format": "MMMM Do YYYY, h:mm a",
-    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email date format allday": "MMMM Do YYYY, [toute la journée]",
     "email invitation title": "Invitation à '%{description}'",
     "email invitation content": "Bonjour, je souhaiterais vous inviter à l’événement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
     "email update title": "L’événement \"%{description}\" a changé",
