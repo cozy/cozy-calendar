@@ -7,7 +7,7 @@ start = function(port, callback) {
     port: port,
     host: process.env.HOST || "0.0.0.0",
     root: __dirname
-  }, function(app, server) {
+  }, function(err, app, server) {
     var Realtimer, User, cozydb, localization, realtime;
     cozydb = require('cozydb');
     User = require('./server/models/user');
