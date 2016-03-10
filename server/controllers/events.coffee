@@ -181,7 +181,6 @@ module.exports.ical = (req, res) ->
             organization:'Cozy Cloud'
             title: 'Cozy Calendar'
 
-        calendar = new VCalendar calendarOptions
         vEvent = req.event.toIcal()
 
         # Force the event to take into account the organizer.
