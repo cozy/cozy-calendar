@@ -65,7 +65,7 @@ module.exports.import = (req, res, next) ->
                     try
                         events = Event.extractEvents result, calendarName
                         res.send 200,
-                            events: Event.extractEvents result, calendarName
+                            events: events
                             calendar:
                                 name: calendarName
                     catch e
