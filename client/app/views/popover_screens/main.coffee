@@ -305,7 +305,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 wait: true
                 success: =>
                     @calendar.save()
-                    app.events.add @model
+                    app.events.add @model, sort: false
                 error: ->
                     alert 'server error occured'
                 complete: =>

@@ -36,6 +36,18 @@ module.exports =
         @contacts = new ContactCollection()
         @calendars = new CalendarsCollection()
 
+        # Main Store is used to mark which months were loaded or not.
+        # That way the app knows when data fetching is required.
+        @mainStore =
+            loadedMonths: {}
+        now = moment().startOf 'month'
+        for i in [1..3]
+            m1 = now.clone().subtract('months', i).format 'YYYY-MM'
+            m2 = now.clone().add('months', i).format 'YYYY-MM'
+            @mainStore.loadedMonths[m1] = true
+            @mainStore.loadedMonths[m2] = true
+        @mainStore.loadedMonths[now.format 'YYYY-MM'] = true
+
         @router = new Router()
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
