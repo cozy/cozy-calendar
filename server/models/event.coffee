@@ -20,6 +20,8 @@ module.exports = Event = cozydb.getModel 'Event',
     timezone        : String
     alarms          : [Object]
     created         : String
+    caldavuri       : String
+    uuid            : String
     lastModification: String
 
 # 'start' and 'end' use those format,
