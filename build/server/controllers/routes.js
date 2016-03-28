@@ -33,21 +33,24 @@ module.exports = {
     put: tags.update,
     "delete": tags["delete"]
   },
+  'eventid': {
+    param: events.fetch
+  },
   'events': {
     get: events.all,
     post: events.create
   },
-  'eventid': {
-    param: events.fetch
-  },
   'events/bulk': {
     post: events.createBulk
+  },
+  'events/:year/:month': {
+    get: events.monthEvents
   },
   'events/rename-calendar': {
     post: events.bulkCalendarRename
   },
   'events/delete': {
-    "delete": events.bulkDelete
+    post: events.bulkDelete
   },
   'events/:eventid': {
     get: events.read,

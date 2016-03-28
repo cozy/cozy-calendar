@@ -31,6 +31,11 @@ module.exports = {
     byDate: function(doc) {
       return emit(new Date(doc.start), doc);
     },
+    reccuring: function(doc) {
+      if ((doc.rrule != null) && doc.rrule.length > 0) {
+        return emit(doc.id, doc);
+      }
+    },
     tags: tagsView,
     byCalendar: cozydb.defaultRequests.by('tags[0]')
   },
