@@ -173,10 +173,8 @@ Event.migrateAll = (callback) ->
 
 Event.bulkCalendarRename = (oldName, newName, callback) ->
     Event.request 'byCalendar', key: oldName, (err, events) ->
-        async.eachLimit events, 10, (event, done) ->
-            # clones the array
-            tags = [].concat event.tags
-            tags[0] = newName
+        async.eachSeries events, (event, done) ->
+            tags = [newName]
             event.updateAttributes {tags}, done
         , (err) -> callback err, events
 

@@ -40,7 +40,7 @@ module.exports =
     'events/rename-calendar':
         post: events.bulkCalendarRename
     'events/delete':
-        delete: events.bulkDelete
+        post: events.bulkDelete
 
     'events/:eventid':
         get: events.read

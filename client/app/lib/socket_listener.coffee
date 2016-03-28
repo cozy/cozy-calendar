@@ -17,7 +17,6 @@ addModel = (model, callback) =>
                 else
                     addModel()
 
-
             setTimeout callback, 50
 
         error: ->
