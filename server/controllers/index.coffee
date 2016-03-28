@@ -1,4 +1,5 @@
 async = require 'async'
+moment = require 'moment'
 Tag = require '../models/tag'
 Event = require '../models/event'
 Contact = require '../models/contact'
@@ -9,6 +10,7 @@ log = require('printit')
     date: true
     prefix: 'calendar:client'
 
+
 module.exports.index = (req, res, next) ->
     async.parallel [
         (done) -> Contact.all (err, contacts) ->
@@ -18,13 +20,23 @@ module.exports.index = (req, res, next) ->
             done null, contacts
 
         (cb) -> Tag.byName {}, cb
-        (cb) -> Event.all cb
+        # Load only reccuring events and events close to current day (> -3
+        # months and < +3 months). That way it doesn't load too much events.
+        (cb) ->
+            start = moment().startOf('month').subtract 3, 'months'
+            end = moment().startOf('month').add 3, 'months'
+            Event.load start, end, (err, events) ->
+                Event.request 'reccuring', (err, reccuringEvents) ->
+                    cb null, events.concat reccuringEvents
+
         (cb) -> cozydb.api.getCozyInstance cb
         (cb) -> WebDavAccount.first cb
         (cb) ->
+
             # Handle the case there User.timezone data is not cached yet.
             if User.timezone?
                 cb null, User.timezone
+
             else
                 User.updateUser ->
                     cb null, User.timezone
@@ -65,3 +77,4 @@ module.exports.logClient = (req, res) ->
     log.error req.body.data
     log.error req.body.data.error?.stack
     res.send 'ok'
+

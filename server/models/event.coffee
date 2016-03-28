@@ -212,3 +212,10 @@ Event.initializeData = (callback) ->
         else
             callback()
 
+
+Event.load = (start, end, callback) ->
+    startkey = start.format 'YYYY-MM-DDT00:00:00.000\Z'
+    endkey = end.format 'YYYY-MM-DDT00:00:00.000\Z'
+
+    Event.request 'byDate', {startkey, endkey}, callback
+
