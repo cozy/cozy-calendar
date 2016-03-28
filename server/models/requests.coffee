@@ -21,6 +21,8 @@ module.exports =
     event:
         all       : cozydb.defaultRequests.all
         byDate    : (doc) -> emit new Date(doc.start), doc
+        reccuring : (doc) ->
+            emit doc.id, doc if doc.rrule? and doc.rrule.length > 0
         tags      : tagsView
         byCalendar: cozydb.defaultRequests.by 'tags[0]'
 

@@ -6,7 +6,19 @@ cozydb = require('cozydb');
 module.exports = Contact = cozydb.getModel('Contact', {
   fn: String,
   n: String,
-  datapoints: [Object]
+  datapoints: [Object],
+  revision: String,
+  note: String,
+  tags: [String],
+  revision: String,
+  accounts: String,
+  title: String,
+  org: String,
+  bday: String,
+  url: String,
+  initials: String,
+  sortedName: String,
+  ref: String
 });
 
 Contact.prototype.asNameAndEmails = function() {

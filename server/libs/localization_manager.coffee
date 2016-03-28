@@ -66,9 +66,11 @@ class LocalizationManager
 
         return @templateCache[cacheKey]
 
-    getLocale: -> return @polyglot.currentLocale
+    getLocale: ->
+        return @polyglot.currentLocale
 
     # for template localization
-    getPolyglot: -> return @polyglot
+    getPolyglot: ->
+        return @polyglot
 
 module.exports = new LocalizationManager()

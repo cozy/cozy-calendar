@@ -21,7 +21,7 @@ module.exports.all = function(req, res, next) {
     if (err) {
       return next(err);
     }
-    return res.send(200, results);
+    return res.status(200).send(results);
   });
 };
 
@@ -38,7 +38,7 @@ module.exports.create = function(req, res) {
         error: "Server error while creating tag."
       }, 500);
     } else {
-      return res.send(tag, 201);
+      return res.status(201).send(tag);
     }
   });
 };
@@ -52,7 +52,7 @@ module.exports.update = function(req, res) {
         error: "Server error while saving tag"
       }, 500);
     } else {
-      return res.send(tag, 200);
+      return res.status(200).send(tag);
     }
   });
 };
@@ -60,13 +60,13 @@ module.exports.update = function(req, res) {
 module.exports["delete"] = function(req, res) {
   return req.tag.destroy(function(err) {
     if (err != null) {
-      return res.send({
+      return res.status(500).send({
         error: "Server error while deleting the tag"
-      }, 500);
+      });
     } else {
-      return res.send({
+      return res.status(200).send({
         success: true
-      }, 200);
+      });
     }
   });
 };

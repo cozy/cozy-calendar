@@ -6,19 +6,19 @@
 
   var modules = {};
   var cache = {};
-  var aliases = {};
   var has = ({}).hasOwnProperty;
+
+  var aliases = {};
 
   var endsWith = function(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
   };
 
-  var _cmp = 'components/';
   var unalias = function(alias, loaderPath) {
     var start = 0;
     if (loaderPath) {
-      if (loaderPath.indexOf(_cmp) === 0) {
-        start = _cmp.length;
+      if (loaderPath.indexOf('components/' === 0)) {
+        start = 'components/'.length;
       }
       if (loaderPath.indexOf('/', start) > 0) {
         loaderPath = loaderPath.substring(start, loaderPath.indexOf('/', start));
@@ -26,32 +26,33 @@
     }
     var result = aliases[alias + '/index.js'] || aliases[loaderPath + '/deps/' + alias + '/index.js'];
     if (result) {
-      return _cmp + result.substring(0, result.length - '.js'.length);
+      return 'components/' + result.substring(0, result.length - '.js'.length);
     }
     return alias;
   };
 
-  var _reg = /^\.\.?(\/|$)/;
-  var expand = function(root, name) {
-    var results = [], part;
-    var parts = (_reg.test(name) ? root + '/' + name : name).split('/');
-    for (var i = 0, length = parts.length; i < length; i++) {
-      part = parts[i];
-      if (part === '..') {
-        results.pop();
-      } else if (part !== '.' && part !== '') {
-        results.push(part);
+  var expand = (function() {
+    var reg = /^\.\.?(\/|$)/;
+    return function(root, name) {
+      var results = [], parts, part;
+      parts = (reg.test(name) ? root + '/' + name : name).split('/');
+      for (var i = 0, length = parts.length; i < length; i++) {
+        part = parts[i];
+        if (part === '..') {
+          results.pop();
+        } else if (part !== '.' && part !== '') {
+          results.push(part);
+        }
       }
-    }
-    return results.join('/');
-  };
-
+      return results.join('/');
+    };
+  })();
   var dirname = function(path) {
     return path.split('/').slice(0, -1).join('/');
   };
 
   var localRequire = function(path) {
-    return function expanded(name) {
+    return function(name) {
       var absolute = expand(dirname(path), name);
       return globals.require(absolute, path);
     };
@@ -106,13 +107,12 @@
   };
 
   require.brunch = true;
-  require._cache = cache;
   globals.require = require;
 })();
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, locales, todayChecker;
+    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, i, j, locales, m1, m2, now, todayChecker;
     window.app = this;
     this.timezone = window.timezone;
     delete window.timezone;
@@ -140,6 +140,17 @@ module.exports = {
     this.events = new EventCollection();
     this.contacts = new ContactCollection();
     this.calendars = new CalendarsCollection();
+    this.mainStore = {
+      loadedMonths: {}
+    };
+    now = moment().startOf('month');
+    for (i = j = 1; j <= 3; i = ++j) {
+      m1 = now.clone().subtract('months', i).format('YYYY-MM');
+      m2 = now.clone().add('months', i).format('YYYY-MM');
+      this.mainStore.loadedMonths[m1] = true;
+      this.mainStore.loadedMonths[m2] = true;
+    }
+    this.mainStore.loadedMonths[now.format('YYYY-MM')] = true;
     this.router = new Router();
     this.menu = new Menu({
       collection: this.calendars
@@ -172,7 +183,7 @@ module.exports = {
 });
 
 ;require.register("collections/calendars", function(exports, require, module) {
-var CalendarCollection, SocketListener, Tag, TagCollection,
+var CalendarCollection, SocketListener, Tag, TagCollection, request, stringify,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   slice = [].slice;
@@ -183,9 +194,13 @@ Tag = require('models/tag');
 
 TagCollection = require('collections/tags');
 
-module.exports = CalendarCollection = (function(superClass) {
-  var stringify;
+request = require('lib/request');
 
+stringify = function(tag) {
+  return tag.toString();
+};
+
+module.exports = CalendarCollection = (function(superClass) {
   extend(CalendarCollection, superClass);
 
   function CalendarCollection() {
@@ -244,66 +259,32 @@ module.exports = CalendarCollection = (function(superClass) {
   };
 
   CalendarCollection.prototype.remove = function(calendarName, callback) {
-    var eventsToRemove, options;
+    var eventsToRemove;
     eventsToRemove = this.eventCollection.getByCalendar(calendarName);
-    options = {
-      ignoreMySocketNotification: true
-    };
-    this._pauseModels(eventsToRemove, options);
-    return $.ajax('events/delete', {
-      type: 'DELETE',
-      data: {
-        calendarName: calendarName
-      },
-      success: (function(_this) {
-        return function() {
-          _this.eventCollection.remove(eventsToRemove);
-          callback();
-          return _this._resumeModels(eventsToRemove, options);
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          _this._resumeModels(eventsToRemove, options);
+    return request.post('events/delete', {
+      calendarName: calendarName
+    }, (function(_this) {
+      return function(err) {
+        if (err) {
           return callback(t('server error occured'));
-        };
-      })(this)
-    });
+        } else {
+          return callback();
+        }
+      };
+    })(this));
   };
 
   CalendarCollection.prototype.rename = function(oldName, newName, callback) {
-    var eventsToChange, options;
-    options = {
-      ignoreMySocketNotification: true
-    };
-    eventsToChange = this.eventCollection.getByCalendar(oldName);
-    this._pauseModels(eventsToChange, options);
-    return $.ajax('events/rename-calendar', {
-      type: 'POST',
-      data: {
-        oldName: oldName,
-        newName: newName
-      },
-      success: (function(_this) {
-        return function(data) {
-          _this.eventCollection.add(data, {
-            merge: true
-          });
-          callback();
-          return _this._resumeModels(eventsToChange, options);
-        };
-      })(this),
-      error: (function(_this) {
-        return function() {
-          _this._resumeModels(eventsToChange, options);
-          return callback(t('server error occured'));
-        };
-      })(this)
+    return request.post('events/rename-calendar', {
+      oldName: oldName,
+      newName: newName
+    }, function(err) {
+      if (err) {
+        return callback(t('server error occured'));
+      } else {
+        return callback();
+      }
     });
-  };
-
-  stringify = function(tag) {
-    return tag.toString();
   };
 
   CalendarCollection.prototype.toArray = function() {
@@ -483,13 +464,15 @@ module.exports = DayBucketCollection = (function(superClass) {
 });
 
 ;require.register("collections/events", function(exports, require, module) {
-var Event, EventCollection, ScheduleItemsCollection,
+var Event, EventCollection, ScheduleItemsCollection, request,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 ScheduleItemsCollection = require('./scheduleitems');
 
 Event = require('../models/event');
+
+request = require('lib/request');
 
 module.exports = EventCollection = (function(superClass) {
   extend(EventCollection, superClass);
@@ -501,6 +484,28 @@ module.exports = EventCollection = (function(superClass) {
   EventCollection.prototype.model = Event;
 
   EventCollection.prototype.url = 'events';
+
+  EventCollection.prototype.loadMonth = function(monthToLoad, callback) {
+    var month, monthKey, year;
+    monthKey = monthToLoad.format('YYYY-MM');
+    if (!window.app.mainStore.loadedMonths[monthKey]) {
+      year = monthToLoad.format('YYYY');
+      month = monthToLoad.format('MM');
+      return request.get("events/" + year + "/" + month, (function(_this) {
+        return function(err, events) {
+          _this.add(events, {
+            silent: true,
+            sort: false
+          });
+          _this.trigger('change');
+          window.app.mainStore.loadedMonths[monthKey] = true;
+          return callback();
+        };
+      })(this));
+    } else {
+      return callback();
+    }
+  };
 
   return EventCollection;
 
@@ -1626,16 +1631,36 @@ var SocketListener, addModel,
 
 addModel = (function(_this) {
   return function(model, callback) {
+    if (window.app.events.get(model.id)) {
+      return;
+    }
     return model.fetch({
       success: function(fetched) {
-        var collection, i, len, ref;
-        if (model.collections != null) {
+        var start;
+        addModel = function() {
+          var collection, i, len, ref, results;
           ref = model.collections;
+          results = [];
           for (i = 0, len = ref.length; i < len; i++) {
             collection = ref[i];
             if (model instanceof collection.model) {
-              collection.add(model);
+              results.push(collection.add(model, {
+                sort: false
+              }));
+            } else {
+              results.push(void 0);
             }
+          }
+          return results;
+        };
+        if (model.collections != null) {
+          if (fetched.get('docType') === 'event') {
+            start = moment(fetched.get('start')).format('YYYY-MM');
+            if (window.app.mainStore.loadedMonths[start]) {
+              addModel();
+            }
+          } else {
+            addModel();
           }
         }
         return setTimeout(callback, 50);
@@ -2915,8 +2940,8 @@ module.exports = {
     "Nov": "Nov",
     "Dec": "Déc",
     "calendar exist error": "Un  agenda nommé \"Nouvel agenda\" existe déjà.",
-    "email date format": "MMMM Do YYYY, h:mm a",
-    "email date format allday": "MMMM Do YYYY, [toute la journée]",
+    "email date format": "D MMMM YYYY - HH:MM",
+    "email date format allday": "D MMMM YYYY, [toute la journée]",
     "email invitation title": "Invitation à '%{description}'",
     "email invitation content": "Bonjour, je souhaiterais vous inviter à l’événement suivant :\n%{description} %{place}\nLe %{date}\nSerez-vous présent ?\n\nOui\n%{url}?status=ACCEPTED&key=%{key}\n\nNon\n%{url}?status=DECLINED&key=%{key}",
     "email update title": "L’événement \"%{description}\" a changé",
@@ -2924,7 +2949,8 @@ module.exports = {
     "email delete title": "Cet événement a été annulé : %{description}",
     "email delete content": "Cet événement a été annulé :\n%{description} %{place}\nLe %{date}",
     "invalid recurring rule": "La règle de récursion est invalide"
-};
+}
+;
 });
 
 require.register("locales/ro", function(exports, require, module) {
@@ -3772,7 +3798,7 @@ module.exports = Tag = (function(superClass) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app,
+var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app, getBeginningOfWeek,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3789,9 +3815,17 @@ ImportView = require('views/import_view');
 
 DayBucketCollection = require('collections/daybuckets');
 
-module.exports = Router = (function(superClass) {
-  var getBeginningOfWeek;
+getBeginningOfWeek = function(year, month, day) {
+  var monday, ref;
+  ref = [year, month, day].map(function(x) {
+    return parseInt(x);
+  }), year = ref[0], month = ref[1], day = ref[2];
+  monday = new Date(year, (month - 1) % 12, day);
+  monday.setDate(monday.getDate() - monday.getDay() + 1);
+  return [year, monday.getMonth() + 1, monday.getDate()];
+};
 
+module.exports = Router = (function(superClass) {
   extend(Router, superClass);
 
   function Router() {
@@ -3805,13 +3839,13 @@ module.exports = Router = (function(superClass) {
     '': 'month',
     'month': 'month',
     'month/:year/:month': 'month',
+    'month/:year/:month/:eventid': 'month_event',
     'week': 'week',
     'week/:year/:month/:day': 'week',
-    'list': 'list',
-    'event/:eventid': 'auto_event',
-    'month/:year/:month/:eventid': 'month_event',
     'week/:year/:month/:day/:eventid': 'week_event',
+    'list': 'list',
     'list/:eventid': 'list_event',
+    'event/:eventid': 'auto_event',
     'calendar': 'backToCalendar',
     'settings': 'settings'
   };
@@ -3838,9 +3872,14 @@ module.exports = Router = (function(superClass) {
   };
 
   Router.prototype.month = function(year, month) {
-    var hash;
+    var hash, monthToLoad;
     if (year != null) {
-      return this.displayCalendar('month', year, month, 1);
+      monthToLoad = moment(year + "/" + month, "YYYY/M");
+      return window.app.events.loadMonth(monthToLoad, (function(_this) {
+        return function() {
+          return _this.displayCalendar('month', year, month, 1);
+        };
+      })(this));
     } else {
       hash = moment().format('[month]/YYYY/M');
       return this.navigate(hash, {
@@ -3850,10 +3889,15 @@ module.exports = Router = (function(superClass) {
   };
 
   Router.prototype.week = function(year, month, day) {
-    var hash, ref;
+    var hash, monthToLoad, ref;
     if (year != null) {
       ref = getBeginningOfWeek(year, month, day), year = ref[0], month = ref[1], day = ref[2];
-      return this.displayCalendar('agendaWeek', year, month, day);
+      monthToLoad = moment(year + "/" + month, "YYYY/M");
+      return window.app.events.loadMonth(monthToLoad, (function(_this) {
+        return function() {
+          return _this.displayCalendar('agendaWeek', year, month, day);
+        };
+      })(this));
     } else {
       hash = moment().format('[week]/YYYY/M/D');
       return this.navigate(hash, {
@@ -3934,16 +3978,6 @@ module.exports = Router = (function(superClass) {
     this.mainView = view;
     $('.main-container').append(this.mainView.$el);
     return this.mainView.render();
-  };
-
-  getBeginningOfWeek = function(year, month, day) {
-    var monday, ref;
-    ref = [year, month, day].map(function(x) {
-      return parseInt(x);
-    }), year = ref[0], month = ref[1], day = ref[2];
-    monday = new Date(year, (month - 1) % 12, day);
-    monday.setDate(monday.getDate() - monday.getDay() + 1);
-    return [year, monday.getMonth() + 1, monday.getDate()];
   };
 
   Router.prototype.settings = function() {
@@ -4291,14 +4325,22 @@ module.exports = CalendarView = (function(superClass) {
     this.calHeader = new Header({
       cal: this.cal
     });
-    this.calHeader.on('next', (function(_this) {
-      return function() {
-        return _this.cal.fullCalendar('next');
-      };
-    })(this));
     this.calHeader.on('prev', (function(_this) {
       return function() {
-        return _this.cal.fullCalendar('prev');
+        var monthToLoad;
+        monthToLoad = _this.cal.fullCalendar('getDate').subtract('months', 1);
+        return window.app.events.loadMonth(monthToLoad, function() {
+          return _this.cal.fullCalendar('prev');
+        });
+      };
+    })(this));
+    this.calHeader.on('next', (function(_this) {
+      return function() {
+        var monthToLoad;
+        monthToLoad = _this.cal.fullCalendar('getDate').add('months', 1);
+        return window.app.events.loadMonth(monthToLoad, function() {
+          return _this.cal.fullCalendar('next');
+        });
       };
     })(this));
     this.calHeader.on('today', (function(_this) {
@@ -4317,6 +4359,7 @@ module.exports = CalendarView = (function(superClass) {
       };
     })(this));
     this.calHeader.on('list', function() {
+      window.app.events.sort();
       return app.router.navigate('list', {
         trigger: true
       });
@@ -4361,6 +4404,9 @@ module.exports = CalendarView = (function(superClass) {
 
   CalendarView.prototype.refreshOne = function(model) {
     var data, fcEvent, modelWasRecurrent, previousRRule;
+    if (model == null) {
+      return null;
+    }
     previousRRule = model.previous('rrule');
     modelWasRecurrent = (previousRRule != null) && previousRRule !== '';
     if (model.isRecurrent() || modelWasRecurrent) {
@@ -6285,7 +6331,9 @@ module.exports = MainPopoverScreen = (function(superClass) {
         success: (function(_this) {
           return function() {
             _this.calendar.save();
-            return app.events.add(_this.model);
+            return app.events.add(_this.model, {
+              sort: false
+            });
           };
         })(this),
         error: function() {

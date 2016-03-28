@@ -87,12 +87,26 @@ module.exports = class CalendarView extends BaseView
 
         @calHeader = new Header cal: @cal
 
-        @calHeader.on 'next', => @cal.fullCalendar 'next'
-        @calHeader.on 'prev', => @cal.fullCalendar 'prev'
+        # Before displaying the calendar for the previous month, we make sure
+        # that events are loaded.
+        @calHeader.on 'prev', =>
+            monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
+            window.app.events.loadMonth monthToLoad, =>
+                @cal.fullCalendar 'prev'
+
+        # Before displaying the calendar for the next month, we make sure that
+        # events are loaded.
+        @calHeader.on 'next', =>
+            monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
+            window.app.events.loadMonth monthToLoad, =>
+                @cal.fullCalendar 'next'
+
         @calHeader.on 'today', => @cal.fullCalendar 'today'
         @calHeader.on 'week', => @cal.fullCalendar 'changeView', 'agendaWeek'
         @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
-        @calHeader.on 'list', -> app.router.navigate 'list', trigger:true
+        @calHeader.on 'list', ->
+            window.app.events.sort()
+            app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -128,6 +142,8 @@ module.exports = class CalendarView extends BaseView
 
 
     refreshOne: (model) =>
+
+        return null unless model?
 
         previousRRule = model.previous('rrule')
         modelWasRecurrent = previousRRule? and previousRRule isnt ''

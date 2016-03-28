@@ -105,7 +105,7 @@ module.exports = class MenuItemView extends BaseView
         calendarName = @model.get 'name'
 
         key = event.keyCode or event.charCode
-         # `escape` key cancels the edition.
+        # `escape` key cancels the edition.
         if key is 27
 
             @hideInput input, calendarName

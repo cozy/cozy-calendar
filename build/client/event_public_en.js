@@ -7,7 +7,7 @@ var jade_interp;
 buf.push("<!DOCTYPE html><html><head><title>Cozy Calendar - Upcoming Event</title><meta charset=\"utf-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\"><script src=\"javascripts/modernizr-2.6.1.js\"></script><link rel=\"stylesheet\" href=\"/fonts/fonts.css\"><link rel=\"stylesheet\" href=\"../stylesheets/app.css\"></head><body class=\"public public-event-body\"><header><img src=\"https://docs.cozy.io/assets/images/cozy-logo.png\"></header><main id=\"container\" class=\"container public-event-container well\"><h2>" + (jade.escape((jade_interp = event.description) == null ? '' : jade_interp)) + "</h2><h3>On " + (jade.escape((jade_interp = date) == null ? '' : jade_interp)) + "");
 if ( event.place != null && event.place.length != 0)
 {
-buf.push("&nbsp; at (" + (jade.escape((jade_interp = event.place) == null ? '' : jade_interp)) + ")");
+buf.push("at (" + (jade.escape((jade_interp = event.place) == null ? '' : jade_interp)) + ")");
 }
 buf.push("</h3>");
 if ( visitor.status == 'NEEDS-ACTION')
