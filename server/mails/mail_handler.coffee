@@ -20,6 +20,7 @@ localization = require '../libs/localization_manager'
 module.exports.sendInvitations = (event, dateChanged, callback) ->
     guests = event.toJSON().attendees
     needSaving = false
+    locale = localization.getLocale()
 
     async.parallel [
         (cb) -> cozydb.api.getCozyDomain cb
@@ -56,7 +57,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
             else
                 'email date format'
             dateFormat    = localization.t dateFormatKey
-            date          = event.formatStart dateFormat
+            date          = event.formatStart dateFormat, locale
 
             {description, place} = event.toJSON()
             place = if place?.length > 0 then place else ""
@@ -139,6 +140,7 @@ module.exports.sendDeleteNotification = (event, callback) ->
     # only process guests that have accepted to attend the event
     guestsToInform = guests.filter (guest) ->
         return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
+    locale = localization.getLocale()
 
     User.getUserInfos (err, user) ->
         return callback err if err
@@ -150,7 +152,7 @@ module.exports.sendDeleteNotification = (event, callback) ->
             else
                 dateFormatKey = 'email date format'
             dateFormat = localization.t dateFormatKey
-            date = event.formatStart dateFormat
+            date = event.formatStart dateFormat, locale
             {description, place} = event.toJSON()
             place = if place?.length > 0 then place else false
             templateOptions =
@@ -180,3 +182,4 @@ module.exports.sendDeleteNotification = (event, callback) ->
                 done err
 
         , callback
+

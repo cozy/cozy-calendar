@@ -1,14 +1,15 @@
 async = require 'async'
 moment = require 'moment'
+cozydb = require 'cozydb'
+log = require('printit')
+    date: true
+    prefix: 'calendar:client'
+
 Tag = require '../models/tag'
 Event = require '../models/event'
 Contact = require '../models/contact'
 User  = require '../models/user'
-cozydb = require 'cozydb'
 WebDavAccount = require '../models/webdavaccount'
-log = require('printit')
-    date: true
-    prefix: 'calendar:client'
 
 
 module.exports.index = (req, res, next) ->

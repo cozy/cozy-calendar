@@ -2,6 +2,7 @@ fs = require 'fs'
 path = require 'path'
 async = require 'async'
 moment = require 'moment-timezone'
+cozydb = require 'cozydb'
 log = require('printit')
     date: true
     prefix: 'events'
@@ -141,13 +142,15 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
+            locale = localization.getLocale()
+
             # Retrieve event data
             if event.isAllDayEvent()
                 dateFormatKey = 'email date format allday'
             else
                 dateFormatKey = 'email date format'
             dateFormat = localization.t dateFormatKey
-            date = event.formatStart dateFormat
+            date = event.formatStart dateFormat, locale
 
             # Retrieve user localization
             locale = localization.getLocale()
@@ -157,11 +160,13 @@ module.exports.public = (req, res, next) ->
             filePath = path.resolve __dirname, '../../client/', fileName
 
             # Usefull for build
-            filePathBuild = path.resolve __dirname, '../../../client/', fileName
+            filePathBuild = path.resolve(
+                __dirname, '../../../client/', fileName)
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
                 fileName = 'event_public_en.jade'
 
-            specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
+            specialCharacters = \
+                /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
             desc = event.description.replace(specialCharacters, '')
             desc = desc.replace(/\ /g, '-')
             day =  moment(event.start).format("YYYY-MM-DD")
