@@ -1,6 +1,5 @@
 async = require 'async'
 fs    = require 'fs'
-jade  = require 'jade'
 os    = require 'os'
 path  = require 'path'
 log   = require('printit')
@@ -8,7 +7,6 @@ log   = require('printit')
     date: true
 
 cozydb = require 'cozydb'
-Event = require '../models/event'
 User  = require '../models/user'
 
 {VCalendar} = require 'cozy-ical'
