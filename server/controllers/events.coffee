@@ -118,13 +118,13 @@ module.exports.public = (req, res, next) ->
             locale = localization.getLocale()
 
             # Display 404 page
-            fileName = "404_#{locale}.jade"
+            fileName = "404_#{locale}"
             filePath = path.resolve __dirname, '../../client/', fileName
 
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-                fileName = '404_en.jade'
+                fileName = '404_en'
 
             res.status 404
             res.render fileName
@@ -152,13 +152,12 @@ module.exports.public = (req, res, next) ->
             locale = localization.getLocale()
 
             # Display event
-            fileName = "event_public_#{locale}.jade"
+            fileName = "event_public_#{locale}"
             filePath = path.resolve __dirname, '../../client/', fileName
 
             # Usefull for build
-            filePathBuild = path.resolve __dirname, '../../../client/', fileName
-            unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-                fileName = 'event_public_en.jade'
+            unless fs.existsSync(filePath)
+                fileName = 'event_public_en'
 
             specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
             desc = event.description.replace(specialCharacters, '')
