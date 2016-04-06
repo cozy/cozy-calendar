@@ -20,6 +20,8 @@ module.exports = Event = cozydb.getModel 'Event',
     timezone        : String
     alarms          : [Object]
     created         : String
+    caldavuri       : String
+    uuid            : String
     lastModification: String
 
 # 'start' and 'end' use those format,
@@ -68,15 +70,17 @@ Event.createOrGetIfImport = (data, callback) ->
 Event::isAllDayEvent = -> return @start.length is 10
 
 
-Event::formatStart = (dateFormat) ->
+Event::formatStart = (dateFormat, locale='en') ->
     if @rrule
         date = moment.tz @start, @timezone
     else
         date = moment @start
 
     date.tz User.timezone
+    date.locale(locale)
     formattedDate = date.format dateFormat
     formattedDate += " (#{User.timezone})" unless @isAllDayEvent()
+    formattedDate += " "
 
     return formattedDate
 
@@ -171,10 +175,8 @@ Event.migrateAll = (callback) ->
 
 Event.bulkCalendarRename = (oldName, newName, callback) ->
     Event.request 'byCalendar', key: oldName, (err, events) ->
-        async.eachLimit events, 10, (event, done) ->
-            # clones the array
-            tags = [].concat event.tags
-            tags[0] = newName
+        async.eachSeries events, (event, done) ->
+            tags = [newName]
             event.updateAttributes {tags}, done
         , (err) -> callback err, events
 
@@ -209,4 +211,11 @@ Event.initializeData = (callback) ->
 
         else
             callback()
+
+
+Event.load = (start, end, callback) ->
+    startkey = start.format 'YYYY-MM-DDT00:00:00.000\Z'
+    endkey = end.format 'YYYY-MM-DDT00:00:00.000\Z'
+
+    Event.request 'byDate', {startkey, endkey}, callback
 

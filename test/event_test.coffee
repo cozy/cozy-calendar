@@ -6,6 +6,7 @@ Client = require('request-json').JsonClient
 client = new Client "http://localhost:8888/"
 helpers = require './helpers'
 
+
 describe "Events management", ->
 
     before helpers.before
@@ -298,5 +299,42 @@ describe "Events management", ->
                     event.should.have.property 'description'
                     event.should.have.property 'place'
 
+                done()
+
+
+    describe "GET events/2013/04", ->
+
+        before helpers.cleanDb
+        before (done) ->
+            events = [
+                description: "Title 1"
+                start: "2013-04-15T15:30:00.000Z"
+                end: "2013-04-15T16:30:00.000Z"
+                place: "place"
+            ,
+                description: "Title 2"
+                start: "2011-04-15T15:30:00.000Z"
+                end: "2011-04-15T16:30:00.000Z"
+                place: "place"
+            ,
+                description: "Title 3"
+                start: "2013-04-16T15:30:00.000Z"
+                end: "2013-05-15T16:30:00.000Z"
+                place: "place"
+            ,
+                description: "Title 4"
+                start: "2015-05-15T15:30:00.000Z"
+                end: "2015-05-15T16:30:00.000Z"
+                place: "place"
+            ]
+
+            client.post "events/bulk", events, (error, response, body) =>
+                done()
+
+        it "should return the event json objects", (done) ->
+            client.get "events/2013/04", (err, res, events) =>
+                events.length.should.equal 2
+                events[0].description.should.equal 'Title 1'
+                events[1].description.should.equal 'Title 3'
                 done()
 

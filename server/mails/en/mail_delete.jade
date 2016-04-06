@@ -17,7 +17,7 @@ html(style="height:100%;")
                       img(src="cid:cozy-logo" width="63" height="48" style="padding: 12px 0; margin: auto;")
                   tr
                     // TODO: add user's email inside the brackets #{displayEmail}
-                    td(style="padding: 1.5em;") #{displayName} (#{displayEmail}) canceled the following event :
+                    td(style="padding: 1.5em;") #{displayName} (#{displayEmail}) canceled the following event:
                   tr
                     td(style="padding: 0 1.5em; width: 100%; font-size: 1.4em; font-weight: bold; text-align:center;")
                           | #{description}
@@ -25,7 +25,7 @@ html(style="height:100%;")
                     td(style="padding: 0 1.5em 2em; width: 100%; font-size: 1.2em; text-align:center;")
                           | On #{date}
                           if place != null && place.length > 0
-                              | &nbsp; at #{place}
+                              | at #{place}
             tr(style="padding-top: 10px; text-align: center; font-size: 0.85em; font-style: italic; color: #999;")
               td
                 p

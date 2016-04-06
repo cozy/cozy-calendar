@@ -1,5 +1,6 @@
 Tag = require '../models/tag'
 
+
 module.exports.fetch = (req, res, next, id) ->
     Tag.find id, (err, tag) ->
         if err or not tag
@@ -8,14 +9,17 @@ module.exports.fetch = (req, res, next, id) ->
             req.tag = tag
             next()
 
+
 module.exports.all = (req, res, next) ->
     Tag.byName (err, results) ->
         return next err if err
 
-        res.send 200, results
+        res.status(200).send results
+
 
 module.exports.read = (req, res) ->
     res.send req.tag
+
 
 module.exports.create = (req, res) ->
     data = req.body
@@ -23,7 +27,8 @@ module.exports.create = (req, res) ->
         if err?
             res.send error: "Server error while creating tag.", 500
         else
-            res.send tag, 201
+            res.status(201).send tag
+
 
 module.exports.update = (req, res) ->
     data = req.body
@@ -31,11 +36,13 @@ module.exports.update = (req, res) ->
         if err?
             res.send error: "Server error while saving tag", 500
         else
-            res.send tag, 200
+            res.status(200).send tag
+
 
 module.exports.delete = (req, res) ->
     req.tag.destroy (err) ->
         if err?
-            res.send error: "Server error while deleting the tag", 500
+            res.status(500).send error: "Server error while deleting the tag"
         else
-            res.send success: true, 200
+            res.status(200).send success: true
+

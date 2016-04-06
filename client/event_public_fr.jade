@@ -17,7 +17,7 @@ html
       h3
         | Le #{date}
         if event.place != null && event.place.length != 0
-          | &nbsp; à (#{event.place})
+          | à #{event.place}
 
       if visitor.status == 'NEEDS-ACTION'
 
