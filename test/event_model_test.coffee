@@ -10,6 +10,7 @@ describe "Events model", ->
 
     describe "load", ->
 
+        before helpers.before
         before helpers.cleanDb
         before (done) ->
             events = [
@@ -38,10 +39,12 @@ describe "Events model", ->
                 Event.create event, next
             , done
 
+        after helpers.after
+
         it "returns events for dates: 21030401 - 20130501", (done) ->
             start = moment('201304', 'YYYYMM')
             end = start.clone().add 'months', 1
-            Event.load start, end, (err, events) =>
+            Event.load start, end, (err, events) ->
                 events.length.should.equal 2
                 events[0].description.should.equal 'Title 1'
                 events[1].description.should.equal 'Title 3'
@@ -50,7 +53,7 @@ describe "Events model", ->
         it "returns events for dates: 21030401 - 20160401", (done) ->
             start = moment('201304', 'YYYYMM')
             end = start.clone().add 'years', 3
-            Event.load start, end, (err, events) =>
+            Event.load start, end, (err, events) ->
                 events.length.should.equal 3
                 events[0].description.should.equal 'Title 1'
                 events[1].description.should.equal 'Title 3'
@@ -60,7 +63,6 @@ describe "Events model", ->
         it "returns no events for dates: 21010401 - 20120401", (done) ->
             start = moment('201304', 'YYYYMM').subtract 'years', 2
             end = start.clone().add 'years', 1
-            Event.load start, end, (err, events) =>
+            Event.load start, end, (err, events) ->
                 events.length.should.equal 0
                 done()
-
