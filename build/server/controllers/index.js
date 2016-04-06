@@ -65,7 +65,7 @@ module.exports.index = function(req, res, next) {
     sanitize = function(obj) {
       return "JSON.parse(decodeURI(\"" + (encodeURI(JSON.stringify(obj))) + "\"));";
     };
-    return res.render('index.jade', {
+    return res.render('index', {
       imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (sanitize(tags)) + ";\nwindow.initevents = " + (sanitize(events)) + "\nwindow.initcontacts = " + (sanitize(contacts)) + ";\nwindow.webDavAccount = " + (sanitize(webDavAccount)) + ";\nwindow.timezone = " + (sanitize(timezone)) + ";"
     });
   });

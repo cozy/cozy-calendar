@@ -150,11 +150,11 @@ module.exports["public"] = function(req, res, next) {
     var date, dateFormat, dateFormatKey, day, desc, fileName, filePath, filePathBuild, locale, ref, specialCharacters, visitor;
     if (err || !event || !(visitor = event.getGuest(key))) {
       locale = localization.getLocale();
-      fileName = "404_" + locale + ".jade";
+      fileName = "404_" + locale;
       filePath = path.resolve(__dirname, '../../client/', fileName);
       filePathBuild = path.resolve(__dirname, '../../../client/', fileName);
       if (!(fs.existsSync(filePath) || fs.existsSync(filePathBuild))) {
-        fileName = '404_en.jade';
+        fileName = '404_en';
       }
       res.status(404);
       return res.render(fileName);
@@ -177,11 +177,10 @@ module.exports["public"] = function(req, res, next) {
       dateFormat = localization.t(dateFormatKey);
       date = event.formatStart(dateFormat);
       locale = localization.getLocale();
-      fileName = "event_public_" + locale + ".jade";
+      fileName = "event_public_" + locale;
       filePath = path.resolve(__dirname, '../../client/', fileName);
-      filePathBuild = path.resolve(__dirname, '../../../client/', fileName);
-      if (!(fs.existsSync(filePath) || fs.existsSync(filePathBuild))) {
-        fileName = 'event_public_en.jade';
+      if (!fs.existsSync(filePath)) {
+        fileName = 'event_public_en';
       }
       specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi;
       desc = event.description.replace(specialCharacters, '');
