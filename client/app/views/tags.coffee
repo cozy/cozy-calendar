@@ -27,5 +27,3 @@ module.exports = class TagsView extends BaseView
             @$el.tagit 'createTag', tag
         @duringRefresh = false
 
-
-

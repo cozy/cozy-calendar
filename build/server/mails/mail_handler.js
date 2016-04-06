@@ -25,9 +25,10 @@ logoPath = fs.realpathSync('./build/server/mails/assets/cozy-logo.png');
 localization = require('../libs/localization_manager');
 
 module.exports.sendInvitations = function(event, dateChanged, callback) {
-  var guests, needSaving;
+  var guests, locale, needSaving;
   guests = event.toJSON().attendees;
   needSaving = false;
+  locale = localization.getLocale();
   return async.parallel([
     function(cb) {
       return cozydb.api.getCozyDomain(cb);
@@ -61,7 +62,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
       url = domain + "public/calendar/events/" + event.id;
       dateFormatKey = event.isAllDayEvent() ? 'email date format allday' : 'email date format';
       dateFormat = localization.t(dateFormatKey);
-      date = event.formatStart(dateFormat);
+      date = event.formatStart(dateFormat, locale);
       ref = event.toJSON(), description = ref.description, place = ref.place;
       place = (place != null ? place.length : void 0) > 0 ? place : "";
       templateOptions = {
@@ -141,12 +142,13 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
 };
 
 module.exports.sendDeleteNotification = function(event, callback) {
-  var guests, guestsToInform;
+  var guests, guestsToInform, locale;
   guests = event.toJSON().attendees;
   guestsToInform = guests.filter(function(guest) {
     var ref;
     return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
   });
+  locale = localization.getLocale();
   return User.getUserInfos(function(err, user) {
     if (err) {
       return callback(err);
@@ -159,7 +161,7 @@ module.exports.sendDeleteNotification = function(event, callback) {
         dateFormatKey = 'email date format';
       }
       dateFormat = localization.t(dateFormatKey);
-      date = event.formatStart(dateFormat);
+      date = event.formatStart(dateFormat, locale);
       ref = event.toJSON(), description = ref.description, place = ref.place;
       place = (place != null ? place.length : void 0) > 0 ? place : false;
       templateOptions = {

@@ -1,12 +1,24 @@
 
 addModel = (model, callback) =>
+    return if window.app.events.get model.id
+
     model.fetch
         success: (fetched) =>
-            if model.collections?
+            addModel = ->
                 for collection in model.collections
                     if model instanceof collection.model
-                        collection.add model
+                        collection.add model, sort: false
+
+            if model.collections?
+                if fetched.get('docType') is 'event'
+                    start = moment(fetched.get('start')).format('YYYY-MM')
+                    if window.app.mainStore.loadedMonths[start]
+                        addModel()
+                else
+                    addModel()
+
             setTimeout callback, 50
+
         error: ->
             setTimeout callback, 50
 

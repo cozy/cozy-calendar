@@ -1,10 +1,14 @@
 SocketListener = require '../lib/socket_listener'
 Tag = require 'models/tag'
 TagCollection = require 'collections/tags'
+request = require 'lib/request'
+
+stringify = (tag) -> tag.toString()
 
 module.exports = class CalendarCollection extends TagCollection
 
     model: Tag
+
 
     initialize: ->
         @eventCollection = app.events
@@ -16,12 +20,15 @@ module.exports = class CalendarCollection extends TagCollection
 
         @resetFromBase()
 
+
     resetFromBase: ->
         @reset []
         @eventCollection.each (model) => @onBaseCollectionAdd model
 
+
     onBaseCollectionChange: (model) ->
         @resetFromBase()
+
 
     onBaseCollectionAdd: (model) ->
         [calendarName, tags...] = model.get 'tags'
@@ -32,65 +39,50 @@ module.exports = class CalendarCollection extends TagCollection
             app.tags.add calendar
             calendar.save()
 
+
     onBaseCollectionRemove: (model) ->
         @resetFromBase()
+
 
     _pauseModels: (models, options) ->
         models.forEach (model) ->
             SocketListener.pause model, null, options
 
+
     _resumeModels: (models, options) ->
         models.forEach (model) ->
             SocketListener.resume model, null, options
+
 
     # Overrides backbone behaviour
     # Removes a calendar (<=> removes all its events)
     remove: (calendarName, callback) ->
         eventsToRemove = @eventCollection.getByCalendar calendarName
-        # Pause real time for models to be removed
-        options = ignoreMySocketNotification: true
-        @_pauseModels eventsToRemove, options
-        $.ajax 'events/delete',
-            type: 'DELETE'
-            data: {calendarName}
-            success: =>
-                @eventCollection.remove eventsToRemove
-                callback()
-                # Resume real time for models that have changed
-                # It takes a noticeable time so we do it after the callback call
-                @_resumeModels eventsToRemove, options
-            error: =>
-                @_resumeModels eventsToRemove, options
+        request.post 'events/delete', {calendarName}, (err) =>
+            if err
                 callback t('server error occured')
+            else
+                callback()
+
 
     # Renames a calendar (<=> change all its events)
     rename: (oldName, newName, callback) ->
-        # Pause real time for models to be changed
-        options = ignoreMySocketNotification: true
-        eventsToChange = @eventCollection.getByCalendar oldName
-        @_pauseModels eventsToChange, options
-
-        $.ajax 'events/rename-calendar',
-            type: 'POST'
-            data: {oldName, newName}
-            success: (data) =>
-                @eventCollection.add data, merge: true
-                callback()
-                # Resume real time for models that have changed
-                # It takes a noticeable time so we do it after the callback call
-                @_resumeModels eventsToChange, options
-            error: =>
-                @_resumeModels eventsToChange, options
+        request.post 'events/rename-calendar', {oldName, newName}, (err) ->
+            if err
                 callback t('server error occured')
+            else
+                callback()
 
-    stringify = (tag) -> tag.toString()
 
-    toArray: -> @map stringify
+    toArray: ->
+        @map stringify
+
 
     comparator: (a, b) ->
         aName = a.get 'name'
         bName = b.get 'name'
         return aName.localeCompare bName, {}, sensitivity: 'base'
+
 
     toAutoCompleteSource: ->
         return @map (tag) ->
@@ -98,3 +90,4 @@ module.exports = class CalendarCollection extends TagCollection
                 label: tag.get 'name'
                 value: tag.get 'name'
             , tag.attributes
+
