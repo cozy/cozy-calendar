@@ -1,5 +1,6 @@
 PopoverView = require 'lib/popover_view'
 Event       = require 'models/event'
+Modal       = require 'lib/modal'
 
 module.exports = class EventPopOver extends PopoverView
 
@@ -13,6 +14,7 @@ module.exports = class EventPopOver extends PopoverView
         alert: require 'views/popover_screens/alert'
         repeat: require 'views/popover_screens/repeat'
         delete: require 'views/popover_screens/delete'
+        confirm: require 'views/popover_screens/confirm'
 
 
     # Key of the screen that will be shown first.
@@ -38,6 +40,9 @@ module.exports = class EventPopOver extends PopoverView
                 description: ''
                 place: ''
 
+        @listenToOnce @model, 'change', =>
+            @modelHasChanged = true
+
         super options
 
 
@@ -45,18 +50,31 @@ module.exports = class EventPopOver extends PopoverView
         if event.keyCode is 27 # ESC
             @selfclose()
 
+    displayConfirmIfNeeded: (checkoutChanges, callbackIfYes) ->
+        needConfirm = checkoutChanges and @modelHasChanged
+        dontConfirm = localStorage.dontConfirmCalendarPopover and
+                      localStorage.dontConfirmCalendarPopover isnt "false"
+        if needConfirm and not dontConfirm
+            @previousScreen = @screenElement.attr 'data-screen'
+            @callbackIfYes = callbackIfYes
+            @switchToScreen 'confirm'
+
+        else
+            callbackIfYes()
+
 
     selfclose: (checkoutChanges = true) ->
-        # Revert if not just saved with addButton.
-        if @model.isNew()
-            super()
-        else
-            # Flag to checkout or not the un-persisted changes. Useful when the
-            # event is actually deleted.
-            if checkoutChanges
-                @model.fetch complete: => super(checkoutChanges)
+        @displayConfirmIfNeeded checkoutChanges, =>
+            # Revert if not just saved with addButton.
+            if @model.isNew()
+                super()
             else
-                super(checkoutChanges)
+                # Flag to checkout or not the un-persisted changes.
+                # Useful when the event is actually deleted.
+                if checkoutChanges
+                    @model.fetch complete: => super(checkoutChanges)
+                else
+                    super(checkoutChanges)
 
         # Popover is closed so the extended status must be reset.
         window.popoverExtended = false

@@ -168,10 +168,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetEnd()
 
             @$addButton.click()
-
-        else if event.keyCode is 27 or event.which is 27 # escape
-            @popover.selfclose false
-
         else
             @$addButton.removeClass 'disabled'
 
@@ -283,7 +279,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Hides popover.
     onCancelClicked: ->
-        @popover.selfclose(false)
+        @popover.selfclose(true)
 
 
     onAddClicked: ->
@@ -409,4 +405,3 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
-

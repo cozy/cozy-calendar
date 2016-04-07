@@ -1,0 +1,10 @@
+.fixed-height.delete-screen
+
+    p=t('screen confirm description')
+    .remove-choices
+        button.btn.answer-yes=t('screen confirm yes button')
+        button.btn.answer-no=t('screen confirm no button')
+        
+    label.dontaskagain-label
+        input.dontaskagain(type="checkbox")
+        = t('dont ask again')
