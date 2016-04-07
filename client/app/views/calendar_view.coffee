@@ -81,6 +81,7 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
             weekNumbers: true
+            nextDayThreshold: "04:00:00"
 
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
