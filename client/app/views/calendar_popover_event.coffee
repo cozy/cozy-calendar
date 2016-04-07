@@ -35,8 +35,8 @@ module.exports = class EventPopOver extends PopoverView
         # If model does not exist, the popover represents a new event.
         if not @model
             @model = new Event
-                start: options.start.toISOString()
-                end: options.end.toISOString()
+                start: @momentToString options.start
+                end: @momentToString options.end
                 description: ''
                 place: ''
 
@@ -44,6 +44,10 @@ module.exports = class EventPopOver extends PopoverView
             @modelHasChanged = true
 
         super options
+
+    momentToString: (m) ->
+        if m.hasTime?() is false then m.toISOString().slice(0, 10)
+        else m.toISOString()
 
 
     onKeyUp: (event) ->
