@@ -17,7 +17,6 @@ class SocketListener extends CozySocketListener
         model.fetch
             success: (fetched) =>
                 if fetched.get('docType') isnt 'event'
-                    console.log('B')
                     @onRemoteCreateOrUpdate fetched
                 else
                     start = moment(fetched.get('start')).format('YYYY-MM')
@@ -36,7 +35,6 @@ class SocketListener extends CozySocketListener
                 @queue.push new @models[doctype](id: id)
 
             when 'update'
-                console.log('A')
                 @queue.push new @models[doctype](id: id)
 
             when 'delete'
@@ -45,7 +43,6 @@ class SocketListener extends CozySocketListener
 
 
     onRemoteCreateOrUpdate: (fetched) ->
-        console.log('C')
         for collection in @collections
             if fetched instanceof collection.model
                 console.log('D')
