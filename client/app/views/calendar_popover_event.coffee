@@ -2,6 +2,9 @@ PopoverView = require 'lib/popover_view'
 Event       = require 'models/event'
 Modal       = require 'lib/modal'
 
+unless window.localStorage
+    window.localStorage = {}
+
 module.exports = class EventPopOver extends PopoverView
 
 
