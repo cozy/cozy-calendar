@@ -81,6 +81,7 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
             weekNumbers: true
+            nextDayThreshold: "04:00:00"
 
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
@@ -215,16 +216,8 @@ module.exports = class CalendarView extends BaseView
     onSelect: (startDate, endDate, jsEvent, view) =>
         # In month view, default to 10:00 - 11:00 instead of fullday event.
         if @view is 'month'
-            # startDate and endDate are dates, we add time part to create an
-            # ambiguous date string.
-
-            # endDate has +1 day for an unknown reason
-            endDate.subtract 1, 'days'
-            startDate = startDate.format() + 'T10:00:00.000'
-            endDate = endDate.format() + 'T11:00:00.000'
-        else if @view is 'agendaWeek'
-            # set default event duration to 1h
-            endDate = startDate.clone().add 1, 'hour'
+            startDate.time('10:00:00.000')
+            endDate.subtract(1, 'days').time('11:00:00.000')
 
         start = helpers.ambiguousToTimezoned startDate
         end = helpers.ambiguousToTimezoned endDate
@@ -314,4 +307,3 @@ module.exports = class CalendarView extends BaseView
             type: model.fcEventType
             model: model
             target: $(jsEvent.currentTarget)
-
