@@ -1,13 +1,8 @@
-{SimpleController} = require 'cozydb'
 tags = require './tags'
 events = require './events'
 index  = require './index'
 ical   = require './ical'
-ContactsController = new SimpleController
-    model: require('../models/contact')
-    reqProp: 'contact'
-    reqParamID: 'contactid'
-
+contacts = require './contacts'
 
 module.exports =
 
@@ -66,12 +61,14 @@ module.exports =
 
     # Contacts
     'contacts':
-        get: ContactsController.listAll
+        get: contacts.listAll
 
     'contacts/:contactid.jpg':
-        get: ContactsController.sendAttachment(filename: 'picture')
+        get: contacts.sendAttachment(filename: 'picture')
+
+    'contacts/:contactid':
+        get: [contacts.find, contacts.sendSmall]
 
     # log client errors
     'log':
         post: index.logClient
-

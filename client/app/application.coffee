@@ -53,6 +53,7 @@ module.exports =
         @menu.render().$el.prependTo 'body'
 
         SocketListener.watch @events
+        SocketListener.watch @contacts
 
         if window.inittags?
             @tags.reset window.inittags
@@ -77,5 +78,3 @@ module.exports =
     isMobile: ->
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
             .test(navigator.userAgent)
-
-
