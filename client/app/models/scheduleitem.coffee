@@ -312,7 +312,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # else: look state of each guest.
         attendees = @get('attendees') or []
-        guestsToInform = attendees.filter (guest) ->
+        guestsToInform = attendees.filter (guest) =>
             if method is 'create'
                 return true
 
@@ -320,8 +320,9 @@ module.exports = class ScheduleItem extends Backbone.Model
                 return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
 
             else if method in ['update', 'patch']
-                return guest.status is 'INVITATION-NOT-SENT' or (
-                    guest.status is 'ACCEPTED' and @startDateChanged)
+                return guest.status is 'INVITATION-NOT-SENT' or \
+                       guest.status is 'NEEDS-ACTION' or \
+                       (guest.status is 'ACCEPTED' and @startDateChanged)
 
         .map (guest) -> guest.email
 

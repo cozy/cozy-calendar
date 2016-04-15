@@ -67,7 +67,11 @@ module.exports = class ImportView extends BaseView
                     @showEventsPreview result.events
 
             error: (xhr) =>
-                msg = JSON.parse(xhr.responseText).msg
+                try
+                    msg = JSON.parse(xhr.responseText).msg
+                catch e
+                    console.error e
+                    console.error xhr.responseText
                 unless msg?
                     msg = 'An error occured while importing your calendar.'
                 alert msg
@@ -79,8 +83,15 @@ module.exports = class ImportView extends BaseView
     # Show the event preview list. It doesn't display all events at the same
     # time because Firefox cannot handle it and freezes.
     showEventsPreview: (events) ->
+        # The ics file may contain events with duplicate ID that won't be added
+        # to the collection but will be imported, so we can't rely on eventList
+        # length for the total number of events to import
+        @eventsCount = events.length
         # Break event to import in smaller lists
-        @eventLists = helpers.getLists events, 100
+        # Reduced the number to 50 because sometime the request was too big
+        # and some events not imported
+        @eventLists  = helpers.getLists events, 50
+        window.eventList = @eventList
 
         async.eachSeries @eventLists, (eventList, done) =>
             @eventList.collection.add eventList, sort: false
@@ -172,13 +183,12 @@ module.exports = class ImportView extends BaseView
 
     # Set import counter to 0.
     initCounter: ->
-        total = @eventList.collection.length
         @counter = 0
 
         # Set the progress widget
         $('.import-progress').html """
         <p>#{t 'imported events'}:
-            <span class="import-counter">0</span>/#{total}</p>
+            <span class="import-counter">0</span>/#{@eventsCount}</p>
         """
 
     # Update counter current value.

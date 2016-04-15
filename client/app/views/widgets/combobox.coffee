@@ -55,7 +55,7 @@ module.exports = class ComboBox extends BaseView
 
     getDefaultValue: ->
         # Select the first calendar by default
-        return @source[0].label
+        return @source[0]?.label or t 'default calendar name'
 
 
     value: =>

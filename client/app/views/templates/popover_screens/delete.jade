@@ -1,7 +1,8 @@
 .fixed-height.delete-screen
 
     p=t('screen delete description', {description: description})
-    img.remove-spinner(src='img/spinner.svg')
+    .spinner-block
+        img.remove-spinner(src='img/spinner.svg')
     p.errors
     .remove-choices
         button.btn.answer-yes=t('screen delete yes button')

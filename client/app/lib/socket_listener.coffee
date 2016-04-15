@@ -1,66 +1,52 @@
-
-addModel = (model, callback) =>
-    model.fetch
-        success: (fetched) =>
-            if model.collections?
-                for collection in model.collections
-                    if model instanceof collection.model
-                        collection.add model
-            setTimeout callback, 50
-        error: ->
-            setTimeout callback, 50
-
-
 class SocketListener extends CozySocketListener
 
     models:
         'event': require 'models/event'
+        'contact': require 'models/contact'
 
     events: [
         'event.create', 'event.update', 'event.delete'
+        'contact.create', 'contact.update', 'contact.delete'
     ]
 
-    queue: async.queue addModel, 1
+    constructor: ->
+        super
+        @queue = async.queue @handleModel, 1
 
+    handleModel: (model, next) =>
+        model.fetch
+            success: (fetched) =>
+                if fetched.get('docType') isnt 'event'
+                    @onRemoteCreateOrUpdate fetched
+                else
+                    start = moment(fetched.get('start')).format('YYYY-MM')
+                    if window.app.mainStore.loadedMonths[start]
+                        @onRemoteCreateOrUpdate fetched
+
+                setTimeout next, 50
+
+            error: ->
+                setTimeout next, 50
 
     process: (event) ->
         {doctype, operation, id} = event
         switch operation
             when 'create'
-                @onRemoteCreate doctype, id
+                @queue.push new @models[doctype](id: id)
 
             when 'update'
-                if model = @singlemodels.get id
-                    model.fetch
-                        success: (fetched) =>
-                            if fetched.changedAttributes()
-                                @onRemoteUpdate fetched, null
-
-                @collections.forEach (collection) =>
-                    return unless model = collection.get id
-                    model.fetch
-                        success: (fetched) =>
-                            if fetched.changedAttributes()
-                                @onRemoteUpdate fetched, collection
+                @queue.push new @models[doctype](id: id)
 
             when 'delete'
-                if model = @singlemodels.get id
-                    @onRemoteDelete model, @singlemodels
-
-                @collections.forEach (collection) =>
-                    return unless model = collection.get id
-                    @onRemoteDelete model, collection
+                for collection in @collections when model = collection.get id
+                    model.trigger 'destroy', model, model.collection, {}
 
 
-    onRemoteCreate: (docType, id) ->
-        return unless @shouldFetchCreated(id)
-        model = new @models[docType](id: id)
-        model.collections = @collections
-        @queue.push model
-
-
-    onRemoteDelete: (model) ->
-        model.trigger 'destroy', model, model.collection, {}
+    onRemoteCreateOrUpdate: (fetched) ->
+        for collection in @collections
+            if fetched instanceof collection.model
+                console.log('D')
+                collection.add fetched, {merge: true}
 
 
 module.exports = new SocketListener()

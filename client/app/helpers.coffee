@@ -56,7 +56,10 @@ exports.isEvent = (start, end) ->
 # Use Cozy's timezone as reference.
 # Fullcalendar should use timezone = "Cozy's timezone" to be coherent.
 exports.ambiguousToTimezoned = (ambigM) ->
-    return moment.tz ambigM, window.app.timezone
+    if ambigM.hasTime()
+        return moment.tz ambigM.toISOString(), window.app.timezone
+    else
+        return ambigM # no need to change TZ for FullDay
 
 
 exports.momentToAmbiguousString = (m) ->
@@ -122,4 +125,3 @@ exports.getLists = (list, length) ->
             #lists.push currentArray
         #i++
     #lists.push currentArray
-

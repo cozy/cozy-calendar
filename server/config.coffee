@@ -1,4 +1,6 @@
 americano = require 'americano'
+fs = require 'fs'
+path = require 'path'
 
 publicPath = "#{__dirname}/../client/public"
 staticMiddleware = americano.static publicPath, maxAge: 86400000
@@ -13,6 +15,9 @@ publicStatic = (req, res, next) ->
 
     staticMiddleware req, res, (err) -> next err
 
+viewsDir = path.resolve __dirname, '..', 'client'
+useBuildView = fs.existsSync path.resolve viewsDir, 'index.js'
+
 module.exports =
 
     common:
@@ -21,12 +26,14 @@ module.exports =
             publicStatic
             americano.bodyParser keepExtensions: true
         ]
-        afterStart: (app, server) ->
-            app.use americano.errorHandler
+        useAfter: [
+            americano.errorHandler
                 dumpExceptions: true
                 showStack: true
+        ]
         set:
-            views: './client'
+            views: viewsDir
+            'view engine': if useBuildView then 'js' else 'jade'
 
         engine:
             js: (path, locales, callback) ->

@@ -1,55 +1,53 @@
-{SimpleController} = require 'cozydb'
 tags = require './tags'
 events = require './events'
 index  = require './index'
 ical   = require './ical'
-ContactsController = new SimpleController
-    model: require('../models/contact')
-    reqProp: 'contact'
-    reqParamID: 'contactid'
-
+contacts = require './contacts'
 
 module.exports =
 
-    '' : get : index.index
+    '':
+        get: index.index
 
     # Tag management
     'tags':
-        get : tags.all
-        post : tags.create
+        get: tags.all
+        post: tags.create
     'tagid':
-        param : tags.fetch
+        param: tags.fetch
     'tags/:tagid':
-        get : tags.read
-        put : tags.update
+        get: tags.read
+        put: tags.update
         delete : tags.delete
 
 
     # Event management
-    'events':
-        get   : events.all
-        post  : events.create
     'eventid':
-        param : events.fetch
+        param: events.fetch
+    'events':
+        get: events.all
+        post: events.create
     'events/bulk':
-        post  : events.createBulk
+        post: events.createBulk
+    'events/:year/:month':
+        get: events.monthEvents
 
     'events/rename-calendar':
         post: events.bulkCalendarRename
     'events/delete':
-        delete: events.bulkDelete
+        post: events.bulkDelete
 
     'events/:eventid':
-        get   : events.read
-        put   : events.update
-        delete   : events.delete
+        get: events.read
+        put: events.update
+        delete: events.delete
 
     'events/:eventid/:name.ics':
-        get   : events.ical
+        get: events.ical
     'public/events/:eventid/:name.ics':
-        get   : events.publicIcal
+        get: events.publicIcal
     'public/events/:publiceventid':
-        get   : events.public
+        get: events.public
 
     # ICal
     'export/:calendarid.ics':
@@ -63,10 +61,13 @@ module.exports =
 
     # Contacts
     'contacts':
-        get: ContactsController.listAll
+        get: contacts.listAll
 
     'contacts/:contactid.jpg':
-        get: ContactsController.sendAttachment(filename: 'picture')
+        get: contacts.sendAttachment(filename: 'picture')
+
+    'contacts/:contactid':
+        get: [contacts.find, contacts.sendSmall]
 
     # log client errors
     'log':

@@ -39,7 +39,7 @@ module.exports = class CalendarView extends BaseView
         currDate.date(@options.date)   if @options.date? and @view isnt 'month'
 
         @cal.fullCalendar
-            lang: window.locale
+            lang: window.app.locale
             header: false
             firstDay: 1 # first day of the week is monday
             height: "auto"
@@ -81,18 +81,33 @@ module.exports = class CalendarView extends BaseView
             eventResize: @onEventResize
             handleWindowResize: false
             weekNumbers: true
+            nextDayThreshold: "04:00:00"
 
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
 
         @calHeader = new Header cal: @cal
 
-        @calHeader.on 'next', => @cal.fullCalendar 'next'
-        @calHeader.on 'prev', => @cal.fullCalendar 'prev'
+        # Before displaying the calendar for the previous month, we make sure
+        # that events are loaded.
+        @calHeader.on 'prev', =>
+            monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
+            window.app.events.loadMonth monthToLoad, =>
+                @cal.fullCalendar 'prev'
+
+        # Before displaying the calendar for the next month, we make sure that
+        # events are loaded.
+        @calHeader.on 'next', =>
+            monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
+            window.app.events.loadMonth monthToLoad, =>
+                @cal.fullCalendar 'next'
+
         @calHeader.on 'today', => @cal.fullCalendar 'today'
         @calHeader.on 'week', => @cal.fullCalendar 'changeView', 'agendaWeek'
         @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
-        @calHeader.on 'list', -> app.router.navigate 'list', trigger:true
+        @calHeader.on 'list', ->
+            window.app.events.sort()
+            app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -128,6 +143,8 @@ module.exports = class CalendarView extends BaseView
 
 
     refreshOne: (model) =>
+
+        return null unless model?
 
         previousRRule = model.previous('rrule')
         modelWasRecurrent = previousRRule? and previousRRule isnt ''
@@ -199,16 +216,8 @@ module.exports = class CalendarView extends BaseView
     onSelect: (startDate, endDate, jsEvent, view) =>
         # In month view, default to 10:00 - 11:00 instead of fullday event.
         if @view is 'month'
-            # startDate and endDate are dates, we add time part to create an
-            # ambiguous date string.
-
-            # endDate has +1 day for an unknown reason
-            endDate.subtract 1, 'days'
-            startDate = startDate.format() + 'T10:00:00.000'
-            endDate = endDate.format() + 'T11:00:00.000'
-        else if @view is 'agendaWeek'
-            # set default event duration to 1h
-            endDate = startDate.clone().add 1, 'hour'
+            startDate.time('10:00:00.000')
+            endDate.subtract(1, 'days').time('11:00:00.000')
 
         start = helpers.ambiguousToTimezoned startDate
         end = helpers.ambiguousToTimezoned endDate
@@ -298,4 +307,3 @@ module.exports = class CalendarView extends BaseView
             type: model.fcEventType
             model: model
             target: $(jsEvent.currentTarget)
-

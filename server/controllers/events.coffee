@@ -2,7 +2,9 @@ fs = require 'fs'
 path = require 'path'
 async = require 'async'
 moment = require 'moment-timezone'
+cozydb = require 'cozydb'
 log = require('printit')
+    date: true
     prefix: 'events'
 
 User = require '../models/user'
@@ -15,7 +17,7 @@ localization = require '../libs/localization_manager'
 module.exports.fetch = (req, res, next, id) ->
     Event.find id, (err, event) ->
         if err or not event
-            res.send error: "Event not found", 404
+            res.status(400).send error: "Event not found"
         else
             req.event = event
             next()
@@ -24,7 +26,8 @@ module.exports.fetch = (req, res, next, id) ->
 module.exports.all = (req, res) ->
     Event.all (err, events) ->
         if err
-            res.send error: 'Server error occurred while retrieving data'
+            res.status(500).send
+                error: 'Server error occurred while retrieving data'
         else
             res.send events
 
@@ -41,13 +44,13 @@ module.exports.create = (req, res) ->
     data.lastModification = moment().tz('UTC').toISOString()
     Event.createOrGetIfImport data, (err, event) ->
         if err?
-            res.send error: "Server error while creating event.", 500
+            res.status(500).send error: "Server error while creating event."
         else
             if data.import or req.query.sendMails isnt 'true'
-                res.send event, 201
+                res.status(201).send event
             else
                 MailHandler.sendInvitations event, false, (err, updatedEvent) ->
-                    res.send (updatedEvent or event), 201
+                    res.status(201).send (updatedEvent or event)
 
 
 # Expect a list of events as body and create an event in database for each
@@ -84,13 +87,13 @@ module.exports.update = (req, res) ->
     req.event.updateAttributes data, (err, event) ->
 
         if err?
-            res.send error: "Server error while saving event", 500
+            res.status(500).send error: "Server error while saving event"
         else if req.query.sendMails is 'true'
             dateChanged = data.start isnt start
             MailHandler.sendInvitations event, dateChanged, (err, updatedEvent) ->
-                res.send (updatedEvent or event), 200
+                res.send (updatedEvent or event)
         else
-            res.send event, 200
+            res.send event
 
 
 module.exports.delete = (req, res) ->
@@ -99,7 +102,7 @@ module.exports.delete = (req, res) ->
             res.send error: "Server error while deleting the event", 500
         else if req.query.sendMails is 'true'
             MailHandler.sendDeleteNotification req.event, ->
-                res.send success: true, 200
+                res.send success: true
         else
             res.send success: true, 200
 
@@ -117,13 +120,13 @@ module.exports.public = (req, res, next) ->
             locale = localization.getLocale()
 
             # Display 404 page
-            fileName = "404_#{locale}.jade"
+            fileName = "404_#{locale}"
             filePath = path.resolve __dirname, '../../client/', fileName
 
             # Usefull for build
             filePathBuild = path.resolve __dirname, '../../../client/', fileName
             unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-                fileName = '404_en.jade'
+                fileName = '404_en'
 
             res.status 404
             res.render fileName
@@ -139,27 +142,29 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
+            locale = localization.getLocale()
+
             # Retrieve event data
             if event.isAllDayEvent()
                 dateFormatKey = 'email date format allday'
             else
                 dateFormatKey = 'email date format'
             dateFormat = localization.t dateFormatKey
-            date = event.formatStart dateFormat
+            date = event.formatStart dateFormat, locale
 
             # Retrieve user localization
             locale = localization.getLocale()
 
             # Display event
-            fileName = "event_public_#{locale}.jade"
+            fileName = "event_public_#{locale}"
             filePath = path.resolve __dirname, '../../client/', fileName
 
             # Usefull for build
-            filePathBuild = path.resolve __dirname, '../../../client/', fileName
-            unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-                fileName = 'event_public_en.jade'
+            unless fs.existsSync(filePath)
+                fileName = 'event_public_en'
 
-            specialCharacters = /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
+            specialCharacters = \
+                /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
             desc = event.description.replace(specialCharacters, '')
             desc = desc.replace(/\ /g, '-')
             day =  moment(event.start).format("YYYY-MM-DD")
@@ -180,7 +185,6 @@ module.exports.ical = (req, res) ->
             organization:'Cozy Cloud'
             title: 'Cozy Calendar'
 
-        calendar = new VCalendar calendarOptions
         vEvent = req.event.toIcal()
 
         # Force the event to take into account the organizer.
@@ -200,7 +204,7 @@ module.exports.publicIcal = (req, res) ->
 
     key = req.query.key
     if not visitor = req.event.getGuest key
-        return res.send error: 'invalid key', 401
+        return res.status(401).send error: 'invalid key'
 
     module.exports.ical(req, res)
 
@@ -208,24 +212,37 @@ module.exports.publicIcal = (req, res) ->
 module.exports.bulkCalendarRename = (req, res) ->
     {oldName, newName} = req.body
     unless oldName?
-        res.send 400, error: '`oldName` is mandatory'
+        res.status(400).send
+            error: '`oldName` is mandatory'
     else if not newName?
-        res.send 400, error: '`newName` is mandatory'
+        res.status(400).send
+            error: '`newName` is mandatory'
     else
         Event.bulkCalendarRename oldName, newName, (err, events) ->
             if err?
-                res.send 500, error: err
+                res.status(500).send error: err
             else
-                res.send 200, events
+                res.send events
 
 
 module.exports.bulkDelete = (req, res) ->
     {calendarName} = req.body
     unless calendarName?
-        res.send 400, error: '`calendarName` is mandatory'
+        res.status(400).send error: '`calendarName` is mandatory'
     else
         Event.bulkDelete calendarName, (err, events) ->
             if err?
-                res.send 500, error: err
+                res.status(500).send error: err
             else
-                res.send 200, events
+                res.send events
+
+
+# Return events for the given month.
+module.exports.monthEvents = (req, res, next) ->
+    {month, year} = req.params
+    start = moment "#{year}-#{month}-01", 'YYYY-MM-DD'
+    end = start.clone().add 'months', 1
+
+    Event.load start, end, (err, events) ->
+        return next err if err
+        res.send events

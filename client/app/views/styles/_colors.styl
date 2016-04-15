@@ -1,0 +1,67 @@
+// "Cozy" colors palette
+// -----------------------------------------------------------------------------
+// blue
+basecolor       = #34A6FF
+basecolor-alpha = rgba(49, 156, 256, 0.5)
+
+//rainbow
+blue  = #33A6FF
+red   = #FF3713
+green = #16D943
+
+// gray and dark gray
+lightcolor           = grey-01
+mediumcolor          = grey-04
+mediumcolor-contrast = grey-05
+darkcolor-contrast   = grey-07
+darkcolor            = grey-08
+
+// special cozy colors
+homeheadercolor = #363a46
+bluegreen       = #34A6BB
+lightorange     = #FFC47F
+lightblue       = #CBE4FB
+lightred        = #F4F4F4
+grey            = #666
+lightgrey       = lightcolor
+darkblue        = blue - 20%
+
+// 50 (well, in fact, mostly 8) shades of grey
+grey-01 = #ECEFF3
+grey-02 = #DFE4E9
+grey-03 = #C8D5DF
+grey-04 = #ACB8C5
+grey-05 = #92A0B2
+grey-06 = #748192
+grey-07 = #4F5B69
+grey-08 = #32363F
+
+// SHITTY DEPENDENCIES
+lightgreyblue = grey-03
+darkgreyblue  = grey-05
+lightgrey = grey-03
+grey      = grey-04
+midgrey   = grey-05
+darkgrey  = grey-08
+
+
+// Defintions
+// -----------------------------------------------------------------------------
+.app
+    background-color grey-01
+
+
+.app [role=menubar] [role=menuitem]
+    color darkcolor
+
+    &:hover
+        color basecolor
+
+.green
+    color: green
+.red
+    color: red
+.blue
+    color: blue
+.orange
+    color: orange

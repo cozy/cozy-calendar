@@ -11,13 +11,13 @@ html
 
   body.public.public-event-body
     header
-      img(src="https://cozy.io/assets/images/cozy-logo.png")
+      img(src="https://docs.cozy.io/assets/images/cozy-logo.png")
     main#container.container.public-event-container.well
       h2 #{event.description}
       h3
         | On #{date}
         if event.place != null && event.place.length != 0
-          | &nbsp; at (#{event.place})
+          | at (#{event.place})
 
       if visitor.status == 'NEEDS-ACTION'
 

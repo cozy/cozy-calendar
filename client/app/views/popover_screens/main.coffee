@@ -55,6 +55,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Screen switches.
         'click .input-people': -> @switchToScreen('guests')
+        'click .input-details-row': -> @switchToScreen('details')
         'click .input-details-trigger': -> @switchToScreen('details')
         'click .input-alert': -> @switchToScreen('alert')
         'click .input-repeat': -> @switchToScreen('repeat')
@@ -167,10 +168,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @onSetEnd()
 
             @$addButton.click()
-
-        else if event.keyCode is 27 or event.which is 27 # escape
-            @popover.selfclose false
-
         else
             @$addButton.removeClass 'disabled'
 
@@ -282,7 +279,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Hides popover.
     onCancelClicked: ->
-        @popover.selfclose(false)
+        @popover.selfclose(true)
 
 
     onAddClicked: ->
@@ -304,7 +301,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 wait: true
                 success: =>
                     @calendar.save()
-                    app.events.add @model
+                    app.events.add @model, sort: false
                 error: ->
                     alert 'server error occured'
                 complete: =>
@@ -408,4 +405,3 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
-

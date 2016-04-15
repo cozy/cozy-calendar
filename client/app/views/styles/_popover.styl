@@ -1,11 +1,3 @@
- * Vars
- */
-overlay-color = #F5F5F5
-opacity-color = #C5C5C5
-icon-color    = #333
-input-color   = #555
-
-
 //
 // Styles for the calendar popover (event and alarm creation/edition)
 // ----------------------------------------------------------------------------
@@ -43,7 +35,7 @@ input-color   = #555
 
             span
                 font-size 1rem
-                color #aaa
+                color grey-04
                 text-shadow none
 
             &.right
@@ -51,11 +43,16 @@ input-color   = #555
 
                 span
                     font-size 2rem
-                    color #ddd
+                    color grey-03
+
+        input.dontaskagain[type=checkbox]
+            height: 3em
+            float left
+            margin-right: 2em
 
     .label-row
         width         100%
-        border-bottom 1px solid #ddd
+        border-bottom 1px solid grey-03
 
         input[type=text]
             height 3em
@@ -67,7 +64,7 @@ input-color   = #555
             height 3em
 
         .button-full-block:focus
-            background-color #EEF
+            background-color lightblue
 
     input
         box-sizing: border-box
@@ -96,7 +93,7 @@ input-color   = #555
 
     .button-full-block
         font-family 'Source Sans Pro', sans-serif
-        color #333
+        color darkcolor
         line-height 0
         overflow auto
         text-overflow ellipsis
@@ -115,15 +112,17 @@ input-color   = #555
             height 1.5em
             padding 0 0.2em
             margin 0
-            border-left 1px solid #e2e2e2
+            border-left 1px solid grey-02
             font-size 1em
             cursor pointer
 
         .remove-spinner
             padding 0 0.5em
+            display none
+            cursor wait
 
         button
-            color icon-color
+            color grey-05
             opacity 0.7
             margin-right 5px
             border none
@@ -134,10 +133,6 @@ input-color   = #555
                 opacity 1
                 color darkblue
 
-        .remove-spinner
-            display none
-            cursor wait
-
     [aria-hidden="true"]
         display none
 
@@ -145,8 +140,8 @@ input-color   = #555
 .popover-title
     position relative
     padding 0
-    background-color #fff
-    border-bottom 1px solid #ddd
+    background-color white
+    border-bottom 1px solid grey-03
     font-size 1em
 
     .label
@@ -240,7 +235,7 @@ input-color   = #555
         align-items baseline
         padding 0.2em 0
         font-size 1rem
-        border-right 1px solid #eee
+        border-right 1px solid grey-03
 
         input[type=text]
             font-size 1rem
@@ -257,7 +252,7 @@ input-color   = #555
     align-items baseline
     flex-direction row-reverse
     padding 0.6em 0.8em
-    background-color overlay-color
+    background-color grey-01
     border-radius 0 0 5px 5px
 
     [role=button]
@@ -304,7 +299,7 @@ input-color   = #555
     justify-content space-between
     align-items center
     padding 0.8em 1.5em
-    background-color #f5f5f5
+    background-color grey-01
     border-radius 5px 5px 0 0
 
     h4
@@ -316,46 +311,49 @@ input-color   = #555
             cursor default
 
     i
-        width 3rem
         font-size 2rem
         line-height 0
-        color #999
+        color grey-04
 
         &:hover
             cursor pointer
             color darkblue
 
     .btn-done
-        width 3rem
-        padding 0.4em 0
-        background-color #bbb
+        padding 0.4em
+        background-color grey-04
         border-radius 3px
         line-height 1
         text-align center
-        color #fff
+        color white
 
         &:hover
             cursor pointer
             background-color darkblue
 
     .btn-back
-        background-color transparent
         padding 0.7em 0
+        width 43px
+        background-color transparent
+        text-align left
 
         &:hover
             cursor pointer
+
+        &:active
+            box-shadow 0 0
 
 // select special
 select.select-big
     margin-bottom 1.5em
     width         100%
     height        2.5rem
-    border-color  #ccc
+    border-color  grey-03
     font-size     1.1em
 
     &.with-margin
         margin 1.5em
-        width         calc(100% - 3em)
+        width  calc(100% - 3em)
 
 // Guest screen
 .guests-action
@@ -367,7 +365,7 @@ select.select-big
         flex 1
         height 2.1em
         margin-right 0.5em
-        border 1px solid #ddd
+        border 1px solid grey-03
         font-size 1rem
 
     // Override bootrstrap style to prevent content from going out of the block.
@@ -381,11 +379,11 @@ ul.guests
 
     li
         padding 1em 1.5em
-        border-top 1px solid #ddd
+        border-top 1px solid grey-03
         line-height 1
 
         &:last-child
-            border-bottom 1px solid #ddd
+            border-bottom 1px solid grey-03
 
     .guest-top
         display flex
@@ -399,7 +397,7 @@ ul.guests
             border none
             background-color transparent
             font-size 1.2em
-            color #bbb
+            color grey-04
 
             &:hover
                 color darkblue
@@ -416,11 +414,11 @@ ul.alerts
 
     li
         padding 1.5em
-        border-bottom 1px solid #ddd
+        border-bottom 1px solid grey-03
         line-height 1
 
         &:first-child
-            border-top 1px solid #ddd
+            border-top 1px solid grey-03
 
     .alert-top
     .type
@@ -436,7 +434,7 @@ ul.alerts
             border none
             background-color transparent
             font-size 1.2em
-            color #bbb
+            color grey-04
 
             &:hover
                 color darkblue
@@ -449,7 +447,7 @@ ul.alerts
 
         label
             padding 0 1.5em 0 0.5em
-            color #999
+            color grey-04
 
         input[type=checkbox]
             flex none
@@ -467,7 +465,7 @@ ul.alerts
         margin-right 0.4em
         width        5rem
         height       2em
-        border       1px solid #e5e5e5
+        border       1px solid grey-03
 
     .inline-input
         display         flex
@@ -485,7 +483,7 @@ ul.alerts
         flex             none
         width            5rem
         text-transform   uppercase
-        color            #999
+        color            grey-05
 
         &.align-top
             align-self flex-start
@@ -518,3 +516,13 @@ ul.alerts
 
         .btn
             margin 0.5em
+
+    .spinner-block
+        width 100%
+        display flex
+        justify-content center
+
+        .remove-spinner
+            width 2em
+            height 2em
+            margin 2em 0

@@ -25,7 +25,7 @@ module.exports =
         Router = require 'router'
         Menu = require 'views/menu'
         Header = require 'views/calendar_header'
-        SocketListener = require '../lib/socket_listener'
+        SocketListener = require 'lib/socket_listener'
         TagCollection = require 'collections/tags'
         EventCollection = require 'collections/events'
         ContactCollection = require 'collections/contacts'
@@ -36,11 +36,24 @@ module.exports =
         @contacts = new ContactCollection()
         @calendars = new CalendarsCollection()
 
+        # Main Store is used to mark which months were loaded or not.
+        # That way the app knows when data fetching is required.
+        @mainStore =
+            loadedMonths: {}
+        now = moment().startOf 'month'
+        for i in [1..3]
+            m1 = now.clone().subtract('months', i).format 'YYYY-MM'
+            m2 = now.clone().add('months', i).format 'YYYY-MM'
+            @mainStore.loadedMonths[m1] = true
+            @mainStore.loadedMonths[m2] = true
+        @mainStore.loadedMonths[now.format 'YYYY-MM'] = true
+
         @router = new Router()
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 
         SocketListener.watch @events
+        SocketListener.watch @contacts
 
         if window.inittags?
             @tags.reset window.inittags
@@ -57,7 +70,7 @@ module.exports =
         Backbone.history.start()
 
         # Starts the automatic update of 'today'
-        todayChecker = require '../lib/today_checker'
+        todayChecker = require 'lib/today_checker'
         todayChecker @router
 
         Object.freeze this if typeof Object.freeze is 'function'
@@ -65,5 +78,3 @@ module.exports =
     isMobile: ->
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
             .test(navigator.userAgent)
-
-

@@ -1,11 +1,13 @@
 li(data-index=index)
     .guest-top
         if status == 'ACCEPTED'
-            i.fa.fa-check-circle-o.green
+            i.fa.fa-check-circle-o.green(title=t('accepted'))
         else if status == 'DECLINED'
-            i.fa.fa-times-circle-o.red
+            i.fa.fa-times-circle-o.red(title=t('declined'))
         else if status == 'NEED-ACTION'
-            i.fa.fa-exclamation-circle.blue
+            i.fa.fa-question-circle.blue(title=t('need action'))
+        else
+            i.fa.fa-exclamation-circle.orange(title=t('mail not sent'))
 
         .guest-label= email
         button.guest-delete.fa.fa-trash-o(title=t('screen guest remove tooltip'), role="button")

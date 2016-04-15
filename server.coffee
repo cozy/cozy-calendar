@@ -2,18 +2,16 @@
 
 start = (port, callback) ->
     require('americano').start
-            name: 'Calendar'
-            port: port
-            host: process.env.HOST or "0.0.0.0"
-            root: __dirname
-    , (app, server) ->
-
-
+        name: 'Calendar'
+        port: port
+        host: process.env.HOST or "0.0.0.0"
+        root: __dirname
+    , (err, app, server) ->
         cozydb = require 'cozydb'
         User = require './server/models/user'
         localization = require './server/libs/localization_manager'
         Realtimer = require 'cozy-realtime-adapter'
-        realtime = Realtimer server, ['event.*']
+        realtime = Realtimer server, ['event.*', 'contact.*']
         realtime.on 'user.*', -> User.updateUser()
 
         # Update localization engine if the language changes.

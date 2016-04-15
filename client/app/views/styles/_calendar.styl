@@ -53,15 +53,15 @@ input-color   = #555
     display flex
     align-items center
     width 100%
-    padding 0.75em 1em
-    background-color #f2f2f2
-    border-bottom 1px solid #e2e2e2
+    padding 0.5em 1em
+    background-color grey-01
+    border-bottom 1px solid grey-03
 
     .btn-group > .btn
         font-weight normal
-        border 1px solid darkgreyblue
-        background-color lightgrey + 60%
-        color darkgreyblue - 40%
+        border 1px solid grey-04
+        background-color grey-01
+        color grey-07
         text-transform capitalize
 
         .fa
@@ -71,11 +71,11 @@ input-color   = #555
             box-shadow none
 
         &:hover
-            background-color darkgreyblue + 60%
+            background-color grey-03
 
         &.fc-state-active
             font-weight bold
-            background-color darkgreyblue + 10%
+            background-color grey-04
             color white
 
             &:hover
@@ -88,12 +88,12 @@ input-color   = #555
             font-size 1rem
 
             &:hover
-                background-color lightgrey + 60%
-                color darkgreyblue - 40%
+                background-color grey-03
+                color grey-07
 
         &.btn-settings
             &:hover
-                background-color darkgreyblue + 60%
+                background-color grey-03
 
             i
                 margin-right 0.4em
@@ -105,15 +105,15 @@ input-color   = #555
     .fc-button-today
         margin-left 0.625em
         font-weight normal
-        border 1px solid darkgreyblue
-        background-color lightgrey + 60%
-        color darkgreyblue - 40%
+        border 1px solid grey-04
+        background-color transparent
+        color grey-07
 
         &:hover
-            background-color darkgreyblue + 60%
+            background-color grey-03
 
         &.fc-state-active
-            background-color darkgreyblue
+            background-color grey-04
             color white
 
     .fc-button
@@ -181,7 +181,7 @@ input-color   = #555
     font-family: 'Source Sans Pro', sans-serif
 
 .fc-bg .fc-other-month
-    background-color rgba(0, 0, 0, 0.02)
+    background-color grey-01 + 50%
 
 .fc-content
     border: 0
@@ -193,9 +193,6 @@ input-color   = #555
     i
         margin-top: 2px
         margin-right: 5px
-
-.fc-day:hover
-    background: transparent
 
 .event-remove
     cursor: pointer
@@ -209,24 +206,44 @@ input-color   = #555
 
 #view-container .fc-view-container
     .fc-cell-overlay
-        background: #CBE4FB
+        background: grey-03
 
     tbody .fc-state-highlight
         background: blue + 92%
 
-    .fc-today.fc-state-highlight
+    .fc-day.fc-today.fc-state-highlight
         color blue
-        background-color #D7EEFF
+        background-color blue + 95%
+        box-shadow inset 0 0 0 2px blue + 33%
 
-.fc-event:hover
-    background: orange !important
+    .fc-day-number.fc-today.fc-state-highlight
+        padding-right .375em
+        color blue
+        background transparent
 
+.fc-basic-view td.fc-day-number
+    padding .375em .5em
+
+.fc-event
+    border-radius 2px
+    transition all .2s ease-out
+
+    &:hover
+        box-shadow 0 0 0 3px white, 0 0 0 6px rgba(51,166,255,.67)
+        z-index 1000
+
+.fc-highlight
+    background-color blue + 80%
+    opacity 1
+
+.fc-day-grid-event
+    margin .1875em .1875em 0
 
 td.fc-widget-header
     border-style: none
 
 .fc-row .fc-content-skeleton td, .fc-row .fc-helper-skeleton td
-    border-color: #DDD
+    border-color: grey-03
 
 #alarms
     height 100%
@@ -235,7 +252,7 @@ td.fc-widget-header
         .fc-first
             .fc-day-header
             .fc-widget-header
-                border-bottom: 1px solid #DDD
+                border-bottom: 1px solid grey-03
 
 a.btn:visited
     color: white
@@ -244,11 +261,10 @@ a.btn:visited
 
     input
     select
-        border: 1px solid lightgrey
+        border: 1px solid grey-03
         box-shadow: 0
         border-radius: 0px
         shadow: none
-        font-family: 'Maven Pro', sans-serif
 
     input.disabled
         border: 1px solid transparent
@@ -258,7 +274,7 @@ a.btn:visited
         border: 1px solid darkblue
         border-radius: 0px
         shadow: inset 1px 1px 2px rgba(100, 100, 100, 0.1)
-        color: #333
+        color: darkcolor
 
     input:focus
     input:active
@@ -298,7 +314,7 @@ a.btn:visited
     margin-bottom 3em
 
     h4
-        color #999
+        color grey-05
         font-size 1em
         line-height 1em
         font-weight normal
@@ -315,7 +331,7 @@ a.btn:visited
             i
                 display none
                 padding: 0 0.5em
-                color #999
+                color grey-05
                 cursor pointer
 
                 &:hover
@@ -329,7 +345,7 @@ a.btn:visited
             margin-right 0.5em
             padding 0.3em 0.5em
             border-radius 3px
-            color #fff
+            color white
             font-size 0.85em
             flex none
             align-self stretch
@@ -347,7 +363,7 @@ a.btn:visited
   width         100%
   max-width     40em
   padding       1.5em
-  border        1px solid #ddd
+  border        1px solid grey-03
   border-top    0
   border-radius 0 0 8px 8px
 
@@ -373,8 +389,8 @@ a.btn:visited
     max-width         40em
     margin:           5em auto 0
     padding:          1em 1.5em
-    background-color: #fff
-    border:           1px solid #ddd
+    background-color: white
+    border:           1px solid grey-03
     border-radius:    8px 8px 0 0
     text-align:       center
 

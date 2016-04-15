@@ -34,7 +34,6 @@ module.exports = class MenuView extends ViewCollection
         # check if a calendar with this name already exists
         checkCalendar = ->
             @tag = app.tags.getOrCreateByName name
-            console.log @tag
 
             calendar = app.calendars.find (tag) ->
                 localName = t name
