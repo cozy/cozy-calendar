@@ -25,7 +25,7 @@ module.exports =
         Router = require 'router'
         Menu = require 'views/menu'
         Header = require 'views/calendar_header'
-        SocketListener = require '../lib/socket_listener'
+        SocketListener = require 'lib/socket_listener'
         TagCollection = require 'collections/tags'
         EventCollection = require 'collections/events'
         ContactCollection = require 'collections/contacts'
@@ -70,7 +70,7 @@ module.exports =
         Backbone.history.start()
 
         # Starts the automatic update of 'today'
-        todayChecker = require '../lib/today_checker'
+        todayChecker = require 'lib/today_checker'
         todayChecker @router
 
         Object.freeze this if typeof Object.freeze is 'function'
