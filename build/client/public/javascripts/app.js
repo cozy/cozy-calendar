@@ -6,53 +6,30 @@
 
   var modules = {};
   var cache = {};
+  var aliases = {};
   var has = ({}).hasOwnProperty;
 
-  var aliases = {};
-
-  var endsWith = function(str, suffix) {
-    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-  };
-
-  var unalias = function(alias, loaderPath) {
-    var start = 0;
-    if (loaderPath) {
-      if (loaderPath.indexOf('components/' === 0)) {
-        start = 'components/'.length;
-      }
-      if (loaderPath.indexOf('/', start) > 0) {
-        loaderPath = loaderPath.substring(start, loaderPath.indexOf('/', start));
+  var expRe = /^\.\.?(\/|$)/;
+  var expand = function(root, name) {
+    var results = [], part;
+    var parts = (expRe.test(name) ? root + '/' + name : name).split('/');
+    for (var i = 0, length = parts.length; i < length; i++) {
+      part = parts[i];
+      if (part === '..') {
+        results.pop();
+      } else if (part !== '.' && part !== '') {
+        results.push(part);
       }
     }
-    var result = aliases[alias + '/index.js'] || aliases[loaderPath + '/deps/' + alias + '/index.js'];
-    if (result) {
-      return 'components/' + result.substring(0, result.length - '.js'.length);
-    }
-    return alias;
+    return results.join('/');
   };
 
-  var expand = (function() {
-    var reg = /^\.\.?(\/|$)/;
-    return function(root, name) {
-      var results = [], parts, part;
-      parts = (reg.test(name) ? root + '/' + name : name).split('/');
-      for (var i = 0, length = parts.length; i < length; i++) {
-        part = parts[i];
-        if (part === '..') {
-          results.pop();
-        } else if (part !== '.' && part !== '') {
-          results.push(part);
-        }
-      }
-      return results.join('/');
-    };
-  })();
   var dirname = function(path) {
     return path.split('/').slice(0, -1).join('/');
   };
 
   var localRequire = function(path) {
-    return function(name) {
+    return function expanded(name) {
       var absolute = expand(dirname(path), name);
       return globals.require(absolute, path);
     };
@@ -65,34 +42,59 @@
     return module.exports;
   };
 
+  var expandAlias = function(name) {
+    return aliases[name] ? expandAlias(aliases[name]) : name;
+  };
+
   var require = function(name, loaderPath) {
-    var path = expand(name, '.');
     if (loaderPath == null) loaderPath = '/';
-    path = unalias(name, loaderPath);
+    var path = expandAlias(name);
 
     if (has.call(cache, path)) return cache[path].exports;
     if (has.call(modules, path)) return initModule(path, modules[path]);
 
-    var dirIndex = expand(path, './index');
-    if (has.call(cache, dirIndex)) return cache[dirIndex].exports;
-    if (has.call(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
-
-    throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
+    throw new Error("Cannot find module '" + name + "' from '" + loaderPath + "'");
   };
 
   require.alias = function(from, to) {
     aliases[to] = from;
   };
 
+  require.reset = function() {
+    modules = {};
+    cache = {};
+    aliases = {};
+  };
+
+  var extRe = /\.[^.\/]+$/;
+  var indexRe = /\/index(\.[^\/]+)?$/;
+  var addExtensions = function(bundle) {
+    if (extRe.test(bundle)) {
+      var alias = bundle.replace(extRe, '');
+      if (!has.call(aliases, alias) || aliases[alias].replace(extRe, '') === alias + '/index') {
+        aliases[alias] = bundle;
+      }
+    }
+
+    if (indexRe.test(bundle)) {
+      var iAlias = bundle.replace(indexRe, '');
+      if (!has.call(aliases, iAlias)) {
+        aliases[iAlias] = bundle;
+      }
+    }
+  };
+
   require.register = require.define = function(bundle, fn) {
     if (typeof bundle === 'object') {
       for (var key in bundle) {
         if (has.call(bundle, key)) {
-          modules[key] = bundle[key];
+          require.register(key, bundle[key]);
         }
       }
     } else {
       modules[bundle] = fn;
+      delete cache[bundle];
+      addExtensions(bundle);
     }
   };
 
@@ -107,12 +109,13 @@
   };
 
   require.brunch = true;
+  require._cache = cache;
   globals.require = require;
 })();
-require.register("application", function(exports, require, module) {
+require.register("application.coffee", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, i, j, locales, m1, m2, now, todayChecker;
+    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, error, i, j, locales, m1, m2, now, todayChecker;
     window.app = this;
     this.timezone = window.timezone;
     delete window.timezone;
@@ -121,8 +124,8 @@ module.exports = {
     this.polyglot = new Polyglot();
     try {
       locales = require('locales/' + this.locale);
-    } catch (_error) {
-      e = _error;
+    } catch (error) {
+      e = error;
       locales = require('locales/en');
     }
     this.polyglot.extend(locales);
@@ -131,7 +134,7 @@ module.exports = {
     Router = require('router');
     Menu = require('views/menu');
     Header = require('views/calendar_header');
-    SocketListener = require('../lib/socket_listener');
+    SocketListener = require('lib/socket_listener');
     TagCollection = require('collections/tags');
     EventCollection = require('collections/events');
     ContactCollection = require('collections/contacts');
@@ -157,6 +160,7 @@ module.exports = {
     });
     this.menu.render().$el.prependTo('body');
     SocketListener.watch(this.events);
+    SocketListener.watch(this.contacts);
     if (window.inittags != null) {
       this.tags.reset(window.inittags);
       delete window.inittags;
@@ -170,7 +174,7 @@ module.exports = {
       delete window.initcontacts;
     }
     Backbone.history.start();
-    todayChecker = require('../lib/today_checker');
+    todayChecker = require('lib/today_checker');
     todayChecker(this.router);
     if (typeof Object.freeze === 'function') {
       return Object.freeze(this);
@@ -182,7 +186,7 @@ module.exports = {
 };
 });
 
-;require.register("collections/calendars", function(exports, require, module) {
+;require.register("collections/calendars.coffee", function(exports, require, module) {
 var CalendarCollection, SocketListener, Tag, TagCollection, request, stringify,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -314,7 +318,7 @@ module.exports = CalendarCollection = (function(superClass) {
 })(TagCollection);
 });
 
-;require.register("collections/contacts", function(exports, require, module) {
+;require.register("collections/contacts.coffee", function(exports, require, module) {
 var Contact, ContactCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -359,7 +363,7 @@ module.exports = ContactCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/daybuckets", function(exports, require, module) {
+;require.register("collections/daybuckets.coffee", function(exports, require, module) {
 var DayBucket, DayBucketCollection, RealEventCollection, RealEventGeneratorCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -463,7 +467,7 @@ module.exports = DayBucketCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/events", function(exports, require, module) {
+;require.register("collections/events.coffee", function(exports, require, module) {
 var Event, EventCollection, ScheduleItemsCollection, request,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -512,7 +516,7 @@ module.exports = EventCollection = (function(superClass) {
 })(ScheduleItemsCollection);
 });
 
-;require.register("collections/realevents", function(exports, require, module) {
+;require.register("collections/realevents.coffee", function(exports, require, module) {
 var RealEvent, RealEventCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -539,7 +543,7 @@ module.exports = RealEventCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/realeventsgenerator", function(exports, require, module) {
+;require.register("collections/realeventsgenerator.coffee", function(exports, require, module) {
 var RealEvent, RealEventGeneratorCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -736,7 +740,7 @@ module.exports = RealEventGeneratorCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/scheduleitems", function(exports, require, module) {
+;require.register("collections/scheduleitems.coffee", function(exports, require, module) {
 var ScheduleItemsCollection,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -762,7 +766,7 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
         var eventsInRange;
         eventsInRange = [];
         _this.each(function(item) {
-          var calendar, duration, e, itemEnd, itemStart;
+          var calendar, duration, e, error, itemEnd, itemStart;
           itemStart = item.getStartDateObject();
           itemEnd = item.getEndDateObject();
           duration = itemEnd - itemStart;
@@ -773,8 +777,8 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
           if (item.isRecurrent()) {
             try {
               return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
-            } catch (_error) {
-              e = _error;
+            } catch (error) {
+              e = error;
               console.error(e);
               if (item.isInRange(start, end)) {
                 return eventsInRange.push(item.toPunctualFullCalendarEvent());
@@ -800,7 +804,7 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/tags", function(exports, require, module) {
+;require.register("collections/tags.coffee", function(exports, require, module) {
 var Tag, TagCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -859,7 +863,7 @@ module.exports = TagCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
-;require.register("helpers", function(exports, require, module) {
+;require.register("helpers.coffee", function(exports, require, module) {
 exports.formatDateISO8601 = function(fullDate) {
   var date, time;
   fullDate = fullDate.split(/#/);
@@ -912,7 +916,11 @@ exports.isEvent = function(start, end) {
 };
 
 exports.ambiguousToTimezoned = function(ambigM) {
-  return moment.tz(ambigM, window.app.timezone);
+  if (ambigM.hasTime()) {
+    return moment.tz(ambigM.toISOString(), window.app.timezone);
+  } else {
+    return ambigM;
+  }
 };
 
 exports.momentToAmbiguousString = function(m) {
@@ -972,15 +980,15 @@ exports.getLists = function(list, length) {
 };
 });
 
-;require.register("helpers/color-set", function(exports, require, module) {
+;require.register("helpers/color-set.coffee", function(exports, require, module) {
 module.exports = ['304FFE', '2979FF', '00B0FF', '00DCE9', '00D5B8', '00C853', 'E70505', 'FF5700', 'FF7900', 'FFA300', 'B3C51D', '64DD17', 'FF2828', 'F819AA', 'AA00FF', '6200EA', '7190AB', '51658D'];
 });
 
-;require.register("helpers/timezone", function(exports, require, module) {
+;require.register("helpers/timezone.coffee", function(exports, require, module) {
 exports.timezones = ["Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau", "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo", "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar", "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun", "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa", "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda", "Africa/Lubumbashi", "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane", "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena", "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo", "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek", "America/Adak", "America/Anchorage", "America/Anguilla", "America/Antigua", "America/Araguaina", "America/Argentina/Buenos_Aires", "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy", "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos", "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis", "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Aruba", "America/Asuncion", "America/Atikokan", "America/Bahia", "America/Barbados", "America/Belem", "America/Belize", "America/Blanc-Sablon", "America/Boa_Vista", "America/Bogota", "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun", "America/Caracas", "America/Cayenne", "America/Cayman", "America/Chicago", "America/Chihuahua", "America/Costa_Rica", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn", "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit", "America/Dominica", "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fortaleza", "America/Glace_Bay", "America/Godthab", "America/Goose_Bay", "America/Grand_Turk", "America/Grenada", "America/Guadeloupe", "America/Guatemala", "America/Guayaquil", "America/Guyana", "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis", "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg", "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes", "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica", "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello", "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Maceio", "America/Managua", "America/Manaus", "America/Martinique", "America/Matamoros", "America/Mazatlan", "America/Menominee", "America/Merida", "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey", "America/Montevideo", "America/Montreal", "America/Montserrat", "America/Nassau", "America/New_York", "America/Nipigon", "America/Nome", "America/Noronha", "America/North_Dakota/Center", "America/North_Dakota/New_Salem", "America/Ojinaga", "America/Panama", "America/Pangnirtung", "America/Paramaribo", "America/Phoenix", "America/Port-au-Prince", "America/Port_of_Spain", "America/Porto_Velho", "America/Puerto_Rico", "America/Rainy_River", "America/Rankin_Inlet", "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco", "America/Santa_Isabel", "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo", "America/Scoresbysund", "America/St_Johns", "America/St_Kitts", "America/St_Lucia", "America/St_Thomas", "America/St_Vincent", "America/Swift_Current", "America/Tegucigalpa", "America/Thule", "America/Thunder_Bay", "America/Tijuana", "America/Toronto", "America/Tortola", "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat", "America/Yellowknife", "Antarctica/Casey", "Antarctica/Davis", "Antarctica/DumontDUrville", "Antarctica/Mawson", "Antarctica/McMurdo", "Antarctica/Palmer", "Antarctica/Rothera", "Antarctica/Syowa", "Antarctica/Vostok", "Asia/Aden", "Asia/Almaty", "Asia/Amman", "Asia/Anadyr", "Asia/Aqtau", "Asia/Aqtobe", "Asia/Ashgabat", "Asia/Baghdad", "Asia/Bahrain", "Asia/Baku", "Asia/Bangkok", "Asia/Beirut", "Asia/Bishkek", "Asia/Brunei", "Asia/Choibalsan", "Asia/Chongqing", "Asia/Colombo", "Asia/Damascus", "Asia/Dhaka", "Asia/Dili", "Asia/Dubai", "Asia/Dushanbe", "Asia/Gaza", "Asia/Harbin", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Hovd", "Asia/Irkutsk", "Asia/Jakarta", "Asia/Jayapura", "Asia/Jerusalem", "Asia/Kabul", "Asia/Kamchatka", "Asia/Karachi", "Asia/Kashgar", "Asia/Kathmandu", "Asia/Kolkata", "Asia/Krasnoyarsk", "Asia/Kuala_Lumpur", "Asia/Kuching", "Asia/Kuwait", "Asia/Macau", "Asia/Magadan", "Asia/Makassar", "Asia/Manila", "Asia/Muscat", "Asia/Nicosia", "Asia/Novokuznetsk", "Asia/Novosibirsk", "Asia/Omsk", "Asia/Oral", "Asia/Phnom_Penh", "Asia/Pontianak", "Asia/Pyongyang", "Asia/Qatar", "Asia/Qyzylorda", "Asia/Rangoon", "Asia/Riyadh", "Asia/Sakhalin", "Asia/Samarkand", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Taipei", "Asia/Tashkent", "Asia/Tbilisi", "Asia/Tehran", "Asia/Thimphu", "Asia/Tokyo", "Asia/Ulaanbaatar", "Asia/Urumqi", "Asia/Vientiane", "Asia/Vladivostok", "Asia/Yakutsk", "Asia/Yekaterinburg", "Asia/Yerevan", "Atlantic/Azores", "Atlantic/Bermuda", "Atlantic/Canary", "Atlantic/Cape_Verde", "Atlantic/Faroe", "Atlantic/Madeira", "Atlantic/Reykjavik", "Atlantic/South_Georgia", "Atlantic/St_Helena", "Atlantic/Stanley", "Australia/Adelaide", "Australia/Brisbane", "Australia/Broken_Hill", "Australia/Currie", "Australia/Darwin", "Australia/Eucla", "Australia/Hobart", "Australia/Lindeman", "Australia/Lord_Howe", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney", "Canada/Atlantic", "Canada/Central", "Canada/Eastern", "Canada/Mountain", "Canada/Newfoundland", "Canada/Pacific", "Europe/Amsterdam", "Europe/Andorra", "Europe/Athens", "Europe/Belgrade", "Europe/Berlin", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Chisinau", "Europe/Copenhagen", "Europe/Dublin", "Europe/Gibraltar", "Europe/Helsinki", "Europe/Istanbul", "Europe/Kaliningrad", "Europe/Kiev", "Europe/Lisbon", "Europe/London", "Europe/Luxembourg", "Europe/Madrid", "Europe/Malta", "Europe/Minsk", "Europe/Monaco", "Europe/Moscow", "Europe/Oslo", "Europe/Paris", "Europe/Prague", "Europe/Riga", "Europe/Rome", "Europe/Samara", "Europe/Simferopol", "Europe/Sofia", "Europe/Stockholm", "Europe/Tallinn", "Europe/Tirane", "Europe/Uzhgorod", "Europe/Vaduz", "Europe/Vienna", "Europe/Vilnius", "Europe/Volgograd", "Europe/Warsaw", "Europe/Zaporozhye", "Europe/Zurich", "GMT", "Indian/Antananarivo", "Indian/Chagos", "Indian/Christmas", "Indian/Cocos", "Indian/Comoro", "Indian/Kerguelen", "Indian/Mahe", "Indian/Maldives", "Indian/Mauritius", "Indian/Mayotte", "Indian/Reunion", "Pacific/Apia", "Pacific/Auckland", "Pacific/Chatham", "Pacific/Easter", "Pacific/Efate", "Pacific/Enderbury", "Pacific/Fakaofo", "Pacific/Fiji", "Pacific/Funafuti", "Pacific/Galapagos", "Pacific/Gambier", "Pacific/Guadalcanal", "Pacific/Guam", "Pacific/Honolulu", "Pacific/Johnston", "Pacific/Kiritimati", "Pacific/Kosrae", "Pacific/Kwajalein", "Pacific/Majuro", "Pacific/Marquesas", "Pacific/Midway", "Pacific/Nauru", "Pacific/Niue", "Pacific/Norfolk", "Pacific/Noumea", "Pacific/Pago_Pago", "Pacific/Palau", "Pacific/Pitcairn", "Pacific/Ponape", "Pacific/Port_Moresby", "Pacific/Rarotonga", "Pacific/Saipan", "Pacific/Tahiti", "Pacific/Tarawa", "Pacific/Tongatapu", "Pacific/Truk", "Pacific/Wake", "Pacific/Wallis", "US/Alaska", "US/Arizona", "US/Central", "US/Eastern", "US/Hawaii", "US/Mountain", "US/Pacific", "UTC"];
 });
 
-;require.register("initialize", function(exports, require, module) {
+;require.register("initialize.coffee", function(exports, require, module) {
 var app, colorSet;
 
 app = require('application');
@@ -1016,7 +1024,7 @@ window.onerror = function(msg, url, line, col, error) {
 };
 
 $(function() {
-  var data, e, exception, xhr;
+  var data, e, error1, exception, xhr;
   try {
     moment.locale(window.locale);
     ColorHash.addScheme('cozy', colorSet);
@@ -1074,8 +1082,8 @@ $(function() {
       }
     };
     return app.initialize();
-  } catch (_error) {
-    e = _error;
+  } catch (error1) {
+    e = error1;
     console.error(e, e != null ? e.stack : void 0);
     exception = e.toString();
     if (exception !== window.lastError) {
@@ -1104,7 +1112,7 @@ $(function() {
 });
 });
 
-;require.register("lib/base_view", function(exports, require, module) {
+;require.register("lib/base_view.coffee", function(exports, require, module) {
 var BaseView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1150,7 +1158,7 @@ module.exports = BaseView = (function(superClass) {
 })(Backbone.View);
 });
 
-;require.register("lib/modal", function(exports, require, module) {
+;require.register("lib/modal.coffee", function(exports, require, module) {
 var Modal,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -1314,7 +1322,7 @@ Modal.error = function(text, cb) {
 module.exports = Modal;
 });
 
-;require.register("lib/popover_screen_view", function(exports, require, module) {
+;require.register("lib/popover_screen_view.coffee", function(exports, require, module) {
 var PopoverScreenView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1385,7 +1393,7 @@ module.exports = PopoverScreenView = (function(superClass) {
 })(Backbone.View);
 });
 
-;require.register("lib/popover_view", function(exports, require, module) {
+;require.register("lib/popover_view.coffee", function(exports, require, module) {
 var BaseView, PopoverView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1554,7 +1562,7 @@ module.exports = PopoverView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("lib/random", function(exports, require, module) {
+;require.register("lib/random.coffee", function(exports, require, module) {
 module.exports.randomString = function(length) {
   var string;
   if (length == null) {
@@ -1568,7 +1576,7 @@ module.exports.randomString = function(length) {
 };
 });
 
-;require.register("lib/request", function(exports, require, module) {
+;require.register("lib/request.coffee", function(exports, require, module) {
 exports.request = function(type, url, data, callback) {
   var body, fired, req;
   body = data != null ? JSON.stringify(data) : null;
@@ -1624,130 +1632,91 @@ exports.del = function(url, callback) {
 };
 });
 
-;require.register("lib/socket_listener", function(exports, require, module) {
-var SocketListener, addModel,
+;require.register("lib/socket_listener.coffee", function(exports, require, module) {
+var SocketListener,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-addModel = (function(_this) {
-  return function(model, callback) {
-    if (window.app.events.get(model.id)) {
-      return;
-    }
-    return model.fetch({
-      success: function(fetched) {
-        var start;
-        addModel = function() {
-          var collection, i, len, ref, results;
-          ref = model.collections;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            collection = ref[i];
-            if (model instanceof collection.model) {
-              results.push(collection.add(model, {
-                sort: false
-              }));
-            } else {
-              results.push(void 0);
-            }
-          }
-          return results;
-        };
-        if (model.collections != null) {
-          if (fetched.get('docType') === 'event') {
-            start = moment(fetched.get('start')).format('YYYY-MM');
-            if (window.app.mainStore.loadedMonths[start]) {
-              addModel();
-            }
-          } else {
-            addModel();
-          }
-        }
-        return setTimeout(callback, 50);
-      },
-      error: function() {
-        return setTimeout(callback, 50);
-      }
-    });
-  };
-})(this);
 
 SocketListener = (function(superClass) {
   extend(SocketListener, superClass);
 
-  function SocketListener() {
-    return SocketListener.__super__.constructor.apply(this, arguments);
-  }
-
   SocketListener.prototype.models = {
-    'event': require('models/event')
+    'event': require('models/event'),
+    'contact': require('models/contact')
   };
 
-  SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete'];
+  SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete', 'contact.create', 'contact.update', 'contact.delete'];
 
-  SocketListener.prototype.queue = async.queue(addModel, 1);
+  function SocketListener() {
+    this.handleModel = bind(this.handleModel, this);
+    SocketListener.__super__.constructor.apply(this, arguments);
+    this.queue = async.queue(this.handleModel, 1);
+  }
+
+  SocketListener.prototype.handleModel = function(model, next) {
+    return model.fetch({
+      success: (function(_this) {
+        return function(fetched) {
+          var start;
+          if (fetched.get('docType') !== 'event') {
+            _this.onRemoteCreateOrUpdate(fetched);
+          } else {
+            start = moment(fetched.get('start')).format('YYYY-MM');
+            if (window.app.mainStore.loadedMonths[start]) {
+              _this.onRemoteCreateOrUpdate(fetched);
+            }
+          }
+          return setTimeout(next, 50);
+        };
+      })(this),
+      error: function() {
+        return setTimeout(next, 50);
+      }
+    });
+  };
 
   SocketListener.prototype.process = function(event) {
-    var doctype, id, model, operation;
+    var collection, doctype, i, id, len, model, operation, ref, results;
     doctype = event.doctype, operation = event.operation, id = event.id;
     switch (operation) {
       case 'create':
-        return this.onRemoteCreate(doctype, id);
+        return this.queue.push(new this.models[doctype]({
+          id: id
+        }));
       case 'update':
-        if (model = this.singlemodels.get(id)) {
-          model.fetch({
-            success: (function(_this) {
-              return function(fetched) {
-                if (fetched.changedAttributes()) {
-                  return _this.onRemoteUpdate(fetched, null);
-                }
-              };
-            })(this)
-          });
-        }
-        return this.collections.forEach((function(_this) {
-          return function(collection) {
-            if (!(model = collection.get(id))) {
-              return;
-            }
-            return model.fetch({
-              success: function(fetched) {
-                if (fetched.changedAttributes()) {
-                  return _this.onRemoteUpdate(fetched, collection);
-                }
-              }
-            });
-          };
-        })(this));
+        return this.queue.push(new this.models[doctype]({
+          id: id
+        }));
       case 'delete':
-        if (model = this.singlemodels.get(id)) {
-          this.onRemoteDelete(model, this.singlemodels);
+        ref = this.collections;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          collection = ref[i];
+          if (model = collection.get(id)) {
+            results.push(model.trigger('destroy', model, model.collection, {}));
+          }
         }
-        return this.collections.forEach((function(_this) {
-          return function(collection) {
-            if (!(model = collection.get(id))) {
-              return;
-            }
-            return _this.onRemoteDelete(model, collection);
-          };
-        })(this));
+        return results;
     }
   };
 
-  SocketListener.prototype.onRemoteCreate = function(docType, id) {
-    var model;
-    if (!this.shouldFetchCreated(id)) {
-      return;
+  SocketListener.prototype.onRemoteCreateOrUpdate = function(fetched) {
+    var collection, i, len, ref, results;
+    ref = this.collections;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      collection = ref[i];
+      if (fetched instanceof collection.model) {
+        console.log('D');
+        results.push(collection.add(fetched, {
+          merge: true
+        }));
+      } else {
+        results.push(void 0);
+      }
     }
-    model = new this.models[docType]({
-      id: id
-    });
-    model.collections = this.collections;
-    return this.queue.push(model);
-  };
-
-  SocketListener.prototype.onRemoteDelete = function(model) {
-    return model.trigger('destroy', model, model.collection, {});
+    return results;
   };
 
   return SocketListener;
@@ -1757,7 +1726,7 @@ SocketListener = (function(superClass) {
 module.exports = new SocketListener();
 });
 
-;require.register("lib/today_checker", function(exports, require, module) {
+;require.register("lib/today_checker.coffee", function(exports, require, module) {
 module.exports = function(router) {
   var waitToChangeToday;
   return (waitToChangeToday = function() {
@@ -1778,7 +1747,7 @@ module.exports = function(router) {
 };
 });
 
-;require.register("lib/view", function(exports, require, module) {
+;require.register("lib/view.coffee", function(exports, require, module) {
 var View,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1819,7 +1788,7 @@ module.exports = View = (function(superClass) {
 })(Backbone.View);
 });
 
-;require.register("lib/view_collection", function(exports, require, module) {
+;require.register("lib/view_collection.coffee", function(exports, require, module) {
 var BaseView, ViewCollection,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -1930,7 +1899,261 @@ module.exports = ViewCollection = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("locales/de", function(exports, require, module) {
+;require.register("locales/cs.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/de.json", function(exports, require, module) {
 module.exports = {
     "calendar list title": "Kalender",
     "sync settings button label": "Synchronisierung",
@@ -2184,7 +2407,7 @@ module.exports = {
 };
 });
 
-require.register("locales/en", function(exports, require, module) {
+require.register("locales/en.json", function(exports, require, module) {
 module.exports = {
   "calendar list title": "Calendars",
   "sync settings button label": "Synchronization",
@@ -2327,6 +2550,11 @@ module.exports = {
   "duplicate event tooltip": "Duplicate event",
   "delete event tooltip": "Delete event",
   "change calendar": "Change calendar",
+  "screen confirm title": "Are you sure?",
+  "screen confirm description": "The change you made in this popover will be lost.",
+  "screen confirm yes button": "Don't save",
+  "screen confirm no button": "Cancel",
+  "dont ask again": "Dont ask for confirmation when exiting the popover.",
   "screen delete title": "Delete event",
   "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
   "screen delete yes button": "Yes",
@@ -2373,6 +2601,10 @@ module.exports = {
   "screen recurrence summary label": "Summary",
   "send mails question": "Send a notification email to:",
   "modal send mails": "Send a notification",
+  "accepted": "Accepted",
+  "declined": "Declined",
+  "need action": "No answer yet",
+  "mail not sent": "No invitation sent",
   "yes": "Yes",
   "no": "No",
   "no summary": "A summary must be set.",
@@ -2444,7 +2676,261 @@ module.exports = {
 ;
 });
 
-require.register("locales/es", function(exports, require, module) {
+require.register("locales/eo.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/es.json", function(exports, require, module) {
 module.exports = {
     "calendar list title": "Agendas",
     "sync settings button label": "Sincronización",
@@ -2698,7 +3184,7 @@ module.exports = {
 };
 });
 
-require.register("locales/fr", function(exports, require, module) {
+require.register("locales/fr.json", function(exports, require, module) {
 module.exports = {
     "calendar list title": "Agendas",
     "sync settings button label": "Synchronisation",
@@ -2953,7 +3439,1531 @@ module.exports = {
 ;
 });
 
-require.register("locales/ro", function(exports, require, module) {
+require.register("locales/id.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/it.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendari",
+    "sync settings button label": "Sincronizzazione",
+    "default calendar name": "Il mio Calendario",
+    "Add": "Aggiungi",
+    "event": "Evento",
+    "create event": "Creazione Evento",
+    "edit event": "Modifica Evento",
+    "edit": "Modifica",
+    "save": "Salva",
+    "create": "Crea",
+    "creation": "Creazione",
+    "invite": "INvita",
+    "close": "Chiudi",
+    "delete": "Cancella",
+    "change color": "Cambia Colore",
+    "rename": "Rinomina",
+    "export": "Esporta",
+    "remove": "Rimuovi Evento",
+    "duplicate": "Duplica Evento",
+    "Place": "Posiziona",
+    "all day": "Tutto il Giorno",
+    "All day": "Tutto il Giorno",
+    "description": "Descrizione",
+    "date": "data",
+    "Day": "Giorno",
+    "days": "giorni",
+    "Edit": "Modifica",
+    "Email": "Email",
+    "Import": "Importa",
+    "Export": "Esporta\n",
+    "show": "Visualizza",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Crea",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Descrizione",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Posiziona",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Descrizione",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Salva",
+    "create button": "Crea",
+    "duplicate event tooltip": "Duplica Evento",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Aggiungi",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Descrizione",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "giorni",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Sincronizzazione",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/ja.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "カレンダー",
+    "sync settings button label": "同期",
+    "default calendar name": "マイ カレンダー",
+    "Add": "追加",
+    "event": "イベント",
+    "create event": "イベント作成",
+    "edit event": "イベント編集",
+    "edit": "編集",
+    "save": "保存",
+    "create": "作成",
+    "creation": "作成",
+    "invite": "招待",
+    "close": "閉じる",
+    "delete": "削除",
+    "change color": "色の変更",
+    "rename": "名前の変更",
+    "export": "エクスポート",
+    "remove": "イベントを削除",
+    "duplicate": "イベントの複製",
+    "Place": "場所",
+    "all day": "終日",
+    "All day": "終日",
+    "description": "説明",
+    "date": "日付",
+    "Day": "日",
+    "days": "日",
+    "Edit": "編集",
+    "Email": "メール",
+    "Import": "インポート",
+    "Export": "エクスポート",
+    "show": "表示",
+    "hide": "非表示",
+    "List": "リスト",
+    "list": "リスト",
+    "Calendar": "カレンダー",
+    "calendar": "カレンダー",
+    "Sync": "同期",
+    "ie: 9:00 important meeting": "例: 9:00 重要なミーティング",
+    "Month": "月",
+    "Popup": "ポップアップ",
+    "Switch to List": "リストに切り替え",
+    "Switch to Calendar": "カレンダーに切り替え",
+    "time": "時間",
+    "Today": "今日",
+    "today": "今日",
+    "What should I remind you ?": "何をリマインドしますか?",
+    "select an icalendar file": "icalendar ファイルを選択",
+    "import your icalendar file": "icalendar ファイルをインポート",
+    "confirm import": "インポートの確認",
+    "cancel": "キャンセル",
+    "Create": "作成",
+    "Events to import": "インポートするイベント",
+    "Create Event": "イベントを作成",
+    "From [hours:minutes]": "開始 [時:分]",
+    "To [hours:minutes]": "終了 [時:分]",
+    "To [date]": "終了 [日付]",
+    "Description": "説明",
+    "days after": "日後",
+    "days later": "日前",
+    "Week": "週",
+    "Display": "通知",
+    "DISPLAY": "通知",
+    "EMAIL": "メール",
+    "BOTH": "メール & 通知",
+    "display previous events": "前のイベントを表示",
+    "display next events": "次のイベントを表示",
+    "are you sure": "よろしいですか?",
+    "confirm delete calendar": "%{calendarName} に関連したイベントをすべて削除します。よろしいですか?",
+    "confirm delete selected calendars": "選択したカレンダーをすべて削除します。よろしいですか?",
+    "advanced": "追加のオプション",
+    "enter email": "メールを入力",
+    "ON": "オン",
+    "OFF": "オフ",
+    "no description": "説明はありません",
+    "add calendar": "カレンダーを追加",
+    "new calendar": "新しいカレンダー",
+    "multiple actions": "複数のアクション",
+    "recurrence": "繰り返し",
+    "recurrence rule": "繰り返しルール",
+    "make reccurent": "繰り返しの作成",
+    "repeat every": "繰り返し間隔",
+    "no recurrence": "繰り返しなし",
+    "repeat on": "繰り返し時期",
+    "repeat on date": "日付で繰り返し",
+    "repeat on weekday": "平日に繰り返し",
+    "repeat until": "繰り返し期限",
+    "after": "以降",
+    "repeat": "繰り返し",
+    "forever": "永久",
+    "occurences": "繰り返し回数",
+    "every": "毎",
+    "minutes": "分",
+    "minute ": "分",
+    "minute": "分",
+    "hours": "時間",
+    "hour": "時間",
+    "day": "日",
+    "weeks": "週間",
+    "week": "週間",
+    "months": "ヶ月",
+    "month": "月",
+    "years": "年",
+    "year": "年",
+    "until": "まで",
+    "for": "間",
+    "on": "オン",
+    "on the": "に",
+    "th": "日",
+    "nd": "日",
+    "rd": "日",
+    "st": "日",
+    "last": "末",
+    "and": "かつ",
+    "times": "回",
+    "weekday": "平日",
+    "screen title done button": "完了",
+    "placeholder event title": "イベントのタイトル",
+    "from": "開始",
+    "placeholder from date": "開始 [日付]",
+    "placeholder from time": "開始 [時:分]",
+    "to": "終了",
+    "placeholder to date": "終了 [日付]",
+    "placeholder to time": "終了 [時:分]",
+    "placeholder place": "場所",
+    "add guest button": "ゲストを追加",
+    "guests list": "%{first} かつ %{smart_count} 他 |||| %{first} かつ %{smart_count} 他",
+    "placeholder description": "説明",
+    "no alert button": "アラームはありません",
+    "alert label": "%{smart_count} アラームをスケジュールしました |||| %{smart_count} アラームをスケジュールしました",
+    "alert tooltip": "アラームの管理",
+    "no repeat button": "繰り返しはありません",
+    "repeat tooltip": "繰り返しの管理",
+    "more details button": "追加のオプション",
+    "save button": "保存",
+    "create button": "作成",
+    "duplicate event tooltip": "イベントの複製",
+    "delete event tooltip": "イベントを削除",
+    "change calendar": "カレンダーを変更",
+    "screen delete title": "イベントを削除",
+    "screen delete description": "イベント \"%{description}\" を削除します。よろしいですか?",
+    "screen delete yes button": "はい",
+    "screen delete no button": "いいえ",
+    "screen guest title empty": "ゲスト",
+    "screen guest title": "%{smart_count} ゲスト |||| %{smart_count} ゲスト",
+    "screen guest input placeholder": "メールアドレス",
+    "screen guest add button": "追加",
+    "screen guest remove tooltip": "招待をキャンセル",
+    "screen description title": "説明",
+    "screen alert title empty": "アラーム",
+    "screen alert title": "%{smart_count} アラーム |||| %{smart_count} アラーム",
+    "screen alert default value": "新しいアラームを追加",
+    "screen alert time of event": "イベントの時刻",
+    "screen alert minute": "%{smart_count} 分 |||| %{smart_count} 分",
+    "screen alert hour": "%{smart_count} 時間 |||| %{smart_count} 時間",
+    "screen alert day": "%{smart_count} 日 |||| %{smart_count} 日",
+    "screen alert week": "%{smart_count} 週間 |||| %{smart_count} 週間",
+    "screen alert delete tooltip": "アラームを削除",
+    "screen alert type email": "メール",
+    "screen alert type notification": "Cozy 通知",
+    "screen recurrence title": "繰り返し",
+    "screen recurrence no repeat": "繰り返しはありません",
+    "screen recurrence daily": "毎日",
+    "screen recurrence weekly": "毎週",
+    "screen recurrence monthly": "毎月",
+    "screen recurrence yearly": "毎年",
+    "screen recurrence interval label": "間隔",
+    "screen recurrence interval unit 0": "年 |||| 年",
+    "screen recurrence interval unit 1": "ヶ月 |||| ヶ月",
+    "screen recurrence interval unit 2": "週間 |||| 週間",
+    "screen recurrence interval unit 3": "日 |||| 日",
+    "screen recurrence interval unit": "日",
+    "screen recurrence days list label": "日に",
+    "screen recurrence repeat by label": "で繰り返し",
+    "screen recurrence repeat by month": "日にち",
+    "screen recurrence repeat by week": "曜日",
+    "screen recurrence ends label": "終了:",
+    "screen recurrence ends never label": "なし",
+    "screen recurrence ends count label": "以降",
+    "screen recurrence ends count unit": "回数",
+    "screen recurrence ends until label": "期限",
+    "screen recurrence ends until placeholder": "期限 [日付]",
+    "screen recurrence summary label": "サマリー",
+    "send mails question": "通知メール送信先:",
+    "modal send mails": "通知を送信",
+    "yes": "はい",
+    "no": "いいえ",
+    "no summary": "サマリーは設定する必要があります。",
+    "start after end": "開始日が終了日の後になっています。",
+    "invalid start date": "開始日が正しくありません。",
+    "invalid end date": "終了日が正しくありません。",
+    "invalid trigg date": "日付が正しくありません。",
+    "invalid action": "アクションが正しくありません。",
+    "server error occured": "サーバーエラーが発生しました。",
+    "synchronization": "同期",
+    "mobile sync": "モバイル同期 (CalDAV)",
+    "link imported events with calendar": "次のカレンダーでイベントをインポートにリンク:",
+    "import an ical file": "iCal ファイルを Cozy カレンダーにインポートするには、まずこのボタンをクリックしてプリロードしてください:",
+    "download a copy of your calendar": "iCal ファイルとしてカレンダーのコピーをダウンロードする場合は、カレンダーを 1 つ選択して、エクスポートボタンをクリックしてください:",
+    "icalendar export": "ICalendar エクスポート",
+    "icalendar import": "ICalendar インポート",
+    "to sync your cal with": "お使いのデバイスとカレンダーを同期するには、次の 2 つの手順を実行する必要があります",
+    "sync headline with data": "お使いのカレンダーを同期するために、次の情報を使用します:",
+    "sync url": "URL:",
+    "sync login": "ユーザー名:",
+    "sync password": "パスワード:",
+    "sync help": "お忘れですか? 次の",
+    "sync help link": "手順に従ってください!",
+    "install the sync module": "Cozy アプリストアから同期モジュールをインストールします",
+    "connect to it and follow": "そこに接続して、CalDAV に関連する指示に従ってください。",
+    "some event fail to save": "イベントは保存されませんでした (エラーが発生しました)。",
+    "imported events": "インポートしたイベントの数",
+    "import finished": "インポートは完了です。すべての新しいイベントを表示するには時間がかかります。より速くロードしたい場合は、ページ全体を更新してください。",
+    "import error": "サーバーエラーが発生しました。インポートに失敗しました。",
+    "import error occured for": "次の要素でインポートエラーが発生しました:",
+    "export your calendar": "あなたのカレンダーをエクスポート",
+    "please select existing calendar": "既存のカレンダーを選択してください。",
+    "January": "1 月",
+    "February": "2 月",
+    "March": "3 月",
+    "April": "4 月",
+    "May": "5 月",
+    "June": "6 月",
+    "July": "7 月",
+    "August": "8 月",
+    "September": "9 月",
+    "October": "10 月",
+    "November": "11 月",
+    "December": "12 月",
+    "Jan": "1 月",
+    "Feb": "2 月",
+    "Mar": "3 月",
+    "Apr": "4 月",
+    "Jun": "6 月",
+    "Jul": "7 月",
+    "Aug": "8 月",
+    "Sep": "8 月",
+    "Oct": "10 月",
+    "Nov": "11 月",
+    "Dec": "12 月",
+    "calendar exist error": "名前が \"新しいカレンダー\" のカレンダーがすでに存在します。",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "'%{description}' への招待",
+    "email invitation content": "こんにちは。次のイベントにご招待します:\n\n%{description} %{place}\n日付 %{date}\nご都合はいかがですか?\n\nはい\n%{url}?status=ACCEPTED&key=%{key}\n\nいいえ\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "イベント \"%{description}\" が変更されました",
+    "email update content": "ご招待したイベントが変更されました:\n%{description} %{place}\n日付 %{date}\n\nまだ参加します\n%{url}?status=ACCEPTED&key=%{key}\n\n参加できません\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "このイベントはキャンセルされました: %{description}",
+    "email delete content": "このイベントはキャンセルされました:\n%{description} %{place}\n日付 %{date}",
+    "invalid recurring rule": "繰り返しルールが正しくありません"
+};
+});
+
+require.register("locales/ko.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "캘린더",
+    "sync settings button label": "동기화",
+    "default calendar name": "내 캘린더",
+    "Add": "추가",
+    "event": "이벤트",
+    "create event": "이벤트 생성",
+    "edit event": "이벤트 수정",
+    "edit": "수정",
+    "save": "저장",
+    "create": "생성",
+    "creation": "생성",
+    "invite": "초대",
+    "close": "닫기",
+    "delete": "삭제",
+    "change color": "색상 변경",
+    "rename": "다른이름으로",
+    "export": "내보내기",
+    "remove": "이벤트 삭제",
+    "duplicate": "이벤트 중복",
+    "Place": "장소",
+    "all day": "종일",
+    "All day": "하루 종일",
+    "description": "설명",
+    "date": "일자",
+    "Day": "일",
+    "days": "일",
+    "Edit": "수정",
+    "Email": "이메일",
+    "Import": "가져오기",
+    "Export": "내보내기",
+    "show": "보기",
+    "hide": "숨기기",
+    "List": "목록",
+    "list": "목록",
+    "Calendar": "캘린더",
+    "calendar": "캘린더",
+    "Sync": "동기화",
+    "ie: 9:00 important meeting": "예: 9:00 중요 미팅",
+    "Month": "월",
+    "Popup": "팝업",
+    "Switch to List": "목록 스위치",
+    "Switch to Calendar": "일정 스위치",
+    "time": "시간",
+    "Today": "오늘",
+    "today": "오늘",
+    "What should I remind you ?": "무엇을 알려 줄까요?",
+    "select an icalendar file": "캘린더 파일 선택",
+    "import your icalendar file": "캘린더 파일 가져오기",
+    "confirm import": "가져오기 확인",
+    "cancel": "취소",
+    "Create": "생성",
+    "Events to import": "가져온 이벤트 목록",
+    "Create Event": "이벤트 생성",
+    "From [hours:minutes]": "부터 [시:분]",
+    "To [hours:minutes]": "까지 [시:분]",
+    "To [date]": "까지 [날짜]",
+    "Description": "설명",
+    "days after": "이후로",
+    "days later": "이후로",
+    "Week": "주간",
+    "Display": "알림",
+    "DISPLAY": "알림",
+    "EMAIL": "이메일",
+    "BOTH": "이메일 & 알림",
+    "display previous events": "이전 이벤트 표시",
+    "display next events": "다음 이벤트 표시",
+    "are you sure": "정말 입니까?",
+    "confirm delete calendar": "%{calendarName}의 모든 이벤트를 삭제 하시겠습니까?",
+    "confirm delete selected calendars": "정말로 선택된 캘린더를 모두 삭제 하시겠습니까?",
+    "advanced": "추가 옵션",
+    "enter email": "이메일 입력",
+    "ON": "켜기",
+    "OFF": "끄기",
+    "no description": "설명 없음",
+    "add calendar": "캘린더 추가",
+    "new calendar": "새 캘린더",
+    "multiple actions": "다중 실행",
+    "recurrence": "되돌리기",
+    "recurrence rule": "되돌리기 정책",
+    "make reccurent": "되돌리기 정책 생성",
+    "repeat every": "전체 되돌리기",
+    "no recurrence": "되돌리기 정책 없음",
+    "repeat on": "반복",
+    "repeat on date": "모든 일자에 반복",
+    "repeat on weekday": "모든 주간에 반복",
+    "repeat until": "때 까지 반복",
+    "after": "이후",
+    "repeat": "반복",
+    "forever": "영원히",
+    "occurences": "참조",
+    "every": "전체",
+    "minutes": "분",
+    "minute ": "분",
+    "minute": "분",
+    "hours": "시",
+    "hour": "시",
+    "day": "일",
+    "weeks": "주간",
+    "week": "주",
+    "months": "월간",
+    "month": "월",
+    "years": "연간",
+    "year": "연",
+    "until": "까지",
+    "for": "동안",
+    "on": "켜기",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "마지막",
+    "and": "그리고",
+    "times": "번",
+    "weekday": "주중",
+    "screen title done button": "완료",
+    "placeholder event title": "이벤트 제목",
+    "from": "시작",
+    "placeholder from date": "시작 [일자]",
+    "placeholder from time": "시작[시:분]",
+    "to": "종료",
+    "placeholder to date": "종료 [일자]",
+    "placeholder to time": "종료 [시:분]",
+    "placeholder place": "장소",
+    "add guest button": "초대",
+    "guests list": "%{first} 명 부터 %{smart_count} 까지 |||| %{first} 명 부터 %{smart_count} 까지",
+    "placeholder description": "내용",
+    "no alert button": "알림 사용안함",
+    "alert label": "%{smart_count}개의 알림 일정 |||| %{smart_count}개의 알림 일정",
+    "alert tooltip": "알림 관리",
+    "no repeat button": "반복안함",
+    "repeat tooltip": "되돌리기 관리",
+    "more details button": "추가 항목",
+    "save button": "저장",
+    "create button": "생성",
+    "duplicate event tooltip": "이벤트 중복",
+    "delete event tooltip": "이벤트 삭제",
+    "change calendar": "캘린더 변경",
+    "screen delete title": "이벤트 삭제",
+    "screen delete description": "정말로 %{calendarName} 캘린더의 모든 이벤트를 삭제 하시겠습니까?",
+    "screen delete yes button": "예",
+    "screen delete no button": "아니오",
+    "screen guest title empty": "초대",
+    "screen guest title": "%{smart_count}명 초대 |||| %{smart_count}명 초대",
+    "screen guest input placeholder": "이메일 주소",
+    "screen guest add button": "추가",
+    "screen guest remove tooltip": "초대 취소",
+    "screen description title": "설명",
+    "screen alert title empty": "알림",
+    "screen alert title": "%{smart_count}개의 알림 |||| %{smart_count}개의 알림",
+    "screen alert default value": "새 알림 추가",
+    "screen alert time of event": "이벤트 시간",
+    "screen alert minute": "%{smart_count}분 |||| %{smart_count}분",
+    "screen alert hour": "%{smart_count}시 |||| %{smart_count}시",
+    "screen alert day": "%{smart_count}일 |||| %{smart_count}일",
+    "screen alert week": "%{smart_count}주 |||| %{smart_count}주",
+    "screen alert delete tooltip": "알림 삭제",
+    "screen alert type email": "이메일",
+    "screen alert type notification": "Cozy 알림",
+    "screen recurrence title": "반복",
+    "screen recurrence no repeat": "반복 없슴",
+    "screen recurrence daily": "일간",
+    "screen recurrence weekly": "주간",
+    "screen recurrence monthly": "월간",
+    "screen recurrence yearly": "연간",
+    "screen recurrence interval label": "주기",
+    "screen recurrence interval unit 0": "매년 |||| 매년",
+    "screen recurrence interval unit 1": "매달 |||| 매달",
+    "screen recurrence interval unit 2": "매주 |||| 매주",
+    "screen recurrence interval unit 3": "매일 |||| 매일",
+    "screen recurrence interval unit": "일",
+    "screen recurrence days list label": "하루 중",
+    "screen recurrence repeat by label": "반복",
+    "screen recurrence repeat by month": "월중 하루",
+    "screen recurrence repeat by week": "주중 하루",
+    "screen recurrence ends label": "종료:",
+    "screen recurrence ends never label": "사용안함",
+    "screen recurrence ends count label": "이후",
+    "screen recurrence ends count unit": "발생",
+    "screen recurrence ends until label": "까지",
+    "screen recurrence ends until placeholder": "종료 [일자]",
+    "screen recurrence summary label": "요약",
+    "send mails question": "공지 보내기:",
+    "modal send mails": "공지 보내기",
+    "yes": "예",
+    "no": "아니오",
+    "no summary": "요약은 필수 입력 항목 입니다.",
+    "start after end": "시작 일자가 종료 일자 보다 이후 입니다.",
+    "invalid start date": "시작 일자가 올바르지 않습니다.",
+    "invalid end date": "종료 일자가 올바르지 않습니다.",
+    "invalid trigg date": "일자가 올바르지 않습니다.",
+    "invalid action": "실행 방법이 올바르지 않습니다.",
+    "server error occured": "서버에서 오류가 발생 하였습니다.",
+    "synchronization": "동기화",
+    "mobile sync": "모바일 동기화(CalDAV)",
+    "link imported events with calendar": "캘린더에서 가져온 이벤트 목록:",
+    "import an ical file": "ICal 파일을 캘린더로 가져오기 위해서, 먼저 미리보기 버튼을 클릭 하세요:",
+    "download a copy of your calendar": "ICal 파일을 다운로드 하려면, 캘린더를 선택 후에 내보내기 버튼을 클릭 클릭하세요:",
+    "icalendar export": "ICalendar 내보내기",
+    "icalendar import": "ICalendar 가져오기",
+    "to sync your cal with": "등록된 장치와 캘린더를 동기화 하기 위해서는, 아래 두 단계를 반드시 이행 하세요.",
+    "sync headline with data": "캘린더를 동기화 하기 위해서는 아래 내용을 확인하세요:",
+    "sync url": "URL:",
+    "sync login": "사용자명:",
+    "sync password": "비밀번호:",
+    "sync help": "정말로 잊어 버렸습니까?다음에 따라",
+    "sync help link": "단계별 안내!",
+    "install the sync module": "스토어에서 동기화 모듈을 설치 하세요",
+    "connect to it and follow": "연결 후 CalDAV 연결 방법을 따라하세요.",
+    "some event fail to save": "이벤트가 저장 되지 않았습니다(오류 발생).",
+    "imported events": "가져오기 한 이벤트 수",
+    "import finished": "이벤트를 추가 하였습니다. 모든 이벤트를 표시 합니다. 잠시 기다려 주세요. 바로 보려면, 페이지를 새로고침 하세요.",
+    "import error": "이벤트를 등록 하는 동안 서버에서 오류가 발생 하였습니다.",
+    "import error occured for": "이벤트 등록 하는 동안 발생 한 오류:",
+    "export your calendar": "캘린터 내보내기",
+    "please select existing calendar": "캘린더를 선택 하세요.",
+    "January": "1월",
+    "February": "2월",
+    "March": "3월",
+    "April": "4월",
+    "May": "5월",
+    "June": "6월",
+    "July": "7월",
+    "August": "8월",
+    "September": "9월",
+    "October": "10월",
+    "November": "11월",
+    "December": "12월",
+    "Jan": "1월",
+    "Feb": "2월",
+    "Mar": "3월",
+    "Apr": "4월",
+    "Jun": "6월",
+    "Jul": "7월",
+    "Aug": "8월",
+    "Sep": "9월",
+    "Oct": "10월",
+    "Nov": "11월",
+    "Dec": "12월",
+    "calendar exist error": "\"새 캘린더\"가 이미 존재 합니다.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [하루종일]",
+    "email invitation title": "초대장 제목 '%{description}'",
+    "email invitation content": "안녕하세요, 아래의 이벤트에 당신을 초대하고 싶습니다:\n일자 : %{date}\n장소 : %{place}\n내용 : %{description}\\n초대를 수락 해 주시겠습니까?\n예\n%{url}?status=ACCEPTED&key=%{key}\n아니오\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "이벤트 \"%{description}\"가 변경 되었습니다.",
+    "email update content": "초대된 이벤트가 변경 되었습니다.:\n일자 : %{date}\n장소 : %{place}\n내용 : %{description}\n예\n%{url}?status=ACCEPTED&key=%{key}\n아니오\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "이 이벤트는 취소 되었습니다: %{description}",
+    "email delete content": "이벤트가 취소 되었습니다:\n일자 : %{date}\n장소 : %{place}\n내용 : %{description}",
+    "invalid recurring rule": "반복 정책이 올바르지 않습니다."
+};
+});
+
+require.register("locales/pl.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/pt_BR.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendários",
+    "sync settings button label": "Sincronizações",
+    "default calendar name": "Meu calendário",
+    "Add": "Adicionar",
+    "event": "Evento",
+    "create event": "Criar Evento",
+    "edit event": "Edição do evento",
+    "edit": "Alterar",
+    "save": "Salvar",
+    "create": "Criar",
+    "creation": "Criação",
+    "invite": "Convide",
+    "close": "Fechar",
+    "delete": "Remover",
+    "change color": "Alterar cor",
+    "rename": "Renomear",
+    "export": "Exportar",
+    "remove": "Remover evento",
+    "duplicate": "Duplicar evento",
+    "Place": "Local",
+    "all day": "O dia todo",
+    "All day": "O dia inteiro",
+    "description": "Descrição",
+    "date": "data",
+    "Day": "Dia",
+    "days": "dias",
+    "Edit": "Alterar",
+    "Email": "Email",
+    "Import": "Importar",
+    "Export": "Exportar",
+    "show": "Mostrar",
+    "hide": "Esconder",
+    "List": "Lista",
+    "list": "Lista",
+    "Calendar": "Calendário",
+    "calendar": "Calendário",
+    "Sync": "Sincronizar",
+    "ie: 9:00 important meeting": "ex: 9:00 reunião importante",
+    "Month": "Mês",
+    "Popup": "Popup",
+    "Switch to List": "Trocar para Lista",
+    "Switch to Calendar": "Trocar para Calendário",
+    "time": "período",
+    "Today": "Hoje",
+    "today": "hoje",
+    "What should I remind you ?": "O que eu deveria lembrá-lo?",
+    "select an icalendar file": "Selecione um arquivo icalendar",
+    "import your icalendar file": "Importe seu arquivo icalendar",
+    "confirm import": "Confirme o importo",
+    "cancel": "cancelar",
+    "Create": "Criar",
+    "Events to import": "Eventos a importar",
+    "Create Event": "Criar Evento",
+    "From [hours:minutes]": "Das [horas:minutos]",
+    "To [hours:minutes]": "Ás [horas:minutos]",
+    "To [date]": "Até [data]",
+    "Description": "Descrição",
+    "days after": "dias depois",
+    "days later": "dias mais tarde",
+    "Week": "Semana",
+    "Display": "Notificação",
+    "DISPLAY": "Notificação",
+    "EMAIL": "Email",
+    "BOTH": "Email e notificação",
+    "display previous events": "Mostrar eventos anteriores",
+    "display next events": "Mostrar eventos seguintes",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "De [horas:minutos]",
+    "to": "To",
+    "placeholder to date": "Até [data]",
+    "placeholder to time": "Ás [horas:minutos]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Descrição",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Salvar",
+    "create button": "Criar",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Descrição",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Sincronizações",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/ro.json", function(exports, require, module) {
 module.exports = {
     "calendar list title": "Calendars",
     "sync settings button label": "Synchronization",
@@ -3208,7 +5218,515 @@ module.exports = {
 ;
 });
 
-require.register("models/contact", function(exports, require, module) {
+require.register("locales/ru.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Календари",
+    "sync settings button label": "Синхронизация",
+    "default calendar name": "мой календарь",
+    "Add": "Добавить",
+    "event": "Событие",
+    "create event": "Создание события",
+    "edit event": "Редактирование события",
+    "edit": "Изменить",
+    "save": "Сохранить",
+    "create": "Создать",
+    "creation": "Создание",
+    "invite": "Пригласить",
+    "close": "Закрыть",
+    "delete": "Удалить",
+    "change color": "Изменить цвет",
+    "rename": "Переименовать",
+    "export": "Экспорт",
+    "remove": "Удалить событие",
+    "duplicate": "Продублировать событие",
+    "Place": "Место",
+    "all day": "Весь день",
+    "All day": "Весь день",
+    "description": "Описание",
+    "date": "дата",
+    "Day": "День",
+    "days": "дни",
+    "Edit": "Изменить",
+    "Email": "Email",
+    "Import": "Импорт",
+    "Export": "Экспорт",
+    "show": "Показать",
+    "hide": "Скрыть",
+    "List": "Список",
+    "list": "список",
+    "Calendar": "Календарь",
+    "calendar": "Календарь",
+    "Sync": "Синхронизировать",
+    "ie: 9:00 important meeting": "например: 9:00 важная встреча",
+    "Month": "Месяц",
+    "Popup": "Pop-up",
+    "Switch to List": "Показать список",
+    "Switch to Calendar": "Показать календарь",
+    "time": "время",
+    "Today": "Сегодня",
+    "today": "сегодня",
+    "What should I remind you ?": "О чем нужно напомнить?",
+    "select an icalendar file": "Выбрать файл iCal",
+    "import your icalendar file": "Импортировать файл iCal",
+    "confirm import": "подтвердить импорт",
+    "cancel": "отмена",
+    "Create": "Создать",
+    "Events to import": "События для импорта",
+    "Create Event": "Создать событие",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Описание",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Неделя",
+    "Display": "Уведомление",
+    "DISPLAY": "Уведомление",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail и уведомление",
+    "display previous events": "Показать предыдущие события",
+    "display next events": "Показать следующие события",
+    "are you sure": "Уверены?",
+    "confirm delete calendar": "Вы собираетесь удалить все события из календаря %{calendarName}. Уверены?",
+    "confirm delete selected calendars": "Вы собираетесь удалить все выбранные календари. Уверены?",
+    "advanced": "Еще опции",
+    "enter email": "Введите e-mail",
+    "ON": "вкл.",
+    "OFF": "выкл.",
+    "no description": "Нет описания",
+    "add calendar": "Добавить календарь",
+    "new calendar": "Новый календарь",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Повтор",
+    "recurrence rule": "Правила повтора",
+    "make reccurent": "Сделать повторяющимся",
+    "repeat every": "Повторять каждые",
+    "no recurrence": "Одноразово",
+    "repeat on": "Повторять по",
+    "repeat on date": "Повторять по датам",
+    "repeat on weekday": "Повторять по выходным",
+    "repeat until": "Повторять до",
+    "after": "После",
+    "repeat": "Повторять",
+    "forever": "Всегда",
+    "occurences": "occurences",
+    "every": "Каждые",
+    "minutes": "минут",
+    "minute ": "минута",
+    "minute": "минута",
+    "hours": "часов",
+    "hour": "час",
+    "day": "день",
+    "weeks": "недели",
+    "week": "неделя",
+    "months": "месяцев",
+    "month": "месяц",
+    "years": "лет |||| года",
+    "year": "год",
+    "until": "до",
+    "for": "для",
+    "on": "на",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Место",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Описание",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "Еще опции",
+    "save button": "Сохранить",
+    "create button": "Создать",
+    "duplicate event tooltip": "Продублировать событие",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Добавить",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Описание",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Повторять",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "дни",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "После",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Синхронизация",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "Январь",
+    "February": "Февраль",
+    "March": "Март",
+    "April": "Апрель",
+    "May": "Май",
+    "June": "Июнь",
+    "July": "Июль",
+    "August": "Август",
+    "September": "Сентябрь",
+    "October": "Октябрь",
+    "November": "Ноябрь",
+    "December": "Декабрь",
+    "Jan": "Янв.",
+    "Feb": "Фев.",
+    "Mar": "Мар.",
+    "Apr": "Апр.",
+    "Jun": "Июн.",
+    "Jul": "Июл.",
+    "Aug": "Авг.",
+    "Sep": "Сент.",
+    "Oct": "Окт.",
+    "Nov": "Нояб.",
+    "Dec": "Дек.",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("locales/sk.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "modal send mails": "Send a notification",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
+require.register("models/contact.coffee", function(exports, require, module) {
 var Contact,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3233,7 +5751,7 @@ module.exports = Contact = (function(superClass) {
 })(Backbone.Model);
 });
 
-;require.register("models/event", function(exports, require, module) {
+;require.register("models/event.coffee", function(exports, require, module) {
 var Event, ScheduleItem,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3358,7 +5876,7 @@ module.exports = Event = (function(superClass) {
 })(ScheduleItem);
 });
 
-;require.register("models/realevent", function(exports, require, module) {
+;require.register("models/realevent.coffee", function(exports, require, module) {
 var RealEvent,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3415,7 +5933,7 @@ module.exports = RealEvent = (function(superClass) {
 })(Backbone.Model);
 });
 
-;require.register("models/scheduleitem", function(exports, require, module) {
+;require.register("models/scheduleitem.coffee", function(exports, require, module) {
 var H, Helpers, Modal, ScheduleItem,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3770,7 +6288,7 @@ module.exports = ScheduleItem = (function(superClass) {
 })(Backbone.Model);
 });
 
-;require.register("models/tag", function(exports, require, module) {
+;require.register("models/tag.coffee", function(exports, require, module) {
 var Tag,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -3797,7 +6315,7 @@ module.exports = Tag = (function(superClass) {
 })(Backbone.Model);
 });
 
-;require.register("router", function(exports, require, module) {
+;require.register("router.coffee", function(exports, require, module) {
 var CalendarView, DayBucketCollection, ImportView, ListView, Router, SettingsModal, app, getBeginningOfWeek,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -3993,7 +6511,7 @@ module.exports = Router = (function(superClass) {
 })(Backbone.Router);
 });
 
-;require.register("views/calendar_header", function(exports, require, module) {
+;require.register("views/calendar_header.coffee", function(exports, require, module) {
 var BaseView, CalendarHeader,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -4116,14 +6634,20 @@ module.exports = CalendarHeader = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/calendar_popover_event", function(exports, require, module) {
-var Event, EventPopOver, PopoverView,
+;require.register("views/calendar_popover_event.coffee", function(exports, require, module) {
+var Event, EventPopOver, Modal, PopoverView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 PopoverView = require('lib/popover_view');
 
 Event = require('models/event');
+
+Modal = require('lib/modal');
+
+if (!window.localStorage) {
+  window.localStorage = {};
+}
 
 module.exports = EventPopOver = (function(superClass) {
   extend(EventPopOver, superClass);
@@ -4138,7 +6662,8 @@ module.exports = EventPopOver = (function(superClass) {
     details: require('views/popover_screens/details'),
     alert: require('views/popover_screens/alert'),
     repeat: require('views/popover_screens/repeat'),
-    "delete": require('views/popover_screens/delete')
+    "delete": require('views/popover_screens/delete'),
+    confirm: require('views/popover_screens/confirm')
   };
 
   EventPopOver.prototype.mainScreen = 'main';
@@ -4154,13 +6679,26 @@ module.exports = EventPopOver = (function(superClass) {
   EventPopOver.prototype.initialize = function(options) {
     if (!this.model) {
       this.model = new Event({
-        start: options.start.toISOString(),
-        end: options.end.toISOString(),
+        start: this.momentToString(options.start),
+        end: this.momentToString(options.end),
         description: '',
         place: ''
       });
     }
+    this.listenToOnce(this.model, 'change', (function(_this) {
+      return function() {
+        return _this.modelHasChanged = true;
+      };
+    })(this));
     return EventPopOver.__super__.initialize.call(this, options);
+  };
+
+  EventPopOver.prototype.momentToString = function(m) {
+    if ((typeof m.hasTime === "function" ? m.hasTime() : void 0) === false) {
+      return m.toISOString().slice(0, 10);
+    } else {
+      return m.toISOString();
+    }
   };
 
   EventPopOver.prototype.onKeyUp = function(event) {
@@ -4169,25 +6707,40 @@ module.exports = EventPopOver = (function(superClass) {
     }
   };
 
+  EventPopOver.prototype.displayConfirmIfNeeded = function(checkoutChanges, callbackIfYes) {
+    var dontConfirm, needConfirm;
+    needConfirm = checkoutChanges && this.modelHasChanged;
+    dontConfirm = localStorage.dontConfirmCalendarPopover && localStorage.dontConfirmCalendarPopover !== "false";
+    if (needConfirm && !dontConfirm) {
+      this.previousScreen = this.screenElement.attr('data-screen');
+      this.callbackIfYes = callbackIfYes;
+      return this.switchToScreen('confirm');
+    } else {
+      return callbackIfYes();
+    }
+  };
+
   EventPopOver.prototype.selfclose = function(checkoutChanges) {
     if (checkoutChanges == null) {
       checkoutChanges = true;
     }
-    if (this.model.isNew()) {
-      EventPopOver.__super__.selfclose.call(this);
-    } else {
-      if (checkoutChanges) {
-        this.model.fetch({
-          complete: (function(_this) {
-            return function() {
-              return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
-            };
-          })(this)
-        });
-      } else {
-        EventPopOver.__super__.selfclose.call(this, checkoutChanges);
-      }
-    }
+    this.displayConfirmIfNeeded(checkoutChanges, (function(_this) {
+      return function() {
+        if (_this.model.isNew()) {
+          return EventPopOver.__super__.selfclose.call(_this);
+        } else {
+          if (checkoutChanges) {
+            return _this.model.fetch({
+              complete: function() {
+                return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+              }
+            });
+          } else {
+            return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+          }
+        }
+      };
+    })(this));
     return window.popoverExtended = false;
   };
 
@@ -4214,7 +6767,7 @@ module.exports = EventPopOver = (function(superClass) {
 })(PopoverView);
 });
 
-;require.register("views/calendar_view", function(exports, require, module) {
+;require.register("views/calendar_view.coffee", function(exports, require, module) {
 var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4318,7 +6871,8 @@ module.exports = CalendarView = (function(superClass) {
       eventResizeStop: this.onEventResizeStop,
       eventResize: this.onEventResize,
       handleWindowResize: false,
-      weekNumbers: true
+      weekNumbers: true,
+      nextDayThreshold: "04:00:00"
     });
     source = this.eventCollection.getFCEventSource(this.calendarsCollection);
     this.cal.fullCalendar('addEventSource', source);
@@ -4474,11 +7028,8 @@ module.exports = CalendarView = (function(superClass) {
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
     var end, start;
     if (this.view === 'month') {
-      endDate.subtract(1, 'days');
-      startDate = startDate.format() + 'T10:00:00.000';
-      endDate = endDate.format() + 'T11:00:00.000';
-    } else if (this.view === 'agendaWeek') {
-      endDate = startDate.clone().add(1, 'hour');
+      startDate.time('10:00:00.000');
+      endDate.subtract(1, 'days').time('11:00:00.000');
     }
     start = helpers.ambiguousToTimezoned(startDate);
     end = helpers.ambiguousToTimezoned(endDate);
@@ -4583,7 +7134,7 @@ module.exports = CalendarView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/import_event_list", function(exports, require, module) {
+;require.register("views/import_event_list.coffee", function(exports, require, module) {
 var EventCollection, EventList, EventView, ViewCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -4610,7 +7161,7 @@ module.exports = EventList = (function(superClass) {
 })(ViewCollection);
 });
 
-;require.register("views/import_event_view", function(exports, require, module) {
+;require.register("views/import_event_view.coffee", function(exports, require, module) {
 var BaseView, EventView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -4642,7 +7193,7 @@ module.exports = EventView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/import_view", function(exports, require, module) {
+;require.register("views/import_view.coffee", function(exports, require, module) {
 var BaseView, ComboBox, Event, EventList, ImportView, helpers, request,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4731,11 +7282,11 @@ module.exports = ImportView = (function(superClass) {
       })(this),
       error: (function(_this) {
         return function(xhr) {
-          var e, msg;
+          var e, error, msg;
           try {
             msg = JSON.parse(xhr.responseText).msg;
-          } catch (_error) {
-            e = _error;
+          } catch (error) {
+            e = error;
             console.error(e);
             console.error(xhr.responseText);
           }
@@ -4870,7 +7421,7 @@ module.exports = ImportView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/list_view", function(exports, require, module) {
+;require.register("views/list_view.coffee", function(exports, require, module) {
 var Header, ListView, ViewCollection, defaultTimezone, helpers,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -5037,7 +7588,7 @@ module.exports = ListView = (function(superClass) {
 })(ViewCollection);
 });
 
-;require.register("views/list_view_bucket", function(exports, require, module) {
+;require.register("views/list_view_bucket.coffee", function(exports, require, module) {
 var BucketView, PopoverEvent, ViewCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5124,7 +7675,7 @@ module.exports = BucketView = (function(superClass) {
 })(ViewCollection);
 });
 
-;require.register("views/list_view_item", function(exports, require, module) {
+;require.register("views/list_view_item.coffee", function(exports, require, module) {
 var BaseView, Event, EventItemView, PopoverEvent,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5204,7 +7755,7 @@ module.exports = EventItemView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/menu", function(exports, require, module) {
+;require.register("views/menu.coffee", function(exports, require, module) {
 var ComboBox, Event, MenuView, Tag, ViewCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5360,7 +7911,7 @@ module.exports = MenuView = (function(superClass) {
 })(ViewCollection);
 });
 
-;require.register("views/menu_item", function(exports, require, module) {
+;require.register("views/menu_item.coffee", function(exports, require, module) {
 var BaseView, MenuItemView, colorSet,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -5565,7 +8116,7 @@ module.exports = MenuItemView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/popover_screens/alert", function(exports, require, module) {
+;require.register("views/popover_screens/alert.coffee", function(exports, require, module) {
 var AlertPopoverScreen, PopoverScreenView, helpers,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5751,7 +8302,50 @@ module.exports = AlertPopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/popover_screens/delete", function(exports, require, module) {
+;require.register("views/popover_screens/confirm.coffee", function(exports, require, module) {
+var ConfirmClosePopoverScreen, PopoverScreenView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+module.exports = ConfirmClosePopoverScreen = (function(superClass) {
+  extend(ConfirmClosePopoverScreen, superClass);
+
+  function ConfirmClosePopoverScreen() {
+    return ConfirmClosePopoverScreen.__super__.constructor.apply(this, arguments);
+  }
+
+  ConfirmClosePopoverScreen.prototype.screenTitle = t('are you sure');
+
+  ConfirmClosePopoverScreen.prototype.templateTitle = require('views/templates/popover_screens/confirm_title');
+
+  ConfirmClosePopoverScreen.prototype.templateContent = require('views/templates/popover_screens/confirm');
+
+  ConfirmClosePopoverScreen.prototype.events = {
+    'click .answer-no': function() {
+      return this.switchToScreen(this.popover.previousScreen);
+    },
+    'click .answer-yes': 'onYes',
+    'change .dontaskagain': 'onCheckboxChange'
+  };
+
+  ConfirmClosePopoverScreen.prototype.onYes = function() {
+    return this.popover.callbackIfYes();
+  };
+
+  ConfirmClosePopoverScreen.prototype.onCheckboxChange = function() {
+    var dontaskagain;
+    dontaskagain = $('.dontaskagain').is(':checked');
+    return localStorage.dontConfirmCalendarPopover = dontaskagain;
+  };
+
+  return ConfirmClosePopoverScreen;
+
+})(PopoverScreenView);
+});
+
+;require.register("views/popover_screens/delete.coffee", function(exports, require, module) {
 var DeletePopoverScreen, PopoverScreenView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5813,7 +8407,7 @@ module.exports = DeletePopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/popover_screens/details", function(exports, require, module) {
+;require.register("views/popover_screens/details.coffee", function(exports, require, module) {
 var DetailsPopoverScreen, PopoverScreenView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5846,7 +8440,7 @@ module.exports = DetailsPopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/popover_screens/guests", function(exports, require, module) {
+;require.register("views/popover_screens/guests.coffee", function(exports, require, module) {
 var GuestPopoverScreen, PopoverScreenView, random,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5997,7 +8591,7 @@ module.exports = GuestPopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/popover_screens/main", function(exports, require, module) {
+;require.register("views/popover_screens/main.coffee", function(exports, require, module) {
 var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -6178,8 +8772,6 @@ module.exports = MainPopoverScreen = (function(superClass) {
       this.onSetStart();
       this.onSetEnd();
       return this.$addButton.click();
-    } else if (event.keyCode === 27 || event.which === 27) {
-      return this.popover.selfclose(false);
     } else {
       return this.$addButton.removeClass('disabled');
     }
@@ -6303,7 +8895,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.onCancelClicked = function() {
-    return this.popover.selfclose(false);
+    return this.popover.selfclose(true);
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
@@ -6396,13 +8988,13 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.getRecurrenceButtonText = function() {
-    var e, language, locale, rrule;
+    var e, error1, language, locale, rrule;
     rrule = this.model.get('rrule');
     if ((rrule != null ? rrule.length : void 0) > 0) {
       try {
         rrule = RRule.fromString(this.model.get('rrule'));
-      } catch (_error) {
-        e = _error;
+      } catch (error1) {
+        e = error1;
         console.error(e);
         return t('invalid recurring rule');
       }
@@ -6451,7 +9043,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/popover_screens/repeat", function(exports, require, module) {
+;require.register("views/popover_screens/repeat.coffee", function(exports, require, module) {
 var NO_REPEAT, PopoverScreenView, RepeatPopoverScreen, allDayDateFieldFormat, dFormat, inputDateDTPickerFormat, tFormat,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -6498,7 +9090,7 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
   };
 
   RepeatPopoverScreen.prototype.getRenderData = function() {
-    var data, e, endMode, functions, monthlyRepeatBy, ref, ref1, rrule, rruleOptions;
+    var data, e, endMode, error, functions, monthlyRepeatBy, ref, ref1, rrule, rruleOptions;
     data = _.extend(RepeatPopoverScreen.__super__.getRenderData.call(this), {
       NO_REPEAT: NO_REPEAT,
       weekDays: moment.localeData()._weekdays,
@@ -6515,8 +9107,8 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
     if (this.model.has('rrule') && this.model.get('rrule').length > 0) {
       try {
         rruleOptions = RRule.fromString(this.model.get('rrule')).options;
-      } catch (_error) {
-        e = _error;
+      } catch (error) {
+        e = error;
         console.error(e);
       }
     }
@@ -6621,7 +9213,7 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
       };
       summary = rrule.toText(window.t, language);
       return this.$('#summary').html(summary);
-    } catch (_error) {}
+    } catch (undefined) {}
   };
 
   RepeatPopoverScreen.prototype.onLeaveScreen = function() {
@@ -6729,7 +9321,7 @@ module.exports = RepeatPopoverScreen = (function(superClass) {
 })(PopoverScreenView);
 });
 
-;require.register("views/settings_modal", function(exports, require, module) {
+;require.register("views/settings_modal.coffee", function(exports, require, module) {
 var BaseView, ComboBox, ImportView, SettingsModals,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -6851,7 +9443,7 @@ module.exports = SettingsModals = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/tags", function(exports, require, module) {
+;require.register("views/tags.coffee", function(exports, require, module) {
 var BaseView, TagsView,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -6903,18 +9495,18 @@ module.exports = TagsView = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/templates/calendar_header", function(exports, require, module) {
+;require.register("views/templates/calendar_header.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendarMode = locals_.calendarMode,title = locals_.title,active = locals_.active,todaytxt = locals_.todaytxt;
+;var locals_for_with = (locals || {});(function (active, calendarMode, title, todaytxt) {
 buf.push("<div class=\"fc-header-left\">");
 if ( calendarMode)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div>");
 }
-buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");;return buf.join("");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\"><div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('week')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div><div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");}.call(this,"active" in locals_for_with?locals_for_with.active:typeof active!=="undefined"?active:undefined,"calendarMode" in locals_for_with?locals_for_with.calendarMode:typeof calendarMode!=="undefined"?calendarMode:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined,"todaytxt" in locals_for_with?locals_for_with.todaytxt:typeof todaytxt!=="undefined"?todaytxt:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6927,7 +9519,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/calendarview", function(exports, require, module) {
+;require.register("views/templates/calendarview.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
@@ -6946,18 +9538,18 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/import_event", function(exports, require, module) {
+;require.register("views/templates/import_event.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),start = locals_.start,end = locals_.end,description = locals_.description,place = locals_.place;
+;var locals_for_with = (locals || {});(function (description, end, place, start) {
 buf.push("<p>" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "\n" + (jade.escape((jade_interp = description) == null ? '' : jade_interp)) + " ");
 if (place != void(0) && place != null && place.length > 0)
 {
 buf.push("(" + (jade.escape((jade_interp = place) == null ? '' : jade_interp)) + ")");
 }
-buf.push("</p>");;return buf.join("");
+buf.push("</p>");}.call(this,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined,"end" in locals_for_with?locals_for_with.end:typeof end!=="undefined"?end:undefined,"place" in locals_for_with?locals_for_with.place:typeof place!=="undefined"?place:undefined,"start" in locals_for_with?locals_for_with.start:typeof start!=="undefined"?start:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -6970,7 +9562,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/import_view", function(exports, require, module) {
+;require.register("views/templates/import_view.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
@@ -6989,7 +9581,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/list_view", function(exports, require, module) {
+;require.register("views/templates/list_view.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
@@ -7008,13 +9600,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/list_view_bucket", function(exports, require, module) {
+;require.register("views/templates/list_view_bucket.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),date = locals_.date;
-buf.push("<h4>" + (jade.escape((jade_interp = date) == null ? '' : jade_interp)) + "</h4><div class=\"alarms\"></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (date) {
+buf.push("<h4>" + (jade.escape((jade_interp = date) == null ? '' : jade_interp)) + "</h4><div class=\"alarms\"></div>");}.call(this,"date" in locals_for_with?locals_for_with.date:typeof date!=="undefined"?date:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7027,12 +9619,12 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/list_view_item", function(exports, require, module) {
+;require.register("views/templates/list_view_item.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),allDay = locals_.allDay,color = locals_.color,start = locals_.start,end = locals_.end,description = locals_.description,counter = locals_.counter;
+;var locals_for_with = (locals || {});(function (allDay, color, counter, description, end, start) {
 if ( !allDay)
 {
 buf.push("<div" + (jade.attr("style", "background-color:"+color+";", true, false)) + " class=\"fc-time\">" + (jade.escape((jade_interp = start) == null ? '' : jade_interp)) + " - " + (jade.escape((jade_interp = end) == null ? '' : jade_interp)) + "</div>");
@@ -7046,7 +9638,7 @@ if(counter != void(0) && counter != null)
 {
 buf.push("&nbsp;(" + (jade.escape((jade_interp = counter.current) == null ? '' : jade_interp)) + " / " + (jade.escape((jade_interp = counter.total) == null ? '' : jade_interp)) + ")");
 }
-buf.push("</div><i class=\"delete fa fa-trash\"></i>");;return buf.join("");
+buf.push("</div><i class=\"delete fa fa-trash\"></i>");}.call(this,"allDay" in locals_for_with?locals_for_with.allDay:typeof allDay!=="undefined"?allDay:undefined,"color" in locals_for_with?locals_for_with.color:typeof color!=="undefined"?color:undefined,"counter" in locals_for_with?locals_for_with.counter:typeof counter!=="undefined"?counter:undefined,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined,"end" in locals_for_with?locals_for_with.end:typeof end!=="undefined"?end:undefined,"start" in locals_for_with?locals_for_with.start:typeof start!=="undefined"?start:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7059,7 +9651,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/menu", function(exports, require, module) {
+;require.register("views/templates/menu.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
@@ -7078,12 +9670,12 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/menu_item", function(exports, require, module) {
+;require.register("views/templates/menu_item.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),back = locals_.back,visible = locals_.visible,color = locals_.color,border = locals_.border,label = locals_.label,colorSet = locals_.colorSet;
+;var locals_for_with = (locals || {});(function (back, border, color, colorSet, label, undefined, visible) {
 back = visible?color:"transparent"
 border = visible?color:"transparent"
 buf.push("<span class=\"badge\"></span><span class=\"calendar-name\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</span><div class=\"dropdown\"><a id=\"dLabel\" data-toggle=\"dropdown\" class=\"dropdown-toggle\"><span class=\"caret\"></span></a><ul aria-labelledBy=\"dLabel\" class=\"dropdown-menu\"><li><a class=\"calendar-color\">" + (jade.escape(null == (jade_interp = t('change color')) ? "" : jade_interp)) + "</a><ul class=\"color-picker\">");
@@ -7109,7 +9701,7 @@ buf.push("<li" + (jade.attr("style", "background-color: #" + (color) + ";", true
   }
 }).call(this);
 
-buf.push("</ul></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div><img src=\"img/spinner.svg\" class=\"spinner\"/>");;return buf.join("");
+buf.push("</ul></li><li><a class=\"calendar-rename\">" + (jade.escape(null == (jade_interp = t('rename')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-remove\">" + (jade.escape(null == (jade_interp = t('delete')) ? "" : jade_interp)) + "</a></li><li><a class=\"calendar-export\">" + (jade.escape(null == (jade_interp = t('export')) ? "" : jade_interp)) + "</a></li></ul></div><img src=\"img/spinner.svg\" class=\"spinner\"/>");}.call(this,"back" in locals_for_with?locals_for_with.back:typeof back!=="undefined"?back:undefined,"border" in locals_for_with?locals_for_with.border:typeof border!=="undefined"?border:undefined,"color" in locals_for_with?locals_for_with.color:typeof color!=="undefined"?color:undefined,"colorSet" in locals_for_with?locals_for_with.colorSet:typeof colorSet!=="undefined"?colorSet:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined,"visible" in locals_for_with?locals_for_with.visible:typeof visible!=="undefined"?visible:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7122,13 +9714,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover", function(exports, require, module) {
+;require.register("views/templates/popover.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),title = locals_.title,content = locals_.content;
-buf.push("<div class=\"popover\"><div class=\"screen-indicator\"><div class=\"arrow\"></div><h3 class=\"popover-title\">" + (null == (jade_interp = title) ? "" : jade_interp) + "</h3><div class=\"popover-content\">" + (null == (jade_interp = content) ? "" : jade_interp) + "</div></div></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (content, title) {
+buf.push("<div class=\"popover\"><div class=\"screen-indicator\"><div class=\"arrow\"></div><h3 class=\"popover-title\">" + (null == (jade_interp = title) ? "" : jade_interp) + "</h3><div class=\"popover-content\">" + (null == (jade_interp = content) ? "" : jade_interp) + "</div></div></div>");}.call(this,"content" in locals_for_with?locals_for_with.content:typeof content!=="undefined"?content:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7141,12 +9733,12 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/alert", function(exports, require, module) {
+;require.register("views/templates/popover_screens/alert.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),alertOptions = locals_.alertOptions;
+;var locals_for_with = (locals || {});(function (alertOptions, undefined) {
 buf.push("<div class=\"fixed-height\"><select class=\"new-alert select-big with-margin\"><option value=\"-1\" selected=\"true\">" + (jade.escape(null == (jade_interp = t('screen alert default value')) ? "" : jade_interp)) + "</option>");
 // iterate alertOptions
 ;(function(){
@@ -7170,7 +9762,7 @@ buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" 
   }
 }).call(this);
 
-buf.push("</select><ul class=\"alerts\"></ul></div>");;return buf.join("");
+buf.push("</select><ul class=\"alerts\"></ul></div>");}.call(this,"alertOptions" in locals_for_with?locals_for_with.alertOptions:typeof alertOptions!=="undefined"?alertOptions:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7183,13 +9775,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/alert_row", function(exports, require, module) {
+;require.register("views/templates/popover_screens/alert_row.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),index = locals_.index,label = locals_.label,isEmailChecked = locals_.isEmailChecked,isNotifChecked = locals_.isNotifChecked;
-buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen alert delete tooltip'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button></div><div class=\"type\"><div class=\"notification-mode\"><input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/><label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp)) + "</label></div><div class=\"notification-mode\"><input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp)) + "</label></div></div></li>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (index, isEmailChecked, isNotifChecked, label) {
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen alert delete tooltip'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button></div><div class=\"type\"><div class=\"notification-mode\"><input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/><label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp)) + "</label></div><div class=\"notification-mode\"><input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp)) + "</label></div></div></li>");}.call(this,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"isEmailChecked" in locals_for_with?locals_for_with.isEmailChecked:typeof isEmailChecked!=="undefined"?isEmailChecked:undefined,"isNotifChecked" in locals_for_with?locals_for_with.isNotifChecked:typeof isNotifChecked!=="undefined"?isNotifChecked:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7202,13 +9794,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/delete", function(exports, require, module) {
+;require.register("views/templates/popover_screens/confirm.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),description = locals_.description;
-buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><div class=\"spinner-block\"><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></div><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");;return buf.join("");
+
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen confirm description')) ? "" : jade_interp)) + "</p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen confirm yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen confirm no button')) ? "" : jade_interp)) + "</button></div><label class=\"dontaskagain-label\"><input type=\"checkbox\" class=\"dontaskagain\"/>" + (jade.escape(null == (jade_interp = t('dont ask again')) ? "" : jade_interp)) + "</label></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7221,13 +9813,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/delete_title", function(exports, require, module) {
+;require.register("views/templates/popover_screens/confirm_title.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),title = locals_.title;
-buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"empty\"></div></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (title) {
+buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"empty\"></div></div>");}.call(this,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7240,13 +9832,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/details", function(exports, require, module) {
+;require.register("views/templates/popover_screens/delete.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),details = locals_.details;
-buf.push("<div class=\"fixed-height\"><textarea class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (description) {
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><div class=\"spinner-block\"><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></div><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");}.call(this,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7259,13 +9851,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/generic_title", function(exports, require, module) {
+;require.register("views/templates/popover_screens/delete_title.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),title = locals_.title;
-buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><button class=\"btn btn-back\"><i class=\"fa fa-angle-left\"></i></button></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><button class=\"btn btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</button></a></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (title) {
+buf.push("<div class=\"popover-back\"><i class=\"fa fa-angle-left\"></i><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"empty\"></div></div>");}.call(this,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7278,26 +9870,68 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/guest_row", function(exports, require, module) {
+;require.register("views/templates/popover_screens/details.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),index = locals_.index,status = locals_.status,email = locals_.email;
+;var locals_for_with = (locals || {});(function (details) {
+buf.push("<div class=\"fixed-height\"><textarea class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");}.call(this,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined));;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/generic_title.jade", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (title) {
+buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><button class=\"btn btn-back\"><i class=\"fa fa-angle-left\"></i></button></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><button class=\"btn btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</button></a></div>");}.call(this,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/popover_screens/guest_row.jade", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (email, index, status) {
 buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"guest-top\">");
 if ( status == 'ACCEPTED')
 {
-buf.push("<i class=\"fa fa-check-circle-o green\"></i>");
+buf.push("<i" + (jade.attr("title", t('accepted'), true, false)) + " class=\"fa fa-check-circle-o green\"></i>");
 }
 else if ( status == 'DECLINED')
 {
-buf.push("<i class=\"fa fa-times-circle-o red\"></i>");
+buf.push("<i" + (jade.attr("title", t('declined'), true, false)) + " class=\"fa fa-times-circle-o red\"></i>");
 }
 else if ( status == 'NEED-ACTION')
 {
-buf.push("<i class=\"fa fa-exclamation-circle blue\"></i>");
+buf.push("<i" + (jade.attr("title", t('need action'), true, false)) + " class=\"fa fa-question-circle blue\"></i>");
 }
-buf.push("<div class=\"guest-label\">" + (jade.escape(null == (jade_interp = email) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></div></li>");;return buf.join("");
+else
+{
+buf.push("<i" + (jade.attr("title", t('mail not sent'), true, false)) + " class=\"fa fa-exclamation-circle orange\"></i>");
+}
+buf.push("<div class=\"guest-label\">" + (jade.escape(null == (jade_interp = email) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></div></li>");}.call(this,"email" in locals_for_with?locals_for_with.email:typeof email!=="undefined"?email:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7310,7 +9944,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/guests", function(exports, require, module) {
+;require.register("views/templates/popover_screens/guests.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
@@ -7329,12 +9963,12 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/main", function(exports, require, module) {
+;require.register("views/templates/popover_screens/main.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),popoverClassName = locals_.popoverClassName,allDay = locals_.allDay,sameDay = locals_.sameDay,details = locals_.details,alerts = locals_.alerts,rrule = locals_.rrule,start = locals_.start,dFormat = locals_.dFormat,tFormat = locals_.tFormat,end = locals_.end,place = locals_.place,guestsButtonText = locals_.guestsButtonText,recurrenceButtonText = locals_.recurrenceButtonText,advancedUrl = locals_.advancedUrl,buttonText = locals_.buttonText;
+;var locals_for_with = (locals || {});(function (advancedUrl, alerts, allDay, buttonText, dFormat, details, end, guestsButtonText, place, popoverClassName, recurrenceButtonText, rrule, sameDay, start, tFormat) {
 popoverClassName  = (allDay ? ' is-all-day' : '')
 popoverClassName += (sameDay? ' is-same-day' : '')
 var showDetailsByDefault = details && details.length > 0
@@ -7349,7 +9983,7 @@ else
 {
 buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
 }
-buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"11\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"11\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"13\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"13\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"14\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");;return buf.join("");
+buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"11\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"11\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"13\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"13\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"14\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");}.call(this,"advancedUrl" in locals_for_with?locals_for_with.advancedUrl:typeof advancedUrl!=="undefined"?advancedUrl:undefined,"alerts" in locals_for_with?locals_for_with.alerts:typeof alerts!=="undefined"?alerts:undefined,"allDay" in locals_for_with?locals_for_with.allDay:typeof allDay!=="undefined"?allDay:undefined,"buttonText" in locals_for_with?locals_for_with.buttonText:typeof buttonText!=="undefined"?buttonText:undefined,"dFormat" in locals_for_with?locals_for_with.dFormat:typeof dFormat!=="undefined"?dFormat:undefined,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined,"end" in locals_for_with?locals_for_with.end:typeof end!=="undefined"?end:undefined,"guestsButtonText" in locals_for_with?locals_for_with.guestsButtonText:typeof guestsButtonText!=="undefined"?guestsButtonText:undefined,"place" in locals_for_with?locals_for_with.place:typeof place!=="undefined"?place:undefined,"popoverClassName" in locals_for_with?locals_for_with.popoverClassName:typeof popoverClassName!=="undefined"?popoverClassName:undefined,"recurrenceButtonText" in locals_for_with?locals_for_with.recurrenceButtonText:typeof recurrenceButtonText!=="undefined"?recurrenceButtonText:undefined,"rrule" in locals_for_with?locals_for_with.rrule:typeof rrule!=="undefined"?rrule:undefined,"sameDay" in locals_for_with?locals_for_with.sameDay:typeof sameDay!=="undefined"?sameDay:undefined,"start" in locals_for_with?locals_for_with.start:typeof start!=="undefined"?start:undefined,"tFormat" in locals_for_with?locals_for_with.tFormat:typeof tFormat!=="undefined"?tFormat:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7362,13 +9996,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/main_title", function(exports, require, module) {
+;require.register("views/templates/popover_screens/main_title.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),calendar = locals_.calendar,description = locals_.description;
-buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("placeholder event title"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></div><div class=\"controls\"><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (calendar, description) {
+buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("placeholder event title"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></div><div class=\"controls\"><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></div>");}.call(this,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7381,13 +10015,13 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/popover_screens/repeat", function(exports, require, module) {
+;require.register("views/templates/popover_screens/repeat.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),NO_REPEAT = locals_.NO_REPEAT,isFreqSelected = locals_.isFreqSelected,genericLimitedVisibility = locals_.genericLimitedVisibility,rrule = locals_.rrule,limitedVisibility = locals_.limitedVisibility,weekDays = locals_.weekDays,isWeekdaySelected = locals_.isWeekdaySelected,monthlyRepeatBy = locals_.monthlyRepeatBy,isEndModeSelected = locals_.isEndModeSelected;
-buf.push("<div class=\"fixed-height repeat-screen\"><label><select name=\"frequency\" class=\"input-repeat select-big\"><option" + (jade.attr("value", NO_REPEAT, true, false)) + (jade.attr("selected", isFreqSelected(NO_REPEAT), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence no repeat')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence daily')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence weekly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence monthly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence yearly')) ? "" : jade_interp)) + "</option></select></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input\">" + (jade.escape(null == (jade_interp = t('screen recurrence interval label')) ? "" : jade_interp)) + "</span><input type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " name=\"interval\" class=\"special\"/><!-- By default the value is -1 and triggers a polyglot warning, so it's left empty.-->");
+;var locals_for_with = (locals || {});(function (NO_REPEAT, genericLimitedVisibility, isEndModeSelected, isFreqSelected, isWeekdaySelected, limitedVisibility, monthlyRepeatBy, rrule, undefined, weekDays) {
+buf.push("<div class=\"fixed-height repeat-screen\"><label><select name=\"frequency\" class=\"input-repeat select-big\"><option" + (jade.attr("value", NO_REPEAT, true, false)) + (jade.attr("selected", isFreqSelected(NO_REPEAT), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence no repeat')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.DAILY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.DAILY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence daily')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.WEEKLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.WEEKLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence weekly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.MONTHLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.MONTHLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence monthly')) ? "" : jade_interp)) + "</option><option" + (jade.attr("value", RRule.YEARLY, true, false)) + (jade.attr("selected", isFreqSelected(RRule.YEARLY), true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen recurrence yearly')) ? "" : jade_interp)) + "</option></select></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"> <span class=\"first-input\">" + (jade.escape(null == (jade_interp = t('screen recurrence interval label')) ? "" : jade_interp)) + "</span><input type=\"number\" min=\"1\"" + (jade.attr("value", rrule.interval, true, false)) + " name=\"interval\" class=\"special\"/><!-- By default the value is -1 and triggers a polyglot warning, so it's left empty.-->");
 if (rrule.freq >= 0)
 {
 var localizationKey = "screen recurrence interval unit " + rrule.freq
@@ -7420,7 +10054,7 @@ buf.push("<label><input type=\"checkbox\" name=\"weekly-repeat-type\"" + (jade.a
   }
 }).call(this);
 
-buf.push("</div></label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.MONTHLY), true, false)) + " class=\"inline-input monthly-only\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence repeat by label')) ? "" : jade_interp)) + "</span><div><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-day\"" + (jade.attr("checked", monthlyRepeatBy('repeat-day'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by month')) == null ? '' : jade_interp)) + "</label><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-weekday\"" + (jade.attr("checked", monthlyRepeatBy('repeat-weekday'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by week')) == null ? '' : jade_interp)) + "</label></div></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends label')) ? "" : jade_interp)) + "</span><div><label for=\"never-end\" class=\"inline-input\"><input id=\"never-end\" type=\"radio\" name=\"endMode\" value=\"never\"" + (jade.attr("checked", isEndModeSelected('never'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('screen recurrence ends never label')) ? "" : jade_interp)) + "</label><label class=\"inline-input\"><input id=\"end-after-num\" type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", isEndModeSelected('count'), true, false)) + "/><label for=\"end-after-num\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count label')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" name=\"count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"special input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count unit')) ? "" : jade_interp)) + "</label></label><label class=\"inline-input\"><input id=\"end-until-date\" type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", isEndModeSelected('until'), true, false)) + "/><label for=\"end-until-date\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends until label')) ? "" : jade_interp)) + "</label><input tabindex=\"3\" type=\"text\" size=\"10\" name=\"until-date\"" + (jade.attr("placeholder", t("screen recurrence ends until placeholder"), true, false)) + (jade.attr("value", rrule.until, true, false)) + " class=\"special input-until-date input-date\"/></label></div></label><div" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input summary generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t("screen recurrence summary label")) ? "" : jade_interp)) + "</span><span id=\"summary\"></span></div></div>");;return buf.join("");
+buf.push("</div></label><label" + (jade.attr("aria-hidden", limitedVisibility(RRule.MONTHLY), true, false)) + " class=\"inline-input monthly-only\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence repeat by label')) ? "" : jade_interp)) + "</span><div><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-day\"" + (jade.attr("checked", monthlyRepeatBy('repeat-day'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by month')) == null ? '' : jade_interp)) + "</label><label><input type=\"radio\" name=\"monthly-repeat-type\" value=\"repeat-weekday\"" + (jade.attr("checked", monthlyRepeatBy('repeat-weekday'), true, false)) + "/>" + (jade.escape((jade_interp = t('screen recurrence repeat by week')) == null ? '' : jade_interp)) + "</label></div></label><label" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends label')) ? "" : jade_interp)) + "</span><div><label for=\"never-end\" class=\"inline-input\"><input id=\"never-end\" type=\"radio\" name=\"endMode\" value=\"never\"" + (jade.attr("checked", isEndModeSelected('never'), true, false)) + "/>" + (jade.escape(null == (jade_interp = t('screen recurrence ends never label')) ? "" : jade_interp)) + "</label><label class=\"inline-input\"><input id=\"end-after-num\" type=\"radio\" name=\"endMode\" value=\"count\"" + (jade.attr("checked", isEndModeSelected('count'), true, false)) + "/><label for=\"end-after-num\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count label')) ? "" : jade_interp)) + "</label><input id=\"rrule-count\" name=\"count\" type=\"number\" min=\"0\"" + (jade.attr("value", rrule.count, true, false)) + " class=\"special input-mini\"/><label for=\"rrule-count\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends count unit')) ? "" : jade_interp)) + "</label></label><label class=\"inline-input\"><input id=\"end-until-date\" type=\"radio\" name=\"endMode\" value=\"until\"" + (jade.attr("checked", isEndModeSelected('until'), true, false)) + "/><label for=\"end-until-date\">" + (jade.escape(null == (jade_interp = t('screen recurrence ends until label')) ? "" : jade_interp)) + "</label><input tabindex=\"3\" type=\"text\" size=\"10\" name=\"until-date\"" + (jade.attr("placeholder", t("screen recurrence ends until placeholder"), true, false)) + (jade.attr("value", rrule.until, true, false)) + " class=\"special input-until-date input-date\"/></label></div></label><div" + (jade.attr("aria-hidden", genericLimitedVisibility(), true, false)) + " class=\"inline-input summary generic\"><span class=\"first-input align-top\">" + (jade.escape(null == (jade_interp = t("screen recurrence summary label")) ? "" : jade_interp)) + "</span><span id=\"summary\"></span></div></div>");}.call(this,"NO_REPEAT" in locals_for_with?locals_for_with.NO_REPEAT:typeof NO_REPEAT!=="undefined"?NO_REPEAT:undefined,"genericLimitedVisibility" in locals_for_with?locals_for_with.genericLimitedVisibility:typeof genericLimitedVisibility!=="undefined"?genericLimitedVisibility:undefined,"isEndModeSelected" in locals_for_with?locals_for_with.isEndModeSelected:typeof isEndModeSelected!=="undefined"?isEndModeSelected:undefined,"isFreqSelected" in locals_for_with?locals_for_with.isFreqSelected:typeof isFreqSelected!=="undefined"?isFreqSelected:undefined,"isWeekdaySelected" in locals_for_with?locals_for_with.isWeekdaySelected:typeof isWeekdaySelected!=="undefined"?isWeekdaySelected:undefined,"limitedVisibility" in locals_for_with?locals_for_with.limitedVisibility:typeof limitedVisibility!=="undefined"?limitedVisibility:undefined,"monthlyRepeatBy" in locals_for_with?locals_for_with.monthlyRepeatBy:typeof monthlyRepeatBy!=="undefined"?monthlyRepeatBy:undefined,"rrule" in locals_for_with?locals_for_with.rrule:typeof rrule!=="undefined"?rrule:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined,"weekDays" in locals_for_with?locals_for_with.weekDays:typeof weekDays!=="undefined"?weekDays:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7433,12 +10067,12 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/templates/settings_modal", function(exports, require, module) {
+;require.register("views/templates/settings_modal.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),account = locals_.account,calendar = locals_.calendar;
+;var locals_for_with = (locals || {});(function (account, calendar) {
 buf.push("<div class=\"modal-header\"><h2>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><span><i class=\"fa fa-refresh\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
 if ( account == null)
 {
@@ -7448,7 +10082,7 @@ else
 {
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
 }
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://docs.cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div><div class=\"modal-footer\"><button class=\"btn btn-link close-settings\">" + (jade.escape(null == (jade_interp = t('close')) ? "" : jade_interp)) + "</button></div>");;return buf.join("");
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://docs.cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div><div class=\"modal-footer\"><button class=\"btn btn-link close-settings\">" + (jade.escape(null == (jade_interp = t('close')) ? "" : jade_interp)) + "</button></div>");}.call(this,"account" in locals_for_with?locals_for_with.account:typeof account!=="undefined"?account:undefined,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -7461,7 +10095,7 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
-;require.register("views/toggle", function(exports, require, module) {
+;require.register("views/toggle.coffee", function(exports, require, module) {
 var BaseView, Toggle,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -7530,7 +10164,7 @@ module.exports = Toggle = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/widgets/combobox", function(exports, require, module) {
+;require.register("views/widgets/combobox.coffee", function(exports, require, module) {
 var BaseView, ComboBox, Tag, TagCollection,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },

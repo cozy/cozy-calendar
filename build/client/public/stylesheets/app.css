@@ -7932,6 +7932,18 @@ ul.tagit input[type="text"] {
 .app [role=menubar] [role=menuitem]:hover {
   color: #34a6ff;
 }
+.green {
+  color: #16d943;
+}
+.red {
+  color: #ff3713;
+}
+.blue {
+  color: #33a6ff;
+}
+.orange {
+  color: #ffa500;
+}
 html,
 body {
   height: 100%;
@@ -9263,6 +9275,12 @@ a.btn:visited {
 .popover .label .icon.right span {
   font-size: 2rem;
   color: #c8d5df;
+}
+.popover label input.dontaskagain[type=checkbox],
+.popover .label input.dontaskagain[type=checkbox] {
+  height: 3em;
+  float: left;
+  margin-right: 2em;
 }
 .popover .label-row {
   width: 100%;
