@@ -39,6 +39,8 @@
     "coffeelint": "1.15.0",
     "jade2commonjs": "0.1.0",
     "mocha": "2.4.5",
+    "nodemon": "^1.9.1",
+    "npm-run-all": "^1.7.0",
     "request-json": "0.5.5",
     "should": "8.3.0"
   },
@@ -62,7 +64,9 @@
     "copy:locales": "mkdir -p build/client/app/locales && cp -r client/app/locales/*.json build/client/app/locales/",
     "copy:emails": "cp -r server/mails/ build/server && rm build/server/mails/*.coffee",
     "prewatch:client": "npm run ensure:client",
+    "watch:server": "nodemon --debug --ignore client/ server.coffee",
     "watch:client": "cd client && ../node_modules/.bin/brunch watch",
+    "watch": "npm-run-all --parallel 'watch:*'",
     "clean": "rm -rf build && rm -rf client/public",
     "tx": "tx pull --all || true"
   },
