@@ -33,15 +33,17 @@ module.exports = class Router extends Backbone.Router
     initialize: (options) ->
         super options
 
+        @isMobile = options?.isMobile
+
         # Only listview on mobile devices.
         $(window).resize =>
-            if window.app.isMobile()
+            if @isMobile
                 @navigate 'list', trigger: true
 
 
     navigate: (route, options) ->
         # Only listview on mobile devices.
-        if window.app.isMobile()
+        if @isMobile
             super 'list', options
         else
             super route, options
@@ -70,6 +72,7 @@ module.exports = class Router extends Backbone.Router
 
     list: ->
         @displayView new ListView
+            isMobile: @isMobile,
             collection: new DayBucketCollection()
         app.menu.activate 'calendar'
         @onCalendar = true
