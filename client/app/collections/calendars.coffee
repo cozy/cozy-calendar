@@ -13,10 +13,10 @@ module.exports = class CalendarCollection extends TagCollection
     initialize: ->
         @eventCollection = app.events
 
-        @listenTo @eventCollection, 'add', @onBaseCollectionAdd
-        @listenTo @eventCollection, 'change:tags', @onBaseCollectionChange
-        @listenTo @eventCollection, 'remove', @onBaseCollectionRemove
-        @listenTo @eventCollection, 'reset', @resetFromBase
+        #@listenTo @eventCollection, 'add', @onBaseCollectionAdd
+       # @listenTo @eventCollection, 'change:tags', @onBaseCollectionChange
+        #@listenTo @eventCollection, 'remove', @onBaseCollectionRemove
+        #@listenTo @eventCollection, 'reset', @resetFromBase
 
         @resetFromBase()
 
