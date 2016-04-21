@@ -11,12 +11,11 @@ module.exports = class CalendarHeader extends BaseView
 
     initialize: (options) ->
         @cal = options?.cal
+        @isMobile = options?.isMobile
 
 
     getViewName: ->
         return 'list' unless @cal?
-        view = @cal.fullCalendar 'getView'
-        return 'week' if view.name is 'agendaWeek'
         return 'month'
 
 
@@ -52,6 +51,7 @@ module.exports = class CalendarHeader extends BaseView
             title: @getTitle()
             todaytxt: t('today')
             calendarMode: @cal?
+            isMobile: @isMobile
             active: (item) =>
                 if item is 'today' and @isToday() or item is @getViewName()
                     return 'fc-state-active'
@@ -62,5 +62,4 @@ module.exports = class CalendarHeader extends BaseView
         'click .fc-button-prev': => @trigger 'prev'
         'click .fc-button-today': => @trigger 'today'
         'click .fc-button-month': => @trigger 'month'
-        'click .fc-button-week': => @trigger 'week'
         'click .fc-button-list': => @trigger 'list'

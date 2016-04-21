@@ -14,11 +14,14 @@ module.exports = class ListView extends ViewCollection
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
 
+    initialize: (options) ->
+        @isMobile = options?.isMobile
+        super
+
     afterRender: ->
-        @calHeader = new Header()
+        @calHeader = new Header isMobile: @isMobile
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
-        @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
 
         @$('#list-container').scroll @checkScroll
 
