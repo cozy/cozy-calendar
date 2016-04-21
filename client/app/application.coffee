@@ -48,7 +48,7 @@ module.exports =
             @mainStore.loadedMonths[m2] = true
         @mainStore.loadedMonths[now.format 'YYYY-MM'] = true
 
-        @router = new Router()
+        @router = new Router isMobile: @isMobile()
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 

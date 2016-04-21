@@ -11,6 +11,7 @@ module.exports = class CalendarHeader extends BaseView
 
     initialize: (options) ->
         @cal = options?.cal
+        @isMobile = options?.isMobile
 
 
     getViewName: ->
@@ -52,6 +53,7 @@ module.exports = class CalendarHeader extends BaseView
             title: @getTitle()
             todaytxt: t('today')
             calendarMode: @cal?
+            isMobile: @isMobile
             active: (item) =>
                 if item is 'today' and @isToday() or item is @getViewName()
                     return 'fc-state-active'
