@@ -39,8 +39,8 @@
     "coffeelint": "1.15.0",
     "jade2commonjs": "0.1.0",
     "mocha": "2.4.5",
-    "nodemon": "^1.9.1",
-    "npm-run-all": "^1.7.0",
+    "nodemon": "1.9.1",
+    "npm-run-all": "1.7.0",
     "request-json": "0.5.5",
     "should": "8.3.0"
   },
