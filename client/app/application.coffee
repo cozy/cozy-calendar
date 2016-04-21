@@ -48,7 +48,9 @@ module.exports =
             @mainStore.loadedMonths[m2] = true
         @mainStore.loadedMonths[now.format 'YYYY-MM'] = true
 
-        @router = new Router isMobile: @isMobile()
+        isMobile = @isMobile()
+
+        @router = new Router isMobile: isMobile
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 
@@ -74,6 +76,11 @@ module.exports =
         todayChecker @router
 
         Object.freeze this if typeof Object.freeze is 'function'
+
+        # Pretty dirty but I don't see any other way at this time
+        if isMobile
+            document.body.classList.add('is-mobile')
+
 
     isMobile: ->
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
