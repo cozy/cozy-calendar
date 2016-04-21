@@ -21,9 +21,6 @@ module.exports = class Router extends Backbone.Router
         'month'                           : 'month'
         'month/:year/:month'              : 'month'
         'month/:year/:month/:eventid'     : 'month_event'
-        'week'                            : 'week'
-        'week/:year/:month/:day'          : 'week'
-        'week/:year/:month/:day/:eventid' : 'week_event'
         'list'                            : 'list'
         'list/:eventid'                   : 'list_event'
         'event/:eventid'                  : 'auto_event'
@@ -59,17 +56,6 @@ module.exports = class Router extends Backbone.Router
             @navigate hash, trigger: true
 
 
-    week: (year, month, day) ->
-        if year?
-            [year, month, day] = getBeginningOfWeek year, month, day
-            monthToLoad = moment("#{year}/#{month}", "YYYY/M")
-            window.app.events.loadMonth monthToLoad, =>
-                @displayCalendar 'agendaWeek', year, month, day
-        else
-            hash = moment().format('[week]/YYYY/M/D')
-            @navigate hash, trigger: true
-
-
     list: ->
         @displayView new ListView
             isMobile: @isMobile,
@@ -90,12 +76,6 @@ module.exports = class Router extends Backbone.Router
     month_event: (year, month, id) ->
         @month(year, month) unless @mainView instanceof CalendarView
         @event id, "month/#{year}/#{month}"
-
-
-    week_event: (year, month, date, id) ->
-        [year, month, day] = getBeginningOfWeek year, month, day
-        @week(year, month, date) unless @mainView instanceof CalendarView
-        @event id, "week/#{year}/#{month}/#{date}"
 
 
     list_event: (id) ->
