@@ -54,7 +54,6 @@ module.exports = class CalendarView extends BaseView
             buttonText:
                 today: t('today')
                 month: t('month')
-                week:  t('week')
                 day:   t('day')
 
             # Display time in the cozy's user timezone.
@@ -64,7 +63,6 @@ module.exports = class CalendarView extends BaseView
             timezone: window.app.timezone
             timeFormat: '' # Setted in scheduleitem title.
             columnFormat:
-                'week': 'ddd D'
                 'month': 'dddd'
 
             axisFormat: 'H:mm'
@@ -103,7 +101,6 @@ module.exports = class CalendarView extends BaseView
                 @cal.fullCalendar 'next'
 
         @calHeader.on 'today', => @cal.fullCalendar 'today'
-        @calHeader.on 'week', => @cal.fullCalendar 'changeView', 'agendaWeek'
         @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
         @calHeader.on 'list', ->
             window.app.events.sort()
@@ -201,16 +198,13 @@ module.exports = class CalendarView extends BaseView
 
         @view = view.name
 
-        f = if @view is 'month' then '[month]/YYYY/M' else '[week]/YYYY/M/D'
-        hash = view.intervalStart.format f
+        hash = view.intervalStart.format '[month]/YYYY/M'
 
         app.router.navigate hash
 
 
     getUrlHash: =>
-        switch @cal.fullCalendar('getView').name
-            when 'month' then 'calendar'
-            when 'agendaWeek' then 'calendarweek'
+        return 'calendar'
 
 
     onSelect: (startDate, endDate, jsEvent, view) =>
