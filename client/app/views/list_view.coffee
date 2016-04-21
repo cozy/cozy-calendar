@@ -22,7 +22,6 @@ module.exports = class ListView extends ViewCollection
         @calHeader = new Header isMobile: @isMobile
         @$('#calheader').html @calHeader.render().$el
         @calHeader.on 'month', -> app.router.navigate '', trigger:true
-        @calHeader.on 'week', -> app.router.navigate 'week', trigger:true
 
         @$('#list-container').scroll @checkScroll
 
