@@ -62,15 +62,13 @@ div.label.label-row.input-people
         span.fa.fa-angle-right
     button.button-full-block(tabindex=8)= guestsButtonText
 
-div.label.label-row.input-details-row(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
+div.label.label-row.input-details(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
     .icon(title=t("placeholder description"))
         span.fa.fa-align-left
     .icon.right
         span.fa.fa-angle-right
-    input.input-details-trigger.input-full-block(tabindex="9",
-                                                 type="text",
-                                                 value=details,
-                                                 placeholder=t("placeholder description"))
+    button.button-full-block(tabindex=9)
+        span.overflow-wrapper= detailsButtonText
 
 div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlertsByDefault}")
     .icon(title=t("alert tooltip"))

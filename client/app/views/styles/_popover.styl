@@ -287,7 +287,6 @@
     .advanced-link
         order 3
 
-.input-details-trigger
 .input-place
     overflow      hidden
     text-overflow ellipsis
@@ -525,3 +524,17 @@ ul.alerts
             width 2em
             height 2em
             margin 2em 0
+
+// The .overflow-wrapper span is a additional span added inside a
+// button-full-block button, to allow an expected rendering of the
+// details Button.
+// Otherwise, Chrome displays the content of the button as expected, but in
+// Firefox the text content of the button overflows the button icons.
+.button-full-block .overflow-wrapper
+    width: 16em
+    overflow: hidden
+    text-overflow: ellipsis
+    line-height: 3em
+    display: inline-block
+    height: 3em
+    display: inline-block
