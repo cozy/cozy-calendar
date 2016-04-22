@@ -55,8 +55,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Screen switches.
         'click .input-people': -> @switchToScreen('guests')
-        'click .input-details-row': -> @switchToScreen('details')
-        'click .input-details-trigger': -> @switchToScreen('details')
+        'click .input-details': -> @switchToScreen('details')
         'click .input-alert': -> @switchToScreen('alert')
         'click .input-repeat': -> @switchToScreen('repeat')
 
@@ -96,6 +95,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             end:         @model.getEndDateObject().add(endOffset, 'd')
             alerts: @model.get('alarms')
             guestsButtonText: @getGuestsButtonText()
+            detailsButtonText: @getDetailsButtonText()
             buttonText: @getButtonText()
             recurrenceButtonText: @getRecurrenceButtonText()
 
@@ -112,6 +112,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @duplicateButton = @$ '.duplicate'
         @$optionalFields = @$ '[data-optional="true"]'
         @$moreDetailsButton = @$ '.advanced-link'
+        @$detailsButton = @$ '.input-details button'
 
         # If this is a new unsaved event, hide the irrelevant buttons.
         if @model.isNew()
@@ -346,6 +347,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 smart_count: numOthers
             return t("guests list", options)
 
+    getDetailsButtonText: ->
+        return @model.get('details') or t("placeholder description")
+
 
     getRecurrenceButtonText: ->
         rrule = @model.get('rrule')
@@ -387,9 +391,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$optionalFields.attr 'aria-hidden', false
         @$moreDetailsButton.hide()
         # focus for keyboard navigation
-        setTimeout =>
-            @$('.input-details-trigger').focus()
-        , 100
+        @$detailsButton.focus()
 
 
     # Handle model's change for field `start`
