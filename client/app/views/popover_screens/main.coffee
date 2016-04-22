@@ -33,6 +33,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     events:
         'keyup':                'onKeyUp'
+        'keyup button':         'stopKeyUpPropagation'
+        'keyup [role=button]':  'stopKeyUpPropagation'
         'change select':        'onKeyUp'
         'change input':         'onKeyUp'
         'click .cancel':        'onCancelClicked'
@@ -171,6 +173,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @$addButton.click()
         else
             @$addButton.removeClass 'disabled'
+
+
+    stopKeyUpPropagation: (event) ->
+        event.stopPropagation()
 
 
     toggleAllDay: ->

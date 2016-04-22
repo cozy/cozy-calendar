@@ -9,7 +9,7 @@ module.exports = Tag = cozydb.getModel 'Tag',
 Tag.byName = (options, callback) ->
     Tag.request 'byName', options, callback
 
-Tag.getOrCreateByName = (data, callback) ->
+Tag.getOrCreate = (data, callback) ->
     # Name is a primary key.
     Tag.byName key: data.name, (err, tags)->
         if err
