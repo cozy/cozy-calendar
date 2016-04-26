@@ -59,8 +59,19 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-alert': -> @switchToScreen('alert')
         'click .input-repeat': -> @switchToScreen('repeat')
 
-
     initialize: ->
+        # As we are in the main event popover screen, we initialize the
+        # form model.
+        # If we're comming back from another screen, the formModel already
+        # exists.
+        # If not, we create a new one by cloning the original model.
+        # The goal is to keep the original model unchanged until the save
+        # action.
+        # @See https://github.com/cozy/cozy-calendar/issues/465
+        @context.formModel = @context.formModel or @model.clone()
+        # shortcut
+        @formModel = @context.formModel
+
         # Listen to the model's change to update the view accordingly.
         # `start` and `end` are updated when one changed to prevent overlapping
         # times.
@@ -81,19 +92,21 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         if @model.isNew()
             currentCalendar = firstCalendar or defaultCalendar
         else
-            currentCalendar = @model.get('tags')?[0] or defaultCalendar
+            currentCalendar = @formModel.get('tags')?[0] or defaultCalendar
 
 
-        endOffset = if @model.isAllDay() then -1 else 0
+        endOffset = if @formModel.isAllDay() then -1 else 0
         return data = _.extend super(),
             tFormat:     tFormat
             dFormat:     dFormat
             calendar:    currentCalendar
-            allDay:      @model.isAllDay()
-            sameDay:     @model.isSameDay()
-            start:       @model.getStartDateObject()
-            end:         @model.getEndDateObject().add(endOffset, 'd')
-            alerts: @model.get('alarms')
+            place:       @formModel.get 'place'
+            description: @formModel.get 'description'
+            allDay:      @formModel.isAllDay()
+            sameDay:     @formModel.isSameDay()
+            start:       @formModel.getStartDateObject()
+            end:         @formModel.getEndDateObject().add(endOffset, 'd')
+            alerts: @formModel.get('alarms')
             guestsButtonText: @getGuestsButtonText()
             detailsButtonText: @getDetailsButtonText()
             buttonText: @getButtonText()
@@ -140,9 +153,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             el: @$ '.calendarcombo'
             small: true
             source: app.calendars.toAutoCompleteSource()
-            current: @model.getCalendar()?.get('name')
+            current: @formModel.getCalendar()?.get('name')
 
-        @calendar.on 'edition-complete', (value) => @model.setCalendar value
+        @calendar.on 'edition-complete', (value) => @formModel.setCalendar value
 
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
@@ -178,41 +191,41 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         #
         # Maybe we should handle those kind of changes inside the model
         # directly. Need to revamp the model event view also.
-        start = @model.getStartDateObject()
-        end = @model.getEndDateObject()
+        start = @formModel.getStartDateObject()
+        end = @formModel.getEndDateObject()
         if @$('.input-allday').is ':checked'
-            @model.set 'start', start.format(allDayDateFieldFormat)
-            @model.set 'end', end.add(1, 'd').format(allDayDateFieldFormat)
+            @formModel.set 'start', start.format(allDayDateFieldFormat)
+            @formModel.set 'end', end.add(1, 'd').format(allDayDateFieldFormat)
         else
-            @model.set 'start', start.hour(12).toISOString()
-            @model.set 'end', start.hour(13).toISOString()
+            @formModel.set 'start', start.hour(12).toISOString()
+            @formModel.set 'end', start.hour(13).toISOString()
 
         # Set labels, captions and views states
-        @$('.input-time').attr 'aria-hidden', @model.isAllDay()
-        @$container.toggleClass 'is-all-day', @model.isAllDay()
+        @$('.input-time').attr 'aria-hidden', @formModel.isAllDay()
+        @$container.toggleClass 'is-all-day', @formModel.isAllDay()
 
 
     onSetDesc: (ev) ->
-        @model.set 'description', ev.target.value
+        @formModel.set 'description', ev.target.value
 
 
     onSetPlace: (ev) ->
-        @model.set 'place', ev.target.value
+        @formModel.set 'place', ev.target.value
 
 
     onSetStart: ->
-        @model.setStart @formatDateTime @$('.input-start').val(),
+        @formModel.setStart @formatDateTime @$('.input-start').val(),
                                         @$('.input-start-date').val(),
                                         false
 
 
     onSetEnd: ->
-        @model.setEnd @formatDateTime @$('.input-end-time').val(),
+        @formModel.setEnd @formatDateTime @$('.input-end-time').val(),
                                       @$('.input-end-date').val()
 
         # We put or remove a top-level class on the popover body that target if
         # the event is one day long or not
-        @$container.toggleClass 'is-same-day', @model.isSameDay()
+        @$container.toggleClass 'is-same-day', @formModel.isSameDay()
 
 
     formatDateTime: (timeStr = '', dateStr = '', end=true) ->
@@ -224,7 +237,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Add a day later if event is all-day long and if it's and end date.
         if end
-            date = +date + 1 if date and @model.isAllDay()
+            date = +date + 1 if date and @formModel.isAllDay()
 
         month = +month - 1 if month # Months are 0 indexed in moment.js
 
@@ -261,7 +274,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     # is created.
     onDuplicateClicked: ->
         attrs = []
-        attrs[key] = value for key, value of @model.attributes
+        attrs[key] = value for key, value of @formModel.attributes
         delete attrs.id
         delete attrs._id
 
@@ -289,7 +302,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$addButton.empty()
         @$addButton.append spinner
 
-        errors = @model.validate @model.attributes
+        errors = @model.validate @formModel.attributes
         if errors
             @$addButton.html @getButtonText()
 
@@ -298,7 +311,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @handleError err for err in errors
 
         else #no errors.
-            @model.save {},
+            @model.setCalendar @formModel.get('tags')?[0]
+            @model.save @formModel.attributes,
                 wait: true
                 success: =>
                     @calendar.save()
@@ -334,7 +348,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getGuestsButtonText: ->
-        guests = @model.get('attendees') or []
+        guests = @formModel.get('attendees') or []
 
         if guests.length is 0
             return t("add guest button")
@@ -348,16 +362,16 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             return t("guests list", options)
 
     getDetailsButtonText: ->
-        return @model.get('details') or t("placeholder description")
+        return @formModel.get('details') or t("placeholder description")
 
 
     getRecurrenceButtonText: ->
-        rrule = @model.get('rrule')
+        rrule = @formModel.get('rrule')
 
         # If there is a valid rrule.
         if rrule?.length > 0
             try
-                rrule = RRule.fromString @model.get('rrule')
+                rrule = RRule.fromString @formModel.get('rrule')
             catch e
                 console.error e
                 return t('invalid recurring rule')
@@ -371,7 +385,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             return rrule.toText(window.t, language)
         else
             return t('no repeat button')
-
 
 
     # Show more fields when triggered.
@@ -396,14 +409,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Handle model's change for field `start`
     onStartChange: ->
-        newValue = @model.getStartDateObject().format tFormat
+        newValue = @formModel.getStartDateObject().format tFormat
         @$('.input-start').timepicker('setTime', newValue)
 
 
     # Handle model's change for field `end`
     onEndChange: ->
-        endOffset = if @model.isAllDay() then -1 else 0
-        newValue = @model.getEndDateObject()
+        endOffset = if @formModel.isAllDay() then -1 else 0
+        newValue = @formModel.getEndDateObject()
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
+

@@ -9,6 +9,8 @@ module.exports = class PopoverView extends BaseView
         @parentView = options.parentView
         @$tabCells = $ '.fc-day-grid-container'
         @$tabCells = $ '.fc-time-grid-container' if @$tabCells.length is 0
+        # Context passed to all children popover screens
+        @context = {}
 
         return @
 
@@ -69,7 +71,8 @@ module.exports = class PopoverView extends BaseView
             el: @$popover
             titleElement: @titleElement
             contentElement: @contentElement
-            popover: @
+            popover: @,
+            @context
 
         # Render it.
         @screen.render()

@@ -1,4 +1,4 @@
-PopoverScreenView = require 'lib/popover_screen_view'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event.coffee'
 
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'
@@ -7,7 +7,7 @@ allDayDateFieldFormat   = 'YYYY-MM-DD'
 
 NO_REPEAT = -1
 
-module.exports = class RepeatPopoverScreen extends PopoverScreenView
+module.exports = class RepeatPopoverScreen extends EventPopoverScreenView
 
     inputDateFormat: 'DD/MM/YYYY'
     inputDateDTPickerFormat: 'dd/mm/yyyy'
@@ -28,7 +28,6 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
 
 
     getRenderData: ->
-
         data = _.extend super(),
             NO_REPEAT: NO_REPEAT
             weekDays: moment.localeData()._weekdays
@@ -44,10 +43,10 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
                 monthlyRepeatBy: 'repeat-day'
 
         # Override default rrule value if the event has a rrule.
-        if @model.has('rrule') and @model.get('rrule').length > 0
+        if @formModel.has('rrule') and @formModel.get('rrule').length > 0
             # Extract rules from the rrule string.
             try
-                rruleOptions = RRule.fromString(@model.get('rrule')).options
+                rruleOptions = RRule.fromString(@formModel.get('rrule')).options
             catch e
                 console.error e
 
@@ -165,13 +164,12 @@ module.exports = class RepeatPopoverScreen extends PopoverScreenView
                 .join ';'
         else
             rruleString = null
-
-        @model.set('rrule', rruleString)
+        @formModel.set('rrule', rruleString)
 
 
     # Build a rrule object from the form fields in the DOM.
     buildRRuleFromDOM: =>
-        start = @model.getStartDateObject()
+        start = @formModel.getStartDateObject()
         RRuleWdays = [RRule.SU, RRule.MO, RRule.TU, RRule.WE,
             RRule.TH, RRule.FR, RRule.SA]
 

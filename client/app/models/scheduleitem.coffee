@@ -296,10 +296,18 @@ module.exports = class ScheduleItem extends Backbone.Model
 
     # Override sync to ask email sending just before changes save on server.
     sync: (method, model, options) ->
+        # We freeze the model's state because when the model contains attendee,
+        # the modal confirm dialog causes the data to be empty at the end of the
+        # process.
+        # I was not able to detect where this issue come from.
+        # As I am lacking of time, I used this ugly hack to keep the expected
+        # attributes in the model.
+        frozenModel = model.clone()
+
         @confirmSendEmails method, (sendMails) ->
             # overrides the url to append the sendmails parameter
             options.url = "#{model.url()}?sendMails=#{sendMails}"
-            return super method, model, options
+            return super method, frozenModel, options
 
     confirmSendEmails: (method, callback) ->
         if @get 'import' # No mails on files import.
@@ -327,7 +335,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         .map (guest) -> guest.email
 
         if guestsToInform.length is 0
-            callback false
+            return callback false
         else
             guestsList = guestsToInform.join ', '
             content = "#{t 'send mails question'} #{guestsList}"
