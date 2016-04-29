@@ -1,6 +1,6 @@
-PopoverScreenView = require 'lib/popover_screen_view'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event'
 
-module.exports = class DetailsPopoverScreen extends PopoverScreenView
+module.exports = class DetailsPopoverScreen extends EventPopoverScreenView
 
     screenTitle: t('screen description title')
     templateContent: require 'views/templates/popover_screens/details'
@@ -14,4 +14,4 @@ module.exports = class DetailsPopoverScreen extends PopoverScreenView
     # Save the value when the screen is left.
     onLeaveScreen: ->
         value = @$('.input-details').val()
-        @model.set 'details', value
+        @formModel.set 'details', value

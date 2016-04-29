@@ -17,7 +17,10 @@ module.exports = class PopoverScreenView extends Backbone.View
         console.log 'Warning, no template has been defined for content.'
 
 
-    constructor: (options) ->
+    constructor: (options, context) ->
+        # Retrieve context given by parent popover view
+        @context = context
+
         super(options)
 
         # Check that mandatory options are defined.

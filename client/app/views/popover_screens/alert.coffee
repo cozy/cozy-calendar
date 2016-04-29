@@ -1,7 +1,7 @@
-PopoverScreenView = require 'lib/popover_screen_view'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event'
 helpers = require 'helpers'
 
-module.exports = class AlertPopoverScreen extends PopoverScreenView
+module.exports = class AlertPopoverScreen extends EventPopoverScreenView
 
     # Define the available options to create alerts.
     # Key is the unit M: minute, H: hour, D: day, and W: week
@@ -35,7 +35,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
     getRenderData: ->
 
         # Override the screen title based on the model's value.
-        alerts = @model.get('alarms') or []
+        alerts = @formModel.get('alarms') or []
         numAlerts = alerts.length
         if numAlerts > 0
             @screenTitle = t('screen alert title', smart_count: numAlerts)
@@ -50,7 +50,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
 
         return _.extend super(),
             alertOptions: formattedAlertOptions
-            alerts: @model.get('alarms')
+            alerts: @formModel.get('alarms')
 
 
     afterRender: ->
@@ -60,7 +60,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         $alerts.empty()
 
         # Create a list item for each alert.
-        alarms = @model.get('alarms') or []
+        alarms = @formModel.get('alarms') or []
         for alarm, index in alarms
             trigger = helpers.iCalDurationToUnitValue alarm.trigg
             {translationKey, value} = @getAlertTranslationInfo trigger
@@ -82,9 +82,9 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         index = @$(event.target).parents('li').attr 'data-index'
 
         # Remove the alert.
-        alerts = @model.get('alarms') or []
+        alerts = @formModel.get('alarms') or []
         alerts.splice index, 1
-        @model.set 'alarms', alerts
+        @formModel.set 'alarms', alerts
 
         # Inefficient way to refresh the list, but it's okay since it will never
         # be a big list.
@@ -104,7 +104,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         index = checkbox.parents('li').attr 'data-index'
 
         # Get current action.
-        alerts = @model.get 'alarms'
+        alerts = @formModel.get 'alarms'
         currentAction = alerts[index].action
 
         # If two actions are selected, unselect this one.
@@ -122,7 +122,7 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
         # Update the alert only if it has changed.
         if newAction?
             alerts[index].action = newAction
-            @model.set 'alarms', alerts
+            @formModel.set 'alarms', alerts
 
 
     # Handle new alert.
@@ -137,12 +137,12 @@ module.exports = class AlertPopoverScreen extends PopoverScreenView
             triggerValue = helpers.unitValuesToiCalDuration alertOption
 
             # Add it to the list of alarms.
-            alarms = @model.get('alarms') or []
+            alarms = @formModel.get('alarms') or []
             alarms.push
                 action: 'DISPLAY'
                 trigg: triggerValue
 
-            @model.set 'alarms', alarms
+            @formModel.set 'alarms', alarms
 
             # Reset selected value
             @$('select.new-alert').val(-1)

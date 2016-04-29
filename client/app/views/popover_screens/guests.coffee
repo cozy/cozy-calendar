@@ -1,7 +1,7 @@
-PopoverScreenView = require 'lib/popover_screen_view'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event'
 random = require 'lib/random'
 
-module.exports = class GuestPopoverScreen extends PopoverScreenView
+module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
     screenTitle: ''
     templateContent: require 'views/templates/popover_screens/guests'
@@ -13,11 +13,10 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         "click .guest-delete": "onRemoveGuest"
         'keyup input[name="guest-name"]': "onKeyup"
 
-
     getRenderData: ->
 
         # Override the screen title based on the model's value.
-        guests = @model.get('attendees') or []
+        guests = @formModel.get('attendees') or []
         numGuests = guests.length
         if numGuests > 0
             @screenTitle = t('screen guest title', smart_count: numGuests)
@@ -25,7 +24,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
             @screenTitle = t('screen guest title empty')
 
         return _.extend super(),
-            guests: @model.get('attendes') or []
+            guests: @formModel.get('attendes') or []
 
 
     afterRender: ->
@@ -35,7 +34,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         $guests.empty()
 
         # Create a list item for each alert.
-        guests = @model.get('attendees') or []
+        guests = @formModel.get('attendees') or []
         for guest, index in guests
             options = _.extend guest, {index}
             row = @templateGuestRow guest
@@ -87,9 +86,9 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         index = @$(event.target).parents('li').attr 'data-index'
 
         # Remove the guest.
-        guests = @model.get('attendees') or []
+        guests = @formModel.get('attendees') or []
         guests.splice index, 1
-        @model.set 'attendees', guests
+        @formModel.set 'attendees', guests
 
         # Inefficient way to refresh the list, but it's okay since it will never
         # be a big list.
@@ -108,7 +107,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
         # An empty value should not be submitted.
         email = email.trim()
         if email.length > 0
-            guests = @model.get('attendees') or []
+            guests = @formModel.get('attendees') or []
             if not _.findWhere(guests, email: email)
                 # Clone the source array, otherwise it's not considered as
                 # changed because it changes the model's attributes
@@ -118,7 +117,7 @@ module.exports = class GuestPopoverScreen extends PopoverScreenView
                     status: 'INVITATION-NOT-SENT'
                     email: email
                     contactid: contactID
-                @model.set 'attendees', guests
+                @formModel.set 'attendees', guests
 
                 # Inefficient way to refresh the list, but it's okay since
                 # it will never be a big list.
