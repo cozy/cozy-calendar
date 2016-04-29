@@ -1,4 +1,4 @@
-EventPopoverScreenView = require 'views/calendar_popover_screen_event.coffee'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event'
 random = require 'lib/random'
 
 module.exports = class GuestPopoverScreen extends EventPopoverScreenView

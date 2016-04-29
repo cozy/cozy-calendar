@@ -1,4 +1,4 @@
-EventPopoverScreenView = require 'views/calendar_popover_screen_event.coffee'
+EventPopoverScreenView = require 'views/calendar_popover_screen_event'
 
 tFormat                 = 'HH:mm'
 dFormat                 = 'DD/MM/YYYY'

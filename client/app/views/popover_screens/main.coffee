@@ -68,9 +68,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # The goal is to keep the original model unchanged until the save
         # action.
         # @See https://github.com/cozy/cozy-calendar/issues/465
-        @context.formModel = @context.formModel or @model.clone()
-        # shortcut
-        @formModel = @context.formModel
+        @formModel = @context.formModel ?= @model.clone()
 
         # Listen to the model's change to update the view accordingly.
         # `start` and `end` are updated when one changed to prevent overlapping
