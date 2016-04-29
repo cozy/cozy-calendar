@@ -22,20 +22,21 @@ module.exports = class CalendarCollection extends TagCollection
 
 
     resetFromBase: ->
-        @reset []
+        #@reset []
         @eventCollection.each (model) => @onBaseCollectionAdd model
 
 
     onBaseCollectionChange: (model) ->
-        @resetFromBase()
+#        @resetFromBase()
 
 
     onBaseCollectionAdd: (model) ->
         [calendarName, tags...] = model.get 'tags'
         calendar = app.tags.getOrCreateByName calendarName
-        @add calendar
+        #@add calendar
 
         if calendar.isNew()
+            @add calendar
             app.tags.add calendar
             calendar.save()
 
@@ -62,6 +63,8 @@ module.exports = class CalendarCollection extends TagCollection
             if err
                 callback t('server error occured')
             else
+                # Effectively removing the calendar
+                super @findWhere name: calendarName
                 callback()
 
 
@@ -69,9 +72,10 @@ module.exports = class CalendarCollection extends TagCollection
     rename: (oldName, newName, callback) ->
         request.post 'events/rename-calendar', {oldName, newName}, (err) ->
             if err
-                callback t('server error occured')
+                console.error t('server error occured'), err
+                callback oldName
             else
-                callback()
+                callback newName
 
 
     toArray: ->

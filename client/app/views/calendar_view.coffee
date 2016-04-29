@@ -24,7 +24,7 @@ module.exports = class CalendarView extends BaseView
         @model = null
 
         @calendarsCollection = app.calendars
-        @listenTo @calendarsCollection, 'change', @refresh
+        @listenTo @calendarsCollection, 'change', @onCalendarCollectionChange
 
 
     afterRender: ->
@@ -135,6 +135,9 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'refetchEvents'
 
 
+    onCalendarCollectionChange: (collection) ->
+        @refresh collection
+
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
 
@@ -157,6 +160,10 @@ module.exports = class CalendarView extends BaseView
         if fcEvent?
             _.extend fcEvent, data
             @cal.fullCalendar 'updateEvent', fcEvent
+
+        # Refresh to deal with calendar update.
+        # If the new calendar is not visible the event should not be shown
+        @refresh()
 
 
     showPopover: (options) ->

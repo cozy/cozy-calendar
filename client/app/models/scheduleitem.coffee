@@ -15,16 +15,24 @@ module.exports = class ScheduleItem extends Backbone.Model
         @on 'change:' + @startDateField, => @startDateChanged = true
         @on 'change:attendees', => @attendeesChanged = true
 
+
     # Return the Tag object of the calendar tag of this.
     getCalendar: ->
-        return app.tags.getByName @get('tags')?[0]
+        # TODO : Should not call app in a model, quick fix.
+        return @calendar or app.calendars.getByName @get('tags')?[0]
 
-    setCalendar: (cal) ->
+    setCalendar: (calendar) ->
         # we clone the source array, otherwise it's not considered as changed
         # because it changes the model's attributes
         oldTags = @get 'tags'
         tags = if oldTags? then [].concat(oldTags) else []
-        tags[0] = cal
+        tags[0] = calendar.get 'name'
+
+
+        # @calendar = calendar
+
+        @calendar = calendar
+
         @set tags: tags
 
     getDefaultColor: -> 'grey'

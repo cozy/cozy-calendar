@@ -56,6 +56,11 @@ module.exports =
 
         SocketListener.watch @events
         SocketListener.watch @contacts
+        SocketListener.watch @calendars
+
+        if window.initcalendars?
+            @calendars.reset window.initcalendars
+            delete window.initcalendars
 
         if window.inittags?
             @tags.reset window.inittags
