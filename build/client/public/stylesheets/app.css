@@ -8498,7 +8498,6 @@ textarea:active {
   left: 0;
   top: 0;
   width: 200px;
-  height: 100vh !important;
   padding: 0.5em 1em;
   background: #eceff3;
   border-right: 1px solid #c8d5df;
@@ -9276,11 +9275,24 @@ a.btn:visited {
   font-size: 2rem;
   color: #c8d5df;
 }
-.popover label input.dontaskagain[type=checkbox],
-.popover .label input.dontaskagain[type=checkbox] {
-  height: 3em;
-  float: left;
-  margin-right: 2em;
+.popover label.dontaskagain-label,
+.popover .label.dontaskagain-label {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-align: baseline;
+  -moz-box-align: baseline;
+  -o-box-align: baseline;
+  -ms-flex-align: baseline;
+  -webkit-align-items: baseline;
+  align-items: baseline;
+}
+.popover label input.dontaskagain,
+.popover .label input.dontaskagain {
+  margin: 0.25em;
 }
 .popover .label-row {
   width: 100%;
@@ -9594,7 +9606,6 @@ a.btn:visited {
   -webkit-order: 3;
   order: 3;
 }
-.input-details-trigger,
 .input-place {
   overflow: hidden;
   -o-text-overflow: ellipsis;
@@ -9956,6 +9967,16 @@ ul.alerts .type input[type=checkbox] {
   width: 2em;
   height: 2em;
   margin: 2em 0;
+}
+.button-full-block .overflow-wrapper {
+  width: 16em;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  line-height: 3em;
+  display: inline-block;
+  height: 3em;
+  display: inline-block;
 }
 [data-state~="default"],
 [data-state~="enabled"] {
@@ -10368,6 +10389,20 @@ body.error-404 .error-frame .headline {
   ul#menu ul#menuitems li.tagmenuitem {
     padding: 0.6em 1em;
   }
+}
+.is-mobile .sidenav {
+  border-right: none;
+}
+.is-mobile ul#menu {
+  height: auto;
+  max-width: 50%;
+  z-index: 2;
+}
+.is-mobile ul#menu ul#menuitems {
+  width: 100vw;
+}
+.is-mobile .main-container {
+  margin-top: 0;
 }
 
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
