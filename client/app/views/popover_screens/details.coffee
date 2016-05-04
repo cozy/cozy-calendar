@@ -15,3 +15,6 @@ module.exports = class DetailsPopoverScreen extends EventPopoverScreenView
     onLeaveScreen: ->
         value = @$('.input-details').val()
         @formModel.set 'details', value
+
+    getRenderData: ->
+        return details: @formModel.get 'details'
