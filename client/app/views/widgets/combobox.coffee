@@ -101,7 +101,7 @@ module.exports = class ComboBox extends BaseView
 
 
     onKeyUp: (ev, ui) =>
-        if event.keyCode is 13 or event.which is 13 #ENTER
+        if ev.keyCode is 13 or ev.which is 13 #ENTER
             @onSubmit ev, ui
         else
             @onChange ev, ui
