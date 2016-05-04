@@ -14,7 +14,6 @@ module.exports = class CalendarCollection extends TagCollection
         @eventCollection = app.events
 
         @listenTo @eventCollection, 'add', @onBaseCollectionAdd
-        @listenTo @eventCollection, 'change:tags', @onBaseCollectionChange
         @listenTo @eventCollection, 'remove', @onBaseCollectionRemove
         @listenTo @eventCollection, 'reset', @resetFromBase
 
@@ -22,18 +21,12 @@ module.exports = class CalendarCollection extends TagCollection
 
 
     resetFromBase: ->
-        #@reset []
         @eventCollection.each (model) => @onBaseCollectionAdd model
-
-
-    onBaseCollectionChange: (model) ->
-#        @resetFromBase()
 
 
     onBaseCollectionAdd: (model) ->
         [calendarName, tags...] = model.get 'tags'
         calendar = app.tags.getOrCreateByName calendarName
-        #@add calendar
 
         if calendar.isNew()
             @add calendar
