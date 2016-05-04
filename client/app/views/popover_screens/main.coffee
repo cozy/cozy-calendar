@@ -115,6 +115,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$el.attr 'tabindex', 0
 
         # Cache jQuery selectors.
+        @description = @$ '.input-desc'
         @$container   = @$ '.popover-content-wrapper'
         @$addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
@@ -154,6 +155,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         @calendarComboBox.on 'edition-complete', (value) =>
             @formModel.setCalendar app.calendars.getOrCreateByName value
+            @description.focus()
 
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
