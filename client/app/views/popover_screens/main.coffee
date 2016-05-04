@@ -62,15 +62,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-repeat': -> @switchToScreen('repeat')
 
     initialize: ->
-        # As we are in the main event popover screen, we initialize the
-        # form model.
-        # If we're comming back from another screen, the formModel already
-        # exists.
-        # If not, we create a new one by cloning the original model.
-        # The goal is to keep the original model unchanged until the save
-        # action.
-        # @See https://github.com/cozy/cozy-calendar/issues/465
-        @formModel = @context.formModel ?= @model.clone()
+        @formModel = @context.formModel
 
         # Listen to the model's change to update the view accordingly.
         # `start` and `end` are updated when one changed to prevent overlapping
