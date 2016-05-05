@@ -8,7 +8,7 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
     # to check every event calendar in the a given calendars collection
     # to verify the visibility
     visibleItems: (calendars) ->
-        return _ @filter (item) ->
+        new ScheduleItemsCollection @filter (item) ->
             calendar = calendars.get item.getCalendar()?.get('id')
             return calendar?.get 'visible'
 

@@ -28,9 +28,6 @@ module.exports = class ScheduleItem extends Backbone.Model
         tags = if oldTags? then [].concat(oldTags) else []
         tags[0] = calendar.get 'name'
 
-
-        # @calendar = calendar
-
         @calendar = calendar
 
         @set tags: tags

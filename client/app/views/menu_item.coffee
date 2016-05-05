@@ -102,7 +102,7 @@ module.exports = class MenuItemView extends BaseView
             trashButton.removeClass 'hidden'
 
 
-    onCalendarChange: =>
+    onCalendarChange: ->
         # Update the label after a rename
         if @rawTextElement and @model.hasChanged 'name'
             @rawTextElement.html @model.get 'name'

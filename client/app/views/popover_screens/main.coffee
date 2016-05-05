@@ -329,7 +329,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             saveEvent = () =>
                 @model.save @formModel.attributes,
                 wait: true
-                success: (model) =>
+                success: (model) ->
                     app.events.add model, sort: false
                 error: ->
                     # TODO better error handling
@@ -341,7 +341,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             if calendar.isNew()
                 calendar.save calendar.attributes,
                     wait: true
-                    success: =>
+                    success: ->
                         app.calendars.add calendar
                         saveEvent()
                     error: ->

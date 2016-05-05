@@ -53,7 +53,6 @@ Event.tags = (callback) ->
 
 Event.calendars = (callback) ->
     Event.tags (err, results) ->
-        console.log results.calendar
         return callback err, [] if err
 
         async.map results.calendar,
@@ -62,7 +61,6 @@ Event.calendars = (callback) ->
                 return Tag.getOrCreateByName name: calendarName, cb
             ,
             (err, calendars) ->
-                console.log 'callback', calendars
                 callback null, calendars
 
 
