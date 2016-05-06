@@ -43,7 +43,16 @@ module.exports = class EventPopOver extends PopoverView
                 description: ''
                 place: ''
 
-        @listenToOnce @model, 'change', =>
+        # Context passed to all children popover screens
+        @context = {}
+
+        # The formModel represents the form's state. It's synchronized with
+        # the original model just before the save action.
+        # The formModel is passed to popover screens via the context property
+        # @See https://github.com/cozy/cozy-calendar/issues/465
+        @context.formModel = @model.clone();
+
+        @listenToOnce @context.formModel, 'change', =>
             @modelHasChanged = true
 
         super options

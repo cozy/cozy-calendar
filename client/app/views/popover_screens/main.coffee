@@ -62,21 +62,18 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-repeat': -> @switchToScreen('repeat')
 
     initialize: ->
-        # As we are in the main event popover screen, we initialize the
-        # form model.
-        # If we're comming back from another screen, the formModel already
-        # exists.
-        # If not, we create a new one by cloning the original model.
-        # The goal is to keep the original model unchanged until the save
-        # action.
-        # @See https://github.com/cozy/cozy-calendar/issues/465
-        @formModel = @context.formModel ?= @model.clone()
+        @formModel = @context.formModel
 
         # Listen to the model's change to update the view accordingly.
         # `start` and `end` are updated when one changed to prevent overlapping
         # times.
         @listenTo @model, "change:start", @onStartChange
         @listenTo @model, "change:end", @onEndChange
+
+        @calendar = @model.getCalendar()
+        @listenTo @calendar, 'change:color', @onCalendarColorChange
+
+        @listenTo app.calendars, 'change', @onCalendarsChange
 
 
     # Remove the listeners when the screen is left.
@@ -118,6 +115,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$el.attr 'tabindex', 0
 
         # Cache jQuery selectors.
+        @description = @$ '.input-desc'
         @$container   = @$ '.popover-content-wrapper'
         @$addButton    = @$ '.btn.add'
         @removeButton = @$ '.remove'
@@ -149,13 +147,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # validation. As a result we don't use a type=date, but a type=text.
         @$('.input-date').datetimepicker defDatePickerOps
 
-        @calendar = new ComboBox
+        @calendarComboBox = new ComboBox
             el: @$ '.calendarcombo'
             small: true
             source: app.calendars.toAutoCompleteSource()
             current: @formModel.getCalendar()?.get('name')
 
-        @calendar.on 'edition-complete', (value) => @formModel.setCalendar value
+        @calendarComboBox.on 'edition-complete', (value) =>
+            @formModel.setCalendar app.calendars.getOrCreateByName value
+            @description.focus()
 
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
@@ -176,7 +176,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     onKeyUp: (event) ->
         if event.keyCode is 13 or event.which is 13 #ENTER
             # Forces the combobox to blur to save the calendar if it has changed
-            @calendar.onBlur()
+            @calendarComboBox.onBlur()
             # Update start and end too.
             @onSetStart()
             @onSetEnd()
@@ -230,6 +230,14 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # We put or remove a top-level class on the popover body that target if
         # the event is one day long or not
         @$container.toggleClass 'is-same-day', @formModel.isSameDay()
+
+
+    onCalendarColorChange: (calendar) ->
+        @calendarComboBox.buildBadge calendar.get 'color'
+
+
+    onCalendarsChange: (calendars) ->
+        @calendarComboBox.resetComboBox app.calendars.toAutoCompleteSource()
 
 
     formatDateTime: (timeStr = '', dateStr = '', end=true) ->
@@ -315,17 +323,32 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @handleError err for err in errors
 
         else #no errors.
-            @model.setCalendar @formModel.get('tags')?[0]
-            @model.save @formModel.attributes,
+            calendar = @formModel.getCalendar()
+            @model.setCalendar calendar
+
+            saveEvent = () =>
+                @model.save @formModel.attributes,
                 wait: true
-                success: =>
-                    @calendar.save()
-                    app.events.add @model, sort: false
+                success: (model) ->
+                    app.events.add model, sort: false
                 error: ->
+                    # TODO better error handling
                     alert 'server error occured'
                 complete: =>
                     @$addButton.html @getButtonText()
                     @popover.selfclose(false)
+
+            if calendar.isNew()
+                calendar.save calendar.attributes,
+                    wait: true
+                    success: ->
+                        app.calendars.add calendar
+                        saveEvent()
+                    error: ->
+                        # TODO better error handling
+                        alert 'server error occured'
+            else
+                saveEvent()
 
     handleError: (error) ->
         switch error.field

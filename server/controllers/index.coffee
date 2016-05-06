@@ -21,6 +21,7 @@ module.exports.index = (req, res, next) ->
             done null, contacts
 
         (cb) -> Tag.byName {}, cb
+        (cb) -> Event.calendars cb
         # Load only reccuring events and events close to current day (> -3
         # months and < +3 months). That way it doesn't load too much events.
         (cb) ->
@@ -49,7 +50,7 @@ module.exports.index = (req, res, next) ->
 
 
         [
-            contacts, tags, events, instance, webDavAccount, timezone
+            contacts, tags, calendars, events, instance, webDavAccount, timezone
         ] = results
 
         locale = instance?.locale or 'en'
@@ -68,6 +69,7 @@ module.exports.index = (req, res, next) ->
         res.render 'index', imports: """
             window.locale = "#{locale}";
             window.inittags = #{sanitize tags};
+            window.initcalendars = #{sanitize calendars};
             window.initevents = #{sanitize events}
             window.initcontacts = #{sanitize contacts};
             window.webDavAccount = #{sanitize webDavAccount};

@@ -23,7 +23,7 @@ module.exports.read = (req, res) ->
 
 module.exports.create = (req, res) ->
     data = req.body
-    Tag.getOrCreate data, (err, tag) ->
+    Tag.getOrCreateByName data, (err, tag) ->
         if err?
             res.send error: "Server error while creating tag.", 500
         else

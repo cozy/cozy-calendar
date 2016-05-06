@@ -3,6 +3,7 @@ moment = require 'moment-timezone'
 async = require 'async'
 log = require('printit')
     prefix: 'event:model'
+Tag = require './tag'
 
 localization = require '../libs/localization_manager'
 User = require './user'
@@ -48,6 +49,19 @@ Event.tags = (callback) ->
             [type, tag] = result.key
             out[type].push tag
         callback null, out
+
+
+Event.calendars = (callback) ->
+    Event.tags (err, results) ->
+        return callback err, [] if err
+
+        async.map results.calendar,
+            # Map string to tag-compatible object
+            (calendarName, cb) ->
+                return Tag.getOrCreateByName name: calendarName, cb
+            ,
+            (err, calendars) ->
+                callback null, calendars
 
 
 Event.createOrGetIfImport = (data, callback) ->
