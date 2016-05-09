@@ -164,6 +164,11 @@ module.exports = {
     this.menu.render().$el.prependTo('body');
     SocketListener.watch(this.events);
     SocketListener.watch(this.contacts);
+    SocketListener.watch(this.calendars);
+    if (window.initcalendars != null) {
+      this.calendars.reset(window.initcalendars);
+      delete window.initcalendars;
+    }
     if (window.inittags != null) {
       this.tags.reset(window.inittags);
       delete window.inittags;
@@ -222,14 +227,12 @@ module.exports = CalendarCollection = (function(superClass) {
   CalendarCollection.prototype.initialize = function() {
     this.eventCollection = app.events;
     this.listenTo(this.eventCollection, 'add', this.onBaseCollectionAdd);
-    this.listenTo(this.eventCollection, 'change:tags', this.onBaseCollectionChange);
     this.listenTo(this.eventCollection, 'remove', this.onBaseCollectionRemove);
     this.listenTo(this.eventCollection, 'reset', this.resetFromBase);
     return this.resetFromBase();
   };
 
   CalendarCollection.prototype.resetFromBase = function() {
-    this.reset([]);
     return this.eventCollection.each((function(_this) {
       return function(model) {
         return _this.onBaseCollectionAdd(model);
@@ -237,16 +240,12 @@ module.exports = CalendarCollection = (function(superClass) {
     })(this));
   };
 
-  CalendarCollection.prototype.onBaseCollectionChange = function(model) {
-    return this.resetFromBase();
-  };
-
   CalendarCollection.prototype.onBaseCollectionAdd = function(model) {
     var calendar, calendarName, ref, tags;
     ref = model.get('tags'), calendarName = ref[0], tags = 2 <= ref.length ? slice.call(ref, 1) : [];
     calendar = app.tags.getOrCreateByName(calendarName);
-    this.add(calendar);
     if (calendar.isNew()) {
+      this.add(calendar);
       app.tags.add(calendar);
       return calendar.save();
     }
@@ -278,6 +277,9 @@ module.exports = CalendarCollection = (function(superClass) {
         if (err) {
           return callback(t('server error occured'));
         } else {
+          CalendarCollection.__super__.remove.call(_this, _this.findWhere({
+            name: calendarName
+          }));
           return callback();
         }
       };
@@ -290,9 +292,10 @@ module.exports = CalendarCollection = (function(superClass) {
       newName: newName
     }, function(err) {
       if (err) {
-        return callback(t('server error occured'));
+        console.error(t('server error occured'), err);
+        return callback(oldName);
       } else {
-        return callback();
+        return callback(newName);
       }
     });
   };
@@ -766,34 +769,40 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
     return si1.getDateObject().diff(si2.getDateObject());
   };
 
+  ScheduleItemsCollection.prototype.visibleItems = function(calendars) {
+    return new ScheduleItemsCollection(this.filter(function(item) {
+      var calendar, ref;
+      calendar = calendars.get((ref = item.getCalendar()) != null ? ref.get('id') : void 0);
+      return calendar != null ? calendar.get('visible') : void 0;
+    }));
+  };
+
   ScheduleItemsCollection.prototype.getFCEventSource = function(calendars) {
     return (function(_this) {
       return function(start, end, timezone, callback) {
-        var eventsInRange;
+        var eventsInRange, ref;
         eventsInRange = [];
-        _this.each(function(item) {
-          var calendar, duration, e, error, itemEnd, itemStart;
-          itemStart = item.getStartDateObject();
-          itemEnd = item.getEndDateObject();
-          duration = itemEnd - itemStart;
-          calendar = item.getCalendar();
-          if (calendar && calendar.get('visible') === false) {
-            return null;
-          }
-          if (item.isRecurrent()) {
-            try {
-              return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
-            } catch (error) {
-              e = error;
-              console.error(e);
-              if (item.isInRange(start, end)) {
-                return eventsInRange.push(item.toPunctualFullCalendarEvent());
+        if ((ref = _this.visibleItems(calendars)) != null) {
+          ref.each(function(item) {
+            var duration, e, error, itemEnd, itemStart;
+            itemStart = item.getStartDateObject();
+            itemEnd = item.getEndDateObject();
+            duration = itemEnd - itemStart;
+            if (item.isRecurrent()) {
+              try {
+                return eventsInRange = eventsInRange.concat(item.getRecurrentFCEventBetween(start, end));
+              } catch (error) {
+                e = error;
+                console.error(e);
+                if (item.isInRange(start, end)) {
+                  return eventsInRange.push(item.toPunctualFullCalendarEvent());
+                }
               }
+            } else if (item.isInRange(start, end)) {
+              return eventsInRange.push(item.toPunctualFullCalendarEvent());
             }
-          } else if (item.isInRange(start, end)) {
-            return eventsInRange.push(item.toPunctualFullCalendarEvent());
-          }
-        });
+          });
+        }
         return callback(eventsInRange);
       };
     })(this);
@@ -1424,7 +1433,6 @@ module.exports = PopoverView = (function(superClass) {
     if (this.$tabCells.length === 0) {
       this.$tabCells = $('.fc-time-grid-container');
     }
-    this.context = {};
     return this;
   };
 
@@ -2310,6 +2318,11 @@ module.exports = {
     "duplicate event tooltip": "Termine duplizieren",
     "delete event tooltip": "Termin löschen",
     "change calendar": "Kalender wechseln",
+    "screen confirm title": "Are you sure?",
+    "screen confirm description": "The change you made in this popover will be lost.",
+    "screen confirm yes button": "Don't save",
+    "screen confirm no button": "Cancel",
+    "dont ask again": "Dont ask for confirmation when exiting the popover.",
     "screen delete title": "Termin Löschen",
     "screen delete description": "Sie sind dabei den Termin  \"%{description}\" Zu löschen. Wollen Sie das wirklich?",
     "screen delete yes button": "Ja",
@@ -2356,6 +2369,10 @@ module.exports = {
     "screen recurrence summary label": "Summary",
     "send mails question": "Eine Mitteilung senden an E-MAil:",
     "modal send mails": "Eine Mitteilung senden",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "need action": "No answer yet",
+    "mail not sent": "No invitation sent",
     "yes": "Ja",
     "no": "Nein",
     "no summary": "Ein Titel muss vergeben werden.",
@@ -3096,6 +3113,11 @@ module.exports = {
     "duplicate event tooltip": "Repetir evento",
     "delete event tooltip": "Anular evento",
     "change calendar": "Cambiar de agenda",
+    "screen confirm title": "¿Está usted seguro?",
+    "screen confirm description": "El cambio que usted ha hecho en este popover puede perderse.",
+    "screen confirm yes button": "No lo guarde",
+    "screen confirm no button": "Anular",
+    "dont ask again": "No pedir confirmación cuando se sale del popover.",
     "screen delete title": "Anular evento",
     "screen delete description": "Está usted a punto de suprimir el evento \"%{description}\". ¿Está seguro?",
     "screen delete yes button": "Si",
@@ -3142,6 +3164,10 @@ module.exports = {
     "screen recurrence summary label": "Resumen",
     "send mails question": "Enviar un correo electrónico de notificación a:",
     "modal send mails": "Enviar una notificación",
+    "accepted": "Aceptado",
+    "declined": "Rechazado",
+    "need action": "Todavía no hay respuesta",
+    "mail not sent": "Ninguna invitación enviada",
     "yes": "Si",
     "no": "No",
     "no summary": "El título es obligatorio",
@@ -3470,8 +3496,7 @@ module.exports = {
     "email delete title": "Cet événement a été annulé : %{description}",
     "email delete content": "Cet événement a été annulé :\n%{description} %{place}\nLe %{date}",
     "invalid recurring rule": "La règle de récursion est invalide"
-}
-;
+};
 });
 
 require.register("locales/id.json", function(exports, require, module) {
@@ -5192,6 +5217,11 @@ module.exports = {
     "duplicate event tooltip": "Duplicate event",
     "delete event tooltip": "Delete event",
     "change calendar": "Schimbă calendarul",
+    "screen confirm title": "Are you sure?",
+    "screen confirm description": "The change you made in this popover will be lost.",
+    "screen confirm yes button": "Don't save",
+    "screen confirm no button": "Cancel",
+    "dont ask again": "Dont ask for confirmation when exiting the popover.",
     "screen delete title": "Delete event",
     "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
     "screen delete yes button": "Yes",
@@ -5238,6 +5268,10 @@ module.exports = {
     "screen recurrence summary label": "Summary",
     "send mails question": "Trimite notificarea pe email către:",
     "modal send mails": "Trimite o notificare",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "need action": "No answer yet",
+    "mail not sent": "No invitation sent",
     "yes": "Da",
     "no": "Nu",
     "no summary": "Un sumar trebuie setat",
@@ -5303,8 +5337,7 @@ module.exports = {
     "email delete title": "Acest eveniment a fost anulat: %{description}",
     "email delete content": "Acest eveniment a fost anulat:\n%{description} %{place}\nÎn %{date}",
     "invalid recurring rule": "The recurring rule is invalid"
-}
-;
+};
 });
 
 require.register("locales/ru.json", function(exports, require, module) {
@@ -6082,14 +6115,15 @@ module.exports = ScheduleItem = (function(superClass) {
 
   ScheduleItem.prototype.getCalendar = function() {
     var ref;
-    return app.tags.getByName((ref = this.get('tags')) != null ? ref[0] : void 0);
+    return this.calendar || app.calendars.getByName((ref = this.get('tags')) != null ? ref[0] : void 0);
   };
 
-  ScheduleItem.prototype.setCalendar = function(cal) {
+  ScheduleItem.prototype.setCalendar = function(calendar) {
     var oldTags, tags;
     oldTags = this.get('tags');
     tags = oldTags != null ? [].concat(oldTags) : [];
-    tags[0] = cal;
+    tags[0] = calendar.get('name');
+    this.calendar = calendar;
     return this.set({
       tags: tags
     });
@@ -6758,7 +6792,9 @@ module.exports = EventPopOver = (function(superClass) {
         place: ''
       });
     }
-    this.listenToOnce(this.model, 'change', (function(_this) {
+    this.context = {};
+    this.context.formModel = this.model.clone();
+    this.listenToOnce(this.context.formModel, 'change', (function(_this) {
       return function() {
         return _this.modelHasChanged = true;
       };
@@ -6913,7 +6949,7 @@ module.exports = CalendarView = (function(superClass) {
     this.listenTo(this.eventCollection, 'change', this.refreshOne);
     this.model = null;
     this.calendarsCollection = app.calendars;
-    return this.listenTo(this.calendarsCollection, 'change', this.refresh);
+    return this.listenTo(this.calendarsCollection, 'change', this.onCalendarCollectionChange);
   };
 
   CalendarView.prototype.afterRender = function() {
@@ -7042,6 +7078,10 @@ module.exports = CalendarView = (function(superClass) {
     return this.cal.fullCalendar('refetchEvents');
   };
 
+  CalendarView.prototype.onCalendarCollectionChange = function(collection) {
+    return this.refresh(collection);
+  };
+
   CalendarView.prototype.onRemove = function(model) {
     return this.cal.fullCalendar('removeEvents', model.cid);
   };
@@ -7063,8 +7103,9 @@ module.exports = CalendarView = (function(superClass) {
     fcEvent = this.cal.fullCalendar('clientEvents', data.id)[0];
     if (fcEvent != null) {
       _.extend(fcEvent, data);
-      return this.cal.fullCalendar('updateEvent', fcEvent);
+      this.cal.fullCalendar('updateEvent', fcEvent);
     }
+    return this.refresh();
   };
 
   CalendarView.prototype.showPopover = function(options) {
@@ -7930,6 +7971,7 @@ module.exports = MenuView = (function(superClass) {
       wait: true,
       success: function() {
         var wait;
+        app.calendars.add(app.tags.getOrCreateByName(name));
         return wait = setInterval(function() {
           var newCalSel, rename;
           newCalSel = "#menuitems li.tagmenuitem[data-name='" + name + "']";
@@ -8034,6 +8076,11 @@ module.exports = MenuItemView = (function(superClass) {
     'keyup input.calendar-name': 'onRenameValidation'
   };
 
+  MenuItemView.prototype.initialize = function() {
+    MenuItemView.__super__.initialize.call(this);
+    return this.listenTo(this.model, 'change', this.onCalendarChange);
+  };
+
   MenuItemView.prototype.getRenderData = function() {
     return {
       label: this.model.get('name'),
@@ -8113,19 +8160,30 @@ module.exports = MenuItemView = (function(superClass) {
     }
   };
 
+  MenuItemView.prototype.onCalendarChange = function() {
+    if (this.rawTextElement && this.model.hasChanged('name')) {
+      this.rawTextElement.html(this.model.get('name'));
+    }
+    if (this.model.hasChanged('color')) {
+      return this.model.save();
+    }
+  };
+
   MenuItemView.prototype.onRenameValidation = function(event) {
     var calendarName, input, key;
     input = $(event.target);
     calendarName = this.model.get('name');
     key = event.keyCode || event.charCode;
     if (key === 27) {
-      return this.hideInput(input, calendarName);
+      return this.hideInput(input);
     } else if (key === 13 || event.type === 'focusout') {
       this.showLoading();
       return app.calendars.rename(calendarName, input.val(), (function(_this) {
-        return function() {
+        return function(name) {
+          _this.model.set('name', name);
+          _this.model.set('color', ColorHash.getColor(name, 'color'));
           _this.hideLoading();
-          return _this.hideInput(input, calendarName);
+          return _this.hideInput(input);
         };
       })(this));
     } else {
@@ -8164,7 +8222,7 @@ module.exports = MenuItemView = (function(superClass) {
   MenuItemView.prototype.hideInput = function(input, calendarName) {
     input.remove();
     this.rawTextElement.insertAfter(this.$('.badge'));
-    this.buildBadge(calendarName);
+    this.buildBadge(this.model.get('color'));
     return this.$('.dropdown-toggle').show();
   };
 
@@ -8521,6 +8579,12 @@ module.exports = DetailsPopoverScreen = (function(superClass) {
     return this.formModel.set('details', value);
   };
 
+  DetailsPopoverScreen.prototype.getRenderData = function() {
+    return {
+      details: this.formModel.get('details')
+    };
+  };
+
   return DetailsPopoverScreen;
 
 })(EventPopoverScreenView);
@@ -8767,10 +8831,12 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.initialize = function() {
-    var base;
-    this.formModel = (base = this.context).formModel != null ? base.formModel : base.formModel = this.model.clone();
+    this.formModel = this.context.formModel;
     this.listenTo(this.model, "change:start", this.onStartChange);
-    return this.listenTo(this.model, "change:end", this.onEndChange);
+    this.listenTo(this.model, "change:end", this.onEndChange);
+    this.calendar = this.model.getCalendar();
+    this.listenTo(this.calendar, 'change:color', this.onCalendarColorChange);
+    return this.listenTo(app.calendars, 'change', this.onCalendarsChange);
   };
 
   MainPopoverScreen.prototype.onLeaveScreen = function() {
@@ -8808,6 +8874,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   MainPopoverScreen.prototype.afterRender = function() {
     var ref, timepickerEvents;
     this.$el.attr('tabindex', 0);
+    this.description = this.$('.input-desc');
     this.$container = this.$('.popover-content-wrapper');
     this.$addButton = this.$('.btn.add');
     this.removeButton = this.$('.remove');
@@ -8833,15 +8900,16 @@ module.exports = MainPopoverScreen = (function(superClass) {
     };
     this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
     this.$('.input-date').datetimepicker(defDatePickerOps);
-    this.calendar = new ComboBox({
+    this.calendarComboBox = new ComboBox({
       el: this.$('.calendarcombo'),
       small: true,
       source: app.calendars.toAutoCompleteSource(),
       current: (ref = this.formModel.getCalendar()) != null ? ref.get('name') : void 0
     });
-    this.calendar.on('edition-complete', (function(_this) {
+    this.calendarComboBox.on('edition-complete', (function(_this) {
       return function(value) {
-        return _this.formModel.setCalendar(value);
+        _this.formModel.setCalendar(app.calendars.getOrCreateByName(value));
+        return _this.description.focus();
       };
     })(this));
     if (window.popoverExtended) {
@@ -8859,7 +8927,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
 
   MainPopoverScreen.prototype.onKeyUp = function(event) {
     if (event.keyCode === 13 || event.which === 13) {
-      this.calendar.onBlur();
+      this.calendarComboBox.onBlur();
       this.onSetStart();
       this.onSetEnd();
       return this.$addButton.click();
@@ -8902,6 +8970,14 @@ module.exports = MainPopoverScreen = (function(superClass) {
   MainPopoverScreen.prototype.onSetEnd = function() {
     this.formModel.setEnd(this.formatDateTime(this.$('.input-end-time').val(), this.$('.input-end-date').val()));
     return this.$container.toggleClass('is-same-day', this.formModel.isSameDay());
+  };
+
+  MainPopoverScreen.prototype.onCalendarColorChange = function(calendar) {
+    return this.calendarComboBox.buildBadge(calendar.get('color'));
+  };
+
+  MainPopoverScreen.prototype.onCalendarsChange = function(calendars) {
+    return this.calendarComboBox.resetComboBox(app.calendars.toAutoCompleteSource());
   };
 
   MainPopoverScreen.prototype.formatDateTime = function(timeStr, dateStr, end) {
@@ -8994,7 +9070,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
-    var err, errors, i, len, ref, results, spinner;
+    var calendar, err, errors, i, len, results, saveEvent, spinner;
     if (this.$('.btn.add').hasClass('disabled')) {
       return;
     }
@@ -9013,27 +9089,41 @@ module.exports = MainPopoverScreen = (function(superClass) {
       }
       return results;
     } else {
-      this.model.setCalendar((ref = this.formModel.get('tags')) != null ? ref[0] : void 0);
-      return this.model.save(this.formModel.attributes, {
-        wait: true,
-        success: (function(_this) {
-          return function() {
-            _this.calendar.save();
-            return app.events.add(_this.model, {
-              sort: false
-            });
-          };
-        })(this),
-        error: function() {
-          return alert('server error occured');
-        },
-        complete: (function(_this) {
-          return function() {
-            _this.$addButton.html(_this.getButtonText());
-            return _this.popover.selfclose(false);
-          };
-        })(this)
-      });
+      calendar = this.formModel.getCalendar();
+      this.model.setCalendar(calendar);
+      saveEvent = (function(_this) {
+        return function() {
+          return _this.model.save(_this.formModel.attributes, {
+            wait: true,
+            success: function(model) {
+              return app.events.add(model, {
+                sort: false
+              });
+            },
+            error: function() {
+              return alert('server error occured');
+            },
+            complete: function() {
+              _this.$addButton.html(_this.getButtonText());
+              return _this.popover.selfclose(false);
+            }
+          });
+        };
+      })(this);
+      if (calendar.isNew()) {
+        return calendar.save(calendar.attributes, {
+          wait: true,
+          success: function() {
+            app.calendars.add(calendar);
+            return saveEvent();
+          },
+          error: function() {
+            return alert('server error occured');
+          }
+        });
+      } else {
+        return saveEvent();
+      }
     }
   };
 
@@ -10285,6 +10375,8 @@ module.exports = ComboBox = (function(superClass) {
     this.renderItem = bind(this.renderItem, this);
     this.onChange = bind(this.onChange, this);
     this.onEditionComplete = bind(this.onEditionComplete, this);
+    this.onSubmit = bind(this.onSubmit, this);
+    this.onKeyUp = bind(this.onKeyUp, this);
     this.onSelect = bind(this.onSelect, this);
     this.onBlur = bind(this.onBlur, this);
     this.onClose = bind(this.onClose, this);
@@ -10296,7 +10388,7 @@ module.exports = ComboBox = (function(superClass) {
   }
 
   ComboBox.prototype.events = {
-    'keyup': 'onChange',
+    'keyup': 'onKeyUp',
     'keypress': 'onChange',
     'change': 'onChange',
     'blur': 'onBlur'
@@ -10306,15 +10398,7 @@ module.exports = ComboBox = (function(superClass) {
     var caret, isInput, method, value;
     ComboBox.__super__.initialize.call(this);
     this.source = options.source;
-    this.$el.autocomplete({
-      delay: 0,
-      minLength: 0,
-      source: this.source,
-      close: this.onClose,
-      open: this.onOpen,
-      select: this.onSelect
-    });
-    this.$el.addClass('combobox');
+    this.resetComboBox(options.source);
     this.small = options.small;
     this.autocompleteWidget = this.$el.data('ui-autocomplete');
     this.autocompleteWidget._renderItem = this.renderItem;
@@ -10329,6 +10413,18 @@ module.exports = ComboBox = (function(superClass) {
     }
     value = options.current || this.getDefaultValue();
     return this.onEditionComplete(value);
+  };
+
+  ComboBox.prototype.resetComboBox = function(source) {
+    this.$el.autocomplete({
+      delay: 0,
+      minLength: 0,
+      source: source,
+      close: this.onClose,
+      open: this.onOpen,
+      select: this.onSelect
+    });
+    return this.$el.addClass('combobox');
   };
 
   ComboBox.prototype.openMenu = function() {
@@ -10387,9 +10483,22 @@ module.exports = ComboBox = (function(superClass) {
     return this.trigger('edition-complete', (ui != null ? (ref = ui.item) != null ? ref.value : void 0 : void 0) || this.value());
   };
 
+  ComboBox.prototype.onKeyUp = function(ev, ui) {
+    if (ev.keyCode === 13 || ev.which === 13) {
+      return this.onSubmit(ev, ui);
+    } else {
+      return this.onChange(ev, ui);
+    }
+  };
+
+  ComboBox.prototype.onSubmit = function(ev, ui) {
+    ev.stopPropagation();
+    return this.onSelect(ev, ui);
+  };
+
   ComboBox.prototype.onEditionComplete = function(name) {
-    this.tag = app.tags.getOrCreateByName(name);
-    return this.buildBadge(this.tag.get('color'));
+    this.calendar = app.calendars.getOrCreateByName(name);
+    return this.buildBadge(this.calendar.get('color'));
   };
 
   ComboBox.prototype.onChange = function(ev, ui) {
