@@ -5,7 +5,7 @@ Tag = require 'models/tag'
 module.exports = class ComboBox extends BaseView
 
     events:
-        'keyup': 'onChange'
+        'keyup': 'onKeyUp'
         'keypress': 'onChange'
         'change': 'onChange'
         'blur': 'onBlur'
@@ -16,14 +16,8 @@ module.exports = class ComboBox extends BaseView
 
         @source = options.source
 
-        @$el.autocomplete
-            delay: 0
-            minLength: 0
-            source: @source
-            close: @onClose
-            open: @onOpen
-            select: @onSelect
-        @$el.addClass 'combobox'
+        @resetComboBox options.source
+
         @small = options.small
 
         @autocompleteWidget = @$el.data 'ui-autocomplete'
@@ -42,6 +36,18 @@ module.exports = class ComboBox extends BaseView
 
         value = options.current or @getDefaultValue()
         @onEditionComplete value
+
+
+    # Used for initialization or reset
+    resetComboBox: (source) ->
+        @$el.autocomplete
+            delay: 0
+            minLength: 0
+            source: source
+            close: @onClose
+            open: @onOpen
+            select: @onSelect
+        @$el.addClass 'combobox'
 
 
     openMenu: =>
@@ -94,9 +100,21 @@ module.exports = class ComboBox extends BaseView
         @trigger 'edition-complete', ui?.item?.value or @value()
 
 
+    onKeyUp: (ev, ui) =>
+        if ev.keyCode is 13 or ev.which is 13 #ENTER
+            @onSubmit ev, ui
+        else
+            @onChange ev, ui
+
+
+    onSubmit: (ev, ui) =>
+        ev.stopPropagation()
+        @onSelect ev, ui
+
+
     onEditionComplete: (name) =>
-        @tag = app.tags.getOrCreateByName name
-        @buildBadge @tag.get('color')
+        @calendar = app.calendars.getOrCreateByName name
+        @buildBadge @calendar.get('color')
 
 
     onChange: (ev, ui) =>

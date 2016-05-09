@@ -22,6 +22,11 @@ module.exports = class MenuItemView extends BaseView
         'keyup input.calendar-name': 'onRenameValidation'
 
 
+    initialize: ->
+        super()
+        @listenTo @model, 'change', @onCalendarChange
+
+
     getRenderData: ->
         label: @model.get 'name'
         colorSet: colorSet
@@ -97,6 +102,15 @@ module.exports = class MenuItemView extends BaseView
             trashButton.removeClass 'hidden'
 
 
+    onCalendarChange: ->
+        # Update the label after a rename
+        if @rawTextElement and @model.hasChanged 'name'
+            @rawTextElement.html @model.get 'name'
+
+        if @model.hasChanged 'color'
+            @model.save()
+
+
     # Handle `blur` and `keyup` (`enter` and `esc` keys) events in order to
     # rename a calendar.
     onRenameValidation: (event) ->
@@ -108,14 +122,16 @@ module.exports = class MenuItemView extends BaseView
         # `escape` key cancels the edition.
         if key is 27
 
-            @hideInput input, calendarName
+            @hideInput input
 
         # `blur` event and `enter` key trigger the persistence
         else if (key is 13 or event.type is 'focusout')
             @showLoading()
-            app.calendars.rename calendarName, input.val(), =>
+            app.calendars.rename calendarName, input.val(), (name) =>
+                @model.set 'name', name
+                @model.set 'color', ColorHash.getColor(name, 'color')
                 @hideLoading()
-                @hideInput input, calendarName
+                @hideInput input
         else
             @buildBadge ColorHash.getColor(input.val(), 'color')
 
@@ -160,7 +176,7 @@ module.exports = class MenuItemView extends BaseView
         @rawTextElement.insertAfter @$('.badge')
 
         # Restores the badge color
-        @buildBadge calendarName
+        @buildBadge @model.get 'color'
 
         # Shows the menu again
         @$('.dropdown-toggle').show()

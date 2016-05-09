@@ -69,6 +69,8 @@ module.exports = class MenuView extends ViewCollection
         calendarEvent.save null,
             wait: true
             success: ->
+                # TODO: All this should be in CalendarCollection
+                app.calendars.add app.tags.getOrCreateByName name
                 # wait for the newly created calendar to appear in the DOM
                 wait = setInterval ->
                     newCalSel = """

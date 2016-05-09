@@ -4,12 +4,7 @@
   "displayName": "Calendar",
   "description": "Manage your events and alarms with your Cozy.",
   "author": "Cozy Cloud <contact@cozycloud.cc> (http://cozycloud.cc)",
-  "licenses": [
-    {
-      "type": "AGPL v3",
-      "url": "http://www.gnu.org/licenses/agpl-3.0.html"
-    }
-  ],
+  "license": "AGPL-3.0",
   "engines": [
     "node = 0.10.x"
   ],
