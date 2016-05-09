@@ -39,6 +39,8 @@ module.exports.index = function(req, res, next) {
     }, function(cb) {
       return Tag.byName({}, cb);
     }, function(cb) {
+      return Event.calendars(cb);
+    }, function(cb) {
       var end, start;
       start = moment().startOf('month').subtract(3, 'months');
       end = moment().startOf('month').add(3, 'months');
@@ -61,11 +63,11 @@ module.exports.index = function(req, res, next) {
       }
     }
   ], function(err, results) {
-    var contacts, events, instance, locale, sanitize, tags, timezone, webDavAccount;
+    var calendars, contacts, events, instance, locale, sanitize, tags, timezone, webDavAccount;
     if (err) {
       return next(err);
     }
-    contacts = results[0], tags = results[1], events = results[2], instance = results[3], webDavAccount = results[4], timezone = results[5];
+    contacts = results[0], tags = results[1], calendars = results[2], events = results[3], instance = results[4], webDavAccount = results[5], timezone = results[6];
     locale = (instance != null ? instance.locale : void 0) || 'en';
     if (webDavAccount != null) {
       webDavAccount.domain = (instance != null ? instance.domain : void 0) || '';
@@ -75,7 +77,7 @@ module.exports.index = function(req, res, next) {
       return "JSON.parse(decodeURI(\"" + (encodeURI(JSON.stringify(obj))) + "\"));";
     };
     return res.render('index', {
-      imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (sanitize(tags)) + ";\nwindow.initevents = " + (sanitize(events)) + "\nwindow.initcontacts = " + (sanitize(contacts)) + ";\nwindow.webDavAccount = " + (sanitize(webDavAccount)) + ";\nwindow.timezone = " + (sanitize(timezone)) + ";"
+      imports: "window.locale = \"" + locale + "\";\nwindow.inittags = " + (sanitize(tags)) + ";\nwindow.initcalendars = " + (sanitize(calendars)) + ";\nwindow.initevents = " + (sanitize(events)) + "\nwindow.initcontacts = " + (sanitize(contacts)) + ";\nwindow.webDavAccount = " + (sanitize(webDavAccount)) + ";\nwindow.timezone = " + (sanitize(timezone)) + ";"
     });
   });
 };
