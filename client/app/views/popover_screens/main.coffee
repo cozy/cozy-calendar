@@ -380,11 +380,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         if guests.length is 0
             return t("add guest button")
         else if guests.length is 1
-            return guests[0].email
+            return guests[0].label
         else
             numOthers = guests.length - 1
             options =
-                first: guests[0].email,
+                first: guests[0].label,
                 smart_count: numOthers
             return t("guests list", options)
 

@@ -9,5 +9,12 @@ li(data-index=index)
         else
             i.fa.fa-exclamation-circle.orange(title=t('mail not sent'))
 
-        .guest-label= email
+        .guest-label= label
         button.guest-delete.fa.fa-trash-o(title=t('screen guest remove tooltip'), role="button")
+
+        // If a cozy instance is linked to a contact
+        if cozy
+            if shareWithCozy
+                button.guest-share-with-email.fa.fa-envelope-o(title=t('screen guest share with email tooltip'), role="button")
+            else
+                button.guest-share-with-cozy.fa.fa-cloud(title=t('screen guest share with cozy tooltip'), role="button")

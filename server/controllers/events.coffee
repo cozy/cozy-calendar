@@ -11,6 +11,7 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
+ShareHandler = require '../share/share_handler'
 localization = require '../libs/localization_manager'
 
 
@@ -49,8 +50,10 @@ module.exports.create = (req, res) ->
             if data.import or req.query.sendMails isnt 'true'
                 res.status(201).send event
             else
-                MailHandler.sendInvitations event, false, (err, updatedEvent) ->
-                    res.status(201).send (updatedEvent or event)
+                ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+                    MailHandler.sendInvitations updatedEvent, false, \
+                            (err, updatedEvent) ->
+                        res.status(201).send (updatedEvent or event)
 
 
 # Expect a list of events as body and create an event in database for each
