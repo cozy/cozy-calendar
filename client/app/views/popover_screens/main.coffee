@@ -67,10 +67,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # Listen to the model's change to update the view accordingly.
         # `start` and `end` are updated when one changed to prevent overlapping
         # times.
-        @listenTo @model, "change:start", @onStartChange
-        @listenTo @model, "change:end", @onEndChange
+        @listenTo @formModel, "change:start", @onStartChange
+        @listenTo @formModel, "change:end", @onEndChange
 
-        @calendar = @model.getCalendar()
+        @calendar = @formModel.getCalendar()
         @listenTo @calendar, 'change:color', @onCalendarColorChange
 
         @listenTo app.calendars, 'change', @onCalendarsChange
@@ -78,7 +78,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Remove the listeners when the screen is left.
     onLeaveScreen: ->
-        @stopListening @model
+        @stopListening @formModel
 
 
     getRenderData: ->
