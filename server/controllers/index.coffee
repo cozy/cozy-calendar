@@ -26,7 +26,7 @@ module.exports.index = (req, res, next) ->
         # months and < +3 months). That way it doesn't load too much events.
         (cb) ->
             start = moment().startOf('month').subtract 3, 'months'
-            end = moment().startOf('month').add 3, 'months'
+            end = moment().endOf('month').add 3, 'months'
             Event.load start, end, (err, events) ->
                 Event.request 'reccuring', (err, reccuringEvents) ->
                     cb null, events.concat reccuringEvents
