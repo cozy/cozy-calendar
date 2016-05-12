@@ -20,7 +20,7 @@ Tag.byName = function(options, callback) {
   return Tag.request('byName', options, callback);
 };
 
-Tag.getOrCreate = function(data, callback) {
+Tag.getOrCreateByName = function(data, callback) {
   return Tag.byName({
     key: data.name
   }, function(err, tags) {

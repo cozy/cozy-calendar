@@ -32,7 +32,7 @@ module.exports.read = function(req, res) {
 module.exports.create = function(req, res) {
   var data;
   data = req.body;
-  return Tag.getOrCreate(data, function(err, tag) {
+  return Tag.getOrCreateByName(data, function(err, tag) {
     if (err != null) {
       return res.send({
         error: "Server error while creating tag."
