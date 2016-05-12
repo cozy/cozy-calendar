@@ -36,9 +36,7 @@
   };
 
   var initModule = function(name, definition) {
-    var hot = null;
-    hot = hmr && hmr.createHot(name);
-    var module = {id: name, exports: {}, hot: hot};
+    var module = {id: name, exports: {}};
     cache[name] = module;
     definition(module.exports, localRequire(name), module);
     return module.exports;
@@ -46,10 +44,6 @@
 
   var expandAlias = function(name) {
     return aliases[name] ? expandAlias(aliases[name]) : name;
-  };
-
-  var _resolve = function(name, dep) {
-    return expandAlias(expand(dirname(name), dep));
   };
 
   var require = function(name, loaderPath) {
@@ -64,6 +58,12 @@
 
   require.alias = function(from, to) {
     aliases[to] = from;
+  };
+
+  require.reset = function() {
+    modules = {};
+    cache = {};
+    aliases = {};
   };
 
   var extRe = /\.[^.\/]+$/;
@@ -99,19 +99,17 @@
   };
 
   require.list = function() {
-    var list = [];
+    var result = [];
     for (var item in modules) {
       if (has.call(modules, item)) {
-        list.push(item);
+        result.push(item);
       }
     }
-    return list;
+    return result;
   };
 
-  var hmr = globals._hmr && new globals._hmr(_resolve, require, modules, cache);
-  require._cache = cache;
-  require.hmr = hmr && hmr.wrap;
   require.brunch = true;
+  require._cache = cache;
   globals.require = require;
 })();
 /*!

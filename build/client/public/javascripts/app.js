@@ -36,9 +36,7 @@
   };
 
   var initModule = function(name, definition) {
-    var hot = null;
-    hot = hmr && hmr.createHot(name);
-    var module = {id: name, exports: {}, hot: hot};
+    var module = {id: name, exports: {}};
     cache[name] = module;
     definition(module.exports, localRequire(name), module);
     return module.exports;
@@ -46,10 +44,6 @@
 
   var expandAlias = function(name) {
     return aliases[name] ? expandAlias(aliases[name]) : name;
-  };
-
-  var _resolve = function(name, dep) {
-    return expandAlias(expand(dirname(name), dep));
   };
 
   var require = function(name, loaderPath) {
@@ -64,6 +58,12 @@
 
   require.alias = function(from, to) {
     aliases[to] = from;
+  };
+
+  require.reset = function() {
+    modules = {};
+    cache = {};
+    aliases = {};
   };
 
   var extRe = /\.[^.\/]+$/;
@@ -99,55 +99,19 @@
   };
 
   require.list = function() {
-    var list = [];
+    var result = [];
     for (var item in modules) {
       if (has.call(modules, item)) {
-        list.push(item);
+        result.push(item);
       }
     }
-    return list;
+    return result;
   };
 
-  var hmr = globals._hmr && new globals._hmr(_resolve, require, modules, cache);
-  require._cache = cache;
-  require.hmr = hmr && hmr.wrap;
   require.brunch = true;
+  require._cache = cache;
   globals.require = require;
 })();
-
-(function() {
-var global = window;
-var __makeRelativeRequire = function(require, mappings, pref) {
-  var none = {};
-  var tryReq = function(name, pref) {
-    var val;
-    try {
-      val = require(pref + '/node_modules/' + name);
-      return val;
-    } catch (e) {
-      if (e.toString().indexOf('Cannot find module') === -1) {
-        throw e;
-      }
-
-      if (pref.indexOf('node_modules') !== -1) {
-        var s = pref.split('/');
-        var i = s.lastIndexOf('node_modules');
-        var newPref = s.slice(0, i).join('/');
-        return tryReq(name, newPref);
-      }
-    }
-    return none;
-  };
-  return function(name) {
-    if (name in mappings) name = mappings[name];
-    if (!name) return;
-    if (name[0] !== '.' && pref) {
-      var val = tryReq(name, pref);
-      if (val !== none) return val;
-    }
-    return require(name);
-  }
-};
 require.register("application.coffee", function(exports, require, module) {
 module.exports = {
   initialize: function() {
@@ -10581,9 +10545,5 @@ module.exports = ComboBox = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("___globals___", function(exports, require, module) {
-  
-});})();require('___globals___');
-
-
+;
 //# sourceMappingURL=app.js.map
