@@ -43,7 +43,7 @@ module.exports.index = function(req, res, next) {
     }, function(cb) {
       var end, start;
       start = moment().startOf('month').subtract(3, 'months');
-      end = moment().startOf('month').add(3, 'months');
+      end = moment().endOf('month').add(3, 'months');
       return Event.load(start, end, function(err, events) {
         return Event.request('reccuring', function(err, reccuringEvents) {
           return cb(null, events.concat(reccuringEvents));
