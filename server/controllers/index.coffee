@@ -7,6 +7,7 @@ log = require('printit')
 
 Tag = require '../models/tag'
 Event = require '../models/event'
+Sharing = require '../models/sharing'
 Contact = require '../models/contact'
 User  = require '../models/user'
 WebDavAccount = require '../models/webdavaccount'
@@ -29,8 +30,8 @@ module.exports.index = (req, res, next) ->
             end = moment().startOf('month').add 3, 'months'
             Event.load start, end, (err, events) ->
                 Event.request 'reccuring', (err, reccuringEvents) ->
-                    cb null, events.concat reccuringEvents
-
+                    cb null, events?.concat reccuringEvents
+        (cb) -> Sharing.pendingBySharedDocType 'event', cb
         (cb) -> cozydb.api.getCozyInstance cb
         (cb) -> WebDavAccount.first cb
         (cb) ->
@@ -50,7 +51,7 @@ module.exports.index = (req, res, next) ->
 
 
         [
-            contacts, tags, calendars, events, instance, webDavAccount, timezone
+            contacts, tags, calendars, events, pendingEventSharings, instance, webDavAccount, timezone
         ] = results
 
         locale = instance?.locale or 'en'
@@ -71,6 +72,7 @@ module.exports.index = (req, res, next) ->
             window.inittags = #{sanitize tags};
             window.initcalendars = #{sanitize calendars};
             window.initevents = #{sanitize events}
+            window.initPendingEventSharings = #{sanitize pendingEventSharings};
             window.initcontacts = #{sanitize contacts};
             window.webDavAccount = #{sanitize webDavAccount};
             window.timezone = #{sanitize timezone};

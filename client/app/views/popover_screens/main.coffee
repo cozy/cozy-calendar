@@ -71,7 +71,9 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @listenTo @formModel, "change:end", @onEndChange
 
         @calendar = @formModel.getCalendar()
-        @listenTo @calendar, 'change:color', @onCalendarColorChange
+
+        if @calendar
+            @listenTo @calendar, 'change:color', @onCalendarColorChange
 
         @listenTo app.calendars, 'change', @onCalendarsChange
 

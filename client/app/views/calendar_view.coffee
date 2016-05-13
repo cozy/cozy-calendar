@@ -1,6 +1,7 @@
 app = require 'application'
 BaseView = require 'lib/base_view'
 EventPopover = require './calendar_popover_event'
+EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
 helpers = require 'helpers'
 timezones = require('helpers/timezone').timezones
@@ -17,14 +18,24 @@ module.exports = class CalendarView extends BaseView
     initialize: (@options) ->
 
         @eventCollection = @model.events
+
         @listenTo @eventCollection, 'add'  , @refresh
         @listenTo @eventCollection, 'reset', @refresh
         @listenTo @eventCollection, 'remove', @onRemove
         @listenTo @eventCollection, 'change', @refreshOne
-        @model = null
 
         @calendarsCollection = app.calendars
         @listenTo @calendarsCollection, 'change', @onCalendarCollectionChange
+
+        @eventSharingButtonView = new EventSharingButtonView
+            collection: @model.pendingEventSharingsCollection
+
+        @model = null
+
+
+    render: ->
+        super()
+        @eventSharingButtonView.snap(@).render()
 
 
     afterRender: ->

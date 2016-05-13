@@ -24,6 +24,7 @@ module.exports = Event = cozydb.getModel 'Event',
     caldavuri       : String
     uuid            : String
     lastModification: String
+    shareID         : String
 
 # 'start' and 'end' use those format,
 # According to allDay or rrules.
@@ -61,7 +62,7 @@ Event.calendars = (callback) ->
                 return Tag.getOrCreateByName name: calendarName, cb
             ,
             (err, calendars) ->
-                callback null, calendars
+                callback err, calendars
 
 
 Event.createOrGetIfImport = (data, callback) ->

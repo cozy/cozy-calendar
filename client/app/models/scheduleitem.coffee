@@ -350,3 +350,6 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         @startDateChanged = false
         @attendeesChanged = false
+
+    isShared: ->
+        return @get('shareID')?
