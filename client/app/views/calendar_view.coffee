@@ -1,6 +1,6 @@
 app = require 'application'
 BaseView = require 'lib/base_view'
-EventPopover = require './calendar_popover_event'
+EventPopover = require './event_popover'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
 helpers = require 'helpers'

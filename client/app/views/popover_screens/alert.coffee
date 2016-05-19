@@ -1,4 +1,4 @@
-EventPopoverScreenView = require 'views/calendar_popover_screen_event'
+EventPopoverScreenView = require 'views/event_popover_screen'
 helpers = require 'helpers'
 
 module.exports = class AlertPopoverScreen extends EventPopoverScreenView
