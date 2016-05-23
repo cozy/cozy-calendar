@@ -1,6 +1,4 @@
 cozydb    = require 'cozydb'
-Client    = require('request-json').JsonClient
-urlHelper = require 'cozy-url-sdk'
 
 
 module.exports.sendShareInvitations = (event, callback) ->
@@ -30,8 +28,7 @@ module.exports.sendShareInvitations = (event, callback) ->
             needSaving   = true
 
     # Send the request to the datasystem
-    client = new Client urlHelper.dataSystem.url()
-    client.post "services/sharing/", data, (err, res, body) ->
+    cozydb.api.createSharing data, (err, body) ->
         if err?
             callback err
         else unless needSaving
