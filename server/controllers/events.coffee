@@ -47,12 +47,22 @@ module.exports.create = (req, res) ->
         if err?
             res.status(500).send error: "Server error while creating event."
         else
-            if data.import or req.query.sendMails isnt 'true'
+            if data.import
                 res.status(201).send event
             else
+                # We first share the events, if the event is shared (this
+                # condition is checked within `sendShareInvitations`)
                 ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
-                    MailHandler.sendInvitations updatedEvent, false, \
-                            (err, updatedEvent) ->
+
+                    # If the event has guests that are notified by email and for
+                    # whom the owner confirmed she wanted to send emails, we
+                    # send the emails
+                    if req.query.sendMails is 'true'
+                        MailHandler.sendInvitations (updatedEvent or event),
+                        false, (err, updatedEvent) ->
+                            res.status(201).send (updatedEvent or event)
+                    # Otherwise we just update the event
+                    else
                         res.status(201).send (updatedEvent or event)
 
 
