@@ -1,8 +1,10 @@
 .fixed-height
 
-    select.new-alert.select-big.with-margin
-        option(value="-1", selected="true")=t('screen alert default value')
-        each alertOption in alertOptions
-            option(value=alertOption.index)= t(alertOption.translationKey, {smart_count: alertOption.value})
+    if !readOnly
+        select.new-alert.select-big.with-margin
+            option(value="-1", selected="true")=t('screen alert default value')
+            each alertOption in alertOptions
+                option(value=alertOption.index)
+                =t(alertOption.translationKey, {smart_count: alertOption.value})
 
     ul.alerts

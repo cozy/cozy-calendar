@@ -27,6 +27,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
         return _.extend super(),
             guests: @formModel.get('attendes') or []
+            readOnly: @context.readOnly
 
 
     afterRender: ->
@@ -39,7 +40,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         guests = @formModel.get('attendees') or []
         for guest, index in guests
             options = _.extend guest, {index}
-            row = @templateGuestRow guest
+            row = @templateGuestRow _.extend guest, readOnly: @context.readOnly
             $guests.append row
 
         @configureGuestTypeahead()

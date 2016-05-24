@@ -97,3 +97,11 @@ module.exports = class Event extends ScheduleItem
 
     #@TODO tags = color
     getDefaultColor: -> '#008AF6'
+
+
+    isShared: ->
+        return @get('shareID')?
+
+
+    isEditable: ->
+        return not @isShared()

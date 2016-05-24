@@ -2,13 +2,16 @@ div.calendar
     input.calendarcombo(value=calendar)
 
 div.label
-    input.input-desc(tabindex="1",
-                     type="text",
-                     value=description,
-                     placeholder=t("placeholder event title"),
-                     data-tabindex-prev="8")
+   input.input-desc.event-description(tabindex="1",
+                                     type="text",
+                                     value=description,
+                                     placeholder=t("placeholder event title"),
+                                     data-tabindex-prev="8",
+                                     readonly=readOnly,
+                                     aria-readonly=readOnly)
 
 div.controls
     button.remove.fa.fa-trash(title=t('delete'), role="button")
     img.remove-spinner(src='img/spinner.svg')
-    button.duplicate.fa.fa-copy(title=t('duplicate'), role="button")
+    if !readOnly
+        button.duplicate.fa.fa-copy(title=t('duplicate'), role="button")

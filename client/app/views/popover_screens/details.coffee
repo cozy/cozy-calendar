@@ -17,4 +17,4 @@ module.exports = class DetailsPopoverScreen extends EventPopoverScreenView
         @formModel.set 'details', value
 
     getRenderData: ->
-        return details: @formModel.get 'details'
+        return _.extend super(), details: @formModel.get 'details'

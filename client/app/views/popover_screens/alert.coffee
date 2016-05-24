@@ -67,6 +67,7 @@ module.exports = class AlertPopoverScreen extends EventPopoverScreenView
             options =
                 index: index
                 label: t(translationKey, smart_count: value)
+                readOnly: @context.readOnly
                 action: alarm.action
                 isEmailChecked: alarm.action in ['EMAIL', 'BOTH']
                 isNotifChecked: alarm.action in ['DISPLAY', 'BOTH']

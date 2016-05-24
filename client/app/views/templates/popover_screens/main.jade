@@ -4,56 +4,68 @@
 - var showAlertsByDefault = alerts && alerts.length > 0
 - var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
 
-.popover-content-wrapper.label-row(class=popoverClassName)
-    .item-row
+.label-row.interval-row(class=readOnly ? 'readonly' : '') 
+    .item-row.date-row
         label.timed.time-row
             .icon
                 span.fa.fa-arrow-right
             span.caption= t("from")
             input.input-start-date.input-date(tabindex="2",
-                                              type="text",
-                                              size="10"
-                                              placeholder=t("placeholder from date"),
-                                              value=start.format(dFormat))
+                                    type="text",
+                                    size="10"
+                                    placeholder=t("placeholder from date"),
+                                    value=start.format(dFormat),
+                                    readonly=readOnly,
+                                    aria-readonly=readOnly)
             input.input-start.input-time(tabindex="3",
-                                         type="time",
-                                         size="5"
-                                         placeholder=t("placeholder from time"),
-                                         value=start.format(tFormat),
-                                         aria-hidden="#{allDay}")
+                                    type="time",
+                                    size="5"
+                                    placeholder=t("placeholder from time"),
+                                    value=start.format(tFormat),
+                                    aria-hidden="#{allDay}",
+                                    readonly=readOnly,
+                                    aria-readonly=readOnly)
 
         label.timed.time-row
             .icon
                 span.fa.fa-arrow-left
             span.input-end-caption.caption= t("to")
             input.input-end-date.input-date(tabindex="4",
-                                            type="text",
-                                            size="10"
-                                            placeholder=t("placeholder to date"),
-                                            value=end.format(dFormat))
+                                    type="text",
+                                    size="10"
+                                    placeholder=t("placeholder to date"),
+                                    value=end.format(dFormat),
+                                    readonly=readOnly,
+                                    aria-readonly=readOnly)
             input.input-end-time.input-time(tabindex="5",
-                                            type="time",
-                                            size="5"
-                                            placeholder=t("placeholder to time"),
-                                            value=end.format(tFormat),
-                                            aria-hidden="#{allDay}")
+                                    type="time",
+                                    size="5"
+                                    placeholder=t("placeholder to time"),
+                                    value=end.format(tFormat),
+                                    aria-hidden="#{allDay}",
+                                    readonly=readOnly,
+                                    aria-readonly=readOnly)
 
-    .item-row
-        label.all-day
-            input.input-allday(tabindex="6",
-                               type="checkbox",
-                               value='checked',
-                               checked=allDay)
-            span= t('all day')
+    if !readOnly
+        .item-row.all-day-row
+            label.all-day
+                input.input-allday(tabindex="6",
+                                   type="checkbox",
+                                   value='checked',
+                                   checked=allDay)
+                span= t('all day')
 
 
-div.label.label-row
-    .icon(title=t("placeholder place"))
-        span.fa.fa-map-marker
-    input.input-place.input-full-block(tabindex="7",
+if !readOnly || place
+    div.label.label-row
+        .icon(title=t("placeholder place"))
+            span.fa.fa-map-marker
+        input.input-place.input-full-block(tabindex="7",
                                        type="text",
                                        value=place,
-                                       placeholder=t("placeholder place"))
+                                       placeholder=t("placeholder place"),
+                                       readonly=readOnly,
+                                       aria-readonly=readOnly)
 
 div.label.label-row.input-people
     .icon(title=t("add guest button"))
@@ -62,46 +74,58 @@ div.label.label-row.input-people
         span.fa.fa-angle-right
     button.button-full-block(tabindex=8)= guestsButtonText
 
-div.label.label-row.input-details(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
-    .icon(title=t("placeholder description"))
-        span.fa.fa-align-left
-    .icon.right
-        span.fa.fa-angle-right
-    button.button-full-block(tabindex=9)
-        span.overflow-wrapper= detailsButtonText
+if !readOnly || details
+    div.label.label-row.input-details(data-optional="true", aria-hidden="#{!showDetailsByDefault}")
+        .icon(title=t("placeholder description"))
+            span.fa.fa-align-left
+        .icon.right
+            span.fa.fa-angle-right
+        button.button-full-block(tabindex=9)
+            span.overflow-wrapper= detailsButtonText
 
-div.label.label-row.input-alert(data-optional="true", aria-hidden="#{!showAlertsByDefault}")
-    .icon(title=t("alert tooltip"))
-        span.fa.fa-bell
-    .icon.right
-        span.fa.fa-angle-right
+if !readOnly || alarms.length
+    div.label.label-row.input-alert(data-optional="true",
+                                    aria-hidden="#{!showAlertsByDefault}")
+        .icon(title=t("alert tooltip"))
+            span.fa.fa-bell
+        .icon.right
+                span.fa.fa-angle-right
 
-    if !alerts || alerts.length === 0
-        button.button-full-block(tabindex="10")= t('no alert button')
-    else
-        button.button-full-block(tabindex="10")= t('alert label', {smart_count: alerts.length})
+        if !alerts || alerts.length === 0
+            button.button-full-block(tabindex="10")= t('no alert button')
+        else
+            button.button-full-block(
+                tabindex="10"
+            )= t( 'alert label', {smart_count: alerts.length})
+
+if !readOnly || rrule
+    div.label.label-row.input-repeat(data-optional="true",
+                                    aria-hidden="#{!showRepeatByDefault}")
+        .icon(title=t("repeat tooltip"))
+            span.fa.fa-repeat
+
+        if !readOnly
+            .icon.right
+                span.fa.fa-angle-right
+        button.button-full-block(tabindex="11",
+                                disabled=readOnly,
+                                aria-disabled=readOnly)= recurrenceButtonText
 
 
-div.label.label-row.input-repeat(data-optional="true", aria-hidden="#{!showRepeatByDefault}")
-    .icon(title=t("repeat tooltip"))
-        span.fa.fa-repeat
-    .icon.right
-        span.fa.fa-angle-right
-    button.button-full-block(tabindex="11")= recurrenceButtonText
-
-.popover-footer
-    a.advanced-link(role="button",
-                    tabindex="11",
-                    href='#' + advancedUrl,
-                    data-tabindex-next="13")
-      .icon
-          span.fa.fa-caret-down
-        = t('more details button')
-    .buttons
-        a.btn.btn-link.cancel(role="button",
-                              tabindex="13")
-            = t('cancel')
-        a.btn.add(role="button",
-                  tabindex="14")
-            = buttonText
+if !readOnly
+    .popover-footer
+        a.advanced-link(role="button",
+                        tabindex="11",
+                        href='#' + advancedUrl,
+                        data-tabindex-next="13")
+          .icon
+              span.fa.fa-caret-down
+            = t('more details button')
+        .buttons
+            a.btn.btn-link.cancel(role="button",
+                                  tabindex="13")
+                = t('cancel')
+            a.btn.add(role="button",
+                      tabindex="14")
+                = buttonText
 
