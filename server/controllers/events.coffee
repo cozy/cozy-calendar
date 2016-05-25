@@ -98,15 +98,18 @@ module.exports.update = (req, res) ->
     data = req.body
     data.lastModification = moment().tz('UTC').toISOString()
     req.event.updateAttributes data, (err, event) ->
-
         if err?
             res.status(500).send error: "Server error while saving event"
-        else if req.query.sendMails is 'true'
-            dateChanged = data.start isnt start
-            MailHandler.sendInvitations event, dateChanged, (err, updatedEvent) ->
-                res.send (updatedEvent or event)
         else
-            res.send event
+            ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+                if req.query.sendMails is 'true'
+                    dateChanged = data.start isnt start
+
+                    MailHandler.sendInvitations (updatedEvent or event),
+                    dateChanged, (err, updatedEvent) ->
+                        res.send (updatedEvent or event)
+                else
+                    res.send event
 
 
 module.exports.delete = (req, res) ->
