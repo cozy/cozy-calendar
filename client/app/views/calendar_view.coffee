@@ -195,9 +195,19 @@ module.exports = class CalendarView extends BaseView
                 @popover = null
                 return
 
-        @popover = new EventPopover options
-        @popover.render()
+        # @TODO Event creation is a typical core feature of the calendar app,
+        # this part should be moved directly into the app module, and managed
+        # with event handlers
+        model = options.model ?= new Event
+            start: helpers.momentToString options.start
+            end: helpers.momentToString options.end
+            description: ''
+            place: ''
 
+        model.fetchEditability (editable) =>
+            @popover = new EventPopover _.extend options,
+                readOnly : not editable
+            @popover.render()
 
     # Close the popover, if it's open.
     closePopover: ->

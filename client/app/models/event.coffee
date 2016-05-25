@@ -1,4 +1,6 @@
+
 ScheduleItem = require './scheduleitem'
+Sharing = require './sharing'
 
 module.exports = class Event extends ScheduleItem
 
@@ -103,5 +105,75 @@ module.exports = class Event extends ScheduleItem
         return @get('shareID')?
 
 
-    isEditable: ->
-        return not @isShared()
+    onSharingChange: (sharing)->
+        # TODO implements method
+        @
+
+
+    # Check for event editability, for that we need to check if it's a
+    # shared event and if so, fetch the related sharing.
+    fetchEditability: (callback) ->
+        if not @isNew() and @isShared()
+            @fetchSharing (err, sharing) =>
+                if err
+                    console.error err
+                    callback false
+                else
+                    isEditable = @get('shareID') == sharing.get('id')
+                    callback isEditable
+        else
+            callback true
+
+
+    fetchSharing: (callback) ->
+        if @sharing
+            callback null, @sharing
+            return
+
+        successHandler = (sharing, response, options) =>
+            @sharing = sharing
+            @listenTo @sharing, 'change', @onSharingChange
+            callback null, sharing
+
+        errorHandler = (err) ->
+            callback err, null
+
+        sharingToFecth = new Sharing id: @get 'shareID'
+        sharingToFecth.fetch
+            success: successHandler
+            # If the fetching fails, it means that the document is shared by
+            # another cozy owner. So we try to get a sharing with the shareID
+            # Reminder :
+            #   The user is the sharer : a sharing object having the event's
+            #       shareID as id exists.
+            #   The user is the recipient : a sharing object having the same
+            #       shareID property than the event exists.
+            error: (sharing, response, options) =>
+                sharingNotFound = response.status == 404
+
+                if sharingNotFound
+                    @fetchSharingByShareId (err, sharing) =>
+                        if err
+                            errorHandler err
+                        else
+                            successHandler sharing
+                else
+                    errorHandler JSON.parse response.responseText
+
+
+    fetchSharingByShareId: (callback) ->
+        if @sharing
+            callback null, @sharing
+            return
+
+        sharingToFetch = new Sharing shareID: @get 'shareID'
+        sharingToFetch.fetch
+            data: shareID: @get 'shareID'
+            success: (sharing, response, options) =>
+                @sharing = sharing
+                @listenTo @sharing, 'change', @onSharingChange
+                callback null, sharing
+
+            error: (sharing, resopnse, options) ->
+                callback JSON.parse(response.responseText), null
+

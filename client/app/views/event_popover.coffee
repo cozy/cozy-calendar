@@ -34,13 +34,7 @@ module.exports = class EventPopOver extends PopoverView
 
 
     initialize: (options) ->
-        # If model does not exist, the popover represents a new event.
-        if not @model
-            @model = new Event
-                start: @momentToString options.start
-                end: @momentToString options.end
-                description: ''
-                place: ''
+        super options
 
         # Context passed to all children popover screens
         @context = {
@@ -49,13 +43,12 @@ module.exports = class EventPopOver extends PopoverView
             # The formModel is passed to popover screens via the context property
             # @See https://github.com/cozy/cozy-calendar/issues/465
             formModel: @model.clone(),
-            readOnly: not @model.isEditable()
+            readOnly: options.readOnly
         }
 
         @listenToOnce @context.formModel, 'change', =>
             @modelHasChanged = true
 
-        super options
 
     momentToString: (m) ->
         if m.hasTime?() is false then m.toISOString().slice(0, 10)

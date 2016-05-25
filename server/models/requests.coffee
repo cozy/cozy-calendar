@@ -40,3 +40,4 @@ module.exports =
             if not doc.accepted && not doc.targets && doc.rules
                 doc.rules.forEach (rule) ->
                     emit(rule.docType, doc)
+        byShareID: cozydb.defaultRequests.by 'shareID'
