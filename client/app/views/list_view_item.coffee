@@ -1,5 +1,5 @@
 BaseView = require 'lib/base_view'
-PopoverEvent = require './calendar_popover_event'
+EventPopover = require './event_popover'
 Event = require 'models/event'
 
 
@@ -26,7 +26,7 @@ module.exports = class EventItemView extends BaseView
     # @TODO : unused, but also outdated (see calendar_view for popover api).
     editMode: ->
         @popover.close() if @popover
-        @popover = new PopoverEvent
+        @popover = new EventPopover
             model: @model,
             target: @$el
             parentView: this

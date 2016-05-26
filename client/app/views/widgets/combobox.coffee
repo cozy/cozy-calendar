@@ -23,6 +23,8 @@ module.exports = class ComboBox extends BaseView
         @autocompleteWidget = @$el.data 'ui-autocomplete'
         @autocompleteWidget._renderItem = @renderItem
 
+        @readOnly = options.readOnly
+
         isInput = @$el[0].nodeName.toLowerCase() is 'input'
         method = @$el[if isInput then "val" else "text"]
 
@@ -51,6 +53,8 @@ module.exports = class ComboBox extends BaseView
 
 
     openMenu: =>
+        if @readOnly
+            return
         @menuOpen = true
         @$el.addClass 'expanded'
         @$el.focus().val(@value()).autocomplete 'search', ''
@@ -142,7 +146,7 @@ module.exports = class ComboBox extends BaseView
         badge = $ '<span class="badge combobox-badge">'
         .html '&nbsp;'
         .css 'backgroundColor', color
-        .css 'cursor', 'pointer'
+        .toggleClass 'readonly', @readOnly
         .click @openMenu
 
         if @small

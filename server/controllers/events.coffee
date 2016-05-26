@@ -11,6 +11,7 @@ User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
 MailHandler = require '../mails/mail_handler'
+ShareHandler = require '../share/share_handler'
 localization = require '../libs/localization_manager'
 
 
@@ -46,11 +47,23 @@ module.exports.create = (req, res) ->
         if err?
             res.status(500).send error: "Server error while creating event."
         else
-            if data.import or req.query.sendMails isnt 'true'
+            if data.import
                 res.status(201).send event
             else
-                MailHandler.sendInvitations event, false, (err, updatedEvent) ->
-                    res.status(201).send (updatedEvent or event)
+                # We first share the events, if the event is shared (this
+                # condition is checked within `sendShareInvitations`)
+                ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+
+                    # If the event has guests that are notified by email and for
+                    # whom the owner confirmed she wanted to send emails, we
+                    # send the emails
+                    if req.query.sendMails is 'true'
+                        MailHandler.sendInvitations (updatedEvent or event),
+                        false, (err, updatedEvent) ->
+                            res.status(201).send (updatedEvent or event)
+                    # Otherwise we just update the event
+                    else
+                        res.status(201).send (updatedEvent or event)
 
 
 # Expect a list of events as body and create an event in database for each
@@ -85,15 +98,18 @@ module.exports.update = (req, res) ->
     data = req.body
     data.lastModification = moment().tz('UTC').toISOString()
     req.event.updateAttributes data, (err, event) ->
-
         if err?
             res.status(500).send error: "Server error while saving event"
-        else if req.query.sendMails is 'true'
-            dateChanged = data.start isnt start
-            MailHandler.sendInvitations event, dateChanged, (err, updatedEvent) ->
-                res.send (updatedEvent or event)
         else
-            res.send event
+            ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+                if req.query.sendMails is 'true'
+                    dateChanged = data.start isnt start
+
+                    MailHandler.sendInvitations (updatedEvent or event),
+                    dateChanged, (err, updatedEvent) ->
+                        res.send (updatedEvent or event)
+                else
+                    res.send event
 
 
 module.exports.delete = (req, res) ->

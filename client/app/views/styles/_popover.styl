@@ -13,7 +13,6 @@
     &:active
         outline none
 
-    label
     .label
         box-sizing border-box
         position relative
@@ -24,19 +23,9 @@
         border-radius 0
 
         .icon
-            display flex
-            justify-content center
-            align-items center
             position absolute
             top 0
-            width 3.2rem
-            height 100%
             cursor pointer
-
-            span
-                font-size 1rem
-                color grey-04
-                text-shadow none
 
             &.right
                 right 0
@@ -52,6 +41,16 @@
         input.dontaskagain
             margin .25em
 
+    .icon
+        font-size 1rem
+        color grey-04
+        text-shadow none
+        width 3.2rem
+        height 100%
+        display flex
+        justify-content center
+        align-items center
+
     .label-row
         width         100%
         border-bottom 1px solid grey-03
@@ -64,6 +63,9 @@
 
         .button-full-block
             height 3em
+
+            &[aria-disabled]
+                cursor not-allowed
 
         .button-full-block:focus
             background-color lightblue
@@ -83,6 +85,14 @@
 
             .input-date
                 width: 8em
+
+        &[type=time]
+            // Revert default width
+            width auto
+
+        &[aria-readonly],
+        &[readonly]
+            background-color: transparent
 
     .input-full-block
     .button-full-block
@@ -105,6 +115,11 @@
         top 0
         right 0
         padding 0.2em
+
+        display flex
+        flex-direction column
+        justify-content center
+        height 100%
 
         [role=button]
         .remove-spinner
@@ -162,6 +177,11 @@
 
         .badge
             margin: 0
+            cursor pointer
+
+            &.readonly
+                cursor default
+
 
         .calendarcombo
             display: none
@@ -170,7 +190,7 @@
                 display: inline-block
                 margin-left: 5px
 
-    .input-desc
+    .event-description
         width 100%
         padding 0 3em
         height 3em
@@ -190,10 +210,6 @@
         display inline-block
         min-width 3em
         margin-left 3rem
-
-    // Specific rules for elements
-    .input-allday
-        margin-right: 5px
 
     .aside
             float: right
@@ -219,33 +235,53 @@
         line-height 1.3rem
 
 
-.popover-content-wrapper
-    overflow hidden
+.popover .interval-row
     display flex
-    align-items center
-    padding 0
+    align-content center
 
-    .item-row
-        width 75%
-        padding .6em 0
-
-        &:last-child
-            width 25%
-
-    .time-row
-        display flex
-        align-items baseline
-        padding 0.2em 0
-        font-size 1rem
+    .date-row
         border-right 1px solid grey-03
 
-        input[type=text]
-            font-size 1rem
+    &.readonly .date-row
+        border-right none
 
-    .all-day
+    .item-row
+        display table
+        padding 0 .5em 0 0
+        margin .5em 0
+
+    .time-row
+        display table-row
+        font-size 1rem
+        line-height 1.5em
+
+        & > *
+            display table-cell
+            vertical-align middle
+
+        .icon
+            text-align center
+
+        input[type=text],
+        input[type=time]
+            font-size 1rem
+            width auto
+            height 1.8em
+            // decrease sides padding for Firefox
+            padding 4px 0
+
+    .all-day-row
+        width 25%
         display flex
         align-items center
         justify-content center
+
+    .all-day
+        display flex
+
+    .input-allday
+        margin auto
+        margin-right 0.5em
 
 
 .popover-footer
@@ -282,6 +318,7 @@
         display inline-block
         padding 0 0.9em 0 0.4em
         font-size 1rem
+        color
 
 
     .buttons
@@ -303,7 +340,14 @@
     background-color grey-01
     border-radius 5px 5px 0 0
 
+    & > *
+        flex-grow 1
+        flex-basis 25%
+
     h4
+        flex-grow 2
+        flex-basis 50%
+        text-align center
         margin 0
         font-weight normal
         font-size 1.2em
@@ -319,6 +363,13 @@
         &:hover
             cursor pointer
             color darkblue
+
+    .btn-done-placeholder
+        // The btn-done element is not rendered when the event is readonly
+        // but we need to keep an empty sapce to keep the screen title h4's
+        // text centered
+        text-align right
+        flex-grow 1
 
     .btn-done
         padding 0.4em
@@ -378,6 +429,9 @@ ul.guests
     margin 0
     list-style-type none
 
+    display table
+    width 100%
+
     li
         padding 1em 1.5em
         border-top 1px solid grey-03
@@ -387,24 +441,37 @@ ul.guests
             border-bottom 1px solid grey-03
 
     .guest-top
-        display flex
+        display table-row
         align-items center
 
-    .guest-top
-        justify-content space-between
+        & > *
+            display table-cell
+            padding .5em
 
-        button
+            &:last-child
+                padding-right 1.5em
+
+            &:first-child
+                padding-left 1.5em
+
+        .status,
+        .button-wrapper
+            width 1em
+
+    .guest-top button
             height auto
             border none
             background-color transparent
             font-size 1.2em
             color grey-04
+            padding .5em
 
             &:hover
                 color darkblue
 
     .guest-label
         font-size 1.1em
+        line-height 1.5em
         text-overflow ellipsis
         overflow hidden
 

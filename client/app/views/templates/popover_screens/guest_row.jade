@@ -1,5 +1,5 @@
-li(data-index=index)
-    .guest-top
+li.guest-top(data-index=index)
+    span.status
         if status == 'ACCEPTED'
             i.fa.fa-check-circle-o.green(title=t('accepted'))
         else if status == 'DECLINED'
@@ -9,5 +9,17 @@ li(data-index=index)
         else
             i.fa.fa-exclamation-circle.orange(title=t('mail not sent'))
 
-        .guest-label= email
-        button.guest-delete.fa.fa-trash-o(title=t('screen guest remove tooltip'), role="button")
+    .guest-label= label
+
+    if !readOnly
+        span.button-wrapper
+            button.guest-delete.fa.fa-trash-o(title=t('screen guest remove tooltip'), role="button")
+
+        // If a cozy instance is linked to a contact
+        if cozy
+            if shareWithCozy
+                span.button-wrapper
+                    button.guest-share-with-email.fa.fa-envelope-o(title=t('screen guest share with email tooltip'), role="button")
+            else
+                span.button-wrapper
+                    button.guest-share-with-cozy.fa.fa-cloud(title=t('screen guest share with cozy tooltip'), role="button")

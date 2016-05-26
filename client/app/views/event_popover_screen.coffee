@@ -6,3 +6,7 @@ module.exports = class EventPopoverScreenView extends PopoverScreenView
     initialize: ->
         super()
         @formModel = @context.formModel
+
+
+    getRenderData: ->
+        _.extend super(), readOnly: @context.readOnly

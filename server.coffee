@@ -11,7 +11,7 @@ start = (port, callback) ->
         User = require './server/models/user'
         localization = require './server/libs/localization_manager'
         Realtimer = require 'cozy-realtime-adapter'
-        realtime = Realtimer server, ['event.*', 'contact.*']
+        realtime = Realtimer server, ['event.*', 'contact.*', 'sharing.*']
         realtime.on 'user.*', -> User.updateUser()
 
         # Update localization engine if the language changes.

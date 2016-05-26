@@ -2,10 +2,12 @@ cozydb = require 'cozydb'
 
 tagsView =
     map: (doc) ->
-        doc.tags?.forEach? (tag, index) ->
-            type = if index is 0 then 'calendar' else 'tag'
-            emit [type, tag], true
+        if not doc.shareID
+            doc.tags?.forEach? (tag, index) ->
+                type = if index is 0 then 'calendar' else 'tag'
+                emit [type, tag], true
     reduce: "_count"
+
 
 module.exports =
 
@@ -31,3 +33,11 @@ module.exports =
 
     webdavaccount:
         all       : cozydb.defaultRequests.all
+
+    sharing:
+        all       : cozydb.defaultRequests.all
+        pendingBySharedDocType: (doc) ->
+            if not doc.accepted && not doc.targets && doc.rules
+                doc.rules.forEach (rule) ->
+                    emit(rule.docType, doc)
+        byShareID: cozydb.defaultRequests.by 'shareID'

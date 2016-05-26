@@ -1,5 +1,7 @@
 module.exports =
 
+    listenTo: Backbone.Model.prototype.listenTo
+
     initialize: ->
 
         window.app = @
@@ -30,11 +32,14 @@ module.exports =
         EventCollection = require 'collections/events'
         ContactCollection = require 'collections/contacts'
         CalendarsCollection = require 'collections/calendars'
+        SharingCollection = require 'collections/sharings'
 
         @tags = new TagCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()
         @calendars = new CalendarsCollection()
+
+        @pendingEventSharings = new SharingCollection()
 
         # Main Store is used to mark which months were loaded or not.
         # That way the app knows when data fetching is required.
@@ -51,12 +56,13 @@ module.exports =
         isMobile = @isMobile()
 
         @router = new Router isMobile: isMobile
+
         @menu = new Menu collection: @calendars
         @menu.render().$el.prependTo 'body'
 
         SocketListener.watch @events
         SocketListener.watch @contacts
-        SocketListener.watch @calendars
+        SocketListener.watch @pendingEventSharings
 
         if window.initcalendars?
             @calendars.reset window.initcalendars
@@ -73,6 +79,10 @@ module.exports =
         if window.initcontacts
             @contacts.reset window.initcontacts
             delete window.initcontacts
+
+        if window.initPendingEventSharings
+            @pendingEventSharings.reset window.initPendingEventSharings
+            delete window.initPendingEventSharings
 
         Backbone.history.start()
 
