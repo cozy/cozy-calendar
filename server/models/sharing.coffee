@@ -2,6 +2,7 @@ cozydb = require 'cozydb'
 
 
 module.exports = Sharing = cozydb.getModel 'Sharing',
+    docType: String
     sharerUrl: String
     shareID: String
     desc: String
@@ -9,7 +10,7 @@ module.exports = Sharing = cozydb.getModel 'Sharing',
         # id: String
         # docType: String
     continuous: Boolean
-    targets: Object
+    targets: [Object]
         # url: String
         # pretoken: String
     accepted: Boolean

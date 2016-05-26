@@ -46,7 +46,10 @@ module.exports = class EventPopOver extends PopoverView
             readOnly: options.readOnly
         }
 
-        @listenToOnce @context.formModel, 'change', =>
+        @listenTo @model, 'change:shareID', =>
+            @context.formModel.set 'shareID', @model.get 'shareID'
+
+        @listenToOnce @context.formModel, 'change', (model, options) =>
             @modelHasChanged = true
 
 

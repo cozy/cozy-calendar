@@ -15,6 +15,12 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         "click .guest-share-with-email" : "onShareWithEmail"
         'keyup input[name="guest-name"]': "onKeyup"
 
+    initialize: (options) ->
+        super options
+
+        @listenTo @formModel, 'change:shareID', () =>
+            @afterRender()
+
     getRenderData: ->
 
         # Override the screen title based on the model's value.
@@ -33,21 +39,27 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     afterRender: ->
         $guests = @$ '.guests'
 
+        @formModel.fetchAttendeesStatuses (err, attendees) =>
+            @renderAttendees $guests, attendees
+
+    renderAttendees: ($guestElement, attendees) ->
         # Remove the existing elements of the list.
-        $guests.empty()
+        $guestElement.empty()
 
         # Create a list item for each alert.
-        guests = @formModel.get('attendees') or []
-        for guest, index in guests
-            options = _.extend guest, {index}
-            row = @templateGuestRow _.extend guest, readOnly: @context.readOnly
-            $guests.append row
+        if attendees
+            for guest, index in attendees
+                options = _.extend guest, {index}
+                row = @templateGuestRow _.extend guest, readOnly: @context.readOnly
+                $guestElement.append row
 
-        @configureGuestTypeahead()
+        if not @context.readOnly
 
-        # Focus the form field. Must be done after the typeahead configuration,
-        # otherwise bootstrap bugs somehow.
-        @$('input[name="guest-name"]').focus()
+            @configureGuestTypeahead()
+
+            # Focus the form field. Must be done after the typeahead configuration,
+            # otherwise bootstrap bugs somehow.
+            @$('input[name="guest-name"]').focus()
 
 
     # Configure the auto-complete on contacts.

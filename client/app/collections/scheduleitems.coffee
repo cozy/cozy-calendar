@@ -9,7 +9,7 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
     # to verify the visibility
     visibleItems: (calendars) ->
         new ScheduleItemsCollection @filter (scheduleItem) ->
-            return true if scheduleItem.isShared()
+            return true if scheduleItem.hasSharing()
 
             calendar = calendars.get scheduleItem.getCalendar()?.get('id')
             return calendar?.get 'visible'

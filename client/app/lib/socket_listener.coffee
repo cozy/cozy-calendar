@@ -8,7 +8,7 @@ class SocketListener extends CozySocketListener
     events: [
         'event.create', 'event.update', 'event.delete'
         'contact.create', 'contact.update', 'contact.delete'
-        'sharing.create', 'sharing.delete'
+        'sharing.create', 'sharing.update', 'sharing.delete'
     ]
 
     constructor: ->
