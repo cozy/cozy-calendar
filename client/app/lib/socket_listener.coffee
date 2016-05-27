@@ -25,7 +25,7 @@ class SocketListener extends CozySocketListener
 
     onSharing: (sharing) ->
         targets = sharing.get 'targets'
-        currentUserIsTheRecipient = not targets
+        currentUserIsTheRecipient = not targets.length
         rules = sharing.get 'rules'
 
         if currentUserIsTheRecipient and rules and rules.find( (rule) ->
