@@ -155,17 +155,28 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                 fs.writeFile icsPath, calendar.toString(), (err) ->
                     if (err)
                         log.error """
-                          An error occured while creating invitation file #{icsPath}
+                          An error occured while creating invitation file
+                          #{icsPath}
                         """
                         log.error err
                     else
-                        needSaving   = true
-                        guest.status = 'NEEDS-ACTION' # ical = waiting an answer
+                        # Send mail through CozyDB API
+                        cozydb.api.sendMailFromUser mailOptions, (err) ->
+                            if err
+                                log.error """
+                                    An error occured while sending invitation
+                                """
+                                log.error err
+                            else
+                                needSaving   = true
+                                guest.status = 'NEEDS-ACTION' # ical = waiting an answer
 
-                    fs.unlink icsPath, (errUnlink) ->
-                        if errUnlink
-                            log.error "Error deleting ics file #{icsPath}"
-                        done err
+                            fs.unlink icsPath, (errUnlink) ->
+                                if errUnlink
+                                    log.error """
+                                        Error deleting ics file #{icsPath}
+                                    """
+                                done err
 
         # Catch errors when doing async foreach
         , (err) ->
