@@ -9217,7 +9217,7 @@ a.btn:visited {
   z-index: 2;
   -webkit-box-shadow: 0 0 0.5em rgba(0,0,0,0.2);
   box-shadow: 0 0 0.5em rgba(0,0,0,0.2);
-  padding: 1em;
+  padding: 1.5em;
   font-size: small;
   -webkit-border-radius: 1em;
   border-radius: 1em;
@@ -9226,7 +9226,7 @@ a.btn:visited {
   line-height: 1.5em;
   margin-top: 1em;
   padding-bottom: 1em;
-  border-bottom: 1px solid #acb8c5;
+  border-bottom: 1px solid #c8d5df;
 }
 .event-sharings-button-item:first-of-type {
   margin-top: 0;
@@ -9241,15 +9241,20 @@ a.btn:visited {
 .event-sharings-button-item .desc {
   color: #acb8c5;
 }
+.event-sharings-button-item .actions {
+  color: #33a6ff;
+}
 .event-sharings-button-item .actions a {
+  cursor: pointer;
   font-size: x-small;
+  font-weight: bold;
   text-transform: uppercase;
 }
-.event-sharings-button-item .actions a::after {
-  content: " ● ";
-}
-.event-sharings-button-item .actions a:last-of-type::after {
-  content: "";
+.event-sharings-button-item .actions a:focus,
+.event-sharings-button-item .actions a:hover,
+.event-sharings-button-item .actions a:active {
+  color: #008af5;
+  text-decoration: none;
 }
 .popover {
   width: 25em;
