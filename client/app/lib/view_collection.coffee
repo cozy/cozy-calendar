@@ -35,6 +35,7 @@ module.exports = class ViewCollection extends BaseView
 
     # bind listeners to the collection
     initialize: ->
+        throw new Error('Collection is undefined') if not @collection
         super
         @views = {}
         @listenTo @collection, "reset",   @onReset
@@ -45,6 +46,9 @@ module.exports = class ViewCollection extends BaseView
         if not @collectionEl?
             @collectionEl = @el
             @$collectionEl = @$el
+
+    getRenderData: ->
+        collection: @collection?.toJSON()
 
     # if we have views before a render call, we detach them
     render: ->

@@ -1,0 +1,40 @@
+.popup
+    position absolute
+    background-color white
+    z-index 2
+    box-shadow:0 0 .5em rgba(0,0,0,.2)
+
+    padding 1em
+    font-size:small
+    border-radius 1em
+
+.event-sharings-button-item
+    line-height 1.5em
+    margin-top 1em
+    padding-bottom 1em
+    border-bottom 1px solid grey
+
+    &:first-of-type
+        margin-top 0
+
+    &:last-of-type
+        padding-bottom 0
+        border-bottom none
+
+
+    .sharer
+        font-weight bold
+
+    .desc
+        color grey
+
+    .actions a
+        font-size x-small
+        text-transform uppercase
+
+        &::after
+            content " ● "
+
+        &:last-of-type::after
+            content ""
+

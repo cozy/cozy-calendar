@@ -59,7 +59,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         'click .input-people': -> @switchToScreen('guests')
         'click .input-details': -> @switchToScreen('details')
         'click .input-alert': -> @switchToScreen('alert')
-        'click .input-repeat': -> @switchToScreen('repeat')
+        'click .input-repeat': ->
+            @switchToScreen('repeat') if not @context.readOnly
 
     initialize: ->
         @formModel = @context.formModel
@@ -71,7 +72,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @listenTo @formModel, "change:end", @onEndChange
 
         @calendar = @formModel.getCalendar()
-        @listenTo @calendar, 'change:color', @onCalendarColorChange
+
+        # Shared event's getCalendar method does not return a calendar
+        if @calendar
+            @listenTo @calendar, 'change:color', @onCalendarColorChange
 
         @listenTo app.calendars, 'change', @onCalendarsChange
 
@@ -94,6 +98,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         endOffset = if @formModel.isAllDay() then -1 else 0
         return data = _.extend super(),
+            readOnly:    @context.readOnly
             tFormat:     tFormat
             dFormat:     dFormat
             calendar:    currentCalendar
@@ -132,30 +137,33 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         timepickerEvents =
             'focus': ->
-                $(@).timepicker 'highlightHour'
+                $(@).timepicker('highlightHour')
             'timepicker.next': ->
                 $("[tabindex=#{+$(@).attr('tabindex') + 1}]").focus()
             'timepicker.prev': ->
                 $("[tabindex=#{+$(@).attr('tabindex') - 1}]").focus()
 
 
-        @$('input[type="time"]').attr('type', 'text')
+        @$('input[type="time"]:not([aria-readonly])').attr('type', 'text')
                                 .timepicker defTimePickerOpts
                                 .delegate timepickerEvents
 
         # Chrome is really bad with HTML5 form so it always get an error of
         # validation. As a result we don't use a type=date, but a type=text.
-        @$('.input-date').datetimepicker defDatePickerOps
+        @$('.input-date:not([aria-readonly])').datetimepicker defDatePickerOps
+
 
         @calendarComboBox = new ComboBox
             el: @$ '.calendarcombo'
             small: true
             source: app.calendars.toAutoCompleteSource()
             current: @formModel.getCalendar()?.get('name')
+            readOnly: @context.readOnly
 
-        @calendarComboBox.on 'edition-complete', (value) =>
-            @formModel.setCalendar app.calendars.getOrCreateByName value
-            @description.focus()
+        if not @context.readOnly
+            @calendarComboBox.on 'edition-complete', (value) =>
+                @formModel.setCalendar app.calendars.getOrCreateByName value
+                @description.focus()
 
         # Apply the expanded status if it has been previously set.
         if window.popoverExtended
@@ -380,11 +388,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         if guests.length is 0
             return t("add guest button")
         else if guests.length is 1
-            return guests[0].email
+            return guests[0].label
         else
             numOthers = guests.length - 1
             options =
-                first: guests[0].email,
+                first: guests[0].label,
                 smart_count: numOthers
             return t("guests list", options)
 

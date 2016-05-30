@@ -1,11 +1,27 @@
 li(data-index=index)
     .alert-top
         .alert-timer= label
-        button.alert-delete.fa.fa-trash-o(title=t('screen alert delete tooltip'), role="button")
+        if !readOnly
+            button.alert-delete.fa.fa-trash-o(title=t('screen alert delete tooltip'), role="button")
     .type
         .notification-mode
-            input.action-email(id="email-#{index}", type="checkbox", checked=isEmailChecked)
-            label(for="email-#{index}")=t('screen alert type email')
-        .notification-mode
-            input.action-display(id="display-#{index}", type="checkbox", checked=isNotifChecked)
-            label(for="display-#{index}")=t('screen alert type notification')
+            if !readOnly
+                input.action-email(id="email-#{index}", type="checkbox", checked=isEmailChecked)
+            if readOnly
+                |(
+                if ['EMAIL', 'BOTH'].indexOf(action) != -1
+                    =t('screen alert type email')
+                    if action == 'BOTH'
+                        |, 
+            else
+                label(for="email-#{index}")=t('screen alert type email')
+
+            if !readOnly
+                input.action-display(id="display-#{index}", type="checkbox", checked=isNotifChecked)
+            if readOnly
+                if ['DISPLAY', 'BOTH'].indexOf(action) != -1
+                    =t('screen alert type notification')
+                |)
+            else
+                .notification-mode
+                    label(for="display-#{index}")=t('screen alert type notification')

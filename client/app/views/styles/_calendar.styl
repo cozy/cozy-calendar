@@ -102,7 +102,7 @@ input-color   = #555
                 i
                     text-decoration none
 
-    .fc-button-today
+    .fc-button
         margin-left 0.625em
         font-weight normal
         border 1px solid grey-04
@@ -116,8 +116,8 @@ input-color   = #555
             background-color grey-04
             color white
 
-    .fc-button
-        margin 0
+.fc-button-wrapper
+    display: inline-block
 
 .fc-header-left
 .fc-header-center
@@ -409,3 +409,5 @@ a.btn:visited
             td.fc-axis.fc-widget-content:first-child
                 span
                     display none
+
+@import '_pending_event_sharings_button'

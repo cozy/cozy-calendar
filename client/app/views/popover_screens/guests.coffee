@@ -1,4 +1,4 @@
-EventPopoverScreenView = require 'views/calendar_popover_screen_event'
+EventPopoverScreenView = require 'views/event_popover_screen'
 random = require 'lib/random'
 
 module.exports = class GuestPopoverScreen extends EventPopoverScreenView
@@ -9,9 +9,17 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     templateGuestRow: require 'views/templates/popover_screens/guest_row'
 
     events:
-        "click .add-new-guest": "onNewGuest"
-        "click .guest-delete": "onRemoveGuest"
+        "click .add-new-guest"          : "onNewGuest"
+        "click .guest-delete"           : "onRemoveGuest"
+        "click .guest-share-with-cozy"  : "onShareWithCozy"
+        "click .guest-share-with-email" : "onShareWithEmail"
         'keyup input[name="guest-name"]': "onKeyup"
+
+    initialize: (options) ->
+        super options
+
+        @listenTo @formModel, 'change:shareID', () =>
+            @afterRender()
 
     getRenderData: ->
 
@@ -25,26 +33,33 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
         return _.extend super(),
             guests: @formModel.get('attendes') or []
+            readOnly: @context.readOnly
 
 
     afterRender: ->
         $guests = @$ '.guests'
 
+        @formModel.fetchAttendeesStatuses (err, attendees) =>
+            @renderAttendees $guests, attendees
+
+    renderAttendees: ($guestElement, attendees) ->
         # Remove the existing elements of the list.
-        $guests.empty()
+        $guestElement.empty()
 
         # Create a list item for each alert.
-        guests = @formModel.get('attendees') or []
-        for guest, index in guests
-            options = _.extend guest, {index}
-            row = @templateGuestRow guest
-            $guests.append row
+        if attendees
+            for guest, index in attendees
+                options = _.extend guest, {index}
+                row = @templateGuestRow _.extend guest, readOnly: @context.readOnly
+                $guestElement.append row
 
-        @configureGuestTypeahead()
+        if not @context.readOnly
 
-        # Focus the form field. Must be done after the typeahead configuration,
-        # otherwise bootstrap bugs somehow.
-        @$('input[name="guest-name"]').focus()
+            @configureGuestTypeahead()
+
+            # Focus the form field. Must be done after the typeahead configuration,
+            # otherwise bootstrap bugs somehow.
+            @$('input[name="guest-name"]').focus()
 
 
     # Configure the auto-complete on contacts.
@@ -95,6 +110,51 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         @render()
 
 
+    # Sharing an invitation directly between Cozy instances.
+    onShareWithCozy: (event) ->
+        # Get the guest
+        index = @$(event.target).parents('li').attr 'data-index'
+
+        # Get the contact information of the guest
+        guests = @formModel.get('attendees') or []
+
+        # Same as for the function onNewGuest: the clone is required for the
+        # view to be refreshed
+        guests = _.clone guests
+        guest  = guests[index]
+        # We add the information regarding the cozy: we change the label field
+        # so that the user has a visual feedback
+        guest.shareWithCozy = true
+        guest.label         = "Cozy: " + guest.name
+
+        @formModel.set 'attendees', guests
+        # We force the refresh
+        @render()
+
+
+    # If the user want to revert back to sharing the invitation using an email
+    # instead of the guest Cozy.
+    onShareWithEmail: (event) ->
+        # Get the guest
+        index = @$(event.target).parents('li').attr 'data-index'
+
+        # Get the contact information of the guest
+        guests = @formModel.get('attendees') or []
+
+        # Same as for the function onNewGuest: the clone is required for the
+        # view to be refreshed
+        guests = _.clone guests
+        guest  = guests[index]
+        # We add the information regarding the cozy: we change the label field
+        # so that the user has a visual feedback
+        guest.shareWithCozy = false
+        guest.label         = guest.email
+
+        @formModel.set 'attendees', guests
+        # We force the refresh
+        @render()
+
+
     # Handle guest addition. `userInfo` is passed when called by the typeahead.
     onNewGuest: (userInfo = null) ->
 
@@ -109,14 +169,25 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         if email.length > 0
             guests = @formModel.get('attendees') or []
             if not _.findWhere(guests, email: email)
+                newGuest =
+                    key           : random.randomString()
+                    status        : 'INVITATION-NOT-SENT'
+                    email         : email
+                    label         : email
+                    contactid     : contactID
+                    shareWithCozy : false
+
+                # If guest was "autocompleted" then contactID is not null and we
+                # can check if a cozy instance is linked to this contact
+                if contactID?
+                    contact       = app.contacts.get contactID
+                    newGuest.cozy = contact.get 'cozy'
+                    newGuest.name = contact.get 'name'
+
                 # Clone the source array, otherwise it's not considered as
                 # changed because it changes the model's attributes
                 guests = _.clone guests
-                guests.push
-                    key: random.randomString()
-                    status: 'INVITATION-NOT-SENT'
-                    email: email
-                    contactid: contactID
+                guests.push newGuest
                 @formModel.set 'attendees', guests
 
                 # Inefficient way to refresh the list, but it's okay since

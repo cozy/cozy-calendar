@@ -1,4 +1,4 @@
-EventPopoverScreenView = require 'views/calendar_popover_screen_event'
+EventPopoverScreenView = require 'views/event_popover_screen'
 
 module.exports = class DetailsPopoverScreen extends EventPopoverScreenView
 
@@ -17,4 +17,4 @@ module.exports = class DetailsPopoverScreen extends EventPopoverScreenView
         @formModel.set 'details', value
 
     getRenderData: ->
-        return details: @formModel.get 'details'
+        return _.extend super(), details: @formModel.get 'details'

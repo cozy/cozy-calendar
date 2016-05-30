@@ -70,6 +70,11 @@ exports.momentToDateString = (m) ->
     m.format 'YYYY-MM-DD'
 
 
+exports.momentToString = (m) ->
+        if m.hasTime?() is false then m.toISOString().slice(0, 10)
+        else m.toISOString()
+
+
 # Transform the unit/value object to a iCal duration string.
 # @param unitsValues { 'M': 15, 'H': 1 ...}
 exports.unitValuesToiCalDuration = (unitsValues) ->

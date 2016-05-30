@@ -326,6 +326,9 @@ module.exports = class ScheduleItem extends Backbone.Model
         # else: look state of each guest.
         attendees = @get('attendees') or []
         guestsToInform = attendees.filter (guest) =>
+            if guest.shareWithCozy
+                return false
+
             if method is 'create'
                 return true
 
@@ -337,13 +340,14 @@ module.exports = class ScheduleItem extends Backbone.Model
                        guest.status is 'NEEDS-ACTION' or \
                        (guest.status is 'ACCEPTED' and @startDateChanged)
 
-        .map (guest) -> guest.email
+        .map (guest) -> guest.label
 
         if guestsToInform.length is 0
             return callback false
         else
             guestsList = guestsToInform.join ', '
-            content = "#{t 'send mails question'} #{guestsList}"
+            # content = "#{t 'send mails question'} #{guestsList}"
+            content = "#{t 'send invitations question'} #{guestsList}"
             Modal.confirm t('modal send mails'), content, \
                 t('yes'), t('no'), callback
 

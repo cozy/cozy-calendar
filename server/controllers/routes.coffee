@@ -3,6 +3,7 @@ events = require './events'
 index  = require './index'
 ical   = require './ical'
 contacts = require './contacts'
+sharings = require './sharings'
 
 module.exports =
 
@@ -72,3 +73,19 @@ module.exports =
     # log client errors
     'log':
         post: index.logClient
+
+    # Sharing
+    'sharingid':
+        param: sharings.fetch
+
+    'sharings':
+        get: sharings.all
+
+    'sharings/:sharingid':
+        get: sharings.read
+
+    'sharing/accept':
+        post: sharings.accept
+
+    'sharing/refuse':
+        post: sharings.refuse

@@ -7,7 +7,9 @@ log   = require('printit')
     date: true
 
 cozydb = require 'cozydb'
-User  = require '../models/user'
+Client = require('request-json').JsonClient
+Event  = require '../models/event'
+User   = require '../models/user'
 
 {VCalendar} = require 'cozy-ical'
 
@@ -31,12 +33,11 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
         async.forEach guests, (guest, done) ->
 
             # only process relevant guests, quits otherwise
-            shouldSend = guest.status is 'INVITATION-NOT-SENT' or \
-                         guest.status is 'NEEDS-ACTION' or \
-                        (guest.status is 'ACCEPTED' and dateChanged)
+            shouldSend = not guest.shareWithCozy and \
+                (guest.status is 'INVITATION-NOT-SENT' or \
+                (guest.status is 'ACCEPTED' and dateChanged))
             return done() unless shouldSend
 
-            # Prepare mail
             if dateChanged
                 htmlTemplate = localization.getEmailTemplate 'mail_update'
                 subjectKey   = 'email update title'
@@ -54,8 +55,9 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                 'email date format allday'
             else
                 'email date format'
+
             dateFormat    = localization.t dateFormatKey
-            date          = event.formatStart dateFormat, locale
+            date          = event.formatStart dateFormat
 
             {description, place} = event.toJSON()
             place = if place?.length > 0 then place else ""
@@ -105,14 +107,56 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
                     """
                     log.error err
                 else
-                    mailOptions.attachments.push
-                        contentType: 'text/calendar'
-                        path: icsPath
+                    'email date format'
+                dateFormat    = localization.t dateFormatKey
+                date          = event.formatStart dateFormat, locale
 
-                # Send mail through CozyDB API
-                cozydb.api.sendMailFromUser mailOptions, (err) ->
-                    if err
-                        log.error "An error occured while sending invitation"
+                {description, place} = event.toJSON()
+                place = if place?.length > 0 then place else ""
+
+                # Build mails
+                templateOptions =
+                    displayName:  user.name
+                    displayEmail: user.email
+                    description:  description
+                    place:        place
+                    key:          guest.key
+                    date:         date
+                    url:          url
+
+                mailOptions =
+                    to:      guest.email
+                    subject: subject
+                    html:    htmlTemplate templateOptions
+                    content: localization.t templateKey, templateOptions
+                    attachments: [
+                        path: logoPath
+                        filename: 'cozy-logo.png'
+                        cid: 'cozy-logo'
+                    ]
+
+                # Attach event as ics file
+                calendarOptions =
+                    organization:'Cozy Cloud'
+                    title: 'Cozy Calendar'
+                    method: 'REQUEST'
+
+                calendar = new VCalendar calendarOptions
+                vEvent = event.toIcal()
+
+                # Force the event to take into account the organizer
+                vEvent.model.organizer =
+                    displayName: user.name
+                    email: user.email
+                vEvent.build()
+
+                calendar.add vEvent
+                icsPath = path.join os.tmpdir(), 'invite.ics'
+                fs.writeFile icsPath, calendar.toString(), (err) ->
+                    if (err)
+                        log.error """
+                          An error occured while creating invitation file #{icsPath}
+                        """
                         log.error err
                     else
                         needSaving   = true
