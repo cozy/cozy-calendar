@@ -155,18 +155,25 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
         icsPath = path.join(os.tmpdir(), 'invite.ics');
         return fs.writeFile(icsPath, calendar.toString(), function(err) {
           if (err) {
-            log.error("An error occured while creating invitation file " + icsPath);
-            log.error(err);
+            log.error("An error occured while creating invitation file\n" + icsPath);
+            return log.error(err);
           } else {
-            needSaving = true;
-            guest.status = 'NEEDS-ACTION';
+            return cozydb.api.sendMailFromUser(mailOptions, function(err) {
+              if (err) {
+                log.error("An error occured while sending invitation");
+                log.error(err);
+              } else {
+                needSaving = true;
+                guest.status = 'NEEDS-ACTION';
+              }
+              return fs.unlink(icsPath, function(errUnlink) {
+                if (errUnlink) {
+                  log.error("Error deleting ics file " + icsPath);
+                }
+                return done(err);
+              });
+            });
           }
-          return fs.unlink(icsPath, function(errUnlink) {
-            if (errUnlink) {
-              log.error("Error deleting ics file " + icsPath);
-            }
-            return done(err);
-          });
         });
       });
     }, function(err) {
