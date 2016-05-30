@@ -25,7 +25,7 @@ Contact::asNameAndEmails = ->
     # XXX What if several Cozy instances are linked to one user?
     cozy = dp.value for dp in @datapoints when (dp.name is 'other' and
         dp.type is 'COZY') or (dp.name is 'url' and
-        dp.mediatype.search 'cozy' isnt -1)
+        dp.mediatype?.search 'cozy' isnt -1)
 
     return simple =
         id         : @id
