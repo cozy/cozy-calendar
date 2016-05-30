@@ -3,6 +3,7 @@ cozydb = require 'cozydb'
 
 module.exports = Sharing = cozydb.getModel 'Sharing',
     docType: String
+    sharerName: String
     sharerUrl: String
     shareID: String
     desc: String

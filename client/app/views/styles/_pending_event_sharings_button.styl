@@ -4,7 +4,7 @@
     z-index 2
     box-shadow:0 0 .5em rgba(0,0,0,.2)
 
-    padding 1em
+    padding 1.5em
     font-size:small
     border-radius 1em
 
@@ -12,7 +12,7 @@
     line-height 1.5em
     margin-top 1em
     padding-bottom 1em
-    border-bottom 1px solid grey
+    border-bottom 1px solid lightgrey
 
     &:first-of-type
         margin-top 0
@@ -21,20 +21,24 @@
         padding-bottom 0
         border-bottom none
 
-
     .sharer
         font-weight bold
 
     .desc
         color grey
 
-    .actions a
-        font-size x-small
-        text-transform uppercase
+    .actions
+        color blue
 
-        &::after
-            content " ● "
+        a
+            cursor pointer
+            font-size x-small
+            font-weight bold
+            text-transform uppercase
 
-        &:last-of-type::after
-            content ""
+            &:focus,
+            &:hover,
+            &:active
+                color darkblue
+                text-decoration none
 
