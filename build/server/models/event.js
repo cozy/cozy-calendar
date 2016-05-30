@@ -36,7 +36,8 @@ module.exports = Event = cozydb.getModel('Event', {
   created: String,
   caldavuri: String,
   uuid: String,
-  lastModification: String
+  lastModification: String,
+  shareID: String
 });
 
 Event.dateFormat = 'YYYY-MM-DD';
@@ -86,7 +87,7 @@ Event.calendars = function(callback) {
         name: calendarName
       }, cb);
     }, function(err, calendars) {
-      return callback(null, calendars);
+      return callback(err, calendars);
     });
   });
 };

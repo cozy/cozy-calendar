@@ -114,8 +114,9 @@
 })();
 require.register("application.coffee", function(exports, require, module) {
 module.exports = {
+  listenTo: Backbone.Model.prototype.listenTo,
   initialize: function() {
-    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SocketListener, TagCollection, e, error, i, isMobile, j, locales, m1, m2, now, todayChecker;
+    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SharingCollection, SocketListener, TagCollection, e, error, i, isMobile, j, locales, m1, m2, now, todayChecker;
     window.app = this;
     this.timezone = window.timezone;
     delete window.timezone;
@@ -139,10 +140,12 @@ module.exports = {
     EventCollection = require('collections/events');
     ContactCollection = require('collections/contacts');
     CalendarsCollection = require('collections/calendars');
+    SharingCollection = require('collections/sharings');
     this.tags = new TagCollection();
     this.events = new EventCollection();
     this.contacts = new ContactCollection();
     this.calendars = new CalendarsCollection();
+    this.pendingEventSharings = new SharingCollection();
     this.mainStore = {
       loadedMonths: {}
     };
@@ -164,7 +167,7 @@ module.exports = {
     this.menu.render().$el.prependTo('body');
     SocketListener.watch(this.events);
     SocketListener.watch(this.contacts);
-    SocketListener.watch(this.calendars);
+    SocketListener.watch(this.pendingEventSharings);
     if (window.initcalendars != null) {
       this.calendars.reset(window.initcalendars);
       delete window.initcalendars;
@@ -180,6 +183,10 @@ module.exports = {
     if (window.initcontacts) {
       this.contacts.reset(window.initcontacts);
       delete window.initcontacts;
+    }
+    if (window.initPendingEventSharings) {
+      this.pendingEventSharings.reset(window.initPendingEventSharings);
+      delete window.initPendingEventSharings;
     }
     Backbone.history.start();
     todayChecker = require('lib/today_checker');
@@ -770,9 +777,12 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
   };
 
   ScheduleItemsCollection.prototype.visibleItems = function(calendars) {
-    return new ScheduleItemsCollection(this.filter(function(item) {
+    return new ScheduleItemsCollection(this.filter(function(scheduleItem) {
       var calendar, ref;
-      calendar = calendars.get((ref = item.getCalendar()) != null ? ref.get('id') : void 0);
+      if (scheduleItem.hasSharing()) {
+        return true;
+      }
+      calendar = calendars.get((ref = scheduleItem.getCalendar()) != null ? ref.get('id') : void 0);
       return calendar != null ? calendar.get('visible') : void 0;
     }));
   };
@@ -815,6 +825,35 @@ module.exports = ScheduleItemsCollection = (function(superClass) {
   };
 
   return ScheduleItemsCollection;
+
+})(Backbone.Collection);
+});
+
+;require.register("collections/sharings.coffee", function(exports, require, module) {
+var Sharing, SharingCollection,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Sharing = require('../models/sharing');
+
+module.exports = SharingCollection = (function(superClass) {
+  extend(SharingCollection, superClass);
+
+  function SharingCollection() {
+    return SharingCollection.__super__.constructor.apply(this, arguments);
+  }
+
+  SharingCollection.prototype.model = Sharing;
+
+  SharingCollection.prototype.initialize = function() {
+    return this.on('accepted refused', this.onAnsweredSharing);
+  };
+
+  SharingCollection.prototype.onAnsweredSharing = function(sharing) {
+    return this.remove(sharing);
+  };
+
+  return SharingCollection;
 
 })(Backbone.Collection);
 });
@@ -944,6 +983,14 @@ exports.momentToAmbiguousString = function(m) {
 
 exports.momentToDateString = function(m) {
   return m.format('YYYY-MM-DD');
+};
+
+exports.momentToString = function(m) {
+  if ((typeof m.hasTime === "function" ? m.hasTime() : void 0) === false) {
+    return m.toISOString().slice(0, 10);
+  } else {
+    return m.toISOString();
+  }
 };
 
 exports.unitValuesToiCalDuration = function(unitsValues) {
@@ -1166,6 +1213,19 @@ module.exports = BaseView = (function(superClass) {
     this.$el.removeData().unbind();
     this.remove();
     return Backbone.View.prototype.remove.call(this);
+  };
+
+  BaseView.prototype.snap = function(view) {
+    var selector;
+    selector = this.id ? "#" + this.id : "." + this.className;
+    view.$(selector).each((function(_this) {
+      return function(index, element) {
+        if (element) {
+          return _this.setElement(element);
+        }
+      };
+    })(this));
+    return this;
   };
 
   return BaseView;
@@ -1578,6 +1638,40 @@ module.exports = PopoverView = (function(superClass) {
 })(BaseView);
 });
 
+;require.register("lib/popup_view.coffee", function(exports, require, module) {
+var BaseView, PopupView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+BaseView = require('lib/base_view');
+
+module.exports = PopupView = (function(superClass) {
+  extend(PopupView, superClass);
+
+  function PopupView() {
+    return PopupView.__super__.constructor.apply(this, arguments);
+  }
+
+  PopupView.prototype.initialize = function(options) {
+    PopupView.__super__.initialize.apply(this, arguments);
+    return this.anchor = options.anchor;
+  };
+
+  PopupView.prototype.hide = function() {
+    this.$el.hide();
+    return this;
+  };
+
+  PopupView.prototype.toggle = function(display) {
+    this.$el.toggle(display);
+    return this;
+  };
+
+  return PopupView;
+
+})(BaseView);
+});
+
 ;require.register("lib/random.coffee", function(exports, require, module) {
 module.exports.randomString = function(length) {
   var string;
@@ -1659,10 +1753,11 @@ SocketListener = (function(superClass) {
 
   SocketListener.prototype.models = {
     'event': require('models/event'),
-    'contact': require('models/contact')
+    'contact': require('models/contact'),
+    'sharing': require('models/sharing')
   };
 
-  SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete', 'contact.create', 'contact.update', 'contact.delete'];
+  SocketListener.prototype.events = ['event.create', 'event.update', 'event.delete', 'contact.create', 'contact.update', 'contact.delete', 'sharing.create', 'sharing.update', 'sharing.delete'];
 
   function SocketListener() {
     this.handleModel = bind(this.handleModel, this);
@@ -1670,18 +1765,37 @@ SocketListener = (function(superClass) {
     this.queue = async.queue(this.handleModel, 1);
   }
 
+  SocketListener.prototype.onEvent = function(event) {
+    var start;
+    start = moment(event.get('start')).format('YYYY-MM');
+    if (window.app.mainStore.loadedMonths[start]) {
+      return this.onRemoteCreateOrUpdate(event);
+    }
+  };
+
+  SocketListener.prototype.onSharing = function(sharing) {
+    var currentUserIsTheRecipient, rules, targets;
+    targets = sharing.get('targets');
+    currentUserIsTheRecipient = !targets.length;
+    rules = sharing.get('rules');
+    if (currentUserIsTheRecipient && rules && rules.find(function(rule) {
+      return rule.docType.toLowerCase() === 'event';
+    })) {
+      return this.onRemoteCreateOrUpdate(sharing);
+    }
+  };
+
   SocketListener.prototype.handleModel = function(model, next) {
     return model.fetch({
       success: (function(_this) {
         return function(fetched) {
-          var start;
-          if (fetched.get('docType') !== 'event') {
-            _this.onRemoteCreateOrUpdate(fetched);
+          var docType, handler;
+          docType = fetched.get('docType');
+          handler = 'on' + docType.charAt(0).toUpperCase() + docType.slice(1);
+          if (typeof _this[handler] === 'function') {
+            _this[handler](fetched);
           } else {
-            start = moment(fetched.get('start')).format('YYYY-MM');
-            if (window.app.mainStore.loadedMonths[start]) {
-              _this.onRemoteCreateOrUpdate(fetched);
-            }
+            _this.onRemoteCreateOrUpdate(fetched);
           }
           return setTimeout(next, 50);
         };
@@ -1724,7 +1838,6 @@ SocketListener = (function(superClass) {
     for (i = 0, len = ref.length; i < len; i++) {
       collection = ref[i];
       if (fetched instanceof collection.model) {
-        console.log('D');
         results.push(collection.add(fetched, {
           merge: true
         }));
@@ -1842,6 +1955,9 @@ module.exports = ViewCollection = (function(superClass) {
   };
 
   ViewCollection.prototype.initialize = function() {
+    if (!this.collection) {
+      throw new Error('Collection is undefined');
+    }
     ViewCollection.__super__.initialize.apply(this, arguments);
     this.views = {};
     this.listenTo(this.collection, "reset", this.onReset);
@@ -1852,6 +1968,13 @@ module.exports = ViewCollection = (function(superClass) {
       this.collectionEl = this.el;
       return this.$collectionEl = this.$el;
     }
+  };
+
+  ViewCollection.prototype.getRenderData = function() {
+    var ref;
+    return {
+      collection: (ref = this.collection) != null ? ref.toJSON() : void 0
+    };
   };
 
   ViewCollection.prototype.render = function() {
@@ -2598,6 +2721,8 @@ module.exports = {
   "screen guest input placeholder": "Email address",
   "screen guest add button": "Add",
   "screen guest remove tooltip": "Cancel the invitation",
+  "screen guest share with cozy tooltip": "Share the invitation with the guest's cozy",
+  "screen guest share with email tooltip": "Send the invitation as an e-mail",
   "screen description title": "Description",
   "screen alert title empty": "Alert",
   "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
@@ -2634,6 +2759,7 @@ module.exports = {
   "screen recurrence ends until placeholder": "Until [date]",
   "screen recurrence summary label": "Summary",
   "send mails question": "Send a notification email to:",
+  "send invitations question": "Send an invitation to:",
   "modal send mails": "Send a notification",
   "accepted": "Accepted",
   "declined": "Declined",
@@ -5892,11 +6018,13 @@ module.exports = Contact = (function(superClass) {
 });
 
 ;require.register("models/event.coffee", function(exports, require, module) {
-var Event, ScheduleItem,
+var Event, ScheduleItem, Sharing,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 ScheduleItem = require('./scheduleitem');
+
+Sharing = require('./sharing');
 
 module.exports = Event = (function(superClass) {
   extend(Event, superClass);
@@ -6009,6 +6137,155 @@ module.exports = Event = (function(superClass) {
 
   Event.prototype.getDefaultColor = function() {
     return '#008AF6';
+  };
+
+  Event.prototype.hasSharing = function() {
+    return this.get('shareID') != null;
+  };
+
+  Event.prototype.onSharingChange = function(sharing) {
+    return this.updateAttendeesFromSharing(sharing);
+  };
+
+  Event.prototype.fetchEditability = function(callback) {
+    if (!this.isNew() && this.hasSharing()) {
+      return this.fetchSharing((function(_this) {
+        return function(err, sharing) {
+          var isEditable;
+          if (err) {
+            console.error(err);
+            return callback(false);
+          } else {
+            isEditable = _this.get('shareID') === sharing.get('id');
+            return callback(isEditable);
+          }
+        };
+      })(this));
+    } else {
+      return callback(true);
+    }
+  };
+
+  Event.prototype.fetchSharing = function(callback) {
+    var errorHandler, sharingToFecth, successHandler;
+    if (!this.hasSharing()) {
+      callback(null, null);
+      return;
+    }
+    if (this.sharing) {
+      callback(null, this.sharing);
+      return;
+    }
+    successHandler = (function(_this) {
+      return function(sharing, response, options) {
+        _this.sharing = sharing;
+        _this.listenTo(_this.sharing, 'change', _this.onSharingChange);
+        return callback(null, sharing);
+      };
+    })(this);
+    errorHandler = function(err) {
+      return callback(err, null);
+    };
+    sharingToFecth = new Sharing({
+      id: this.get('shareID')
+    });
+    return sharingToFecth.fetch({
+      success: successHandler,
+      error: (function(_this) {
+        return function(sharing, response, options) {
+          var sharingNotFound;
+          sharingNotFound = response.status === 404;
+          if (sharingNotFound) {
+            return _this.fetchSharingByShareId(function(err, sharing) {
+              if (err) {
+                return errorHandler(err);
+              } else {
+                return successHandler(sharing);
+              }
+            });
+          } else {
+            return errorHandler(JSON.parse(response.responseText));
+          }
+        };
+      })(this)
+    });
+  };
+
+  Event.prototype.fetchSharingByShareId = function(callback) {
+    var sharingToFetch;
+    console.debug('Event.fetchSharingByShareId');
+    if (!this.hasSharing()) {
+      callback(null, null);
+      return;
+    }
+    if (this.sharing) {
+      callback(null, this.sharing);
+      return;
+    }
+    sharingToFetch = new Sharing();
+    return sharingToFetch.fetch({
+      data: {
+        shareID: this.get('shareID')
+      },
+      success: (function(_this) {
+        return function(sharing, response, options) {
+          return callback(null, sharing);
+        };
+      })(this),
+      error: function(sharing, resopnse, options) {
+        return callback(JSON.parse(response.responseText), null);
+      }
+    });
+  };
+
+  Event.prototype.fetchAttendeesStatuses = function(callback) {
+    return this.fetchSharing((function(_this) {
+      return function(err, sharing) {
+        if (err) {
+          return callback(err, null);
+        } else if (sharing) {
+          return callback(null, _this.updateAttendeesFromSharing(sharing));
+        } else {
+          return callback(null, _this.get('attendees'));
+        }
+      };
+    })(this));
+  };
+
+  Event.prototype.updateAttendeesFromSharing = function(sharing) {
+    var sharingChanged;
+    sharingChanged = !_.isEqual(this.cachedAttendeesSharing, sharing);
+    if (!sharingChanged) {
+      return this.get('attendees');
+    }
+    this.set('attendees', this.get('attendees').map(function(attendee) {
+      var statusReducer, statusRules, target;
+      if (!attendee.shareWithCozy) {
+        return attendee;
+      }
+      target = sharing.get('targets').find(function(target) {
+        return target.recipientUrl === attendee.cozy;
+      });
+      statusRules = {
+        'DECLINED': function(sharing, target) {
+          return (target == null) && !sharing.get('accepted');
+        },
+        'ACCEPTED': function(sharing, target) {
+          return ((target != null ? target.token : void 0) != null) || sharing.get('accepted');
+        },
+        'NEED-ACTION': function(sharing, target) {
+          return (target != null) && !target.token;
+        }
+      };
+      statusReducer = function(previous, status) {
+        return previous || (statusRules[status](sharing, target) ? status : null);
+      };
+      attendee.status = Object.keys(statusRules).reduce(statusReducer, null);
+      return attendee;
+    }));
+    this.trigger('change:attendees', this);
+    this.cachedAttendeesSharing = _.clone(sharing);
+    return this.get('attendees');
   };
 
   return Event;
@@ -6404,6 +6681,9 @@ module.exports = ScheduleItem = (function(superClass) {
     guestsToInform = attendees.filter((function(_this) {
       return function(guest) {
         var ref;
+        if (guest.shareWithCozy) {
+          return false;
+        }
         if (method === 'create') {
           return true;
         } else if (method === 'delete') {
@@ -6413,13 +6693,13 @@ module.exports = ScheduleItem = (function(superClass) {
         }
       };
     })(this)).map(function(guest) {
-      return guest.email;
+      return guest.label;
     });
     if (guestsToInform.length === 0) {
       return callback(false);
     } else {
       guestsList = guestsToInform.join(', ');
-      content = (t('send mails question')) + " " + guestsList;
+      content = (t('send invitations question')) + " " + guestsList;
       Modal.confirm(t('modal send mails'), content, t('yes'), t('no'), callback);
     }
     this.startDateChanged = false;
@@ -6427,6 +6707,57 @@ module.exports = ScheduleItem = (function(superClass) {
   };
 
   return ScheduleItem;
+
+})(Backbone.Model);
+});
+
+;require.register("models/sharing.coffee", function(exports, require, module) {
+var Sharing, request,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+request = require('lib/request');
+
+module.exports = Sharing = (function(superClass) {
+  extend(Sharing, superClass);
+
+  function Sharing() {
+    return Sharing.__super__.constructor.apply(this, arguments);
+  }
+
+  Sharing.prototype.urlRoot = 'sharings';
+
+  Sharing.prototype.accept = function(callback) {
+    var id;
+    id = this.get('id');
+    return request.post('sharing/accept', this.toJSON(), (function(_this) {
+      return function(err, response) {
+        if (err) {
+          return callback(err, null);
+        } else {
+          callback(null, response);
+          return _this.trigger('accepted', _this);
+        }
+      };
+    })(this));
+  };
+
+  Sharing.prototype.refuse = function(callback) {
+    var id;
+    id = this.get('id');
+    return request.post('sharing/refuse', this.toJSON(), (function(_this) {
+      return function(err, response) {
+        if (err) {
+          return callback(err, null);
+        } else {
+          callback(null, response);
+          return _this.trigger('refused', _this);
+        }
+      };
+    })(this));
+  };
+
+  return Sharing;
 
 })(Backbone.Model);
 });
@@ -6597,7 +6928,8 @@ module.exports = Router = (function(superClass) {
       date: parseInt(day),
       view: view,
       model: {
-        events: app.events
+        events: app.events,
+        pendingEventSharingsCollection: app.pendingEventSharings
       }
     }));
     app.menu.activate('calendar');
@@ -6741,167 +7073,8 @@ module.exports = CalendarHeader = (function(superClass) {
 })(BaseView);
 });
 
-;require.register("views/calendar_popover_event.coffee", function(exports, require, module) {
-var Event, EventPopOver, Modal, PopoverView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-PopoverView = require('lib/popover_view');
-
-Event = require('models/event');
-
-Modal = require('lib/modal');
-
-if (!window.localStorage) {
-  window.localStorage = {};
-}
-
-module.exports = EventPopOver = (function(superClass) {
-  extend(EventPopOver, superClass);
-
-  function EventPopOver() {
-    return EventPopOver.__super__.constructor.apply(this, arguments);
-  }
-
-  EventPopOver.prototype.screens = {
-    main: require('views/popover_screens/main'),
-    guests: require('views/popover_screens/guests'),
-    details: require('views/popover_screens/details'),
-    alert: require('views/popover_screens/alert'),
-    repeat: require('views/popover_screens/repeat'),
-    "delete": require('views/popover_screens/delete'),
-    confirm: require('views/popover_screens/confirm')
-  };
-
-  EventPopOver.prototype.mainScreen = 'main';
-
-  EventPopOver.prototype.events = {
-    'keyup': 'onKeyUp',
-    'click .close': 'selfclose',
-    'click div.popover-back': function() {
-      return this.switchToScreen(this.mainScreen);
-    }
-  };
-
-  EventPopOver.prototype.initialize = function(options) {
-    if (!this.model) {
-      this.model = new Event({
-        start: this.momentToString(options.start),
-        end: this.momentToString(options.end),
-        description: '',
-        place: ''
-      });
-    }
-    this.context = {};
-    this.context.formModel = this.model.clone();
-    this.listenToOnce(this.context.formModel, 'change', (function(_this) {
-      return function() {
-        return _this.modelHasChanged = true;
-      };
-    })(this));
-    return EventPopOver.__super__.initialize.call(this, options);
-  };
-
-  EventPopOver.prototype.momentToString = function(m) {
-    if ((typeof m.hasTime === "function" ? m.hasTime() : void 0) === false) {
-      return m.toISOString().slice(0, 10);
-    } else {
-      return m.toISOString();
-    }
-  };
-
-  EventPopOver.prototype.onKeyUp = function(event) {
-    if (event.keyCode === 27) {
-      return this.selfclose();
-    }
-  };
-
-  EventPopOver.prototype.displayConfirmIfNeeded = function(checkoutChanges, callbackIfYes) {
-    var dontConfirm, needConfirm;
-    needConfirm = checkoutChanges && this.modelHasChanged;
-    dontConfirm = localStorage.dontConfirmCalendarPopover && localStorage.dontConfirmCalendarPopover !== "false";
-    if (needConfirm && !dontConfirm) {
-      this.previousScreen = this.screenElement.attr('data-screen');
-      this.callbackIfYes = callbackIfYes;
-      return this.switchToScreen('confirm');
-    } else {
-      return callbackIfYes();
-    }
-  };
-
-  EventPopOver.prototype.selfclose = function(checkoutChanges) {
-    if (checkoutChanges == null) {
-      checkoutChanges = true;
-    }
-    this.displayConfirmIfNeeded(checkoutChanges, (function(_this) {
-      return function() {
-        if (_this.model.isNew()) {
-          return EventPopOver.__super__.selfclose.call(_this);
-        } else {
-          if (checkoutChanges) {
-            return _this.model.fetch({
-              complete: function() {
-                return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
-              }
-            });
-          } else {
-            return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
-          }
-        }
-      };
-    })(this));
-    return window.popoverExtended = false;
-  };
-
-  EventPopOver.prototype.close = function(checkoutChanges) {
-    if (checkoutChanges == null) {
-      checkoutChanges = true;
-    }
-    if (this.model.isNew()) {
-      EventPopOver.__super__.close.call(this);
-    } else {
-      if (checkoutChanges) {
-        this.model.fetch({
-          complete: EventPopOver.__super__.close.apply(this, arguments)
-        });
-      } else {
-        EventPopOver.__super__.close.call(this);
-      }
-    }
-    return window.popoverExtended = false;
-  };
-
-  return EventPopOver;
-
-})(PopoverView);
-});
-
-;require.register("views/calendar_popover_screen_event.coffee", function(exports, require, module) {
-var EventPopoverScreenView, PopoverScreenView,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-PopoverScreenView = require('lib/popover_screen_view');
-
-module.exports = EventPopoverScreenView = (function(superClass) {
-  extend(EventPopoverScreenView, superClass);
-
-  function EventPopoverScreenView() {
-    return EventPopoverScreenView.__super__.constructor.apply(this, arguments);
-  }
-
-  EventPopoverScreenView.prototype.initialize = function() {
-    EventPopoverScreenView.__super__.initialize.call(this);
-    return this.formModel = this.context.formModel;
-  };
-
-  return EventPopoverScreenView;
-
-})(PopoverScreenView);
-});
-
 ;require.register("views/calendar_view.coffee", function(exports, require, module) {
-var BaseView, CalendarView, Event, EventPopover, Header, app, helpers, timezones,
+var BaseView, CalendarView, Event, EventPopover, EventSharingButtonView, Header, app, helpers, timezones,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -6911,7 +7084,9 @@ app = require('application');
 
 BaseView = require('lib/base_view');
 
-EventPopover = require('./calendar_popover_event');
+EventPopover = require('./event_popover');
+
+EventSharingButtonView = require('./pending_event_sharings_button');
 
 Header = require('./calendar_header');
 
@@ -6947,9 +7122,17 @@ module.exports = CalendarView = (function(superClass) {
     this.listenTo(this.eventCollection, 'reset', this.refresh);
     this.listenTo(this.eventCollection, 'remove', this.onRemove);
     this.listenTo(this.eventCollection, 'change', this.refreshOne);
-    this.model = null;
     this.calendarsCollection = app.calendars;
-    return this.listenTo(this.calendarsCollection, 'change', this.onCalendarCollectionChange);
+    this.listenTo(this.calendarsCollection, 'change', this.onCalendarCollectionChange);
+    this.eventSharingButtonView = new EventSharingButtonView({
+      collection: this.model.pendingEventSharingsCollection
+    });
+    return this.model = null;
+  };
+
+  CalendarView.prototype.render = function() {
+    CalendarView.__super__.render.call(this);
+    return this.eventSharingButtonView.snap(this).render();
   };
 
   CalendarView.prototype.afterRender = function() {
@@ -7109,7 +7292,7 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    var ref, ref1;
+    var model, ref, ref1;
     options.container = this.cal;
     options.parentView = this;
     if (this.popover) {
@@ -7120,8 +7303,20 @@ module.exports = CalendarView = (function(superClass) {
         return;
       }
     }
-    this.popover = new EventPopover(options);
-    return this.popover.render();
+    model = options.model != null ? options.model : options.model = new Event({
+      start: helpers.momentToString(options.start),
+      end: helpers.momentToString(options.end),
+      description: '',
+      place: ''
+    });
+    return model.fetchEditability((function(_this) {
+      return function(editable) {
+        _this.popover = new EventPopover(_.extend(options, {
+          readOnly: !editable
+        }));
+        return _this.popover.render();
+      };
+    })(this));
   };
 
   CalendarView.prototype.closePopover = function() {
@@ -7257,6 +7452,201 @@ module.exports = CalendarView = (function(superClass) {
   return CalendarView;
 
 })(BaseView);
+});
+
+;require.register("views/collection_counter.coffee", function(exports, require, module) {
+var CollectionCounterView, CollectionView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+CollectionView = require('lib/view_collection');
+
+module.exports = CollectionCounterView = (function(superClass) {
+  extend(CollectionCounterView, superClass);
+
+  function CollectionCounterView() {
+    return CollectionCounterView.__super__.constructor.apply(this, arguments);
+  }
+
+  CollectionCounterView.prototype.className = 'collection-counter';
+
+  CollectionCounterView.prototype.template = require('./templates/collection_counter');
+
+  CollectionCounterView.prototype.initialize = function(options) {
+    CollectionCounterView.__super__.initialize.call(this, options);
+    this.stopListening(this.collection);
+    return this.listenTo(this.collection, 'add remove reset', this.render);
+  };
+
+  CollectionCounterView.prototype.afterRender = function() {};
+
+  return CollectionCounterView;
+
+})(CollectionView);
+});
+
+;require.register("views/event_popover.coffee", function(exports, require, module) {
+var Event, EventPopOver, Modal, PopoverView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+PopoverView = require('lib/popover_view');
+
+Event = require('models/event');
+
+Modal = require('lib/modal');
+
+if (!window.localStorage) {
+  window.localStorage = {};
+}
+
+module.exports = EventPopOver = (function(superClass) {
+  extend(EventPopOver, superClass);
+
+  function EventPopOver() {
+    return EventPopOver.__super__.constructor.apply(this, arguments);
+  }
+
+  EventPopOver.prototype.screens = {
+    main: require('views/popover_screens/main'),
+    guests: require('views/popover_screens/guests'),
+    details: require('views/popover_screens/details'),
+    alert: require('views/popover_screens/alert'),
+    repeat: require('views/popover_screens/repeat'),
+    "delete": require('views/popover_screens/delete'),
+    confirm: require('views/popover_screens/confirm')
+  };
+
+  EventPopOver.prototype.mainScreen = 'main';
+
+  EventPopOver.prototype.events = {
+    'keyup': 'onKeyUp',
+    'click .close': 'selfclose',
+    'click div.popover-back': function() {
+      return this.switchToScreen(this.mainScreen);
+    }
+  };
+
+  EventPopOver.prototype.initialize = function(options) {
+    EventPopOver.__super__.initialize.call(this, options);
+    this.context = {
+      formModel: this.model.clone(),
+      readOnly: options.readOnly
+    };
+    this.listenTo(this.model, 'change:shareID', (function(_this) {
+      return function() {
+        return _this.context.formModel.set('shareID', _this.model.get('shareID'));
+      };
+    })(this));
+    return this.listenToOnce(this.context.formModel, 'change', (function(_this) {
+      return function(model, options) {
+        return _this.modelHasChanged = true;
+      };
+    })(this));
+  };
+
+  EventPopOver.prototype.momentToString = function(m) {
+    if ((typeof m.hasTime === "function" ? m.hasTime() : void 0) === false) {
+      return m.toISOString().slice(0, 10);
+    } else {
+      return m.toISOString();
+    }
+  };
+
+  EventPopOver.prototype.onKeyUp = function(event) {
+    if (event.keyCode === 27) {
+      return this.selfclose();
+    }
+  };
+
+  EventPopOver.prototype.displayConfirmIfNeeded = function(checkoutChanges, callbackIfYes) {
+    var dontConfirm, needConfirm;
+    needConfirm = checkoutChanges && this.modelHasChanged;
+    dontConfirm = localStorage.dontConfirmCalendarPopover && localStorage.dontConfirmCalendarPopover !== "false";
+    if (needConfirm && !dontConfirm) {
+      this.previousScreen = this.screenElement.attr('data-screen');
+      this.callbackIfYes = callbackIfYes;
+      return this.switchToScreen('confirm');
+    } else {
+      return callbackIfYes();
+    }
+  };
+
+  EventPopOver.prototype.selfclose = function(checkoutChanges) {
+    if (checkoutChanges == null) {
+      checkoutChanges = true;
+    }
+    this.displayConfirmIfNeeded(checkoutChanges, (function(_this) {
+      return function() {
+        if (_this.model.isNew()) {
+          return EventPopOver.__super__.selfclose.call(_this);
+        } else {
+          if (checkoutChanges) {
+            return _this.model.fetch({
+              complete: function() {
+                return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+              }
+            });
+          } else {
+            return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
+          }
+        }
+      };
+    })(this));
+    return window.popoverExtended = false;
+  };
+
+  EventPopOver.prototype.close = function(checkoutChanges) {
+    if (checkoutChanges == null) {
+      checkoutChanges = true;
+    }
+    if (this.model.isNew()) {
+      EventPopOver.__super__.close.call(this);
+    } else {
+      if (checkoutChanges) {
+        this.model.fetch({
+          complete: EventPopOver.__super__.close.apply(this, arguments)
+        });
+      } else {
+        EventPopOver.__super__.close.call(this);
+      }
+    }
+    return window.popoverExtended = false;
+  };
+
+  return EventPopOver;
+
+})(PopoverView);
+});
+
+;require.register("views/event_popover_screen.coffee", function(exports, require, module) {
+var EventPopoverScreenView, PopoverScreenView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+PopoverScreenView = require('lib/popover_screen_view');
+
+module.exports = EventPopoverScreenView = (function(superClass) {
+  extend(EventPopoverScreenView, superClass);
+
+  function EventPopoverScreenView() {
+    return EventPopoverScreenView.__super__.constructor.apply(this, arguments);
+  }
+
+  EventPopoverScreenView.prototype.initialize = function() {
+    EventPopoverScreenView.__super__.initialize.call(this);
+    return this.formModel = this.context.formModel;
+  };
+
+  EventPopoverScreenView.prototype.getRenderData = function() {
+    return _.extend(EventPopoverScreenView.__super__.getRenderData.call(this), {
+      readOnly: this.context.readOnly
+    });
+  };
+
+  return EventPopoverScreenView;
+
+})(PopoverScreenView);
 });
 
 ;require.register("views/import_event_list.coffee", function(exports, require, module) {
@@ -7716,13 +8106,13 @@ module.exports = ListView = (function(superClass) {
 });
 
 ;require.register("views/list_view_bucket.coffee", function(exports, require, module) {
-var BucketView, PopoverEvent, ViewCollection,
+var BucketView, EventPopover, ViewCollection,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 ViewCollection = require('../lib/view_collection');
 
-PopoverEvent = require('./calendar_popover_event');
+EventPopover = require('./event_popover');
 
 module.exports = BucketView = (function(superClass) {
   extend(BucketView, superClass);
@@ -7777,7 +8167,7 @@ module.exports = BucketView = (function(superClass) {
     if (this.popover) {
       this.popover.close();
     }
-    this.popover = new PopoverEvent(options);
+    this.popover = new EventPopover(options);
     return this.popover.render();
   };
 
@@ -7803,13 +8193,13 @@ module.exports = BucketView = (function(superClass) {
 });
 
 ;require.register("views/list_view_item.coffee", function(exports, require, module) {
-var BaseView, Event, EventItemView, PopoverEvent,
+var BaseView, Event, EventItemView, EventPopover,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 BaseView = require('lib/base_view');
 
-PopoverEvent = require('./calendar_popover_event');
+EventPopover = require('./event_popover');
 
 Event = require('models/event');
 
@@ -7850,7 +8240,7 @@ module.exports = EventItemView = (function(superClass) {
     if (this.popover) {
       this.popover.close();
     }
-    this.popover = new PopoverEvent({
+    this.popover = new EventPopover({
       model: this.model,
       target: this.$el,
       parentView: this,
@@ -8260,12 +8650,160 @@ module.exports = MenuItemView = (function(superClass) {
 })(BaseView);
 });
 
+;require.register("views/pending_event_sharings_button.coffee", function(exports, require, module) {
+var CollectionCounterView, CollectionView, PendingEventSharingsButtonView, PopupView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+CollectionView = require('lib/view_collection');
+
+CollectionCounterView = require('./collection_counter');
+
+PopupView = require('lib/popup_view');
+
+module.exports = PendingEventSharingsButtonView = (function(superClass) {
+  extend(PendingEventSharingsButtonView, superClass);
+
+  function PendingEventSharingsButtonView() {
+    return PendingEventSharingsButtonView.__super__.constructor.apply(this, arguments);
+  }
+
+  PendingEventSharingsButtonView.prototype.id = 'shared-events-button';
+
+  PendingEventSharingsButtonView.prototype.template = require('./templates/pending_event_sharings_button');
+
+  PendingEventSharingsButtonView.prototype.itemview = require('./pending_event_sharings_button_item');
+
+  PendingEventSharingsButtonView.prototype.collectionEl = '#shared-events-popup';
+
+  PendingEventSharingsButtonView.prototype.events = {
+    'click button': 'togglePopup',
+    'keyup': 'onKeyUp'
+  };
+
+  PendingEventSharingsButtonView.prototype.initialize = function() {
+    PendingEventSharingsButtonView.__super__.initialize.call(this);
+    return this.counterView = new CollectionCounterView({
+      collection: this.collection
+    });
+  };
+
+  PendingEventSharingsButtonView.prototype.togglePopup = function(display) {
+    return this.popup && this.popup.toggle();
+  };
+
+  PendingEventSharingsButtonView.prototype.render = function() {
+    PendingEventSharingsButtonView.__super__.render.apply(this, arguments);
+    return this.counterView.snap(this).render();
+  };
+
+  PendingEventSharingsButtonView.prototype.afterRender = function() {
+    if (this.collection.length) {
+      this.$el.show();
+    } else {
+      this.$el.hide();
+    }
+    PendingEventSharingsButtonView.__super__.afterRender.apply(this, arguments);
+    return this.popup = new PopupView({
+      el: this.$(this.collectionEl),
+      anchor: this.$el
+    });
+  };
+
+  PendingEventSharingsButtonView.prototype.addItem = function(model) {
+    this.$el.show();
+    return PendingEventSharingsButtonView.__super__.addItem.call(this, model);
+  };
+
+  PendingEventSharingsButtonView.prototype.removeItem = function(model) {
+    PendingEventSharingsButtonView.__super__.removeItem.call(this, model);
+    if (this.collection.length === 0) {
+      this.popup.hide();
+      return this.$el.hide();
+    }
+  };
+
+  PendingEventSharingsButtonView.prototype.onKeyUp = function(event) {
+    var keys;
+    keys = {
+      ESC: 27
+    };
+    if (event.keyCode === keys.ESC) {
+      return this.withdraw;
+    }
+  };
+
+  PendingEventSharingsButtonView.prototype.withdraw = function() {
+    return this.togglePopup(false);
+  };
+
+  return PendingEventSharingsButtonView;
+
+})(CollectionView);
+});
+
+;require.register("views/pending_event_sharings_button_item.coffee", function(exports, require, module) {
+var BaseView, PendingEventSharingsButtonItemView,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+BaseView = require('lib/base_view');
+
+module.exports = PendingEventSharingsButtonItemView = (function(superClass) {
+  extend(PendingEventSharingsButtonItemView, superClass);
+
+  function PendingEventSharingsButtonItemView() {
+    return PendingEventSharingsButtonItemView.__super__.constructor.apply(this, arguments);
+  }
+
+  PendingEventSharingsButtonItemView.prototype.className = 'event-sharings-button-item';
+
+  PendingEventSharingsButtonItemView.prototype.template = require('./templates/pending_event_sharings_button_item');
+
+  PendingEventSharingsButtonItemView.prototype.events = {
+    'click .accept': 'onAccept',
+    'click .decline': 'onDecline'
+  };
+
+  PendingEventSharingsButtonItemView.prototype.initialize = function() {
+    return this.listenTo(this.model, 'accepted refused', this.destroy);
+  };
+
+  PendingEventSharingsButtonItemView.prototype.onAccept = function() {
+    return this.model.accept((function(_this) {
+      return function(err) {
+        if (err) {
+          return _this.onAnswerError(err);
+        }
+      };
+    })(this));
+  };
+
+  PendingEventSharingsButtonItemView.prototype.onDecline = function() {
+    return this.model.refuse((function(_this) {
+      return function(err) {
+        if (err) {
+          return _this.onAnswerError(err);
+        }
+      };
+    })(this));
+  };
+
+  PendingEventSharingsButtonItemView.prototype.onAnswerError = function(err) {
+    return console.error(err);
+  };
+
+  return PendingEventSharingsButtonItemView;
+
+})(BaseView);
+});
+
 ;require.register("views/popover_screens/alert.coffee", function(exports, require, module) {
 var AlertPopoverScreen, EventPopoverScreenView, helpers,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-EventPopoverScreenView = require('views/calendar_popover_screen_event');
+EventPopoverScreenView = require('views/event_popover_screen');
 
 helpers = require('helpers');
 
@@ -8358,6 +8896,7 @@ module.exports = AlertPopoverScreen = (function(superClass) {
         label: t(translationKey, {
           smart_count: value
         }),
+        readOnly: this.context.readOnly,
         action: alarm.action,
         isEmailChecked: (ref1 = alarm.action) === 'EMAIL' || ref1 === 'BOTH',
         isNotifChecked: (ref2 = alarm.action) === 'DISPLAY' || ref2 === 'BOTH'
@@ -8556,7 +9095,7 @@ var DetailsPopoverScreen, EventPopoverScreenView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-EventPopoverScreenView = require('views/calendar_popover_screen_event');
+EventPopoverScreenView = require('views/event_popover_screen');
 
 module.exports = DetailsPopoverScreen = (function(superClass) {
   extend(DetailsPopoverScreen, superClass);
@@ -8580,9 +9119,9 @@ module.exports = DetailsPopoverScreen = (function(superClass) {
   };
 
   DetailsPopoverScreen.prototype.getRenderData = function() {
-    return {
+    return _.extend(DetailsPopoverScreen.__super__.getRenderData.call(this), {
       details: this.formModel.get('details')
-    };
+    });
   };
 
   return DetailsPopoverScreen;
@@ -8595,7 +9134,7 @@ var EventPopoverScreenView, GuestPopoverScreen, random,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-EventPopoverScreenView = require('views/calendar_popover_screen_event');
+EventPopoverScreenView = require('views/event_popover_screen');
 
 random = require('lib/random');
 
@@ -8615,7 +9154,18 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   GuestPopoverScreen.prototype.events = {
     "click .add-new-guest": "onNewGuest",
     "click .guest-delete": "onRemoveGuest",
+    "click .guest-share-with-cozy": "onShareWithCozy",
+    "click .guest-share-with-email": "onShareWithEmail",
     'keyup input[name="guest-name"]': "onKeyup"
+  };
+
+  GuestPopoverScreen.prototype.initialize = function(options) {
+    GuestPopoverScreen.__super__.initialize.call(this, options);
+    return this.listenTo(this.formModel, 'change:shareID', (function(_this) {
+      return function() {
+        return _this.afterRender();
+      };
+    })(this));
   };
 
   GuestPopoverScreen.prototype.getRenderData = function() {
@@ -8630,25 +9180,40 @@ module.exports = GuestPopoverScreen = (function(superClass) {
       this.screenTitle = t('screen guest title empty');
     }
     return _.extend(GuestPopoverScreen.__super__.getRenderData.call(this), {
-      guests: this.formModel.get('attendes') || []
+      guests: this.formModel.get('attendes') || [],
+      readOnly: this.context.readOnly
     });
   };
 
   GuestPopoverScreen.prototype.afterRender = function() {
-    var $guests, guest, guests, i, index, len, options, row;
+    var $guests;
     $guests = this.$('.guests');
-    $guests.empty();
-    guests = this.formModel.get('attendees') || [];
-    for (index = i = 0, len = guests.length; i < len; index = ++i) {
-      guest = guests[index];
-      options = _.extend(guest, {
-        index: index
-      });
-      row = this.templateGuestRow(guest);
-      $guests.append(row);
+    return this.formModel.fetchAttendeesStatuses((function(_this) {
+      return function(err, attendees) {
+        return _this.renderAttendees($guests, attendees);
+      };
+    })(this));
+  };
+
+  GuestPopoverScreen.prototype.renderAttendees = function($guestElement, attendees) {
+    var guest, i, index, len, options, row;
+    $guestElement.empty();
+    if (attendees) {
+      for (index = i = 0, len = attendees.length; i < len; index = ++i) {
+        guest = attendees[index];
+        options = _.extend(guest, {
+          index: index
+        });
+        row = this.templateGuestRow(_.extend(guest, {
+          readOnly: this.context.readOnly
+        }));
+        $guestElement.append(row);
+      }
     }
-    this.configureGuestTypeahead();
-    return this.$('input[name="guest-name"]').focus();
+    if (!this.context.readOnly) {
+      this.configureGuestTypeahead();
+      return this.$('input[name="guest-name"]').focus();
+    }
   };
 
   GuestPopoverScreen.prototype.configureGuestTypeahead = function() {
@@ -8696,8 +9261,32 @@ module.exports = GuestPopoverScreen = (function(superClass) {
     return this.render();
   };
 
+  GuestPopoverScreen.prototype.onShareWithCozy = function(event) {
+    var guest, guests, index;
+    index = this.$(event.target).parents('li').attr('data-index');
+    guests = this.formModel.get('attendees') || [];
+    guests = _.clone(guests);
+    guest = guests[index];
+    guest.shareWithCozy = true;
+    guest.label = "Cozy: " + guest.name;
+    this.formModel.set('attendees', guests);
+    return this.render();
+  };
+
+  GuestPopoverScreen.prototype.onShareWithEmail = function(event) {
+    var guest, guests, index;
+    index = this.$(event.target).parents('li').attr('data-index');
+    guests = this.formModel.get('attendees') || [];
+    guests = _.clone(guests);
+    guest = guests[index];
+    guest.shareWithCozy = false;
+    guest.label = guest.email;
+    this.formModel.set('attendees', guests);
+    return this.render();
+  };
+
   GuestPopoverScreen.prototype.onNewGuest = function(userInfo) {
-    var contactID, email, guests, ref;
+    var contact, contactID, email, guests, newGuest, ref;
     if (userInfo == null) {
       userInfo = null;
     }
@@ -8713,13 +9302,21 @@ module.exports = GuestPopoverScreen = (function(superClass) {
       if (!_.findWhere(guests, {
         email: email
       })) {
-        guests = _.clone(guests);
-        guests.push({
+        newGuest = {
           key: random.randomString(),
           status: 'INVITATION-NOT-SENT',
           email: email,
-          contactid: contactID
-        });
+          label: email,
+          contactid: contactID,
+          shareWithCozy: false
+        };
+        if (contactID != null) {
+          contact = app.contacts.get(contactID);
+          newGuest.cozy = contact.get('cozy');
+          newGuest.name = contact.get('name');
+        }
+        guests = _.clone(guests);
+        guests.push(newGuest);
         this.formModel.set('attendees', guests);
         this.render();
       }
@@ -8826,7 +9423,9 @@ module.exports = MainPopoverScreen = (function(superClass) {
       return this.switchToScreen('alert');
     },
     'click .input-repeat': function() {
-      return this.switchToScreen('repeat');
+      if (!this.context.readOnly) {
+        return this.switchToScreen('repeat');
+      }
     }
   };
 
@@ -8835,7 +9434,9 @@ module.exports = MainPopoverScreen = (function(superClass) {
     this.listenTo(this.formModel, "change:start", this.onStartChange);
     this.listenTo(this.formModel, "change:end", this.onEndChange);
     this.calendar = this.formModel.getCalendar();
-    this.listenTo(this.calendar, 'change:color', this.onCalendarColorChange);
+    if (this.calendar) {
+      this.listenTo(this.calendar, 'change:color', this.onCalendarColorChange);
+    }
     return this.listenTo(app.calendars, 'change', this.onCalendarsChange);
   };
 
@@ -8854,6 +9455,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
     }
     endOffset = this.formModel.isAllDay() ? -1 : 0;
     return data = _.extend(MainPopoverScreen.__super__.getRenderData.call(this), {
+      readOnly: this.context.readOnly,
       tFormat: tFormat,
       dFormat: dFormat,
       calendar: currentCalendar,
@@ -8898,20 +9500,23 @@ module.exports = MainPopoverScreen = (function(superClass) {
         return $("[tabindex=" + (+$(this).attr('tabindex') - 1) + "]").focus();
       }
     };
-    this.$('input[type="time"]').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
-    this.$('.input-date').datetimepicker(defDatePickerOps);
+    this.$('input[type="time"]:not([aria-readonly])').attr('type', 'text').timepicker(defTimePickerOpts).delegate(timepickerEvents);
+    this.$('.input-date:not([aria-readonly])').datetimepicker(defDatePickerOps);
     this.calendarComboBox = new ComboBox({
       el: this.$('.calendarcombo'),
       small: true,
       source: app.calendars.toAutoCompleteSource(),
-      current: (ref = this.formModel.getCalendar()) != null ? ref.get('name') : void 0
+      current: (ref = this.formModel.getCalendar()) != null ? ref.get('name') : void 0,
+      readOnly: this.context.readOnly
     });
-    this.calendarComboBox.on('edition-complete', (function(_this) {
-      return function(value) {
-        _this.formModel.setCalendar(app.calendars.getOrCreateByName(value));
-        return _this.description.focus();
-      };
-    })(this));
+    if (!this.context.readOnly) {
+      this.calendarComboBox.on('edition-complete', (function(_this) {
+        return function(value) {
+          _this.formModel.setCalendar(app.calendars.getOrCreateByName(value));
+          return _this.description.focus();
+        };
+      })(this));
+    }
     if (window.popoverExtended) {
       this.expandPopover();
     }
@@ -9162,11 +9767,11 @@ module.exports = MainPopoverScreen = (function(superClass) {
     if (guests.length === 0) {
       return t("add guest button");
     } else if (guests.length === 1) {
-      return guests[0].email;
+      return guests[0].label;
     } else {
       numOthers = guests.length - 1;
       options = {
-        first: guests[0].email,
+        first: guests[0].label,
         smart_count: numOthers
       };
       return t("guests list", options);
@@ -9236,7 +9841,7 @@ var EventPopoverScreenView, NO_REPEAT, RepeatPopoverScreen, allDayDateFieldForma
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-EventPopoverScreenView = require('views/calendar_popover_screen_event');
+EventPopoverScreenView = require('views/event_popover_screen');
 
 tFormat = 'HH:mm';
 
@@ -9690,7 +10295,7 @@ var jade_interp;
 buf.push("<div class=\"fc-header-left\">");
 if ( calendarMode)
 {
-buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button-today',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button',active('today')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div><div id=\"shared-events-button\" class=\"fc-button-wrapper\"></div>");
 }
 buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\">");
 if ( !isMobile)
@@ -9717,6 +10322,25 @@ var jade_mixins = {};
 var jade_interp;
 
 buf.push("<div id=\"alarms\" class=\"well\"></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/collection_counter.jade", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (collection) {
+buf.push(jade.escape(null == (jade_interp = collection.length) ? "" : jade_interp));}.call(this,"collection" in locals_for_with?locals_for_with.collection:typeof collection!=="undefined"?collection:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -9905,6 +10529,44 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
+;require.register("views/templates/pending_event_sharings_button.jade", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+
+buf.push("<button class=\"btn fc-button\"><span class=\"collection-counter\"></span><span>" + (jade.escape(null == (jade_interp = ' shared events') ? "" : jade_interp)) + "</span></button><div id=\"shared-events-popup\" style=\"display:none\" class=\"popup\"></div>");;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("views/templates/pending_event_sharings_button_item.jade", function(exports, require, module) {
+var __templateData = function template(locals) {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (model) {
+buf.push("<div class=\"sharer\">" + (jade.escape(null == (jade_interp = model.sharerUrl) ? "" : jade_interp)) + "</div><div class=\"desc\">" + (jade.escape(null == (jade_interp = model.desc) ? "" : jade_interp)) + "</div><div class=\"actions\"><a class=\"accept\">" + (jade.escape(null == (jade_interp = 'Accept') ? "" : jade_interp)) + "</a><a class=\"decline\">" + (jade.escape(null == (jade_interp = 'Decline') ? "" : jade_interp)) + "</a></div>");}.call(this,"model" in locals_for_with?locals_for_with.model:typeof model!=="undefined"?model:undefined));;return buf.join("");
+};
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
 ;require.register("views/templates/popover.jade", function(exports, require, module) {
 var __templateData = function template(locals) {
 var buf = [];
@@ -9929,8 +10591,11 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (alertOptions, undefined) {
-buf.push("<div class=\"fixed-height\"><select class=\"new-alert select-big with-margin\"><option value=\"-1\" selected=\"true\">" + (jade.escape(null == (jade_interp = t('screen alert default value')) ? "" : jade_interp)) + "</option>");
+;var locals_for_with = (locals || {});(function (alertOptions, readOnly, undefined) {
+buf.push("<div class=\"fixed-height\">");
+if ( !readOnly)
+{
+buf.push("<select class=\"new-alert select-big with-margin\"><option value=\"-1\" selected=\"true\">" + (jade.escape(null == (jade_interp = t('screen alert default value')) ? "" : jade_interp)) + "</option>");
 // iterate alertOptions
 ;(function(){
   var $$obj = alertOptions;
@@ -9939,7 +10604,7 @@ buf.push("<div class=\"fixed-height\"><select class=\"new-alert select-big with-
     for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
       var alertOption = $$obj[$index];
 
-buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey,{smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
     }
 
   } else {
@@ -9947,13 +10612,15 @@ buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" 
     for (var $index in $$obj) {
       $$l++;      var alertOption = $$obj[$index];
 
-buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey, {smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
+buf.push("<option" + (jade.attr("value", alertOption.index, true, false)) + ">" + (jade.escape(null == (jade_interp = t(alertOption.translationKey,{smart_count: alertOption.value})) ? "" : jade_interp)) + "</option>");
     }
 
   }
 }).call(this);
 
-buf.push("</select><ul class=\"alerts\"></ul></div>");}.call(this,"alertOptions" in locals_for_with?locals_for_with.alertOptions:typeof alertOptions!=="undefined"?alertOptions:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
+buf.push("</select>");
+}
+buf.push("<ul class=\"alerts\"></ul></div>");}.call(this,"alertOptions" in locals_for_with?locals_for_with.alertOptions:typeof alertOptions!=="undefined"?alertOptions:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -9971,8 +10638,50 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (index, isEmailChecked, isNotifChecked, label) {
-buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen alert delete tooltip'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button></div><div class=\"type\"><div class=\"notification-mode\"><input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/><label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp)) + "</label></div><div class=\"notification-mode\"><input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp)) + "</label></div></div></li>");}.call(this,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"isEmailChecked" in locals_for_with?locals_for_with.isEmailChecked:typeof isEmailChecked!=="undefined"?isEmailChecked:undefined,"isNotifChecked" in locals_for_with?locals_for_with.isNotifChecked:typeof isNotifChecked!=="undefined"?isNotifChecked:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined));;return buf.join("");
+;var locals_for_with = (locals || {});(function (action, index, isEmailChecked, isNotifChecked, label, readOnly) {
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"alert-top\"><div class=\"alert-timer\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div>");
+if ( !readOnly)
+{
+buf.push("<button" + (jade.attr("title", t('screen alert delete tooltip'), true, false)) + " role=\"button\" class=\"alert-delete fa fa-trash-o\"></button>");
+}
+buf.push("</div><div class=\"type\"><div class=\"notification-mode\">");
+if ( !readOnly)
+{
+buf.push("<input" + (jade.attr("id", "email-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isEmailChecked, true, false)) + " class=\"action-email\"/>");
+}
+if ( readOnly)
+{
+buf.push("(");
+if ( ['EMAIL', 'BOTH'].indexOf(action) != -1)
+{
+buf.push(jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp));
+if ( action == 'BOTH')
+{
+buf.push(", ");
+}
+}
+}
+else
+{
+buf.push("<label" + (jade.attr("for", "email-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type email')) ? "" : jade_interp)) + "</label>");
+}
+if ( !readOnly)
+{
+buf.push("<input" + (jade.attr("id", "display-" + (index) + "", true, false)) + " type=\"checkbox\"" + (jade.attr("checked", isNotifChecked, true, false)) + " class=\"action-display\"/>");
+}
+if ( readOnly)
+{
+if ( ['DISPLAY', 'BOTH'].indexOf(action) != -1)
+{
+buf.push(jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp));
+}
+buf.push(")");
+}
+else
+{
+buf.push("<div class=\"notification-mode\"><label" + (jade.attr("for", "display-" + (index) + "", true, false)) + ">" + (jade.escape(null == (jade_interp = t('screen alert type notification')) ? "" : jade_interp)) + "</label></div>");
+}
+buf.push("</div></div></li>");}.call(this,"action" in locals_for_with?locals_for_with.action:typeof action!=="undefined"?action:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"isEmailChecked" in locals_for_with?locals_for_with.isEmailChecked:typeof isEmailChecked!=="undefined"?isEmailChecked:undefined,"isNotifChecked" in locals_for_with?locals_for_with.isNotifChecked:typeof isNotifChecked!=="undefined"?isNotifChecked:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10066,8 +10775,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (details) {
-buf.push("<div class=\"fixed-height\"><textarea class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");}.call(this,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined));;return buf.join("");
+;var locals_for_with = (locals || {});(function (details, readOnly) {
+buf.push("<div class=\"fixed-height\"><textarea" + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-details\">" + (jade.escape(null == (jade_interp = details) ? "" : jade_interp)) + "</textarea></div>");}.call(this,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10085,8 +10794,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (title) {
-buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><button class=\"btn btn-back\"><i class=\"fa fa-angle-left\"></i></button></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><a tabindex=\"0\"><button class=\"btn btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</button></a></div>");}.call(this,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
+;var locals_for_with = (locals || {});(function (readOnly, title) {
+buf.push("<div class=\"popover-back\"><a tabindex=\"0\"><button class=\"btn btn-back\"><i class=\"fa fa-angle-left\"></i></button></a><h4>" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</h4><div class=\"btn-done-placeholder\">");
+if ( !readOnly)
+{
+buf.push("<a tabindex=\"0\"><button class=\"btn btn-done\">" + (jade.escape(null == (jade_interp = t('screen title done button')) ? "" : jade_interp)) + "</button></a>");
+}
+buf.push("</div></div>");}.call(this,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10104,8 +10818,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (email, index, status) {
-buf.push("<li" + (jade.attr("data-index", index, true, false)) + "><div class=\"guest-top\">");
+;var locals_for_with = (locals || {});(function (cozy, index, label, readOnly, shareWithCozy, status) {
+buf.push("<li" + (jade.attr("data-index", index, true, false)) + " class=\"guest-top\"><span class=\"status\">");
 if ( status == 'ACCEPTED')
 {
 buf.push("<i" + (jade.attr("title", t('accepted'), true, false)) + " class=\"fa fa-check-circle-o green\"></i>");
@@ -10122,7 +10836,23 @@ else
 {
 buf.push("<i" + (jade.attr("title", t('mail not sent'), true, false)) + " class=\"fa fa-exclamation-circle orange\"></i>");
 }
-buf.push("<div class=\"guest-label\">" + (jade.escape(null == (jade_interp = email) ? "" : jade_interp)) + "</div><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></div></li>");}.call(this,"email" in locals_for_with?locals_for_with.email:typeof email!=="undefined"?email:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
+buf.push("</span><div class=\"guest-label\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div>");
+if ( !readOnly)
+{
+buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></span><!-- If a cozy instance is linked to a contact-->");
+if ( cozy)
+{
+if ( shareWithCozy)
+{
+buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest share with email tooltip'), true, false)) + " role=\"button\" class=\"guest-share-with-email fa fa-envelope-o\"></button></span>");
+}
+else
+{
+buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest share with cozy tooltip'), true, false)) + " role=\"button\" class=\"guest-share-with-cozy fa fa-cloud\"></button></span>");
+}
+}
+}
+buf.push("</li>");}.call(this,"cozy" in locals_for_with?locals_for_with.cozy:typeof cozy!=="undefined"?cozy:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"shareWithCozy" in locals_for_with?locals_for_with.shareWithCozy:typeof shareWithCozy!=="undefined"?shareWithCozy:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10140,8 +10870,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-
-buf.push("<div class=\"fixed-height\"><div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + "/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div><ul class=\"guests\"></ul></div>");;return buf.join("");
+;var locals_for_with = (locals || {});(function (readOnly) {
+buf.push("<div class=\"fixed-height\">");
+if ( !readOnly)
+{
+buf.push("<div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + "/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div>");
+}
+buf.push("<ul class=\"guests\"></ul></div>");}.call(this,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10159,22 +10894,53 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (advancedUrl, alerts, allDay, buttonText, dFormat, details, detailsButtonText, end, guestsButtonText, place, popoverClassName, recurrenceButtonText, rrule, sameDay, start, tFormat) {
+;var locals_for_with = (locals || {});(function (advancedUrl, alarms, alerts, allDay, buttonText, dFormat, details, detailsButtonText, end, guestsButtonText, place, popoverClassName, readOnly, recurrenceButtonText, rrule, sameDay, start, tFormat) {
 popoverClassName  = (allDay ? ' is-all-day' : '')
 popoverClassName += (sameDay? ' is-same-day' : '')
 var showDetailsByDefault = details && details.length > 0
 var showAlertsByDefault = alerts && alerts.length > 0
 var showRepeatByDefault = rrule != null && rrule != void(0) && rrule.length > 0
-buf.push("<div" + (jade.cls(['popover-content-wrapper','label-row',popoverClassName], [null,null,true])) + "><div class=\"item-row\"><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + " class=\"input-end-time input-time\"/></label></div><div class=\"item-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div></div><div class=\"label label-row\"><div" + (jade.attr("title", t("placeholder place"), true, false)) + " class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + " class=\"input-place input-full-block\"/></div><div class=\"label label-row input-people\"><div" + (jade.attr("title", t("add guest button"), true, false)) + " class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"8\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row input-details\"><div" + (jade.attr("title", t("placeholder description"), true, false)) + " class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"9\" class=\"button-full-block\"><span class=\"overflow-wrapper\">" + (jade.escape(null == (jade_interp = detailsButtonText) ? "" : jade_interp)) + "</span></button></div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div" + (jade.attr("title", t("alert tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+buf.push("<div" + (jade.cls(['label-row','interval-row',readOnly ? 'readonly' : ''], [null,null,true])) + "> <div class=\"item-row date-row\"><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-right\"></span></div><span class=\"caption\">" + (jade.escape(null == (jade_interp = t("from")) ? "" : jade_interp)) + "</span><input tabindex=\"2\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder from date"), true, false)) + (jade.attr("value", start.format(dFormat), true, false)) + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-start-date input-date\"/><input tabindex=\"3\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder from time"), true, false)) + (jade.attr("value", start.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-start input-time\"/></label><label class=\"timed time-row\"><div class=\"icon\"><span class=\"fa fa-arrow-left\"></span></div><span class=\"input-end-caption caption\">" + (jade.escape(null == (jade_interp = t("to")) ? "" : jade_interp)) + "</span><input tabindex=\"4\" type=\"text\" size=\"10\"" + (jade.attr("placeholder", t("placeholder to date"), true, false)) + (jade.attr("value", end.format(dFormat), true, false)) + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-end-date input-date\"/><input tabindex=\"5\" type=\"time\" size=\"5\"" + (jade.attr("placeholder", t("placeholder to time"), true, false)) + (jade.attr("value", end.format(tFormat), true, false)) + (jade.attr("aria-hidden", "" + (allDay) + "", true, false)) + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-end-time input-time\"/></label></div>");
+if ( !readOnly)
+{
+buf.push("<div class=\"item-row all-day-row\"><label class=\"all-day\"><input tabindex=\"6\" type=\"checkbox\" value=\"checked\"" + (jade.attr("checked", allDay, true, false)) + " class=\"input-allday\"/><span>" + (jade.escape(null == (jade_interp = t('all day')) ? "" : jade_interp)) + "</span></label></div>");
+}
+buf.push("</div>");
+if ( !readOnly || place)
+{
+buf.push("<div class=\"label label-row\"><div" + (jade.attr("title", t("placeholder place"), true, false)) + " class=\"icon\"><span class=\"fa fa-map-marker\"></span></div><input tabindex=\"7\" type=\"text\"" + (jade.attr("value", place, true, false)) + (jade.attr("placeholder", t("placeholder place"), true, false)) + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-place input-full-block\"/></div>");
+}
+buf.push("<div class=\"label label-row input-people\"><div" + (jade.attr("title", t("add guest button"), true, false)) + " class=\"icon\"><span class=\"fa fa-users\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"8\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = guestsButtonText) ? "" : jade_interp)) + "</button></div>");
+if ( !readOnly || details)
+{
+buf.push("<div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showDetailsByDefault) + "", true, false)) + " class=\"label label-row input-details\"><div" + (jade.attr("title", t("placeholder description"), true, false)) + " class=\"icon\"><span class=\"fa fa-align-left\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"9\" class=\"button-full-block\"><span class=\"overflow-wrapper\">" + (jade.escape(null == (jade_interp = detailsButtonText) ? "" : jade_interp)) + "</span></button></div>");
+}
+if ( !readOnly || alarms.length)
+{
+buf.push("<div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showAlertsByDefault) + "", true, false)) + " class=\"label label-row input-alert\"><div" + (jade.attr("title", t("alert tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-bell\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
 if ( !alerts || alerts.length === 0)
 {
 buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('no alert button')) ? "" : jade_interp)) + "</button>");
 }
 else
 {
-buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t('alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
+buf.push("<button tabindex=\"10\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = t( 'alert label', {smart_count: alerts.length})) ? "" : jade_interp)) + "</button>");
 }
-buf.push("</div><div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div><div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div><button tabindex=\"11\" class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div><div class=\"popover-footer\"><a role=\"button\" tabindex=\"11\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"13\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"13\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"14\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");}.call(this,"advancedUrl" in locals_for_with?locals_for_with.advancedUrl:typeof advancedUrl!=="undefined"?advancedUrl:undefined,"alerts" in locals_for_with?locals_for_with.alerts:typeof alerts!=="undefined"?alerts:undefined,"allDay" in locals_for_with?locals_for_with.allDay:typeof allDay!=="undefined"?allDay:undefined,"buttonText" in locals_for_with?locals_for_with.buttonText:typeof buttonText!=="undefined"?buttonText:undefined,"dFormat" in locals_for_with?locals_for_with.dFormat:typeof dFormat!=="undefined"?dFormat:undefined,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined,"detailsButtonText" in locals_for_with?locals_for_with.detailsButtonText:typeof detailsButtonText!=="undefined"?detailsButtonText:undefined,"end" in locals_for_with?locals_for_with.end:typeof end!=="undefined"?end:undefined,"guestsButtonText" in locals_for_with?locals_for_with.guestsButtonText:typeof guestsButtonText!=="undefined"?guestsButtonText:undefined,"place" in locals_for_with?locals_for_with.place:typeof place!=="undefined"?place:undefined,"popoverClassName" in locals_for_with?locals_for_with.popoverClassName:typeof popoverClassName!=="undefined"?popoverClassName:undefined,"recurrenceButtonText" in locals_for_with?locals_for_with.recurrenceButtonText:typeof recurrenceButtonText!=="undefined"?recurrenceButtonText:undefined,"rrule" in locals_for_with?locals_for_with.rrule:typeof rrule!=="undefined"?rrule:undefined,"sameDay" in locals_for_with?locals_for_with.sameDay:typeof sameDay!=="undefined"?sameDay:undefined,"start" in locals_for_with?locals_for_with.start:typeof start!=="undefined"?start:undefined,"tFormat" in locals_for_with?locals_for_with.tFormat:typeof tFormat!=="undefined"?tFormat:undefined));;return buf.join("");
+buf.push("</div>");
+}
+if ( !readOnly || rrule)
+{
+buf.push("<div data-optional=\"true\"" + (jade.attr("aria-hidden", "" + (!showRepeatByDefault) + "", true, false)) + " class=\"label label-row input-repeat\"><div" + (jade.attr("title", t("repeat tooltip"), true, false)) + " class=\"icon\"><span class=\"fa fa-repeat\"></span></div>");
+if ( !readOnly)
+{
+buf.push("<div class=\"icon right\"><span class=\"fa fa-angle-right\"></span></div>");
+}
+buf.push("<button tabindex=\"11\"" + (jade.attr("disabled", readOnly, true, false)) + (jade.attr("aria-disabled", readOnly, true, false)) + " class=\"button-full-block\">" + (jade.escape(null == (jade_interp = recurrenceButtonText) ? "" : jade_interp)) + "</button></div>");
+}
+if ( !readOnly)
+{
+buf.push("<div class=\"popover-footer\"><a role=\"button\" tabindex=\"11\"" + (jade.attr("href", '#' + advancedUrl, true, false)) + " data-tabindex-next=\"13\" class=\"advanced-link\"><div class=\"icon\"><span class=\"fa fa-caret-down\"></span></div>" + (jade.escape(null == (jade_interp = t('more details button')) ? "" : jade_interp)) + "</a><div class=\"buttons\"><a role=\"button\" tabindex=\"13\" class=\"btn btn-link cancel\">" + (jade.escape(null == (jade_interp = t('cancel')) ? "" : jade_interp)) + "</a><a role=\"button\" tabindex=\"14\" class=\"btn add\">" + (jade.escape(null == (jade_interp = buttonText) ? "" : jade_interp)) + "</a></div></div>");
+}}.call(this,"advancedUrl" in locals_for_with?locals_for_with.advancedUrl:typeof advancedUrl!=="undefined"?advancedUrl:undefined,"alarms" in locals_for_with?locals_for_with.alarms:typeof alarms!=="undefined"?alarms:undefined,"alerts" in locals_for_with?locals_for_with.alerts:typeof alerts!=="undefined"?alerts:undefined,"allDay" in locals_for_with?locals_for_with.allDay:typeof allDay!=="undefined"?allDay:undefined,"buttonText" in locals_for_with?locals_for_with.buttonText:typeof buttonText!=="undefined"?buttonText:undefined,"dFormat" in locals_for_with?locals_for_with.dFormat:typeof dFormat!=="undefined"?dFormat:undefined,"details" in locals_for_with?locals_for_with.details:typeof details!=="undefined"?details:undefined,"detailsButtonText" in locals_for_with?locals_for_with.detailsButtonText:typeof detailsButtonText!=="undefined"?detailsButtonText:undefined,"end" in locals_for_with?locals_for_with.end:typeof end!=="undefined"?end:undefined,"guestsButtonText" in locals_for_with?locals_for_with.guestsButtonText:typeof guestsButtonText!=="undefined"?guestsButtonText:undefined,"place" in locals_for_with?locals_for_with.place:typeof place!=="undefined"?place:undefined,"popoverClassName" in locals_for_with?locals_for_with.popoverClassName:typeof popoverClassName!=="undefined"?popoverClassName:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"recurrenceButtonText" in locals_for_with?locals_for_with.recurrenceButtonText:typeof recurrenceButtonText!=="undefined"?recurrenceButtonText:undefined,"rrule" in locals_for_with?locals_for_with.rrule:typeof rrule!=="undefined"?rrule:undefined,"sameDay" in locals_for_with?locals_for_with.sameDay:typeof sameDay!=="undefined"?sameDay:undefined,"start" in locals_for_with?locals_for_with.start:typeof start!=="undefined"?start:undefined,"tFormat" in locals_for_with?locals_for_with.tFormat:typeof tFormat!=="undefined"?tFormat:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10192,8 +10958,13 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (calendar, description) {
-buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("placeholder event title"), true, false)) + " data-tabindex-prev=\"8\" class=\"input-desc\"/></div><div class=\"controls\"><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/><button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button></div>");}.call(this,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined));;return buf.join("");
+;var locals_for_with = (locals || {});(function (calendar, description, readOnly) {
+buf.push("<div class=\"calendar\"><input" + (jade.attr("value", calendar, true, false)) + " class=\"calendarcombo\"/></div><div class=\"label\"><input tabindex=\"1\" type=\"text\"" + (jade.attr("value", description, true, false)) + (jade.attr("placeholder", t("placeholder event title"), true, false)) + " data-tabindex-prev=\"8\"" + (jade.attr("readonly", readOnly, true, false)) + (jade.attr("aria-readonly", readOnly, true, false)) + " class=\"input-desc event-description\"/></div><div class=\"controls\"><button" + (jade.attr("title", t('delete'), true, false)) + " role=\"button\" class=\"remove fa fa-trash\"></button><img src=\"img/spinner.svg\" class=\"remove-spinner\"/>");
+if ( !readOnly)
+{
+buf.push("<button" + (jade.attr("title", t('duplicate'), true, false)) + " role=\"button\" class=\"duplicate fa fa-copy\"></button>");
+}
+buf.push("</div>");}.call(this,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10402,6 +11173,7 @@ module.exports = ComboBox = (function(superClass) {
     this.small = options.small;
     this.autocompleteWidget = this.$el.data('ui-autocomplete');
     this.autocompleteWidget._renderItem = this.renderItem;
+    this.readOnly = options.readOnly;
     isInput = this.$el[0].nodeName.toLowerCase() === 'input';
     method = this.$el[isInput ? "val" : "text"];
     this.on('edition-complete', this.onEditionComplete);
@@ -10428,6 +11200,9 @@ module.exports = ComboBox = (function(superClass) {
   };
 
   ComboBox.prototype.openMenu = function() {
+    if (this.readOnly) {
+      return;
+    }
     this.menuOpen = true;
     this.$el.addClass('expanded');
     this.$el.focus().val(this.value()).autocomplete('search', '');
@@ -10528,7 +11303,7 @@ module.exports = ComboBox = (function(superClass) {
 
   ComboBox.prototype.makeBadge = function(color) {
     var badge;
-    badge = $('<span class="badge combobox-badge">').html('&nbsp;').css('backgroundColor', color).css('cursor', 'pointer').click(this.openMenu);
+    badge = $('<span class="badge combobox-badge">').html('&nbsp;').css('backgroundColor', color).toggleClass('readonly', this.readOnly).click(this.openMenu);
     if (this.small) {
       badge.attr('title', t('change calendar'));
     }

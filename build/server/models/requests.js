@@ -6,11 +6,13 @@ cozydb = require('cozydb');
 tagsView = {
   map: function(doc) {
     var ref;
-    return (ref = doc.tags) != null ? typeof ref.forEach === "function" ? ref.forEach(function(tag, index) {
-      var type;
-      type = index === 0 ? 'calendar' : 'tag';
-      return emit([type, tag], true);
-    }) : void 0 : void 0;
+    if (!doc.shareID) {
+      return (ref = doc.tags) != null ? typeof ref.forEach === "function" ? ref.forEach(function(tag, index) {
+        var type;
+        type = index === 0 ? 'calendar' : 'tag';
+        return emit([type, tag], true);
+      }) : void 0 : void 0;
+    }
   },
   reduce: "_count"
 };
@@ -44,5 +46,16 @@ module.exports = {
   },
   webdavaccount: {
     all: cozydb.defaultRequests.all
+  },
+  sharing: {
+    all: cozydb.defaultRequests.all,
+    pendingBySharedDocType: function(doc) {
+      if (!doc.accepted && !doc.targets && doc.rules) {
+        return doc.rules.forEach(function(rule) {
+          return emit(rule.docType, doc);
+        });
+      }
+    },
+    byShareID: cozydb.defaultRequests.by('shareID')
   }
 };
