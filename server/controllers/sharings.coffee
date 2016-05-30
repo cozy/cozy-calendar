@@ -6,14 +6,18 @@ module.exports.all = (req, res) ->
         Sharing.byShareID data.shareID, (err, sharings) ->
             if err
                 res.status(500).send error: "Server error occured"
+            if not sharings?.length
+                res.status(404).send error: "Sharing not found"
             else
                 res.send sharings[0]
     else
         Sharing.all (err, sharings)->
             if err
                 res.status(500).send error: err
+            if not sharings?.length
+                res.status(404).send error: "Sharing not found"
             else
-                res.send sharings
+                res.send sharings[0]
 
 
 module.exports.fetch = (req, res, next, id) ->

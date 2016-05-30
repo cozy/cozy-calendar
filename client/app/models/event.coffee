@@ -152,7 +152,7 @@ module.exports = class Event extends ScheduleItem
             #   The user is the recipient : a sharing object having the same
             #       shareID property than the event exists.
             error: (sharing, response, options) =>
-                sharingNotFound = response.status == 404
+                sharingNotFound = response and response.status == 404
 
                 if sharingNotFound
                     @fetchSharingByShareId (err, sharing) =>
