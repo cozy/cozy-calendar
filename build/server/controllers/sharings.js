@@ -9,8 +9,13 @@ module.exports.all = function(req, res) {
   if (data.shareID) {
     return Sharing.byShareID(data.shareID, function(err, sharings) {
       if (err) {
-        return res.status(500).send({
+        res.status(500).send({
           error: "Server error occured"
+        });
+      }
+      if (!(sharings != null ? sharings.length : void 0)) {
+        return res.status(404).send({
+          error: "Sharing not found"
         });
       } else {
         return res.send(sharings[0]);
@@ -19,11 +24,16 @@ module.exports.all = function(req, res) {
   } else {
     return Sharing.all(function(err, sharings) {
       if (err) {
-        return res.status(500).send({
+        res.status(500).send({
           error: err
         });
+      }
+      if (!(sharings != null ? sharings.length : void 0)) {
+        return res.status(404).send({
+          error: "Sharing not found"
+        });
       } else {
-        return res.send(sharings);
+        return res.send(sharings[0]);
       }
     });
   }

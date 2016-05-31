@@ -6236,7 +6236,7 @@ module.exports = Event = (function(superClass) {
       error: (function(_this) {
         return function(sharing, response, options) {
           var sharingNotFound;
-          sharingNotFound = response.status === 404;
+          sharingNotFound = response && response.status === 404;
           if (sharingNotFound) {
             return _this.fetchSharingByShareId(function(err, sharing) {
               if (err) {
@@ -9742,10 +9742,15 @@ module.exports = MainPopoverScreen = (function(superClass) {
         return function() {
           return _this.model.save(_this.formModel.attributes, {
             wait: true,
-            success: function(model) {
-              return app.events.add(model, {
+            success: function(model, response) {
+              var isShared;
+              app.events.add(model, {
                 sort: false
               });
+              isShared = model.get('shareID') != null;
+              if (isShared) {
+                return _this.onSharedEventSync(model);
+              }
             },
             error: function() {
               return alert('server error occured');
@@ -9772,6 +9777,18 @@ module.exports = MainPopoverScreen = (function(superClass) {
         return saveEvent();
       }
     }
+  };
+
+  MainPopoverScreen.prototype.onSharedEventSync = function(event) {
+    return event.fetchSharing((function(_this) {
+      return function(err, sharing) {
+        err = err != null ? err : err = sharing.error;
+        if (err) {
+          console.error(err);
+          return alert('Sharing with Cozy users failed');
+        }
+      };
+    })(this));
   };
 
   MainPopoverScreen.prototype.handleError = function(error) {
