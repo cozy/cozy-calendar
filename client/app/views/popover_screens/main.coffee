@@ -337,8 +337,12 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             saveEvent = () =>
                 @model.save @formModel.attributes,
                 wait: true
-                success: (model) ->
+                success: (model, response) =>
                     app.events.add model, sort: false
+
+                    isShared = model.get('shareID')?
+                    @onSharedEventSync(model) if isShared
+
                 error: ->
                     # TODO better error handling
                     alert 'server error occured'
@@ -357,6 +361,15 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                         alert 'server error occured'
             else
                 saveEvent()
+
+    # Fetch the sharing object to handle any error
+    onSharedEventSync: (event) ->
+        event.fetchSharing (err, sharing) =>
+            err = err ?= sharing.error
+            if err
+                console.error err
+                alert 'Sharing with Cozy users failed'
+
 
     handleError: (error) ->
         switch error.field
