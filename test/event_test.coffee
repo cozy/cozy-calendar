@@ -1,6 +1,6 @@
+### eslint-env node,mocha ###
+
 should = require 'should'
-async = require 'async'
-moment = require 'moment-timezone'
 Client = require('request-json').JsonClient
 
 client = new Client "http://localhost:8888/"
@@ -74,7 +74,7 @@ describe "Events management", ->
 
         it "should have only one item in the database", (done) ->
 
-            helpers.getAllEvents (err, events) =>
+            helpers.getAllEvents (err, events) ->
 
                 should.not.exist err
                 should.exist events
@@ -83,7 +83,7 @@ describe "Events management", ->
                 done()
 
         it "should do nothing in import mode when an event with " + \
-           "same start data already exists", (done) ->
+                                    "same start data already exists", (done) ->
             @event =
                 description: 'Title'
                 start: "2013-04-15T15:30:00.000Z"
@@ -91,9 +91,9 @@ describe "Events management", ->
                 place: "place"
                 import: true
 
-            client.post "events/", @event, (error, response, body) =>
+            client.post "events/", @event, (error) ->
 
-                helpers.getAllEvents (err, events) =>
+                helpers.getAllEvents (err, events) ->
 
                     should.not.exist err
                     should.exist events
@@ -102,16 +102,16 @@ describe "Events management", ->
                     done()
 
         it "should create an event when not in import mode and when an " + \
-           "event with same start data already exists", (done) ->
+                        "event with same start data already exists", (done) ->
             @event =
                 description: 'Title'
                 start: "2013-04-15T15:30:00.000Z"
                 end: "2013-04-15T16:30:00.000Z"
                 place: "place"
 
-            client.post "events/", @event, (error, response, body) =>
+            client.post "events/", @event, (error) ->
 
-                helpers.getAllEvents (err, events) =>
+                helpers.getAllEvents (err, events) ->
 
                     should.not.exist err
                     should.exist events
@@ -202,13 +202,15 @@ describe "Events management", ->
                 body.should.have.property 'place'
 
                 body.should.have.property 'attendees'
-                body.attendees[0].should.have.property 'key', @key
-                body.attendees[0].should.have.property 'status', 'INVITATION-NOT-SENT'
-                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                attendee = body.attendees[0]
+                attendee.should.have.property 'key', @key
+                attendee.should.have.property 'status', 'INVITATION-NOT-SENT'
+                attendee.should.have.property 'email', 'test@cozycloud.cc'
                 done()
 
         it "Then guess accepts it", (done) ->
-            client.get "public/events/#{@event.id}?key=#{@key}&status=ACCEPTED", (err, resp, body) =>
+            urlpath = "public/events/#{@event.id}?key=#{@key}&status=ACCEPTED"
+            client.get urlpath, (err) ->
                 err.should.not.exist
                 done()
 
@@ -216,13 +218,15 @@ describe "Events management", ->
             client.get "events/#{@event.id}", (err, resp, body) =>
 
                 body.should.have.property 'attendees'
-                body.attendees[0].should.have.property 'key', @key
-                body.attendees[0].should.have.property 'status', 'ACCEPTED'
-                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                attendee = body.attendees[0]
+                attendee.should.have.property 'key', @key
+                attendee.should.have.property 'status', 'ACCEPTED'
+                attendee.should.have.property 'email', 'test@cozycloud.cc'
                 done()
 
         it "Then guess declines it", (done) ->
-            client.get "public/events/#{@event.id}?key=#{@key}&status=DECLINED", (err, resp, body) =>
+            urlpath = "public/events/#{@event.id}?key=#{@key}&status=DECLINED"
+            client.get urlpath, (err) ->
                 err.should.not.exist
                 done()
 
@@ -230,9 +234,10 @@ describe "Events management", ->
             client.get "events/#{@event.id}", (err, resp, body) =>
 
                 body.should.have.property 'attendees'
-                body.attendees[0].should.have.property 'key', @key
-                body.attendees[0].should.have.property 'status', 'DECLINED'
-                body.attendees[0].should.have.property 'email', 'test@cozycloud.cc'
+                attendee = body.attendees[0]
+                attendee.should.have.property 'key', @key
+                attendee.should.have.property 'status', 'DECLINED'
+                attendee.should.have.property 'email', 'test@cozycloud.cc'
                 done()
 
 
@@ -252,7 +257,7 @@ describe "Events management", ->
                 done()
 
         it "should return the deleted event", (done) ->
-            client.del "events/#{@event.id}", (err, resp, body) =>
+            client.del "events/#{@event.id}", (err, resp) ->
                 should.not.exist err
                 should.exist resp
                 resp.should.have.property 'statusCode', 200
@@ -282,7 +287,7 @@ describe "Events management", ->
                     end: "2013-04-15T16:30:00.000Z"
                     place: "place"
 
-            client.post "events/bulk", @events, (error, response, body) =>
+            client.post "events/bulk", @events, (error, response, body) ->
 
                 should.not.exist error
                 should.exist response
@@ -328,13 +333,12 @@ describe "Events management", ->
                 place: "place"
             ]
 
-            client.post "events/bulk", events, (error, response, body) =>
-                done()
+            client.post "events/bulk", events, (error) ->
+                done(error)
 
         it "should return the event json objects", (done) ->
-            client.get "events/2013/04", (err, res, events) =>
+            client.get "events/2013/04", (err, res, events) ->
                 events.length.should.equal 2
                 events[0].description.should.equal 'Title 1'
                 events[1].description.should.equal 'Title 3'
                 done()
-

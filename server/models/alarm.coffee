@@ -78,7 +78,8 @@ Alarm::migrateDoctype = (callback) ->
 Alarm.migrateAll = (callback) ->
     Alarm.all {}, (err, alarms) ->
         if err
-            console.log err
+            log.error "can get alarm/all"
+            log.raw err
             callback()
         else
             async.eachLimit alarms, 10, (alarm, done) ->

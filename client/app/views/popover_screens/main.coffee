@@ -341,10 +341,10 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             calendar = @formModel.getCalendar()
             @model.setCalendar calendar
 
-            saveEvent = () =>
+            saveEvent = =>
                 @model.save @formModel.attributes,
                 wait: true
-                success: (model, response) =>
+                success: (model) =>
                     app.events.add model, sort: false
 
                     isShared = model.get('shareID')?
@@ -371,7 +371,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
     # Fetch the sharing object to handle any error
     onSharedEventSync: (event) ->
-        event.fetchSharing (err, sharing) =>
+        event.fetchSharing (err, sharing) ->
             err = err ?= sharing.error
             if err
                 console.error err
@@ -475,4 +475,3 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
-

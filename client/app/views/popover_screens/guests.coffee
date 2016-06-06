@@ -17,9 +17,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
     initialize: (options) ->
         super options
-
-        @listenTo @formModel, 'change:shareID', () =>
-            @afterRender()
+        @listenTo @formModel, 'change:shareID', => @afterRender()
 
     getRenderData: ->
 
@@ -49,16 +47,16 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # Create a list item for each alert.
         if attendees
             for guest, index in attendees
-                options = _.extend guest, {index}
-                row = @templateGuestRow _.extend guest, readOnly: @context.readOnly
+                options = _.extend guest, {index, readOnly: @context.readOnly}
+                row = @templateGuestRow _.extend guest, options
                 $guestElement.append row
 
         if not @context.readOnly
 
             @configureGuestTypeahead()
 
-            # Focus the form field. Must be done after the typeahead configuration,
-            # otherwise bootstrap bugs somehow.
+            # Focus the form field. Must be done after the typeahead
+            # configuration, otherwise bootstrap bugs somehow.
             @$('input[name="guest-name"]').focus()
 
 
@@ -203,4 +201,3 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         key = event.keyCode
         if key is 13 # enter
             @onNewGuest()
-

@@ -25,7 +25,7 @@ module.exports = class PendingEventSharingsButtonView extends CollectionView
         @options = options
 
 
-    togglePopup: (display) ->
+    togglePopup: ->
         @popup and @popup.toggle()
 
 
@@ -53,7 +53,7 @@ module.exports = class PendingEventSharingsButtonView extends CollectionView
     removeItem: (model) ->
         super model
 
-        if @collection.length == 0
+        if @collection.length is 0
             @popup.hide()
             @$el.hide()
 

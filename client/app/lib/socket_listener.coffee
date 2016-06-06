@@ -28,8 +28,8 @@ class SocketListener extends CozySocketListener
         currentUserIsTheRecipient = not targets.length
         rules = sharing.get 'rules'
 
-        if currentUserIsTheRecipient and rules and rules.find( (rule) ->
-                return rule.docType.toLowerCase() is 'event' )
+        eventRule = (rule) -> rule.docType.toLowerCase() is 'event'
+        if currentUserIsTheRecipient and rules and rules.find(eventRule)
             @onRemoteCreateOrUpdate sharing
 
 

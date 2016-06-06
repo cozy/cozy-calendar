@@ -121,7 +121,7 @@ module.exports = class CalendarView extends BaseView
             @clearViewComponents =>
                 @cal.fullCalendar 'changeView', 'month'
         @calHeader.on 'list', =>
-            @clearViewComponents =>
+            @clearViewComponents ->
                 window.app.events.sort()
                 app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
@@ -190,9 +190,9 @@ module.exports = class CalendarView extends BaseView
         options.parentView = @
 
         showNewPopover = =>
-            # @TODO Event creation is a typical core feature of the calendar app,
-            # this part should be moved directly into the app module, and managed
-            # with event handlers
+            # @TODO Event creation is a typical core feature of the calendar
+            # app,  this part should be moved directly into the app module,
+            # and managed with event handlers
             model = options.model ?= new Event
                 start: helpers.momentToString options.start
                 end: helpers.momentToString options.end
@@ -209,7 +209,7 @@ module.exports = class CalendarView extends BaseView
         if @popover
             # click on same case
             @preventUnselecting()
-            @popover.close =>
+            @popover.close ->
                 showNewPopover()
 
         else
@@ -234,10 +234,7 @@ module.exports = class CalendarView extends BaseView
         else
             callback() if callback and typeof callback is 'function'
 
-
-    getUrlHash: =>
-        return 'calendar'
-
+    getUrlHash: -> return 'calendar'
 
     onSelect: (startDate, endDate, jsEvent, view) =>
         # In month view, default to 10:00 - 11:00 instead of fullday event.

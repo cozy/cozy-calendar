@@ -178,7 +178,8 @@ Event::patchTag = (callback) ->
 Event.migrateAll = (callback) ->
     Event.all {}, (err, events) ->
         if err?
-            console.log err
+            log.error "can get event/all"
+            log.raw err
             callback()
         else
             async.eachLimit events, 10, (event, done) ->

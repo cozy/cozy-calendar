@@ -1,3 +1,5 @@
+###global emit ###
+
 cozydb = require 'cozydb'
 
 tagsView =
@@ -37,7 +39,7 @@ module.exports =
     sharing:
         all       : cozydb.defaultRequests.all
         pendingBySharedDocType: (doc) ->
-            if not doc.accepted && not doc.targets && doc.rules
+            if not doc.accepted and not doc.targets and doc.rules
                 doc.rules.forEach (rule) ->
                     emit(rule.docType, doc)
         byShareID: cozydb.defaultRequests.by 'shareID'
