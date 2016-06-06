@@ -18,6 +18,7 @@
     "archiver": "1.0.0",
     "async": "1.5.2",
     "cozy-ical": "1.1.19",
+    "cozy-localization-manager": "0.1.2",
     "cozy-realtime-adapter": "1.0.2",
     "cozy-url-sdk": "1.0.2",
     "cozydb": "0.1.12",
