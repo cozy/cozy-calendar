@@ -5,7 +5,7 @@ log = require('printit')
     prefix: 'event:model'
 Tag = require './tag'
 
-localization = require '../libs/localization_manager'
+localization = require 'cozy-localization-manager'
 User = require './user'
 
 module.exports = Event = cozydb.getModel 'Event',
@@ -233,4 +233,3 @@ Event.load = (start, end, callback) ->
     endkey = end.format 'YYYY-MM-DDT00:00:00.000\Z'
 
     Event.request 'byDate', {startkey, endkey}, callback
-

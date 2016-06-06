@@ -6,7 +6,7 @@ multiparty = require 'multiparty'
 fs = require 'fs'
 archiver = require 'archiver'
 async = require 'async'
-localization = require '../libs/localization_manager'
+localization = require 'cozy-localization_manager'
 log = require('printit')
     date: true
     prefix: 'calendar:ical'

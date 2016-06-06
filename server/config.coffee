@@ -15,7 +15,7 @@ publicStatic = (req, res, next) ->
 
     staticMiddleware req, res, (err) -> next err
 
-viewsDir = path.resolve __dirname, '..', 'client'
+viewsDir = path.resolve __dirname, 'views'
 useBuildView = fs.existsSync path.resolve viewsDir, 'index.js'
 
 module.exports =
@@ -49,4 +49,5 @@ module.exports =
 
     plugins: [
         'cozydb'
+        'cozy-localization-manager'
     ]
