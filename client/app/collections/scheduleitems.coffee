@@ -22,16 +22,12 @@ module.exports = class ScheduleItemsCollection extends Backbone.Collection
             eventsInRange = []
 
             @visibleItems(calendars)?.each (item) ->
-                itemStart = item.getStartDateObject()
-                itemEnd = item.getEndDateObject()
-                duration = itemEnd - itemStart
-
                 if item.isRecurrent()
                     try
                         eventsInRange = eventsInRange.concat(
                             item.getRecurrentFCEventBetween start, end)
-                    catch e
-                        console.error e
+                    catch error
+                        console.error error
                         # sometime the RRule is badly formated, so we try to
                         # at least display the first item
                         if item.isInRange start, end

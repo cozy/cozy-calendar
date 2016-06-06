@@ -40,7 +40,7 @@ module.exports = class ImportView extends BaseView
 
     # When a file is selected by the user, the import preview is generated
     # by the backend and the result is displayed.
-    onFileChanged: (event) ->
+    onFileChanged: ->
         file = @uploader[0].files[0]
         return unless file
         form = new FormData()
@@ -127,7 +127,8 @@ module.exports = class ImportView extends BaseView
         @confirmButton.spin 'tiny'
 
         # Save every imported events to the database.
-        async.eachSeries @eventLists, @importEvents, (err) =>
+        async.eachSeries @eventLists, @importEvents, (error) =>
+            console.error error
 
             # When import is finished, the import form is reset and the
             # calendar view is displayed.

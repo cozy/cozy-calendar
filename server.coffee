@@ -7,7 +7,7 @@ start = (port, callback) ->
         host: process.env.HOST or "0.0.0.0"
         root: __dirname
     , (err, app, server) ->
-        cozydb = require 'cozydb'
+        require 'cozydb'
         User = require './server/models/user'
         Realtimer = require 'cozy-realtime-adapter'
         localization = require 'cozy-localization-manager'
@@ -26,8 +26,8 @@ start = (port, callback) ->
             Alarm = require './server/models/alarm'
             Event.migrateAll -> Alarm.migrateAll ->
 
-                Event.initializeData (err2, event) ->
-                    callback err, app, server
+                Event.initializeData (err2) ->
+                    callback err or err2, app, server
 
 
 if not module.parent

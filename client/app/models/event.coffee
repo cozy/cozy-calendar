@@ -71,7 +71,7 @@ module.exports = class Event extends ScheduleItem
 
         @set @endDateField, @_formatMoment edo
 
-    validate: (attrs, options) ->
+    validate: (attrs) ->
 
         errors = []
 
@@ -113,13 +113,13 @@ module.exports = class Event extends ScheduleItem
     tryGetShareID: (numtries, delay, callback) ->
 
         @fetch
-            success: (model, response) =>
+            success: (model) =>
                 shareID = model.get 'shareID'
                 if shareID
                     callback null, shareID
                     return
 
-                triesLeft = --numtries;
+                triesLeft = --numtries
 
                 if numtries
                     setTimeout =>
@@ -163,7 +163,7 @@ module.exports = class Event extends ScheduleItem
             # And then deal with the sharing
             # The goal is to detect any error occurring asynchronously
             if @isShared() and not @hasSharing()
-                @tryGetShareID 5, 2000, (err, shareID) =>
+                @tryGetShareID 5, 2000, (err) =>
                     if err
                         throw
                             name: 'EventSharingError'
@@ -191,7 +191,7 @@ module.exports = class Event extends ScheduleItem
                 if err
                     callback err, false
                 else
-                    isEditable = @get('shareID') == sharing.get('id')
+                    isEditable = @get('shareID') is sharing.get('id')
                     callback null, isEditable
         else
             callback null, true
@@ -206,7 +206,7 @@ module.exports = class Event extends ScheduleItem
             callback null, @sharing
             return
 
-        successHandler = (sharing, response, options) =>
+        successHandler = (sharing) =>
             @sharing = sharing
             @listenTo @sharing, 'change', @onSharingChange
             callback null, sharing
@@ -224,11 +224,11 @@ module.exports = class Event extends ScheduleItem
             #       shareID as id exists.
             #   The user is the recipient : a sharing object having the same
             #       shareID property than the event exists.
-            error: (sharing, response, options) =>
-                sharingNotFound = response and response.status == 404
+            error: (sharing, response) =>
+                sharingNotFound = response and response.status is 404
 
                 if sharingNotFound
-                    @fetchSharingByShareId (err, sharing) =>
+                    @fetchSharingByShareId (err, sharing) ->
                         if err
                             errorHandler err
                         else
@@ -249,10 +249,9 @@ module.exports = class Event extends ScheduleItem
         sharingToFetch = new Sharing()
         sharingToFetch.fetch
             data: shareID: @get 'shareID'
-            success: (sharing, response, options) =>
-                callback null, sharing
+            success: (sharing) -> callback null, sharing
 
-            error: (sharing, resopnse, options) ->
+            error: (sharing, response) ->
                 callback JSON.parse(response.responseText), null
 
 
@@ -312,7 +311,6 @@ module.exports = class Event extends ScheduleItem
 
         return @get 'attendees'
 
-
     # Prepare data before sync.
     prepare: ->
         # Remove trailing slash from any cozy url in attendees
@@ -327,4 +325,3 @@ module.exports = class Event extends ScheduleItem
     sync: (method, model, options) ->
         @prepare()
         super method, model, options
-

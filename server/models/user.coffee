@@ -1,11 +1,17 @@
 cozydb = require 'cozydb'
+log = require('printit')
+    prefix: 'user:model'
+
 
 module.exports = User = {}
 
 User.updateUser = (callback) ->
     cozydb.api.getCozyUser (err, user) ->
         if err or not user
-            console.log err if err
+            if err
+                log.error "can get alarm/all"
+                log.raw err
+
             User.timezone = 'Europe/Paris'
             User.email = ''
         else

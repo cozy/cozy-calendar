@@ -54,7 +54,8 @@ module.exports =
         @polyglot = new Polyglot()
         try
             locales = require 'locales/'+ @locale
-        catch e
+        catch error
+            console.error error
             locales = require 'locales/en'
 
         @polyglot.extend locales

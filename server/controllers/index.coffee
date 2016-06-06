@@ -51,7 +51,8 @@ module.exports.index = (req, res, next) ->
 
 
         [
-            contacts, tags, calendars, events, pendingEventSharings, instance, webDavAccount, timezone
+            contacts, tags, calendars, events, pendingEventSharings,
+            instance, webDavAccount, timezone
         ] = results
 
         locale = instance?.locale or 'en'
@@ -82,4 +83,3 @@ module.exports.logClient = (req, res) ->
     log.error req.body.data
     log.error req.body.data.error?.stack
     res.send 'ok'
-

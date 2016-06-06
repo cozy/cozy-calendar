@@ -1,6 +1,4 @@
 BaseView  = require 'lib/base_view'
-TagCollection = require 'collections/tags'
-Tag = require 'models/tag'
 
 module.exports = class ComboBox extends BaseView
 
@@ -24,9 +22,6 @@ module.exports = class ComboBox extends BaseView
         @autocompleteWidget._renderItem = @renderItem
 
         @readOnly = options.readOnly
-
-        isInput = @$el[0].nodeName.toLowerCase() is 'input'
-        method = @$el[if isInput then "val" else "text"]
 
         @on 'edition-complete', @onEditionComplete
 
@@ -160,4 +155,4 @@ module.exports = class ComboBox extends BaseView
 
 
     widget: ->
-         @$el.autocomplete 'widget'
+        @$el.autocomplete 'widget'

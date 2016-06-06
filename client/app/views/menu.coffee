@@ -86,7 +86,7 @@ module.exports = class MenuView extends ViewCollection
                 setTimeout @hideLoading.bind(@), 100
 
 
-    activate: (href) ->
+    activate: ->
         @$('.active').removeClass 'active'
 
 
@@ -99,7 +99,6 @@ module.exports = class MenuView extends ViewCollection
         if confirm(message)
             $('.calendar-actions:checked').each ->
                 calendarName = @value
-                tag = app.tags.getByName calendarName
                 app.calendars.remove calendarName
 
         # remove additional menu if only 1 calendar is left
@@ -123,4 +122,3 @@ module.exports = class MenuView extends ViewCollection
     hideLoading: ->
         @$('.main-spinner').hide()
         @$('.calendar-add').show()
-

@@ -28,8 +28,8 @@ class SocketListener extends CozySocketListener
         currentUserIsTheRecipient = not targets.length
         rules = sharing.get 'rules'
 
-        if currentUserIsTheRecipient and rules and rules.find( (rule) ->
-                return rule.docType.toLowerCase() is 'event' )
+        eventRule = (rule) -> rule.docType.toLowerCase() is 'event'
+        if currentUserIsTheRecipient and rules and rules.find(eventRule)
             @onRemoteCreateOrUpdate sharing
 
 
@@ -63,7 +63,8 @@ class SocketListener extends CozySocketListener
                 @queue.push new @models[doctype](id: id)
 
             when 'delete'
-                for collection in @collections when model = collection.get id
+                for collection in @collections when collection.get id
+                    model = collection.get id
                     model.trigger 'destroy', model, model.collection, {}
 
     # Todo : should not we be more specific at what we are listening and where

@@ -17,19 +17,20 @@ module.exports = Contact = cozydb.getModel 'Contact',
     ref           : String
     _attachments  : Object
 
+isCozyDataPoint = (dp) ->
+    ((dp.name is 'other') and (dp.type.toLowerCase() is 'cozy')) or
+    ((dp.name is 'url') and (dp.mediatype?.search('cozy') isnt -1))
 
 Contact::asNameAndEmails = ->
     name = @fn or @n?.split(';')[0..1].join ' '
     emails = @datapoints?.filter (dp) -> dp.name is 'email'
 
-    # XXX What if several Cozy instances are linked to one user?
-    cozy = @datapoints?.filter (dp) -> ((dp.name is 'other') and
-        (dp.type.toLowerCase() is 'cozy')) or ((dp.name is 'url') and
-        (dp.mediatype?.search 'cozy' isnt -1))
-
-    return simple =
+    simple =
         id         : @id
         name       : name or '?'
         emails     : emails or []
         hasPicture : @_attachments?.picture?
-        cozy       : cozy or null
+        # XXX What if several Cozy instances are linked to one user?
+        cozy       : @datapoints?.filter(isCozyDataPoint) or null
+
+    return simple

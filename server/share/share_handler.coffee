@@ -62,7 +62,7 @@ module.exports.sendShareInvitations = (event, callback) ->
             needSaving   = true
 
     # Send the request to the datasystem
-    cozydb.api.createSharing data, (err, body) ->
+    cozydb.api.createSharing data, (err) ->
         if err?
             callback err
         else unless needSaving

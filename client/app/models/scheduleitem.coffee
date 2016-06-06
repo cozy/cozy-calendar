@@ -285,7 +285,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         description = @get 'description'
         description = description or t 'no description'
-        return fcEvent =
+        fcEvent =
             id: @cid
             title:  "#{displayedTime} #{description}"
             start: start
@@ -300,5 +300,4 @@ module.exports = class ScheduleItem extends Backbone.Model
             backgroundColor: @getColor()
             borderColor: @getColor()
 
-
-
+        return fcEvent

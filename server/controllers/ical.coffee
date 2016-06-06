@@ -1,6 +1,5 @@
 ical = require 'cozy-ical'
 Event = require '../models/event'
-Tag = require '../models/tag'
 User  = require '../models/user'
 multiparty = require 'multiparty'
 fs = require 'fs'
@@ -44,7 +43,7 @@ module.exports.import = (req, res, next) ->
             for key, arrfile of files
                 for file in arrfile
                     fs.unlink file.path, logError
-                    undefined
+            undefined # prevent coffee comprehension
 
 
         unless file = files['file']?[0]
@@ -70,8 +69,8 @@ module.exports.import = (req, res, next) ->
                             events: events
                             calendar:
                                 name: calendarName
-                    catch e
-                        log.error e.stack
+                    catch parseError
+                        log.error parseError.stack
                         log.error result
                         res.status(500).send
                             error: 'error occured while parsing file'
@@ -98,7 +97,7 @@ module.exports.zipExport = (req, res, next) ->
 
         async.eachSeries files, addToArchive, (err) ->
             return next err if err
-            archive.finalize (err, bytes) ->
+            archive.finalize (err) ->
                 return next err if err
 
     addToArchive = (cal, cb) ->

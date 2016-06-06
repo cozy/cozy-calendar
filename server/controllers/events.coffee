@@ -60,7 +60,7 @@ module.exports.create = (req, res) ->
 # Expect a list of events as body and create an event in database for each
 # entry. When it's done, it returns the list of created events and events for
 # which an error occured.
-module.exports.createBulk = (req, res) ->
+module.exports.createBulk = (req, res, next) ->
     events = req.body
     newEvents = []
     errors = []
@@ -79,6 +79,7 @@ module.exports.createBulk = (req, res) ->
             setTimeout done, 10
 
     , (err) ->
+        return next err if err
         res.status(201).send
             events: newEvents
             errors: errors
@@ -192,7 +193,8 @@ module.exports.ical = (req, res) ->
 module.exports.publicIcal = (req, res) ->
 
     key = req.query.key
-    if not visitor = req.event.getGuest key
+
+    if not req.event.getGuest key
         return res.status(401).send error: 'invalid key'
 
     module.exports.ical(req, res)
