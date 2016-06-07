@@ -4,8 +4,7 @@ async = require 'async'
 log = require('printit')
     prefix: 'event:model'
 Tag = require './tag'
-
-localization = require 'cozy-localization-manager'
+defaultCalendar = require '../libs/default_calendar'
 User = require './user'
 
 module.exports = Event = cozydb.getModel 'Event',
@@ -219,7 +218,7 @@ Event.initializeData = (callback) ->
                 end: formattedDate
                 description: ''
                 place: ''
-                tags: [localization.t("new calendar")]
+                tags: [defaultCalendar.getName()]
                 created: formattedNow
                 lastModification: formattedNow
             Event.create data, callback

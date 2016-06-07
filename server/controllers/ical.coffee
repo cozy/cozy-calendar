@@ -6,7 +6,7 @@ multiparty = require 'multiparty'
 fs = require 'fs'
 archiver = require 'archiver'
 async = require 'async'
-localization = require 'cozy-localization_manager'
+defaultCalendar = require('../libs/default_calendar')
 log = require('printit')
     date: true
     prefix: 'calendar:ical'
@@ -59,8 +59,7 @@ module.exports.import = (req, res, next) ->
             else
                 Event.tags (err, tags) ->
                     calendars = tags.calendar
-                    key = 'default calendar name'
-                    defaultCalendar = calendars?[0] or localization.t key
+                    defaultCalendar = calendars?[0] or defaultCalendar.getName()
                     calendarName = result?.model?.name or defaultCalendar
                     try
                         events = Event.extractEvents result, calendarName
