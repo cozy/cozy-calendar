@@ -4,7 +4,7 @@ moment = require 'moment-timezone'
 User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
-MailHandler = require '../mails/mail_handler'
+MailHandler = require '../libs/mail_handler'
 ShareHandler = require '../share/share_handler'
 localization = require('cozy-localization-manager').getInstance()
 

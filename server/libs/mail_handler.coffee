@@ -11,9 +11,7 @@ User   = require '../models/user'
 
 {VCalendar} = require 'cozy-ical'
 
-logoPath = fs.realpathSync './build/server/mails/assets/cozy-logo.png'
-
-localization = require 'localization_manager'
+localization = require('cozy-localization-manager').getInstance()
 
 app = null
 render = (view, locales, callback)->
@@ -45,7 +43,7 @@ _makeMailHTML = (template, locales, callback) ->
     # Build mails
     render view, locales, callback
 
-_makeICSFile = (user) ->
+_makeICSFile = (event, user) ->
     # Attach event as ics file
     calendarOptions =
         organization:'Cozy Cloud'
@@ -92,21 +90,21 @@ _sendMail = (guest, subject, html, content, callback) ->
         html:    html
         content: content
         attachments: [
-            path: logoPath
+            path: path.resolve __dirname, '../assets/cozy-logo.png'
             filename: 'cozy-logo.png'
             cid: 'cozy-logo'
         ]
     # Send mail through CozyDB API
     cozydb.api.sendMailFromUser mailOptions, callback
 
-_getDomainAndPrepareICS = (callback) ->
+_getDomainAndPrepareICS = (event, callback) ->
     async.parallel [
         (cb) -> cozydb.api.getCozyDomain cb
         (cb) -> User.getUserInfos cb
     ], (err, results) ->
         return callback err if err
         [domain, user] = results
-        icsPath = _makeICSFile user, (err) ->
+        icsPath = _makeICSFile event, user, (err) ->
             return callback err if err
             callback null, [domain, user, icsPath]
 
@@ -126,7 +124,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
     # Get mail contents
     subject = localization.t subjectKey, description: event.description
 
-    _getDomainAndPrepareICS (err, results) ->
+    _getDomainAndPrepareICS event, (err, results) ->
         return callback err if err
         [domain, user, icsPath] = results
 
