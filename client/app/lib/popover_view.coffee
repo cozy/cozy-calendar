@@ -5,6 +5,8 @@ module.exports = class PopoverView extends BaseView
 
     initialize: (options) ->
         @target = options.target
+        @openerEvent = options.openerEvent
+        @document = options.document
         @container = options.container
         @parentView = options.parentView
         @$tabCells = $ '.fc-day-grid-container'
@@ -23,6 +25,7 @@ module.exports = class PopoverView extends BaseView
             @$popover.remove()
             @$popover = null
         @target.data 'popover', undefined
+        @clickOutListener.dispose()
         @remove()
 
 
@@ -109,6 +112,14 @@ module.exports = class PopoverView extends BaseView
         @positionPopover()
 
         return @
+
+
+    afterRender: ->
+        # The click out listener must be set after the rendering of the view,
+        # otherwise @$el is not ready
+        @clickOutListener = @addClickOutListener @document, => @selfclose()
+            .ignoreEvent @openerEvent
+            .exceptOn @target.get(0)
 
 
     # Set the popover's position so it doesn't overflow out of the screen.

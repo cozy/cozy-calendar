@@ -105,6 +105,7 @@ module.exports = class Router extends Backbone.Router
                 events: app.events
                 # TODO : All router logic should be in app object
                 pendingEventSharingsCollection: app.pendingEventSharings
+            document: window.document
 
         app.menu.activate 'calendar'
         @onCalendar = true

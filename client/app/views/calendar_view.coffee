@@ -29,6 +29,7 @@ module.exports = class CalendarView extends BaseView
 
         @eventSharingButtonView = new EventSharingButtonView
             collection: @model.pendingEventSharingsCollection
+            document: @options.document
 
         @model = null
 
@@ -248,6 +249,8 @@ module.exports = class CalendarView extends BaseView
             start: start
             end: end
             target: $ jsEvent.target
+            document: @options.document
+            openerEvent: jsEvent.originalEvent
 
 
     onPopoverClose: ->
@@ -328,4 +331,6 @@ module.exports = class CalendarView extends BaseView
         @showPopover
             type: model.fcEventType
             model: model
-            target: $(jsEvent.currentTarget)
+            target: $ jsEvent.currentTarget
+            document: @options.document,
+            openerEvent: jsEvent.originalEvent

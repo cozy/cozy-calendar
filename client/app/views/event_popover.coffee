@@ -52,6 +52,14 @@ module.exports = class EventPopOver extends PopoverView
         @listenToOnce @context.formModel, 'change', (model, options) =>
             @modelHasChanged = true
 
+    afterRender: ->
+        super()
+        # Pretty headache here. The Calendar view from full calendar trigger
+        # another click event on the far bottom part of a day cell.
+        # So, two Mouse event are triggered sometimes, and so we have to ignore
+        # click event from the closest parent div having the class fc-row
+        # To remind, @target here is a calendar cell (td element).
+        @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
 
     momentToString: (m) ->
         if m.hasTime?() is false then m.toISOString().slice(0, 10)
