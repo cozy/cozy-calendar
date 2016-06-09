@@ -1,6 +1,6 @@
 cozydb = require 'cozydb'
 async = require 'async'
-moment = require 'moment-timezone'
+moment = require '../libs/moment'
 Event = require './event'
 log = require('printit')
     prefix: 'alarm:model'

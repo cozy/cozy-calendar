@@ -1,5 +1,5 @@
 async = require 'async'
-moment = require 'moment'
+moment = require '../libs/moment'
 cozydb = require 'cozydb'
 log = require('printit')
     date: true
