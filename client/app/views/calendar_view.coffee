@@ -208,14 +208,7 @@ module.exports = class CalendarView extends BaseView
 
         if @popover
             # click on same case
-            if @popover.options? and (@popover.options.model? and \
-               @popover.options.model is options.model or \
-               (@popover.options.start?.isSame(options.start) and \
-               @popover.options.end?.isSame(options.end) and \
-               @popover.options.type is options.type))
-
-                @cal.fullCalendar 'unselect'
-
+            @preventUnselecting()
             @popover.close =>
                 showNewPopover()
 
@@ -263,8 +256,19 @@ module.exports = class CalendarView extends BaseView
             openerEvent: jsEvent.originalEvent
 
 
+    # Prevent unselecting the calendar cell on popover close.
+    # Not the cleanest way but as fullcalendar does not allow us to explicitly
+    # set the selection without trigerring onSelect callback, we have to keep
+    # a flag like this locally.
+    preventUnselecting: ->
+        @isUnselectPrevented = true
+
+
     onPopoverClose: ->
-        @cal.fullCalendar 'unselect'
+        if not @isUnselectPrevented
+            @cal.fullCalendar 'unselect'
+
+        @isUnselectPrevented = false
         @popover = null
 
 
