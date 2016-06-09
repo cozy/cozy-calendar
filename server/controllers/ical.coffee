@@ -37,15 +37,18 @@ module.exports.import = (req, res, next) ->
 
         return next err if err
 
+        logError = (err) ->
+            log.error "failed to cleanup file", file.path, err if err
+
         cleanUp = ->
             for key, arrfile of files
                 for file in arrfile
-                    fs.unlink file.path, (err) ->
-                        if err
-                            log.error "failed to cleanup file", file.path, err
+                    fs.unlink file.path, logError
+                    undefined
+
 
         unless file = files['file']?[0]
-            res.send error: 'no file sent', 400
+            res.status(400).send error: 'no file sent'
             return cleanUp()
 
         parser = new ical.ICalParser()
@@ -54,7 +57,7 @@ module.exports.import = (req, res, next) ->
             if err
                 log.error err
                 log.error err.message
-                res.send 500, error: 'error occured while saving file'
+                res.status(500).send error: 'error occured while saving file'
                 cleanUp()
             else
                 Event.tags (err, tags) ->
@@ -63,14 +66,15 @@ module.exports.import = (req, res, next) ->
                     calendarName = result?.model?.name or defaultCalendar
                     try
                         events = Event.extractEvents result, calendarName
-                        res.send 200,
+                        res.status(200).send
                             events: events
                             calendar:
                                 name: calendarName
                     catch e
                         log.error e.stack
                         log.error result
-                        res.send 500, error: 'error occured while parsing file'
+                        res.status(500).send
+                            error: 'error occured while parsing file'
                     cleanUp()
 
 module.exports.zipExport = (req, res, next) ->
