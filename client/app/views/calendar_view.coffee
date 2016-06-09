@@ -182,9 +182,24 @@ module.exports = class CalendarView extends BaseView
         options.container = @cal
         options.parentView = @
 
-        if @popover
-            @popover.close()
+        showNewPopover = =>
+            # @TODO Event creation is a typical core feature of the calendar app,
+            # this part should be moved directly into the app module, and managed
+            # with event handlers
+            model = options.model ?= new Event
+                start: helpers.momentToString options.start
+                end: helpers.momentToString options.end
+                description: ''
+                place: ''
 
+            model.fetchEditability (editable) =>
+                @popover = new EventPopover _.extend options,
+                    readOnly : not editable
+                @popover.render()
+
+            @listenTo @popover, 'closed', @onPopoverClose
+
+        if @popover
             # click on same case
             if @popover.options? and (@popover.options.model? and \
                @popover.options.model is options.model or \
@@ -193,22 +208,14 @@ module.exports = class CalendarView extends BaseView
                @popover.options.type is options.type))
 
                 @cal.fullCalendar 'unselect'
-                @popover = null
-                return
 
-        # @TODO Event creation is a typical core feature of the calendar app,
-        # this part should be moved directly into the app module, and managed
-        # with event handlers
-        model = options.model ?= new Event
-            start: helpers.momentToString options.start
-            end: helpers.momentToString options.end
-            description: ''
-            place: ''
+            @popover.close =>
+                showNewPopover()
 
-        model.fetchEditability (editable) =>
-            @popover = new EventPopover _.extend options,
-                readOnly : not editable
-            @popover.render()
+        else
+            showNewPopover()
+
+
 
     # Close the popover, if it's open.
     closePopover: ->

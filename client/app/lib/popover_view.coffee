@@ -22,7 +22,7 @@ module.exports = class PopoverView extends BaseView
         @target.data 'popover', undefined
         @clickOutListener.dispose()
         @remove()
-
+        @trigger 'closed', @
         callback() if callback and typeof callback is 'function'
 
     # Get templates for a given screen.
