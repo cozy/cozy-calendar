@@ -311,9 +311,16 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @spinner.hide()
 
 
+    # Revert formModel to model state, so the close method will not
+    # detect any change.
+    cancelChanges: ->
+        @context.formModel = @model.clone()
+
+
     # Hides popover.
     onCancelClicked: ->
-        @popover.selfclose(true)
+        @cancelChanges()
+        @popover.close()
 
 
     onAddClicked: ->
@@ -348,7 +355,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                     alert 'server error occured'
                 complete: =>
                     @$addButton.html @getButtonText()
-                    @popover.selfclose(false)
+                    @popover.close()
 
             if calendar.isNew()
                 calendar.save calendar.attributes,

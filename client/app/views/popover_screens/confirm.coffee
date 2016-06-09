@@ -9,12 +9,24 @@ module.exports = class ConfirmClosePopoverScreen extends PopoverScreenView
     templateContent: require 'views/templates/popover_screens/confirm'
 
     events:
-        'click .answer-no': -> @switchToScreen(@popover.previousScreen)
-        'click .answer-yes': 'onYes'
+        'click .answer-no': -> @onCancel()
+        'click .answer-yes': -> @onConfirm()
         'change .dontaskagain': 'onCheckboxChange'
 
-    onYes: ->
-        @popover.callbackIfYes()
+    initialize: (options) ->
+        super()
+
+        @confirmCallback = options.data?.confirmCallback or
+            throw new Error 'No confirm callback has been set.'
+
+        @cancelCallback = options.data?.cancelCallback or
+            throw new Error 'No cancel callback has been set.'
+
+    onConfirm: ->
+        @confirmCallback()
+
+    onCancel: ->
+        @cancelCallback()
 
     onCheckboxChange: ->
         dontaskagain = $('.dontaskagain').is(':checked')

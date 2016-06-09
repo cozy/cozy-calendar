@@ -15,12 +15,7 @@ module.exports = class PopoverView extends BaseView
         return @
 
 
-    selfclose: (checkoutChanges = true) ->
-        @parentView.onPopoverClose?()
-        @close(checkoutChanges)
-
-
-    close: ->
+    close: (callback) ->
         if @$popover?
             @$popover.remove()
             @$popover = null
@@ -28,6 +23,7 @@ module.exports = class PopoverView extends BaseView
         @clickOutListener.dispose()
         @remove()
 
+        callback() if callback and typeof callback is 'function'
 
     # Get templates for a given screen.
     getScreen: (screenID = 'default') ->
@@ -41,7 +37,7 @@ module.exports = class PopoverView extends BaseView
 
 
     # Switch screen.
-    switchToScreen: (screenID) ->
+    switchToScreen: (screenID, data) ->
 
         # Throw if popover has not been rendered yet.
         unless @$popover?
@@ -58,11 +54,11 @@ module.exports = class PopoverView extends BaseView
             @screen.destroy()
 
         # Build the screen object and render it.
-        @renderScreen screenID
+        @renderScreen screenID, data
 
 
     # Render a specific screen.
-    renderScreen: (screenID) ->
+    renderScreen: (screenID, data) ->
         # Get the screen data.
         ScreenBuilder = @getScreen screenID
 
@@ -72,14 +68,15 @@ module.exports = class PopoverView extends BaseView
             el: @$popover
             titleElement: @titleElement
             contentElement: @contentElement
-            popover: @,
+            popover: @
+            data : data,
             @context
 
         # Render it.
         @screen.render()
 
         # Change current screen information.
-        @screenElement.attr 'data-screen', screenID
+        @context.screen = screenID
 
 
     render: ->
@@ -97,7 +94,6 @@ module.exports = class PopoverView extends BaseView
             @$popover = $ popoverWrapper
             @titleElement = @$popover.find '.popover-title'
             @contentElement = @$popover.find '.popover-content'
-            @screenElement = @$popover.find '.screen-indicator'
 
             # Reset @el and @$el.
             @setElement @$popover
@@ -117,7 +113,7 @@ module.exports = class PopoverView extends BaseView
     afterRender: ->
         # The click out listener must be set after the rendering of the view,
         # otherwise @$el is not ready
-        @clickOutListener = @addClickOutListener @document, => @selfclose()
+        @clickOutListener = @addClickOutListener @document, => @close()
             .ignoreEvent @openerEvent
             .exceptOn @target.get(0)
 
