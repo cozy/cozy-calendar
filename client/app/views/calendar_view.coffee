@@ -101,22 +101,29 @@ module.exports = class CalendarView extends BaseView
         # Before displaying the calendar for the previous month, we make sure
         # that events are loaded.
         @calHeader.on 'prev', =>
-            monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
-            window.app.events.loadMonth monthToLoad, =>
-                @cal.fullCalendar 'prev'
+            @clearViewComponents =>
+                monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
+                window.app.events.loadMonth monthToLoad, =>
+                    @cal.fullCalendar 'prev'
 
         # Before displaying the calendar for the next month, we make sure that
         # events are loaded.
         @calHeader.on 'next', =>
-            monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
-            window.app.events.loadMonth monthToLoad, =>
-                @cal.fullCalendar 'next'
+            @clearViewComponents =>
+                monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
+                window.app.events.loadMonth monthToLoad, =>
+                    @cal.fullCalendar 'next'
 
-        @calHeader.on 'today', => @cal.fullCalendar 'today'
-        @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
-        @calHeader.on 'list', ->
-            window.app.events.sort()
-            app.router.navigate 'list', trigger:true
+        @calHeader.on 'today', =>
+            @clearViewComponents =>
+                @cal.fullCalendar 'today'
+        @calHeader.on 'month', =>
+            @clearViewComponents =>
+                @cal.fullCalendar 'changeView', 'month'
+        @calHeader.on 'list', =>
+            @clearViewComponents =>
+                window.app.events.sort()
+                app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -216,18 +223,7 @@ module.exports = class CalendarView extends BaseView
             showNewPopover()
 
 
-
-    # Close the popover, if it's open.
-    closePopover: ->
-        @popover?.close()
-        @onPopoverClose()
-
-
     onChangeView: (view) =>
-
-        # Prevent a popover from staying on screen, if it's open.
-        @closePopover()
-
         @calHeader?.render()
         if @view isnt view.name
             @handleWindowResize()
@@ -237,6 +233,13 @@ module.exports = class CalendarView extends BaseView
         hash = view.intervalStart.format '[month]/YYYY/M'
 
         app.router.navigate hash
+
+
+    clearViewComponents: (callback)->
+        if @popover
+            @popover.close(callback)
+        else
+            callback() if callback and typeof callback is 'function'
 
 
     getUrlHash: =>
