@@ -166,7 +166,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @description.focus()
 
         # Apply the expanded status if it has been previously set.
-        if window.popoverExtended
+        if @context.popoverExtended
             @expandPopover()
 
         # If all the optional fields are shown by default (they all have a
@@ -451,7 +451,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Mark the popover has extended so the information is not lost when
         # screen is left.
-        window.popoverExtended = not window.popoverExtended
+        @context.popoverExtended = not @context.popoverExtended?
 
 
     # Show the optional fields of the screen (the ones hidden by default).
