@@ -59,7 +59,10 @@ module.exports = class EventPopOver extends PopoverView
         # So, two Mouse event are triggered sometimes, and so we have to ignore
         # click event from the closest parent div having the class fc-row
         # To remind, @target here is a calendar cell (td element).
-        @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
+        try
+            @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
+        catch error
+            console.warn error
 
     momentToString: (m) ->
         if m.hasTime?() is false then m.toISOString().slice(0, 10)
