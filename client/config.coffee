@@ -12,9 +12,6 @@ exports.config =
         jade:
             globals: ['t', 'moment','RRule']
 
-    conventions:
-        vendor:  /(vendor)|(tests)(\/|\\)/ # do not wrap tests in modules
-
     files:
         javascripts:
             joinTo:
@@ -51,6 +48,4 @@ exports.config =
                 after: ['vendor/styles/helpers.css']
 
         templates:
-            defaultExtensions: 'jade'
             joinTo: 'javascripts/app.js'
-
