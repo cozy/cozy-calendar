@@ -129,11 +129,12 @@ module.exports = class MenuItemView extends BaseView
             @showLoading()
             app.calendars.rename calendarName, input.val(), (name) =>
                 @model.set 'name', name
-                @model.set 'color', ColorHash.getColor(name, 'color')
+                if @model.isNew()
+                    @model.set 'color', ColorHash.getColor(name, 'color')
+                    @model.save()
+
                 @hideLoading()
                 @hideInput input
-        else
-            @buildBadge ColorHash.getColor(input.val(), 'color')
 
 
     # Replace the calendar's name by an input to edit the name.
