@@ -115,12 +115,12 @@ module.exports.update = (req, res) ->
 module.exports.delete = (req, res) ->
     req.event.destroy (err) ->
         if err?
-            res.send error: "Server error while deleting the event", 500
+            res.status(500).send error: "Server error while deleting the event"
         else if req.query.sendMails is 'true'
             MailHandler.sendDeleteNotification req.event, ->
                 res.send success: true
         else
-            res.send success: true, 200
+            res.send success: true
 
 
 module.exports.public = (req, res, next) ->
