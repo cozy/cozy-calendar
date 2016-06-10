@@ -17,5 +17,6 @@ server.coffee
 .editorconfig
 .tx
 .travis.yml
+.gitignore
 Cakefile
 coffeelint.json
