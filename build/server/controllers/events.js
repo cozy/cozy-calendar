@@ -139,9 +139,9 @@ module.exports.update = function(req, res) {
 module.exports["delete"] = function(req, res) {
   return req.event.destroy(function(err) {
     if (err != null) {
-      return res.send({
+      return res.status(500).send({
         error: "Server error while deleting the event"
-      }, 500);
+      });
     } else if (req.query.sendMails === 'true') {
       return MailHandler.sendDeleteNotification(req.event, function() {
         return res.send({
@@ -151,7 +151,7 @@ module.exports["delete"] = function(req, res) {
     } else {
       return res.send({
         success: true
-      }, 200);
+      });
     }
   });
 };

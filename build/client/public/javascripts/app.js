@@ -1177,7 +1177,8 @@ $(function() {
 ;require.register("lib/base_view.coffee", function(exports, require, module) {
 var BaseView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  hasProp = {}.hasOwnProperty,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 module.exports = BaseView = (function(superClass) {
   extend(BaseView, superClass);
@@ -1226,6 +1227,62 @@ module.exports = BaseView = (function(superClass) {
       };
     })(this));
     return this;
+  };
+
+  BaseView.prototype.addClickOutListener = function(document, callback) {
+    var documentClickHandler, element, insideElementClickHandler, listenedElements;
+    documentClickHandler = (function(_this) {
+      return function(event) {
+        var clickIsOutside;
+        clickIsOutside = !event.clickOutSources || indexOf.call(event.clickOutSources, _this) < 0;
+        if (clickIsOutside) {
+          return callback();
+        }
+      };
+    })(this);
+    document.addEventListener('click', documentClickHandler);
+    insideElementClickHandler = (function(_this) {
+      return function(event) {
+        event.clickOutSources = event.clickOutSources != null ? event.clickOutSources : event.clickOutSources = [];
+        return event.clickOutSources.push(_this);
+      };
+    })(this);
+    listenedElements = [];
+    if (this.$el) {
+      element = this.$el.get(0);
+      element.addEventListener('click', insideElementClickHandler);
+      listenedElements.push(element);
+    }
+    return {
+      exceptOn: function(elements) {
+        var addClickListener;
+        addClickListener = function(element) {
+          if (!_.isElement(element)) {
+            throw new Error('Cannot add click listener on non element');
+          }
+          element.addEventListener('click', insideElementClickHandler);
+          return listenedElements.push(element);
+        };
+        if (_.isArray(elements)) {
+          elements.forEach(addClickListener);
+        } else {
+          addClickListener(elements);
+        }
+        return this;
+      },
+      ignoreEvent: function(event) {
+        if (event) {
+          insideElementClickHandler(event);
+        }
+        return this;
+      },
+      dispose: function() {
+        document.removeEventListener('click', documentClickHandler);
+        return listenedElements.forEach(function(element) {
+          return element.removeEventListener('click', insideElementClickHandler);
+        });
+      }
+    };
   };
 
   return BaseView;
@@ -1487,6 +1544,8 @@ module.exports = PopoverView = (function(superClass) {
 
   PopoverView.prototype.initialize = function(options) {
     this.target = options.target;
+    this.openerEvent = options.openerEvent;
+    this.document = options.document;
     this.container = options.container;
     this.parentView = options.parentView;
     this.$tabCells = $('.fc-day-grid-container');
@@ -1496,24 +1555,18 @@ module.exports = PopoverView = (function(superClass) {
     return this;
   };
 
-  PopoverView.prototype.selfclose = function(checkoutChanges) {
-    var base;
-    if (checkoutChanges == null) {
-      checkoutChanges = true;
-    }
-    if (typeof (base = this.parentView).onPopoverClose === "function") {
-      base.onPopoverClose();
-    }
-    return this.close(checkoutChanges);
-  };
-
-  PopoverView.prototype.close = function() {
+  PopoverView.prototype.close = function(callback) {
     if (this.$popover != null) {
       this.$popover.remove();
       this.$popover = null;
     }
     this.target.data('popover', void 0);
-    return this.remove();
+    this.clickOutListener.dispose();
+    this.remove();
+    this.trigger('closed', this);
+    if (callback && typeof callback === 'function') {
+      return callback();
+    }
   };
 
   PopoverView.prototype.getScreen = function(screenID) {
@@ -1529,7 +1582,7 @@ module.exports = PopoverView = (function(superClass) {
     }
   };
 
-  PopoverView.prototype.switchToScreen = function(screenID) {
+  PopoverView.prototype.switchToScreen = function(screenID, data) {
     var error;
     if (this.$popover == null) {
       error = 'Popover must be rendered before switching its screen.';
@@ -1541,10 +1594,10 @@ module.exports = PopoverView = (function(superClass) {
     if (this.screen != null) {
       this.screen.destroy();
     }
-    return this.renderScreen(screenID);
+    return this.renderScreen(screenID, data);
   };
 
-  PopoverView.prototype.renderScreen = function(screenID) {
+  PopoverView.prototype.renderScreen = function(screenID, data) {
     var ScreenBuilder;
     ScreenBuilder = this.getScreen(screenID);
     this.screen = new ScreenBuilder({
@@ -1552,10 +1605,11 @@ module.exports = PopoverView = (function(superClass) {
       el: this.$popover,
       titleElement: this.titleElement,
       contentElement: this.contentElement,
-      popover: this
+      popover: this,
+      data: data
     }, this.context);
     this.screen.render();
-    return this.screenElement.attr('data-screen', screenID);
+    return this.context.screen = screenID;
   };
 
   PopoverView.prototype.render = function() {
@@ -1569,13 +1623,20 @@ module.exports = PopoverView = (function(superClass) {
       this.$popover = $(popoverWrapper);
       this.titleElement = this.$popover.find('.popover-title');
       this.contentElement = this.$popover.find('.popover-content');
-      this.screenElement = this.$popover.find('.screen-indicator');
       this.setElement(this.$popover);
     }
     this.afterRender();
     this.renderScreen(this.mainScreen);
     this.positionPopover();
     return this;
+  };
+
+  PopoverView.prototype.afterRender = function() {
+    return this.clickOutListener = this.addClickOutListener(this.document, (function(_this) {
+      return function() {
+        return _this.close();
+      };
+    })(this)).ignoreEvent(this.openerEvent).exceptOn(this.target.get(0));
   };
 
   PopoverView.prototype.positionPopover = function() {
@@ -1654,7 +1715,12 @@ module.exports = PopupView = (function(superClass) {
 
   PopupView.prototype.initialize = function(options) {
     PopupView.__super__.initialize.apply(this, arguments);
-    return this.anchor = options.anchor;
+    this.anchor = options.anchor;
+    return this.addClickOutListener(options.document, (function(_this) {
+      return function() {
+        return _this.hide();
+      };
+    })(this)).exceptOn(this.anchor.get(0));
   };
 
   PopupView.prototype.hide = function() {
@@ -6255,7 +6321,6 @@ module.exports = Event = (function(superClass) {
 
   Event.prototype.fetchSharingByShareId = function(callback) {
     var sharingToFetch;
-    console.debug('Event.fetchSharingByShareId');
     if (!this.hasSharing()) {
       callback(null, null);
       return;
@@ -6972,7 +7037,8 @@ module.exports = Router = (function(superClass) {
       model: {
         events: app.events,
         pendingEventSharingsCollection: app.pendingEventSharings
-      }
+      },
+      document: window.document
     }));
     app.menu.activate('calendar');
     return this.onCalendar = true;
@@ -7167,7 +7233,8 @@ module.exports = CalendarView = (function(superClass) {
     this.calendarsCollection = app.calendars;
     this.listenTo(this.calendarsCollection, 'change', this.onCalendarCollectionChange);
     this.eventSharingButtonView = new EventSharingButtonView({
-      collection: this.model.pendingEventSharingsCollection
+      collection: this.model.pendingEventSharingsCollection,
+      document: this.options.document
     });
     return this.model = null;
   };
@@ -7237,38 +7304,50 @@ module.exports = CalendarView = (function(superClass) {
     });
     this.calHeader.on('prev', (function(_this) {
       return function() {
-        var monthToLoad;
-        monthToLoad = _this.cal.fullCalendar('getDate').subtract('months', 1);
-        return window.app.events.loadMonth(monthToLoad, function() {
-          return _this.cal.fullCalendar('prev');
+        return _this.clearViewComponents(function() {
+          var monthToLoad;
+          monthToLoad = _this.cal.fullCalendar('getDate').subtract('months', 1);
+          return window.app.events.loadMonth(monthToLoad, function() {
+            return _this.cal.fullCalendar('prev');
+          });
         });
       };
     })(this));
     this.calHeader.on('next', (function(_this) {
       return function() {
-        var monthToLoad;
-        monthToLoad = _this.cal.fullCalendar('getDate').add('months', 1);
-        return window.app.events.loadMonth(monthToLoad, function() {
-          return _this.cal.fullCalendar('next');
+        return _this.clearViewComponents(function() {
+          var monthToLoad;
+          monthToLoad = _this.cal.fullCalendar('getDate').add('months', 1);
+          return window.app.events.loadMonth(monthToLoad, function() {
+            return _this.cal.fullCalendar('next');
+          });
         });
       };
     })(this));
     this.calHeader.on('today', (function(_this) {
       return function() {
-        return _this.cal.fullCalendar('today');
+        return _this.clearViewComponents(function() {
+          return _this.cal.fullCalendar('today');
+        });
       };
     })(this));
     this.calHeader.on('month', (function(_this) {
       return function() {
-        return _this.cal.fullCalendar('changeView', 'month');
+        return _this.clearViewComponents(function() {
+          return _this.cal.fullCalendar('changeView', 'month');
+        });
       };
     })(this));
-    this.calHeader.on('list', function() {
-      window.app.events.sort();
-      return app.router.navigate('list', {
-        trigger: true
-      });
-    });
+    this.calHeader.on('list', (function(_this) {
+      return function() {
+        return _this.clearViewComponents(function() {
+          window.app.events.sort();
+          return app.router.navigate('list', {
+            trigger: true
+          });
+        });
+      };
+    })(this));
     this.$('#alarms').prepend(this.calHeader.render().$el);
     this.handleWindowResize();
     debounced = _.debounce(this.handleWindowResize, 10);
@@ -7334,44 +7413,41 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.showPopover = function(options) {
-    var model, ref, ref1;
+    var showNewPopover;
     options.container = this.cal;
     options.parentView = this;
-    if (this.popover) {
-      this.popover.close();
-      if ((this.popover.options != null) && ((this.popover.options.model != null) && this.popover.options.model === options.model || (((ref = this.popover.options.start) != null ? ref.isSame(options.start) : void 0) && ((ref1 = this.popover.options.end) != null ? ref1.isSame(options.end) : void 0) && this.popover.options.type === options.type))) {
-        this.cal.fullCalendar('unselect');
-        this.popover = null;
-        return;
-      }
-    }
-    model = options.model != null ? options.model : options.model = new Event({
-      start: helpers.momentToString(options.start),
-      end: helpers.momentToString(options.end),
-      description: '',
-      place: ''
-    });
-    return model.fetchEditability((function(_this) {
-      return function(editable) {
-        _this.popover = new EventPopover(_.extend(options, {
-          readOnly: !editable
-        }));
-        return _this.popover.render();
+    showNewPopover = (function(_this) {
+      return function() {
+        var model;
+        model = options.model != null ? options.model : options.model = new Event({
+          start: helpers.momentToString(options.start),
+          end: helpers.momentToString(options.end),
+          description: '',
+          place: ''
+        });
+        model.fetchEditability(function(editable) {
+          _this.popover = new EventPopover(_.extend(options, {
+            readOnly: !editable
+          }));
+          return _this.popover.render();
+        });
+        return _this.listenTo(_this.popover, 'closed', _this.onPopoverClose);
       };
-    })(this));
-  };
-
-  CalendarView.prototype.closePopover = function() {
-    var ref;
-    if ((ref = this.popover) != null) {
-      ref.close();
+    })(this);
+    if (this.popover) {
+      this.preventUnselecting();
+      return this.popover.close((function(_this) {
+        return function() {
+          return showNewPopover();
+        };
+      })(this));
+    } else {
+      return showNewPopover();
     }
-    return this.onPopoverClose();
   };
 
   CalendarView.prototype.onChangeView = function(view) {
     var hash, ref;
-    this.closePopover();
     if ((ref = this.calHeader) != null) {
       ref.render();
     }
@@ -7381,6 +7457,16 @@ module.exports = CalendarView = (function(superClass) {
     this.view = view.name;
     hash = view.intervalStart.format('[month]/YYYY/M');
     return app.router.navigate(hash);
+  };
+
+  CalendarView.prototype.clearViewComponents = function(callback) {
+    if (this.popover) {
+      return this.popover.close(callback);
+    } else {
+      if (callback && typeof callback === 'function') {
+        return callback();
+      }
+    }
   };
 
   CalendarView.prototype.getUrlHash = function() {
@@ -7399,12 +7485,21 @@ module.exports = CalendarView = (function(superClass) {
       type: 'event',
       start: start,
       end: end,
-      target: $(jsEvent.target)
+      target: $(jsEvent.target),
+      document: this.options.document,
+      openerEvent: jsEvent.originalEvent
     });
   };
 
+  CalendarView.prototype.preventUnselecting = function() {
+    return this.isUnselectPrevented = true;
+  };
+
   CalendarView.prototype.onPopoverClose = function() {
-    this.cal.fullCalendar('unselect');
+    if (!this.isUnselectPrevented) {
+      this.cal.fullCalendar('unselect');
+    }
+    this.isUnselectPrevented = false;
     return this.popover = null;
   };
 
@@ -7487,7 +7582,9 @@ module.exports = CalendarView = (function(superClass) {
     return this.showPopover({
       type: model.fcEventType,
       model: model,
-      target: $(jsEvent.currentTarget)
+      target: $(jsEvent.currentTarget),
+      document: this.options.document,
+      openerEvent: jsEvent.originalEvent
     });
   };
 
@@ -7529,6 +7626,7 @@ module.exports = CollectionCounterView = (function(superClass) {
 
 ;require.register("views/event_popover.coffee", function(exports, require, module) {
 var Event, EventPopOver, Modal, PopoverView,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -7546,6 +7644,7 @@ module.exports = EventPopOver = (function(superClass) {
   extend(EventPopOver, superClass);
 
   function EventPopOver() {
+    this.confirmClose = bind(this.confirmClose, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
 
@@ -7563,7 +7662,7 @@ module.exports = EventPopOver = (function(superClass) {
 
   EventPopOver.prototype.events = {
     'keyup': 'onKeyUp',
-    'click .close': 'selfclose',
+    'click .close': 'close',
     'click div.popover-back': function() {
       return this.switchToScreen(this.mainScreen);
     }
@@ -7587,6 +7686,17 @@ module.exports = EventPopOver = (function(superClass) {
     })(this));
   };
 
+  EventPopOver.prototype.afterRender = function() {
+    var error, error1;
+    EventPopOver.__super__.afterRender.call(this);
+    try {
+      return this.clickOutListener.exceptOn(this.target.closest('.fc-row').get(0));
+    } catch (error1) {
+      error = error1;
+      return console.warn(error);
+    }
+  };
+
   EventPopOver.prototype.momentToString = function(m) {
     if ((typeof m.hasTime === "function" ? m.hasTime() : void 0) === false) {
       return m.toISOString().slice(0, 10);
@@ -7597,63 +7707,42 @@ module.exports = EventPopOver = (function(superClass) {
 
   EventPopOver.prototype.onKeyUp = function(event) {
     if (event.keyCode === 27) {
-      return this.selfclose();
+      return this.close();
     }
   };
 
-  EventPopOver.prototype.displayConfirmIfNeeded = function(checkoutChanges, callbackIfYes) {
-    var dontConfirm, needConfirm;
-    needConfirm = checkoutChanges && this.modelHasChanged;
-    dontConfirm = localStorage.dontConfirmCalendarPopover && localStorage.dontConfirmCalendarPopover !== "false";
-    if (needConfirm && !dontConfirm) {
-      this.previousScreen = this.screenElement.attr('data-screen');
-      this.callbackIfYes = callbackIfYes;
-      return this.switchToScreen('confirm');
-    } else {
-      return callbackIfYes();
-    }
+  EventPopOver.prototype.confirmClose = function(confirmCallback, cancelCallback) {
+    return this.switchToScreen('confirm', {
+      confirmCallback: confirmCallback,
+      cancelCallback: cancelCallback
+    });
   };
 
-  EventPopOver.prototype.selfclose = function(checkoutChanges) {
-    if (checkoutChanges == null) {
-      checkoutChanges = true;
+  EventPopOver.prototype.close = function(callback) {
+    var cancelHandler, confirmHandler, formModelDiffers, needConfirm, screen, userIgnoresConfirm;
+    if (this.closing) {
+      return;
     }
-    this.displayConfirmIfNeeded(checkoutChanges, (function(_this) {
+    this.closing = true;
+    formModelDiffers = !_.isEqual(this.context.formModel.attributes, this.model.attributes);
+    userIgnoresConfirm = localStorage.dontConfirmCalendarPopover && localStorage.dontConfirmCalendarPopover === 'true';
+    needConfirm = formModelDiffers && !userIgnoresConfirm;
+    if (!needConfirm) {
+      return EventPopOver.__super__.close.call(this, callback);
+    }
+    confirmHandler = (function(_this) {
       return function() {
-        if (_this.model.isNew()) {
-          return EventPopOver.__super__.selfclose.call(_this);
-        } else {
-          if (checkoutChanges) {
-            return _this.model.fetch({
-              complete: function() {
-                return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
-              }
-            });
-          } else {
-            return EventPopOver.__super__.selfclose.call(_this, checkoutChanges);
-          }
-        }
+        return EventPopOver.__super__.close.call(_this, callback);
       };
-    })(this));
-    return window.popoverExtended = false;
-  };
-
-  EventPopOver.prototype.close = function(checkoutChanges) {
-    if (checkoutChanges == null) {
-      checkoutChanges = true;
-    }
-    if (this.model.isNew()) {
-      EventPopOver.__super__.close.call(this);
-    } else {
-      if (checkoutChanges) {
-        this.model.fetch({
-          complete: EventPopOver.__super__.close.apply(this, arguments)
-        });
-      } else {
-        EventPopOver.__super__.close.call(this);
-      }
-    }
-    return window.popoverExtended = false;
+    })(this);
+    screen = this.context.screen;
+    cancelHandler = (function(_this) {
+      return function() {
+        _this.closing = false;
+        return _this.switchToScreen(screen);
+      };
+    })(this);
+    return this.confirmClose(confirmHandler, cancelHandler);
   };
 
   return EventPopOver;
@@ -8613,13 +8702,14 @@ module.exports = MenuItemView = (function(superClass) {
       return app.calendars.rename(calendarName, input.val(), (function(_this) {
         return function(name) {
           _this.model.set('name', name);
-          _this.model.set('color', ColorHash.getColor(name, 'color'));
+          if (_this.model.isNew()) {
+            _this.model.set('color', ColorHash.getColor(name, 'color'));
+            _this.model.save();
+          }
           _this.hideLoading();
           return _this.hideInput(input);
         };
       })(this));
-    } else {
-      return this.buildBadge(ColorHash.getColor(input.val(), 'color'));
     }
   };
 
@@ -8723,11 +8813,12 @@ module.exports = PendingEventSharingsButtonView = (function(superClass) {
     'keyup': 'onKeyUp'
   };
 
-  PendingEventSharingsButtonView.prototype.initialize = function() {
+  PendingEventSharingsButtonView.prototype.initialize = function(options) {
     PendingEventSharingsButtonView.__super__.initialize.call(this);
-    return this.counterView = new CollectionCounterView({
+    this.counterView = new CollectionCounterView({
       collection: this.collection
     });
+    return this.options = options;
   };
 
   PendingEventSharingsButtonView.prototype.togglePopup = function(display) {
@@ -8748,7 +8839,8 @@ module.exports = PendingEventSharingsButtonView = (function(superClass) {
     PendingEventSharingsButtonView.__super__.afterRender.apply(this, arguments);
     return this.popup = new PopupView({
       el: this.$(this.collectionEl),
-      anchor: this.$el
+      anchor: this.$el,
+      document: this.options.document
     });
   };
 
@@ -9048,15 +9140,37 @@ module.exports = ConfirmClosePopoverScreen = (function(superClass) {
   ConfirmClosePopoverScreen.prototype.templateContent = require('views/templates/popover_screens/confirm');
 
   ConfirmClosePopoverScreen.prototype.events = {
-    'click .answer-no': function() {
-      return this.switchToScreen(this.popover.previousScreen);
+    'click .popover-back': function(event) {
+      return this.onCancel(event);
     },
-    'click .answer-yes': 'onYes',
+    'click .answer-no': function(event) {
+      return this.onCancel(event);
+    },
+    'click .answer-yes': function(event) {
+      return this.onConfirm(event);
+    },
     'change .dontaskagain': 'onCheckboxChange'
   };
 
-  ConfirmClosePopoverScreen.prototype.onYes = function() {
-    return this.popover.callbackIfYes();
+  ConfirmClosePopoverScreen.prototype.initialize = function(options) {
+    var ref, ref1;
+    ConfirmClosePopoverScreen.__super__.initialize.call(this);
+    this.confirmCallback = ((ref = options.data) != null ? ref.confirmCallback : void 0) || (function() {
+      throw new Error('No confirm callback has been set.');
+    })();
+    return this.cancelCallback = ((ref1 = options.data) != null ? ref1.cancelCallback : void 0) || (function() {
+      throw new Error('No cancel callback has been set.');
+    })();
+  };
+
+  ConfirmClosePopoverScreen.prototype.onConfirm = function(event) {
+    event.stopPropagation();
+    return this.confirmCallback();
+  };
+
+  ConfirmClosePopoverScreen.prototype.onCancel = function(event) {
+    event.stopPropagation();
+    return this.cancelCallback();
   };
 
   ConfirmClosePopoverScreen.prototype.onCheckboxChange = function() {
@@ -9121,7 +9235,7 @@ module.exports = DeletePopoverScreen = (function(superClass) {
       success: (function(_this) {
         return function() {
           _this.$spinner.hide();
-          return _this.popover.selfclose(false);
+          return _this.popover.close();
         };
       })(this)
     });
@@ -9559,7 +9673,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
         };
       })(this));
     }
-    if (window.popoverExtended) {
+    if (this.context.popoverExtended) {
       this.expandPopover();
     }
     if (this.$("[aria-hidden=true]").length === 0) {
@@ -9712,8 +9826,13 @@ module.exports = MainPopoverScreen = (function(superClass) {
     });
   };
 
+  MainPopoverScreen.prototype.cancelChanges = function() {
+    return this.context.formModel = this.model.clone();
+  };
+
   MainPopoverScreen.prototype.onCancelClicked = function() {
-    return this.popover.selfclose(true);
+    this.cancelChanges();
+    return this.popover.close();
   };
 
   MainPopoverScreen.prototype.onAddClicked = function() {
@@ -9757,7 +9876,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
             },
             complete: function() {
               _this.$addButton.html(_this.getButtonText());
-              return _this.popover.selfclose(false);
+              return _this.popover.close();
             }
           });
         };
@@ -9866,7 +9985,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
   MainPopoverScreen.prototype.onAdvancedClicked = function(event) {
     event.preventDefault();
     this.expandPopover();
-    return window.popoverExtended = !window.popoverExtended;
+    return this.context.popoverExtended = this.context.popoverExtended == null;
   };
 
   MainPopoverScreen.prototype.expandPopover = function() {
@@ -10594,7 +10713,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<button class=\"btn fc-button\"><span class=\"collection-counter\"></span><span>" + (jade.escape(null == (jade_interp = ' shared events') ? "" : jade_interp)) + "</span></button><div id=\"shared-events-popup\" style=\"display:none\" class=\"popup\"></div>");;return buf.join("");
+buf.push("<button class=\"btn fc-button\"><span class=\"collection-counter\"></span><span>" + (jade.escape(null == (jade_interp = ' ' + t('shared events')) ? "" : jade_interp)) + "</span></button><div id=\"shared-events-popup\" style=\"display:none\" class=\"popup\"></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10613,7 +10732,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (model) {
-buf.push("<div class=\"sharer\">" + (jade.escape(null == (jade_interp = model.sharerName || model.sharerUrl) ? "" : jade_interp)) + "</div><div class=\"desc\">" + (jade.escape(null == (jade_interp = model.desc) ? "" : jade_interp)) + "</div><div class=\"actions\"><a class=\"accept\">" + (jade.escape(null == (jade_interp = 'Accept') ? "" : jade_interp)) + "</a><span class=\"separator\">" + (jade.escape(null == (jade_interp = ' • ') ? "" : jade_interp)) + "</span><a class=\"decline\">" + (jade.escape(null == (jade_interp = 'Decline') ? "" : jade_interp)) + "</a></div>");}.call(this,"model" in locals_for_with?locals_for_with.model:typeof model!=="undefined"?model:undefined));;return buf.join("");
+buf.push("<div class=\"sharer\">" + (jade.escape(null == (jade_interp = model.sharerName || model.sharerUrl) ? "" : jade_interp)) + "</div><div class=\"desc\">" + (jade.escape(null == (jade_interp = model.desc) ? "" : jade_interp)) + "</div><div class=\"actions\"><a class=\"accept\">" + (jade.escape(null == (jade_interp = t('Accept')) ? "" : jade_interp)) + "</a><span class=\"separator\">" + (jade.escape(null == (jade_interp = ' • ') ? "" : jade_interp)) + "</span><a class=\"decline\">" + (jade.escape(null == (jade_interp = t('Decline')) ? "" : jade_interp)) + "</a></div>");}.call(this,"model" in locals_for_with?locals_for_with.model:typeof model!=="undefined"?model:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
