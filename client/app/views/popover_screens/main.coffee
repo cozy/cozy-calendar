@@ -166,7 +166,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @description.focus()
 
         # Apply the expanded status if it has been previously set.
-        if window.popoverExtended
+        if @context.popoverExtended
             @expandPopover()
 
         # If all the optional fields are shown by default (they all have a
@@ -311,9 +311,16 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @spinner.hide()
 
 
+    # Revert formModel to model state, so the close method will not
+    # detect any change.
+    cancelChanges: ->
+        @context.formModel = @model.clone()
+
+
     # Hides popover.
     onCancelClicked: ->
-        @popover.selfclose(true)
+        @cancelChanges()
+        @popover.close()
 
 
     onAddClicked: ->
@@ -348,7 +355,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                     alert 'server error occured'
                 complete: =>
                     @$addButton.html @getButtonText()
-                    @popover.selfclose(false)
+                    @popover.close()
 
             if calendar.isNew()
                 calendar.save calendar.attributes,
@@ -444,7 +451,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # Mark the popover has extended so the information is not lost when
         # screen is left.
-        window.popoverExtended = not window.popoverExtended
+        @context.popoverExtended = not @context.popoverExtended?
 
 
     # Show the optional fields of the screen (the ones hidden by default).

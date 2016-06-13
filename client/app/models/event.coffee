@@ -165,7 +165,6 @@ module.exports = class Event extends ScheduleItem
 
 
     fetchSharingByShareId: (callback) ->
-        console.debug 'Event.fetchSharingByShareId'
         if not @hasSharing()
             callback null, null
             return

@@ -7,6 +7,9 @@ module.exports = class PopupView extends BaseView
         super
         @anchor = options.anchor
 
+        @addClickOutListener options.document, => @hide()
+            .exceptOn @anchor.get 0
+
 
     hide: ->
         @$el.hide()

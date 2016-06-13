@@ -16,11 +16,13 @@ module.exports = class PendingEventSharingsButtonView extends CollectionView
         'keyup': 'onKeyUp'
 
 
-    initialize: ->
+    initialize: (options)->
         super()
 
         @counterView = new CollectionCounterView
             collection: @collection
+
+        @options = options
 
 
     togglePopup: (display) ->
@@ -40,6 +42,7 @@ module.exports = class PendingEventSharingsButtonView extends CollectionView
         @popup = new PopupView
             el: @$ @collectionEl
             anchor: @$el
+            document: @options.document
 
 
     addItem: (model) ->

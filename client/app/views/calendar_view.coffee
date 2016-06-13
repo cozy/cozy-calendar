@@ -29,6 +29,7 @@ module.exports = class CalendarView extends BaseView
 
         @eventSharingButtonView = new EventSharingButtonView
             collection: @model.pendingEventSharingsCollection
+            document: @options.document
 
         @model = null
 
@@ -100,22 +101,29 @@ module.exports = class CalendarView extends BaseView
         # Before displaying the calendar for the previous month, we make sure
         # that events are loaded.
         @calHeader.on 'prev', =>
-            monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
-            window.app.events.loadMonth monthToLoad, =>
-                @cal.fullCalendar 'prev'
+            @clearViewComponents =>
+                monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
+                window.app.events.loadMonth monthToLoad, =>
+                    @cal.fullCalendar 'prev'
 
         # Before displaying the calendar for the next month, we make sure that
         # events are loaded.
         @calHeader.on 'next', =>
-            monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
-            window.app.events.loadMonth monthToLoad, =>
-                @cal.fullCalendar 'next'
+            @clearViewComponents =>
+                monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
+                window.app.events.loadMonth monthToLoad, =>
+                    @cal.fullCalendar 'next'
 
-        @calHeader.on 'today', => @cal.fullCalendar 'today'
-        @calHeader.on 'month', => @cal.fullCalendar 'changeView', 'month'
-        @calHeader.on 'list', ->
-            window.app.events.sort()
-            app.router.navigate 'list', trigger:true
+        @calHeader.on 'today', =>
+            @clearViewComponents =>
+                @cal.fullCalendar 'today'
+        @calHeader.on 'month', =>
+            @clearViewComponents =>
+                @cal.fullCalendar 'changeView', 'month'
+        @calHeader.on 'list', =>
+            @clearViewComponents =>
+                window.app.events.sort()
+                app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -181,45 +189,34 @@ module.exports = class CalendarView extends BaseView
         options.container = @cal
         options.parentView = @
 
+        showNewPopover = =>
+            # @TODO Event creation is a typical core feature of the calendar app,
+            # this part should be moved directly into the app module, and managed
+            # with event handlers
+            model = options.model ?= new Event
+                start: helpers.momentToString options.start
+                end: helpers.momentToString options.end
+                description: ''
+                place: ''
+
+            model.fetchEditability (editable) =>
+                @popover = new EventPopover _.extend options,
+                    readOnly : not editable
+                @popover.render()
+
+            @listenTo @popover, 'closed', @onPopoverClose
+
         if @popover
-            @popover.close()
-
             # click on same case
-            if @popover.options? and (@popover.options.model? and \
-               @popover.options.model is options.model or \
-               (@popover.options.start?.isSame(options.start) and \
-               @popover.options.end?.isSame(options.end) and \
-               @popover.options.type is options.type))
+            @preventUnselecting()
+            @popover.close =>
+                showNewPopover()
 
-                @cal.fullCalendar 'unselect'
-                @popover = null
-                return
-
-        # @TODO Event creation is a typical core feature of the calendar app,
-        # this part should be moved directly into the app module, and managed
-        # with event handlers
-        model = options.model ?= new Event
-            start: helpers.momentToString options.start
-            end: helpers.momentToString options.end
-            description: ''
-            place: ''
-
-        model.fetchEditability (editable) =>
-            @popover = new EventPopover _.extend options,
-                readOnly : not editable
-            @popover.render()
-
-    # Close the popover, if it's open.
-    closePopover: ->
-        @popover?.close()
-        @onPopoverClose()
+        else
+            showNewPopover()
 
 
     onChangeView: (view) =>
-
-        # Prevent a popover from staying on screen, if it's open.
-        @closePopover()
-
         @calHeader?.render()
         if @view isnt view.name
             @handleWindowResize()
@@ -229,6 +226,13 @@ module.exports = class CalendarView extends BaseView
         hash = view.intervalStart.format '[month]/YYYY/M'
 
         app.router.navigate hash
+
+
+    clearViewComponents: (callback)->
+        if @popover
+            @popover.close(callback)
+        else
+            callback() if callback and typeof callback is 'function'
 
 
     getUrlHash: =>
@@ -248,10 +252,23 @@ module.exports = class CalendarView extends BaseView
             start: start
             end: end
             target: $ jsEvent.target
+            document: @options.document
+            openerEvent: jsEvent.originalEvent
+
+
+    # Prevent unselecting the calendar cell on popover close.
+    # Not the cleanest way but as fullcalendar does not allow us to explicitly
+    # set the selection without trigerring onSelect callback, we have to keep
+    # a flag like this locally.
+    preventUnselecting: ->
+        @isUnselectPrevented = true
 
 
     onPopoverClose: ->
-        @cal.fullCalendar 'unselect'
+        if not @isUnselectPrevented
+            @cal.fullCalendar 'unselect'
+
+        @isUnselectPrevented = false
         @popover = null
 
 
@@ -328,4 +345,6 @@ module.exports = class CalendarView extends BaseView
         @showPopover
             type: model.fcEventType
             model: model
-            target: $(jsEvent.currentTarget)
+            target: $ jsEvent.currentTarget
+            document: @options.document,
+            openerEvent: jsEvent.originalEvent
