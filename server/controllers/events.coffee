@@ -235,7 +235,7 @@ module.exports.bulkDelete = (req, res) ->
 module.exports.monthEvents = (req, res, next) ->
     {month, year} = req.params
     start = moment "#{year}-#{month}-01", 'YYYY-MM-DD'
-    end = start.clone().add 'months', 1
+    end = start.clone().add 1, 'months'
 
     Event.load start, end, (err, events) ->
         return next err if err
