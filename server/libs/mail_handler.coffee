@@ -38,7 +38,7 @@ _makeTemplateOptions = (event, user, domain, guest) ->
 
 
 _makeMailHTML = (template, locales, callback) ->
-    locale = localization.polyglot.getLocale()
+    locale = localization.polyglot.locale()
     view = "mails/#{locale}/#{template}"
     # Build mails
     render view, locales, callback

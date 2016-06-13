@@ -128,7 +128,7 @@ module.exports.public = (req, res, next) ->
         # If event doesn't exist or visitor hasn't access display 404 page
         if err or not event or not visitor = event.getGuest key
             # Retreive user localization
-            locale = localization.polyglot?.getLocale()
+            locale = localization.polyglot?.locale()
             locale = 'en' unless locale is 'fr' # only files for FR and EN
             res.status 404
             res.render "404_#{locale}"
@@ -144,7 +144,7 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
-            locale = localization.polyglot?.getLocale() or 'en'
+            locale = localization.polyglot?.locale() or 'en'
 
             # Retrieve event data
             if event.isAllDayEvent()
