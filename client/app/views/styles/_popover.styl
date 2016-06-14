@@ -446,6 +446,7 @@ ul.guests
 
         & > *
             display table-cell
+            max-width 11.5em
             padding .5em
 
             &:last-child
@@ -466,14 +467,24 @@ ul.guests
             color grey-04
             padding .5em
 
-            &:hover
+            &:hover,
+            &.active
                 color darkblue
+
+            &.aria-hidden
+                visibility hidden
 
     .guest-label
         font-size 1.1em
         line-height 1.5em
         text-overflow ellipsis
         overflow hidden
+
+        &:hover
+            text-overflow clip
+            white-space normal
+            word-break break-all
+
 
 // Alerts screen
 ul.alerts

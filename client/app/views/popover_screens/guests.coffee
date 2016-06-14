@@ -18,7 +18,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     initialize: (options) ->
         super options
 
-        @listenTo @formModel, 'change:shareID', () =>
+        @listenTo @formModel, 'change:shareID', =>
             @afterRender()
 
     getRenderData: ->
@@ -57,8 +57,8 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
             @configureGuestTypeahead()
 
-            # Focus the form field. Must be done after the typeahead configuration,
-            # otherwise bootstrap bugs somehow.
+            # Focus the form field. Must be done after the typeahead
+            # configuration, otherwise bootstrap bugs somehow.
             @$('input[name="guest-name"]').focus()
 
 
@@ -122,10 +122,28 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # view to be refreshed
         guests = _.clone guests
         guest  = guests[index]
-        # We add the information regarding the cozy: we change the label field
-        # so that the user has a visual feedback
-        guest.shareWithCozy = true
-        guest.label         = "Cozy: " + guest.name
+        # We remove the guest from the list to find a possible duplicate. If we
+        # don't do that then `findWhere` could return this very same guest
+        # instead of the duplicate, if there is one.
+        guests.splice index, 1
+
+        # Check for duplicate:
+        # * if `guestBis` is null then there are no duplicate, we can go on
+        #   ahead and add him;
+        # * if `guestBis` is not null then there is a possible duplicate, a
+        #   guest whose cozy matches the one we want to add. However, if the
+        #   duplicate's invitation is set to mail (meaning `shareWithCozy` is
+        #   falsy) then we can add the guest: it will not be a "duplicate"
+        #   stricto sensu since an invitation will be sent by mail and the other
+        #   one shared.
+        guestBis = _.findWhere(guests, cozy: guest.cozy)
+        if (not guestBis?) or (not guestBis.shareWithCozy)
+            # We add the information regarding the cozy and we change the label
+            # so that the user has a visual feedback
+            guest.shareWithCozy = true
+            guest.label         = guest.cozy
+            # add the guest back up
+            guests.splice index, 0, guest
 
         @formModel.set 'attendees', guests
         # We force the refresh
@@ -145,10 +163,17 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # view to be refreshed
         guests = _.clone guests
         guest  = guests[index]
-        # We add the information regarding the cozy: we change the label field
-        # so that the user has a visual feedback
-        guest.shareWithCozy = false
-        guest.label         = guest.email
+        # We remove the guest from the list to find a possible duplicate.
+        guests.splice index, 1
+
+        # Check for duplicate, same as above: if a guest already has that email
+        # then we check if `shareWithCozy` is true, if that's the case we can
+        # add the new guest; otherwise we cannot.
+        guestBis = _.findWhere(guests, email: guest.email)
+        if (not guestBis?) or (guestBis.shareWithCozy)
+            guest.shareWithCozy = false
+            guest.label         = guest.email
+            guests.splice index, 0, guest
 
         @formModel.set 'attendees', guests
         # We force the refresh
@@ -158,31 +183,79 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     # Handle guest addition. `userInfo` is passed when called by the typeahead.
     onNewGuest: (userInfo = null) ->
 
+        # Autocomplete was used.
         if userInfo? and typeof(userInfo) is "string"
-            [email, contactID] = userInfo.split(';')
+            [channel, contactID] = userInfo.split(';')
+        # Field was entered manually.
         else
-            email = @$('input[name="guest-name"]').val()
+            channel   = @$('input[name="guest-name"]').val()
             contactID = null
 
-        # An empty value should not be submitted.
-        email = email.trim()
-        if email.length > 0
-            guests = @formModel.get('attendees') or []
-            if not _.findWhere(guests, email: email)
-                newGuest =
-                    key           : random.randomString()
-                    status        : 'INVITATION-NOT-SENT'
-                    email         : email
-                    label         : email
-                    contactid     : contactID
-                    shareWithCozy : false
+        # Determine if guest's "channel" of communication is the url of his cozy
+        # or his mail address.
+        if (channel.indexOf "@") < 0
+            cozy  = channel
+        else
+            email = channel
+            # An empty value should not be submitted.
+            email = email.trim()
 
-                # If guest was "autocompleted" then contactID is not null and we
-                # can check if a cozy instance is linked to this contact
+        if email?.length > 0 or cozy?.length > 0
+            guests = @formModel.get('attendees') or []
+
+            # Look for a duplicate:
+            # * another guest with the same email;
+            if email?
+                guestBisEmail = _.findWhere(guests, email: email)
+            # * another guest with the same cozy;
+            if cozy?
+                guestBisCozy  = _.findWhere(guests, cozy: cozy)
+
+            # But a duplicate is not a duplicate under certain circumstances:
+            # * same email and `shareWithCozy` is true;
+            # * same cozy and `shareWithCozy` is false;
+            # In those cases we can add the new guest.
+            if (email? and (not guestBisEmail? or
+            guestBisEmail?.shareWithCozy)) or (cozy? and (not guestBisCozy? or
+            (not guestBisCozy?.shareWithCozy)))
+                newGuest =
+                    key       : random.randomString()
+                    status    : 'INVITATION-NOT-SENT'
+                    contactid : contactID
+
+                # If guest was "autocompleted" then contactID is not null. We
+                # can fill additionnal information.
                 if contactID?
                     contact       = app.contacts.get contactID
-                    newGuest.cozy = contact.get 'cozy'
                     newGuest.name = contact.get 'name'
+                    if email?
+                        newGuest.email         = email
+                        newGuest.label         = email
+                        # By default if a guest has several cozy linked to him,
+                        # the first one is chosen.
+                        newGuest.cozy          =
+                            (contact.get 'cozy')?[0]?.value or null
+                        newGuest.shareWithCozy = false
+                    else if cozy?
+                        emails                 = (contact.get 'emails')
+                        # By default if a guest has several emails linked to
+                        # him, the first one is chosen.
+                        newGuest.email         = emails?[0]?.value or null
+                        newGuest.label         = cozy
+                        newGuest.cozy          = cozy
+                        newGuest.shareWithCozy = true
+                # Guest was manually entered
+                else
+                    if email?
+                        newGuest.label         = email
+                        newGuest.email         = email
+                        newGuest.shareWithCozy = false
+                        newGuest.cozy          = null
+                    else
+                        newGuest.label         = cozy
+                        newGuest.email         = null
+                        newGuest.shareWithCozy = true
+                        newGuest.cozy          = cozy
 
                 # Clone the source array, otherwise it's not considered as
                 # changed because it changes the model's attributes
