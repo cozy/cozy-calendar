@@ -12,16 +12,35 @@ module.exports = class PendingEventSharingsButtonItemView extends BaseView
     initialize: ->
         @listenTo @model, 'accepted refused', @destroy
 
+
     onAccept: ->
+        @disable()
+        @setBusy()
         @model.accept (err) =>
             if err
                 @onAnswerError err
+            else
+                @onAnswerSuccess()
 
 
     onDecline: ->
+        @disable()
+        @setBusy()
         @model.refuse (err) =>
             if err
                 @onAnswerError err
+            else
+                @onAnswerSuccess()
+
+
+    onAnswerSuccess: ->
+        @setValid()
+        @remove()
+
 
     onAnswerError: (err) ->
-        console.error err
+        @$errors = @$errors ?= @$ '.errors'
+        @$errors.html t 'An error occurred. Please try again later.'
+        @setNotBusy()
+        @setInvalid()
+        @enable()

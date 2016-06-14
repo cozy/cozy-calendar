@@ -9,6 +9,7 @@
     border-radius 1em
 
 .event-sharings-button-item
+    position relative
     line-height 1.5em
     margin-top 1em
     padding-bottom 1em
@@ -41,4 +42,38 @@
             &:active
                 color darkblue
                 text-decoration none
+
+    // Alternate states
+    .disabler,
+    .spinner,
+    .errors
+        display none
+
+    .disabler
+        background-color rgba(255,255,255,0.75)
+
+    &[aria-disabled],
+    &[aria-busy]
+        position relative
+
+    &[aria-disabled] .disabler,
+    &[aria-busy] .spinner
+        display block
+        position absolute
+        top 0
+        bottom 0
+        left 0
+        right 0
+
+    &[aria-busy] .spinner
+        display flex
+        align-items center
+        justify-content center
+
+        img
+            height 2em
+
+    &[aria-invalid] .errors
+        display block
+        color red
 
