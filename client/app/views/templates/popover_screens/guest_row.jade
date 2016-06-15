@@ -17,44 +17,40 @@ li.guest-top(data-index=index)
             role="button"
         )
 
-        - var displayShare = false
-        - var displayEmail = false
-        - var disableShare = false
-        - var disableEmail = false
+        - var hideShare    = true
+        - var hideEmail    = true
         - var activeShare  = false
         - var activeEmail  = false
 
         // If a cozy instance is linked to a contact.
         if cozy
-            - displayShare = true
+            - hideShare = false
 
             // The invitation is shared.
             if shareWithCozy
-                - disableShare = true
                 - activeShare  = true
 
         // If the contact also has an email.
         if email
-            - displayEmail = true
+            - hideEmail = false
 
             // The invitation is not shared, hence sent by email.
             if !shareWithCozy
-                - disableEmail = true
                 - activeEmail  = true
 
         button.guest-share-with-email.fa.fa-envelope-o(
             title=t('screen guest share with email tooltip')
             role='button'
             class=activeEmail ? 'active' : ''
-            disabled=disableEmail ? 'disabled' : false
-            class=displayEmail ? '' : 'aria-hidden'
+            disabled=activeEmail ? 'disabled' : false
+            aria-hidden=hideEmail
         )
 
         button.guest-share-with-cozy.fa.fa-cloud(
             title=t('screen guest share with cozy tooltip')
             role="button"
             class=activeShare ? 'active' : ''
-            disabled=disableShare ? 'disabled' : false
-            class=displayShare ? '' : 'aria-hidden'
+            disabled=activeShare ? 'disabled' : false
+            aria-hidden=hideShare
         )
 
