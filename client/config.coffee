@@ -48,5 +48,4 @@ exports.config =
                 after: ['vendor/styles/helpers.css']
 
         templates:
-            defaultExtensions: 'jade'
             joinTo: 'javascripts/app.js'

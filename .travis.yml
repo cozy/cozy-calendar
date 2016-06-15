@@ -26,4 +26,4 @@ deploy:
     tags: true
     node: '4'
   api_key:
-    secure: TxW9CktbFR6xUz/OLu4dCbAJICoYU4M2nMf7F9crO5vFdwouI86p7CVQ8o6ug1G1jxWjECYpilDmhsHOEWFaBbKrM0CJQsGfFKhKiHDLrf7O6lhhBKZHrx67WDHgQ1LDjo6Pd2fuFsdmAdEm890MavA1vvnqS4ycqECOuBcHY8s=
+    secure: cgSVkp9SA52dMj/sT7ZWiZ5Im++rUMZfRk6TbWCZXS0fgMFebOk1Th7NkVd8AWorMVLfWKWC4v4IlO7oFo/LYfklgnl7CaGhtPnyYDqMuKVOjZullsoF6hAPRv2//Hx/d5lb50KKn8+pRCkQLgi2EBkwHT+4eCwzknHZj1FEIv8=
