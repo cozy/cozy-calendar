@@ -50,3 +50,5 @@ Sharing.refuse = function(id, callback) {
     accepted: false
   }, callback);
 };
+
+//# sourceMappingURL=sharing.js.map

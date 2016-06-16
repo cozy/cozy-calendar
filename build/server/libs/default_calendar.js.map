@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "default_calendar.js",
+  "sourceRoot": "../../..",
+  "sources": [
+    "server/libs/default_calendar.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA,IAAA;;AAAA,YAAA,GAAe,OAAA,CAAQ,2BAAR,CAAoC,CAAC,WAArC,CAAA;;AAEf,MAAM,CAAC,OAAO,CAAC,OAAf,GAAyB,SAAA;SACrB,YAAY,CAAC,CAAb,CAAe,uBAAf;AADqB"
+}

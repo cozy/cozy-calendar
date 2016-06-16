@@ -34,3 +34,5 @@ Tag.getOrCreateByName = function(data, callback) {
     }
   });
 };
+
+//# sourceMappingURL=tag.js.map

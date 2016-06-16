@@ -27,7 +27,7 @@ module.exports.sendShareInvitations = function(event, callback) {
       return needSaving = true;
     }
   });
-  return cozydb.api.createSharing(data, function(err, body) {
+  return cozydb.api.createSharing(data, function(err) {
     if (err != null) {
       return callback(err);
     } else if (!needSaving) {
@@ -39,3 +39,5 @@ module.exports.sendShareInvitations = function(event, callback) {
     }
   });
 };
+
+//# sourceMappingURL=share_handler.js.map

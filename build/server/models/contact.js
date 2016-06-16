@@ -22,23 +22,31 @@ module.exports = Contact = cozydb.getModel('Contact', {
 });
 
 Contact.prototype.asNameAndEmails = function() {
-  var cozy, dp, emails, i, len, name, ref, ref1, ref2, ref3, ref4, simple;
+  var cozy, dp, emails, name, ref, ref1, ref2, simple;
   name = this.fn || ((ref = this.n) != null ? ref.split(';').slice(0, 2).join(' ') : void 0);
   emails = (ref1 = this.datapoints) != null ? ref1.filter(function(dp) {
     return dp.name === 'email';
   }) : void 0;
-  ref2 = this.datapoints;
-  for (i = 0, len = ref2.length; i < len; i++) {
-    dp = ref2[i];
-    if ((dp.name === 'other' && dp.type === 'COZY') || (dp.name === 'url' && ((ref3 = dp.mediatype) != null ? ref3.search('cozy' !== -1) : void 0))) {
-      cozy = dp.value;
+  cozy = (function() {
+    var i, len, ref2, ref3, results;
+    ref2 = this.datapoints;
+    results = [];
+    for (i = 0, len = ref2.length; i < len; i++) {
+      dp = ref2[i];
+      if ((dp.name === 'other' && dp.type === 'COZY') || (dp.name === 'url' && ((ref3 = dp.mediatype) != null ? ref3.search('cozy' !== -1) : void 0))) {
+        results.push(dp.value);
+      }
     }
-  }
-  return simple = {
+    return results;
+  }).call(this);
+  simple = {
     id: this.id,
     name: name || '?',
     emails: emails || [],
-    hasPicture: ((ref4 = this._attachments) != null ? ref4.picture : void 0) != null,
+    hasPicture: ((ref2 = this._attachments) != null ? ref2.picture : void 0) != null,
     cozy: cozy || null
   };
+  return simple;
 };
+
+//# sourceMappingURL=contact.js.map

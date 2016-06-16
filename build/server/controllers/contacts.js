@@ -9,8 +9,10 @@ ContactsController = new SimpleController({
   reqParamID: 'contactid'
 });
 
-ContactsController.sendSmall = function(req, res, next) {
+ContactsController.sendSmall = function(req, res) {
   return res.send(req.contact.asNameAndEmails());
 };
 
 module.exports = ContactsController;
+
+//# sourceMappingURL=contacts.js.map

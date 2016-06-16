@@ -25,7 +25,7 @@ publicStatic = function(req, res, next) {
   });
 };
 
-viewsDir = path.resolve(__dirname, '..', 'client');
+viewsDir = path.resolve(__dirname, 'views');
 
 useBuildView = fs.existsSync(path.resolve(viewsDir, 'index.js'));
 
@@ -48,11 +48,14 @@ module.exports = {
     },
     engine: {
       js: function(path, locales, callback) {
+        locales.webpack = require('../webpack-assets.json');
         return callback(null, require(path)(locales));
       }
     }
   },
   development: [americano.logger('dev')],
   production: [americano.logger('short')],
-  plugins: ['cozydb']
+  plugins: ['cozydb', 'cozy-localization-manager']
 };
+
+//# sourceMappingURL=config.js.map

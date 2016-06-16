@@ -5,7 +5,7 @@ cozydb = require('cozydb');
 
 async = require('async');
 
-moment = require('moment-timezone');
+moment = require('../libs/moment');
 
 Event = require('./event');
 
@@ -126,7 +126,8 @@ Alarm.prototype.migrateDoctype = function(callback) {
 Alarm.migrateAll = function(callback) {
   return Alarm.all({}, function(err, alarms) {
     if (err) {
-      console.log(err);
+      log.error("can get alarm/all");
+      log.raw(err);
       return callback();
     } else {
       return async.eachLimit(alarms, 10, function(alarm, done) {
@@ -135,3 +136,5 @@ Alarm.migrateAll = function(callback) {
     }
   });
 };
+
+//# sourceMappingURL=alarm.js.map

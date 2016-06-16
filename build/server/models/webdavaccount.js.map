@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "webdavaccount.js",
+  "sourceRoot": "../../..",
+  "sources": [
+    "server/models/webdavaccount.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA,IAAA;;AAAA,MAAA,GAAS,OAAA,CAAQ,QAAR;;AAGT,MAAM,CAAC,OAAP,GAAiB,MAAM,CAAC,QAAP,CAAgB,eAAhB,EACb;EAAA,EAAA,EAAI,MAAJ;EACA,KAAA,EAAO,MADP;EAEA,KAAA,EAAO,MAFP;EAGA,QAAA,EAAU,MAHV;EAIA,IAAA,EAAM,MAJN;EAKA,QAAA,EAAU,MALV;CADa"
+}

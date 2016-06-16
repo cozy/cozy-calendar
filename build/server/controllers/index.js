@@ -3,7 +3,7 @@ var Contact, Event, Sharing, Tag, User, WebDavAccount, async, cozydb, log, momen
 
 async = require('async');
 
-moment = require('moment');
+moment = require('../libs/moment');
 
 cozydb = require('cozydb');
 
@@ -92,3 +92,5 @@ module.exports.logClient = function(req, res) {
   log.error((ref = req.body.data.error) != null ? ref.stack : void 0);
   return res.send('ok');
 };
+
+//# sourceMappingURL=index.js.map
