@@ -2,7 +2,37 @@ module.exports =
 
     listenTo: Backbone.Model.prototype.listenTo
 
-    initialize: ->
+
+    # Initialize a custom error handler for the global app
+    initializeErrorHandler: (window) ->
+        existingDefaultHandler = window.onerror
+
+        applicationErrorHandler = (msg, url, line, col, error) ->
+            # Handler for asynchronous errors
+            @onEventSharingError = (error) ->
+                # TODO find a better way to format a string like this
+                alert [ t('Event sharing failed for event'),
+                        error.event.get('description'),
+                        '(' + t(error.message) + ')' ].join ' '
+
+                return true
+
+            # error = event.error
+            errorHandlerName = 'on' + error.name
+
+            if @[errorHandlerName] and typeof @[errorHandlerName] == 'function'
+                return @[errorHandlerName] error
+            else if existingDefaultHandler and
+                        typeof existingDefaultHandler == 'function'
+                return existingDefaultHandler msg, url, line, col, error
+            else
+                throw error
+
+        window.onerror = applicationErrorHandler
+
+
+    initialize: (window) ->
+        @initializeErrorHandler(window)
 
         window.app = @
 
