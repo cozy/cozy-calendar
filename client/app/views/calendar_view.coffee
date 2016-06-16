@@ -199,7 +199,10 @@ module.exports = class CalendarView extends BaseView
                 description: ''
                 place: ''
 
-            model.fetchEditability (editable) =>
+            model.fetchEditability (err, editable) =>
+                if err
+                    console.error err
+
                 @popover = new EventPopover _.extend options,
                     readOnly : not editable
                 @popover.render()

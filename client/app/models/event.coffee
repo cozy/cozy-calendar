@@ -115,11 +115,10 @@ module.exports = class Event extends ScheduleItem
         if not @isNew() and @hasSharing()
             @fetchSharing (err, sharing) =>
                 if err
-                    console.error err
-                    callback false
+                    callback err, false
                 else
                     isEditable = @get('shareID') == sharing.get('id')
-                    callback isEditable
+                    callback null, isEditable
         else
             callback true
 
