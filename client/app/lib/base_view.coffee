@@ -102,3 +102,27 @@ module.exports = class BaseView extends Backbone.View
 
             listenedElements.forEach (element) ->
                 element.removeEventListener 'click', insideElementClickHandler
+
+
+    disable: ->
+        @$el.attr 'aria-disabled', true
+
+
+    enable: ($disabler)->
+        @$el.removeAttr 'aria-disabled'
+
+
+    setInvalid: ->
+        @$el.attr 'aria-invalid', true
+
+
+    setValid: ->
+        @$el.removeAttr 'aria-invalid'
+
+
+    setBusy: ->
+        @$el.attr 'aria-busy', true
+
+
+    setNotBusy: ->
+        @$el.removeAttr 'aria-busy'
