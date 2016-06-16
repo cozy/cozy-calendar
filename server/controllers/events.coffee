@@ -1,5 +1,5 @@
 async = require 'async'
-moment = require 'moment-timezone'
+moment = require '../libs/moment'
 
 User = require '../models/user'
 Event = require '../models/event'

@@ -2,7 +2,7 @@
 
 should = require 'should'
 async = require 'async'
-moment = require 'moment-timezone'
+moment = require '../server/libs/moment'
 Client = require('request-json').JsonClient
 
 client = new Client "http://localhost:8888/"

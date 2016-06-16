@@ -1,5 +1,5 @@
 async = require 'async'
-moment = require 'moment'
+moment = require '../server/libs/moment'
 should = require 'should'
 
 Event = require '../server/models/event'
