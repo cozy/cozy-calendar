@@ -50,20 +50,29 @@ module.exports.create = (req, res) ->
             if data.import
                 res.status(201).send event
             else
-                # We first share the events, if the event is shared (this
-                # condition is checked within `sendShareInvitations`)
-                ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
-
-                    # If the event has guests that are notified by email and for
-                    # whom the owner confirmed she wanted to send emails, we
-                    # send the emails
-                    if req.query.sendMails is 'true'
-                        MailHandler.sendInvitations (updatedEvent or event),
-                        false, (err, updatedEvent) ->
+                # If at least one guest has the event shared
+                if req.query.share is 'true'
+                    ShareHandler.sendShareInvitations event,
+                    (err, updatedEvent) ->
+                        # If the event has guests that are notified by email and
+                        # for whom the owner confirmed she wanted to send
+                        # emails, we send the emails
+                        if req.query.sendMails is 'true'
+                            MailHandler.sendInvitations (updatedEvent or event),
+                            false, (err, updatedEvent) ->
+                                res.status(201).send (updatedEvent or event)
+                        # Otherwise we just update the event
+                        else
                             res.status(201).send (updatedEvent or event)
-                    # Otherwise we just update the event
+
+                # No guest has the event shared
+                else
+                    if req.query.sendMails is 'true'
+                        MailHandler.sendInvitations event, false,
+                        (err, updatedEvent) ->
+                            res.status(201).send (updatedEvent or event)
                     else
-                        res.status(201).send (updatedEvent or event)
+                        res.status(201).send event
 
 
 # Expect a list of events as body and create an event in database for each
@@ -101,15 +110,26 @@ module.exports.update = (req, res) ->
         if err?
             res.status(500).send error: "Server error while saving event"
         else
-            ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+            if req.query.share is 'true'
+                ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
+                    if req.query.sendMails is 'true'
+                        dateChanged = data.start isnt start
+
+                        MailHandler.sendInvitations (updatedEvent or event),
+                        dateChanged, (err, updatedEvent) ->
+                            res.status(201).send (updatedEvent or event)
+                    else
+                        res.status(201).send event
+
+            else
                 if req.query.sendMails is 'true'
                     dateChanged = data.start isnt start
 
-                    MailHandler.sendInvitations (updatedEvent or event),
-                    dateChanged, (err, updatedEvent) ->
-                        res.send (updatedEvent or event)
+                    MailHandler.sendInvitations event, dateChanged,
+                    (err, updatedEvent) ->
+                        res.status(201).send (updatedEvent or event)
                 else
-                    res.send event
+                    res.status(201).send event
 
 
 module.exports.delete = (req, res) ->

@@ -309,10 +309,13 @@ module.exports = class ScheduleItem extends Backbone.Model
         # attributes in the model.
         frozenModel = model.clone()
 
-        @confirmSendEmails method, (sendMails) ->
-            # overrides the url to append the sendmails parameter
-            options.url = "#{model.url()}?sendMails=#{sendMails}"
-            return super method, frozenModel, options
+        @confirmSendEmails method, (sendMails) =>
+            @hasShare method, (share) ->
+                # overrides the url to append the sendmails parameter
+                options.url  = "#{model.url()}?sendMails=#{sendMails}"
+                options.url += "&share=#{share}"
+                return super method, frozenModel, options
+
 
     confirmSendEmails: (method, callback) ->
         if @get 'import' # No mails on files import.
@@ -320,7 +323,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # Kind of changes which doesn't need mails.
         if method in ['update', 'patch'] and
-           not ( @startDateChanged or @attendeesChanged)
+        not ( @startDateChanged or @attendeesChanged)
             return callback false
 
         # else: look state of each guest.
@@ -352,4 +355,29 @@ module.exports = class ScheduleItem extends Backbone.Model
                 t('yes'), t('no'), callback
 
         @startDateChanged = false
+
+
+    hasShare: (method, callback) =>
+        # No share on files import or deletion.
+        if (@get 'import') or (method is 'delete')
+            return callback false
+
+        if (method in ['update', 'patch']) and (not @attendeesChanged)
+            return callback false
+
         @attendeesChanged = false
+
+        attendees = @get('attendees') or []
+        i = 0
+        guest = attendees[i]
+
+        while guest
+            if guest.shareWithCozy and ((method is 'create') or
+            (guest.status is 'INVITATION-NOT-SENT'))
+                return callback true
+
+            i++
+            guest = attendees[i]
+
+        return callback false
+
