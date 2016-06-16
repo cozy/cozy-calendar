@@ -104,9 +104,9 @@ module.exports = class Event extends ScheduleItem
     # A shared event has at least one attendees with a cozy invitation
     isShared: ->
         attendees = @get 'attendees'
-        hasCozyAttendees = attendees?.find (attendee) ->
+        cozyAttendees = attendees?.find (attendee) ->
             return attendee.shareWithCozy
-        return hasCozyAttendees
+        return cozyAttendees?
 
 
     # Try to get a shareID (called typically just after saving),
