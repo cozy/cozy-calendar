@@ -204,7 +204,7 @@ module.exports = class CalendarView extends BaseView
                     readOnly : not editable
                 @popover.render()
 
-            @listenTo @popover, 'closed', @onPopoverClose
+                @listenTo @popover, 'closed', @onPopoverClose
 
         if @popover
             # click on same case
