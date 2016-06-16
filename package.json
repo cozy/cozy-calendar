@@ -37,8 +37,7 @@
     "should": "8.3.0"
   },
   "corbu": {
-    "--same-locales": true,
-    "--brunch": true
+    "--same-locales": true
   },
   "scripts": {
     "start": "node build/server.js",

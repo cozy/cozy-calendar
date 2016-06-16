@@ -164,21 +164,21 @@ module.exports = class ImportView extends BaseView
 
                 # Events which was not properly imported are listed.
                 for event in result.errors
-                    @addImportError event, './templates/import_event'
+                    @addImportError event
 
             @updateCounter events.length
             setTimeout callback, 200
 
 
     # Display error that occured while importing an element.
-    addImportError: (event, templatePath) ->
+    addImportError: (event) ->
         if $('.import-errors').html().length is 0
             $('.import-errors').html """
             <p>#{t 'import error occured for'}</p>
             """
 
         $('.import-errors').append(
-            require(templatePath)(event)
+            require('./templates/import_event')(event)
         )
 
 
@@ -208,4 +208,3 @@ module.exports = class ImportView extends BaseView
     resetUploader: ->
         @uploader.wrap('<form>').parent('form').trigger('reset')
         @uploader.unwrap()
-
