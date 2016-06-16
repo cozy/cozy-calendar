@@ -70,3 +70,5 @@ module.exports["delete"] = function(req, res) {
     }
   });
 };
+
+//# sourceMappingURL=tags.js.map

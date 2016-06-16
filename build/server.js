@@ -8,38 +8,34 @@ start = function(port, callback) {
     host: process.env.HOST || "0.0.0.0",
     root: __dirname
   }, function(err, app, server) {
-    var Realtimer, User, cozydb, localization, realtime;
-    cozydb = require('cozydb');
+    var Realtimer, User, localization, localizationManager, realtime, updateLocales;
+    require('cozydb');
     User = require('./server/models/user');
-    localization = require('./server/libs/localization_manager');
     Realtimer = require('cozy-realtime-adapter');
+    localization = require('cozy-localization-manager');
+    localizationManager = localization.getInstance();
     realtime = Realtimer(server, ['event.*', 'contact.*', 'sharing.*']);
     realtime.on('user.*', function() {
       return User.updateUser();
     });
-    realtime.on('cozyinstance.*', function() {
-      return cozydb.api.getCozyInstance(function(err, instance) {
-        var locale;
-        locale = (instance != null ? instance.locale : void 0) || null;
-        return localization.updateLocale(locale);
-      });
-    });
+    updateLocales = localizationManager.realtimeCallback.bind(localizationManager);
+    realtime.on('cozyinstance.*', updateLocales);
     return User.updateUser(function(err) {
-      return localization.initialize(function() {
-        var Alarm, Event;
-        Event = require('./server/models/event');
-        Alarm = require('./server/models/alarm');
-        return Event.migrateAll(function() {
-          return Alarm.migrateAll(function() {
-            return Event.initializeData(function(err2, event) {
-              return callback(err, app, server);
-            });
+      var Alarm, Event;
+      Event = require('./server/models/event');
+      Alarm = require('./server/models/alarm');
+      return Event.migrateAll(function() {
+        return Alarm.migrateAll(function() {
+          return Event.initializeData(function(err2) {
+            return callback(err || err2, app, server);
           });
         });
       });
     });
   });
 };
+
+console.log("env", process.env);
 
 if (!module.parent) {
   port = process.env.PORT || 9113;
@@ -53,3 +49,5 @@ if (!module.parent) {
 } else {
   module.exports = start;
 }
+
+//# sourceMappingURL=server.js.map

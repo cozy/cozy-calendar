@@ -1,5 +1,4 @@
 Client = require('request-json').JsonClient
-client = new Client "http://localhost:8888/"
 ds = new Client "http://localhost:9101/"
 ds.setBasicAuth process.env.NAME, process.env.TOKEN
 
@@ -11,7 +10,6 @@ else
     helpers.prefix = '../'
 
 Event = require "#{helpers.prefix}server/models/event"
-User  = require "#{helpers.prefix}server/models/user"
 
 userID = null
 
@@ -45,7 +43,7 @@ helpers.getAllEvents = (callback) ->
     Event.all callback
 
 # Create an event from values
-helpers.createEvent = (start, end, place, description, callback) ->
+helpers.createEvent = (start, end, place, description) ->
     (callback) ->
         evt =
             start: start

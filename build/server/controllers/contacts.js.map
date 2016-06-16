@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "contacts.js",
+  "sourceRoot": "../../..",
+  "sources": [
+    "server/controllers/contacts.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA,IAAA;;AAAC,mBAAoB,OAAA,CAAQ,QAAR,EAApB;;AACD,kBAAA,GAAyB,IAAA,gBAAA,CACrB;EAAA,KAAA,EAAO,OAAA,CAAQ,mBAAR,CAAP;EACA,OAAA,EAAS,SADT;EAEA,UAAA,EAAY,WAFZ;CADqB;;AAKzB,kBAAkB,CAAC,SAAnB,GAA+B,SAAC,GAAD,EAAM,GAAN;SAC3B,GAAG,CAAC,IAAJ,CAAS,GAAG,CAAC,OAAO,CAAC,eAAZ,CAAA,CAAT;AAD2B;;AAG/B,MAAM,CAAC,OAAP,GAAiB"
+}

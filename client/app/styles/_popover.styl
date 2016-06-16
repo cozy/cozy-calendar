@@ -1,0 +1,608 @@
+//
+// Styles for the calendar popover (event and alarm creation/edition)
+// ----------------------------------------------------------------------------
+// TODO: rebuild all styles with relative units. Need to revamp a whole bunch
+//       of the app styles
+.popover
+    width: 25em
+    max-width: none
+    padding: 0
+    font-family: 'Source Sans Pro', sans-serif
+
+    &:focus
+    &:active
+        outline none
+
+    .label
+        box-sizing border-box
+        position relative
+        margin 0
+        padding 0
+        background-color transparent
+        border medium none
+        border-radius 0
+
+        .icon
+            position absolute
+            top 0
+            cursor pointer
+
+            &.right
+                right 0
+
+                span
+                    font-size 2rem
+                    color grey-03
+
+        &.dontaskagain-label
+            display flex
+            align-items baseline
+
+        input.dontaskagain
+            margin .25em
+
+    .icon
+        font-size 1rem
+        color grey-04
+        text-shadow none
+        width 3.2rem
+        height 100%
+        display flex
+        justify-content center
+        align-items center
+
+    .label-row
+        width         100%
+        border-bottom 1px solid grey-03
+
+        input[type=text]
+            height 3em
+
+        &.is-same-day input[type=text]
+            height: 1.8em
+
+        .button-full-block
+            height 3em
+
+            &[aria-disabled]
+                cursor not-allowed
+
+        .button-full-block:focus
+            background-color lightblue
+
+    input
+        box-sizing: border-box
+        margin: 0px
+        border: 1px solid white
+        border-radius: 0
+        box-shadow: none !important
+        font-family: 'Source Sans Pro', sans-serif
+
+        &[type=text]
+            .input-time
+                width: 4em
+                text-align: right
+
+            .input-date
+                width: 8em
+
+        &[type=time]
+            // Revert default width
+            width auto
+
+        &[aria-readonly],
+        &[readonly]
+            background-color: transparent
+
+    .input-full-block
+    .button-full-block
+        width 100%
+        padding 0 3em
+        background-color transparent
+        border none
+        font-size 1rem
+        text-align left
+
+    .button-full-block
+        font-family 'Source Sans Pro', sans-serif
+        color darkcolor
+        line-height 0
+        overflow auto
+        text-overflow ellipsis
+
+    .controls
+        position absolute
+        top 0
+        right 0
+        padding 0.2em
+
+        display flex
+        flex-direction column
+        justify-content center
+        height 100%
+
+        [role=button]
+        .remove-spinner
+            box-sizing border-box
+            display block
+            width 2em
+            height 1.5em
+            padding 0 0.2em
+            margin 0
+            border-left 1px solid grey-02
+            font-size 1em
+            cursor pointer
+
+        .remove-spinner
+            padding 0 0.5em
+            display none
+            cursor wait
+
+        button
+            color grey-05
+            opacity 0.7
+            margin-right 5px
+            border none
+            font-size 0.8em
+            background-color transparent
+
+            &:hover
+                opacity 1
+                color darkblue
+
+    [aria-hidden="true"]
+        display none
+
+
+.popover-title
+    position relative
+    padding 0
+    background-color white
+    border-bottom 1px solid grey-03
+    font-size 1em
+
+    .label
+        width: 100%
+        padding: 0
+
+    .label + .label
+        margin-top: 4px
+
+    .calendar
+        z-index 1
+        position absolute
+        top 50%
+        margin-top -0.75em
+        margin-left 1.2em
+
+        .badge
+            margin: 0
+            cursor pointer
+
+            &.readonly
+                cursor default
+
+
+        .calendarcombo
+            display: none
+
+            &.expanded
+                display: inline-block
+                margin-left: 5px
+
+    .event-description
+        width 100%
+        padding 0 3em
+        height 3em
+        background-color transparent
+        border none
+        font-size: 1.6em
+
+
+.popover-content
+    padding 0
+
+    .fixed-height
+        height 24rem
+        overflow auto
+
+    .caption
+        display inline-block
+        min-width 3em
+        margin-left 3rem
+
+    .aside
+            float: right
+            clear: none
+
+    .end-date
+        clear: none
+
+        .caption
+            min-width: inherit
+
+    textarea
+        box-sizing border-box
+        margin 0
+        padding 1em
+        width 100%
+        height 100%
+        resize none
+        background-color transparent
+        border none
+        box-shadow none
+        font-size 1rem
+        line-height 1.3rem
+
+
+.popover .interval-row
+    display flex
+    align-content center
+
+    .date-row
+        border-right 1px solid grey-03
+
+    &.readonly .date-row
+        border-right none
+
+    .item-row
+        display table
+        padding 0 .5em 0 0
+        margin .5em 0
+
+    .time-row
+        display table-row
+        font-size 1rem
+        line-height 1.5em
+
+        & > *
+            display table-cell
+            vertical-align middle
+
+        .icon
+            text-align center
+
+        input[type=text],
+        input[type=time]
+            font-size 1rem
+            width auto
+            height 1.8em
+            // decrease sides padding for Firefox
+            padding 4px 0
+
+    .all-day-row
+        width 25%
+        display flex
+        align-items center
+        justify-content center
+
+    .all-day
+        display flex
+
+    .input-allday
+        margin auto
+        margin-right 0.5em
+
+
+.popover-footer
+    display flex
+    justify-content space-between
+    align-items baseline
+    flex-direction row-reverse
+    padding 0.6em 0.8em
+    background-color grey-01
+    border-radius 0 0 5px 5px
+
+    [role=button]
+        font-size: 0.95em
+
+        &:hover
+            text-decoration none
+
+        &:focus
+            color white
+            text-decoration none
+
+    .btn-link[role=button]
+        &:hover
+            text-decoration underline
+
+        &:focus
+            color white
+
+    .btn-link.cancel
+        margin-right 0.5em
+
+
+    .icon
+        display inline-block
+        padding 0 0.9em 0 0.4em
+        font-size 1rem
+
+    .buttons
+        order 1
+
+    .advanced-link
+        order 3
+
+.input-place
+    overflow      hidden
+    text-overflow ellipsis
+
+// header on secondary screen
+.popover-back
+    display flex
+    justify-content space-between
+    align-items center
+    padding 0.8em 1.5em
+    background-color grey-01
+    border-radius 5px 5px 0 0
+
+    & > *
+        flex-grow 1
+        flex-basis 25%
+
+    h4
+        flex-grow 2
+        flex-basis 50%
+        text-align center
+        margin 0
+        font-weight normal
+        font-size 1.2em
+
+        &:hover
+            cursor default
+
+    i
+        font-size 2rem
+        line-height 0
+        color grey-04
+
+        &:hover
+            cursor pointer
+            color darkblue
+
+    .btn-done-placeholder
+        // The btn-done element is not rendered when the event is readonly
+        // but we need to keep an empty sapce to keep the screen title h4's
+        // text centered
+        text-align right
+        flex-grow 1
+
+    .btn-done
+        padding 0.4em
+        background-color grey-04
+        border-radius 3px
+        line-height 1
+        text-align center
+        color white
+
+        &:hover
+            cursor pointer
+            background-color darkblue
+
+    .btn-back
+        padding 0.7em 0
+        width 43px
+        background-color transparent
+        text-align left
+
+        &:hover
+            cursor pointer
+
+        &:active
+            box-shadow 0 0
+
+// select special
+select.select-big
+    margin-bottom 1.5em
+    width         100%
+    height        2.5rem
+    border-color  grey-03
+    font-size     1.1em
+
+    &.with-margin
+        margin 1.5em
+        width  calc(100% - 3em)
+
+// Guest screen
+.guests-action
+    display flex
+    align-items center
+    padding 1em 1.5em
+
+    input[type=text]
+        flex 1
+        height 2.1em
+        margin-right 0.5em
+        border 1px solid grey-03
+        font-size 1rem
+
+    // Override bootrstrap style to prevent content from going out of the block.
+    .dropdown-menu > li > a
+        overflow hidden
+        text-overflow ellipsis
+
+ul.guests
+    margin 0
+    list-style-type none
+
+    display table
+    width 100%
+
+    li
+        padding 1em 1.5em
+        border-top 1px solid grey-03
+        line-height 1
+
+        &:last-child
+            border-bottom 1px solid grey-03
+
+    .guest-top
+        display table-row
+        align-items center
+
+        & > *
+            display table-cell
+            padding .5em
+
+            &:last-child
+                padding-right 1.5em
+
+            &:first-child
+                padding-left 1.5em
+
+        .status,
+        .button-wrapper
+            width 1em
+
+    .guest-top button
+            height auto
+            border none
+            background-color transparent
+            font-size 1.2em
+            color grey-04
+            padding .5em
+
+            &:hover
+                color darkblue
+
+    .guest-label
+        font-size 1.1em
+        line-height 1.5em
+        text-overflow ellipsis
+        overflow hidden
+
+// Alerts screen
+ul.alerts
+    margin 0
+    list-style-type none
+
+    li
+        padding 1.5em
+        border-bottom 1px solid grey-03
+        line-height 1
+
+        &:first-child
+            border-top 1px solid grey-03
+
+    .alert-top
+    .type
+    .notification-mode
+        display flex
+        align-items center
+
+    .alert-top
+        justify-content space-between
+
+        button
+            height auto
+            border none
+            background-color transparent
+            font-size 1.2em
+            color grey-04
+
+            &:hover
+                color darkblue
+
+    .alert-timer
+        font-size 1.4em
+
+    .type
+        margin-top 0.5em
+
+        label
+            padding 0 1.5em 0 0.5em
+            color grey-04
+
+        input[type=checkbox]
+            flex none
+
+// repeat screen
+.repeat-screen
+    box-sizing border-box
+    padding    1.5em
+
+    label
+    .label
+        width auto
+
+    input.special
+        margin-right 0.4em
+        width        5rem
+        height       2em
+        border       1px solid grey-03
+
+    .inline-input
+        display         flex
+        justify-content flex-start
+        align-items     center
+        margin-bottom   1.4em
+
+        label.inline-input
+            margin-bottom   0.2em
+
+            input.special
+                margin-left 0.4em
+
+    .first-input
+        flex             none
+        width            5rem
+        text-transform   uppercase
+        color            grey-05
+
+        &.align-top
+            align-self flex-start
+
+    input[type="radio"],
+    input[type="checkbox"]
+        flex         none
+        margin-right 0.5em
+
+    .space-between
+        display         flex
+        align-items     center
+        justify-content space-between
+        width           100%
+
+        label
+            margin-right 0.75em
+
+        input[type="radio"],
+        input[type="checkbox"]
+            margin-right 0.25em
+
+// delete screen
+.delete-screen
+    box-sizing border-box
+    padding    1.5em
+
+    .remove-choices
+        text-align center
+
+        .btn
+            margin 0.5em
+
+    .spinner-block
+        width 100%
+        display flex
+        justify-content center
+
+        .remove-spinner
+            width 2em
+            height 2em
+            margin 2em 0
+
+// The .overflow-wrapper span is a additional span added inside a
+// button-full-block button, to allow an expected rendering of the
+// details Button.
+// Otherwise, Chrome displays the content of the button as expected, but in
+// Firefox the text content of the button overflows the button icons.
+.button-full-block .overflow-wrapper
+    width: 16em
+    overflow: hidden
+    text-overflow: ellipsis
+    line-height: 3em
+    display: inline-block
+    height: 3em
+    display: inline-block

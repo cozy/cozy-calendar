@@ -1,6 +1,4 @@
 PopoverView = require 'lib/popover_view'
-Event       = require 'models/event'
-Modal       = require 'lib/modal'
 
 unless window.localStorage
     window.localStorage = {}
@@ -40,7 +38,8 @@ module.exports = class EventPopOver extends PopoverView
         @context = {
             # The formModel represents the form's state. It's synchronized with
             # the original model just before the save action.
-            # The formModel is passed to popover screens via the context property
+            # The formModel is passed to popover screens via the
+            # context property
             # @See https://github.com/cozy/cozy-calendar/issues/465
             formModel: @model.clone(),
             readOnly: options.readOnly

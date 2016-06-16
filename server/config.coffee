@@ -15,7 +15,7 @@ publicStatic = (req, res, next) ->
 
     staticMiddleware req, res, (err) -> next err
 
-viewsDir = path.resolve __dirname, '..', 'client'
+viewsDir = path.resolve __dirname, 'views'
 useBuildView = fs.existsSync path.resolve viewsDir, 'index.js'
 
 module.exports =
@@ -37,6 +37,7 @@ module.exports =
 
         engine:
             js: (path, locales, callback) ->
+                locales.webpack = require('../webpack-assets.json')
                 callback null, require(path)(locales)
 
     development: [
@@ -49,4 +50,5 @@ module.exports =
 
     plugins: [
         'cozydb'
+        'cozy-localization-manager'
     ]

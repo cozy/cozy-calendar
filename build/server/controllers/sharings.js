@@ -64,7 +64,7 @@ module.exports.accept = function(req, res) {
   var data, id;
   data = req.body;
   id = data.id;
-  return Sharing.accept(id, function(err, response) {
+  return Sharing.accept(id, function(err) {
     if (err) {
       return res.status(500).send({
         error: err
@@ -79,7 +79,7 @@ module.exports.refuse = function(req, res) {
   var data, id;
   data = req.body;
   id = data.id;
-  return Sharing.refuse(id, function(err, response) {
+  return Sharing.refuse(id, function(err) {
     if (err) {
       return res.status(500).send({
         error: err
@@ -89,3 +89,5 @@ module.exports.refuse = function(req, res) {
     }
   });
 };
+
+//# sourceMappingURL=sharings.js.map

@@ -118,7 +118,7 @@ module.exports = class Event extends ScheduleItem
                     console.error err
                     callback false
                 else
-                    isEditable = @get('shareID') == sharing.get('id')
+                    isEditable = @get('shareID') is sharing.get('id')
                     callback isEditable
         else
             callback true
@@ -152,10 +152,10 @@ module.exports = class Event extends ScheduleItem
             #   The user is the recipient : a sharing object having the same
             #       shareID property than the event exists.
             error: (sharing, response, options) =>
-                sharingNotFound = response and response.status == 404
+                sharingNotFound = response and response.status is 404
 
                 if sharingNotFound
-                    @fetchSharingByShareId (err, sharing) =>
+                    @fetchSharingByShareId (err, sharing) ->
                         if err
                             errorHandler err
                         else
@@ -176,10 +176,9 @@ module.exports = class Event extends ScheduleItem
         sharingToFetch = new Sharing()
         sharingToFetch.fetch
             data: shareID: @get 'shareID'
-            success: (sharing, response, options) =>
-                callback null, sharing
+            success: (sharing) -> callback null, sharing
 
-            error: (sharing, resopnse, options) ->
+            error: (sharing, response) ->
                 callback JSON.parse(response.responseText), null
 
 
@@ -201,7 +200,7 @@ module.exports = class Event extends ScheduleItem
             return attendee if not attendee.shareWithCozy
 
             target = sharing.get('targets').find (target) ->
-                return target.recipientUrl == attendee.cozy
+                return target.recipientUrl is attendee.cozy
 
             # If an attendee is invited to an event with a Cozy sharing,
             # he should be in the list of the sharing's targets.
@@ -238,4 +237,3 @@ module.exports = class Event extends ScheduleItem
         @cachedAttendeesSharing = _.clone sharing
 
         return @get 'attendees'
-

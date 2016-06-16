@@ -1,11 +1,10 @@
 cozydb = require 'cozydb'
-moment = require 'moment-timezone'
+moment = require '../libs/moment'
 async = require 'async'
 log = require('printit')
     prefix: 'event:model'
 Tag = require './tag'
-
-localization = require '../libs/localization_manager'
+defaultCalendar = require '../libs/default_calendar'
 User = require './user'
 
 module.exports = Event = cozydb.getModel 'Event',
@@ -179,7 +178,8 @@ Event::patchTag = (callback) ->
 Event.migrateAll = (callback) ->
     Event.all {}, (err, events) ->
         if err?
-            console.log err
+            log.error "can get event/all"
+            log.raw err
             callback()
         else
             async.eachLimit events, 10, (event, done) ->
@@ -219,7 +219,7 @@ Event.initializeData = (callback) ->
                 end: formattedDate
                 description: ''
                 place: ''
-                tags: [localization.t("new calendar")]
+                tags: [defaultCalendar.getName()]
                 created: formattedNow
                 lastModification: formattedNow
             Event.create data, callback
@@ -233,4 +233,3 @@ Event.load = (start, end, callback) ->
     endkey = end.format 'YYYY-MM-DDT00:00:00.000\Z'
 
     Event.request 'byDate', {startkey, endkey}, callback
-

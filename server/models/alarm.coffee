@@ -1,6 +1,6 @@
 cozydb = require 'cozydb'
 async = require 'async'
-moment = require 'moment-timezone'
+moment = require '../libs/moment'
 Event = require './event'
 log = require('printit')
     prefix: 'alarm:model'
@@ -78,7 +78,8 @@ Alarm::migrateDoctype = (callback) ->
 Alarm.migrateAll = (callback) ->
     Alarm.all {}, (err, alarms) ->
         if err
-            console.log err
+            log.error "can get alarm/all"
+            log.raw err
             callback()
         else
             async.eachLimit alarms, 10, (alarm, done) ->

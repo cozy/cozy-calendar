@@ -101,3 +101,5 @@ module.exports = {
     post: sharings.refuse
   }
 };
+
+//# sourceMappingURL=routes.js.map

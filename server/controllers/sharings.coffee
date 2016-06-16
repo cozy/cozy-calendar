@@ -24,7 +24,7 @@ module.exports.fetch = (req, res, next, id) ->
     Sharing.find id, (err, sharing) ->
         if err
             res.status(500).send error: "Server error occured"
-         else if not sharing
+        else if not sharing
             res.status(404).send error: "Sharing not found"
         else
             req.sharing = sharing
@@ -39,7 +39,7 @@ module.exports.accept = (req, res) ->
     data = req.body
     id = data.id
 
-    Sharing.accept id, (err, response) ->
+    Sharing.accept id, (err) ->
         if err
             res.status(500).send error: err
         else
@@ -50,7 +50,7 @@ module.exports.refuse = (req, res) ->
     data = req.body
     id = data.id
 
-    Sharing.refuse id, (err, response) ->
+    Sharing.refuse id, (err) ->
         if err
             res.status(500).send error: err
         else
