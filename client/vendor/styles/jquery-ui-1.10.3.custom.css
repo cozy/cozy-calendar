@@ -4,6 +4,11 @@
 * To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Helvetica%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=2px&bgColorHeader=dddddd&bgTextureHeader=highlight_soft&bgImgOpacityHeader=50&borderColorHeader=dddddd&fcHeader=444444&iconColorHeader=0073ea&bgColorContent=ffffff&bgTextureContent=flat&bgImgOpacityContent=75&borderColorContent=dddddd&fcContent=444444&iconColorContent=ff0084&bgColorDefault=f6f6f6&bgTextureDefault=highlight_soft&bgImgOpacityDefault=100&borderColorDefault=dddddd&fcDefault=0073ea&iconColorDefault=666666&bgColorHover=0073ea&bgTextureHover=highlight_soft&bgImgOpacityHover=25&borderColorHover=0073ea&fcHover=ffffff&iconColorHover=ffffff&bgColorActive=ffffff&bgTextureActive=glass&bgImgOpacityActive=65&borderColorActive=dddddd&fcActive=ff0084&iconColorActive=454545&bgColorHighlight=ffffff&bgTextureHighlight=flat&bgImgOpacityHighlight=55&borderColorHighlight=cccccc&fcHighlight=444444&iconColorHighlight=0073ea&bgColorError=ffffff&bgTextureError=flat&bgImgOpacityError=55&borderColorError=ff0084&fcError=222222&iconColorError=ff0084&bgColorOverlay=eeeeee&bgTextureOverlay=flat&bgImgOpacityOverlay=0&opacityOverlay=80&bgColorShadow=aaaaaa&bgTextureShadow=flat&bgImgOpacityShadow=0&opacityShadow=60&thicknessShadow=4px&offsetTopShadow=-4px&offsetLeftShadow=-4px&cornerRadiusShadow=0px
 * Copyright 2014 jQuery Foundation and other contributors; Licensed MIT */
 
+/*
+CHANGES : ROMAIN 16/06/2016
+- Removed images, which are not used and disturb webpack
+*/
+
 /* Layout helpers
 ----------------------------------*/
 .ui-helper-hidden {
@@ -374,30 +379,6 @@
 .ui-icon {
 	width: 16px;
 	height: 16px;
-}
-.ui-icon,
-.ui-widget-content .ui-icon {
-	background-image: url(images/ui-icons_ff0084_256x240.png);
-}
-.ui-widget-header .ui-icon {
-	background-image: url(images/ui-icons_0073ea_256x240.png);
-}
-.ui-state-default .ui-icon {
-	background-image: url(images/ui-icons_666666_256x240.png);
-}
-.ui-state-hover .ui-icon,
-.ui-state-focus .ui-icon {
-	background-image: url(images/ui-icons_ffffff_256x240.png);
-}
-.ui-state-active .ui-icon {
-	background-image: url(images/ui-icons_454545_256x240.png);
-}
-.ui-state-highlight .ui-icon {
-	background-image: url(images/ui-icons_0073ea_256x240.png);
-}
-.ui-state-error .ui-icon,
-.ui-state-error-text .ui-icon {
-	background-image: url(images/ui-icons_ff0084_256x240.png);
 }
 
 /* positioning */

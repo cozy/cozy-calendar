@@ -37,6 +37,7 @@ module.exports =
 
         engine:
             js: (path, locales, callback) ->
+                locales.webpack = require('../webpack-assets.json')
                 callback null, require(path)(locales)
 
     development: [
