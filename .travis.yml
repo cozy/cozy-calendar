@@ -19,6 +19,8 @@ before_install:
 - npm install -g npm@latest-2
 before_script:
 - npm run travis-before
+after_failure:
+- cat ./node_modules/cozy-regular-build/tmp/*
 deploy:
   provider: npm
   skip_cleanup: true
