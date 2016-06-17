@@ -17,27 +17,6 @@ li.guest-top(data-index=index)
             role="button"
         )
 
-        - var hideShare    = true
-        - var hideEmail    = true
-        - var activeShare  = false
-        - var activeEmail  = false
-
-        // If a cozy instance is linked to a contact.
-        if cozy
-            - hideShare = false
-
-            // The invitation is shared.
-            if shareWithCozy
-                - activeShare  = true
-
-        // If the contact also has an email.
-        if email
-            - hideEmail = false
-
-            // The invitation is not shared, hence sent by email.
-            if !shareWithCozy
-                - activeEmail  = true
-
         button.guest-share-with-email.fa.fa-envelope-o(
             title=t('screen guest share with email tooltip')
             role='button'
