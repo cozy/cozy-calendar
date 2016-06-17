@@ -181,83 +181,66 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
         # Determine if guest's "channel" of communication is the url of his cozy
         # or his mail address.
-        if (channel.indexOf "@") < 0
-            cozy  = channel
-        else
+        # The regular expression below was found here:
+        # http://www.regular-expressions.info/email.html
+        emailRegExp =
+            /// ^
+                (?=[A-Z0-9][A-Z0-9@._%+-]{5,253}$)[A-Z0-9._%+-]{1,64}
+                @
+                (?:(?=[A-Z0-9-]{1,63}\.)[A-Z0-9]+(?:-[A-Z0-9]+)*\.){1,8}
+                [A-Z]{2,63}$
+            ///i # the "i" is for case insensitive search
+
+        if emailRegExp.test channel
             email = channel
-            # An empty value should not be submitted.
-            email = email.trim()
-
-        if email?.length > 0 or cozy?.length > 0
-            guests = @formModel.get('attendees') or []
-
-            # Look for a duplicate:
-            # * another guest with the same email;
-            if email?
-                guestBisEmail = _.findWhere(guests, email: email)
-            # * another guest with the same cozy;
-            if cozy?
-                guestBisCozy  = _.findWhere(guests, cozy: cozy)
-
-            # But a duplicate is not a duplicate under certain circumstances:
-            # * same email and `shareWithCozy` is true;
-            # * same cozy and `shareWithCozy` is false;
-            # In those cases we can add the new guest.
-            if (email? and (not guestBisEmail? or
-            guestBisEmail?.shareWithCozy)) or (cozy? and (not guestBisCozy? or
-            (not guestBisCozy?.shareWithCozy)))
-                newGuest =
-                    key       : random.randomString()
-                    status    : 'INVITATION-NOT-SENT'
-                    contactid : contactID
-
-                # If guest was "autocompleted" then contactID is not null. We
-                # can fill additionnal information.
-                if contactID?
-                    contact       = app.contacts.get contactID
-                    newGuest.name = contact.get 'name'
-                    if email?
-                        newGuest.email         = email
-                        newGuest.label         = email
-                        # By default if a guest has several cozy linked to him,
-                        # the first one is chosen.
-                        newGuest.cozy          =
-                            (contact.get 'cozy')?[0]?.value or null
-                        newGuest.shareWithCozy = false
-                    else if cozy?
-                        emails                 = (contact.get 'emails')
-                        # By default if a guest has several emails linked to
-                        # him, the first one is chosen.
-                        newGuest.email         = emails?[0]?.value or null
-                        newGuest.label         = cozy
-                        newGuest.cozy          = cozy
-                        newGuest.shareWithCozy = true
-                # Guest was manually entered
-                else
-                    if email?
-                        newGuest.label         = email
-                        newGuest.email         = email
-                        newGuest.shareWithCozy = false
-                        newGuest.cozy          = null
-                    else
-                        newGuest.label         = cozy
-                        newGuest.email         = null
-                        newGuest.shareWithCozy = true
-                        newGuest.cozy          = cozy
-
-                # Clone the source array, otherwise it's not considered as
-                # changed because it changes the model's attributes
-                guests = _.clone guests
-                guests.push newGuest
-                @formModel.set 'attendees', guests
-
-                # Inefficient way to refresh the list, but it's okay since
-                # it will never be a big list.
-                @render()
+        else
+            cozy  = channel
+            cozy  = cozy.trim()
 
         # Reset form field.
         @$('input[name="guest-name"]').val ''
         @$('input[name="guest-name"]').focus()
+
+        guests = @formModel.get('attendees') or []
+
+        # Look for a duplicate:
+        # * another guest with the same email and for whom the event is not
+        # shared;
+        if email? and (email.length > 0)
+            guestBisEmail = _.findWhere(guests, {email: email, share: false})
+        # * another guest with the same cozy and for whom the event is shared;
+        if cozy? and (cozy.length > 0)
+            guestBisCozy  = _.findWhere(guests, {cozy: cozy, share: true})
+
+        # If there is no duplicate we can add the guest.
+        if (email? and (email.length > 0) and (not guestBisEmail)) or
+        (cozy? and (cozy.length > 0) and (not guestBisCozy))
+            newGuest =
+                key       : random.randomString()
+                status    : 'INVITATION-NOT-SENT'
+                contactid : contactID
+
+            if contactID?
+                contact = app.contacts.get contactID
+
+            _.extend newGuest,
+                name  : if contact? then (contact.get 'name') else null
+                cozy  : cozy or
+                    (contact and contact.get('cozy')?[0]?.value) or null
+                email : email or
+                    (contact and contact.get('emails')?[0]?.value) or null
+                label : email or cozy
+                share : cozy?
+
+            # Clone the source array, otherwise it's not considered as
+            # changed because it changes the model's attributes
+            guests = _.clone guests
+            guests.push newGuest
+            @formModel.set 'attendees', guests
+
+            # Inefficient way to refresh the list, but it's okay since
+            # it will never be a big list.
+            @render()
 
 
     onKeyup: (event) ->
