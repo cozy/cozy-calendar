@@ -11,8 +11,8 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     events:
         "click .add-new-guest"          : "onNewGuest"
         "click .guest-delete"           : "onRemoveGuest"
-        "click .guest-share-with-cozy"  : "onShareWithCozy"
-        "click .guest-share-with-email" : "onShareWithEmail"
+        "click .guest-share-with-cozy"  : "onShare"
+        "click .guest-share-with-email" : "onEmail"
         'keyup input[name="guest-name"]': "onKeyup"
 
     initialize: (options) ->
@@ -111,72 +111,60 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
 
     # Sharing an invitation directly between Cozy instances.
-    onShareWithCozy: (event) ->
+    onShare: (event) =>
         # Get the guest
         index = @$(event.target).parents('li').attr 'data-index'
-
-        # Get the contact information of the guest
-        guests = @formModel.get('attendees') or []
-
-        # Same as for the function onNewGuest: the clone is required for the
-        # view to be refreshed
-        guests = _.clone guests
-        guest  = guests[index]
-        # We remove the guest from the list to find a possible duplicate. If we
-        # don't do that then `findWhere` could return this very same guest
-        # instead of the duplicate, if there is one.
-        guests.splice index, 1
-
-        # Check for duplicate:
-        # * if `guestBis` is null then there are no duplicate, we can go on
-        #   ahead and add him;
-        # * if `guestBis` is not null then there is a possible duplicate, a
-        #   guest whose cozy matches the one we want to add. However, if the
-        #   duplicate's invitation is set to mail (meaning `shareWithCozy` is
-        #   falsy) then we can add the guest: it will not be a "duplicate"
-        #   stricto sensu since an invitation will be sent by mail and the other
-        #   one shared.
-        guestBis = _.findWhere(guests, cozy: guest.cozy)
-        if (not guestBis?) or (not guestBis.shareWithCozy)
-            # We add the information regarding the cozy and we change the label
-            # so that the user has a visual feedback
-            guest.shareWithCozy = true
-            guest.label         = guest.cozy
-            # add the guest back up
-            guests.splice index, 0, guest
-
-        @formModel.set 'attendees', guests
-        # We force the refresh
-        @render()
+        # Remove duplicate if any and refresh the view.
+        @removeIfDuplicate index, true
 
 
     # If the user want to revert back to sharing the invitation using an email
     # instead of the guest Cozy.
-    onShareWithEmail: (event) ->
+    onEmail: (event) =>
         # Get the guest
         index = @$(event.target).parents('li').attr 'data-index'
+        # Remove duplicate if any and refresh the view.
+        @removeIfDuplicate index, false
 
-        # Get the contact information of the guest
+
+    # Remove any duplicate: this function looks for a guest who is "identical"
+    # to the one the user wants a switch. To be identical means to use the same
+    # channel (email or share) to send the event. If a duplicate is found then
+    # the guest for whom the user wanted a switch is removed from the guest
+    # list.
+    #
+    # This function also refreshes the view.
+    #
+    # Parameters:
+    #   * index: the index of the guest in the `guests` array;
+    #   * share: a boolean to tell if the user wants to switch from email to
+    #            share (true) or from share to email (false).
+    removeIfDuplicate: (index, share) ->
         guests = @formModel.get('attendees') or []
-
-        # Same as for the function onNewGuest: the clone is required for the
-        # view to be refreshed
+        # A clone is required in order to refresh the view.
         guests = _.clone guests
         guest  = guests[index]
         # We remove the guest from the list to find a possible duplicate.
         guests.splice index, 1
 
-        # Check for duplicate, same as above: if a guest already has that email
-        # then we check if `shareWithCozy` is true, if that's the case we can
-        # add the new guest; otherwise we cannot.
-        guestBis = _.findWhere(guests, email: guest.email)
-        if (not guestBis?) or (guestBis.shareWithCozy)
-            guest.shareWithCozy = false
-            guest.label         = guest.email
+        if share
+            guestBis = _.findWhere(guests, cozy: guest.cozy)
+        else
+            guestBis = _.findWhere(guests, email: guest.email)
+
+        # If the switch is email -> share then the parameter `share` is true
+        # hence the label is the guest's cozy; if the switch is share -> email
+        # then `share` is false and the label is the guest's email.
+        guest.share = share
+        guest.label = if share then guest.cozy else guest.email
+
+        # If there is no duplicate the guest is added back to its original spot.
+        if (not guestBis?) or (share and (not guestBis.share)) or
+        ((not share) and guestBis.share)
             guests.splice index, 0, guest
 
         @formModel.set 'attendees', guests
-        # We force the refresh
+        # Force refresh the view.
         @render()
 
 
