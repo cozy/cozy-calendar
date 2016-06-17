@@ -22,7 +22,7 @@ module.exports.sendShareInvitations = (event, callback) ->
 
     # only process relevant guests
     guests.forEach (guest) ->
-        if guest.status is 'INVITATION-NOT-SENT' and guest.shareWithCozy
+        if guest.status is 'INVITATION-NOT-SENT' and guest.share
             data.targets.push recipientUrl: guest.cozy
             guest.status = "NEEDS-ACTION"
             needSaving   = true

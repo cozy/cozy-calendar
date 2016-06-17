@@ -33,7 +33,7 @@ module.exports.sendInvitations = (event, dateChanged, callback) ->
         async.forEach guests, (guest, done) ->
 
             # only process relevant guests, quits otherwise
-            shouldSend = not guest.shareWithCozy and \
+            shouldSend = not guest.share and \
                 (guest.status is 'INVITATION-NOT-SENT' or \
                 (guest.status is 'ACCEPTED' and dateChanged))
             return done() unless shouldSend

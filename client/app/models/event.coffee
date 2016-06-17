@@ -197,7 +197,7 @@ module.exports = class Event extends ScheduleItem
             return @get 'attendees'
 
         @set 'attendees', @get('attendees').map (attendee) ->
-            return attendee if not attendee.shareWithCozy
+            return attendee if not attendee.share
 
             target = sharing.get('targets').find (target) ->
                 return target.recipientUrl == attendee.cozy
