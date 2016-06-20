@@ -156,9 +156,9 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         guests.splice index, 1
 
         if share
-            guestBis = _.findWhere(guests, cozy: guest.cozy)
+            guestBis = _.findWhere(guests, {cozy: guest.cozy, share: share})
         else
-            guestBis = _.findWhere(guests, email: guest.email)
+            guestBis = _.findWhere(guests, {email: guest.email, share: share})
 
         # If the switch is email -> share then the parameter `share` is true
         # hence the label is the guest's cozy; if the switch is share -> email
@@ -167,8 +167,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         guest.label = if share then guest.cozy else guest.email
 
         # If there is no duplicate the guest is added back to its original spot.
-        if (not guestBis?) or (share and (not guestBis.share)) or
-        ((not share) and guestBis.share)
+        if (not guestBis?)
             guests.splice index, 0, guest
 
         @formModel.set 'attendees', guests
