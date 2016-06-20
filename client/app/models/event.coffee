@@ -101,6 +101,80 @@ module.exports = class Event extends ScheduleItem
     getDefaultColor: -> '#008AF6'
 
 
+    # A shared event has at least one attendees with a cozy invitation
+    isShared: ->
+        attendees = @get 'attendees'
+        cozyAttendees = attendees?.find (attendee) ->
+            return attendee.shareWithCozy
+        return cozyAttendees?
+
+
+    # Try to get a shareID (called typically just after saving).
+    tryGetShareID: (numtries, delay, callback) ->
+
+        @fetch
+            success: (model, response) =>
+                shareID = model.get 'shareID'
+                if shareID
+                    callback null, shareID
+                    return
+
+                triesLeft = --numtries;
+
+                if numtries
+                    setTimeout =>
+                        @tryGetShareID triesLeft, delay, callback
+                    , delay
+                else
+                    callback 'Could not retrieve shareID, maximum \
+                        number of tries exceeded',
+                        null
+            error: (model, response) ->
+                callback(response.error or response, null)
+
+
+    # Fetch the sharing object to handle any error
+    onShareIDChange: ->
+        @fetchSharing (err, sharing) =>
+            if err
+                throw
+                    name: 'EventSharingError',
+                    event: @
+                    message: err
+            else
+                sharing.getFailedTargets().forEach (target) =>
+                    throw
+                        name: 'EventSharingError',
+                        event: @
+                        target: target
+
+
+    # Override the native save mehod to bypass the success callback with
+    # a custom one dealing with event sharing case.
+    # The idea is to only call the success callback when the shareID
+    # has been actually fetched.
+    save: (attributes, options) ->
+        successCallback = options?.success
+        options.success = (model, response, options) =>
+            # Call the original success handler, before dealing with
+            # sharing aspect
+            successCallback model, response, options
+
+            # And then deal with the sharing
+            # The goal is to detect any error occurring asynchronously
+            if @isShared() and not @hasSharing()
+               @tryGetShareID 5, 2000, ( err, shareID ) =>
+                    if err
+                        throw
+                            name: 'EventSharingError'
+                            event: @
+                            message: err
+                    else
+                        @onShareIDChange()
+
+        super attributes, options
+
+
     hasSharing: ->
         return @get('shareID')?
 

@@ -78,7 +78,7 @@ $ ->
                 console.log "Spinner class not available."
                 null
 
-        app.initialize()
+        app.initialize(window)
 
     catch e
         console.error e, e?.stack

@@ -2,8 +2,47 @@ module.exports =
 
     listenTo: Backbone.Model.prototype.listenTo
 
-    initialize: ->
 
+    # Initialize a custom error handler for the global app
+    initializeErrorHandler: (window, polyglot) ->
+        existingDefaultHandler = window.onerror
+
+        applicationErrorHandler = (msg, url, line, col, error) ->
+            polyglot.extend
+                eventSharingError: 'event sharing failed for event \
+                                    "%{eventName}": %{message}'
+                eventSharingTargetError: '%{message} for %{target}'
+
+            # Handler for asynchronous errors
+            @onEventSharingError = (error) ->
+                isSharingError = error.target?
+
+                message = (isSharingError and t('eventSharingTargetError',
+                    message: error.target.error
+                    target: error.target.recipientUrl
+                    )) or t(error.message)
+
+                alert t('eventSharingError',
+                    eventName: error.event.get('description')
+                    message: message)
+
+                return true
+
+            # error = event.error
+            errorHandlerName = 'on' + error.name
+
+            if @[errorHandlerName] and typeof @[errorHandlerName] is 'function'
+                return @[errorHandlerName] error
+            else if existingDefaultHandler and
+                        typeof existingDefaultHandler is 'function'
+                return existingDefaultHandler msg, url, line, col, error
+            else
+                throw error
+
+        window.onerror = applicationErrorHandler
+
+
+    initialize: (window) ->
         window.app = @
 
         @timezone = window.timezone
@@ -20,6 +59,8 @@ module.exports =
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
+
+        @initializeErrorHandler(window, @polyglot)
 
         # If needed, add locales to client/vendor/scripts/lang
         moment.locale @locale

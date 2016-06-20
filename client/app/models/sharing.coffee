@@ -22,3 +22,9 @@ module.exports = class Sharing extends Backbone.Model
             else
                 callback null, response
                 @trigger 'refused', @
+
+
+    # Returns an array of sharing's targets having errors
+    getFailedTargets: ->
+        return @get('targets')?.filter (target) ->
+            return target.error?
