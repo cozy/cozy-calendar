@@ -160,6 +160,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             current: @formModel.getCalendar()?.get('name')
             readOnly: @context.readOnly
 
+        @context.clickOutListener.exceptOn @calendarComboBox.widget().get 0
+
         if not @context.readOnly
             @calendarComboBox.on 'edition-complete', (value) =>
                 @formModel.setCalendar app.calendars.getOrCreateByName value

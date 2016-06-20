@@ -158,3 +158,6 @@ module.exports = class ComboBox extends BaseView
         @autocompleteWidget.destroy()
         super
 
+
+    widget: ->
+         @$el.autocomplete 'widget'

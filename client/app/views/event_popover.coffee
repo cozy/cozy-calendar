@@ -61,6 +61,7 @@ module.exports = class EventPopOver extends PopoverView
         # To remind, @target here is a calendar cell (td element).
         try
             @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
+            @context.clickOutListener = @clickOutListener
         catch error
             console.warn error
 
