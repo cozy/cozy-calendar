@@ -11,7 +11,7 @@ module.exports =
             # Handler for asynchronous errors
             @onEventSharingError = (error) ->
                 # TODO find a better way to format a string like this
-                alert [ t('Event sharing failed for event'),
+                alert [ t('event sharing failed for event'),
                         error.event.get('description'),
                         '(' + t(error.message) + ')' ].join ' '
 
@@ -20,10 +20,10 @@ module.exports =
             # error = event.error
             errorHandlerName = 'on' + error.name
 
-            if @[errorHandlerName] and typeof @[errorHandlerName] == 'function'
+            if @[errorHandlerName] and typeof @[errorHandlerName] is 'function'
                 return @[errorHandlerName] error
             else if existingDefaultHandler and
-                        typeof existingDefaultHandler == 'function'
+                        typeof existingDefaultHandler is 'function'
                 return existingDefaultHandler msg, url, line, col, error
             else
                 throw error

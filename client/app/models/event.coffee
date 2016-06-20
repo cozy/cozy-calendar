@@ -109,7 +109,7 @@ module.exports = class Event extends ScheduleItem
         return cozyAttendees?
 
 
-    # Try to get a shareID (called typically just after saving),
+    # Try to get a shareID (called typically just after saving).
     tryGetShareID: (numtries, delay, callback) ->
 
         @fetch
