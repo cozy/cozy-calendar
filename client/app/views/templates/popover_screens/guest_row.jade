@@ -12,14 +12,24 @@ li.guest-top(data-index=index)
     .guest-label= label
 
     if !readOnly
-        span.button-wrapper
-            button.guest-delete.fa.fa-trash-o(title=t('screen guest remove tooltip'), role="button")
+        button.guest-delete.fa.fa-trash-o(
+            title=t('screen guest remove tooltip')
+            role="button"
+        )
 
-        // If a cozy instance is linked to a contact
-        if cozy
-            if shareWithCozy
-                span.button-wrapper
-                    button.guest-share-with-email.fa.fa-envelope-o(title=t('screen guest share with email tooltip'), role="button")
-            else
-                span.button-wrapper
-                    button.guest-share-with-cozy.fa.fa-cloud(title=t('screen guest share with cozy tooltip'), role="button")
+        button.guest-share-with-email.fa.fa-envelope-o(
+            title=t('screen guest share with email tooltip')
+            role='button'
+            class=activeEmail ? 'active' : ''
+            disabled=activeEmail ? 'disabled' : false
+            aria-hidden=hideEmail
+        )
+
+        button.guest-share-with-cozy.fa.fa-cloud(
+            title=t('screen guest share with cozy tooltip')
+            role="button"
+            class=activeShare ? 'active' : ''
+            disabled=activeShare ? 'disabled' : false
+            aria-hidden=hideShare
+        )
+

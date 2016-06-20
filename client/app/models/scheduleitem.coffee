@@ -326,7 +326,7 @@ module.exports = class ScheduleItem extends Backbone.Model
         # else: look state of each guest.
         attendees = @get('attendees') or []
         guestsToInform = attendees.filter (guest) =>
-            if guest.shareWithCozy
+            if guest.share
                 return false
 
             if method is 'create'
