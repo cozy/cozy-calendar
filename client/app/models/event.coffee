@@ -120,7 +120,7 @@ module.exports = class Event extends ScheduleItem
                     isEditable = @get('shareID') == sharing.get('id')
                     callback null, isEditable
         else
-            callback true
+            callback null, true
 
 
     fetchSharing: (callback) ->
