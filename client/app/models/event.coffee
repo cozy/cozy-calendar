@@ -140,14 +140,13 @@ module.exports = class Event extends ScheduleItem
                 throw
                     name: 'EventSharingError',
                     event: @
-                    message: 'cannot retrieve sharing : ' + err
+                    message: err
             else
                 sharing.getFailedTargets().forEach (target) =>
                     throw
                         name: 'EventSharingError',
                         event: @
-                        message: [ target.recipientUrl, ':',
-                                    target.error ].join ' '
+                        target: target
 
 
     # Override the native save mehod to bypass the success callback with

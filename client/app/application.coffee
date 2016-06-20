@@ -4,16 +4,27 @@ module.exports =
 
 
     # Initialize a custom error handler for the global app
-    initializeErrorHandler: (window) ->
+    initializeErrorHandler: (window, polyglot) ->
         existingDefaultHandler = window.onerror
 
         applicationErrorHandler = (msg, url, line, col, error) ->
+            polyglot.extend
+                eventSharingError: 'event sharing failed for event \
+                                    "%{eventName}": %{message}'
+                eventSharingTargetError: '%{message} for %{target}'
+
             # Handler for asynchronous errors
             @onEventSharingError = (error) ->
-                # TODO find a better way to format a string like this
-                alert [ t('event sharing failed for event'),
-                        error.event.get('description'),
-                        '(' + t(error.message) + ')' ].join ' '
+                isSharingError = error.target?
+
+                message = (isSharingError and t('eventSharingTargetError',
+                    message: error.target.error
+                    target: error.target.recipientUrl
+                    )) or t(error.message)
+
+                alert t('eventSharingError',
+                    eventName: error.event.get('description')
+                    message: message)
 
                 return true
 
@@ -32,8 +43,6 @@ module.exports =
 
 
     initialize: (window) ->
-        @initializeErrorHandler(window)
-
         window.app = @
 
         @timezone = window.timezone
@@ -50,6 +59,8 @@ module.exports =
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
+
+        @initializeErrorHandler(window, @polyglot)
 
         # If needed, add locales to client/vendor/scripts/lang
         moment.locale @locale
