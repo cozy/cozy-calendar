@@ -10,9 +10,6 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
     events:
         "click .add-new-guest"          : "onNewGuest"
-        "click .guest-delete"           : "onRemoveGuest"
-        "click .guest-share-with-cozy"  : "onShare"
-        "click .guest-share-with-email" : "onEmail"
         'keyup input[name="guest-name"]': "onKeyup"
 
     initialize: (options) ->
@@ -56,10 +53,13 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
                     hideEmail   : (not guest.email?)
                     activeEmail : guest.email? and (not guest.isSharedWithCozy)
 
-                row = @templateGuestRow _.extend guest,
+                $row = $ @templateGuestRow _.extend guest,
                     readOnly: @context.readOnly
 
-                $guestElement.append row
+                $guestElement.append $row
+
+                if not @context.readOnly
+                    @bindGuestActions $row, guest
 
         if not @context.readOnly
 
@@ -68,6 +68,15 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
             # Focus the form field. Must be done after the typeahead
             # configuration, otherwise bootstrap bugs somehow.
             @$('input[name="guest-name"]').focus()
+
+
+    # Link directly click action to related guest, avoid using Backbone's
+    # default event managing, as we are here in a sort of CollectionView.
+    bindGuestActions: ($element, guest) ->
+        $element
+            .on('click', '.guest-delete', => @onRemoveGuest guest)
+            .on('click', '.guest-share-with-cozy', => @onShare guest)
+            .on('click', '.guest-share-with-email', => @onEmail guest)
 
 
     # Configure the auto-complete on contacts.
@@ -104,13 +113,16 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
             updater: @onNewGuest.bind(@)
 
 
-    onRemoveGuest: (event) ->
-        # Get which guest to remove.
-        index = @$(event.target).parents('li').attr 'data-index'
-
+    onRemoveGuest: (guest) ->
         # Remove the guest.
         guests = @formModel.get('attendees') or []
-        guests.splice index, 1
+        guestIndex = guests.indexOf guest
+
+        if guestIndex is -1
+            return
+
+        guests.splice guestIndex, 1
+
         @formModel.set 'attendees', guests
 
         # Inefficient way to refresh the list, but it's okay since it will never
@@ -119,20 +131,18 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
 
     # Sharing an invitation directly between Cozy instances.
-    onShare: (event) =>
-        # Get the guest
-        index = @$(event.target).parents('li').attr 'data-index'
+    onShare: (guest) =>
         # Remove duplicate if any and refresh the view.
-        @removeIfDuplicate index, true
+        @removeIfDuplicate guest, true
 
 
     # If the user want to revert back to sharing the invitation using an email
     # instead of the guest Cozy.
-    onEmail: (event) =>
+    onEmail: (guest) =>
         # Get the guest
-        index = @$(event.target).parents('li').attr 'data-index'
+
         # Remove duplicate if any and refresh the view.
-        @removeIfDuplicate index, false
+        @removeIfDuplicate guest, false
 
 
     # Remove any duplicate: this function looks for a guest who is "identical"
@@ -144,16 +154,20 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     # This function also refreshes the view.
     #
     # Parameters:
-    #   * index   : the index of the guest in the `guests` array;
+    #   * guest   : the guest to check for duplicate
     #   * isShare : a boolean to tell if the user wants to switch from email to
     #               share (true) or from share to email (false).
-    removeIfDuplicate: (index, isShare) ->
+    removeIfDuplicate: (guest, isShare) ->
         guests = @formModel.get('attendees') or []
         # A clone is required in order to refresh the view.
+        guestIndex = guests.indexOf guest
+
+        if guestIndex is -1
+            return
+
         guests = _.clone guests
-        guest  = guests[index]
         # We remove the guest from the list to find a possible duplicate.
-        guests.splice index, 1
+        guests.splice guestIndex, 1
 
         # We determine if the switch will create a duplicate.
         if isShare
@@ -177,7 +191,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
             guest.label            = if isShare then guest.cozy else guest.email
             guest.isSharedWithCozy = isShare
             # The guest is added back to its original spot.
-            guests.splice index, 0, guest
+            guests.splice guestIndex, 0, guest
 
         @formModel.set 'attendees', guests
         # Force refresh the view.

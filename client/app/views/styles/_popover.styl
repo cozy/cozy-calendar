@@ -3,8 +3,10 @@
 // ----------------------------------------------------------------------------
 // TODO: rebuild all styles with relative units. Need to revamp a whole bunch
 //       of the app styles
+popover-width = 25em
+
 .popover
-    width: 25em
+    width: popover-width
     max-width: none
     padding: 0
     font-family: 'Source Sans Pro', sans-serif
@@ -425,12 +427,14 @@ select.select-big
         overflow hidden
         text-overflow ellipsis
 
-ul.guests
+// .fc table to override .fc table coming from nowhere
+.fc table.guests
     margin 0
     list-style-type none
 
-    display table
-    width 100%
+
+    width popover-width - 3em
+    margin 0 1.5em
 
     li
         padding 1em 1.5em
@@ -441,23 +445,16 @@ ul.guests
             border-bottom 1px solid grey-03
 
     .guest-top
-        display table-row
-        align-items center
+        td
+            vertical-align middle
+            border-width 0
 
-        & > *
-            display table-cell
-            max-width 11.5em
-            padding .5em
+        &.status,
+        &.action
+                text-align center
 
-            &:last-child
-                padding-right 1.5em
-
-            &:first-child
-                padding-left 1.5em
-
-        .status,
-        .button-wrapper
-            width 1em
+        &.status
+            width 1.5em
 
     .guest-top button
             height auto
@@ -479,11 +476,7 @@ ul.guests
         line-height 1.5em
         text-overflow ellipsis
         overflow hidden
-
-        &:hover
-            text-overflow clip
-            white-space normal
-            word-break break-all
+        width 60%
 
 
 // Alerts screen

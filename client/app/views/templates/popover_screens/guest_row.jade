@@ -1,5 +1,5 @@
-li.guest-top(data-index=index)
-    span.status
+tr.guest-top(data-index=index)
+    td.status
         if status == 'ACCEPTED'
             i.fa.fa-check-circle-o.green(title=t('accepted'))
         else if status == 'DECLINED'
@@ -9,27 +9,31 @@ li.guest-top(data-index=index)
         else
             i.fa.fa-exclamation-circle.orange(title=t('mail not sent'))
 
-    .guest-label= label
+    td.guest-label(title=label)= label
 
-    if !readOnly
-        button.guest-delete.fa.fa-trash-o(
-            title=t('screen guest remove tooltip')
-            role="button"
-        )
+    if readOnly
+        td[colspan=3]
+    else
+        td.action
+            button.guest-delete.fa.fa-trash-o(
+                title=t('screen guest remove tooltip')
+                role="button"
+            )
+        td.action
+            button.guest-share-with-email.fa.fa-envelope-o(
+                title=t('screen guest share with email tooltip')
+                role='button'
+                class=activeEmail ? 'active' : ''
+                disabled=activeEmail ? 'disabled' : false
+                aria-hidden=hideEmail
+            )
+        td.action
+            button.guest-share-with-cozy.fa.fa-cloud(
+                title=t('screen guest share with cozy tooltip')
+                role="button"
+                class=activeShare ? 'active' : ''
+                disabled=activeShare ? 'disabled' : false
+                aria-hidden=hideShare
+            )
 
-        button.guest-share-with-email.fa.fa-envelope-o(
-            title=t('screen guest share with email tooltip')
-            role='button'
-            class=activeEmail ? 'active' : ''
-            disabled=activeEmail ? 'disabled' : false
-            aria-hidden=hideEmail
-        )
-
-        button.guest-share-with-cozy.fa.fa-cloud(
-            title=t('screen guest share with cozy tooltip')
-            role="button"
-            class=activeShare ? 'active' : ''
-            disabled=activeShare ? 'disabled' : false
-            aria-hidden=hideShare
-        )
 
