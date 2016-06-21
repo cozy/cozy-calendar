@@ -321,7 +321,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # Kind of changes which doesn't need mails.
         if method in ['update', 'patch'] and
-        not (@startDateChanged or @attendeesChanged)
+                not (@startDateChanged or @attendeesChanged)
             return callback false
 
         # else: look state of each guest.

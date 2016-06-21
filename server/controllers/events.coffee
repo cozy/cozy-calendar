@@ -52,7 +52,7 @@ module.exports.create = (req, res) ->
             else
                 ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
                     # If the event has guests that are notified by email and for
-                    # whom the owner confirmed s.he wanted to send emails, we
+                    # whom the owner confirmed she wanted to send emails, we
                     # send the emails.
                     if req.query.sendMails is 'true'
                         MailHandler.sendInvitations (updatedEvent or event),
