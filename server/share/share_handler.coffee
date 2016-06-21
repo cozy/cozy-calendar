@@ -5,6 +5,15 @@ module.exports.sendShareInvitations = (event, callback) ->
     guests     = event.toJSON().attendees
     needSaving = false
 
+    # Before proceeding any further we check here that we have to share the
+    # event with at least one guest.
+    hasGuestToShare = guests.find (guest) ->
+        return (guest.share and (guest.status is 'INVITATION-NOT-SENT'))
+
+    # If we haven't found a single guest to share the event with, we stop here.
+    unless hasGuestToShare
+        return callback()
+
     # The format of the req.body to send must match:
     #
     # desc      : the sharing description
@@ -30,8 +39,9 @@ module.exports.sendShareInvitations = (event, callback) ->
     # Send the request to the datasystem
     cozydb.api.createSharing data, (err, body) ->
         if err?
-            callback err
+            return callback err
         else unless needSaving
-            callback()
+            return callback()
         else
             event.updateAttributes attendees: guests, callback
+

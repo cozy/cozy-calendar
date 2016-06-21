@@ -311,8 +311,9 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         @confirmSendEmails method, (sendMails) ->
             # overrides the url to append the sendmails parameter
-            options.url = "#{model.url()}?sendMails=#{sendMails}"
+            options.url  = "#{model.url()}?sendMails=#{sendMails}"
             return super method, frozenModel, options
+
 
     confirmSendEmails: (method, callback) ->
         if @get 'import' # No mails on files import.
@@ -320,7 +321,7 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # Kind of changes which doesn't need mails.
         if method in ['update', 'patch'] and
-           not ( @startDateChanged or @attendeesChanged)
+                not (@startDateChanged or @attendeesChanged)
             return callback false
 
         # else: look state of each guest.
@@ -353,3 +354,4 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         @startDateChanged = false
         @attendeesChanged = false
+

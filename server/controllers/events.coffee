@@ -50,13 +50,10 @@ module.exports.create = (req, res) ->
             if data.import
                 res.status(201).send event
             else
-                # We first share the events, if the event is shared (this
-                # condition is checked within `sendShareInvitations`)
                 ShareHandler.sendShareInvitations event, (err, updatedEvent) ->
-
                     # If the event has guests that are notified by email and for
                     # whom the owner confirmed she wanted to send emails, we
-                    # send the emails
+                    # send the emails.
                     if req.query.sendMails is 'true'
                         MailHandler.sendInvitations (updatedEvent or event),
                         false, (err, updatedEvent) ->
@@ -107,9 +104,9 @@ module.exports.update = (req, res) ->
 
                     MailHandler.sendInvitations (updatedEvent or event),
                     dateChanged, (err, updatedEvent) ->
-                        res.send (updatedEvent or event)
+                        res.status(201).send (updatedEvent or event)
                 else
-                    res.send event
+                    res.status(201).send (updatedEvent or event)
 
 
 module.exports.delete = (req, res) ->
