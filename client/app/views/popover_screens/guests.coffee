@@ -52,9 +52,9 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
                 options = _.extend guest,
                     index       : index
                     hideShare   : (not guest.cozy?)
-                    activeShare : guest.cozy? and guest.share
+                    activeShare : guest.cozy? and guest.isSharedWithCozy
                     hideEmail   : (not guest.email?)
-                    activeEmail : guest.email? and (not guest.share)
+                    activeEmail : guest.email? and (not guest.isSharedWithCozy)
 
                 row = @templateGuestRow _.extend guest,
                     readOnly: @context.readOnly
@@ -144,10 +144,10 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
     # This function also refreshes the view.
     #
     # Parameters:
-    #   * index: the index of the guest in the `guests` array;
-    #   * share: a boolean to tell if the user wants to switch from email to
-    #            share (true) or from share to email (false).
-    removeIfDuplicate: (index, share) ->
+    #   * index   : the index of the guest in the `guests` array;
+    #   * isShare : a boolean to tell if the user wants to switch from email to
+    #               share (true) or from share to email (false).
+    removeIfDuplicate: (index, isShare) ->
         guests = @formModel.get('attendees') or []
         # A clone is required in order to refresh the view.
         guests = _.clone guests
@@ -155,19 +155,28 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # We remove the guest from the list to find a possible duplicate.
         guests.splice index, 1
 
-        if share
-            guestBis = _.findWhere(guests, {cozy: guest.cozy, share: share})
+        # We determine if the switch will create a duplicate.
+        if isShare
+            test = cozy  : guest.cozy
         else
-            guestBis = _.findWhere(guests, {email: guest.email, share: share})
+            test = email : guest.email
+        # A duplicate has the parameter `isSharedWithCozy` set to:
+        # * true  if the switch is email -> share
+        # * false if share -> email
+        # => in both cases it matches the value of `isShare`.
+        _.extend test, isSharedWithCozy : isShare
 
-        # If the switch is email -> share then the parameter `share` is true
-        # hence the label is the guest's cozy; if the switch is share -> email
-        # then `share` is false and the label is the guest's email.
-        guest.share = share
-        guest.label = if share then guest.cozy else guest.email
+        guestBis = _.findWhere guests, test
 
-        # If there is no duplicate the guest is added back to its original spot.
+        # If there is no duplicate.
         if (not guestBis?)
+            # If the switch is email -> share then the parameter `isShare` is
+            # true hence the label is the guest's cozy; if the switch is share
+            # -> email then `isShare` is false and the label is the guest's
+            # email.
+            guest.label            = if isShare then guest.cozy else guest.email
+            guest.isSharedWithCozy = isShare
+            # The guest is added back to its original spot.
             guests.splice index, 0, guest
 
         @formModel.set 'attendees', guests
@@ -214,10 +223,14 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # * another guest with the same email and for whom the event is not
         # shared;
         if email? and (email.length > 0)
-            guestBisEmail = _.findWhere(guests, {email: email, share: false})
+            guestBisEmail = _.findWhere guests,
+                email            : email
+                isSharedWithCozy : false
         # * another guest with the same cozy and for whom the event is shared;
         if cozy? and (cozy.length > 0)
-            guestBisCozy  = _.findWhere(guests, {cozy: cozy, share: true})
+            guestBisCozy  = _.findWhere guests,
+                cozy             : cozy
+                isSharedWithCozy : true
 
         # If there is no duplicate we can add the guest.
         if (email? and (email.length > 0) and (not guestBisEmail)) or
@@ -231,13 +244,14 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
                 contact = app.contacts.get contactID
 
             _.extend newGuest,
-                name  : if contact? then (contact.get 'name') else null
-                cozy  : cozy or
+                name             : if contact? then \
+                    (contact.get 'name') else null
+                cozy             : cozy or
                     (contact and contact.get('cozy')?[0]?.value) or null
-                email : email or
+                email            : email or
                     (contact and contact.get('emails')?[0]?.value) or null
-                label : email or cozy
-                share : cozy?
+                label            : email or cozy
+                isSharedWithCozy : cozy?
 
             # Clone the source array, otherwise it's not considered as
             # changed because it changes the model's attributes

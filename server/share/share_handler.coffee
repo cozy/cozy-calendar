@@ -8,7 +8,8 @@ module.exports.sendShareInvitations = (event, callback) ->
     # Before proceeding any further we check here that we have to share the
     # event with at least one guest.
     hasGuestToShare = guests.find (guest) ->
-        return (guest.share and (guest.status is 'INVITATION-NOT-SENT'))
+        return (guest.isSharedWithCozy and
+               (guest.status is 'INVITATION-NOT-SENT'))
 
     # If we haven't found a single guest to share the event with, we stop here.
     unless hasGuestToShare
@@ -31,7 +32,7 @@ module.exports.sendShareInvitations = (event, callback) ->
 
     # only process relevant guests
     guests.forEach (guest) ->
-        if guest.status is 'INVITATION-NOT-SENT' and guest.share
+        if (guest.status is 'INVITATION-NOT-SENT') and guest.isSharedWithCozy
             data.targets.push recipientUrl: guest.cozy
             guest.status = "NEEDS-ACTION"
             needSaving   = true
@@ -39,9 +40,9 @@ module.exports.sendShareInvitations = (event, callback) ->
     # Send the request to the datasystem
     cozydb.api.createSharing data, (err, body) ->
         if err?
-            return callback err
+            callback err
         else unless needSaving
-            return callback()
+            callback()
         else
             event.updateAttributes attendees: guests, callback
 
