@@ -105,7 +105,7 @@ module.exports = class Event extends ScheduleItem
     isShared: ->
         attendees = @get 'attendees'
         cozyAttendees = attendees?.find (attendee) ->
-            return attendee.shareWithCozy
+            return attendee.isSharedWithCozy
         return cozyAttendees?
 
 
@@ -163,7 +163,7 @@ module.exports = class Event extends ScheduleItem
             # And then deal with the sharing
             # The goal is to detect any error occurring asynchronously
             if @isShared() and not @hasSharing()
-               @tryGetShareID 5, 2000, ( err, shareID ) =>
+                @tryGetShareID 5, 2000, (err, shareID) =>
                     if err
                         throw
                             name: 'EventSharingError'
