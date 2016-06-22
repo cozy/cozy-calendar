@@ -271,10 +271,10 @@ module.exports = class Event extends ScheduleItem
             return @get 'attendees'
 
         @set 'attendees', @get('attendees').map (attendee) ->
-            return attendee if not attendee.share
+            return attendee if not attendee.isSharedWithCozy
 
             target = sharing.get('targets').find (target) ->
-                return target.recipientUrl == attendee.cozy
+                return target.recipientUrl is attendee.cozy
 
             # If an attendee is invited to an event with a Cozy sharing,
             # he should be in the list of the sharing's targets.
