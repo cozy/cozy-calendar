@@ -115,8 +115,41 @@
 require.register("application.coffee", function(exports, require, module) {
 module.exports = {
   listenTo: Backbone.Model.prototype.listenTo,
-  initialize: function() {
-    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SharingCollection, SocketListener, TagCollection, e, error, i, isMobile, j, locales, m1, m2, now, todayChecker;
+  initializeErrorHandler: function(window, polyglot) {
+    var applicationErrorHandler, existingDefaultHandler;
+    existingDefaultHandler = window.onerror;
+    applicationErrorHandler = function(msg, url, line, col, error) {
+      var errorHandlerName;
+      polyglot.extend({
+        eventSharingError: 'event sharing failed for event "%{eventName}": %{message}',
+        eventSharingTargetError: '%{message} for %{target}'
+      });
+      this.onEventSharingError = function(error) {
+        var isSharingError, message;
+        isSharingError = error.target != null;
+        message = (isSharingError && t('eventSharingTargetError', {
+          message: error.target.error,
+          target: error.target.recipientUrl
+        })) || t(error.message);
+        alert(t('eventSharingError', {
+          eventName: error.event.get('description'),
+          message: message
+        }));
+        return true;
+      };
+      errorHandlerName = 'on' + error.name;
+      if (this[errorHandlerName] && typeof this[errorHandlerName] === 'function') {
+        return this[errorHandlerName](error);
+      } else if (existingDefaultHandler && typeof existingDefaultHandler === 'function') {
+        return existingDefaultHandler(msg, url, line, col, error);
+      } else {
+        throw error;
+      }
+    };
+    return window.onerror = applicationErrorHandler;
+  },
+  initialize: function(window) {
+    var CalendarsCollection, ContactCollection, EventCollection, Header, Menu, Router, SharingCollection, SocketListener, TagCollection, e, error1, i, isMobile, j, locales, m1, m2, now, todayChecker;
     window.app = this;
     this.timezone = window.timezone;
     delete window.timezone;
@@ -125,12 +158,13 @@ module.exports = {
     this.polyglot = new Polyglot();
     try {
       locales = require('locales/' + this.locale);
-    } catch (error) {
-      e = error;
+    } catch (error1) {
+      e = error1;
       locales = require('locales/en');
     }
     this.polyglot.extend(locales);
     window.t = this.polyglot.t.bind(this.polyglot);
+    this.initializeErrorHandler(window, this.polyglot);
     moment.locale(this.locale);
     Router = require('router');
     Menu = require('views/menu');
@@ -360,13 +394,23 @@ module.exports = ContactCollection = (function(superClass) {
     });
     items = [];
     contacts.forEach(function(contact) {
-      return contact.get('emails').forEach(function(email) {
+      contact.get('emails').forEach(function(email) {
         return items.push({
           id: contact.id,
           hasPicture: contact.get('hasPicture'),
           display: (contact.get('name')) + " &lt;" + email.value + "&gt;",
           toString: function() {
             return email.value + ";" + contact.id;
+          }
+        });
+      });
+      return contact.get('cozy').forEach(function(cozy) {
+        return items.push({
+          id: contact.id,
+          hasPicture: contact.get('hasPicture'),
+          display: (contact.get('name')) + " &lt;" + cozy.value + "&gt;",
+          toString: function() {
+            return cozy.value + ";" + contact.id;
           }
         });
       });
@@ -1143,7 +1187,7 @@ $(function() {
         return null;
       }
     };
-    return app.initialize();
+    return app.initialize(window);
   } catch (error1) {
     e = error1;
     console.error(e, e != null ? e.stack : void 0);
@@ -1283,6 +1327,30 @@ module.exports = BaseView = (function(superClass) {
         });
       }
     };
+  };
+
+  BaseView.prototype.disable = function() {
+    return this.$el.attr('aria-disabled', true);
+  };
+
+  BaseView.prototype.enable = function($disabler) {
+    return this.$el.removeAttr('aria-disabled');
+  };
+
+  BaseView.prototype.setInvalid = function() {
+    return this.$el.attr('aria-invalid', true);
+  };
+
+  BaseView.prototype.setValid = function() {
+    return this.$el.removeAttr('aria-invalid');
+  };
+
+  BaseView.prototype.setBusy = function() {
+    return this.$el.attr('aria-busy', true);
+  };
+
+  BaseView.prototype.setNotBusy = function() {
+    return this.$el.removeAttr('aria-busy');
   };
 
   return BaseView;
@@ -6115,7 +6183,7 @@ module.exports = Contact = (function(superClass) {
   Contact.prototype.urlRoot = 'contacts';
 
   Contact.prototype.match = function(filter) {
-    return filter.test(this.get('name')) || this.get('emails').some(function(dp) {
+    return filter.test(this.get('name')) || filter.test(this.get('cozy')) || this.get('emails').some(function(dp) {
       return filter.test(dp.get('value'));
     });
   };
@@ -6247,6 +6315,87 @@ module.exports = Event = (function(superClass) {
     return '#008AF6';
   };
 
+  Event.prototype.isShared = function() {
+    var attendees, cozyAttendees;
+    attendees = this.get('attendees');
+    cozyAttendees = attendees != null ? attendees.find(function(attendee) {
+      return attendee.isSharedWithCozy;
+    }) : void 0;
+    return cozyAttendees != null;
+  };
+
+  Event.prototype.tryGetShareID = function(numtries, delay, callback) {
+    return this.fetch({
+      success: (function(_this) {
+        return function(model, response) {
+          var shareID, triesLeft;
+          shareID = model.get('shareID');
+          if (shareID) {
+            callback(null, shareID);
+            return;
+          }
+          triesLeft = --numtries;
+          if (numtries) {
+            return setTimeout(function() {
+              return _this.tryGetShareID(triesLeft, delay, callback);
+            }, delay);
+          } else {
+            return callback('Could not retrieve shareID, maximum number of tries exceeded', null);
+          }
+        };
+      })(this),
+      error: function(model, response) {
+        return callback(response.error || response, null);
+      }
+    });
+  };
+
+  Event.prototype.onShareIDChange = function() {
+    return this.fetchSharing((function(_this) {
+      return function(err, sharing) {
+        if (err) {
+          throw {
+            name: 'EventSharingError',
+            event: _this,
+            message: err
+          };
+        } else {
+          return sharing.getFailedTargets().forEach(function(target) {
+            throw {
+              name: 'EventSharingError',
+              event: _this,
+              target: target
+            };
+          });
+        }
+      };
+    })(this));
+  };
+
+  Event.prototype.save = function(attributes, options) {
+    var successCallback;
+    successCallback = options != null ? options.success : void 0;
+    options.success = (function(_this) {
+      return function(model, response, options) {
+        successCallback(model, response, options);
+        if (_this.isShared() && !_this.hasSharing()) {
+          return _this.tryGetShareID(5, 2000, function(err, shareID) {
+            if (err) {
+              throw {
+                name: 'EventSharingError',
+                event: _this,
+                message: err
+              };
+            } else {
+              return _this.onShareIDChange();
+            }
+          });
+        }
+      };
+    })(this);
+    return Event.__super__.save.call(this, attributes, options);
+  };
+
   Event.prototype.hasSharing = function() {
     return this.get('shareID') != null;
   };
@@ -6261,16 +6410,15 @@ module.exports = Event = (function(superClass) {
         return function(err, sharing) {
           var isEditable;
           if (err) {
-            console.error(err);
-            return callback(false);
+            return callback(err, false);
           } else {
             isEditable = _this.get('shareID') === sharing.get('id');
-            return callback(isEditable);
+            return callback(null, isEditable);
           }
         };
       })(this));
     } else {
-      return callback(true);
+      return callback(null, true);
     }
   };
 
@@ -6367,7 +6515,7 @@ module.exports = Event = (function(superClass) {
     }
     this.set('attendees', this.get('attendees').map(function(attendee) {
       var statusReducer, statusRules, target;
-      if (!attendee.shareWithCozy) {
+      if (!attendee.isSharedWithCozy) {
         return attendee;
       }
       target = sharing.get('targets').find(function(target) {
@@ -6788,7 +6936,7 @@ module.exports = ScheduleItem = (function(superClass) {
     guestsToInform = attendees.filter((function(_this) {
       return function(guest) {
         var ref;
-        if (guest.shareWithCozy) {
+        if (guest.isSharedWithCozy) {
           return false;
         }
         if (method === 'create') {
@@ -6862,6 +7010,13 @@ module.exports = Sharing = (function(superClass) {
         }
       };
     })(this));
+  };
+
+  Sharing.prototype.getFailedTargets = function() {
+    var ref;
+    return (ref = this.get('targets')) != null ? ref.filter(function(target) {
+      return target.error != null;
+    }) : void 0;
   };
 
   return Sharing;
@@ -7425,13 +7580,16 @@ module.exports = CalendarView = (function(superClass) {
           description: '',
           place: ''
         });
-        model.fetchEditability(function(editable) {
+        return model.fetchEditability(function(err, editable) {
+          if (err) {
+            console.error(err);
+          }
           _this.popover = new EventPopover(_.extend(options, {
             readOnly: !editable
           }));
-          return _this.popover.render();
+          _this.popover.render();
+          return _this.listenTo(_this.popover, 'closed', _this.onPopoverClose);
         });
-        return _this.listenTo(_this.popover, 'closed', _this.onPopoverClose);
       };
     })(this);
     if (this.popover) {
@@ -7690,7 +7848,8 @@ module.exports = EventPopOver = (function(superClass) {
     var error, error1;
     EventPopOver.__super__.afterRender.call(this);
     try {
-      return this.clickOutListener.exceptOn(this.target.closest('.fc-row').get(0));
+      this.clickOutListener.exceptOn(this.target.closest('.fc-row').get(0));
+      return this.context.clickOutListener = this.clickOutListener;
     } catch (error1) {
       error = error1;
       return console.warn(error);
@@ -8904,27 +9063,44 @@ module.exports = PendingEventSharingsButtonItemView = (function(superClass) {
   };
 
   PendingEventSharingsButtonItemView.prototype.onAccept = function() {
+    this.disable();
+    this.setBusy();
     return this.model.accept((function(_this) {
       return function(err) {
         if (err) {
           return _this.onAnswerError(err);
+        } else {
+          return _this.onAnswerSuccess();
         }
       };
     })(this));
   };
 
   PendingEventSharingsButtonItemView.prototype.onDecline = function() {
+    this.disable();
+    this.setBusy();
     return this.model.refuse((function(_this) {
       return function(err) {
         if (err) {
           return _this.onAnswerError(err);
+        } else {
+          return _this.onAnswerSuccess();
         }
       };
     })(this));
   };
 
+  PendingEventSharingsButtonItemView.prototype.onAnswerSuccess = function() {
+    this.setValid();
+    return this.remove();
+  };
+
   PendingEventSharingsButtonItemView.prototype.onAnswerError = function(err) {
-    return console.error(err);
+    this.$errors = this.$errors != null ? this.$errors : this.$errors = this.$('.errors');
+    this.$errors.html(t('An error occurred. Please try again later.'));
+    this.setNotBusy();
+    this.setInvalid();
+    return this.enable();
   };
 
   return PendingEventSharingsButtonItemView;
@@ -9287,6 +9463,7 @@ module.exports = DetailsPopoverScreen = (function(superClass) {
 
 ;require.register("views/popover_screens/guests.coffee", function(exports, require, module) {
 var EventPopoverScreenView, GuestPopoverScreen, random,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -9298,6 +9475,8 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   extend(GuestPopoverScreen, superClass);
 
   function GuestPopoverScreen() {
+    this.onEmail = bind(this.onEmail, this);
+    this.onShare = bind(this.onShare, this);
     return GuestPopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
@@ -9310,8 +9489,8 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   GuestPopoverScreen.prototype.events = {
     "click .add-new-guest": "onNewGuest",
     "click .guest-delete": "onRemoveGuest",
-    "click .guest-share-with-cozy": "onShareWithCozy",
-    "click .guest-share-with-email": "onShareWithEmail",
+    "click .guest-share-with-cozy": "onShare",
+    "click .guest-share-with-email": "onEmail",
     'keyup input[name="guest-name"]': "onKeyup"
   };
 
@@ -9358,7 +9537,11 @@ module.exports = GuestPopoverScreen = (function(superClass) {
       for (index = i = 0, len = attendees.length; i < len; index = ++i) {
         guest = attendees[index];
         options = _.extend(guest, {
-          index: index
+          index: index,
+          hideShare: guest.cozy == null,
+          activeShare: (guest.cozy != null) && guest.isSharedWithCozy,
+          hideEmail: guest.email == null,
+          activeEmail: (guest.email != null) && (!guest.isSharedWithCozy)
         });
         row = this.templateGuestRow(_.extend(guest, {
           readOnly: this.context.readOnly
@@ -9417,68 +9600,100 @@ module.exports = GuestPopoverScreen = (function(superClass) {
     return this.render();
   };
 
-  GuestPopoverScreen.prototype.onShareWithCozy = function(event) {
-    var guest, guests, index;
+  GuestPopoverScreen.prototype.onShare = function(event) {
+    var index;
     index = this.$(event.target).parents('li').attr('data-index');
-    guests = this.formModel.get('attendees') || [];
-    guests = _.clone(guests);
-    guest = guests[index];
-    guest.shareWithCozy = true;
-    guest.label = "Cozy: " + guest.name;
-    this.formModel.set('attendees', guests);
-    return this.render();
+    return this.removeIfDuplicate(index, true);
   };
 
-  GuestPopoverScreen.prototype.onShareWithEmail = function(event) {
-    var guest, guests, index;
+  GuestPopoverScreen.prototype.onEmail = function(event) {
+    var index;
     index = this.$(event.target).parents('li').attr('data-index');
+    return this.removeIfDuplicate(index, false);
+  };
+
+  GuestPopoverScreen.prototype.removeIfDuplicate = function(index, isShare) {
+    var guest, guestBis, guests, test;
     guests = this.formModel.get('attendees') || [];
     guests = _.clone(guests);
     guest = guests[index];
-    guest.shareWithCozy = false;
-    guest.label = guest.email;
+    guests.splice(index, 1);
+    if (isShare) {
+      test = {
+        cozy: guest.cozy
+      };
+    } else {
+      test = {
+        email: guest.email
+      };
+    }
+    _.extend(test, {
+      isSharedWithCozy: isShare
+    });
+    guestBis = _.findWhere(guests, test);
+    if (guestBis == null) {
+      guest.label = isShare ? guest.cozy : guest.email;
+      guest.isSharedWithCozy = isShare;
+      guests.splice(index, 0, guest);
+    }
     this.formModel.set('attendees', guests);
     return this.render();
   };
 
   GuestPopoverScreen.prototype.onNewGuest = function(userInfo) {
-    var contact, contactID, email, guests, newGuest, ref;
+    var channel, contact, contactID, cozy, email, emailRegExp, guestBisCozy, guestBisEmail, guests, newGuest, ref, ref1, ref2, ref3, ref4;
     if (userInfo == null) {
       userInfo = null;
     }
     if ((userInfo != null) && typeof userInfo === "string") {
-      ref = userInfo.split(';'), email = ref[0], contactID = ref[1];
+      ref = userInfo.split(';'), channel = ref[0], contactID = ref[1];
     } else {
-      email = this.$('input[name="guest-name"]').val();
+      channel = this.$('input[name="guest-name"]').val();
       contactID = null;
     }
-    email = email.trim();
-    if (email.length > 0) {
-      guests = this.formModel.get('attendees') || [];
-      if (!_.findWhere(guests, {
-        email: email
-      })) {
-        newGuest = {
-          key: random.randomString(),
-          status: 'INVITATION-NOT-SENT',
-          email: email,
-          label: email,
-          contactid: contactID,
-          shareWithCozy: false
-        };
-        if (contactID != null) {
-          contact = app.contacts.get(contactID);
-          newGuest.cozy = contact.get('cozy');
-          newGuest.name = contact.get('name');
-        }
-        guests = _.clone(guests);
-        guests.push(newGuest);
-        this.formModel.set('attendees', guests);
-        this.render();
-      }
+    emailRegExp = /^(?=[A-Z0-9][A-Z0-9@._%+-]{5,253}$)[A-Z0-9._%+-]{1,64}@(?:(?=[A-Z0-9-]{1,63}\.)[A-Z0-9]+(?:-[A-Z0-9]+)*\.){1,8}[A-Z]{2,63}$/i;
+    if (emailRegExp.test(channel)) {
+      email = channel;
+    } else {
+      cozy = channel;
+      cozy = cozy.trim();
     }
     this.$('input[name="guest-name"]').val('');
-    return this.$('input[name="guest-name"]').focus();
+    this.$('input[name="guest-name"]').focus();
+    guests = this.formModel.get('attendees') || [];
+    if ((email != null) && (email.length > 0)) {
+      guestBisEmail = _.findWhere(guests, {
+        email: email,
+        isSharedWithCozy: false
+      });
+    }
+    if ((cozy != null) && (cozy.length > 0)) {
+      guestBisCozy = _.findWhere(guests, {
+        cozy: cozy,
+        isSharedWithCozy: true
+      });
+    }
+    if (((email != null) && (email.length > 0) && (!guestBisEmail)) || ((cozy != null) && (cozy.length > 0) && (!guestBisCozy))) {
+      newGuest = {
+        key: random.randomString(),
+        status: 'INVITATION-NOT-SENT',
+        contactid: contactID
+      };
+      if (contactID != null) {
+        contact = app.contacts.get(contactID);
+      }
+      _.extend(newGuest, {
+        name: contact != null ? contact.get('name') : null,
+        cozy: cozy || (contact && ((ref1 = contact.get('cozy')) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0)) || null,
+        email: email || (contact && ((ref3 = contact.get('emails')) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0)) || null,
+        label: email || cozy,
+        isSharedWithCozy: cozy != null
+      });
+      guests = _.clone(guests);
+      guests.push(newGuest);
+      this.formModel.set('attendees', guests);
+      return this.render();
+    }
   };
 
   GuestPopoverScreen.prototype.onKeyup = function(event) {
@@ -9665,6 +9880,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
       current: (ref = this.formModel.getCalendar()) != null ? ref.get('name') : void 0,
       readOnly: this.context.readOnly
     });
+    this.context.clickOutListener.exceptOn(this.calendarComboBox.widget().get(0));
     if (!this.context.readOnly) {
       this.calendarComboBox.on('edition-complete', (function(_this) {
         return function(value) {
@@ -9862,14 +10078,9 @@ module.exports = MainPopoverScreen = (function(superClass) {
           return _this.model.save(_this.formModel.attributes, {
             wait: true,
             success: function(model, response) {
-              var isShared;
-              app.events.add(model, {
+              return app.events.add(model, {
                 sort: false
               });
-              isShared = model.get('shareID') != null;
-              if (isShared) {
-                return _this.onSharedEventSync(model);
-              }
             },
             error: function() {
               return alert('server error occured');
@@ -9896,18 +10107,6 @@ module.exports = MainPopoverScreen = (function(superClass) {
         return saveEvent();
       }
     }
-  };
-
-  MainPopoverScreen.prototype.onSharedEventSync = function(event) {
-    return event.fetchSharing((function(_this) {
-      return function(err, sharing) {
-        err = err != null ? err : err = sharing.error;
-        if (err) {
-          console.error(err);
-          return alert('Sharing with Cozy users failed');
-        }
-      };
-    })(this));
   };
 
   MainPopoverScreen.prototype.handleError = function(error) {
@@ -10732,7 +10931,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (model) {
-buf.push("<div class=\"sharer\">" + (jade.escape(null == (jade_interp = model.sharerName || model.sharerUrl) ? "" : jade_interp)) + "</div><div class=\"desc\">" + (jade.escape(null == (jade_interp = model.desc) ? "" : jade_interp)) + "</div><div class=\"actions\"><a class=\"accept\">" + (jade.escape(null == (jade_interp = t('Accept')) ? "" : jade_interp)) + "</a><span class=\"separator\">" + (jade.escape(null == (jade_interp = ' • ') ? "" : jade_interp)) + "</span><a class=\"decline\">" + (jade.escape(null == (jade_interp = t('Decline')) ? "" : jade_interp)) + "</a></div>");}.call(this,"model" in locals_for_with?locals_for_with.model:typeof model!=="undefined"?model:undefined));;return buf.join("");
+buf.push("<div class=\"sharer\">" + (jade.escape(null == (jade_interp = model.sharerName || model.sharerUrl) ? "" : jade_interp)) + "</div><div class=\"desc\">" + (jade.escape(null == (jade_interp = model.desc) ? "" : jade_interp)) + "</div><div class=\"errors\"></div><div class=\"actions\"><a class=\"accept\">" + (jade.escape(null == (jade_interp = t('Accept')) ? "" : jade_interp)) + "</a><span class=\"separator\">" + (jade.escape(null == (jade_interp = ' • ') ? "" : jade_interp)) + "</span><a class=\"decline\">" + (jade.escape(null == (jade_interp = t('Decline')) ? "" : jade_interp)) + "</a></div><div class=\"disabler\"></div><div class=\"spinner\"><img src=\"img/spinner.svg\"/></div>");}.call(this,"model" in locals_for_with?locals_for_with.model:typeof model!=="undefined"?model:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -10996,7 +11195,7 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-;var locals_for_with = (locals || {});(function (cozy, index, label, readOnly, shareWithCozy, status) {
+;var locals_for_with = (locals || {});(function (activeEmail, activeShare, hideEmail, hideShare, index, label, readOnly, status) {
 buf.push("<li" + (jade.attr("data-index", index, true, false)) + " class=\"guest-top\"><span class=\"status\">");
 if ( status == 'ACCEPTED')
 {
@@ -11017,20 +11216,9 @@ buf.push("<i" + (jade.attr("title", t('mail not sent'), true, false)) + " class=
 buf.push("</span><div class=\"guest-label\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div>");
 if ( !readOnly)
 {
-buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></span><!-- If a cozy instance is linked to a contact-->");
-if ( cozy)
-{
-if ( shareWithCozy)
-{
-buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest share with email tooltip'), true, false)) + " role=\"button\" class=\"guest-share-with-email fa fa-envelope-o\"></button></span>");
+buf.push("<button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button><button" + (jade.attr("title", t('screen guest share with email tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeEmail ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideEmail, true, false)) + (jade.cls(['guest-share-with-email','fa','fa-envelope-o',activeEmail ? 'active' : ''], [null,null,null,true])) + "></button><button" + (jade.attr("title", t('screen guest share with cozy tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeShare ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideShare, true, false)) + (jade.cls(['guest-share-with-cozy','fa','fa-cloud',activeShare ? 'active' : ''], [null,null,null,true])) + "></button>");
 }
-else
-{
-buf.push("<span class=\"button-wrapper\"><button" + (jade.attr("title", t('screen guest share with cozy tooltip'), true, false)) + " role=\"button\" class=\"guest-share-with-cozy fa fa-cloud\"></button></span>");
-}
-}
-}
-buf.push("</li>");}.call(this,"cozy" in locals_for_with?locals_for_with.cozy:typeof cozy!=="undefined"?cozy:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"shareWithCozy" in locals_for_with?locals_for_with.shareWithCozy:typeof shareWithCozy!=="undefined"?shareWithCozy:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
+buf.push("</li>");}.call(this,"activeEmail" in locals_for_with?locals_for_with.activeEmail:typeof activeEmail!=="undefined"?activeEmail:undefined,"activeShare" in locals_for_with?locals_for_with.activeShare:typeof activeShare!=="undefined"?activeShare:undefined,"hideEmail" in locals_for_with?locals_for_with.hideEmail:typeof hideEmail!=="undefined"?hideEmail:undefined,"hideShare" in locals_for_with?locals_for_with.hideShare:typeof hideShare!=="undefined"?hideShare:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -11491,6 +11679,10 @@ module.exports = ComboBox = (function(superClass) {
   ComboBox.prototype.remove = function() {
     this.autocompleteWidget.destroy();
     return ComboBox.__super__.remove.apply(this, arguments);
+  };
+
+  ComboBox.prototype.widget = function() {
+    return this.$el.autocomplete('widget');
   };
 
   return ComboBox;

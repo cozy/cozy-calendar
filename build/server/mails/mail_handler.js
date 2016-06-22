@@ -47,7 +47,7 @@ module.exports.sendInvitations = function(event, dateChanged, callback) {
     domain = results[0], user = results[1];
     return async.forEach(guests, function(guest, done) {
       var calendar, calendarOptions, date, dateFormat, dateFormatKey, description, htmlTemplate, icsPath, mailOptions, place, ref, shouldSend, subject, subjectKey, templateKey, templateOptions, url, vEvent;
-      shouldSend = !guest.shareWithCozy && (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged));
+      shouldSend = !guest.isSharedWithCozy && (guest.status === 'INVITATION-NOT-SENT' || (guest.status === 'ACCEPTED' && dateChanged));
       if (!shouldSend) {
         return done();
       }

@@ -126,10 +126,10 @@ module.exports.update = function(req, res) {
         if (req.query.sendMails === 'true') {
           dateChanged = data.start !== start;
           return MailHandler.sendInvitations(updatedEvent || event, dateChanged, function(err, updatedEvent) {
-            return res.send(updatedEvent || event);
+            return res.status(201).send(updatedEvent || event);
           });
         } else {
-          return res.send(event);
+          return res.status(201).send(updatedEvent || event);
         }
       });
     }

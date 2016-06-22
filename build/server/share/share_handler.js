@@ -4,9 +4,15 @@ var cozydb;
 cozydb = require('cozydb');
 
 module.exports.sendShareInvitations = function(event, callback) {
-  var data, guests, needSaving;
+  var data, guests, hasGuestToShare, needSaving;
   guests = event.toJSON().attendees;
   needSaving = false;
+  hasGuestToShare = guests.find(function(guest) {
+    return guest.isSharedWithCozy && (guest.status === 'INVITATION-NOT-SENT');
+  });
+  if (!hasGuestToShare) {
+    return callback();
+  }
   data = {
     desc: event.description,
     rules: [
@@ -19,7 +25,7 @@ module.exports.sendShareInvitations = function(event, callback) {
     continuous: true
   };
   guests.forEach(function(guest) {
-    if (guest.status === 'INVITATION-NOT-SENT' && guest.shareWithCozy) {
+    if ((guest.status === 'INVITATION-NOT-SENT') && guest.isSharedWithCozy) {
       data.targets.push({
         recipientUrl: guest.cozy
       });

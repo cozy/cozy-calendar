@@ -9223,6 +9223,7 @@ a.btn:visited {
   border-radius: 1em;
 }
 .event-sharings-button-item {
+  position: relative;
   line-height: 1.5em;
   margin-top: 1em;
   padding-bottom: 1em;
@@ -9255,6 +9256,54 @@ a.btn:visited {
 .event-sharings-button-item .actions a:active {
   color: #008af5;
   text-decoration: none;
+}
+.event-sharings-button-item .disabler,
+.event-sharings-button-item .spinner,
+.event-sharings-button-item .errors {
+  display: none;
+}
+.event-sharings-button-item .disabler {
+  background-color: rgba(255,255,255,0.75);
+}
+.event-sharings-button-item[aria-disabled],
+.event-sharings-button-item[aria-busy] {
+  position: relative;
+}
+.event-sharings-button-item[aria-disabled] .disabler,
+.event-sharings-button-item[aria-busy] .spinner {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.event-sharings-button-item[aria-busy] .spinner {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.event-sharings-button-item[aria-busy] .spinner img {
+  height: 2em;
+}
+.event-sharings-button-item[aria-invalid] .errors {
+  display: block;
+  color: #ff3713;
 }
 .popover {
   width: 25em;
@@ -9858,6 +9907,7 @@ ul.guests .guest-top {
 }
 ul.guests .guest-top > * {
   display: table-cell;
+  max-width: 11.5em;
   padding: 0.5em;
 }
 ul.guests .guest-top > *:last-child {
@@ -9878,8 +9928,12 @@ ul.guests .guest-top button {
   color: #acb8c5;
   padding: 0.5em;
 }
-ul.guests .guest-top button:hover {
+ul.guests .guest-top button:hover,
+ul.guests .guest-top button.active {
   color: #008af5;
+}
+ul.guests .guest-top button[aria-hidden] {
+  visibility: hidden;
 }
 ul.guests .guest-label {
   font-size: 1.1em;
@@ -9887,6 +9941,12 @@ ul.guests .guest-label {
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+ul.guests .guest-label:hover {
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-all;
 }
 ul.alerts {
   margin: 0;
