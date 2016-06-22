@@ -49,15 +49,15 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
         # Create a list item for each alert.
         if attendees
             for guest, index in attendees
-                options = _.extend guest,
+                options = _.extend _.clone(guest),
                     index       : index
                     hideShare   : (not guest.cozy?)
                     activeShare : guest.cozy? and guest.isSharedWithCozy
                     hideEmail   : (not guest.email?)
                     activeEmail : guest.email? and (not guest.isSharedWithCozy)
-
-                row = @templateGuestRow _.extend guest,
                     readOnly: @context.readOnly
+
+                row = @templateGuestRow options
 
                 $guestElement.append row
 
