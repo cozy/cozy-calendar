@@ -390,11 +390,16 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         if guestsToInform.length
             guestsList = guestsToInform.map((guest) -> guest.label).join ', '
-            Modal.confirm t('modal send mails'),
+            modal = Modal.confirm t('modal send mails'),
                 "#{t 'send invitations question'} #{guestsList}", \
                 t('yes'),
                 t('no'),
                 (result) -> callback null, result
+
+            @context.clickOutListener.exceptOn [
+                    modal.el,
+                    modal.getBackdrop() ]
+
         else
             callback null, false
 

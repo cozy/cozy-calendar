@@ -31,11 +31,16 @@ module.exports = class DeletePopoverScreen extends PopoverScreenView
 
         if guestsToInform.length
             guestsList = guestsToInform.map((guest) -> guest.label).join ', '
-            Modal.confirm t('modal send mails'),
+            modal = Modal.confirm t('modal send mails'),
                 "#{t 'send delete notifications'} #{guestsList}", \
                 t('yes'),
                 t('no'),
                 (result) -> callback null, result
+
+            @context.clickOutListener.exceptOn [
+                    modal.el,
+                    modal.getBackdrop() ]
+
         else
             callback null, false
 
