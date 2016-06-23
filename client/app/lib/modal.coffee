@@ -76,6 +76,11 @@ class Modal extends Backbone.View
     # if the target is not a child element, the click targets the backdrop
     onClickAnywhere: (event) -> @onNo() if event.target.id is @id
 
+    # Returns the modal's backdrop element
+    getBackdrop: () ->
+        $modal = @$el.data 'modal'
+        return $modal?.$backdrop?.get 0
+
 Modal.alert = (title, content, cb) ->
     new Modal {title, content, yes: 'ok', no: null, cb}
 

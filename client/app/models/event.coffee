@@ -312,12 +312,13 @@ module.exports = class Event extends ScheduleItem
 
         return @get 'attendees'
 
+
     # Prepare data brefore sync
     prepare: ->
         # Remove trailing slash from any cozy url in attendees
         attendees = @get('attendees') or []
         @set 'attendees', attendees.map (attendee) ->
-            return _.extend {}, attendee,
+            return _.extend _.clone(attendee),
                 # Remove trailing slash to allow easier comparison with sharing
                 # objects
                 cozy: attendee.cozy?.replace /\/$/, ''
