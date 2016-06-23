@@ -1,5 +1,6 @@
 PopoverScreenView = require 'lib/popover_screen_view'
 ComboBox    = require 'views/widgets/combobox'
+Modal = require 'lib/modal'
 Event       = require 'models/event'
 
 tFormat                 = 'HH:mm'
@@ -343,29 +344,73 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             calendar = @formModel.getCalendar()
             @model.setCalendar calendar
 
-            saveEvent = () =>
+            saveEvent = (sendInvitations) =>
                 @model.save @formModel.attributes,
-                wait: true
-                success: (model, response) =>
-                    app.events.add model, sort: false
-                error: ->
-                    # TODO better error handling
-                    alert 'server error occured'
-                complete: =>
-                    @$addButton.html @getButtonText()
-                    @popover.close()
-
-            if calendar.isNew()
-                calendar.save calendar.attributes,
                     wait: true
-                    success: ->
-                        app.calendars.add calendar
-                        saveEvent()
+                    url: "#{@model.url()}?sendMails=#{sendInvitations}"
+                    success: (model, response) =>
+                        app.events.add model, sort: false
                     error: ->
                         # TODO better error handling
                         alert 'server error occured'
-            else
-                saveEvent()
+                    complete: =>
+                        @$addButton.html @getButtonText()
+                        @popover.close()
+
+            @confirmEmailInvitations @formModel, (err, sendInvitations) =>
+                if err
+                    # TODO better error handling
+                    alert err
+                    return
+
+                @syncCalendar calendar, (err, calendar) ->
+                    # TODO better error handling
+                    if err
+                        alert err
+                        return
+
+                    saveEvent(sendInvitations)
+
+    # Display confirmation modal for sending emails invitation to attendees
+    confirmEmailInvitations: (model, callback) ->
+        invitationsShouldBeSent = model.isNew() or
+                                    model.startDateChanged() or
+                                        model.attendeesChanged()
+        if not invitationsShouldBeSent
+            callback null, false
+            return
+
+        # else: look state of each guest.
+        attendees = model.get('attendees') or []
+        guestsToInform = attendees.filter (guest) =>
+            return not guest.isSharedWithCozy and
+                (model.isNew() or
+                    guest.status is not 'ACCEPTED' or
+                        model.startDateChanged())
+
+        if guestsToInform.length
+            guestsList = guestsToInform.map((guest) -> guest.label).join ', '
+            Modal.confirm t('modal send mails'),
+                "#{t 'send invitations question'} #{guestsList}", \
+                t('yes'),
+                t('no'),
+                (result) -> callback null, result
+        else
+            callback null, false
+
+    # Ensure that the given calendar is saved (method called just before
+    # saving an event)
+    syncCalendar: (calendar, callback) ->
+        if calendar.isNew()
+            calendar.save calendar.attributes,
+                wait: true
+                success: ->
+                    app.calendars.add calendar
+                    callback null, calendar
+                error: ->
+                    callback 'server error occured', null
+        else
+            callback null, calendar
 
 
     handleError: (error) ->
