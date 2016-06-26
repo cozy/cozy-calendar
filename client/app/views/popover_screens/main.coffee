@@ -374,8 +374,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
     # Display confirmation modal for sending emails invitation to attendees
     confirmEmailInvitations: (model, callback) ->
         invitationsShouldBeSent = model.isNew() or
-                                    model.startDateChanged() or
-                                        model.attendeesChanged()
+                                    model.startDateChanged or
+                                        model.attendeesChanged
         if not invitationsShouldBeSent
             callback null, false
             return
@@ -386,7 +386,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             return not guest.isSharedWithCozy and
                 (model.isNew() or
                     guest.status is not 'ACCEPTED' or
-                        model.startDateChanged())
+                        model.startDateChanged)
 
         if guestsToInform.length
             guestsList = guestsToInform.map((guest) -> guest.label).join ', '
@@ -515,4 +515,3 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             .add endOffset, 'd'
             .format tFormat
         @$('.input-end-time').timepicker('setTime', newValue)
-
