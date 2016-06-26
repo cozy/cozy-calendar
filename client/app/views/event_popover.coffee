@@ -49,6 +49,12 @@ module.exports = class EventPopOver extends PopoverView
         @listenTo @model, 'change:shareID', =>
             @context.formModel.set 'shareID', @model.get 'shareID'
 
+        # Listen to attendees, they could be change by a call to event.prepare
+        # before a deletion of an event. If so, we have to keep attendees equals
+        # to avoid a warning message after delete confirmation.
+        @listenTo @model, 'change:attendees', =>
+            @context.formModel.set 'attendees', @model.get 'attendees'
+
         @listenToOnce @context.formModel, 'change', (model, options) =>
             @modelHasChanged = true
 

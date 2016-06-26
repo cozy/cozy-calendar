@@ -299,59 +299,5 @@ module.exports = class ScheduleItem extends Backbone.Model
             backgroundColor: @getColor()
             borderColor: @getColor()
 
-    # Override sync to ask email sending just before changes save on server.
-    sync: (method, model, options) ->
-        # We freeze the model's state because when the model contains attendee,
-        # the modal confirm dialog causes the data to be empty at the end of the
-        # process.
-        # I was not able to detect where this issue come from.
-        # As I am lacking of time, I used this ugly hack to keep the expected
-        # attributes in the model.
-        frozenModel = model.clone()
 
-        @confirmSendEmails method, (sendMails) ->
-            # overrides the url to append the sendmails parameter
-            options.url  = "#{model.url()}?sendMails=#{sendMails}"
-            return super method, frozenModel, options
-
-
-    confirmSendEmails: (method, callback) ->
-        if @get 'import' # No mails on files import.
-            return callback false
-
-        # Kind of changes which doesn't need mails.
-        if method in ['update', 'patch'] and
-                not (@startDateChanged or @attendeesChanged)
-            return callback false
-
-        # else: look state of each guest.
-        attendees = @get('attendees') or []
-        guestsToInform = attendees.filter (guest) =>
-            if guest.isSharedWithCozy
-                return false
-
-            if method is 'create'
-                return true
-
-            else if method is 'delete'
-                return guest.status in ['ACCEPTED', 'NEEDS-ACTION']
-
-            else if method in ['update', 'patch']
-                return guest.status is 'INVITATION-NOT-SENT' or \
-                       guest.status is 'NEEDS-ACTION' or \
-                       (guest.status is 'ACCEPTED' and @startDateChanged)
-
-        .map (guest) -> guest.label
-
-        if guestsToInform.length is 0
-            return callback false
-        else
-            guestsList = guestsToInform.join ', '
-            # content = "#{t 'send mails question'} #{guestsList}"
-            content = "#{t 'send invitations question'} #{guestsList}"
-            Modal.confirm t('modal send mails'), content, \
-                t('yes'), t('no'), callback
-
-        @startDateChanged = false
-        @attendeesChanged = false
 
