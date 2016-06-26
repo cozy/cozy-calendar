@@ -1485,6 +1485,12 @@ Modal = (function(superClass) {
     }
   };
 
+  Modal.prototype.getBackdrop = function() {
+    var $modal, ref;
+    $modal = this.$el.data('modal');
+    return $modal != null ? (ref = $modal.$backdrop) != null ? ref.get(0) : void 0 : void 0;
+  };
+
   return Modal;
 
 })(Backbone.View);
@@ -2481,13 +2487,13 @@ module.exports = {
     "Month": "Monat",
     "Popup": "Popup",
     "Switch to List": "Wechseln zur Liste",
-    "Switch to Calendar": "Wechseln zum Kalendar",
+    "Switch to Calendar": "Wechseln zum Kalender",
     "time": "Zeit",
     "Today": "Heute",
     "today": "heute",
     "What should I remind you ?": "An was soll ich Sie erinnern?",
-    "select an icalendar file": "Auswählen einer ICalendar Datei",
-    "import your icalendar file": "Ihre ICalendar Datei importieren",
+    "select an icalendar file": "Auswählen einer iCalendar Datei",
+    "import your icalendar file": "Ihre iCalendar Datei importieren",
     "confirm import": "Importieren bestätigen",
     "cancel": "abbrechen",
     "Create": "Erstellen",
@@ -2503,7 +2509,7 @@ module.exports = {
     "Display": "Mitteilung",
     "DISPLAY": "Mitteilung",
     "EMAIL": "E-Mail",
-    "BOTH": "E-Mail & Mitteilung",
+    "BOTH": "E-Mail & Benachrichtigung",
     "display previous events": "vorherige Ereignisse anzeigen",
     "display next events": "nächste Ereignisse anzeigen",
     "are you sure": "Sind Sie sicher?",
@@ -2514,8 +2520,8 @@ module.exports = {
     "ON": "EIN",
     "OFF": "AUS",
     "no description": "Keine Beschreibung",
-    "add calendar": "Kalendar hinzufügen",
-    "new calendar": "Neuer Kalendar",
+    "add calendar": "Kalender hinzufügen",
+    "new calendar": "Neuer Kalender",
     "multiple actions": "mehrere  Aktionen",
     "recurrence": "Wiederholung",
     "recurrence rule": "Wiederholungsregeln",
@@ -2575,16 +2581,16 @@ module.exports = {
     "more details button": "Mehr Optionen",
     "save button": "Speichern",
     "create button": "Erstellen",
-    "duplicate event tooltip": "Termine duplizieren",
+    "duplicate event tooltip": "Termin duplizieren",
     "delete event tooltip": "Termin löschen",
     "change calendar": "Kalender wechseln",
-    "screen confirm title": "Are you sure?",
-    "screen confirm description": "The change you made in this popover will be lost.",
-    "screen confirm yes button": "Don't save",
-    "screen confirm no button": "Cancel",
-    "dont ask again": "Dont ask for confirmation when exiting the popover.",
+    "screen confirm title": "Sind Sie sicher?",
+    "screen confirm description": "Die Änderung, die Sie in diesem Fenster gemacht haben, wird nicht gespeichert.",
+    "screen confirm yes button": "Nicht speichern",
+    "screen confirm no button": "Abbrechen",
+    "dont ask again": "Beim Schließen des Fensters nicht um Bestätigung bitten.",
     "screen delete title": "Termin Löschen",
-    "screen delete description": "Sie sind dabei den Termin  \"%{description}\" Zu löschen. Wollen Sie das wirklich?",
+    "screen delete description": "Termin \"%{description}\" wird gelöscht. Sind Sie sicher?",
     "screen delete yes button": "Ja",
     "screen delete no button": "Nein",
     "screen guest title empty": "Gast",
@@ -2592,32 +2598,32 @@ module.exports = {
     "screen guest input placeholder": "Email Adresse",
     "screen guest add button": "Hinzufügen",
     "screen guest remove tooltip": "Einladung abbrechen",
-    "screen guest share with cozy tooltip": "Share the invitation with the guest's cozy",
-    "screen guest share with email tooltip": "Send the invitation as an e-mail",
-    "screen description title": "Beschribeung",
+    "screen guest share with cozy tooltip": "Teile die Einladung mit dem Cozy des Gastes",
+    "screen guest share with email tooltip": "Die Einladung als Email verschicken",
+    "screen description title": "Beschreibung",
     "screen alert title empty": "Erinnerung",
-    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
-    "screen alert default value": "Add new alert",
-    "screen alert time of event": "Time of the event",
-    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
-    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
-    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
-    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
-    "screen alert delete tooltip": "Delete alert",
+    "screen alert title": "%{smart_count} Erinnerung |||| %{smart_count} Erinnerungen",
+    "screen alert default value": "Neue Erinnerung",
+    "screen alert time of event": "Uhrzeit des Ereignisses",
+    "screen alert minute": "%{smart_count} Minute |||| %{smart_count} Minuten",
+    "screen alert hour": "%{smart_count} Stunde |||| %{smart_count} Stunden",
+    "screen alert day": "%{smart_count} Tag |||| %{smart_count} Tage",
+    "screen alert week": "%{smart_count} Woche |||| %{smart_count} Wochen",
+    "screen alert delete tooltip": "Erinnerung löschen",
     "screen alert type email": "Email",
-    "screen alert type notification": "Cozy notification",
+    "screen alert type notification": "Cozy Benachrichtigung",
     "screen recurrence title": "Wiederholen",
     "screen recurrence no repeat": "Nicht Wiederholen",
     "screen recurrence daily": "Täglich",
     "screen recurrence weekly": "Wöchentlich",
     "screen recurrence monthly": "Monatlich",
     "screen recurrence yearly": "Jährlich",
-    "screen recurrence interval label": "Interval",
-    "screen recurrence interval unit 0": "year |||| years",
-    "screen recurrence interval unit 1": "month |||| months",
-    "screen recurrence interval unit 2": "week |||| weeks",
-    "screen recurrence interval unit 3": "day |||| days",
-    "screen recurrence interval unit": "days",
+    "screen recurrence interval label": "Intervall",
+    "screen recurrence interval unit 0": "Jahr |||| Jahre",
+    "screen recurrence interval unit 1": "Monat |||| Monate",
+    "screen recurrence interval unit 2": "Woche |||| Wochen",
+    "screen recurrence interval unit 3": "Tag |||| Tage",
+    "screen recurrence interval unit": "Tage",
     "screen recurrence days list label": "On days",
     "screen recurrence repeat by label": "Repeat by",
     "screen recurrence repeat by month": "Day of the month",
@@ -2630,12 +2636,12 @@ module.exports = {
     "screen recurrence ends until placeholder": "Until [date]",
     "screen recurrence summary label": "Summary",
     "send mails question": "Eine Mitteilung senden an E-MAil:",
-    "send invitations question": "Send an invitation to:",
+    "send invitations question": "Eine Einladung schicken an:",
     "modal send mails": "Eine Mitteilung senden",
-    "accepted": "Accepted",
-    "declined": "Declined",
-    "need action": "No answer yet",
-    "mail not sent": "No invitation sent",
+    "accepted": "Angenommen",
+    "declined": "Abgelehnt",
+    "need action": "Bisher keine Antwort",
+    "mail not sent": "Keine Einladung verschickt",
     "yes": "Ja",
     "no": "Nein",
     "no summary": "Ein Titel muss vergeben werden.",
@@ -2643,9 +2649,9 @@ module.exports = {
     "invalid start date": "Das Start-Datum ist ungültig.",
     "invalid end date": "Das End-Datum ist ungültig.",
     "invalid trigg date": "Das Datum ist ungültig.",
-    "invalid action": "Die Aktion ist ungültig..",
+    "invalid action": "Die Aktion ist ungültig.",
     "server error occured": "EIn Server Fehler ist aufgetreten.",
-    "synchronization": "Synchronisation",
+    "synchronization": "Synchronisierung",
     "mobile sync": "Mobile Sync (CalDAV)",
     "link imported events with calendar": "Ereignis auswählen um mit folgendem Kalendar zu importieren:",
     "import an ical file": "Um eine ICal Datei in Ihren Cozy Kalender zu importieren, bitte erst diese Schaltfläche zum vorladen drücken:",
@@ -2691,7 +2697,7 @@ module.exports = {
     "Oct": "Okt",
     "Nov": "Nov",
     "Dec": "Dez",
-    "calendar exist error": "Ein Kalendar mit dem Namenn \"Neuer Kalendar\" existiert bereits.",
+    "calendar exist error": "Ein Kalender mit dem Namen \"Neuer Kalender\" existiert bereits.",
     "email date format": "On MMMM Do YYYY, h:mm a",
     "email date format allday": "On MMMM Do YYYY, [all day long]",
     "email invitation title": "Invitation to '%{description}'",
@@ -6168,6 +6174,272 @@ module.exports = {
 };
 });
 
+require.register("locales/zh_CN.json", function(exports, require, module) {
+module.exports = {
+    "calendar list title": "Calendars",
+    "sync settings button label": "Synchronization",
+    "default calendar name": "my calendar",
+    "Add": "Add",
+    "event": "Event",
+    "create event": "Event creation",
+    "edit event": "Event edition",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "creation": "Creation",
+    "invite": "Invite",
+    "close": "Close",
+    "delete": "Delete",
+    "change color": "Change color",
+    "rename": "Rename",
+    "export": "Export",
+    "remove": "Remove event",
+    "duplicate": "Duplicate event",
+    "Place": "Place",
+    "all day": "All day",
+    "All day": "All day",
+    "description": "Description",
+    "date": "date",
+    "Day": "Day",
+    "days": "days",
+    "Edit": "Edit",
+    "Email": "Email",
+    "Import": "Import",
+    "Export": "Export",
+    "show": "Show",
+    "hide": "Hide",
+    "List": "List",
+    "list": "list",
+    "Calendar": "Calendar",
+    "calendar": "Calendar",
+    "Sync": "Sync",
+    "ie: 9:00 important meeting": "ie: 9:00 important meeting",
+    "Month": "Month",
+    "Popup": "Popup",
+    "Switch to List": "Switch to List",
+    "Switch to Calendar": "Switch to Calendar",
+    "time": "time",
+    "Today": "Today",
+    "today": "today",
+    "What should I remind you ?": "What should I remind you?",
+    "select an icalendar file": "Select an icalendar file",
+    "import your icalendar file": "import your icalendar file",
+    "confirm import": "confirm import",
+    "cancel": "cancel",
+    "Create": "Create",
+    "Events to import": "Events to import",
+    "Create Event": "Create Event",
+    "From [hours:minutes]": "From [hours:minutes]",
+    "To [hours:minutes]": "To [hours:minutes]",
+    "To [date]": "To [date]",
+    "Description": "Description",
+    "days after": "days after",
+    "days later": "days later",
+    "Week": "Week",
+    "Display": "Notification",
+    "DISPLAY": "Notification",
+    "EMAIL": "E-mail",
+    "BOTH": "E-mail & Notification",
+    "display previous events": "Display previous events",
+    "display next events": "Display next events",
+    "are you sure": "Are you sure?",
+    "confirm delete calendar": "You are about to delete all the events related to %{calendarName}. Are you sure?",
+    "confirm delete selected calendars": "You are about to delete all the selected calendars. Are you sure?",
+    "advanced": "More options",
+    "enter email": "Enter email",
+    "ON": "on",
+    "OFF": "off",
+    "no description": "No description",
+    "add calendar": "Add calendar",
+    "new calendar": "New calendar",
+    "multiple actions": "Multiple actions",
+    "recurrence": "Recurrence",
+    "recurrence rule": "Recurrence rules",
+    "make reccurent": "Make recurrent",
+    "repeat every": "Repeat every",
+    "no recurrence": "No recurrence",
+    "repeat on": "Repeat on",
+    "repeat on date": "Repeat on dates",
+    "repeat on weekday": "Repeat on weekday",
+    "repeat until": "Repeat until",
+    "after": "After",
+    "repeat": "Repeat",
+    "forever": "Forever",
+    "occurences": "occurences",
+    "every": "Every",
+    "minutes": "minutes",
+    "minute ": "minute",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour",
+    "day": "day",
+    "weeks": "weeks",
+    "week": "week",
+    "months": "months",
+    "month": "month",
+    "years": "years",
+    "year": "year",
+    "until": "until",
+    "for": "for",
+    "on": "on",
+    "on the": "on the",
+    "th": "th",
+    "nd": "nd",
+    "rd": "rd",
+    "st": "st",
+    "last": "last",
+    "and": "and",
+    "times": "times",
+    "weekday": "weekday",
+    "screen title done button": "Done",
+    "placeholder event title": "Event title",
+    "from": "From",
+    "placeholder from date": "From [date]",
+    "placeholder from time": "From [hours:minutes]",
+    "to": "To",
+    "placeholder to date": "To [date]",
+    "placeholder to time": "To [hours:minutes]",
+    "placeholder place": "Place",
+    "add guest button": "Add guest",
+    "guests list": "%{first} and %{smart_count} other |||| %{first} and %{smart_count} others",
+    "placeholder description": "Description",
+    "no alert button": "No alert",
+    "alert label": "%{smart_count} alert scheduled |||| %{smart_count} alerts scheduled",
+    "alert tooltip": "Manage alerts",
+    "no repeat button": "No repeat",
+    "repeat tooltip": "Manage recurrence",
+    "more details button": "More options",
+    "save button": "Save",
+    "create button": "Create",
+    "duplicate event tooltip": "Duplicate event",
+    "delete event tooltip": "Delete event",
+    "change calendar": "Change calendar",
+    "screen confirm title": "Are you sure?",
+    "screen confirm description": "The change you made in this popover will be lost.",
+    "screen confirm yes button": "Don't save",
+    "screen confirm no button": "Cancel",
+    "dont ask again": "Dont ask for confirmation when exiting the popover.",
+    "screen delete title": "Delete event",
+    "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
+    "screen delete yes button": "Yes",
+    "screen delete no button": "No",
+    "screen guest title empty": "Guest",
+    "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
+    "screen guest input placeholder": "Email address",
+    "screen guest add button": "Add",
+    "screen guest remove tooltip": "Cancel the invitation",
+    "screen guest share with cozy tooltip": "Share the invitation with the guest's cozy",
+    "screen guest share with email tooltip": "Send the invitation as an e-mail",
+    "screen description title": "Description",
+    "screen alert title empty": "Alert",
+    "screen alert title": "%{smart_count} alert |||| %{smart_count} alerts",
+    "screen alert default value": "Add new alert",
+    "screen alert time of event": "Time of the event",
+    "screen alert minute": "%{smart_count} minute |||| %{smart_count} minutes",
+    "screen alert hour": "%{smart_count} hour |||| %{smart_count} hours",
+    "screen alert day": "%{smart_count} day |||| %{smart_count} days",
+    "screen alert week": "%{smart_count} week |||| %{smart_count} weeks",
+    "screen alert delete tooltip": "Delete alert",
+    "screen alert type email": "Email",
+    "screen alert type notification": "Cozy notification",
+    "screen recurrence title": "Repeat",
+    "screen recurrence no repeat": "No repeat",
+    "screen recurrence daily": "Daily",
+    "screen recurrence weekly": "Weekly",
+    "screen recurrence monthly": "Monthly",
+    "screen recurrence yearly": "Yearly",
+    "screen recurrence interval label": "Interval",
+    "screen recurrence interval unit 0": "year |||| years",
+    "screen recurrence interval unit 1": "month |||| months",
+    "screen recurrence interval unit 2": "week |||| weeks",
+    "screen recurrence interval unit 3": "day |||| days",
+    "screen recurrence interval unit": "days",
+    "screen recurrence days list label": "On days",
+    "screen recurrence repeat by label": "Repeat by",
+    "screen recurrence repeat by month": "Day of the month",
+    "screen recurrence repeat by week": "Day of the week",
+    "screen recurrence ends label": "Ends:",
+    "screen recurrence ends never label": "Never",
+    "screen recurrence ends count label": "After",
+    "screen recurrence ends count unit": "occurrences",
+    "screen recurrence ends until label": "Until",
+    "screen recurrence ends until placeholder": "Until [date]",
+    "screen recurrence summary label": "Summary",
+    "send mails question": "Send a notification email to:",
+    "send invitations question": "Send an invitation to:",
+    "modal send mails": "Send a notification",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "need action": "No answer yet",
+    "mail not sent": "No invitation sent",
+    "yes": "Yes",
+    "no": "No",
+    "no summary": "A summary must be set.",
+    "start after end": "The start date is after the end date.",
+    "invalid start date": "The start date is invalid.",
+    "invalid end date": "The end date is invalid.",
+    "invalid trigg date": "The date is invalid.",
+    "invalid action": "The action is invalid.",
+    "server error occured": "A server error occured.",
+    "synchronization": "Synchronization",
+    "mobile sync": "Mobile Sync (CalDAV)",
+    "link imported events with calendar": "Link events to import with following calendar:",
+    "import an ical file": "To import an ICal file into your cozy calendar, first click on this button to preload it:",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy if the calendar as an ICal file, :",
+    "icalendar export": "ICalendar Export",
+    "icalendar import": "ICalendar Import",
+    "to sync your cal with": "To synchronize your calendar with your devices, you must follow two steps",
+    "sync headline with data": "To synchronize your calendar, use the following information:",
+    "sync url": "URL:",
+    "sync login": "Username:",
+    "sync password": "Password:",
+    "sync help": "Are you lost? Follow the",
+    "sync help link": "step-by-step guide!",
+    "install the sync module": "Install the Sync module from the Cozy App Store",
+    "connect to it and follow": "Connect to it and follow the instructions related to CalDAV.",
+    "some event fail to save": "An event was not saved (an error occured).",
+    "imported events": "Amount of imported events",
+    "import finished": "Your import is now finished. Displaying all new events take time. If you want to load them faster, refresh the whole page.",
+    "import error": "A server error occured, the import failed.",
+    "import error occured for": "Import error occured for following elements:",
+    "export your calendar": "Export your calendar",
+    "please select existing calendar": "Please select an existing calendar.",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec",
+    "calendar exist error": "A calendar named \"New Calendar\" already exists.",
+    "email date format": "MMMM Do YYYY, h:mm a",
+    "email date format allday": "MMMM Do YYYY, [all day long]",
+    "email invitation title": "Invitation to '%{description}'",
+    "email invitation content": "Hello, I would like to invite you to the following event:\n\n%{description} %{place}\non %{date}\nWould you be there?\n\nYes\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n%{url}?status=DECLINED&key=%{key}",
+    "email update title": "Event \"%{description}\" has changed",
+    "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
+    "email delete title": "This event has been canceled: %{description}",
+    "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
+    "invalid recurring rule": "The recurring rule is invalid"
+};
+});
+
 require.register("models/contact.coffee", function(exports, require, module) {
 var Contact,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -6543,6 +6815,22 @@ module.exports = Event = (function(superClass) {
     return this.get('attendees');
   };
 
+  Event.prototype.prepare = function() {
+    var attendees;
+    attendees = this.get('attendees') || [];
+    return this.set('attendees', attendees.map(function(attendee) {
+      var ref;
+      return _.extend(_.clone(attendee), {
+        cozy: (ref = attendee.cozy) != null ? ref.replace(/\/$/, '') : void 0
+      });
+    }));
+  };
+
+  Event.prototype.sync = function(method, model, options) {
+    this.prepare();
+    return Event.__super__.sync.call(this, method, model, options);
+  };
+
   return Event;
 
 })(ScheduleItem);
@@ -6913,52 +7201,6 @@ module.exports = ScheduleItem = (function(superClass) {
       backgroundColor: this.getColor(),
       borderColor: this.getColor()
     };
-  };
-
-  ScheduleItem.prototype.sync = function(method, model, options) {
-    var frozenModel;
-    frozenModel = model.clone();
-    return this.confirmSendEmails(method, function(sendMails) {
-      options.url = (model.url()) + "?sendMails=" + sendMails;
-      return ScheduleItem.__super__.sync.call(this, method, frozenModel, options);
-    });
-  };
-
-  ScheduleItem.prototype.confirmSendEmails = function(method, callback) {
-    var attendees, content, guestsList, guestsToInform;
-    if (this.get('import')) {
-      return callback(false);
-    }
-    if ((method === 'update' || method === 'patch') && !(this.startDateChanged || this.attendeesChanged)) {
-      return callback(false);
-    }
-    attendees = this.get('attendees') || [];
-    guestsToInform = attendees.filter((function(_this) {
-      return function(guest) {
-        var ref;
-        if (guest.isSharedWithCozy) {
-          return false;
-        }
-        if (method === 'create') {
-          return true;
-        } else if (method === 'delete') {
-          return (ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION';
-        } else if (method === 'update' || method === 'patch') {
-          return guest.status === 'INVITATION-NOT-SENT' || guest.status === 'NEEDS-ACTION' || (guest.status === 'ACCEPTED' && _this.startDateChanged);
-        }
-      };
-    })(this)).map(function(guest) {
-      return guest.label;
-    });
-    if (guestsToInform.length === 0) {
-      return callback(false);
-    } else {
-      guestsList = guestsToInform.join(', ');
-      content = (t('send invitations question')) + " " + guestsList;
-      Modal.confirm(t('modal send mails'), content, t('yes'), t('no'), callback);
-    }
-    this.startDateChanged = false;
-    return this.attendeesChanged = false;
   };
 
   return ScheduleItem;
@@ -7835,6 +8077,11 @@ module.exports = EventPopOver = (function(superClass) {
     this.listenTo(this.model, 'change:shareID', (function(_this) {
       return function() {
         return _this.context.formModel.set('shareID', _this.model.get('shareID'));
+      };
+    })(this));
+    this.listenTo(this.model, 'change:attendees', (function(_this) {
+      return function() {
+        return _this.context.formModel.set('attendees', _this.model.get('attendees'));
       };
     })(this));
     return this.listenToOnce(this.context.formModel, 'change', (function(_this) {
@@ -9361,11 +9608,13 @@ module.exports = ConfirmClosePopoverScreen = (function(superClass) {
 });
 
 ;require.register("views/popover_screens/delete.coffee", function(exports, require, module) {
-var DeletePopoverScreen, PopoverScreenView,
+var DeletePopoverScreen, Modal, PopoverScreenView,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 PopoverScreenView = require('lib/popover_screen_view');
+
+Modal = require('lib/modal');
 
 module.exports = DeletePopoverScreen = (function(superClass) {
   extend(DeletePopoverScreen, superClass);
@@ -9395,26 +9644,49 @@ module.exports = DeletePopoverScreen = (function(superClass) {
     return this.$errors.hide();
   };
 
+  DeletePopoverScreen.prototype.confirmEmailNotifications = function(model, callback) {
+    var attendees, guestsList, guestsToInform, modal;
+    attendees = model.get('attendees') || [];
+    guestsToInform = attendees.filter((function(_this) {
+      return function(guest) {
+        var ref;
+        return !guest.isSharedWithCozy && ((ref = guest.status) === 'ACCEPTED' || ref === 'NEEDS-ACTION');
+      };
+    })(this));
+    if (guestsToInform.length) {
+      guestsList = guestsToInform.map(function(guest) {
+        return guest.label;
+      }).join(', ');
+      modal = Modal.confirm(t('modal send mails'), (t('send delete notifications')) + " " + guestsList, t('yes'), t('no'), function(result) {
+        return callback(null, result);
+      });
+      return this.context.clickOutListener.exceptOn([modal.el, modal.getBackdrop()]);
+    } else {
+      return callback(null, false);
+    }
+  };
+
   DeletePopoverScreen.prototype.onDelete = function() {
     this.$errors.hide();
     this.$spinner.show();
     this.$removeChoices.hide();
-    return this.model.destroy({
-      wait: true,
-      error: (function(_this) {
-        return function() {
-          _this.$removeChoices.show();
-          _this.$errors.html(t('server error occured'));
-          return _this.$errors.show();
-        };
-      })(this),
-      success: (function(_this) {
-        return function() {
-          _this.$spinner.hide();
-          return _this.popover.close();
-        };
-      })(this)
-    });
+    return this.confirmEmailNotifications(this.model, (function(_this) {
+      return function(err, sendEmailNotifications) {
+        return _this.model.destroy({
+          wait: true,
+          url: (_this.model.url()) + "?sendMails=" + sendEmailNotifications,
+          error: function() {
+            _this.$removeChoices.show();
+            _this.$errors.html(t('server error occured'));
+            return _this.$errors.show();
+          },
+          success: function() {
+            _this.$spinner.hide();
+            return _this.popover.close();
+          }
+        });
+      };
+    })(this));
   };
 
   return DeletePopoverScreen;
@@ -9536,16 +9808,15 @@ module.exports = GuestPopoverScreen = (function(superClass) {
     if (attendees) {
       for (index = i = 0, len = attendees.length; i < len; index = ++i) {
         guest = attendees[index];
-        options = _.extend(guest, {
+        options = _.extend(_.clone(guest), {
           index: index,
           hideShare: guest.cozy == null,
           activeShare: (guest.cozy != null) && guest.isSharedWithCozy,
           hideEmail: guest.email == null,
-          activeEmail: (guest.email != null) && (!guest.isSharedWithCozy)
-        });
-        row = this.templateGuestRow(_.extend(guest, {
+          activeEmail: (guest.email != null) && (!guest.isSharedWithCozy),
           readOnly: this.context.readOnly
-        }));
+        });
+        row = this.templateGuestRow(options);
         $guestElement.append(row);
       }
     }
@@ -9710,7 +9981,7 @@ module.exports = GuestPopoverScreen = (function(superClass) {
 });
 
 ;require.register("views/popover_screens/main.coffee", function(exports, require, module) {
-var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
+var ComboBox, Event, MainPopoverScreen, Modal, PopoverScreenView, allDayDateFieldFormat, dFormat, defDatePickerOps, defTimePickerOpts, inputDateDTPickerFormat, tFormat,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -9718,6 +9989,8 @@ var ComboBox, Event, MainPopoverScreen, PopoverScreenView, allDayDateFieldFormat
 PopoverScreenView = require('lib/popover_screen_view');
 
 ComboBox = require('views/widgets/combobox');
+
+Modal = require('lib/modal');
 
 Event = require('models/event');
 
@@ -10074,9 +10347,10 @@ module.exports = MainPopoverScreen = (function(superClass) {
       calendar = this.formModel.getCalendar();
       this.model.setCalendar(calendar);
       saveEvent = (function(_this) {
-        return function() {
+        return function(sendInvitations) {
           return _this.model.save(_this.formModel.attributes, {
             wait: true,
+            url: (_this.model.url()) + "?sendMails=" + sendInvitations,
             success: function(model, response) {
               return app.events.add(model, {
                 sort: false
@@ -10092,20 +10366,64 @@ module.exports = MainPopoverScreen = (function(superClass) {
           });
         };
       })(this);
-      if (calendar.isNew()) {
-        return calendar.save(calendar.attributes, {
-          wait: true,
-          success: function() {
-            app.calendars.add(calendar);
-            return saveEvent();
-          },
-          error: function() {
-            return alert('server error occured');
+      return this.confirmEmailInvitations(this.formModel, (function(_this) {
+        return function(err, sendInvitations) {
+          if (err) {
+            alert(err);
+            return;
           }
-        });
-      } else {
-        return saveEvent();
-      }
+          return _this.syncCalendar(calendar, function(err, calendar) {
+            if (err) {
+              alert(err);
+              return;
+            }
+            return saveEvent(sendInvitations);
+          });
+        };
+      })(this));
+    }
+  };
+
+  MainPopoverScreen.prototype.confirmEmailInvitations = function(model, callback) {
+    var attendees, guestsList, guestsToInform, invitationsShouldBeSent, modal;
+    invitationsShouldBeSent = model.isNew() || model.startDateChanged() || model.attendeesChanged();
+    if (!invitationsShouldBeSent) {
+      callback(null, false);
+      return;
+    }
+    attendees = model.get('attendees') || [];
+    guestsToInform = attendees.filter((function(_this) {
+      return function(guest) {
+        return !guest.isSharedWithCozy && (model.isNew() || guest.status === !'ACCEPTED' || model.startDateChanged());
+      };
+    })(this));
+    if (guestsToInform.length) {
+      guestsList = guestsToInform.map(function(guest) {
+        return guest.label;
+      }).join(', ');
+      modal = Modal.confirm(t('modal send mails'), (t('send invitations question')) + " " + guestsList, t('yes'), t('no'), function(result) {
+        return callback(null, result);
+      });
+      return this.context.clickOutListener.exceptOn([modal.el, modal.getBackdrop()]);
+    } else {
+      return callback(null, false);
+    }
+  };
+
+  MainPopoverScreen.prototype.syncCalendar = function(calendar, callback) {
+    if (calendar.isNew()) {
+      return calendar.save(calendar.attributes, {
+        wait: true,
+        success: function() {
+          app.calendars.add(calendar);
+          return callback(null, calendar);
+        },
+        error: function() {
+          return callback('server error occured', null);
+        }
+      });
+    } else {
+      return callback(null, calendar);
     }
   };
 
