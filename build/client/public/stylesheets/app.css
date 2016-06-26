@@ -9882,45 +9882,32 @@ select.select-big.with-margin {
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
 }
-ul.guests {
+.fc table.guests {
   margin: 0;
   list-style-type: none;
-  display: table;
-  width: 100%;
+  width: 22em;
+  margin: 0 1.5em;
 }
-ul.guests li {
+.fc table.guests li {
   padding: 1em 1.5em;
   border-top: 1px solid #c8d5df;
   line-height: 1;
 }
-ul.guests li:last-child {
+.fc table.guests li:last-child {
   border-bottom: 1px solid #c8d5df;
 }
-ul.guests .guest-top {
-  display: table-row;
-  -webkit-box-align: center;
-  -moz-box-align: center;
-  -o-box-align: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
+.fc table.guests .guest-top td {
+  vertical-align: middle;
+  border-width: 0;
 }
-ul.guests .guest-top > * {
-  display: table-cell;
-  max-width: 11.5em;
-  padding: 0.5em;
+.fc table.guests .guest-top.status,
+.fc table.guests .guest-top.action {
+  text-align: center;
 }
-ul.guests .guest-top > *:last-child {
-  padding-right: 1.5em;
+.fc table.guests .guest-top.status {
+  width: 1.5em;
 }
-ul.guests .guest-top > *:first-child {
-  padding-left: 1.5em;
-}
-ul.guests .guest-top .status,
-ul.guests .guest-top .button-wrapper {
-  width: 1em;
-}
-ul.guests .guest-top button {
+.fc table.guests .guest-top button {
   height: auto;
   border: none;
   background-color: transparent;
@@ -9928,25 +9915,20 @@ ul.guests .guest-top button {
   color: #acb8c5;
   padding: 0.5em;
 }
-ul.guests .guest-top button:hover,
-ul.guests .guest-top button.active {
+.fc table.guests .guest-top button:hover,
+.fc table.guests .guest-top button.active {
   color: #008af5;
 }
-ul.guests .guest-top button[aria-hidden] {
+.fc table.guests .guest-top button[aria-hidden] {
   visibility: hidden;
 }
-ul.guests .guest-label {
+.fc table.guests .guest-label {
   font-size: 1.1em;
   line-height: 1.5em;
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-ul.guests .guest-label:hover {
-  -o-text-overflow: clip;
-  text-overflow: clip;
-  white-space: normal;
-  word-break: break-all;
+  width: 60%;
 }
 ul.alerts {
   margin: 0;

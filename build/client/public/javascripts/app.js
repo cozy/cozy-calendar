@@ -9760,9 +9760,6 @@ module.exports = GuestPopoverScreen = (function(superClass) {
 
   GuestPopoverScreen.prototype.events = {
     "click .add-new-guest": "onNewGuest",
-    "click .guest-delete": "onRemoveGuest",
-    "click .guest-share-with-cozy": "onShare",
-    "click .guest-share-with-email": "onEmail",
     'keyup input[name="guest-name"]': "onKeyup"
   };
 
@@ -9803,7 +9800,7 @@ module.exports = GuestPopoverScreen = (function(superClass) {
   };
 
   GuestPopoverScreen.prototype.renderAttendees = function($guestElement, attendees) {
-    var guest, i, index, len, options, row;
+    var $row, guest, i, index, len, options;
     $guestElement.empty();
     if (attendees) {
       for (index = i = 0, len = attendees.length; i < len; index = ++i) {
@@ -9813,17 +9810,35 @@ module.exports = GuestPopoverScreen = (function(superClass) {
           hideShare: guest.cozy == null,
           activeShare: (guest.cozy != null) && guest.isSharedWithCozy,
           hideEmail: guest.email == null,
-          activeEmail: (guest.email != null) && (!guest.isSharedWithCozy),
-          readOnly: this.context.readOnly
+          activeEmail: (guest.email != null) && (!guest.isSharedWithCozy)
         });
-        row = this.templateGuestRow(options);
-        $guestElement.append(row);
+        $row = $(this.templateGuestRow(options));
+        $guestElement.append($row);
+        if (!this.context.readOnly) {
+          this.bindGuestActions($row, guest);
+        }
       }
     }
     if (!this.context.readOnly) {
       this.configureGuestTypeahead();
       return this.$('input[name="guest-name"]').focus();
     }
+  };
+
+  GuestPopoverScreen.prototype.bindGuestActions = function($element, guest) {
+    return $element.on('click', '.guest-delete', (function(_this) {
+      return function() {
+        return _this.onRemoveGuest(guest);
+      };
+    })(this)).on('click', '.guest-share-with-cozy', (function(_this) {
+      return function() {
+        return _this.onShare(guest);
+      };
+    })(this)).on('click', '.guest-share-with-email', (function(_this) {
+      return function() {
+        return _this.onEmail(guest);
+      };
+    })(this));
   };
 
   GuestPopoverScreen.prototype.configureGuestTypeahead = function() {
@@ -9862,33 +9877,35 @@ module.exports = GuestPopoverScreen = (function(superClass) {
     });
   };
 
-  GuestPopoverScreen.prototype.onRemoveGuest = function(event) {
-    var guests, index;
-    index = this.$(event.target).parents('li').attr('data-index');
+  GuestPopoverScreen.prototype.onRemoveGuest = function(guest) {
+    var guestIndex, guests;
     guests = this.formModel.get('attendees') || [];
-    guests.splice(index, 1);
+    guestIndex = guests.indexOf(guest);
+    if (guestIndex === -1) {
+      return;
+    }
+    guests.splice(guestIndex, 1);
     this.formModel.set('attendees', guests);
     return this.render();
   };
 
-  GuestPopoverScreen.prototype.onShare = function(event) {
-    var index;
-    index = this.$(event.target).parents('li').attr('data-index');
-    return this.removeIfDuplicate(index, true);
+  GuestPopoverScreen.prototype.onShare = function(guest) {
+    return this.removeIfDuplicate(guest, true);
   };
 
-  GuestPopoverScreen.prototype.onEmail = function(event) {
-    var index;
-    index = this.$(event.target).parents('li').attr('data-index');
-    return this.removeIfDuplicate(index, false);
+  GuestPopoverScreen.prototype.onEmail = function(guest) {
+    return this.removeIfDuplicate(guest, false);
   };
 
-  GuestPopoverScreen.prototype.removeIfDuplicate = function(index, isShare) {
-    var guest, guestBis, guests, test;
+  GuestPopoverScreen.prototype.removeIfDuplicate = function(guest, isShare) {
+    var guestBis, guestIndex, guests, test;
     guests = this.formModel.get('attendees') || [];
+    guestIndex = guests.indexOf(guest);
+    if (guestIndex === -1) {
+      return;
+    }
     guests = _.clone(guests);
-    guest = guests[index];
-    guests.splice(index, 1);
+    guests.splice(guestIndex, 1);
     if (isShare) {
       test = {
         cozy: guest.cozy
@@ -9905,7 +9922,7 @@ module.exports = GuestPopoverScreen = (function(superClass) {
     if (guestBis == null) {
       guest.label = isShare ? guest.cozy : guest.email;
       guest.isSharedWithCozy = isShare;
-      guests.splice(index, 0, guest);
+      guests.splice(guestIndex, 0, guest);
     }
     this.formModel.set('attendees', guests);
     return this.render();
@@ -10386,7 +10403,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
 
   MainPopoverScreen.prototype.confirmEmailInvitations = function(model, callback) {
     var attendees, guestsList, guestsToInform, invitationsShouldBeSent, modal;
-    invitationsShouldBeSent = model.isNew() || model.startDateChanged() || model.attendeesChanged();
+    invitationsShouldBeSent = model.isNew() || model.startDateChanged || model.attendeesChanged;
     if (!invitationsShouldBeSent) {
       callback(null, false);
       return;
@@ -10394,7 +10411,7 @@ module.exports = MainPopoverScreen = (function(superClass) {
     attendees = model.get('attendees') || [];
     guestsToInform = attendees.filter((function(_this) {
       return function(guest) {
-        return !guest.isSharedWithCozy && (model.isNew() || guest.status === !'ACCEPTED' || model.startDateChanged());
+        return !guest.isSharedWithCozy && (model.isNew() || guest.status === !'ACCEPTED' || model.startDateChanged);
       };
     })(this));
     if (guestsToInform.length) {
@@ -11514,7 +11531,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (activeEmail, activeShare, hideEmail, hideShare, index, label, readOnly, status) {
-buf.push("<li" + (jade.attr("data-index", index, true, false)) + " class=\"guest-top\"><span class=\"status\">");
+buf.push("<tr" + (jade.attr("data-index", index, true, false)) + " class=\"guest-top\"><td class=\"status\">");
 if ( status == 'ACCEPTED')
 {
 buf.push("<i" + (jade.attr("title", t('accepted'), true, false)) + " class=\"fa fa-check-circle-o green\"></i>");
@@ -11531,12 +11548,16 @@ else
 {
 buf.push("<i" + (jade.attr("title", t('mail not sent'), true, false)) + " class=\"fa fa-exclamation-circle orange\"></i>");
 }
-buf.push("</span><div class=\"guest-label\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</div>");
-if ( !readOnly)
+buf.push("</td><td" + (jade.attr("title", label, true, false)) + " class=\"guest-label\">" + (jade.escape(null == (jade_interp = label) ? "" : jade_interp)) + "</td>");
+if ( readOnly)
 {
-buf.push("<button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button><button" + (jade.attr("title", t('screen guest share with email tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeEmail ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideEmail, true, false)) + (jade.cls(['guest-share-with-email','fa','fa-envelope-o',activeEmail ? 'active' : ''], [null,null,null,true])) + "></button><button" + (jade.attr("title", t('screen guest share with cozy tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeShare ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideShare, true, false)) + (jade.cls(['guest-share-with-cozy','fa','fa-cloud',activeShare ? 'active' : ''], [null,null,null,true])) + "></button>");
+buf.push("<td>[colspan=3]</td>");
 }
-buf.push("</li>");}.call(this,"activeEmail" in locals_for_with?locals_for_with.activeEmail:typeof activeEmail!=="undefined"?activeEmail:undefined,"activeShare" in locals_for_with?locals_for_with.activeShare:typeof activeShare!=="undefined"?activeShare:undefined,"hideEmail" in locals_for_with?locals_for_with.hideEmail:typeof hideEmail!=="undefined"?hideEmail:undefined,"hideShare" in locals_for_with?locals_for_with.hideShare:typeof hideShare!=="undefined"?hideShare:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
+else
+{
+buf.push("<td class=\"action\"><button" + (jade.attr("title", t('screen guest remove tooltip'), true, false)) + " role=\"button\" class=\"guest-delete fa fa-trash-o\"></button></td><td class=\"action\"><button" + (jade.attr("title", t('screen guest share with email tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeEmail ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideEmail, true, false)) + (jade.cls(['guest-share-with-email','fa','fa-envelope-o',activeEmail ? 'active' : ''], [null,null,null,true])) + "></button></td><td class=\"action\"><button" + (jade.attr("title", t('screen guest share with cozy tooltip'), true, false)) + " role=\"button\"" + (jade.attr("disabled", activeShare ? 'disabled' : false, true, false)) + (jade.attr("aria-hidden", hideShare, true, false)) + (jade.cls(['guest-share-with-cozy','fa','fa-cloud',activeShare ? 'active' : ''], [null,null,null,true])) + "></button></td>");
+}
+buf.push("</tr>");}.call(this,"activeEmail" in locals_for_with?locals_for_with.activeEmail:typeof activeEmail!=="undefined"?activeEmail:undefined,"activeShare" in locals_for_with?locals_for_with.activeShare:typeof activeShare!=="undefined"?activeShare:undefined,"hideEmail" in locals_for_with?locals_for_with.hideEmail:typeof hideEmail!=="undefined"?hideEmail:undefined,"hideShare" in locals_for_with?locals_for_with.hideShare:typeof hideShare!=="undefined"?hideShare:undefined,"index" in locals_for_with?locals_for_with.index:typeof index!=="undefined"?index:undefined,"label" in locals_for_with?locals_for_with.label:typeof label!=="undefined"?label:undefined,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined,"status" in locals_for_with?locals_for_with.status:typeof status!=="undefined"?status:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -11560,7 +11581,7 @@ if ( !readOnly)
 {
 buf.push("<div class=\"guests-action\"><input type=\"text\" name=\"guest-name\"" + (jade.attr("placeholder", t('screen guest input placeholder'), true, false)) + "/><button class=\"btn add-new-guest\">" + (jade.escape(null == (jade_interp = t('screen guest add button')) ? "" : jade_interp)) + "</button></div>");
 }
-buf.push("<ul class=\"guests\"></ul></div>");}.call(this,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
+buf.push("<table class=\"guests\"></table></div>");}.call(this,"readOnly" in locals_for_with?locals_for_with.readOnly:typeof readOnly!=="undefined"?readOnly:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
