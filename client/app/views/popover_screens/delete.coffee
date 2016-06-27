@@ -25,7 +25,7 @@ module.exports = class DeletePopoverScreen extends PopoverScreenView
     # Display a modal to confirm sending of emails to notify attendees
     confirmEmailNotifications: (model, callback) ->
         attendees = model.get('attendees') or []
-        guestsToInform = attendees.filter (guest) =>
+        guestsToInform = attendees.filter (guest) ->
             return not guest.isSharedWithCozy and
                 guest.status in ['ACCEPTED', 'NEEDS-ACTION']
 
