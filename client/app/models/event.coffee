@@ -313,7 +313,7 @@ module.exports = class Event extends ScheduleItem
         return @get 'attendees'
 
 
-    # Prepare data brefore sync
+    # Prepare data before sync.
     prepare: ->
         # Remove trailing slash from any cozy url in attendees
         attendees = @get('attendees') or []
