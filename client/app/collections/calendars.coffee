@@ -1,13 +1,14 @@
 SocketListener = require '../lib/socket_listener'
 Tag = require 'models/tag'
+Calendar = require 'models/calendar'
 TagCollection = require 'collections/tags'
 request = require 'lib/request'
 
-stringify = (tag) -> tag.toString()
+stringify = (calendar) -> calendar.toString()
 
 module.exports = class CalendarCollection extends TagCollection
 
-    model: Tag
+    model: Calendar
 
 
     initialize: ->
@@ -82,9 +83,9 @@ module.exports = class CalendarCollection extends TagCollection
 
 
     toAutoCompleteSource: ->
-        return @map (tag) ->
+        return @map (calendar) ->
             return _.extend
-                label: tag.get 'name'
-                value: tag.get 'name'
-            , tag.attributes
+                label: calendar.get 'name'
+                value: calendar.get 'name'
+            , calendar.attributes
 
