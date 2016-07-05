@@ -208,7 +208,7 @@
     "mobile sync": "Synchro Mobile (CalDAV)",
     "link imported events with calendar": "Lier les événements à importer avec l'agenda suivant :",
     "import an ical file": "Pour importer un fichier iCal dans votre agenda, commencez par cliquer sur ce bouton pour le précharger :",
-    "download a copy of your calendar": "Sélectionner un agenda puis cliquer sur le bouton exporter pour télécharger une copie de l'agenda comme un fichier iCal :",
+    "download a copy of your calendar": "Select one calendar and then click on the export button, to download a copy of the calendar as an ICal file :",
     "icalendar export": "Exporter ICalendar",
     "icalendar import": "Importer ICalendar",
     "to sync your cal with": "Pour synchroniser votre agenda avec votre mobile vous devez :",
