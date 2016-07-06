@@ -129,9 +129,10 @@ module.exports = class MenuItemView extends BaseView
             @showLoading()
             app.calendars.rename calendarName, input.val(), (name) =>
                 @model.set 'name', name
-                if @model.isNew()
-                    @model.set 'color', ColorHash.getColor(name, 'color')
-                    @model.save()
+                # As the calendar is actually a new tag, and not the updated
+                # previous one, we have to save the color. Otherwise, we will
+                # lose it at the next refresh or page load.
+                @model.save()
 
                 @hideLoading()
                 @hideInput input
