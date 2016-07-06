@@ -250,8 +250,9 @@ module.exports = class ScheduleItem extends Backbone.Model
                 # Make up a date for the i-th day.
                 date = moment(startDate).add(i, 'days')
                 fakeEvent =
-                    start: date
-                    end: date
+                    start: if i is 0 then startDate else date.startOf 'day'
+                    end: if i is difference then endDate else date.endOf 'day'
+                    isAllDay: i not in [0, difference]
                     counter:
                         current: i + 1
                         total: difference + 1

@@ -8,9 +8,9 @@ module.exports = class RealEvent extends Backbone.Model
 
         @event = options.event
         @start = options.start
-        @end = options.start
+        @end = options.end
         @counter = options.counter
-
+        @forceAllDay = options.isAllDay
 
         if @event.isRecurrent()
             @set 'id', @event.get('id') + @start.toISOString()
@@ -23,12 +23,13 @@ module.exports = class RealEvent extends Backbone.Model
             @start = @event.getStartDateObject()
             @end = @event.getEndDateObject()
 
+
     getCalendar: -> @event.getCalendar()
     getColor: -> @event.getColor()
     getDateHash: ->
         return @start?.format 'YYYYMMDD'
 
-    isAllDay: -> @event.isAllDay() or @event.isMultipleDays()
+    isAllDay: -> @event.isAllDay() or @forceAllDay
 
     getFormattedStartDate: (format) ->
         return @start?.format format
