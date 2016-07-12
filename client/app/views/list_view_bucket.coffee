@@ -43,4 +43,4 @@ module.exports = class BucketView extends ViewCollection
         if index is 0 then @$collectionEl.prepend el
         else
             prevCid = @collection.at(index-1).cid
-            @views[prevCid].$el.after el
+            @views[prevCid].$el.before el
