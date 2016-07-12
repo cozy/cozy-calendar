@@ -3,6 +3,30 @@ var cozydb;
 
 cozydb = require('cozydb');
 
+if (!Array.prototype.find) {
+  Array.prototype.find = function(predicate) {
+    var i, length, list, thisArg, value;
+    if (this === null) {
+      throw new TypeError("Find call on null or undefined.");
+    }
+    if ((typeof predicate) !== "function") {
+      throw new TypeError("Predicate must be a function.");
+    }
+    list = Object(this);
+    length = list.length >>> 0;
+    thisArg = arguments[1];
+    i = 0;
+    value = list[i];
+    while (value) {
+      if (predicate.call(thisArg, value, i, list)) {
+        return value;
+      }
+      value = list[++i];
+    }
+    return void 0;
+  };
+}
+
 module.exports.sendShareInvitations = function(event, callback) {
   var data, guests, hasGuestToShare, needSaving;
   guests = event.toJSON().attendees;
