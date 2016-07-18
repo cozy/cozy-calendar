@@ -133,11 +133,14 @@ module.exports = class PopoverView extends BaseView
 
         # Define everything that will be needed for positionning.
         popoverWidth = @$popover.innerWidth()
+        popoverHeight = @$popover.innerHeight()
 
         # Container is the screen, except the sidebar.
         containerOffset = @$tabCells.offset()
         containerHeight = @$tabCells.innerHeight()
         containerWidth = @$tabCells.innerWidth()
+
+        windowHeight = window.innerHeight
 
         # Target is the calendar's cell clicked.
         targetOffset = @target.offset()
@@ -170,7 +173,12 @@ module.exports = class PopoverView extends BaseView
         oneRowHeight = (containerHeight / 6)
 
         # Cell is on the first two rows.
-        if targetOffset.top < oneRowHeight * 1
+        popoverOverflowWindow = (targetOffset.top + windowHeight) > containerHeight
+        if popoverOverflowWindow
+            topOffset = (windowHeight - popoverHeight)/2
+            top = "#{topOffset}px"
+            bottom = 'auto'
+        else if targetOffset.top < oneRowHeight * 1
             top = '5vh'
             bottom = 'auto'
         else if targetOffset.top < oneRowHeight * 2
