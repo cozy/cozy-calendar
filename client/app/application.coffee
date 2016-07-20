@@ -99,7 +99,7 @@ module.exports =
         @router = new Router isMobile: isMobile
 
         @menu = new Menu collection: @calendars
-        @menu.render().$el.prependTo 'body'
+        @menu.render().$el.prependTo '[role=application]'
 
         SocketListener.watch @events
         SocketListener.watch @contacts

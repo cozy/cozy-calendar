@@ -1,17 +1,9 @@
-@media(max-width: 1200px)
+@media(max-width: (1200/16)rem)
 
     #alarms, #alarm-list
         width: 100%
         padding: 0
         box-sizing: border-box
-
-        .fc-header-title
-            h2
-                font-size: 16px
-
-        .fc-header-left
-            width auto
-
 
     #view-container
         padding: 0
@@ -28,7 +20,10 @@
         display: block
         margin-bottom: 10px
 
-@media(max-width: 900px)
+
+///////////////////////////////////////
+///////////////////////////////////////
+@media (max-width: (1023/16)rem)
     #alarms
         .fc-day-header
             font-size: 12px
@@ -39,57 +34,26 @@
         h2
             font-size: 22px
 
-    ul#menu
-        height: 40px
-        width: 100%
-        float: none
-        position: absolute
-        top: 0
-        left: 0
-        margin: 0
-
+    aside.drawer
         li
             display: inline-block
 
         #import-menu-button, span
             display: block
 
-        li.calendars
-            padding 0.4em 0
-
-        .menu-icon
-            display inline-block
-            padding-right 0.7em
+        .calendars
+            padding .4em 0
 
         .calendar-add
             display none
 
-        ul#menuitems
-            z-index 1050
-            display none
-            position absolute
-            top 40px
-            right 0
-            left 0
-            margin 0
-            padding 0.5em 0
-            background-color inherit
-            box-shadow 0 10px 12px rgba(0,0,0,.15)
+        .btn:last-child
+            display flex
+            align-items center
 
-            &.visible
-                display block
-
-            li
-                padding 0.6em 1.5em
-                list-style-type none
-
-            span
-                display inline
-                font-size 1.1em
-
-    .main-container
+    main
         margin-left 0
-        margin-top 3rem
+        box-shadow 0 0 24px 6px rgba(50,54,63,.15)
 
     #alarms
         .fc-day-header
@@ -139,31 +103,31 @@
 
     .fc-header .btn-group > .btn.fc-state-active.title
         min-width inherit
-    .fc-header-left, .fc-header-center, .fc-header-right
-        width inherit
 
-@media(max-width: 600px)
+    .fc-header-left,
+    .fc-header-right
+        display none
 
-    .fc-header
+    .fc-header-name
         display block
+        width 100%
+        padding-right 2.75rem
         text-align center
 
+
+///////////////////////////////////////
+///////////////////////////////////////
+@media (max-width: (767/16)rem)
+    .fc-header
+        padding 0
+
         .btn-group
-            margin-bottom .25em
             font-size inherit
 
     #alarms
 
         .fc-day-header
             font-size: 10px
-
-        .fc-header-title
-            h2
-                font-size 0.7em
-
-        .fc-header-right
-            width 100%
-            text-align center
 
         .popover
             width: auto
@@ -183,8 +147,3 @@
         top 0
         margin-bottom 0
         padding-bottom 1em
-
-    ul#menu
-        ul#menuitems
-            li.tagmenuitem
-                padding 0.6em 1em

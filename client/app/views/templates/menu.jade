@@ -1,11 +1,16 @@
-li.calendars
+.calendars
     .title(href="#calendar")
-        span.fa.fa-bars.menu-icon
         span= t('calendar list title')
+
+section.calendar-list
+    ul#menuitems
+    a.calendar-add
+        span.add-calendar-icon
+            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><title>add</title><path fill="#33A6FF" d="M0 7h7V0h2v7h7v2H9v7H7V9H0" fill-rule="evenodd"/></svg>
         span.main-spinner
             img(src="img/spinner.svg")
-        span.fa.fa-plus-square-o.calendar-add(title=t("add calendar"))
+        span= t('create calendar')
 
-ul#menuitems
-
-
+a.btn(href="#settings")
+    i.fa.fa-cog
+    span= t('sync settings button label')

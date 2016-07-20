@@ -1,36 +1,27 @@
-.sidenav
-    position relative
-    float: left
-    left: 0
-    top: 0
-    width: 200px
-    padding 0.5em 1em
-    background: grey-01
-    border-right 1px solid grey-03
+aside.drawer
+    overflow-y auto
+    flex-basis 16.25rem
     box-sizing border-box
-    list-style-type: none
-    text-align: left
-    font-family: 'Source Sans Pro', sans-serif
-    font-weight: normal
-
-    a
-        color: grey-08
-
-        &:hover
-            text-decoration none
+    margin 0
+    border-right 1px solid grey-03
+    font-family 'Source Sans Pro', sans-serif
 
     .btn
+        padding .5rem 1rem
+        background grey-05
         color white
-        background grey-04
-        transition background 0.3s
-
+        font-size .875rem
         &:hover
-            background blue
+            background grey-06
+        &:last-child
+            flex none
+            margin-bottom .5rem
+            margin-top 1rem
+            text-align left
 
     i
-        position relative
-        top 1px
-        margin-right 0.5em
+        margin-right .5em
+        font-size 1rem
 
     .calendars
         position relative
@@ -43,21 +34,18 @@
             display flex
             justify-content space-between
             align-items center
-            font-size 1.3em
+            font-size 1.5em
             color darkcolor
 
-        .calendar-add
-            margin-top 1px
-            font-size 1.6rem
-            text-shadow none
-            color grey-04
-            transition color 0.3s
+    .calendar-add
+        display flex
+        padding 0 .25em
+        cursor pointer
+        text-transform uppercase
 
-            &:hover
-                color blue
-
-    .menu-icon
-        display none        // hidden in desktop view
+        span:last-child
+            margin-left .75rem
+            font-size (14/16)em
 
     .spinner
         flex none
@@ -82,36 +70,40 @@
         &.hidden
             opacity 0
 
+    section.calendar-list
+        flex 1
+
     ul#menuitems
         margin-left 0
         list-style none
-        padding-bottom 4em
 
         li.tagmenuitem
             display flex
             position relative
             align-items center
             margin-left 0
-            padding 0.4em 0.1em
+            padding .5rem .125rem
+            border-radius 3px
 
             &:hover
                 cursor pointer
+                background-color grey-02
 
             .calendar-actions
                 opacity 0
-                margin 0 0.5em 0 0.5em
+                margin 0 .5em
                 &:checked
                     opacity 1
             i
-                margin 0px
+                margin 0
 
             .badge
                 flex none
                 display inline-block
-                width 1em
-                height 1em
+                width 1rem
+                height 1rem
                 padding 0
-                margin-right 0.8em
+                margin-right .8em
                 border-radius 100%
 
             .calendar-name
@@ -119,7 +111,7 @@
                 padding-right 1em
                 font-size 1em
                 color grey-07
-                word-break break-all
+                word-break break-word
 
             input.calendar-name
                 width 100px
@@ -149,9 +141,12 @@
 
                 .dropdown-menu
                     padding 0.4em 0
-                    min-width 180px
+                    width 13em
                     border-color grey-03
-                    box-shadow 0 5px 16px rgba(0,0,0,0.12)
+                    box-shadow 0 5px 16px rgba(0,0,0,0.19)
+                    left auto
+                    right -.5em
+
 
                     & > li
                         margin 0
@@ -181,7 +176,10 @@
 
     li
         display inline-block
-        width 1.3rem
-        height 1.3rem
+        width (20/16)rem
+        height (20/16)rem
         list-style none
-        margin-right 0.2em
+        border 2px solid white
+
+        &:hover
+            border-color grey-08

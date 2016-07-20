@@ -1,0 +1,71 @@
+.drawer
+    display flex
+    flex-direction column
+
+    padding .5em 1.25em
+
+    background-color grey-01
+    border-right     1px solid grey-03
+
+    [class^=tool-]
+        vertically-spaced 10px
+
+
+    [class$=actions]
+        padding-right 1.25em
+
+
+    legend
+    button
+    [role=button]
+        display       block
+        box-sizing    border-box
+        width         100%
+
+        text-align left
+
+    li:not(:last-child)
+        button
+        [role=button]
+            bottom-spaced .5em
+
+
+    .tool-labels
+        vertically-spaced()
+        flex 1
+        overflow-y auto
+
+        legend
+            color          grey-05
+            font-size      14px
+            text-transform uppercase
+
+        ul
+            padding-right em(20px)
+
+        li
+            vertically-spaced .5em
+            text-transform    capitalize
+
+        label
+            right-spaced .5em
+
+        a
+            color grey-06
+
+            &[aria-checked=true]
+                color grey-08
+
+        [data-input=checkbox] label::before
+            background-color: white
+
+
+    .select
+        vertically-spaced .5em
+
+        li
+            button
+                reset()
+                line-height      1.6em
+                background-color transparent
+                color            blue
