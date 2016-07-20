@@ -11,10 +11,6 @@ popover-width = 25em
     padding: 0
     font-family: 'Source Sans Pro', sans-serif
 
-    &:focus
-    &:active
-        outline none
-
     .label
         box-sizing border-box
         position relative
@@ -68,9 +64,6 @@ popover-width = 25em
 
             &[aria-disabled]
                 cursor not-allowed
-
-        .button-full-block:focus
-            background-color lightblue
 
     input
         box-sizing: border-box
@@ -297,21 +290,12 @@ popover-width = 25em
     border-radius 0 0 5px 5px
 
     [role=button]
-        font-size: 0.95em
-
         &:hover
-            text-decoration none
-
-        &:focus
-            color white
             text-decoration none
 
     .btn-link[role=button]
         &:hover
             text-decoration underline
-
-        &:focus
-            color white
 
     .btn-link.cancel
         margin-right 0.5em

@@ -16,7 +16,8 @@ input
     line-height 1.2
 
 a,
-a:visited
+a:visited,
+a:focus
     color blue
     text-decoration none
 
@@ -25,6 +26,7 @@ a:visited
 
 [aria-hidden=true]
     display none !important
+
 
 /* fixing bootstrap */
 
@@ -69,6 +71,10 @@ afocus,
     &:hover
         background darkblue
         border-color darkblue
+        color white
+
+    &:focus
+        background blue
         color white
 
 .badge
