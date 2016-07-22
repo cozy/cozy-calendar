@@ -136,8 +136,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
         i = @baseCollection.indexOf @firstGeneratedEvent
         @firstGeneratedEvent = null # reset, before finding the new one.
         while i >= 0 and @firstGeneratedEvent is null
-            item = @baseCollection.at i
-            i--
+            item = @baseCollection.at --i
 
             unless item.isVisible() then continue
             else if item.getStartDateObject().isBefore(start)
