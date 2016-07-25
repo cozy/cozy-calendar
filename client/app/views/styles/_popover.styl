@@ -229,6 +229,12 @@ popover-width = 25em
         font-size 1rem
         line-height 1.3rem
 
+    .dontaskagain-label
+        margin-top 1rem
+
+        input
+            margin-right .5rem
+
 
 .popover .interval-row
     display flex
@@ -329,11 +335,13 @@ popover-width = 25em
 
     & > *
         flex-grow 1
-        flex-basis 25%
+
+    a,
+    div
+        flex-basis 1%
 
     h4
         flex-grow 2
-        flex-basis 50%
         text-align center
         margin 0
         font-weight normal
@@ -353,7 +361,7 @@ popover-width = 25em
 
     .btn-done-placeholder
         // The btn-done element is not rendered when the event is readonly
-        // but we need to keep an empty sapce to keep the screen title h4's
+        // but we need to keep an empty space to keep the screen title h4's
         // text centered
         text-align right
         flex-grow 1
@@ -372,7 +380,6 @@ popover-width = 25em
 
     .btn-back
         padding 0.7em 0
-        width 43px
         background-color transparent
         text-align left
 
@@ -573,10 +580,10 @@ ul.alerts
     padding    1.5em
 
     .remove-choices
-        text-align center
+        margin 2rem 0
 
         .btn
-            margin 0.5em
+            padding .5rem
 
     .spinner-block
         width 100%

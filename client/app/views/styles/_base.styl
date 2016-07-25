@@ -77,6 +77,38 @@ afocus,
         background blue
         color white
 
+button,
+.btn
+    &.secondary
+        background-color grey-05
+        border-color     grey-05
+
+        &:hover
+            background-color grey-06
+            border-color     grey-06
+
+    &.danger
+        background-color red
+        border-color     red
+
+        &:hover
+            background-color darken(red, 20%)
+            border-color     darken(red, 20%)
+
+.button-group
+    display flex
+
+    button
+        flex 1
+        height auto
+        margin 0 .5rem
+
+        &:first-child
+            margin-left 0
+
+        &:last-child
+            margin-right 0
+
 .badge
     background grey-01
 

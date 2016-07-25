@@ -1,9 +1,9 @@
 .fixed-height.delete-screen
 
     p=t('screen confirm description')
-    .remove-choices
-        button.btn.answer-yes=t('screen confirm yes button')
-        button.btn.answer-no=t('screen confirm no button')
+    .remove-choices.button-group
+        button.btn.secondary.answer-no=t('screen confirm no button')
+        button.btn.danger.answer-yes(autofocus)=t('screen confirm yes button')
         
     label.dontaskagain-label
         input.dontaskagain(type="checkbox")
