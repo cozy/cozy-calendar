@@ -1,0 +1,101 @@
+.modal-backdrop
+    background alpha(grey-07, .85)
+
+    &.fade.in
+        opacity 1
+
+.modal
+    flex-direction column
+    flex-basis 30em
+
+    box-sizing border-box
+    padding 2em
+
+    border none
+    border-radius .52083em
+    box-shadow 0 1px 3px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)
+
+    .modal-close
+        display block
+
+        position  absolute
+        top       -2.5rem
+        right     -1.5rem
+        @media (max-width: (60)rem)
+            right 0
+        font-size      2.5rem
+        text-rendering auto
+        font-smooth    antialiased
+
+        color white
+
+        cursor pointer
+
+    h2
+        margin 0
+        padding 0
+        border none
+        margin-bottom .769230769230769em
+        font-size 1.625em
+        font-weight bold
+        text-transform capitalize
+
+    h3
+        margin 0
+        padding 0
+        border none
+        margin-bottom .454545454545455em
+        font-weight 400
+        font-size 1.375em
+        color grey-06
+        text-transform capitalize
+
+    section
+        margin-bottom 2rem
+
+        &:last-child
+            margin 0
+
+        .well
+            padding 0
+
+    .btn
+        padding 1rem
+        width 100%
+        box-sizing border-box
+
+    .surrounded-combobox
+        .combobox
+            box-sizing border-box
+            height 2.5rem
+            width 100%
+            padding-left 3rem
+            border-color grey-04
+            border-radius 3px
+            font-size 1rem
+            margin-bottom .5rem
+
+        .combobox-caret
+            position absolute
+            right 2.75rem
+            padding .5em
+            margin-top .5rem
+
+            .caret
+                border-top 8px solid grey-04
+                border-right 6px solid transparent
+                border-left 6px solid transparent
+
+        .combobox-badge
+            position absolute
+            left 2.75rem
+            margin-right 0
+            margin-top .75rem
+
+.ui-menu
+    max-height (240/16)rem
+    overflow-y scroll
+
+@media (max-width: 767px)
+    .modal.fade.in
+        top 3rem
