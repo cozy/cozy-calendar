@@ -4,7 +4,7 @@ ContactsController = new SimpleController
     reqProp: 'contact'
     reqParamID: 'contactid'
 
-ContactsController.sendSmall = (req, res, next) ->
+ContactsController.sendSmall = (req, res) ->
     res.send req.contact.asNameAndEmails()
 
 module.exports = ContactsController

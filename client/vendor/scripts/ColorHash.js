@@ -1,4 +1,4 @@
-var ColorHash = (function () {
+module.exports = (function () {
 
     var schemes = {
         "base" : [

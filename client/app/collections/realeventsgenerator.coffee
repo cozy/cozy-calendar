@@ -1,7 +1,7 @@
 RealEvent = require '../models/realevent'
 
 module.exports = class RealEventGeneratorCollection extends Backbone.Collection
-    model = RealEvent
+    model: RealEvent
     comparator: (re1, re2) ->
         return re1.start?.isBefore re2.start
 
@@ -106,7 +106,7 @@ module.exports = class RealEventGeneratorCollection extends Backbone.Collection
                 @runningRecurringEvents.splice index, 1
 
         # Generate one event for each day multiple-days events are running.
-        multipleDaysEvents.forEach (item, index) ->
+        multipleDaysEvents.forEach (item) ->
             fakeEvents = item
                 .generateMultipleDaysEvents()
                 .map (rawEvent) ->

@@ -14,7 +14,7 @@ module.exports = class PopoverScreenView extends Backbone.View
     # Template function that will be used to render this screen.
     # Defined in subclasses.
     templateContent: ->
-        console.log 'Warning, no template has been defined for content.'
+        console.error Error 'Warning, no template has been defined for content.'
 
 
     constructor: (options, context) ->

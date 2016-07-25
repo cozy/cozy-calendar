@@ -1,6 +1,6 @@
 BaseView = require 'lib/base_view'
 
-module.exports = class PendingEventSharingsButtonItemView extends BaseView
+class PendingEventSharingsButtonItemView extends BaseView
 
     className: 'event-sharings-button-item'
     template: require './templates/pending_event_sharings_button_item'
@@ -39,8 +39,11 @@ module.exports = class PendingEventSharingsButtonItemView extends BaseView
 
 
     onAnswerError: (err) ->
-        @$errors = @$errors ?= @$ '.errors'
+        console.error err
+        @$errors ?= @$ '.errors'
         @$errors.html t 'An error occurred. Please try again later.'
         @setNotBusy()
         @setInvalid()
         @enable()
+
+module.exports = PendingEventSharingsButtonItemView

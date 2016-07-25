@@ -80,22 +80,22 @@ $ ->
 
         app.initialize(window)
 
-    catch e
-        console.error e, e?.stack
-        exception = e.toString()
+    catch error
+        console.error error, error?.stack
+        exception = error.toString()
         if exception isnt window.lastError
             # Send client side errors to server
             data =
                 data:
                     type: 'error'
                     error:
-                        msg: e.message
-                        name: e?.name
+                        msg: error.message
+                        name: error?.name
                         full: exception
-                        stack: e?.stack
-                    file: e?.fileName
-                    line: e?.lineNumber
-                    col: e?.columnNumber
+                        stack: error?.stack
+                    file: error?.fileName
+                    line: error?.lineNumber
+                    col: error?.columnNumber
                     href: window.location.href
             xhr = new XMLHttpRequest()
             xhr.open 'POST', 'log', true

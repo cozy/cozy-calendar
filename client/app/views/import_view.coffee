@@ -40,7 +40,7 @@ module.exports = class ImportView extends BaseView
 
     # When a file is selected by the user, the import preview is generated
     # by the backend and the result is displayed.
-    onFileChanged: (event) ->
+    onFileChanged: ->
         file = @uploader[0].files[0]
         return unless file
         form = new FormData()
@@ -127,7 +127,8 @@ module.exports = class ImportView extends BaseView
         @confirmButton.spin 'tiny'
 
         # Save every imported events to the database.
-        async.eachSeries @eventLists, @importEvents, (err) =>
+        async.eachSeries @eventLists, @importEvents, (error) =>
+            console.error error
 
             # When import is finished, the import form is reset and the
             # calendar view is displayed.
@@ -163,21 +164,21 @@ module.exports = class ImportView extends BaseView
 
                 # Events which was not properly imported are listed.
                 for event in result.errors
-                    @addImportError event, './templates/import_event'
+                    @addImportError event
 
             @updateCounter events.length
             setTimeout callback, 200
 
 
     # Display error that occured while importing an element.
-    addImportError: (event, templatePath) ->
+    addImportError: (event) ->
         if $('.import-errors').html().length is 0
             $('.import-errors').html """
             <p>#{t 'import error occured for'}</p>
             """
 
         $('.import-errors').append(
-            require(templatePath)(event)
+            require('./templates/import_event')(event)
         )
 
 
@@ -207,4 +208,3 @@ module.exports = class ImportView extends BaseView
     resetUploader: ->
         @uploader.wrap('<form>').parent('form').trigger('reset')
         @uploader.unwrap()
-

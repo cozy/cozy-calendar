@@ -26,7 +26,7 @@ module.exports = class CalendarCollection extends TagCollection
 
 
     onBaseCollectionAdd: (model) ->
-        [calendarName, tags...] = model.get 'tags'
+        calendarName = model.get('tags')[0]
         calendar = app.tags.getOrCreateByName calendarName
 
         if calendar.isNew()
@@ -35,7 +35,7 @@ module.exports = class CalendarCollection extends TagCollection
             calendar.save()
 
 
-    onBaseCollectionRemove: (model) ->
+    onBaseCollectionRemove: ->
         @resetFromBase()
 
 
@@ -52,7 +52,6 @@ module.exports = class CalendarCollection extends TagCollection
     # Overrides backbone behaviour
     # Removes a calendar (<=> removes all its events)
     remove: (calendarName, callback) ->
-        eventsToRemove = @eventCollection.getByCalendar calendarName
         request.post 'events/delete', {calendarName}, (err) =>
             if err
                 callback t('server error occured')
@@ -88,4 +87,3 @@ module.exports = class CalendarCollection extends TagCollection
                 label: calendar.get 'name'
                 value: calendar.get 'name'
             , calendar.attributes
-

@@ -98,7 +98,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
         endOffset = if @formModel.isAllDay() then -1 else 0
-        return data = _.extend super(),
+        return _.extend super(),
             readOnly:    @context.readOnly
             tFormat:     tFormat
             dFormat:     dFormat
@@ -247,13 +247,13 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @calendarComboBox.buildBadge calendar.get 'color'
 
 
-    onCalendarsChange: (calendars) ->
+    onCalendarsChange: ->
         @calendarComboBox.resetComboBox app.calendars.toAutoCompleteSource()
 
 
     formatDateTime: (timeStr = '', dateStr = '', end=true) ->
         t = timeStr.match /([0-9]{1,2}):([0-9]{2})\+?([0-9]*)/
-        d = splitted = dateStr.match /([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/
+        d = dateStr.match /([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})/
 
         [hour, minute] = t[1..2] if t?[0]
         [date, month, year] = d[1..3] if d?[0]
@@ -270,7 +270,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         # is superior to the number of days of the month, and setting the
         # monthe before the day will produce a wrong date.
         # See #409
-        setObj = { year, month, date, hour, minute}
+        return { year, month, date, hour, minute}
 
 
     # Loop over controls elements w/o exiting the popover scope
@@ -348,7 +348,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 @model.save @formModel.attributes,
                     wait: true
                     url: "#{@model.url()}?sendMails=#{sendInvitations}"
-                    success: (model, response) =>
+                    success: (model) ->
                         app.events.add model, sort: false
                     error: ->
                         # TODO better error handling
@@ -363,7 +363,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                     alert err
                     return
 
-                @syncCalendar calendar, (err, calendar) ->
+                @syncCalendar calendar, (err) ->
                     # TODO better error handling
                     if err
                         alert err
@@ -382,7 +382,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # else: look state of each guest.
         attendees = model.get('attendees') or []
-        guestsToInform = attendees.filter (guest) =>
+        guestsToInform = attendees.filter (guest) ->
             return not guest.isSharedWithCozy and
                 (model.isNew() or
                     guest.status is not 'ACCEPTED' or
@@ -416,7 +416,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                     callback 'server error occured', null
         else
             callback null, calendar
-
 
     handleError: (error) ->
         switch error.field
@@ -467,8 +466,8 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         if rrule?.length > 0
             try
                 rrule = RRule.fromString @formModel.get('rrule')
-            catch e
-                console.error e
+            catch error
+                console.error error
                 return t('invalid recurring rule')
             # Handle localization.
             locale = moment.localeData()

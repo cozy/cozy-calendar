@@ -1,5 +1,5 @@
 doctype
-html
+html(lang=lang)
   head
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible",content="IE=edge, chrome=1")
@@ -30,7 +30,7 @@ html
 
     script(src="javascripts/modernizr-2.6.1.js")
     link(rel="stylesheet", href="/fonts/fonts.css")
-    link(rel="stylesheet", href="stylesheets/app.css")
+    link(rel="stylesheet", href=webpack?'webpack.style.css':'app.css')
 
     script(src="socket.io/socket.io.js")
 
@@ -38,5 +38,4 @@ html
     .main-container
 
     script!= imports
-    script(src="javascripts/vendor.js")
-    script(src="javascripts/app.js", onload="require('initialize');")
+    script(src=webpack?webpack.app.js:'./app.js')

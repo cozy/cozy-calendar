@@ -1,7 +1,5 @@
 ViewCollection      = require '../lib/view_collection'
 Header              = require 'views/calendar_header'
-helpers = require '../helpers'
-defaultTimezone = 'timezone'
 
 
 module.exports = class ListView extends ViewCollection

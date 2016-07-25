@@ -171,7 +171,7 @@ module.exports = class MenuItemView extends BaseView
                 @hideLoading()
 
 
-    hideInput: (input, calendarName) ->
+    hideInput: (input) ->
         input.remove()
 
         # re-appends text element
@@ -208,4 +208,3 @@ module.exports = class MenuItemView extends BaseView
     hideLoading: ->
         @$('.spinner').hide()
         @$('.caret').removeClass 'hidden'
-

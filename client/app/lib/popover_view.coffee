@@ -136,7 +136,6 @@ module.exports = class PopoverView extends BaseView
         popoverHeight = @$popover.innerHeight()
 
         # Container is the screen, except the sidebar.
-        containerOffset = @$tabCells.offset()
         containerHeight = @$tabCells.innerHeight()
         containerWidth = @$tabCells.innerWidth()
 

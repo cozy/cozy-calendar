@@ -78,10 +78,7 @@ module.exports = class SettingsModals extends BaseView
 
     # creates a placeholder for the password
     getPlaceholder: (password) ->
-        placeholder = []
-        placeholder.push '*' for i in [1..password.length] by 1
-        return placeholder.join ''
-
+        return new Array(password.length + 1).join('*')
 
     showPassword: ->
         @$('#placeholder').html @model.token

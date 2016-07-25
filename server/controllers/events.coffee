@@ -1,18 +1,12 @@
-fs = require 'fs'
-path = require 'path'
 async = require 'async'
-moment = require 'moment-timezone'
-cozydb = require 'cozydb'
-log = require('printit')
-    date: true
-    prefix: 'events'
+moment = require '../libs/moment'
 
 User = require '../models/user'
 Event = require '../models/event'
 {VCalendar} = require 'cozy-ical'
-MailHandler = require '../mails/mail_handler'
+MailHandler = require '../libs/mail_handler'
 ShareHandler = require '../share/share_handler'
-localization = require '../libs/localization_manager'
+localization = require('cozy-localization-manager').getInstance()
 
 
 module.exports.fetch = (req, res, next, id) ->
@@ -66,7 +60,7 @@ module.exports.create = (req, res) ->
 # Expect a list of events as body and create an event in database for each
 # entry. When it's done, it returns the list of created events and events for
 # which an error occured.
-module.exports.createBulk = (req, res) ->
+module.exports.createBulk = (req, res, next) ->
     events = req.body
     newEvents = []
     errors = []
@@ -85,6 +79,7 @@ module.exports.createBulk = (req, res) ->
             setTimeout done, 10
 
     , (err) ->
+        return next err if err
         res.status(201).send
             events: newEvents
             errors: errors
@@ -130,19 +125,10 @@ module.exports.public = (req, res, next) ->
         # If event doesn't exist or visitor hasn't access display 404 page
         if err or not event or not visitor = event.getGuest key
             # Retreive user localization
-            locale = localization.getLocale()
-
-            # Display 404 page
-            fileName = "404_#{locale}"
-            filePath = path.resolve __dirname, '../../client/', fileName
-
-            # Usefull for build
-            filePathBuild = path.resolve __dirname, '../../../client/', fileName
-            unless fs.existsSync(filePath) or fs.existsSync(filePathBuild)
-                fileName = '404_en'
-
+            locale = localization.polyglot?.locale()
+            locale = 'en' unless locale is 'fr' # only files for FR and EN
             res.status 404
-            res.render fileName
+            res.render "404_#{locale}"
 
         # If event exists, guess is authorized and request has a status
         # Update status for guess (accepted or declined)
@@ -155,7 +141,7 @@ module.exports.public = (req, res, next) ->
         # If event exists, guess is authorized and request hasn't a status
         # Display event.
         else
-            locale = localization.getLocale()
+            locale = localization.polyglot?.locale() or 'en'
 
             # Retrieve event data
             if event.isAllDayEvent()
@@ -165,16 +151,7 @@ module.exports.public = (req, res, next) ->
             dateFormat = localization.t dateFormatKey
             date = event.formatStart dateFormat, locale
 
-            # Retrieve user localization
-            locale = localization.getLocale()
-
-            # Display event
-            fileName = "event_public_#{locale}"
-            filePath = path.resolve __dirname, '../../client/', fileName
-
-            # Usefull for build
-            unless fs.existsSync(filePath)
-                fileName = 'event_public_en'
+            locale = 'en' unless locale is 'fr' # only files for FR and EN
 
             specialCharacters = \
                 /[-'`~!@#$%^&*()_|+=?;:'",.<>\{\}\[\]\\\/]/gi
@@ -182,7 +159,7 @@ module.exports.public = (req, res, next) ->
             desc = desc.replace(/\ /g, '-')
             day =  moment(event.start).format("YYYY-MM-DD")
 
-            res.render fileName,
+            res.render "event_public_#{locale}",
                 event: event
                 file: "#{day}-#{desc}"
                 date: date
@@ -216,7 +193,8 @@ module.exports.ical = (req, res) ->
 module.exports.publicIcal = (req, res) ->
 
     key = req.query.key
-    if not visitor = req.event.getGuest key
+
+    if not req.event.getGuest key
         return res.status(401).send error: 'invalid key'
 
     module.exports.ical(req, res)
@@ -254,7 +232,7 @@ module.exports.bulkDelete = (req, res) ->
 module.exports.monthEvents = (req, res, next) ->
     {month, year} = req.params
     start = moment "#{year}-#{month}-01", 'YYYY-MM-DD'
-    end = start.clone().add 'months', 1
+    end = start.clone().add 1, 'months'
 
     Event.load start, end, (err, events) ->
         return next err if err

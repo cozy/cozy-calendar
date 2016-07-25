@@ -97,7 +97,7 @@ module.exports = class BaseView extends Backbone.View
             return @
 
         # Clean all listeners
-        dispose: () ->
+        dispose: ->
             document.removeEventListener 'click', documentClickHandler
 
             listenedElements.forEach (element) ->
@@ -108,7 +108,7 @@ module.exports = class BaseView extends Backbone.View
         @$el.attr 'aria-disabled', true
 
 
-    enable: ($disabler)->
+    enable: ->
         @$el.removeAttr 'aria-disabled'
 
 

@@ -1,5 +1,5 @@
 fs = require 'fs'
-moment = require 'moment-timezone'
+moment = require '../server/libs/moment'
 
 # Return a random number between 0 and `max` (included).
 getRandom = (max) -> Math.round Math.random() * max

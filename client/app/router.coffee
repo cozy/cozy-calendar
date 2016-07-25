@@ -2,16 +2,8 @@ app = require 'application'
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
 SettingsModal = require 'views/settings_modal'
-ImportView = require 'views/import_view'
 # RealEventCollection = require 'collections/realevents'
 DayBucketCollection = require 'collections/daybuckets'
-
-
-getBeginningOfWeek = (year, month, day) ->
-    [year, month, day] = [year, month, day].map (x) -> parseInt x
-    monday = new Date(year, (month-1)%12, day)
-    monday.setDate(monday.getDate() - monday.getDay() + 1)
-    return [year, monday.getMonth()+1, monday.getDate()]
 
 
 module.exports = class Router extends Backbone.Router
@@ -83,7 +75,7 @@ module.exports = class Router extends Backbone.Router
         @event id, 'list'
 
 
-    event: (id, backurl) ->
+    event: ->
         # @TODO: bring back that feature in the future
         console.log 'This feature has been temporarily disabled. Let us ' + \
                      'know if you miss it!'
@@ -124,4 +116,3 @@ module.exports = class Router extends Backbone.Router
         $('body').append view.$el
         view.render()
         @onCalendar = true
-

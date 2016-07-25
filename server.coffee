@@ -7,27 +7,27 @@ start = (port, callback) ->
         host: process.env.HOST or "0.0.0.0"
         root: __dirname
     , (err, app, server) ->
-        cozydb = require 'cozydb'
+        require 'cozydb'
         User = require './server/models/user'
-        localization = require './server/libs/localization_manager'
         Realtimer = require 'cozy-realtime-adapter'
+        localization = require 'cozy-localization-manager'
+        localizationManager = localization.getInstance()
         realtime = Realtimer server, ['event.*', 'contact.*', 'sharing.*']
         realtime.on 'user.*', -> User.updateUser()
 
         # Update localization engine if the language changes.
-        realtime.on 'cozyinstance.*', ->
-            cozydb.api.getCozyInstance (err, instance) ->
-                locale = instance?.locale or null
-                localization.updateLocale locale
+        updateLocales = localizationManager.realtimeCallback
+                        .bind(localizationManager)
+        realtime.on 'cozyinstance.*', updateLocales
 
-        User.updateUser (err) -> localization.initialize ->
+        User.updateUser (err) ->
             # Migration scripts. Relies on User.
             Event = require './server/models/event'
             Alarm = require './server/models/alarm'
             Event.migrateAll -> Alarm.migrateAll ->
 
-                Event.initializeData (err2, event) ->
-                    callback err, app, server
+                Event.initializeData (err2) ->
+                    callback err or err2, app, server
 
 
 if not module.parent

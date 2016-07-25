@@ -12,10 +12,9 @@ pids
 logs
 results
 client/public
-
-deploy_config.coffee
+client/app/locales
+!client/app/locales/en.json
+server/locales
 
 node_modules
-npm-debug.log
-*.transifex.coffee
-test/fixtures/events_generated.json
+test/fixtures/generated.json

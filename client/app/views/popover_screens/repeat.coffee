@@ -1,10 +1,5 @@
 EventPopoverScreenView = require 'views/event_popover_screen'
 
-tFormat                 = 'HH:mm'
-dFormat                 = 'DD/MM/YYYY'
-inputDateDTPickerFormat = 'dd/mm/yyyy'
-allDayDateFieldFormat   = 'YYYY-MM-DD'
-
 NO_REPEAT = -1
 
 module.exports = class RepeatPopoverScreen extends EventPopoverScreenView
@@ -47,8 +42,8 @@ module.exports = class RepeatPopoverScreen extends EventPopoverScreenView
             # Extract rules from the rrule string.
             try
                 rruleOptions = RRule.fromString(@formModel.get('rrule')).options
-            catch e
-                console.error e
+            catch error
+                console.error error
 
         if rruleOptions?
             # Build the overriden rrule.

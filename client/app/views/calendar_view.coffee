@@ -4,7 +4,6 @@ EventPopover = require './event_popover'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
 helpers = require 'helpers'
-timezones = require('helpers/timezone').timezones
 
 Event = require 'models/event'
 
@@ -121,7 +120,7 @@ module.exports = class CalendarView extends BaseView
             @clearViewComponents =>
                 @cal.fullCalendar 'changeView', 'month'
         @calHeader.on 'list', =>
-            @clearViewComponents =>
+            @clearViewComponents ->
                 window.app.events.sort()
                 app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
@@ -136,7 +135,7 @@ module.exports = class CalendarView extends BaseView
         super
 
 
-    handleWindowResize: (initial) =>
+    handleWindowResize: =>
 
         if $(window).width() > 1000
             targetHeight = $(window).height() - 85
@@ -150,7 +149,7 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'option', 'height', targetHeight
 
 
-    refresh: (collection) ->
+    refresh: ->
         @cal.fullCalendar 'refetchEvents'
 
 
@@ -190,9 +189,9 @@ module.exports = class CalendarView extends BaseView
         options.parentView = @
 
         showNewPopover = =>
-            # @TODO Event creation is a typical core feature of the calendar app,
-            # this part should be moved directly into the app module, and managed
-            # with event handlers
+            # @TODO Event creation is a typical core feature of the calendar
+            # app,  this part should be moved directly into the app module,
+            # and managed with event handlers
             model = options.model ?= new Event
                 start: helpers.momentToString options.start
                 end: helpers.momentToString options.end
@@ -212,7 +211,7 @@ module.exports = class CalendarView extends BaseView
         if @popover
             # click on same case
             @preventUnselecting()
-            @popover.close =>
+            @popover.close ->
                 showNewPopover()
 
         else
@@ -237,12 +236,9 @@ module.exports = class CalendarView extends BaseView
         else
             callback() if callback and typeof callback is 'function'
 
+    getUrlHash: -> return 'calendar'
 
-    getUrlHash: =>
-        return 'calendar'
-
-
-    onSelect: (startDate, endDate, jsEvent, view) =>
+    onSelect: (startDate, endDate, jsEvent) =>
         # In month view, default to 10:00 - 11:00 instead of fullday event.
         if @view is 'month'
             startDate.time('10:00:00.000')
@@ -302,11 +298,9 @@ module.exports = class CalendarView extends BaseView
         return $element
 
 
-    onEventDragStop: (event, jsEvent, ui, view) ->
-        event.isSaving = true
+    onEventDragStop: -> event.isSaving = true
 
-
-    onEventDrop: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
+    onEventDrop: (fcEvent, delta, revertFunc) =>
         evt = @eventCollection.get fcEvent.id
         evt.addToStart(delta)
         evt.addToEnd(delta)
@@ -320,11 +314,11 @@ module.exports = class CalendarView extends BaseView
                 revertFunc()
 
 
-    onEventResizeStop: (fcEvent, jsEvent, ui, view) ->
+    onEventResizeStop: (fcEvent) ->
         fcEvent.isSaving = true
 
 
-    onEventResize: (fcEvent, delta, revertFunc, jsEvent, ui, view) =>
+    onEventResize: (fcEvent, delta, revertFunc) =>
 
         model = @eventCollection.get fcEvent.id
         model.addToEnd delta
@@ -339,7 +333,7 @@ module.exports = class CalendarView extends BaseView
                 revertFunc()
 
 
-    onEventClick: (fcEvent, jsEvent, view) =>
+    onEventClick: (fcEvent, jsEvent) =>
         return true if $(jsEvent.target).hasClass 'ui-resizable-handle'
 
         model = if fcEvent.type is 'event' then @eventCollection.get fcEvent.id

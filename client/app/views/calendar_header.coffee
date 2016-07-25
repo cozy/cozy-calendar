@@ -47,7 +47,7 @@ module.exports = class CalendarHeader extends BaseView
 
 
     getRenderData: ->
-        return data =
+        data =
             title: @getTitle()
             todaytxt: t('today')
             calendarMode: @cal?
@@ -55,6 +55,8 @@ module.exports = class CalendarHeader extends BaseView
             active: (item) =>
                 if item is 'today' and @isToday() or item is @getViewName()
                     return 'fc-state-active'
+
+        return data
 
 
     events: ->

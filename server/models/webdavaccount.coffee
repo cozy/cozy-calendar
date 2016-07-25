@@ -1,7 +1,7 @@
 cozydb = require 'cozydb'
 
 # Object required to store the automatically generated webdav credentials.
-module.exports = WebDAVAccount = cozydb.getModel 'WebDAVAccount',
+module.exports = cozydb.getModel 'WebDAVAccount',
     id: String
     login: String
     token: String

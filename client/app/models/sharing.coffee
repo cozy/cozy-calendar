@@ -6,7 +6,6 @@ module.exports = class Sharing extends Backbone.Model
     urlRoot: 'sharings'
 
     accept: (callback) ->
-        id = @get 'id'
         request.post 'sharing/accept', @toJSON(), (err, response) =>
             if err
                 callback err, null
@@ -15,7 +14,6 @@ module.exports = class Sharing extends Backbone.Model
                 @trigger 'accepted', @
 
     refuse: (callback) ->
-        id = @get 'id'
         request.post 'sharing/refuse', @toJSON(), (err, response) =>
             if err
                 callback err, null

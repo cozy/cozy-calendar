@@ -14,7 +14,6 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
 
     initialize: (options) ->
         super options
-
         @listenTo @formModel, 'change:shareID', =>
             @afterRender()
 
@@ -52,7 +51,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
                     activeShare : guest.cozy? and guest.isSharedWithCozy
                     hideEmail   : (not guest.email?)
                     activeEmail : guest.email? and (not guest.isSharedWithCozy)
-
+                    readOnly    : @context.readOnly
 
                 $row = $ @templateGuestRow options
                 $guestElement.append $row
@@ -239,7 +238,7 @@ module.exports = class GuestPopoverScreen extends EventPopoverScreenView
             guestBisEmail = _.findWhere guests,
                 email            : email
                 isSharedWithCozy : false
-        # * another guest with the same cozy and for whom the event is shared;
+        # * another guest with the same cozy and for whom the event is shared
         if cozy? and (cozy.length > 0)
             guestBisCozy  = _.findWhere guests,
                 cozy             : cozy

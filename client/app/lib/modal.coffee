@@ -77,7 +77,7 @@ class Modal extends Backbone.View
     onClickAnywhere: (event) -> @onNo() if event.target.id is @id
 
     # Returns the modal's backdrop element
-    getBackdrop: () ->
+    getBackdrop: ->
         $modal = @$el.data 'modal'
         return $modal?.$backdrop?.get 0
 
