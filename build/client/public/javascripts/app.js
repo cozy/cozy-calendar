@@ -198,7 +198,7 @@ module.exports = {
     this.menu = new Menu({
       collection: this.calendars
     });
-    this.menu.render().$el.prependTo('body');
+    this.menu.render().$el.prependTo('[role=application]');
     SocketListener.watch(this.events);
     SocketListener.watch(this.contacts);
     SocketListener.watch(this.pendingEventSharings);
@@ -2987,15 +2987,17 @@ module.exports = {
 require.register("locales/en.json", function(exports, require, module) {
 module.exports = {
   "calendar list title": "Calendars",
-  "sync settings button label": "Synchronization",
+  "sync settings button label": "Settings",
   "default calendar name": "my calendar",
   "Add": "Add",
   "event": "Event",
+  "upcoming events": "Upcoming Events",
   "create event": "Event creation",
   "edit event": "Event edition",
   "edit": "Edit",
   "save": "Save",
   "create": "Create",
+  "create calendar": "Create new Calendar",
   "creation": "Creation",
   "invite": "Invite",
   "close": "Close",
@@ -3127,15 +3129,15 @@ module.exports = {
   "duplicate event tooltip": "Duplicate event",
   "delete event tooltip": "Delete event",
   "change calendar": "Change calendar",
-  "screen confirm title": "Are you sure?",
-  "screen confirm description": "The change you made in this popover will be lost.",
-  "screen confirm yes button": "Don't save",
-  "screen confirm no button": "Cancel",
+  "screen confirm title": "Delete Changes",
+  "screen confirm description": "The changes you made on the previous event will be lost. Do you want to delete them?",
+  "screen confirm yes button": "Delete changes",
+  "screen confirm no button": "Back",
   "dont ask again": "Dont ask for confirmation when exiting the popover.",
   "screen delete title": "Delete event",
   "screen delete description": "You are about to delete the event \"%{description}\". Are you sure?",
-  "screen delete yes button": "Yes",
-  "screen delete no button": "No",
+  "screen delete yes button": "Delete",
+  "screen delete no button": "Cancel",
   "screen guest title empty": "Guest",
   "screen guest title": "%{smart_count} guest |||| %{smart_count} guests",
   "screen guest input placeholder": "Email address",
@@ -3791,15 +3793,17 @@ module.exports = {
 require.register("locales/fr.json", function(exports, require, module) {
 module.exports = {
     "calendar list title": "Agendas",
-    "sync settings button label": "Synchronisation",
+    "sync settings button label": "Paramètres",
     "default calendar name": "mon agenda",
     "Add": "Ajouter",
     "event": "événement",
+    "upcoming events": "Événements à Venir",
     "create event": "Création d'un événement",
     "edit event": "Modification d'un événement",
     "edit": "Modifier",
     "save": "Sauvegarder",
     "create": "Créer",
+    "create calendar": "Nouveau Calendrier",
     "creation": "Création",
     "invite": "Inviter",
     "close": "Fermer",
@@ -3905,7 +3909,7 @@ module.exports = {
     "and": "et",
     "times": "fois",
     "weekday": "jours de la semaine",
-    "screen title done button": "Ok",
+    "screen title done button": "OK",
     "placeholder event title": "Titre de l'évènement",
     "from": "De",
     "placeholder from date": "De [date]",
@@ -3928,15 +3932,15 @@ module.exports = {
     "duplicate event tooltip": "Dupliquer l’événement",
     "delete event tooltip": "Supprimer l’événement",
     "change calendar": "Modifier l'agenda",
-    "screen confirm title": "Vous confirmez ?",
-    "screen confirm description": "Les modifications de l'évènement seront perdues.",
-    "screen confirm yes button": "Abandonner les modifications",
-    "screen confirm no button": "Annuler",
+    "screen confirm title": "Supprimer modifications",
+    "screen confirm description": "Les modifications liées à l'évènement précédent seront perdues. Êtes-vous sûr⋅e de vouloir les supprimer ?",
+    "screen confirm yes button": "Supprimer modifications",
+    "screen confirm no button": "Retour",
     "dont ask again": "Ne plus me demander de confirmer.",
     "screen delete title": "Supprimer l’événement",
     "screen delete description": "Vous êtes sur le point de supprimer l’événement \"%{description}\". Êtes-vous sûr(e) ?",
-    "screen delete yes button": "Oui",
-    "screen delete no button": "Non",
+    "screen delete yes button": "Supprimer",
+    "screen delete no button": "Annuler",
     "screen guest title empty": "Invité",
     "screen guest title": "%{smart_count} invité |||| %{smart_count} invités",
     "screen guest input placeholder": "Adresse e-mail",
@@ -4051,7 +4055,8 @@ module.exports = {
     "email delete title": "Cet événement a été annulé : %{description}",
     "email delete content": "Cet événement a été annulé :\n%{description} %{place}\nLe %{date}",
     "invalid recurring rule": "La règle de récursion est invalide"
-};
+}
+;
 });
 
 require.register("locales/id.json", function(exports, require, module) {
@@ -7774,7 +7779,7 @@ module.exports = Router = (function(superClass) {
       this.mainView.remove();
     }
     this.mainView = view;
-    $('.main-container').append(this.mainView.$el);
+    $('main').append(this.mainView.$el);
     return this.mainView.render();
   };
 
@@ -7871,8 +7876,16 @@ module.exports = CalendarHeader = (function(superClass) {
     };
   };
 
+  CalendarHeader.prototype.toggleDrawer = function() {
+    var $drawer, isVisible;
+    $drawer = $('aside.drawer');
+    isVisible = $drawer.attr('aria-expanded') === 'true';
+    return $drawer.attr('aria-expanded', !isVisible);
+  };
+
   CalendarHeader.prototype.events = function() {
     return {
+      'click .drawer-toggle': 'toggleDrawer',
       'click .fc-button-next': (function(_this) {
         return function() {
           return _this.trigger('next');
@@ -9157,11 +9170,9 @@ module.exports = MenuView = (function(superClass) {
     return MenuView.__super__.constructor.apply(this, arguments);
   }
 
-  MenuView.prototype.tagName = 'ul';
+  MenuView.prototype.tagName = 'aside';
 
-  MenuView.prototype.id = 'menu';
-
-  MenuView.prototype.className = 'container nav nav-list sidenav';
+  MenuView.prototype.className = 'drawer nav';
 
   MenuView.prototype.collectionEl = '#menuitems';
 
@@ -9171,7 +9182,6 @@ module.exports = MenuView = (function(superClass) {
 
   MenuView.prototype.events = function() {
     return {
-      'click .calendars': 'toggleDropdown',
       'click .calendar-add': 'onAddCalendar',
       'click .remove-cals': 'onCalendarMultipleRemove',
       'click .export-cals': 'onCalendarMultipleExport'
@@ -9249,10 +9259,6 @@ module.exports = MenuView = (function(superClass) {
     return this.$('.active').removeClass('active');
   };
 
-  MenuView.prototype.toggleDropdown = function() {
-    return this.$('#menuitems').toggleClass('visible');
-  };
-
   MenuView.prototype.onCalendarMultipleRemove = function() {
     var message;
     message = t('confirm delete selected calendars');
@@ -9281,12 +9287,12 @@ module.exports = MenuView = (function(superClass) {
 
   MenuView.prototype.showLoading = function() {
     this.$('.main-spinner').show();
-    return this.$('.calendar-add').hide();
+    return this.$('.add-calendar-icon').hide();
   };
 
   MenuView.prototype.hideLoading = function() {
     this.$('.main-spinner').hide();
-    return this.$('.calendar-add').show();
+    return this.$('.add-calendar-icon').show();
   };
 
   return MenuView;
@@ -9881,7 +9887,7 @@ module.exports = ConfirmClosePopoverScreen = (function(superClass) {
     return ConfirmClosePopoverScreen.__super__.constructor.apply(this, arguments);
   }
 
-  ConfirmClosePopoverScreen.prototype.screenTitle = t('are you sure');
+  ConfirmClosePopoverScreen.prototype.screenTitle = t('screen confirm title');
 
   ConfirmClosePopoverScreen.prototype.templateTitle = require('views/templates/popover_screens/confirm_title');
 
@@ -11185,7 +11191,7 @@ module.exports = SettingsModals = (function(superClass) {
     'click a#export': 'exportCalendar',
     'click #show-password': 'showPassword',
     'click #hide-password': 'hidePassword',
-    'click .close-settings': 'close'
+    'click .modal-close': 'close'
   };
 
   SettingsModals.prototype.getRenderData = function() {
@@ -11329,17 +11335,17 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (active, calendarMode, isMobile, title, todaytxt) {
-buf.push("<div class=\"fc-header-left\">");
+buf.push("<button class=\"drawer-toggle\"><svg width=\"16\" height=\"12\" viewBox=\"0 0 16 12\" xmlns=\"http://www.w3.org/2000/svg\"><title>menu</title><path d=\"M0 1c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1C.45 2 0 1.556 0 1zm0 5c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1C.45 7 0 6.556 0 6zm0 5c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1c-.552 0-1-.444-1-1z\" fill=\"#788195\" fill-rule=\"evenodd\"/></svg></button><div class=\"fc-header-left\">");
 if ( calendarMode)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-prev fc-corner-left\"><i class=\"fa fa-angle-left\"></i></span><span class=\"btn title\">" + (jade.escape(null == (jade_interp = title) ? "" : jade_interp)) + "</span><span class=\"btn fc-button-next fc-corner-right\"><i class=\"fa fa-angle-right\"></i></span></div><div" + (jade.cls(['btn','fc-button','fc-button-today',active('today')], [null,null,null,true])) + ">" + (jade.escape(null == (jade_interp = todaytxt) ? "" : jade_interp)) + "</div><div id=\"shared-events-button\" class=\"fc-button-wrapper\"></div>");
 }
-buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-right\">");
+buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-name\">" + (jade.escape(null == (jade_interp = t('upcoming events')) ? "" : jade_interp)) + "</div><div class=\"fc-header-right\">");
 if ( !isMobile)
 {
 buf.push("<div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
 }
-buf.push("<div role=\"group\" class=\"btn-group\"><a href=\"#settings\" class=\"btn btn-settings\"><i class=\"fa fa-refresh\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a></div></div>");}.call(this,"active" in locals_for_with?locals_for_with.active:typeof active!=="undefined"?active:undefined,"calendarMode" in locals_for_with?locals_for_with.calendarMode:typeof calendarMode!=="undefined"?calendarMode:undefined,"isMobile" in locals_for_with?locals_for_with.isMobile:typeof isMobile!=="undefined"?isMobile:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined,"todaytxt" in locals_for_with?locals_for_with.todaytxt:typeof todaytxt!=="undefined"?todaytxt:undefined));;return buf.join("");
+buf.push("</div>");}.call(this,"active" in locals_for_with?locals_for_with.active:typeof active!=="undefined"?active:undefined,"calendarMode" in locals_for_with?locals_for_with.calendarMode:typeof calendarMode!=="undefined"?calendarMode:undefined,"isMobile" in locals_for_with?locals_for_with.isMobile:typeof isMobile!=="undefined"?isMobile:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined,"todaytxt" in locals_for_with?locals_for_with.todaytxt:typeof todaytxt!=="undefined"?todaytxt:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -11509,7 +11515,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<li class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span class=\"fa fa-bars menu-icon\"></span><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span" + (jade.attr("title", t("add calendar"), true, false)) + " class=\"fa fa-plus-square-o calendar-add\"></span></div></li><ul id=\"menuitems\"></ul>");;return buf.join("");
+buf.push("<div class=\"calendars\"><div href=\"#calendar\" class=\"title\"><span>" + (jade.escape(null == (jade_interp = t('calendar list title')) ? "" : jade_interp)) + "</span></div></div><section class=\"calendar-list\"><ul id=\"menuitems\"></ul><a class=\"calendar-add\"><span class=\"add-calendar-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\"><title>add</title><path fill=\"#33A6FF\" d=\"M0 7h7V0h2v7h7v2H9v7H7V9H0\" fill-rule=\"evenodd\"/></svg></span><span class=\"main-spinner\"><img src=\"img/spinner.svg\"/></span><span>" + (jade.escape(null == (jade_interp = t('create calendar')) ? "" : jade_interp)) + "</span></a></section><a href=\"#settings\" class=\"btn\"><i class=\"fa fa-cog\"></i><span>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</span></a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -11737,7 +11743,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen confirm description')) ? "" : jade_interp)) + "</p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen confirm yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen confirm no button')) ? "" : jade_interp)) + "</button></div><label class=\"dontaskagain-label\"><input type=\"checkbox\" class=\"dontaskagain\"/>" + (jade.escape(null == (jade_interp = t('dont ask again')) ? "" : jade_interp)) + "</label></div>");;return buf.join("");
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen confirm description')) ? "" : jade_interp)) + "</p><div class=\"remove-choices button-group\"><button class=\"btn secondary answer-no\">" + (jade.escape(null == (jade_interp = t('screen confirm no button')) ? "" : jade_interp)) + "</button><button autofocus=\"autofocus\" class=\"btn danger answer-yes\">" + (jade.escape(null == (jade_interp = t('screen confirm yes button')) ? "" : jade_interp)) + "</button></div><label class=\"dontaskagain-label\"><input type=\"checkbox\" class=\"dontaskagain\"/>" + (jade.escape(null == (jade_interp = t('dont ask again')) ? "" : jade_interp)) + "</label></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -11775,7 +11781,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (description) {
-buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><div class=\"spinner-block\"><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></div><p class=\"errors\"></p><div class=\"remove-choices\"><button class=\"btn answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button><button class=\"btn answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button></div></div>");}.call(this,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined));;return buf.join("");
+buf.push("<div class=\"fixed-height delete-screen\"><p>" + (jade.escape(null == (jade_interp = t('screen delete description', {description: description})) ? "" : jade_interp)) + "</p><div class=\"spinner-block\"><img src=\"img/spinner.svg\" class=\"remove-spinner\"/></div><p class=\"errors\"></p><div class=\"remove-choices button-group\"><button class=\"btn secondary answer-no\">" + (jade.escape(null == (jade_interp = t('screen delete no button')) ? "" : jade_interp)) + "</button><button autofocus=\"autofocus\" class=\"btn danger answer-yes\">" + (jade.escape(null == (jade_interp = t('screen delete yes button')) ? "" : jade_interp)) + "</button></div></div>");}.call(this,"description" in locals_for_with?locals_for_with.description:typeof description!=="undefined"?description:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -12065,7 +12071,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 ;var locals_for_with = (locals || {});(function (account, calendar) {
-buf.push("<div class=\"modal-header\"><h2>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</h2></div><div class=\"helptext\"><span><i class=\"fa fa-refresh\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
+buf.push("<h2>" + (jade.escape(null == (jade_interp = t('sync settings button label')) ? "" : jade_interp)) + "</h2><div class=\"modal-close\">" + (jade.escape(null == (jade_interp = t('×')) ? "" : jade_interp)) + "</div><section><h3>" + (jade.escape(null == (jade_interp = t('mobile sync')) ? "" : jade_interp)) + "</h3>");
 if ( account == null)
 {
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('to sync your cal with')) ? "" : jade_interp)) + "</p><ol><li>" + (jade.escape(null == (jade_interp = t('install the sync module')) ? "" : jade_interp)) + "</li><li>" + (jade.escape(null == (jade_interp = t('connect to it and follow')) ? "" : jade_interp)) + "</li></ol>");
@@ -12074,7 +12080,7 @@ else
 {
 buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync headline with data')) ? "" : jade_interp)) + "</p><ul><li>" + (jade.escape((jade_interp = t('sync url')) == null ? '' : jade_interp)) + " https://" + (jade.escape((jade_interp = account.domain) == null ? '' : jade_interp)) + "/public/sync/principals/me</li><li>" + (jade.escape((jade_interp = t('sync login')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = account.login) == null ? '' : jade_interp)) + "</li><li>" + (jade.escape((jade_interp = t('sync password') + " ") == null ? '' : jade_interp)) + "<span id=\"placeholder\">" + (jade.escape(null == (jade_interp = account.placeholder) ? "" : jade_interp)) + "</span><button id=\"show-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('show')) ? "" : jade_interp)) + "</button><button id=\"hide-password\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('hide')) ? "" : jade_interp)) + "</button></li></ul>");
 }
-buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://docs.cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-upload\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><span>&nbsp;</span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></div><div class=\"helptext\"><span><i class=\"fa fa-download\"></i></span><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></div><div class=\"modal-footer\"><button class=\"btn btn-link close-settings\">" + (jade.escape(null == (jade_interp = t('close')) ? "" : jade_interp)) + "</button></div>");}.call(this,"account" in locals_for_with?locals_for_with.account:typeof account!=="undefined"?account:undefined,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined));;return buf.join("");
+buf.push("<p>" + (jade.escape(null == (jade_interp = t('sync help') + " ") ? "" : jade_interp)) + "<a href=\"https://docs.cozy.io/mobile/calendar.html\" target=\"_blank\">" + (jade.escape(null == (jade_interp = t('sync help link')) ? "" : jade_interp)) + "</a></p></section><section><h3>" + (jade.escape(null == (jade_interp = t('icalendar export')) ? "" : jade_interp)) + "</h3><p>" + (jade.escape(null == (jade_interp = t('download a copy of your calendar')) ? "" : jade_interp)) + "</p><p class=\"line\"><span class=\"surrounded-combobox\"><input id=\"export-calendar\"" + (jade.attr("value", calendar, true, false)) + "/></span><a id=\"export\" class=\"btn\">" + (jade.escape(null == (jade_interp = t('export your calendar')) ? "" : jade_interp)) + "</a></p></section><section><h3>" + (jade.escape(null == (jade_interp = t('icalendar import')) ? "" : jade_interp)) + "</h3><div id=\"importviewplaceholder\"></div></section>");}.call(this,"account" in locals_for_with?locals_for_with.account:typeof account!=="undefined"?account:undefined,"calendar" in locals_for_with?locals_for_with.calendar:typeof calendar!=="undefined"?calendar:undefined));;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
