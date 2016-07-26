@@ -1,0 +1,59 @@
+$centerized
+    position  absolute
+    top       50%
+    left      50%
+    transform translateX(-50%) translateY(-50%)
+
+
+$content-center
+    display         flex
+    align-items     center
+    justify-content center
+
+
+$app-2panes-toolbar
+    display flex
+    width   100vw
+    height  100vh
+
+    main
+    > aside
+        display        flex
+        flex-direction column
+        z-index 1
+
+    main
+    main > [role=contentinfo]
+        flex       1
+        height     auto
+        overflow-x hidden
+        overflow-y auto
+
+    @media (max-width: (1023/16)rem)
+        toggle-width = (56/16)em
+
+        > aside
+            z-index       1
+            position      absolute
+            top           0
+            left          0
+            width         100vw
+            height        100vh
+            padding-right toggle-width + 1.25
+
+            &[aria-expanded=true] + main
+                transform translateX("calc(100vw - %s)" % toggle-width)
+
+        main
+            z-index    2
+            position   relative
+            transform  translateX(0)
+            transition transform 350ms ease-out
+
+
+$fullbleed
+    position fixed
+    bottom   0
+    top      0
+    left     0
+    right    0

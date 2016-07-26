@@ -4,6 +4,6 @@
     .spinner-block
         img.remove-spinner(src='img/spinner.svg')
     p.errors
-    .remove-choices
-        button.btn.answer-yes=t('screen delete yes button')
-        button.btn.answer-no=t('screen delete no button')
+    .remove-choices.button-group
+        button.btn.secondary.answer-no=t('screen delete no button')
+        button.btn.danger.answer-yes(autofocus)=t('screen delete yes button')

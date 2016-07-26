@@ -16,7 +16,7 @@ module.exports = class SettingsModals extends BaseView
         'click a#export': 'exportCalendar'
         'click #show-password': 'showPassword'
         'click #hide-password': 'hidePassword'
-        'click .close-settings': 'close'
+        'click .modal-close': 'close'
 
 
     getRenderData: ->

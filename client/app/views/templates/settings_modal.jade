@@ -1,9 +1,8 @@
-.modal-header
-    h2= t('sync settings button label')
+h2= t('sync settings button label')
 
-.helptext
-    span
-        i.fa.fa-refresh
+.modal-close= t('×')
+
+section
     h3= t('mobile sync')
 
     if account == null
@@ -23,25 +22,17 @@
     p= t('sync help') + " "
         a(href='https://docs.cozy.io/mobile/calendar.html', target="_blank")= t('sync help link')
 
-.helptext
-    span
-        i.fa.fa-upload
+section
     h3= t('icalendar export')
     p
       = t('download a copy of your calendar')
     p.line
       span.surrounded-combobox
         input#export-calendar(value=calendar)
-      span &nbsp;
       a#export.btn= t('export your calendar')
 
-.helptext
-    span
-        i.fa.fa-download
+section
     h3= t('icalendar import')
 
     #importviewplaceholder
-
-.modal-footer
-    button.btn.btn-link.close-settings= t('close')
 

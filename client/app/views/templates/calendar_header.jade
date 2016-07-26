@@ -1,3 +1,5 @@
+button.drawer-toggle
+    <svg width="16" height="12" viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg"><title>menu</title><path d="M0 1c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1C.45 2 0 1.556 0 1zm0 5c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1C.45 7 0 6.556 0 6zm0 5c0-.552.445-1 1-1h14c.552 0 1 .444 1 1 0 .552-.445 1-1 1H1c-.552 0-1-.444-1-1z" fill="#788195" fill-rule="evenodd"/></svg>
 .fc-header-left
     if calendarMode
         .btn-group(role="group")
@@ -14,12 +16,10 @@
 // just preload the image for fast display when used
 img.hidden(src="img/spinner-white.svg")
 
+.fc-header-name= t('upcoming events')
+
 .fc-header-right
     if !isMobile
         .btn-group(role="group")
             span.btn.fc-button-month(class=active('month') type="button")= t('month')
             span.btn.fc-button-list(class=active('list') type="button")= t('list')
-    .btn-group(role="group")
-        a.btn.btn-settings(href="#settings")
-            i.fa.fa-refresh
-            span= t('sync settings button label')

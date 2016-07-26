@@ -56,8 +56,14 @@ module.exports = class CalendarHeader extends BaseView
                 if item is 'today' and @isToday() or item is @getViewName()
                     return 'fc-state-active'
 
+    toggleDrawer: ->
+        $drawer = $ 'aside.drawer'
+        isVisible = $drawer.attr('aria-expanded') is 'true'
+        $drawer.attr 'aria-expanded', not isVisible
+
 
     events: ->
+        'click .drawer-toggle': 'toggleDrawer'
         'click .fc-button-next': => @trigger 'next'
         'click .fc-button-prev': => @trigger 'prev'
         'click .fc-button-today': => @trigger 'today'

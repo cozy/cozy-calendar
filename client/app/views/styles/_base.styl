@@ -3,6 +3,8 @@ body
     height 100%
     width 100%
     padding 0
+    font-size 16px
+    font-family 'Source Sans Pro', sans-serif !important // override Bootstrap
 
 body
     text-rendering optimizeLegibility
@@ -14,7 +16,8 @@ input
     line-height 1.2
 
 a,
-a:visited
+a:visited,
+a:focus
     color blue
     text-decoration none
 
@@ -23,6 +26,7 @@ a:visited
 
 [aria-hidden=true]
     display none !important
+
 
 /* fixing bootstrap */
 
@@ -56,11 +60,10 @@ afocus,
     border 0
     background blue
     color white
+    text-transform uppercase
     box-shadow none
     text-shadow none
     border-radius 0
-    font-family 'Source Sans Pro', sans-serif
-    font-weight bold
     border-radius 3px
     transition background 0.2s
     transition color 0.2s
@@ -69,6 +72,42 @@ afocus,
         background darkblue
         border-color darkblue
         color white
+
+    &:focus
+        background blue
+        color white
+
+button,
+.btn
+    &.secondary
+        background-color grey-05
+        border-color     grey-05
+
+        &:hover
+            background-color grey-06
+            border-color     grey-06
+
+    &.danger
+        background-color red
+        border-color     red
+
+        &:hover
+            background-color darken(red, 20%)
+            border-color     darken(red, 20%)
+
+.button-group
+    display flex
+
+    button
+        flex 1
+        height auto
+        margin 0 .5rem
+
+        &:first-child
+            margin-left 0
+
+        &:last-child
+            margin-right 0
 
 .badge
     background grey-01
@@ -99,22 +138,6 @@ afocus,
         .add-on i
             margin-top 2px !important
 
-.helptext
-    margin 1.5em 2em
-    padding-bottom 0.5em
-    font-family 'Source Sans Pro', sans-serif
-
-    h3
-        display inline-block
-        margin 0 0 0.5em
-        font-size 1.2em
-        text-transform uppercase
-
-    i
-        margin-right 0.5em
-        font-size 1.2em
-
-
 .info
     font-size 12px
     color grey-06
@@ -126,9 +149,8 @@ afocus,
 .showbefore
     margin 1em 0
 
-.main-container
+main
     box-sizing border-box
-    margin-left 200px
     border 0
     width auto
     background white

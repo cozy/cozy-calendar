@@ -2,7 +2,7 @@ PopoverScreenView = require 'lib/popover_screen_view'
 
 module.exports = class ConfirmClosePopoverScreen extends PopoverScreenView
 
-    screenTitle: t('are you sure')
+    screenTitle: t('screen confirm title')
 
     # Override title template.
     templateTitle: require 'views/templates/popover_screens/confirm_title'

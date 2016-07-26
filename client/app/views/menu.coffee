@@ -6,15 +6,13 @@ Tag = require 'models/tag'
 
 module.exports = class MenuView extends ViewCollection
 
-    tagName: 'ul'
-    id: 'menu'
-    className: 'container nav nav-list sidenav'
+    tagName: 'aside'
+    className: 'drawer nav'
     collectionEl: '#menuitems'
     template: require './templates/menu'
     itemview: require 'views/menu_item'
 
     events: ->
-        'click .calendars': 'toggleDropdown'
         'click .calendar-add': 'onAddCalendar'
         'click .remove-cals': 'onCalendarMultipleRemove'
         'click .export-cals': 'onCalendarMultipleExport'
@@ -90,8 +88,9 @@ module.exports = class MenuView extends ViewCollection
         @$('.active').removeClass 'active'
 
 
-    toggleDropdown: ->
-        @$('#menuitems').toggleClass 'visible'
+    # toggleDrawer: ->
+    #     isVisible = @$el.attr('aria-expanded') is 'true'
+    #     @$el.attr 'aria-expanded', not isVisible
 
 
     onCalendarMultipleRemove: ->
@@ -117,10 +116,10 @@ module.exports = class MenuView extends ViewCollection
 
     showLoading: ->
         @$('.main-spinner').show()
-        @$('.calendar-add').hide()
+        @$('.add-calendar-icon').hide()
 
 
     hideLoading: ->
         @$('.main-spinner').hide()
-        @$('.calendar-add').show()
+        @$('.add-calendar-icon').show()
 

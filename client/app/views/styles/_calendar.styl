@@ -10,6 +10,9 @@ input-color   = #555
 // Styles for the fullcalendar plugin
 // ----------------------------------------------------------------------------
 
+.fc button
+    font-size (13/16)rem
+
 .fc-ltr
     padding 0
 
@@ -53,7 +56,6 @@ input-color   = #555
     display flex
     align-items center
     width 100%
-    padding 0.5em 1em
     background-color grey-01
     border-bottom 1px solid grey-03
 
@@ -91,17 +93,6 @@ input-color   = #555
                 background-color grey-03
                 color grey-07
 
-        &.btn-settings
-            &:hover
-                background-color grey-03
-
-            i
-                margin-right 0.4em
-
-            &:hover
-                i
-                    text-decoration none
-
     .fc-button
         margin-left 0.625em
         font-weight normal
@@ -120,17 +111,16 @@ input-color   = #555
     display: inline-block
 
 .fc-header-left
-.fc-header-center
 .fc-header-right
     flex-grow 1
     width 33.33%
-
-.fc-header-center
-    display flex
-    justify-content center
+    padding .5rem 1rem
 
 .fc-header-right
     text-align: right
+
+.fc-header-name
+    display none
 
 .fc-header-title h2
     margin 0
