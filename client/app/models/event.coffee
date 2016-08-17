@@ -1,6 +1,7 @@
-
 ScheduleItem = require './scheduleitem'
 Sharing = require './sharing'
+request = require '../lib/request'
+
 
 module.exports = class Event extends ScheduleItem
 
@@ -119,7 +120,7 @@ module.exports = class Event extends ScheduleItem
                     callback null, shareID
                     return
 
-                triesLeft = --numtries;
+                triesLeft = --numtries
 
                 if numtries
                     setTimeout =>
@@ -191,7 +192,7 @@ module.exports = class Event extends ScheduleItem
                 if err
                     callback err, false
                 else
-                    isEditable = @get('shareID') == sharing.get('id')
+                    isEditable = @get('shareID') is sharing.get('id')
                     callback null, isEditable
         else
             callback null, true
@@ -214,27 +215,29 @@ module.exports = class Event extends ScheduleItem
         errorHandler = (err) ->
             callback err, null
 
-        sharingToFecth = new Sharing id: @get 'shareID'
-        sharingToFecth.fetch
-            success: successHandler
-            # If the fetching fails, it means that the document is shared by
-            # another cozy owner. So we try to get a sharing with the shareID
-            # Reminder :
-            #   The user is the sharer : a sharing object having the event's
-            #       shareID as id exists.
-            #   The user is the recipient : a sharing object having the same
-            #       shareID property than the event exists.
-            error: (sharing, response, options) =>
-                sharingNotFound = response and response.status == 404
-
-                if sharingNotFound
-                    @fetchSharingByShareId (err, sharing) =>
-                        if err
-                            errorHandler err
-                        else
-                            successHandler sharing
-                else
-                    errorHandler JSON.parse response.responseText
+        # If the exist test fails, it means that the document is shared by
+        # another cozy owner. So we try to get a sharing with the shareID.
+        # Reminder :
+        #   The user is the sharer : a sharing object having the event's
+        #       shareID as id exists.
+        #   The user is the recipient : a sharing object having the same
+        #       shareID property than the event exists.
+        request.exist @get('shareID'), (err, exist) =>
+            if err?
+                errorHandler err
+            # A document having an id equal to the shareID exists: sharer.
+            else if exist
+                sharingToFetch = new Sharing id: @get('shareID')
+                sharingToFetch.fetch
+                    success: successHandler
+                    error  : errorHandler
+            # No document having an id equal to the shareID exists: recipient.
+            else
+                @fetchSharingByShareId (err, sharing) ->
+                    if err?
+                        errorHandler err
+                    else
+                        successHandler sharing
 
 
     fetchSharingByShareId: (callback) ->
@@ -249,7 +252,7 @@ module.exports = class Event extends ScheduleItem
         sharingToFetch = new Sharing()
         sharingToFetch.fetch
             data: shareID: @get 'shareID'
-            success: (sharing, response, options) =>
+            success: (sharing, response, options) ->
                 callback null, sharing
 
             error: (sharing, resopnse, options) ->

@@ -53,3 +53,8 @@ exports.put = (url, data, callback) ->
 exports.del = (url, callback) ->
     exports.request "DELETE", url, null, callback
 
+
+# Sends an exist request
+exports.exist = (id, callback) ->
+    exports.get "data/exist/#{id}/", callback
+
