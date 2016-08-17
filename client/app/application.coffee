@@ -88,8 +88,8 @@ module.exports =
             loadedMonths: {}
         now = moment().startOf 'month'
         for i in [1..3]
-            m1 = now.clone().subtract('months', i).format 'YYYY-MM'
-            m2 = now.clone().add('months', i).format 'YYYY-MM'
+            m1 = now.clone().subtract(i, 'months').format 'YYYY-MM'
+            m2 = now.clone().add(i, 'months').format 'YYYY-MM'
             @mainStore.loadedMonths[m1] = true
             @mainStore.loadedMonths[m2] = true
         @mainStore.loadedMonths[now.format 'YYYY-MM'] = true
