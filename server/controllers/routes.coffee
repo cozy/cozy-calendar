@@ -4,6 +4,8 @@ index  = require './index'
 ical   = require './ical'
 contacts = require './contacts'
 sharings = require './sharings'
+utils = require '../helpers/utils'
+
 
 module.exports =
 
@@ -89,3 +91,9 @@ module.exports =
 
     'sharing/refuse':
         post: sharings.refuse
+
+
+    # Data management
+    'data/exist/:id/':
+        get: utils.exist
+
