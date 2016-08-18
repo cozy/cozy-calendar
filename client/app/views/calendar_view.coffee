@@ -102,7 +102,7 @@ module.exports = class CalendarView extends BaseView
         # that events are loaded.
         @calHeader.on 'prev', =>
             @clearViewComponents =>
-                monthToLoad = @cal.fullCalendar('getDate').subtract('months', 1)
+                monthToLoad = @cal.fullCalendar('getDate').subtract(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'prev'
 
@@ -110,7 +110,7 @@ module.exports = class CalendarView extends BaseView
         # events are loaded.
         @calHeader.on 'next', =>
             @clearViewComponents =>
-                monthToLoad = @cal.fullCalendar('getDate').add('months', 1)
+                monthToLoad = @cal.fullCalendar('getDate').add(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'next'
 
@@ -121,7 +121,7 @@ module.exports = class CalendarView extends BaseView
             @clearViewComponents =>
                 @cal.fullCalendar 'changeView', 'month'
         @calHeader.on 'list', =>
-            @clearViewComponents =>
+            @clearViewComponents ->
                 window.app.events.sort()
                 app.router.navigate 'list', trigger:true
         @$('#alarms').prepend @calHeader.render().$el
@@ -190,8 +190,9 @@ module.exports = class CalendarView extends BaseView
         options.parentView = @
 
         showNewPopover = =>
-            # @TODO Event creation is a typical core feature of the calendar app,
-            # this part should be moved directly into the app module, and managed
+            # @TODO Event creation is a typical core feature of the calendar
+            # app, this part should be moved directly into the app module, and
+            # managed
             # with event handlers
             model = options.model ?= new Event
                 start: helpers.momentToString options.start
@@ -212,7 +213,7 @@ module.exports = class CalendarView extends BaseView
         if @popover
             # click on same case
             @preventUnselecting()
-            @popover.close =>
+            @popover.close ->
                 showNewPopover()
 
         else
@@ -238,7 +239,7 @@ module.exports = class CalendarView extends BaseView
             callback() if callback and typeof callback is 'function'
 
 
-    getUrlHash: =>
+    getUrlHash: ->
         return 'calendar'
 
 

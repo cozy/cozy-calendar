@@ -51,7 +51,8 @@ module.exports.index = (req, res, next) ->
 
 
         [
-            contacts, tags, calendars, events, pendingEventSharings, instance, webDavAccount, timezone
+            contacts, tags, calendars, events, pendingEventSharings, instance,
+            webDavAccount, timezone
         ] = results
 
         locale = instance?.locale or 'en'
