@@ -294,7 +294,7 @@ module.exports.monthEvents = function(req, res, next) {
   var end, month, ref, start, year;
   ref = req.params, month = ref.month, year = ref.year;
   start = moment(year + "-" + month + "-01", 'YYYY-MM-DD');
-  end = start.clone().add('months', 1);
+  end = start.clone().add(1, 'months');
   return Event.load(start, end, function(err, events) {
     if (err) {
       return next(err);

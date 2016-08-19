@@ -185,8 +185,8 @@ module.exports = {
     };
     now = moment().startOf('month');
     for (i = j = 1; j <= 3; i = ++j) {
-      m1 = now.clone().subtract('months', i).format('YYYY-MM');
-      m2 = now.clone().add('months', i).format('YYYY-MM');
+      m1 = now.clone().subtract(i, 'months').format('YYYY-MM');
+      m2 = now.clone().add(i, 'months').format('YYYY-MM');
       this.mainStore.loadedMonths[m1] = true;
       this.mainStore.loadedMonths[m2] = true;
     }
@@ -1887,6 +1887,10 @@ exports.put = function(url, data, callback) {
 
 exports.del = function(url, callback) {
   return exports.request("DELETE", url, null, callback);
+};
+
+exports.exist = function(id, callback) {
+  return exports.get("data/exist/" + id + "/", callback);
 };
 });
 
@@ -6797,13 +6801,15 @@ module.exports = Contact = (function(superClass) {
 });
 
 ;require.register("models/event.coffee", function(exports, require, module) {
-var Event, ScheduleItem, Sharing,
+var Event, ScheduleItem, Sharing, request,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 ScheduleItem = require('./scheduleitem');
 
 Sharing = require('./sharing');
+
+request = require('../lib/request');
 
 module.exports = Event = (function(superClass) {
   extend(Event, superClass);
@@ -7026,7 +7032,7 @@ module.exports = Event = (function(superClass) {
   };
 
   Event.prototype.fetchSharing = function(callback) {
-    var errorHandler, sharingToFecth, successHandler;
+    var errorHandler, successHandler;
     if (!this.hasSharing()) {
       callback(null, null);
       return;
@@ -7045,29 +7051,30 @@ module.exports = Event = (function(superClass) {
     errorHandler = function(err) {
       return callback(err, null);
     };
-    sharingToFecth = new Sharing({
-      id: this.get('shareID')
-    });
-    return sharingToFecth.fetch({
-      success: successHandler,
-      error: (function(_this) {
-        return function(sharing, response, options) {
-          var sharingNotFound;
-          sharingNotFound = response && response.status === 404;
-          if (sharingNotFound) {
-            return _this.fetchSharingByShareId(function(err, sharing) {
-              if (err) {
-                return errorHandler(err);
-              } else {
-                return successHandler(sharing);
-              }
-            });
-          } else {
-            return errorHandler(JSON.parse(response.responseText));
-          }
-        };
-      })(this)
-    });
+    return request.exist(this.get('shareID'), (function(_this) {
+      return function(err, exist) {
+        var sharingToFetch;
+        if (err != null) {
+          return errorHandler(err);
+        } else if (exist) {
+          sharingToFetch = new Sharing({
+            id: _this.get('shareID')
+          });
+          return sharingToFetch.fetch({
+            success: successHandler,
+            error: errorHandler
+          });
+        } else {
+          return _this.fetchSharingByShareId(function(err, sharing) {
+            if (err != null) {
+              return errorHandler(err);
+            } else {
+              return successHandler(sharing);
+            }
+          });
+        }
+      };
+    })(this));
   };
 
   Event.prototype.fetchSharingByShareId = function(callback) {
@@ -7085,11 +7092,9 @@ module.exports = Event = (function(superClass) {
       data: {
         shareID: this.get('shareID')
       },
-      success: (function(_this) {
-        return function(sharing, response, options) {
-          return callback(null, sharing);
-        };
-      })(this),
+      success: function(sharing, response, options) {
+        return callback(null, sharing);
+      },
       error: function(sharing, resopnse, options) {
         return callback(JSON.parse(response.responseText), null);
       }
@@ -7950,7 +7955,6 @@ module.exports = CalendarView = (function(superClass) {
     this.onEventResize = bind(this.onEventResize, this);
     this.onEventDrop = bind(this.onEventDrop, this);
     this.onSelect = bind(this.onSelect, this);
-    this.getUrlHash = bind(this.getUrlHash, this);
     this.onChangeView = bind(this.onChangeView, this);
     this.refreshOne = bind(this.refreshOne, this);
     this.handleWindowResize = bind(this.handleWindowResize, this);
@@ -8044,7 +8048,7 @@ module.exports = CalendarView = (function(superClass) {
       return function() {
         return _this.clearViewComponents(function() {
           var monthToLoad;
-          monthToLoad = _this.cal.fullCalendar('getDate').subtract('months', 1);
+          monthToLoad = _this.cal.fullCalendar('getDate').subtract(1, 'months');
           return window.app.events.loadMonth(monthToLoad, function() {
             return _this.cal.fullCalendar('prev');
           });
@@ -8055,7 +8059,7 @@ module.exports = CalendarView = (function(superClass) {
       return function() {
         return _this.clearViewComponents(function() {
           var monthToLoad;
-          monthToLoad = _this.cal.fullCalendar('getDate').add('months', 1);
+          monthToLoad = _this.cal.fullCalendar('getDate').add(1, 'months');
           return window.app.events.loadMonth(monthToLoad, function() {
             return _this.cal.fullCalendar('next');
           });
@@ -8177,11 +8181,9 @@ module.exports = CalendarView = (function(superClass) {
     })(this);
     if (this.popover) {
       this.preventUnselecting();
-      return this.popover.close((function(_this) {
-        return function() {
-          return showNewPopover();
-        };
-      })(this));
+      return this.popover.close(function() {
+        return showNewPopover();
+      });
     } else {
       return showNewPopover();
     }
