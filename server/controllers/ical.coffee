@@ -3,6 +3,7 @@ Event = require '../models/event'
 Tag = require '../models/tag'
 User  = require '../models/user'
 multiparty = require 'multiparty'
+moment = require 'moment-timezone'
 fs = require 'fs'
 archiver = require 'archiver'
 async = require 'async'
@@ -27,7 +28,12 @@ createCalendar = (calendarName, callback) ->
         return callback err if err
 
         if events.length > 0
-            calendar.add event.toIcal() for event in events
+            for event in events
+                # first time app opening calendar and new calendar dummy event
+                endDateArray = moment(event.end, 'YYYYMMDD')._a
+                if endDateArray[0] <= 1901
+                    continue
+                calendar.add event.toIcal()
             callback null, calendar
 
 module.exports.import = (req, res, next) ->
