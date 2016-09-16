@@ -292,6 +292,17 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$("[tabindex=#{index}]").focus()
         ev.preventDefault()
 
+    # Revert formModel to model state, so the close method will not
+    # detect any change.
+    cancelChanges: ->
+        @context.formModel = @model.clone()
+
+
+    # Hides popover.
+    onCancelClicked: ->
+        @cancelChanges()
+        @popover.close()
+
 
     # When duplicate button is clicked, an new event with exact same date
     # is created.
@@ -309,21 +320,11 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             success: =>
                 @duplicateButton.show()
                 @spinner.hide()
+                @onCancelClicked()
             error: =>
                 @duplicateButton.show()
                 @spinner.hide()
-
-
-    # Revert formModel to model state, so the close method will not
-    # detect any change.
-    cancelChanges: ->
-        @context.formModel = @model.clone()
-
-
-    # Hides popover.
-    onCancelClicked: ->
-        @cancelChanges()
-        @popover.close()
+                @onCancelClicked()
 
 
     onAddClicked: ->
