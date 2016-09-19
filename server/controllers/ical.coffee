@@ -30,10 +30,9 @@ createCalendar = (calendarName, callback) ->
         if events.length > 0
             for event in events
                 # first time app opening calendar and new calendar dummy event
-                endDateArray = moment(event.end, 'YYYYMMDD')._a
-                if endDateArray[0] <= 1901
-                    continue
-                calendar.add event.toIcal()
+                isDummyEvent = moment(event.end, 'YYYYMMDD').year() <= 1901
+                if not isDummyEvent
+                    calendar.add event.toIcal()
             callback null, calendar
 
 module.exports.import = (req, res, next) ->
