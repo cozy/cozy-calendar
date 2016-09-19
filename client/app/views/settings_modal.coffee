@@ -26,6 +26,10 @@ module.exports = class SettingsModals extends BaseView
     initialize: ->
         @model = window.webDavAccount
         if @model?
+            # See https://github.com/cozy/cozy-calendar/issues/549
+            legacyToken = @model.password
+            @model.token = @model.token or legacyToken
+
             @model.placeholder = @getPlaceholder @model.token
 
 
