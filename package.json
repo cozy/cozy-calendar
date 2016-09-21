@@ -31,14 +31,14 @@
     "request-json": "0.5.5"
   },
   "devDependencies": {
-    "brunch": "2.6.5",
+    "brunch": "1.8.5",
     "coffee-script": "1.10.0",
     "coffeelint": "1.15.0",
     "cozy-url-sdk": "1.0.2",
     "jade2commonjs": "0.1.0",
     "mocha": "2.4.5",
     "nodemon": "1.9.1",
-    "npm-run-all": "1.7.0",
+    "npm-run-all": "3.1.0",
     "should": "8.3.0"
   },
   "scripts": {
@@ -54,9 +54,10 @@
     "prebuild": "npm run clean && npm run tx",
     "prebuild:client": "npm run ensure:client",
     "postbuild": "npm run copy:locales && npm run copy:emails",
+    "postbuild:views": "rm build/client/public/*.jade",
     "build": "npm run build:server && npm run build:client && npm run build:views",
-    "build:client": "mkdir -p build/client && cd client && ../node_modules/.bin/brunch build && cp -R public ../build/client/public",
-    "build:views": "./node_modules/.bin/jade2commonjs --no-debug --ignore './client/app/**/*' --ignore './client/node_modules/**/*' --out ./build/client ./client",
+    "build:client": "cd client && brunch build --production",
+    "build:views": "./node_modules/.bin/jade2commonjs --no-debug --out ./build/client/ ./build/client/public/",
     "build:server": "./node_modules/.bin/coffee --bare --compile --output build/server server && coffee --bare --compile --output build server.coffee",
     "copy:locales": "mkdir -p build/client/app/locales && cp -r client/app/locales/*.json build/client/app/locales/",
     "copy:emails": "cp -r server/mails build/server/ && rm build/server/mails/*.coffee",
