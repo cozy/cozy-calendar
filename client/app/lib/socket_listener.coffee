@@ -37,11 +37,15 @@ class SocketListener extends CozySocketListener
         model.fetch
             success: (fetched) =>
                 docType = fetched.get('docType')
-                # generate specific handler name to avoid switch/case
-                # onEvent, onSharing, etc.
-                handler = 'on' +
-                    docType.charAt(0).toUpperCase() +
-                    docType.slice(1)
+
+                # docType may be undefined
+                # See https://github.com/cozy/cozy-calendar/issues/564
+                if docType?
+                    # generate specific handler name to avoid switch/case
+                    # onEvent, onSharing, etc.
+                    handler = 'on' +
+                        docType.charAt(0).toUpperCase() +
+                        docType.slice(1)
 
                 if typeof @[handler] is 'function'
                     @[handler] fetched
