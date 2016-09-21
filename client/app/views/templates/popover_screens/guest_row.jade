@@ -12,7 +12,7 @@ tr.guest-top(data-index=index)
     td.guest-label(title=label)= label
 
     if readOnly
-        td[colspan=3]
+        td(colspan=3)
     else
         td.action
             button.guest-delete.fa.fa-trash-o(
@@ -35,5 +35,3 @@ tr.guest-top(data-index=index)
                 disabled=activeShare ? 'disabled' : false
                 aria-hidden=hideShare
             )
-
-
