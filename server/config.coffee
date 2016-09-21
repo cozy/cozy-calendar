@@ -15,7 +15,7 @@ publicStatic = (req, res, next) ->
 
     staticMiddleware req, res, (err) -> next err
 
-viewsDir = path.resolve __dirname, '..', 'client'
+viewsDir = path.resolve __dirname, '..', 'client', 'public'
 useBuildView = fs.existsSync path.resolve viewsDir, 'index.js'
 
 module.exports =
