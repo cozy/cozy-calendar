@@ -19,3 +19,6 @@ node_modules
 npm-debug.log
 *.transifex.coffee
 test/fixtures/events_generated.json
+
+locales
+!locales/en.json
