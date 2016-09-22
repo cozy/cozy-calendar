@@ -104,9 +104,9 @@ module.exports.update = (req, res) ->
 
                     MailHandler.sendInvitations (updatedEvent or event),
                     dateChanged, (err, updatedEvent) ->
-                        res.status(201).send (updatedEvent or event)
+                        res.status(200).send (updatedEvent or event)
                 else
-                    res.status(201).send (updatedEvent or event)
+                    res.status(200).send (updatedEvent or event)
 
 
 module.exports.delete = (req, res) ->
