@@ -18,6 +18,7 @@ module.exports = class EventPopOver extends PopoverView
         repeat: require 'views/popover_screens/repeat'
         delete: require 'views/popover_screens/delete'
         confirm: require 'views/popover_screens/confirm'
+        duplicate: require 'views/popover_screens/duplicate'
 
 
     # Key of the screen that will be shown first.
@@ -112,4 +113,3 @@ module.exports = class EventPopOver extends PopoverView
             @switchToScreen screen
 
         @confirmClose confirmHandler, cancelHandler
-
