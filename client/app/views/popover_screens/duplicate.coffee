@@ -9,7 +9,7 @@ module.exports = class ConfirmDuplicatePopoverScreen extends PopoverScreenView
     templateContent: require 'views/templates/popover_screens/duplicate'
 
     events:
-        'click .popover-back': (event) -> @onCancel(event)
+        'click .popover-back': (event) -> @onBack(event)
         'click .answer-no': (event) -> @onNo(event)
         'click .answer-yes': (event) -> @onYes(event)
 
