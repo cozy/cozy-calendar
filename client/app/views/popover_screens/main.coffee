@@ -322,6 +322,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @duplicateButton.show()
         @spinner.hide()
 
+        # update popover with the duplicated event
         _updatePopover = (screen) =>
             contextDesc = @context.formModel.attributes.description
             isNotNewDesc = contextDesc is @model.attributes.description
@@ -334,7 +335,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
         # if changes -> screen to confirm discard/save changes on previous
         if formModelDiffers
-            # used to go back to popover screen
             screen = @context.screen
             duplicateHandler = =>
                 _updatePopover screen
