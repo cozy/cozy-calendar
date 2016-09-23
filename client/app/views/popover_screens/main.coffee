@@ -322,23 +322,22 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @duplicateButton.show()
         @spinner.hide()
 
-        _updatePopover = =>
+        _updatePopover = (screen) =>
             contextDesc = @context.formModel.attributes.description
             isNotNewDesc = contextDesc is @model.attributes.description
             if isNotNewDesc
                 calendarEvent.attributes.description += ' copy'
             @popover.model = calendarEvent.clone()
-            # @popover.positionPopover()
             @context.formModel = calendarEvent.clone()
             @formModel = @context.formModel
+            @switchToScreen screen
 
         # if changes -> screen to confirm discard/save changes on previous
         if formModelDiffers
             # used to go back to popover screen
             screen = @context.screen
             duplicateHandler = =>
-                _updatePopover()
-                @switchToScreen screen
+                _updatePopover screen
                 return
             cancelHandler = =>
                 @switchToScreen screen
@@ -349,9 +348,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
                 duplicateCallback: duplicateHandler
                 cancelCallback: cancelHandler
         else
-            _updatePopover()
-            # update popover screen
-            @switchToScreen @context.screen
+            _updatePopover @context.screen
 
 
     onAddClicked: ->
