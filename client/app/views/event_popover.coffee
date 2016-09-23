@@ -110,6 +110,9 @@ module.exports = class EventPopOver extends PopoverView
 
         cancelHandler = =>
             @closing = false
-            @switchToScreen screen
+            if screen is 'duplicate'
+                @switchToScreen 'main'
+            else
+                @switchToScreen screen
 
         @confirmClose confirmHandler, cancelHandler
