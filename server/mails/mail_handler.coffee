@@ -13,7 +13,7 @@ User   = require '../models/user'
 
 {VCalendar} = require 'cozy-ical'
 
-logoPath = fs.realpathSync './build/server/mails/assets/cozy-logo.png'
+logoPath = path.resolve './assets/cozy-logo.png'
 
 localization = require '../libs/localization_manager'
 
@@ -235,4 +235,3 @@ module.exports.sendDeleteNotification = (event, callback) ->
                 done err
 
         , callback
-

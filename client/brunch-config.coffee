@@ -1,19 +1,15 @@
 exports.config =
 
-    # See docs at http://brunch.readthedocs.org/en/latest/config.html.
-
-    paths:
-        public:  'public'
-
     plugins:
         coffeelint:
             options:
                 indentation: value: 4, level: 'error'
+
         jade:
             globals: ['t', 'moment','RRule']
 
-    conventions:
-        vendor:  /(vendor)|(tests)(\/|\\)/ # do not wrap tests in modules
+        digest:
+            referenceFiles: /\.jade$/
 
     files:
         javascripts:
@@ -54,3 +50,8 @@ exports.config =
             defaultExtension: 'jade'
             joinTo: 'javascripts/app.js'
 
+    overrides:
+        production:
+            sourceMaps: true
+            paths:
+                public: '../build/client/public'
