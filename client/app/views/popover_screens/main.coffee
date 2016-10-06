@@ -292,6 +292,17 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         @$("[tabindex=#{index}]").focus()
         ev.preventDefault()
 
+    # Revert formModel to model state, so the close method will not
+    # detect any change.
+    cancelChanges: ->
+        @context.formModel = @model.clone()
+
+
+    # Hides popover.
+    onCancelClicked: ->
+        @cancelChanges()
+        @popover.close()
+
 
     # When duplicate button is clicked, an new event with exact same date
     # is created.
@@ -304,26 +315,40 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         calendarEvent = new Event attrs
         @duplicateButton.hide()
         @spinner.show()
-        calendarEvent.save null,
-            wait: true
-            success: =>
-                @duplicateButton.show()
-                @spinner.hide()
-            error: =>
-                @duplicateButton.show()
-                @spinner.hide()
 
+        formModelDiffers = not _.isEqual @context.formModel.attributes,
+                                    @model.attributes
 
-    # Revert formModel to model state, so the close method will not
-    # detect any change.
-    cancelChanges: ->
-        @context.formModel = @model.clone()
+        @duplicateButton.show()
+        @spinner.hide()
 
+        # update popover with the duplicated event
+        _updatePopover = (screen) =>
+            contextDesc = @context.formModel.attributes.description
+            isNotNewDesc = contextDesc is @model.attributes.description
+            if isNotNewDesc
+                calendarEvent.attributes.description += ' copy'
+            @popover.model = calendarEvent.clone()
+            @context.formModel = calendarEvent.clone()
+            @formModel = @context.formModel
+            @switchToScreen screen
 
-    # Hides popover.
-    onCancelClicked: ->
-        @cancelChanges()
-        @popover.close()
+        # if changes -> screen to confirm discard/save changes on previous
+        if formModelDiffers
+            screen = @context.screen
+            duplicateHandler = =>
+                _updatePopover screen
+                return
+            cancelHandler = =>
+                @switchToScreen screen
+                @duplicateButton.hide()
+                @spinner.show()
+                return
+            @switchToScreen 'duplicate',
+                duplicateCallback: duplicateHandler
+                cancelCallback: cancelHandler
+        else
+            _updatePopover @context.screen
 
 
     onAddClicked: ->
