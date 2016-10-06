@@ -319,9 +319,6 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
         formModelDiffers = not _.isEqual @context.formModel.attributes,
                                     @model.attributes
 
-        @duplicateButton.show()
-        @spinner.hide()
-
         # update popover with the duplicated event
         _updatePopover = (screen) =>
             contextDesc = @context.formModel.attributes.description
