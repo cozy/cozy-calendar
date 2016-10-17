@@ -126,7 +126,11 @@ module.exports = class ScheduleItem extends Backbone.Model
             return false
 
     isRecurrent: ->
-        return @has('rrule') and @get('rrule') isnt ''
+        # temporary workaround for https://github.com/cozy/cozy-calendar/issues/543
+        # if rrule starts with ";", we won't be able to parse it and the application
+        # will crash, so we don't mark the event as recurrent if we are unable to
+        # parse the rrule
+        return @has('rrule') and @get('rrule') isnt '' and not /^;/.test(@get('rrule'))
 
     # Compute list of fullcalendar event objects, that this recurring event
     # generate between start and end.
