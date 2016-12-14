@@ -217,6 +217,7 @@ module.exports = class CalendarView extends BaseView
             target: $ jsEvent.target
             openerEvent: jsEvent.originalEvent
             container: @cal
+            content: @$ '.fc-day-grid-container'
         }
 
 

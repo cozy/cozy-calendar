@@ -102,6 +102,10 @@ exports.iCalDurationToUnitValue = (s) ->
 
     return o
 
+exports.getStartOfDay = (date = new Date()) ->
+    value = new Date date.getFullYear(), date.getMonth(), date.getDate()
+    return moment(value).tz(window.app.timezone)
+
 
 # Convert any date parsable by moment to a moment with cozy's timezone.
 # CAUTION depend on

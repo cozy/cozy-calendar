@@ -42,7 +42,7 @@ module.exports = class ListView extends ViewCollection
             type: 'event'
             target: $ jsEvent.target
             openerEvent: jsEvent.originalEvent
-            container: @$el
+            container: @$('#add-new-event')
         }
 
 

@@ -5,12 +5,12 @@ module.exports = class PopoverView extends BaseView
 
     initialize: (options) ->
         @target = options.target
+        @container = options.container
+        @content = options.content || options.container
+
         @openerEvent = options.openerEvent
         @document = options.document
-        @container = options.container
         @parentView = options.parentView
-        @$tabCells = $ '.fc-day-grid-container'
-        @$tabCells = $ '.fc-time-grid-container' if @$tabCells.length is 0
 
         return @
 
@@ -19,11 +19,15 @@ module.exports = class PopoverView extends BaseView
         if @$popover?
             @$popover.remove()
             @$popover = null
+
         @target.data 'popover', undefined
         @clickOutListener.dispose()
         @remove()
+
         @trigger 'closed', @
+
         callback() if callback and typeof callback is 'function'
+
 
     # Get templates for a given screen.
     getScreen: (screenID = 'default') ->
@@ -114,8 +118,8 @@ module.exports = class PopoverView extends BaseView
         # The click out listener must be set after the rendering of the view,
         # otherwise @$el is not ready
         @clickOutListener = @addClickOutListener @document, => @close()
-            .ignoreEvent @openerEvent
-            .exceptOn @target.get(0)
+        @clickOutListener.ignoreEvent @openerEvent
+        @clickOutListener.exceptOn @target.get(0)
 
 
     # Set the popover's position so it doesn't overflow out of the screen.
@@ -136,9 +140,8 @@ module.exports = class PopoverView extends BaseView
         popoverHeight = @$popover.innerHeight()
 
         # Container is the screen, except the sidebar.
-        containerOffset = @$tabCells.offset()
-        containerHeight = @$tabCells.innerHeight()
-        containerWidth = @$tabCells.innerWidth()
+        containerHeight = @content.innerHeight()
+        containerWidth = @content.innerWidth()
 
         windowHeight = window.innerHeight
 

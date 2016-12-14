@@ -11,8 +11,6 @@ DayBucketCollection = require 'collections/daybuckets'
 Event = require 'models/event'
 
 helpers = require 'helpers'
-
-
 getBeginningOfWeek = (year, month, day) ->
     [year, month, day] = [year, month, day].map (x) -> parseInt x
     monday = new Date(year, (month-1)%12, day)
@@ -32,6 +30,7 @@ module.exports = class Router extends Backbone.Router
         'event/:eventid'                  : 'auto_event'
         'calendar'                        : 'backToCalendar'
         'settings'                        : 'settings'
+
 
     initialize: (options) ->
         super options
@@ -131,9 +130,8 @@ module.exports = class Router extends Backbone.Router
         # with event handlers
         options.document = window.document
         options.parentView = @mainView
-        options.start ?= new Date()
-        options.end ?= new Date()
-
+        options.start ?= helpers.getStartOfDay()
+        options.end ?= helpers.getStartOfDay()
 
         # Prevent unselecting the calendar cell on popover close.
         # Not the cleanest way but as fullcalendar does not allow us to explicitly
@@ -144,7 +142,7 @@ module.exports = class Router extends Backbone.Router
 
 
         onPopoverClose = =>
-            @mainView.cal.fullCalendar 'unselect' unless @isUnselectPrevented
+            @mainView.cal?.fullCalendar 'unselect' unless @isUnselectPrevented
             @isUnselectPrevented = false
             @mainView.popover = null
 
@@ -159,7 +157,8 @@ module.exports = class Router extends Backbone.Router
             model.fetchEditability (err, editable) =>
                 console.error err if err
 
-                @mainView.popover = new EventPopover _.extend options, { readOnly: not editable }
+                _.extend options, { readOnly: not editable }
+                @mainView.popover = new EventPopover options
 
                 @mainView.popover.render()
 

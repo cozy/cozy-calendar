@@ -65,15 +65,8 @@ module.exports = class EventPopOver extends PopoverView
         # So, two Mouse event are triggered sometimes, and so we have to ignore
         # click event from the closest parent div having the class fc-row
         # To remind, @target here is a calendar cell (td element).
-        try
-            @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
-            @context.clickOutListener = @clickOutListener
-        catch error
-            console.warn error
-
-    momentToString: (m) ->
-        if m.hasTime?() is false then m.toISOString().slice(0, 10)
-        else m.toISOString()
+        @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
+        @context.clickOutListener = @clickOutListener
 
 
     onKeyUp: (event) ->
@@ -88,8 +81,7 @@ module.exports = class EventPopOver extends PopoverView
 
 
     close: (callback) ->
-        if @closing
-            return
+        return if @closing
 
         @closing = true
 
@@ -99,7 +91,6 @@ module.exports = class EventPopOver extends PopoverView
                              localStorage.dontConfirmCalendarPopover is 'true'
 
         needConfirm = formModelDiffers and not userIgnoresConfirm
-
         return super(callback) if not needConfirm
 
         confirmHandler = =>
@@ -112,4 +103,3 @@ module.exports = class EventPopOver extends PopoverView
             @switchToScreen screen
 
         @confirmClose confirmHandler, cancelHandler
-
