@@ -11,6 +11,7 @@ module.exports = class ListView extends ViewCollection
     itemview: require './list_view_bucket'
     collectionEl: '#alarm-list'
     events:
+        'click .addNewEvent': 'showPopover'
         'click .showafter': 'loadAfter'
         'click .showbefore': 'loadBefore'
 
@@ -34,6 +35,16 @@ module.exports = class ListView extends ViewCollection
         super
 
         @keepScreenFull()
+
+
+    showPopover: (jsEvent) =>
+        @trigger 'event:dialog', {
+            type: 'event'
+            target: $ jsEvent.target
+            openerEvent: jsEvent.originalEvent
+            container: @$el
+        }
+
 
     appendView: (view) ->
         index = @collection.indexOf view.model
