@@ -130,8 +130,8 @@ module.exports = class Router extends Backbone.Router
         # with event handlers
         options.document = window.document
         options.parentView = @mainView
-        options.start ?= helpers.getStartOfDay()
-        options.end ?= helpers.getStartOfDay()
+        options.start ?= helpers.getStartOfDay().hour(10)
+        options.end ?= helpers.getStartOfDay().hour(11)
 
         # Prevent unselecting the calendar cell on popover close.
         # Not the cleanest way but as fullcalendar does not allow us to explicitly
