@@ -5,16 +5,34 @@
         padding: 0
         box-sizing: border-box
 
-    #add-new-event .popover
-        position relative
-        top: 0!important
-        left: 0!important
-        bottom: 0!important
-        right: 0!important
-        max-width 100%
-        box-shadow none
-        border none
-        margin 0 0 2em
+    #add-new-event
+
+        .popover
+            position absolute
+            top 0!important
+            left 0!important
+            bottom 0!important
+            right 0!important
+
+            max-width 100%
+
+            box-shadow none
+            border none
+            margin 0
+
+            h4
+                font-size 1em
+
+            .popover-back
+                padding 0
+
+                .btn-back
+                    padding 0.4em 1em
+                    i
+                        line-height 1
+
+                .btn-done-placeholder
+                    text-align left
 
     #view-container
         padding: 0
