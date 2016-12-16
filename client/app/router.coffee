@@ -1,12 +1,16 @@
 app = require 'application'
+
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
 SettingsModal = require 'views/settings_modal'
 ImportView = require 'views/import_view'
+EventPopover = require 'views/event_popover'
+
 # RealEventCollection = require 'collections/realevents'
 DayBucketCollection = require 'collections/daybuckets'
+Event = require 'models/event'
 
-
+helpers = require 'helpers'
 getBeginningOfWeek = (year, month, day) ->
     [year, month, day] = [year, month, day].map (x) -> parseInt x
     monday = new Date(year, (month-1)%12, day)
@@ -26,6 +30,7 @@ module.exports = class Router extends Backbone.Router
         'event/:eventid'                  : 'auto_event'
         'calendar'                        : 'backToCalendar'
         'settings'                        : 'settings'
+
 
     initialize: (options) ->
         super options
@@ -60,8 +65,12 @@ module.exports = class Router extends Backbone.Router
         @displayView new ListView
             isMobile: @isMobile,
             collection: new DayBucketCollection()
+
         app.menu.activate 'calendar'
         @onCalendar = true
+
+        @mainView.on 'event:dialog', @showPopover
+
 
 
     auto_event: (id) ->
@@ -96,6 +105,7 @@ module.exports = class Router extends Backbone.Router
     displayCalendar: (view, year, month, day) =>
         @lastDisplayCall = Array.apply arguments
 
+
         @displayView new CalendarView
             year: parseInt year
             month: (parseInt(month) + 11) % 12
@@ -107,8 +117,57 @@ module.exports = class Router extends Backbone.Router
                 pendingEventSharingsCollection: app.pendingEventSharings
             document: window.document
 
+        @mainView.on 'event:dialog', @showPopover
+
         app.menu.activate 'calendar'
         @onCalendar = true
+
+
+    showPopover: (options={}) =>
+        options.document = window.document
+        options.parentView = @mainView
+        options.start ?= helpers.getStartOfDay().hour(10)
+        options.end ?= helpers.getStartOfDay().hour(11)
+
+        # Prevent unselecting the calendar cell on popover close.
+        # Not the cleanest way but as fullcalendar does not allow us to explicitly
+        # set the selection without trigerring onSelect callback, we have to keep
+        # a flag like this locally.
+        preventUnselecting = =>
+            @isUnselectPrevented = true
+
+
+        onPopoverClose = =>
+            @mainView.cal?.fullCalendar 'unselect' unless @isUnselectPrevented
+            @isUnselectPrevented = false
+            @mainView.popover = null
+
+
+        showNewPopover = =>
+            model = options.model ?= new Event
+                start: helpers.momentToString(options.start)
+                end: helpers.momentToString(options.end)
+                description: ''
+                place: ''
+
+            model.fetchEditability (err, editable) =>
+                console.error err if err
+
+                _.extend options, { readOnly: not editable }
+                @mainView.popover = new EventPopover options
+
+                @mainView.popover.render()
+
+                @listenTo @mainView.popover, 'closed', onPopoverClose
+
+
+        if @mainView.popover
+            # click on same case
+            preventUnselecting()
+            @mainView.popover.close showNewPopover
+
+        else
+            showNewPopover()
 
 
     # display a page properly (remove previous page)
@@ -124,4 +183,3 @@ module.exports = class Router extends Backbone.Router
         $('body').append view.$el
         view.render()
         @onCalendar = true
-

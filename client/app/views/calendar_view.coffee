@@ -1,12 +1,9 @@
 app = require 'application'
 BaseView = require 'lib/base_view'
-EventPopover = require './event_popover'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
-helpers = require 'helpers'
-timezones = require('helpers/timezone').timezones
 
-Event = require 'models/event'
+helpers = require 'helpers'
 
 
 module.exports = class CalendarView extends BaseView
@@ -16,7 +13,6 @@ module.exports = class CalendarView extends BaseView
 
 
     initialize: (@options) ->
-
         @eventCollection = @model.events
 
         @listenTo @eventCollection, 'add'  , @refresh
@@ -185,41 +181,6 @@ module.exports = class CalendarView extends BaseView
         @refresh()
 
 
-    showPopover: (options) ->
-        options.container = @cal
-        options.parentView = @
-
-        showNewPopover = =>
-            # @TODO Event creation is a typical core feature of the calendar
-            # app, this part should be moved directly into the app module, and
-            # managed
-            # with event handlers
-            model = options.model ?= new Event
-                start: helpers.momentToString options.start
-                end: helpers.momentToString options.end
-                description: ''
-                place: ''
-
-            model.fetchEditability (err, editable) =>
-                if err
-                    console.error err
-
-                @popover = new EventPopover _.extend options,
-                    readOnly : not editable
-                @popover.render()
-
-                @listenTo @popover, 'closed', @onPopoverClose
-
-        if @popover
-            # click on same case
-            @preventUnselecting()
-            @popover.close ->
-                showNewPopover()
-
-        else
-            showNewPopover()
-
-
     onChangeView: (view) =>
         @calHeader?.render()
         if @view isnt view.name
@@ -249,31 +210,15 @@ module.exports = class CalendarView extends BaseView
             startDate.time('10:00:00.000')
             endDate.subtract(1, 'days').time('11:00:00.000')
 
-        start = helpers.ambiguousToTimezoned startDate
-        end = helpers.ambiguousToTimezoned endDate
-        @showPopover
+        @trigger 'event:dialog', {
             type: 'event'
-            start: start
-            end: end
+            start: helpers.ambiguousToTimezoned startDate
+            end: helpers.ambiguousToTimezoned endDate
             target: $ jsEvent.target
-            document: @options.document
             openerEvent: jsEvent.originalEvent
-
-
-    # Prevent unselecting the calendar cell on popover close.
-    # Not the cleanest way but as fullcalendar does not allow us to explicitly
-    # set the selection without trigerring onSelect callback, we have to keep
-    # a flag like this locally.
-    preventUnselecting: ->
-        @isUnselectPrevented = true
-
-
-    onPopoverClose: ->
-        if not @isUnselectPrevented
-            @cal.fullCalendar 'unselect'
-
-        @isUnselectPrevented = false
-        @popover = null
+            container: @cal
+            content: @$ '.fc-day-grid-container'
+        }
 
 
     onEventRender: (event, $element) ->
@@ -346,9 +291,9 @@ module.exports = class CalendarView extends BaseView
         model = if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
         else throw new Error('wrong typed event in fc')
 
-        @showPopover
+        @trigger 'event:dialog', {
             type: model.fcEventType
             model: model
             target: $ jsEvent.currentTarget
-            document: @options.document,
             openerEvent: jsEvent.originalEvent
+        }
