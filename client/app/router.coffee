@@ -124,10 +124,6 @@ module.exports = class Router extends Backbone.Router
 
 
     showPopover: (options={}) =>
-        # @TODO Event creation is a typical core feature of the calendar
-        # app, this part should be moved directly into the app module, and
-        # managed
-        # with event handlers
         options.document = window.document
         options.parentView = @mainView
         options.start ?= helpers.getStartOfDay().hour(10)
