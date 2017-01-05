@@ -11,6 +11,7 @@ else
     helpers.prefix = '../'
 
 Event = require "#{helpers.prefix}server/models/event"
+Settings = require "#{helpers.prefix}server/models/settings"
 User  = require "#{helpers.prefix}server/models/user"
 
 userID = null
@@ -36,9 +37,13 @@ helpers.after = (done) ->
     helpers.cleanDb ->
         ds.del "/data/#{userID}/", done
 
-# Remove all the alarms
+# Remove all events and settings.
 helpers.cleanDb = (callback) ->
-    Event.destroyAll callback
+    Event.destroyAll (err) ->
+        return callback(err) if err
+        Settings.destroyAll (err) ->
+            return callback(err) if err
+            callback()
 
 # Get all the alarams
 helpers.getAllEvents = (callback) ->
