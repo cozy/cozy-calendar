@@ -1,12 +1,13 @@
 {
   "devDependencies": {
-    "clean-css-brunch": "1.8.0",
-    "coffee-script-brunch": "1.8.3",
-    "css-brunch": "1.7.0",
-    "digest-brunch": "1.5.1",
-    "jade-brunch": "1.8.2",
-    "javascript-brunch": "1.8.0",
+    "clean-css-brunch": "2.0.0",
+    "coffee-script-brunch": "2.1.0",
+    "cozy-data-system-dev": "2.5.7",
+    "css-brunch": "2.6.1",
+    "digest-brunch": "1.6.0",
+    "jade-brunch": "2.8.0",
+    "javascript-brunch": "2.0.0",
     "json-brunch": "1.5.4",
-    "stylus-brunch": "1.8.1"
+    "stylus-brunch": "2.8.0"
   }
 }
