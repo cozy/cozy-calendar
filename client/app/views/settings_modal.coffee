@@ -44,7 +44,7 @@ module.exports = class SettingsModals extends BaseView
         @defaultCalendar = new ComboBox
             el: @$('#default-calendar')
             source: app.calendars.toAutoCompleteSource()
-        @defaultCalendar.setValue window.app.settings.get('defaultCalendar')
+            current: app.settings.get('defaultCalendar')
         @defaultCalendar.on 'change', @defaultCalendarChange
 
         @$('#importviewplaceholder').append new ImportView().render().$el
