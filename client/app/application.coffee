@@ -74,11 +74,13 @@ module.exports =
         ContactCollection = require 'collections/contacts'
         CalendarsCollection = require 'collections/calendars'
         SharingCollection = require 'collections/sharings'
+        Settings = require 'models/settings'
 
         @tags = new TagCollection()
         @events = new EventCollection()
         @contacts = new ContactCollection()
         @calendars = new CalendarsCollection()
+        @settings = new Settings()
 
         @pendingEventSharings = new SharingCollection()
 
@@ -124,6 +126,9 @@ module.exports =
         if window.initPendingEventSharings
             @pendingEventSharings.reset window.initPendingEventSharings
             delete window.initPendingEventSharings
+
+        if window.settings
+            @settings.set window.settings
 
         Backbone.history.start()
 

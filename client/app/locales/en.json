@@ -15,6 +15,8 @@
   "invite": "Invite",
   "close": "Close",
   "delete": "Delete",
+  "default calendar": "Default calendar",
+  "default calendar error": "An error occured while saving default calendar.",
   "change color": "Change color",
   "rename": "Rename",
   "export": "Export",

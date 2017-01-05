@@ -32,6 +32,12 @@ section
       a#export.btn= t('export your calendar')
 
 section
+    h3= t('default calendar')
+    p.line
+      span.surrounded-combobox
+        input#default-calendar(value=calendar)
+
+section
     h3= t('icalendar import')
 
     #importviewplaceholder
