@@ -46,6 +46,7 @@ module.exports = class SettingsModals extends BaseView
             source: app.calendars.toAutoCompleteSource()
             current: app.settings.get('defaultCalendar')
         @defaultCalendar.on 'change', @defaultCalendarChange
+        @defaultCalLoadingIndicator = @$('#default-calendar-loading')
 
         @$('#importviewplaceholder').append new ImportView().render().$el
 
@@ -87,11 +88,22 @@ module.exports = class SettingsModals extends BaseView
             alert t 'please select existing calendar'
 
 
-    defaultCalendarChange: (value) ->
-        app.settings.set 'defaultCalendar', value
-        app.settings.save
-            error: ->
+    defaultCalendarChange: (value) =>
+        @defaultCalLoadingIndicator.html t 'default calendar change loading'
+        app.settings.save defaultCalendar: value,
+            success: =>
+                @defaultCalLoadingIndicator.html(
+                    t 'default calendar change success'
+                )
+            error: =>
                 alert t 'default calendar change error'
+                @defaultCalLoadingIndicator.html(
+                    t 'default calendar change success'
+                )
+            complete: =>
+                setTimeout =>
+                    @defaultCalLoadingIndicator.html('')
+                , 4000
 
 
     # creates a placeholder for the password

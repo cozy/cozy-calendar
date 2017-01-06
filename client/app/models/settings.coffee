@@ -3,5 +3,5 @@ module.exports = class Settings extends Backbone.Model
 
     # Make sure that put requests doesn't add id to the url.
     sync: (method, model, options) ->
-      options.url ='settings'
+      options.url = 'settings'
       return Backbone.sync method, model, options
