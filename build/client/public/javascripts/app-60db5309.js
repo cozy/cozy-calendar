@@ -8993,7 +8993,9 @@ module.exports = CalendarView = (function(superClass) {
       type: model.fcEventType,
       model: model,
       target: $(jsEvent.currentTarget),
-      openerEvent: jsEvent.originalEvent
+      openerEvent: jsEvent.originalEvent,
+      container: this.cal,
+      content: this.$('.fc-day-grid-container')
     });
   };
 
