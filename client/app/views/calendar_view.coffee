@@ -205,6 +205,7 @@ module.exports = class CalendarView extends BaseView
 
 
     onSelect: (startDate, endDate, jsEvent, view) =>
+
         # In month view, default to 10:00 - 11:00 instead of fullday event.
         if @view is 'month'
             startDate.time('10:00:00.000')
@@ -296,4 +297,6 @@ module.exports = class CalendarView extends BaseView
             model: model
             target: $ jsEvent.currentTarget
             openerEvent: jsEvent.originalEvent
+            container: @cal
+            content: @$ '.fc-day-grid-container'
         }
