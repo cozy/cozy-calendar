@@ -22,3 +22,4 @@ test/fixtures/events_generated.json
 
 locales
 !locales/en.json
+!build/client/app/locales
