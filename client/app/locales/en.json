@@ -275,5 +275,6 @@
   "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
   "email delete title": "This event has been canceled: %{description}",
   "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
-  "invalid recurring rule": "The recurring rule is invalid"
+  "invalid recurring rule": "The recurring rule is invalid",
+  "shared events": "Shared events"
 }
