@@ -22,6 +22,8 @@ module.exports = class Router extends Backbone.Router
 
     routes:
         ''                                : 'month'
+        'week'                            : 'week'
+        'week/:year/:month/:day'          : 'week'
         'month'                           : 'month'
         'month/:year/:month'              : 'month'
         'month/:year/:month/:eventid'     : 'month_event'
@@ -49,6 +51,16 @@ module.exports = class Router extends Backbone.Router
             super 'list', options
         else
             super route, options
+
+
+    week: (year, month, day) ->
+        if year?
+            monthToLoad = moment("#{year}/#{month}", "YYYY/M")
+            window.app.events.loadMonth monthToLoad, =>
+                @displayCalendar 'agendaWeek', year, month, day
+        else
+            hash = moment().format('[week]/YYYY/M/D')
+            @navigate hash, trigger: true
 
 
     month: (year, month) ->
