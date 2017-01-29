@@ -92,7 +92,9 @@ module.exports = class CalendarView extends BaseView
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
 
-        @calHeader = new Header cal: @cal
+        @calHeader = new Header
+            cal: @cal
+            view: @view
 
         # Before displaying the calendar for the previous month, we make sure
         # that events are loaded.
@@ -113,9 +115,15 @@ module.exports = class CalendarView extends BaseView
         @calHeader.on 'today', =>
             @clearViewComponents =>
                 @cal.fullCalendar 'today'
+
         @calHeader.on 'month', =>
             @clearViewComponents =>
                 @cal.fullCalendar 'changeView', 'month'
+
+        @calHeader.on 'week', =>
+            @clearViewComponents =>
+                @cal.fullCalendar 'changeView', 'agendaWeek'
+
         @calHeader.on 'list', =>
             @clearViewComponents ->
                 window.app.events.sort()
@@ -189,6 +197,10 @@ module.exports = class CalendarView extends BaseView
         @view = view.name
 
         hash = view.intervalStart.format '[month]/YYYY/M'
+        if @view is 'month'
+            hash = view.intervalStart.format '[month]/YYYY/M'
+        else if @view is 'agendaWeek'
+            hash = view.intervalStart.format '[week]/YYYY/M/DD'
 
         app.router.navigate hash
 
