@@ -1,4 +1,5 @@
 app = require 'application'
+
 BaseView = require 'lib/base_view'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
@@ -117,12 +118,14 @@ module.exports = class CalendarView extends BaseView
                 @cal.fullCalendar 'today'
 
         @calHeader.on 'month', =>
-            @clearViewComponents =>
-                @cal.fullCalendar 'changeView', 'month'
+            view = @cal.fullCalendar 'getView'
+            hash = view.intervalStart.format '[month]/YYYY/M'
+            app.router.navigate hash, true
 
         @calHeader.on 'week', =>
-            @clearViewComponents =>
-                @cal.fullCalendar 'changeView', 'agendaWeek'
+            view = @cal.fullCalendar 'getView'
+            hash = view.intervalStart.format '[week]/YYYY/M/DD'
+            app.router.navigate hash, true
 
         @calHeader.on 'list', =>
             @clearViewComponents ->
