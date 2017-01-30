@@ -16,7 +16,7 @@ module.exports = class CalendarView extends BaseView
     initialize: (@options) ->
         @eventCollection = @model.events
 
-        @listenTo @eventCollection, 'add'  , @refresh
+        @listenTo @eventCollection, 'add', @refreshOne
         @listenTo @eventCollection, 'reset', @refresh
         @listenTo @eventCollection, 'remove', @onRemove
         @listenTo @eventCollection, 'change', @refreshOne
@@ -186,10 +186,8 @@ module.exports = class CalendarView extends BaseView
         if fcEvent?
             _.extend fcEvent, data
             @cal.fullCalendar 'updateEvent', fcEvent
-
-        # Refresh to deal with calendar update.
-        # If the new calendar is not visible the event should not be shown
-        @refresh()
+        else
+            @cal.fullCalendar 'renderEvent', data
 
 
     onChangeView: (view) =>
