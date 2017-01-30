@@ -172,20 +172,15 @@ module.exports = class CalendarView extends BaseView
 
         return null unless model?
 
-        previousRRule = model.previous('rrule')
-        modelWasRecurrent = previousRRule? and previousRRule isnt ''
-        return @refresh() if model.isRecurrent() or modelWasRecurrent
-
-        # fullCalendar('updateEvent') eats end of allDay events!(?),
-        # perform a full refresh as a workaround.
-        return @refresh() if model.isAllDay()
-
         data = model.toPunctualFullCalendarEvent()
         [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
+
         # if updated event is not shown on screen, fcEvent doesn't exist
         if fcEvent?
             _.extend fcEvent, data
-            @cal.fullCalendar 'updateEvent', fcEvent
+            # @cal.fullCalendar 'updateEvent', fcEvent
+            @cal.fullCalendar 'removeEvents', fcEvent.id
+            @cal.fullCalendar 'renderEvent', data
         else
             @cal.fullCalendar 'renderEvent', data
 
