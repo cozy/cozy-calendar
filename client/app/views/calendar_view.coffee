@@ -131,6 +131,7 @@ module.exports = class CalendarView extends BaseView
             @clearViewComponents ->
                 window.app.events.sort()
                 app.router.navigate 'list', trigger:true
+
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
@@ -157,12 +158,12 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'option', 'height', targetHeight
 
 
-    refresh: (collection) ->
+    refresh: () ->
         @cal.fullCalendar 'refetchEvents'
 
 
-    onCalendarCollectionChange: (collection) ->
-        @refresh collection
+    onCalendarCollectionChange: () ->
+        @refresh()
 
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
@@ -173,14 +174,17 @@ module.exports = class CalendarView extends BaseView
         return null unless model?
 
         data = model.toPunctualFullCalendarEvent()
-        [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
 
-        # if updated event is not shown on screen, fcEvent doesn't exist
+        [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
         if fcEvent?
-            _.extend fcEvent, data
-            # @cal.fullCalendar 'updateEvent', fcEvent
-            @cal.fullCalendar 'removeEvents', fcEvent.id
-            @cal.fullCalendar 'renderEvent', data
+            @cal.fullCalendar 'removeEvents', data.id
+
+        if model.isRecurrent()
+            view = @cal.fullCalendar 'getView'
+            start = view.intervalStart
+            end = view.intervalEnd
+            events = model.getRecurrentFCEventBetween start, end
+            @cal.fullCalendar 'renderEvent', event for event in events
         else
             @cal.fullCalendar 'renderEvent', data
 
