@@ -170,24 +170,36 @@ module.exports = class CalendarView extends BaseView
 
 
     refreshOne: (model) =>
-
         return null unless model?
 
-        data = model.toPunctualFullCalendarEvent()
+        # Removing / adding prevent display glitches that update don't handle
+        # properly like full day or reccuring events.
+        @removeEventFromView model
+        @addEventToView model
 
-        [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
-        if fcEvent?
-            @cal.fullCalendar 'removeEvents', data.id
+    getFcEvent: (model) =>
+        [fcEvent] = @cal.fullCalendar 'clientEvents', model.cid
+        return fcEvent
 
+    addEventToView: (model) =>
         if model.isRecurrent()
-            view = @cal.fullCalendar 'getView'
-            start = view.intervalStart
-            end = view.intervalEnd
-            events = model.getRecurrentFCEventBetween start, end
-            @cal.fullCalendar 'renderEvent', event for event in events
+            @_addReccuringEventToView model
         else
-            @cal.fullCalendar 'renderEvent', data
+            @addFcEventToView model.toPunctualFullCalendarEvent()
 
+    addFcEventToView: (fcEvent) =>
+        @cal.fullCalendar 'renderEvent', fcEvent
+
+    _addReccuringEventToView: (model) =>
+        fcView = @cal.fullCalendar 'getView'
+        start = fcView.intervalStart
+        end = fcView.intervalEnd.add 7, 'day'
+        events = model.getRecurrentFCEventBetween start, end
+        @addFcEventToView event for event in events
+
+    removeEventFromView: (model) =>
+        fcEvent = @getFcEvent model
+        @cal.fullCalendar 'removeEvents', model.cid if fcEvent?
 
     onChangeView: (view) =>
         @calHeader?.render()
