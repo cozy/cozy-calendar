@@ -3,6 +3,7 @@ app = require 'application'
 BaseView = require 'lib/base_view'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
+format = require '../format'
 
 helpers = require 'helpers'
 
@@ -118,13 +119,11 @@ module.exports = class CalendarView extends BaseView
                 @cal.fullCalendar 'today'
 
         @calHeader.on 'month', =>
-            view = @cal.fullCalendar 'getView'
-            hash = view.intervalStart.format '[month]/YYYY/M'
+            hash = @getMonthUrlHash()
             app.router.navigate hash, true
 
         @calHeader.on 'week', =>
-            view = @cal.fullCalendar 'getView'
-            hash = view.intervalStart.format '[week]/YYYY/M/DD'
+            hash = @getWeekUrlHash()
             app.router.navigate hash, true
 
         @calHeader.on 'list', =>
@@ -217,12 +216,11 @@ module.exports = class CalendarView extends BaseView
 
         @view = view.name
 
-        hash = view.intervalStart.format '[month]/YYYY/M'
+        hash = view.intervalStart.format format.MONTH_URL_HASH_FORMAT
         if @view is 'month'
-            hash = view.intervalStart.format '[month]/YYYY/M'
+            hash = @getMonthUrlHash view
         else if @view is 'agendaWeek'
-            hash = view.intervalStart.format '[week]/YYYY/M/DD'
-
+            hash = @getWeekUrlHash view
         app.router.navigate hash
 
 
@@ -235,6 +233,25 @@ module.exports = class CalendarView extends BaseView
 
     getUrlHash: ->
         return 'calendar'
+
+    getWeekUrlHash: (view) ->
+        now = moment()
+        view ?= @cal.fullCalendar 'getView'
+
+        if view.intervalStart.month() is now.month()
+            beginningOfTodayWeek = now.startOf('isoWeek')
+            return beginningOfTodayWeek.format format.WEEK_URL_HASH_FORMAT
+        else
+            begginingOfCurrentView = view.intervalStart.startOf('isoWeek')
+            return begginingOfCurrentView.format format.WEEK_URL_HASH_FORMAT
+
+    getMonthUrlHash: (view) ->
+        view ?= @cal.fullCalendar 'getView'
+        if view.name is 'agendaWeek'
+            monthOfEndOfTheWeek = view.intervalEnd.startOf('month')
+            return monthOfEndOfTheWeek.format format.MONTH_URL_HASH_FORMAT
+        else
+            return view.intervalStart.format format.MONTH_URL_HASH_FORMAT
 
 
     onSelect: (startDate, endDate, jsEvent, view) =>
