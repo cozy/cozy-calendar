@@ -181,6 +181,15 @@ module.exports = class CalendarView extends BaseView
         [fcEvent] = @cal.fullCalendar 'clientEvents', model.cid
         return fcEvent
 
+    getPopoverContainer: =>
+        if @view is 'month'
+            content = @$ '.fc-day-grid-container'
+        else if @view is 'agendaWeek'
+            content = @$ '.fc-widget-content'
+        else
+            content = @$ '.main-container'
+        return content
+
     addEventToView: (model) =>
         if model.isRecurrent()
             @_addReccuringEventToView model
@@ -234,6 +243,7 @@ module.exports = class CalendarView extends BaseView
         if @view is 'month'
             startDate.time('10:00:00.000')
             endDate.subtract(1, 'days').time('11:00:00.000')
+        content = @getPopoverContainer()
 
         @trigger 'event:dialog', {
             type: 'event'
@@ -242,9 +252,8 @@ module.exports = class CalendarView extends BaseView
             target: $ jsEvent.target
             openerEvent: jsEvent.originalEvent
             container: @cal
-            content: @$ '.fc-day-grid-container'
+            content: content
         }
-
 
     onEventRender: (event, $element) ->
         # TODO: use the new spinner, instead of this.
@@ -315,6 +324,7 @@ module.exports = class CalendarView extends BaseView
 
         model = if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
         else throw new Error('wrong typed event in fc')
+        content = @getPopoverContainer()
 
         @trigger 'event:dialog', {
             type: model.fcEventType
@@ -322,5 +332,5 @@ module.exports = class CalendarView extends BaseView
             target: $ jsEvent.currentTarget
             openerEvent: jsEvent.originalEvent
             container: @cal
-            content: @$ '.fc-day-grid-container'
+            content: content
         }
