@@ -143,6 +143,13 @@ module.exports =
         if isMobile
             document.body.classList.add('is-mobile')
 
+    getDefaultCalendar: ->
+        defaultCalendar = @settings.get('defaultCalendar')
+        calendar = @calendars.findWhere name: defaultCalendar
+        if not calendar?
+            firstCalendar =  @calendars.at(0)
+            calendar = firstCalendar
+        return calendar
 
     isMobile: ->
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i

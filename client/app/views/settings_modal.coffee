@@ -44,7 +44,8 @@ module.exports = class SettingsModals extends BaseView
         @defaultCalendar = new ComboBox
             el: @$('#default-calendar')
             source: app.calendars.toAutoCompleteSource()
-            current: app.settings.get('defaultCalendar')
+            current: app.getDefaultCalendar()
+
         @defaultCalendar.on 'change', @defaultCalendarChange
         @defaultCalLoadingIndicator = @$('#default-calendar-loading')
 

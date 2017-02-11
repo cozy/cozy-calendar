@@ -1,5 +1,6 @@
 PopoverScreenView = require 'lib/popover_screen_view'
 ComboBox    = require 'views/widgets/combobox'
+Settings = require 'models/settings'
 Modal = require 'lib/modal'
 Event       = require 'models/event'
 
@@ -87,15 +88,13 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
 
 
     getRenderData: ->
-        # A new event's calendar is the first calendar in alphabetical order
-        # It fallbacks to the default calendar name if anything goes wrong
-        firstCalendar = app.calendars?.at(0)?.get 'name'
-        defaultCalendar = t 'default calendar name'
+        defaultCalendar = app.getDefaultCalendar()
         if @model.isNew()
-            currentCalendar = firstCalendar or defaultCalendar
+            currentCalendar = defaultCalendar
+            @formModel.setCalendar currentCalendar
         else
-            currentCalendar = @formModel.get('tags')?[0] or defaultCalendar
-
+            currentCalendar = @formModel.get('tags')?[0] or \
+                defaultCalendar.get('name')
 
         endOffset = if @formModel.isAllDay() then -1 else 0
         return data = _.extend super(),
@@ -362,7 +361,7 @@ module.exports = class MainPopoverScreen extends PopoverScreenView
             @$('input').css 'border-color', ''
             @handleError err for err in errors
 
-        else #no errors.
+        else # no errors.
             calendar = @formModel.getCalendar()
             @model.setCalendar calendar
 
