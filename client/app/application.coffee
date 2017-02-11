@@ -127,8 +127,9 @@ module.exports =
             @pendingEventSharings.reset window.initPendingEventSharings
             delete window.initPendingEventSharings
 
-        if window.settings
-            @settings.set window.settings
+        if window.initsettings?
+            @settings.set window.initsettings
+            delete window.initsettings
 
         Backbone.history.start()
 

@@ -77,9 +77,9 @@ module.exports.index = (req, res, next) ->
             window.initevents = #{sanitize events}
             window.initPendingEventSharings = #{sanitize pendingEventSharings};
             window.initcontacts = #{sanitize contacts};
+            window.initsettings = #{sanitize settings};
             window.webDavAccount = #{sanitize webDavAccount};
             window.timezone = #{sanitize timezone};
-            window.settings = #{sanitize settings};
         """
 
 module.exports.logClient = (req, res) ->
