@@ -27,9 +27,8 @@ module.exports =
             publicStatic
             americano.bodyParser keepExtensions: true
             expressValidator
-             customValidators:
-                 isString: (value) ->
-                     return typeof(value) is 'string'
+                customValidators:
+                    isString: (value) -> return typeof(value) is 'string'
         ]
         useAfter: [
             americano.errorHandler

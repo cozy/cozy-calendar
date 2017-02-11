@@ -14,7 +14,6 @@ Settings.getCalAppSettings = (callback) ->
     Settings.request 'all', (err, allSettings) ->
         return callback err if err
 
-        # TODO use lodash find here
         allSettings = allSettings.filter (settings) ->
             settings.app is 'calendar'
 
