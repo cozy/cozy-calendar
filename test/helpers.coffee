@@ -33,7 +33,7 @@ helpers.before = (done) ->
             setTimeout done, 1000
 
 helpers.after = (done) ->
-    @server.close()
+    @server.close() if @server?
     helpers.cleanDb ->
         ds.del "/data/#{userID}/", done
 
