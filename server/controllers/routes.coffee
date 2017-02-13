@@ -4,6 +4,7 @@ index  = require './index'
 ical   = require './ical'
 contacts = require './contacts'
 sharings = require './sharings'
+settings = require './settings'
 utils = require '../helpers/utils'
 
 
@@ -11,6 +12,10 @@ module.exports =
 
     '':
         get: index.index
+
+    # Params management
+    'settings':
+        put: settings.update
 
     # Tag management
     'tags':
@@ -23,7 +28,6 @@ module.exports =
         put: tags.update
         delete : tags.delete
 
-
     # Event management
     'eventid':
         param: events.fetch
@@ -34,17 +38,14 @@ module.exports =
         post: events.createBulk
     'events/:year/:month':
         get: events.monthEvents
-
     'events/rename-calendar':
         post: events.bulkCalendarRename
     'events/delete':
         post: events.bulkDelete
-
     'events/:eventid':
         get: events.read
         put: events.update
         delete: events.delete
-
     'events/:eventid/:name.ics':
         get: events.ical
     'public/events/:eventid/:name.ics':
@@ -65,10 +66,8 @@ module.exports =
     # Contacts
     'contacts':
         get: contacts.listAll
-
     'contacts/:contactid.jpg':
         get: contacts.sendAttachment(filename: 'picture')
-
     'contacts/:contactid':
         get: [contacts.find, contacts.sendSmall]
 
@@ -79,21 +78,15 @@ module.exports =
     # Sharing
     'sharingid':
         param: sharings.fetch
-
     'sharings':
         get: sharings.all
-
     'sharings/:sharingid':
         get: sharings.read
-
     'sharing/accept':
         post: sharings.accept
-
     'sharing/refuse':
         post: sharings.refuse
-
 
     # Data management
     'data/exist/:id/':
         get: utils.exist
-

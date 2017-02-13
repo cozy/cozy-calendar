@@ -1,6 +1,7 @@
 americano = require 'americano'
 fs = require 'fs'
 path = require 'path'
+expressValidator = require 'express-validator'
 
 publicPath = "#{__dirname}/../client/public"
 staticMiddleware = americano.static publicPath, maxAge: 86400000
@@ -25,6 +26,9 @@ module.exports =
             staticMiddleware
             publicStatic
             americano.bodyParser keepExtensions: true
+            expressValidator
+                customValidators:
+                    isString: (value) -> return typeof(value) is 'string'
         ]
         useAfter: [
             americano.errorHandler

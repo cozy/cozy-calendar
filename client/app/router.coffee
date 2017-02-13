@@ -149,6 +149,7 @@ module.exports = class Router extends Backbone.Router
                 end: helpers.momentToString(options.end)
                 description: ''
                 place: ''
+                calendar: app.settings.default
 
             model.fetchEditability (err, editable) =>
                 console.error err if err

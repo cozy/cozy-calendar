@@ -11,6 +11,7 @@ Sharing = require '../models/sharing'
 Contact = require '../models/contact'
 User  = require '../models/user'
 WebDavAccount = require '../models/webdavaccount'
+Settings  = require '../models/settings'
 
 
 module.exports.index = (req, res, next) ->
@@ -22,6 +23,7 @@ module.exports.index = (req, res, next) ->
             done null, contacts
 
         (cb) -> Tag.byName {}, cb
+        (cb) -> Settings.getCalAppSettings cb
         (cb) -> Event.calendars cb
         # Load only reccuring events and events close to current day (> -3
         # months and < +3 months). That way it doesn't load too much events.
@@ -51,7 +53,7 @@ module.exports.index = (req, res, next) ->
 
 
         [
-            contacts, tags, calendars, events, pendingEventSharings, instance,
+            contacts, tags, settings, calendars, events, pendingEventSharings, instance,
             webDavAccount, timezone
         ] = results
 
@@ -75,6 +77,7 @@ module.exports.index = (req, res, next) ->
             window.initevents = #{sanitize events}
             window.initPendingEventSharings = #{sanitize pendingEventSharings};
             window.initcontacts = #{sanitize contacts};
+            window.initsettings = #{sanitize settings};
             window.webDavAccount = #{sanitize webDavAccount};
             window.timezone = #{sanitize timezone};
         """

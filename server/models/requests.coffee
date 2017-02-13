@@ -19,7 +19,6 @@ module.exports =
         byDate    : (doc) -> emit new Date(doc.trigg), doc
         tags      : tagsView
 
-
     event:
         all       : cozydb.defaultRequests.all
         byDate    : (doc) -> emit new Date(doc.start), doc
@@ -41,3 +40,6 @@ module.exports =
                 doc.rules.forEach (rule) ->
                     emit(rule.docType, doc)
         byShareID: cozydb.defaultRequests.by 'shareID'
+
+    settings:
+        all       : cozydb.defaultRequests.all

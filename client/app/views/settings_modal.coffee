@@ -1,4 +1,5 @@
 BaseView = require 'lib/base_view'
+request = require 'lib/request'
 ImportView = require './import_view'
 ComboBox = require './widgets/combobox'
 
@@ -40,6 +41,14 @@ module.exports = class SettingsModals extends BaseView
             el: @$('#export-calendar')
             source: app.calendars.toAutoCompleteSource()
 
+        @defaultCalendar = new ComboBox
+            el: @$('#default-calendar')
+            source: app.calendars.toAutoCompleteSource()
+            current: app.getDefaultCalendar()
+
+        @defaultCalendar.on 'change', @defaultCalendarChange
+        @defaultCalLoadingIndicator = @$('#default-calendar-loading')
+
         @$('#importviewplaceholder').append new ImportView().render().$el
 
         # Show the modal.
@@ -78,6 +87,24 @@ module.exports = class SettingsModals extends BaseView
 
         else
             alert t 'please select existing calendar'
+
+
+    defaultCalendarChange: (value) =>
+        @defaultCalLoadingIndicator.html t 'default calendar change loading'
+        app.settings.save defaultCalendar: value,
+            success: =>
+                @defaultCalLoadingIndicator.html(
+                    t 'default calendar change success'
+                )
+            error: =>
+                alert t 'default calendar change error'
+                @defaultCalLoadingIndicator.html(
+                    t 'default calendar change success'
+                )
+            complete: =>
+                setTimeout =>
+                    @defaultCalLoadingIndicator.html('')
+                , 4000
 
 
     # creates a placeholder for the password
