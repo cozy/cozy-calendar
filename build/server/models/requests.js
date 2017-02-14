@@ -57,5 +57,8 @@ module.exports = {
       }
     },
     byShareID: cozydb.defaultRequests.by('shareID')
+  },
+  settings: {
+    all: cozydb.defaultRequests.all
   }
 };
