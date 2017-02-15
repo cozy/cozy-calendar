@@ -105,6 +105,11 @@ module.exports = class CalendarView extends BaseView
                 monthToLoad = @cal.fullCalendar('getDate').subtract(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'prev'
+                    # This action is due to a bug of fullcalendar which
+                    # removes events from the last day of the week from
+                    # the view.
+                    @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
+
 
         # Before displaying the calendar for the next month, we make sure that
         # events are loaded.
@@ -113,10 +118,18 @@ module.exports = class CalendarView extends BaseView
                 monthToLoad = @cal.fullCalendar('getDate').add(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'next'
+                    # This action is due to a bug of fullcalendar which
+                    # removes events from the last day of the week from
+                    # the view.
+                    @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
 
         @calHeader.on 'today', =>
             @clearViewComponents =>
                 @cal.fullCalendar 'today'
+                # This action is due to a bug of fullcalendar which
+                # removes events from the last day of the week from
+                # the view.
+                @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
 
         @calHeader.on 'month', =>
             hash = @getMonthUrlHash()
@@ -138,13 +151,16 @@ module.exports = class CalendarView extends BaseView
         $(window).resize (ev) -> debounced() if ev.target is window
 
 
+    isWeekViewActive: ->
+        return @view is 'agendaWeek'
+
+
     remove: ->
         @popover?.close()
         super
 
 
     handleWindowResize: (initial) =>
-
         if $(window).width() > 1000
             targetHeight = $(window).height() - 85
 
@@ -175,6 +191,20 @@ module.exports = class CalendarView extends BaseView
         # properly like full day or reccuring events.
         @removeEventFromView model
         @addEventToView model
+
+
+    refreshEventsOfLastDisplayedDay: =>
+        view = @cal.fullCalendar 'getView'
+        beginOfLastDay = view.intervalEnd.clone().subtract 1, 'days'
+        endOfLastDay = view.intervalEnd
+
+        for model in @eventCollection.models
+            eventStart = model.getStartDateObject()
+            isFromLastDay = eventStart.isAfter(beginOfLastDay) and \
+                eventStart.isBefore(endOfLastDay)
+
+            @refreshOne model if isFromLastDay
+
 
     getFcEvent: (model) =>
         [fcEvent] = @cal.fullCalendar 'clientEvents', model.cid

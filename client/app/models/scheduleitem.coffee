@@ -303,6 +303,3 @@ module.exports = class ScheduleItem extends Backbone.Model
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()
-
-
-
