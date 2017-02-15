@@ -176,12 +176,7 @@ module.exports = class PopoverView extends BaseView
         oneRowHeight = (containerHeight / 6)
 
         # Cell is on the first two rows.
-        popoverOverflowWindow = (targetOffset.top + popoverHeight) > containerHeight
-        if false
-            topOffset = (windowHeight - popoverHeight)/2
-            top = "#{topOffset}px"
-            bottom = 'auto'
-        else if targetOffset.top < oneRowHeight * 1
+        if targetOffset.top < oneRowHeight * 1
             top = '5vh'
             bottom = 'auto'
         else if targetOffset.top < oneRowHeight * 2
