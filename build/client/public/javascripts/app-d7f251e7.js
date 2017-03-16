@@ -977,6 +977,13 @@ module.exports = TagCollection = (function(superClass) {
 })(Backbone.Collection);
 });
 
+;require.register("format", function(exports, require, module) {
+module.exports = {
+  WEEK_URL_HASH_FORMAT: '[week]/YYYY/MM/DD',
+  MONTH_URL_HASH_FORMAT: '[month]/YYYY/MM'
+};
+});
+
 ;require.register("helpers", function(exports, require, module) {
 exports.formatDateISO8601 = function(fullDate) {
   var date, time;
@@ -1742,7 +1749,7 @@ module.exports = PopoverView = (function(superClass) {
   };
 
   PopoverView.prototype.positionPopover = function() {
-    var bottom, containerHeight, containerWidth, left, oneRowHeight, popoverHeight, popoverMargin, popoverOverflowWindow, popoverWidth, position, targetLeftBorder, targetOffset, targetWidth, top, topOffset, windowHeight;
+    var bottom, containerHeight, containerWidth, left, oneRowHeight, popoverHeight, popoverMargin, popoverWidth, position, targetLeftBorder, targetOffset, targetWidth, top, windowHeight;
     this.$popover.detach().css({
       display: 'block',
       top: 'auto',
@@ -1770,12 +1777,7 @@ module.exports = PopoverView = (function(superClass) {
       left = targetLeftBorder + (popoverWidth / 2) + popoverMargin;
     }
     oneRowHeight = containerHeight / 6;
-    popoverOverflowWindow = (targetOffset.top + windowHeight) > containerHeight;
-    if (popoverOverflowWindow) {
-      topOffset = (windowHeight - popoverHeight) / 2;
-      top = topOffset + "px";
-      bottom = 'auto';
-    } else if (targetOffset.top < oneRowHeight * 1) {
+    if (targetOffset.top < oneRowHeight * 1) {
       top = '5vh';
       bottom = 'auto';
     } else if (targetOffset.top < oneRowHeight * 2) {
@@ -3312,7 +3314,8 @@ module.exports = {
   "email update content": "An event you were invited to has changed:\n%{description} %{place}\nOn %{date}\n\nI'm still going\n%{url}?status=ACCEPTED&key=%{key}\n\nI'm not going anymore\n%{url}?status=DECLINED&key=%{key}",
   "email delete title": "This event has been canceled: %{description}",
   "email delete content": "This event has been canceled:\n%{description} %{place}\nOn %{date}",
-  "invalid recurring rule": "The recurring rule is invalid"
+  "invalid recurring rule": "The recurring rule is invalid",
+  "shared events": "Shared events"
 }
 ;
 });
@@ -3633,9 +3636,9 @@ module.exports = {
     "ie: 9:00 important meeting": "ej: 9:00 reunión importante",
     "Month": "Mes",
     "Popup": "Popup",
-    "Switch to List": "Cambiar a modo Lista",
-    "Switch to Calendar": "Cambiar a modo Agenda",
-    "time": "tiempo",
+    "Switch to List": "Cambiar al modo Lista",
+    "Switch to Calendar": "Cambiar al modo Agenda",
+    "time": "vez",
     "Today": "Hoy",
     "today": "hoy",
     "What should I remind you ?": "¿Qué debo recordarle?",
@@ -3651,7 +3654,7 @@ module.exports = {
     "To [date]": "A [fecha]",
     "Description": "Descripción",
     "days after": "días después",
-    "days later": "días después",
+    "days later": "días más tarde",
     "Week": "Semana",
     "Display": "Notificación",
     "DISPLAY": "Notificación",
@@ -3707,15 +3710,15 @@ module.exports = {
     "last": "último",
     "and": "y",
     "times": "veces",
-    "weekday": "día de la semana",
-    "screen title done button": "Proceder",
+    "weekday": "días de la semana",
+    "screen title done button": "Ok",
     "placeholder event title": "Titulo del evento",
     "from": "Desde el",
-    "placeholder from date": "Desde el [date]",
-    "placeholder from time": "Desde la(s) [hours:minutes]",
+    "placeholder from date": "Desde el [fecha]",
+    "placeholder from time": "Desde la(s) [horas:minutos]",
     "to": "Hasta el",
-    "placeholder to date": "Hasta el [date]",
-    "placeholder to time": "Hasta la(s)",
+    "placeholder to date": "Hasta el [fecha]",
+    "placeholder to time": "Hasta la(s) [horas:minutos]",
     "placeholder place": "Lugar",
     "add guest button": "Añadir invitado",
     "guests list": "%{first} y %{smart_count} otro |||| %{first} y %{smart_count} otros",
@@ -3728,11 +3731,11 @@ module.exports = {
     "more details button": "Más opciones",
     "save button": "Guardar",
     "create button": "Crear",
-    "duplicate event tooltip": "Repetir evento",
-    "delete event tooltip": "Anular evento",
-    "change calendar": "Cambiar de agenda",
+    "duplicate event tooltip": "Repetir el evento",
+    "delete event tooltip": "Anular el evento",
+    "change calendar": "Modificar la agenda",
     "screen confirm title": "Borrar cambios",
-    "screen confirm description": "Los cambios que usted ha efectuado se perderán. Desea borrarlos?",
+    "screen confirm description": "Los cambios que usted ha efectuado se perderán. ¿Desea borrarlos?",
     "screen confirm yes button": "Borrar cambios",
     "screen confirm no button": "Atrás",
     "screen duplicate title": "Los cambios no han sido guardados",
@@ -3740,46 +3743,46 @@ module.exports = {
     "screen duplicate yes button": "Duplicar",
     "screen duplicate no button": "Seguir editando",
     "dont ask again": "No pedir confirmación cuando se sale del popover.",
-    "screen delete title": "Anular evento",
+    "screen delete title": "Suprimir el evento",
     "screen delete description": "Está usted a punto de suprimir el evento \"%{description}\". ¿Está seguro?",
     "screen delete yes button": "Suprimir",
     "screen delete no button": "Anular",
     "screen guest title empty": "Invitado",
     "screen guest title": "%{smart_count} invitado |||| %{smart_count} invitados",
-    "screen guest input placeholder": "Correo electrónico",
+    "screen guest input placeholder": "Dirección de correo electrónico",
     "screen guest add button": "Añadir",
     "screen guest remove tooltip": "Anular la invitación",
     "screen guest share with cozy tooltip": "Compartir la invitación con el cozy del invitado",
-    "screen guest share with email tooltip": "Enviar la invitación por email",
+    "screen guest share with email tooltip": "Enviar la invitación por correo electrónico",
     "screen description title": "Descripción",
     "screen alert title empty": "Alarma",
     "screen alert title": "%{smart_count} alarma |||| %{smart_count} alarmas",
     "screen alert default value": "Añadir otra alarma",
-    "screen alert time of event": "Al inicio del evento",
+    "screen alert time of event": "En el momento del evento",
     "screen alert minute": "%{smart_count} minuto |||| %{smart_count} minutos",
     "screen alert hour": "%{smart_count} hora |||| %{smart_count} horas",
     "screen alert day": "%{smart_count} día |||| %{smart_count} días",
     "screen alert week": "%{smart_count} semana |||| %{smart_count} semanas",
     "screen alert delete tooltip": "Suprimir alarma",
-    "screen alert type email": "Email",
+    "screen alert type email": "Correo electrónico",
     "screen alert type notification": "Notificación de Cozy",
     "screen recurrence title": "Repetir",
     "screen recurrence no repeat": "No repetir",
-    "screen recurrence daily": "Diariamente",
-    "screen recurrence weekly": "Semanalmente",
-    "screen recurrence monthly": "Mensualmente",
-    "screen recurrence yearly": "Anualmente",
-    "screen recurrence interval label": "intervalo",
+    "screen recurrence daily": "Todos los días",
+    "screen recurrence weekly": "Cada semana",
+    "screen recurrence monthly": "Cada mes",
+    "screen recurrence yearly": "Cada año",
+    "screen recurrence interval label": "Intervalo",
     "screen recurrence interval unit 0": "año |||| años",
     "screen recurrence interval unit 1": "mes |||| meses",
     "screen recurrence interval unit 2": "semana |||| semanas",
     "screen recurrence interval unit 3": "día |||| días",
     "screen recurrence interval unit": "días",
     "screen recurrence days list label": "Los días",
-    "screen recurrence repeat by label": "Debe repetirse por",
+    "screen recurrence repeat by label": "Repetir por",
     "screen recurrence repeat by month": "Día del mes",
     "screen recurrence repeat by week": "Día de la semana",
-    "screen recurrence ends label": "Terminan:",
+    "screen recurrence ends label": "Termina el:",
     "screen recurrence ends never label": "Nunca",
     "screen recurrence ends count label": "Después",
     "screen recurrence ends count unit": "veces",
@@ -3792,8 +3795,8 @@ module.exports = {
     "accepted": "Aceptado",
     "declined": "Rechazado",
     "need action": "Todavía no hay respuesta",
-    "mail not sent": "Ninguna invitación enviada",
-    "yes": "Si",
+    "mail not sent": "Ninguna invitación ha sido enviada",
+    "yes": "Sí",
     "no": "No",
     "no summary": "El título es obligatorio",
     "start after end": "La fecha del comienzo es posterior a la fecha del final.",
@@ -3804,25 +3807,25 @@ module.exports = {
     "server error occured": "Ha ocurrido un error en el servidor",
     "synchronization": "Sincronización",
     "mobile sync": "Sincronización con los móviles (CalDAV)",
-    "link imported events with calendar": "Ligar los eventos a importar con la siguiente agenda:",
+    "link imported events with calendar": "Ligar los eventos que se han de importar con la siguiente agenda:",
     "import an ical file": "Para importar un archivo ICal a su agenda Cozy, comenzar por hacer clic en este botón para precargarlo:",
-    "download a copy of your calendar": "Seleccione una agenda y luego haga clic en el botón export, para descargar una copia como archivo ICal:",
+    "download a copy of your calendar": "Seleccione una agenda y luego haga clic en el botón exportar, para descargar una copia como archivo ICal:",
     "icalendar export": "Exportar ICalendar",
     "icalendar import": "Importar ICalendar",
-    "to sync your cal with": "Para sincronizar su agenda con sus periféricos, usted debe seguir los dos siguientes pasos",
+    "to sync your cal with": "Para sincronizar su agenda con sus periféricos, usted debe seguir los dos pasos siguientes",
     "sync headline with data": "Para sincronizar su agenda, use la siguiente información:",
     "sync url": "URL:",
-    "sync login": "Usuario:",
+    "sync login": "Nombre del usuario:",
     "sync password": "Contraseña:",
     "sync help": "¿Esta usted perdido(a)? siga la",
     "sync help link": "guía paso a paso!",
     "install the sync module": "Instalar el módulo Sincronización desde la Apliteca Cozy",
     "connect to it and follow": "Conectarse y seguir las instrucciones relativas a CalDAV.",
-    "some event fail to save": "Unn evento o se ha guardado (ha ocurrido un error)",
+    "some event fail to save": "Un evento no se ha grabado (ha ocurrido un error)",
     "imported events": "Número de eventos importados",
     "import finished": "La importación se ha terminado. Visualizar los nuevos eventos toma un cierto tiempo. Si quiere cargarlos más rápido, vuelva a cargar la página.",
-    "import error": "Error en el servidor, la importación ha fallado.",
-    "import error occured for": "Error en la importación de los siguientes elementos:",
+    "import error": "ha ocurrido un error en el servidor, la importación ha fallado.",
+    "import error occured for": "Ha ocurrido un error en la importación de los siguientes elementos:",
     "export your calendar": "Exportar su agenda",
     "please select existing calendar": "Por favor seleccionar una agenda existente",
     "January": "enero",
@@ -3852,12 +3855,12 @@ module.exports = {
     "email date format": "MMMM Do YYYY, h:mm a",
     "email date format allday": "MMMM Do YYYY, [todo el día]",
     "email invitation title": "Invitación a '%{description}'",
-    "email invitation content": "Buenos días, desearía invitarlo(a) al siguiente evento:\n\n%{description} %{place}\nel %{date}\n¿Podríamos contar con su presencia?\n\nSi\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n %{url}?status=DECLINED&key=%{key}",
+    "email invitation content": "Buenos días, desearía invitarlo(a) al siguiente evento:\n\n%{description} %{place}\nel %{date}\n¿Podríamos contar con su presencia?\n\nSí\n%{url}?status=ACCEPTED&key=%{key}\n\nNo\n %{url}?status=DECLINED&key=%{key}",
     "email update title": "El evento \"%{description}\" ha sido modificado",
     "email update content": "Un evento en el que usted participa se ha cambiado:\n%{description} %{place}\nel %{date}\n\nSeguiré estando presente\n %{url}?status=ACCEPTED&key=%{key}\n\nNo cuenten conmigo\n %{url}?status=ACCEPTED&key=%{key}",
     "email delete title": "Este evento ha sido anulado: %{description}",
     "email delete content": "Este evento ha sido anulado:\n%{description} %{place}\nel %{date}",
-    "invalid recurring rule": "La regla recurrente no es válida"
+    "invalid recurring rule": "La regla de recurrencia no es válida"
 };
 });
 
@@ -7132,8 +7135,8 @@ module.exports = {
     "sync settings button label": "设置",
     "default calendar name": "我的日程表",
     "Add": "添加",
-    "event": "Event",
-    "upcoming events": "Upcoming Events",
+    "event": "事件",
+    "upcoming events": "即将到来的事件",
     "create event": "Event creation",
     "edit event": "Event edition",
     "edit": "Edit",
@@ -8192,8 +8195,6 @@ module.exports = ScheduleItem = (function(superClass) {
     var description, displayedTime, fcEvent;
     if (this.isAllDay()) {
       displayedTime = "";
-    } else if (this.isRecurrent()) {
-      displayedTime = moment(start).utc().format('H:mm');
     } else {
       displayedTime = start.format('H:mm');
     }
@@ -8331,12 +8332,14 @@ module.exports = Tag = (function(superClass) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var CalendarView, DayBucketCollection, Event, EventPopover, ImportView, ListView, Router, SettingsModal, app, getBeginningOfWeek, helpers,
+var CalendarView, DayBucketCollection, Event, EventPopover, ImportView, ListView, Router, SettingsModal, app, format, getBeginningOfWeek, helpers,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 app = require('application');
+
+format = require('format');
 
 ListView = require('views/list_view');
 
@@ -8377,6 +8380,8 @@ module.exports = Router = (function(superClass) {
 
   Router.prototype.routes = {
     '': 'month',
+    'week': 'week',
+    'week/:year/:month/:day': 'week',
     'month': 'month',
     'month/:year/:month': 'month',
     'month/:year/:month/:eventid': 'month_event',
@@ -8409,17 +8414,34 @@ module.exports = Router = (function(superClass) {
     }
   };
 
+  Router.prototype.week = function(year, month, day) {
+    var hash, monthToLoad;
+    if (year != null) {
+      monthToLoad = moment(year + "/" + month, "YYYY/MM");
+      return window.app.events.loadMonth(monthToLoad, (function(_this) {
+        return function() {
+          return _this.displayCalendar('agendaWeek', year, month, day);
+        };
+      })(this));
+    } else {
+      hash = moment().format(format.WEEK_URL_HASH_FORMAT);
+      return this.navigate(hash, {
+        trigger: true
+      });
+    }
+  };
+
   Router.prototype.month = function(year, month) {
     var hash, monthToLoad;
     if (year != null) {
-      monthToLoad = moment(year + "/" + month, "YYYY/M");
+      monthToLoad = moment(year + "/" + month, "YYYY/MM");
       return window.app.events.loadMonth(monthToLoad, (function(_this) {
         return function() {
           return _this.displayCalendar('month', year, month, 1);
         };
       })(this));
     } else {
-      hash = moment().format('[month]/YYYY/M');
+      hash = moment().format(format.MONTH_URL_HASH_FORMAT);
       return this.navigate(hash, {
         trigger: true
       });
@@ -8593,15 +8615,13 @@ module.exports = CalendarHeader = (function(superClass) {
   CalendarHeader.prototype.template = require('./templates/calendar_header');
 
   CalendarHeader.prototype.initialize = function(options) {
+    this.view = options != null ? options.view : void 0;
     this.cal = options != null ? options.cal : void 0;
     return this.isMobile = options != null ? options.isMobile : void 0;
   };
 
   CalendarHeader.prototype.getViewName = function() {
-    if (this.cal == null) {
-      return 'list';
-    }
-    return 'month';
+    return this.view;
   };
 
   CalendarHeader.prototype.getTitle = function() {
@@ -8675,6 +8695,11 @@ module.exports = CalendarHeader = (function(superClass) {
           return _this.trigger('today');
         };
       })(this),
+      'click .fc-button-week': (function(_this) {
+        return function() {
+          return _this.trigger('week');
+        };
+      })(this),
       'click .fc-button-month': (function(_this) {
         return function() {
           return _this.trigger('month');
@@ -8694,7 +8719,7 @@ module.exports = CalendarHeader = (function(superClass) {
 });
 
 ;require.register("views/calendar_view", function(exports, require, module) {
-var BaseView, CalendarView, EventSharingButtonView, Header, app, helpers,
+var BaseView, CalendarView, EventSharingButtonView, Header, app, format, helpers,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -8708,6 +8733,8 @@ EventSharingButtonView = require('./pending_event_sharings_button');
 
 Header = require('./calendar_header');
 
+format = require('../format');
+
 helpers = require('helpers');
 
 module.exports = CalendarView = (function(superClass) {
@@ -8719,6 +8746,13 @@ module.exports = CalendarView = (function(superClass) {
     this.onEventDrop = bind(this.onEventDrop, this);
     this.onSelect = bind(this.onSelect, this);
     this.onChangeView = bind(this.onChangeView, this);
+    this.removeEventFromView = bind(this.removeEventFromView, this);
+    this._addReccuringEventToView = bind(this._addReccuringEventToView, this);
+    this.addFcEventToView = bind(this.addFcEventToView, this);
+    this.addEventToView = bind(this.addEventToView, this);
+    this.getPopoverContainer = bind(this.getPopoverContainer, this);
+    this.getFcEvent = bind(this.getFcEvent, this);
+    this.refreshEventsOfLastDisplayedDay = bind(this.refreshEventsOfLastDisplayedDay, this);
     this.refreshOne = bind(this.refreshOne, this);
     this.handleWindowResize = bind(this.handleWindowResize, this);
     return CalendarView.__super__.constructor.apply(this, arguments);
@@ -8731,7 +8765,7 @@ module.exports = CalendarView = (function(superClass) {
   CalendarView.prototype.initialize = function(options) {
     this.options = options;
     this.eventCollection = this.model.events;
-    this.listenTo(this.eventCollection, 'add', this.refresh);
+    this.listenTo(this.eventCollection, 'add', this.refreshOne);
     this.listenTo(this.eventCollection, 'reset', this.refresh);
     this.listenTo(this.eventCollection, 'remove', this.onRemove);
     this.listenTo(this.eventCollection, 'change', this.refreshOne);
@@ -8805,7 +8839,8 @@ module.exports = CalendarView = (function(superClass) {
     source = this.eventCollection.getFCEventSource(this.calendarsCollection);
     this.cal.fullCalendar('addEventSource', source);
     this.calHeader = new Header({
-      cal: this.cal
+      cal: this.cal,
+      view: this.view
     });
     this.calHeader.on('prev', (function(_this) {
       return function() {
@@ -8813,7 +8848,10 @@ module.exports = CalendarView = (function(superClass) {
           var monthToLoad;
           monthToLoad = _this.cal.fullCalendar('getDate').subtract(1, 'months');
           return window.app.events.loadMonth(monthToLoad, function() {
-            return _this.cal.fullCalendar('prev');
+            _this.cal.fullCalendar('prev');
+            if (_this.isWeekViewActive()) {
+              return _this.refreshEventsOfLastDisplayedDay();
+            }
           });
         });
       };
@@ -8824,7 +8862,10 @@ module.exports = CalendarView = (function(superClass) {
           var monthToLoad;
           monthToLoad = _this.cal.fullCalendar('getDate').add(1, 'months');
           return window.app.events.loadMonth(monthToLoad, function() {
-            return _this.cal.fullCalendar('next');
+            _this.cal.fullCalendar('next');
+            if (_this.isWeekViewActive()) {
+              return _this.refreshEventsOfLastDisplayedDay();
+            }
           });
         });
       };
@@ -8832,15 +8873,25 @@ module.exports = CalendarView = (function(superClass) {
     this.calHeader.on('today', (function(_this) {
       return function() {
         return _this.clearViewComponents(function() {
-          return _this.cal.fullCalendar('today');
+          _this.cal.fullCalendar('today');
+          if (_this.isWeekViewActive()) {
+            return _this.refreshEventsOfLastDisplayedDay();
+          }
         });
       };
     })(this));
     this.calHeader.on('month', (function(_this) {
       return function() {
-        return _this.clearViewComponents(function() {
-          return _this.cal.fullCalendar('changeView', 'month');
-        });
+        var hash;
+        hash = _this.getMonthUrlHash();
+        return app.router.navigate(hash, true);
+      };
+    })(this));
+    this.calHeader.on('week', (function(_this) {
+      return function() {
+        var hash;
+        hash = _this.getWeekUrlHash();
+        return app.router.navigate(hash, true);
       };
     })(this));
     this.calHeader.on('list', (function(_this) {
@@ -8863,6 +8914,10 @@ module.exports = CalendarView = (function(superClass) {
     });
   };
 
+  CalendarView.prototype.isWeekViewActive = function() {
+    return this.view === 'agendaWeek';
+  };
+
   CalendarView.prototype.remove = function() {
     var ref;
     if ((ref = this.popover) != null) {
@@ -8883,12 +8938,12 @@ module.exports = CalendarView = (function(superClass) {
     return this.cal.fullCalendar('option', 'height', targetHeight);
   };
 
-  CalendarView.prototype.refresh = function(collection) {
+  CalendarView.prototype.refresh = function() {
     return this.cal.fullCalendar('refetchEvents');
   };
 
-  CalendarView.prototype.onCalendarCollectionChange = function(collection) {
-    return this.refresh(collection);
+  CalendarView.prototype.onCalendarCollectionChange = function() {
+    return this.refresh();
   };
 
   CalendarView.prototype.onRemove = function(model) {
@@ -8896,25 +8951,83 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.refreshOne = function(model) {
-    var data, fcEvent, modelWasRecurrent, previousRRule;
     if (model == null) {
       return null;
     }
-    previousRRule = model.previous('rrule');
-    modelWasRecurrent = (previousRRule != null) && previousRRule !== '';
-    if (model.isRecurrent() || modelWasRecurrent) {
-      return this.refresh();
+    this.removeEventFromView(model);
+    return this.addEventToView(model);
+  };
+
+  CalendarView.prototype.refreshEventsOfLastDisplayedDay = function() {
+    var beginOfLastDay, endOfLastDay, eventStart, i, isFromLastDay, len, model, ref, results, view;
+    view = this.cal.fullCalendar('getView');
+    beginOfLastDay = view.intervalEnd.clone().subtract(1, 'days');
+    endOfLastDay = view.intervalEnd;
+    ref = this.eventCollection.models;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      model = ref[i];
+      eventStart = model.getStartDateObject();
+      isFromLastDay = eventStart.isAfter(beginOfLastDay) && eventStart.isBefore(endOfLastDay);
+      if (isFromLastDay) {
+        results.push(this.refreshOne(model));
+      } else {
+        results.push(void 0);
+      }
     }
-    if (model.isAllDay()) {
-      return this.refresh();
+    return results;
+  };
+
+  CalendarView.prototype.getFcEvent = function(model) {
+    var fcEvent;
+    fcEvent = this.cal.fullCalendar('clientEvents', model.cid)[0];
+    return fcEvent;
+  };
+
+  CalendarView.prototype.getPopoverContainer = function() {
+    var content;
+    if (this.view === 'month') {
+      content = this.$('.fc-day-grid-container');
+    } else if (this.view === 'agendaWeek') {
+      content = this.$('.fc-widget-content');
+    } else {
+      content = this.$('.main-container');
     }
-    data = model.toPunctualFullCalendarEvent();
-    fcEvent = this.cal.fullCalendar('clientEvents', data.id)[0];
+    return content;
+  };
+
+  CalendarView.prototype.addEventToView = function(model) {
+    if (model.isRecurrent()) {
+      return this._addReccuringEventToView(model);
+    } else {
+      return this.addFcEventToView(model.toPunctualFullCalendarEvent());
+    }
+  };
+
+  CalendarView.prototype.addFcEventToView = function(fcEvent) {
+    return this.cal.fullCalendar('renderEvent', fcEvent);
+  };
+
+  CalendarView.prototype._addReccuringEventToView = function(model) {
+    var end, event, events, fcView, i, len, results, start;
+    fcView = this.cal.fullCalendar('getView');
+    start = fcView.intervalStart;
+    end = fcView.intervalEnd.add(7, 'day');
+    events = model.getRecurrentFCEventBetween(start, end);
+    results = [];
+    for (i = 0, len = events.length; i < len; i++) {
+      event = events[i];
+      results.push(this.addFcEventToView(event));
+    }
+    return results;
+  };
+
+  CalendarView.prototype.removeEventFromView = function(model) {
+    var fcEvent;
+    fcEvent = this.getFcEvent(model);
     if (fcEvent != null) {
-      _.extend(fcEvent, data);
-      this.cal.fullCalendar('updateEvent', fcEvent);
+      return this.cal.fullCalendar('removeEvents', model.cid);
     }
-    return this.refresh();
   };
 
   CalendarView.prototype.onChangeView = function(view) {
@@ -8926,7 +9039,12 @@ module.exports = CalendarView = (function(superClass) {
       this.handleWindowResize();
     }
     this.view = view.name;
-    hash = view.intervalStart.format('[month]/YYYY/M');
+    hash = view.intervalStart.format(format.MONTH_URL_HASH_FORMAT);
+    if (this.view === 'month') {
+      hash = this.getMonthUrlHash(view);
+    } else if (this.view === 'agendaWeek') {
+      hash = this.getWeekUrlHash(view);
+    }
     return app.router.navigate(hash);
   };
 
@@ -8944,11 +9062,41 @@ module.exports = CalendarView = (function(superClass) {
     return 'calendar';
   };
 
+  CalendarView.prototype.getWeekUrlHash = function(view) {
+    var begginingOfCurrentView, beginningOfTodayWeek, now;
+    now = moment();
+    if (view == null) {
+      view = this.cal.fullCalendar('getView');
+    }
+    if (view.intervalStart.month() === now.month()) {
+      beginningOfTodayWeek = now.startOf('isoWeek');
+      return beginningOfTodayWeek.format(format.WEEK_URL_HASH_FORMAT);
+    } else {
+      begginingOfCurrentView = view.intervalStart.startOf('isoWeek');
+      return begginingOfCurrentView.format(format.WEEK_URL_HASH_FORMAT);
+    }
+  };
+
+  CalendarView.prototype.getMonthUrlHash = function(view) {
+    var monthOfEndOfTheWeek;
+    if (view == null) {
+      view = this.cal.fullCalendar('getView');
+    }
+    if (view.name === 'agendaWeek') {
+      monthOfEndOfTheWeek = view.intervalEnd.startOf('month');
+      return monthOfEndOfTheWeek.format(format.MONTH_URL_HASH_FORMAT);
+    } else {
+      return view.intervalStart.format(format.MONTH_URL_HASH_FORMAT);
+    }
+  };
+
   CalendarView.prototype.onSelect = function(startDate, endDate, jsEvent, view) {
+    var content;
     if (this.view === 'month') {
       startDate.time('10:00:00.000');
       endDate.subtract(1, 'days').time('11:00:00.000');
     }
+    content = this.getPopoverContainer();
     return this.trigger('event:dialog', {
       type: 'event',
       start: helpers.ambiguousToTimezoned(startDate),
@@ -8956,7 +9104,7 @@ module.exports = CalendarView = (function(superClass) {
       target: $(jsEvent.target),
       openerEvent: jsEvent.originalEvent,
       container: this.cal,
-      content: this.$('.fc-day-grid-container')
+      content: content
     });
   };
 
@@ -9025,7 +9173,7 @@ module.exports = CalendarView = (function(superClass) {
   };
 
   CalendarView.prototype.onEventClick = function(fcEvent, jsEvent, view) {
-    var model;
+    var content, model;
     if ($(jsEvent.target).hasClass('ui-resizable-handle')) {
       return true;
     }
@@ -9036,13 +9184,14 @@ module.exports = CalendarView = (function(superClass) {
         throw new Error('wrong typed event in fc');
       }
     }).call(this);
+    content = this.getPopoverContainer();
     return this.trigger('event:dialog', {
       type: model.fcEventType,
       model: model,
       target: $(jsEvent.currentTarget),
       openerEvent: jsEvent.originalEvent,
       container: this.cal,
-      content: this.$('.fc-day-grid-container')
+      content: content
     });
   };
 
@@ -9103,6 +9252,10 @@ module.exports = EventPopOver = (function(superClass) {
 
   function EventPopOver() {
     this.confirmClose = bind(this.confirmClose, this);
+    this.ignoreWeekGridOnCloseEvent = bind(this.ignoreWeekGridOnCloseEvent, this);
+    this.ignoreMonthGridOnCloseEvent = bind(this.ignoreMonthGridOnCloseEvent, this);
+    this.isMonthView = bind(this.isMonthView, this);
+    this.setTargetToIgnoreOnCloseEvent = bind(this.setTargetToIgnoreOnCloseEvent, this);
     return EventPopOver.__super__.constructor.apply(this, arguments);
   }
 
@@ -9152,8 +9305,28 @@ module.exports = EventPopOver = (function(superClass) {
 
   EventPopOver.prototype.afterRender = function() {
     EventPopOver.__super__.afterRender.call(this);
-    this.clickOutListener.exceptOn(this.target.closest('.fc-row').get(0));
+    return this.setTargetToIgnoreOnCloseEvent();
+  };
+
+  EventPopOver.prototype.setTargetToIgnoreOnCloseEvent = function() {
+    if (this.isMonthView()) {
+      this.ignoreMonthGridOnCloseEvent();
+    } else {
+      this.ignoreWeekGridOnCloseEvent();
+    }
     return this.context.clickOutListener = this.clickOutListener;
+  };
+
+  EventPopOver.prototype.isMonthView = function() {
+    return this.target.closest('.fc-row').get(0) != null;
+  };
+
+  EventPopOver.prototype.ignoreMonthGridOnCloseEvent = function() {
+    return this.clickOutListener.exceptOn($('.fc-day-grid-container').get(0));
+  };
+
+  EventPopOver.prototype.ignoreWeekGridOnCloseEvent = function() {
+    return this.clickOutListener.exceptOn($('.fc-time-grid').get(0));
   };
 
   EventPopOver.prototype.onKeyUp = function(event) {
@@ -9580,11 +9753,17 @@ module.exports = ListView = (function(superClass) {
 
   ListView.prototype.afterRender = function() {
     this.calHeader = new Header({
+      view: 'list',
       isMobile: this.isMobile
     });
     this.$('#calheader').html(this.calHeader.render().$el);
     this.calHeader.on('month', function() {
-      return app.router.navigate('', {
+      return app.router.navigate('month', {
+        trigger: true
+      });
+    });
+    this.calHeader.on('week', function() {
+      return app.router.navigate('week', {
         trigger: true
       });
     });
@@ -9597,8 +9776,8 @@ module.exports = ListView = (function(superClass) {
         return _this.keepScreenFull();
       };
     })(this));
-    ListView.__super__.afterRender.apply(this, arguments);
-    return this.keepScreenFull();
+    this.keepScreenFull();
+    return ListView.__super__.afterRender.apply(this, arguments);
   };
 
   ListView.prototype.showPopover = function(jsEvent) {
@@ -12200,7 +12379,7 @@ buf.push("<div role=\"group\" class=\"btn-group\"><span class=\"btn fc-button-pr
 buf.push("<span class=\"fc-header-title\"></span></div><!-- just preload the image for fast display when used--><img src=\"img/spinner-white.svg\" class=\"hidden\"/><div class=\"fc-header-name\">" + (jade.escape(null == (jade_interp = t('upcoming events')) ? "" : jade_interp)) + "</div><div class=\"fc-header-right\">");
 if ( !isMobile)
 {
-buf.push("<div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
+buf.push("<div role=\"group\" class=\"btn-group\"><span type=\"button\"" + (jade.cls(['btn','fc-button-month',active('month')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('month')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-week',active('agendaWeek')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('week')) ? "" : jade_interp)) + "</span><span type=\"button\"" + (jade.cls(['btn','fc-button-list',active('list')], [null,null,true])) + ">" + (jade.escape(null == (jade_interp = t('list')) ? "" : jade_interp)) + "</span></div>");
 }
 buf.push("</div>");}.call(this,"active" in locals_for_with?locals_for_with.active:typeof active!=="undefined"?active:undefined,"calendarMode" in locals_for_with?locals_for_with.calendarMode:typeof calendarMode!=="undefined"?calendarMode:undefined,"isMobile" in locals_for_with?locals_for_with.isMobile:typeof isMobile!=="undefined"?isMobile:undefined,"title" in locals_for_with?locals_for_with.title:typeof title!=="undefined"?title:undefined,"todaytxt" in locals_for_with?locals_for_with.todaytxt:typeof todaytxt!=="undefined"?todaytxt:undefined));;return buf.join("");
 };
