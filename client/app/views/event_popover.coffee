@@ -61,14 +61,29 @@ module.exports = class EventPopOver extends PopoverView
 
     afterRender: ->
         super()
-        # Pretty headache here. The Calendar view from full calendar trigger
-        # another click event on the far bottom part of a day cell.
-        # So, two Mouse event are triggered sometimes, and so we have to ignore
-        # click event from the closest parent div having the class fc-row
-        # To remind, @target here is a calendar cell (td element).
-        @clickOutListener.exceptOn @target.closest('.fc-row').get(0)
-        @context.clickOutListener = @clickOutListener
+        @setTargetToIgnoreOnCloseEvent()
 
+
+    # Warning: The Calendar view from full calendar trigger
+    # another click event on the far bottom part of a day cell.
+    # So, two Mouse event are triggered sometimes, and so we have to ignore
+    # click event from the unexpect ed source.
+    # here is a calendar cell (td element).
+    setTargetToIgnoreOnCloseEvent: =>
+        if @isMonthView()
+            @ignoreMonthGridOnCloseEvent()
+        else # We consider it's week view.
+            @ignoreWeekGridOnCloseEvent()
+        @context.clickOutListener = @clickOutListener # Save ignore config.
+
+    isMonthView: =>
+        return @target.closest('.fc-row').get(0)?
+
+    ignoreMonthGridOnCloseEvent: =>
+        @clickOutListener.exceptOn $('.fc-day-grid-container').get(0)
+
+    ignoreWeekGridOnCloseEvent: =>
+        @clickOutListener.exceptOn $('.fc-time-grid').get(0)
 
     onKeyUp: (event) ->
         if event.keyCode is 27 # ESC

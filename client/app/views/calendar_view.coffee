@@ -1,7 +1,9 @@
 app = require 'application'
+
 BaseView = require 'lib/base_view'
 EventSharingButtonView = require './pending_event_sharings_button'
 Header = require './calendar_header'
+format = require '../format'
 
 helpers = require 'helpers'
 
@@ -15,7 +17,7 @@ module.exports = class CalendarView extends BaseView
     initialize: (@options) ->
         @eventCollection = @model.events
 
-        @listenTo @eventCollection, 'add'  , @refresh
+        @listenTo @eventCollection, 'add', @refreshOne
         @listenTo @eventCollection, 'reset', @refresh
         @listenTo @eventCollection, 'remove', @onRemove
         @listenTo @eventCollection, 'change', @refreshOne
@@ -92,7 +94,9 @@ module.exports = class CalendarView extends BaseView
         source = @eventCollection.getFCEventSource @calendarsCollection
         @cal.fullCalendar 'addEventSource', source
 
-        @calHeader = new Header cal: @cal
+        @calHeader = new Header
+            cal: @cal
+            view: @view
 
         # Before displaying the calendar for the previous month, we make sure
         # that events are loaded.
@@ -101,6 +105,11 @@ module.exports = class CalendarView extends BaseView
                 monthToLoad = @cal.fullCalendar('getDate').subtract(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'prev'
+                    # This action is due to a bug of fullcalendar which
+                    # removes events from the last day of the week from
+                    # the view.
+                    @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
+
 
         # Before displaying the calendar for the next month, we make sure that
         # events are loaded.
@@ -109,22 +118,41 @@ module.exports = class CalendarView extends BaseView
                 monthToLoad = @cal.fullCalendar('getDate').add(1, 'months')
                 window.app.events.loadMonth monthToLoad, =>
                     @cal.fullCalendar 'next'
+                    # This action is due to a bug of fullcalendar which
+                    # removes events from the last day of the week from
+                    # the view.
+                    @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
 
         @calHeader.on 'today', =>
             @clearViewComponents =>
                 @cal.fullCalendar 'today'
+                # This action is due to a bug of fullcalendar which
+                # removes events from the last day of the week from
+                # the view.
+                @refreshEventsOfLastDisplayedDay() if @isWeekViewActive()
+
         @calHeader.on 'month', =>
-            @clearViewComponents =>
-                @cal.fullCalendar 'changeView', 'month'
+            hash = @getMonthUrlHash()
+            app.router.navigate hash, true
+
+        @calHeader.on 'week', =>
+            hash = @getWeekUrlHash()
+            app.router.navigate hash, true
+
         @calHeader.on 'list', =>
             @clearViewComponents ->
                 window.app.events.sort()
                 app.router.navigate 'list', trigger:true
+
         @$('#alarms').prepend @calHeader.render().$el
 
         @handleWindowResize()
         debounced = _.debounce @handleWindowResize, 10
         $(window).resize (ev) -> debounced() if ev.target is window
+
+
+    isWeekViewActive: ->
+        return @view is 'agendaWeek'
 
 
     remove: ->
@@ -133,7 +161,6 @@ module.exports = class CalendarView extends BaseView
 
 
     handleWindowResize: (initial) =>
-
         if $(window).width() > 1000
             targetHeight = $(window).height() - 85
 
@@ -146,40 +173,71 @@ module.exports = class CalendarView extends BaseView
         @cal.fullCalendar 'option', 'height', targetHeight
 
 
-    refresh: (collection) ->
+    refresh: () ->
         @cal.fullCalendar 'refetchEvents'
 
 
-    onCalendarCollectionChange: (collection) ->
-        @refresh collection
+    onCalendarCollectionChange: () ->
+        @refresh()
 
     onRemove: (model) ->
         @cal.fullCalendar 'removeEvents', model.cid
 
 
     refreshOne: (model) =>
-
         return null unless model?
 
-        previousRRule = model.previous('rrule')
-        modelWasRecurrent = previousRRule? and previousRRule isnt ''
-        return @refresh() if model.isRecurrent() or modelWasRecurrent
+        # Removing / adding prevent display glitches that update don't handle
+        # properly like full day or reccuring events.
+        @removeEventFromView model
+        @addEventToView model
 
-        # fullCalendar('updateEvent') eats end of allDay events!(?),
-        # perform a full refresh as a workaround.
-        return @refresh() if model.isAllDay()
 
-        data = model.toPunctualFullCalendarEvent()
-        [fcEvent] = @cal.fullCalendar 'clientEvents', data.id
-        # if updated event is not shown on screen, fcEvent doesn't exist
-        if fcEvent?
-            _.extend fcEvent, data
-            @cal.fullCalendar 'updateEvent', fcEvent
+    refreshEventsOfLastDisplayedDay: =>
+        view = @cal.fullCalendar 'getView'
+        beginOfLastDay = view.intervalEnd.clone().subtract 1, 'days'
+        endOfLastDay = view.intervalEnd
 
-        # Refresh to deal with calendar update.
-        # If the new calendar is not visible the event should not be shown
-        @refresh()
+        for model in @eventCollection.models
+            eventStart = model.getStartDateObject()
+            isFromLastDay = eventStart.isAfter(beginOfLastDay) and \
+                eventStart.isBefore(endOfLastDay)
 
+            @refreshOne model if isFromLastDay
+
+
+    getFcEvent: (model) =>
+        [fcEvent] = @cal.fullCalendar 'clientEvents', model.cid
+        return fcEvent
+
+    getPopoverContainer: =>
+        if @view is 'month'
+            content = @$ '.fc-day-grid-container'
+        else if @view is 'agendaWeek'
+            content = @$ '.fc-widget-content'
+        else
+            content = @$ '.main-container'
+        return content
+
+    addEventToView: (model) =>
+        if model.isRecurrent()
+            @_addReccuringEventToView model
+        else
+            @addFcEventToView model.toPunctualFullCalendarEvent()
+
+    addFcEventToView: (fcEvent) =>
+        @cal.fullCalendar 'renderEvent', fcEvent
+
+    _addReccuringEventToView: (model) =>
+        fcView = @cal.fullCalendar 'getView'
+        start = fcView.intervalStart
+        end = fcView.intervalEnd.add 7, 'day'
+        events = model.getRecurrentFCEventBetween start, end
+        @addFcEventToView event for event in events
+
+    removeEventFromView: (model) =>
+        fcEvent = @getFcEvent model
+        @cal.fullCalendar 'removeEvents', model.cid if fcEvent?
 
     onChangeView: (view) =>
         @calHeader?.render()
@@ -188,8 +246,11 @@ module.exports = class CalendarView extends BaseView
 
         @view = view.name
 
-        hash = view.intervalStart.format '[month]/YYYY/M'
-
+        hash = view.intervalStart.format format.MONTH_URL_HASH_FORMAT
+        if @view is 'month'
+            hash = @getMonthUrlHash view
+        else if @view is 'agendaWeek'
+            hash = @getWeekUrlHash view
         app.router.navigate hash
 
 
@@ -203,6 +264,25 @@ module.exports = class CalendarView extends BaseView
     getUrlHash: ->
         return 'calendar'
 
+    getWeekUrlHash: (view) ->
+        now = moment()
+        view ?= @cal.fullCalendar 'getView'
+
+        if view.intervalStart.month() is now.month()
+            beginningOfTodayWeek = now.startOf('isoWeek')
+            return beginningOfTodayWeek.format format.WEEK_URL_HASH_FORMAT
+        else
+            begginingOfCurrentView = view.intervalStart.startOf('isoWeek')
+            return begginingOfCurrentView.format format.WEEK_URL_HASH_FORMAT
+
+    getMonthUrlHash: (view) ->
+        view ?= @cal.fullCalendar 'getView'
+        if view.name is 'agendaWeek'
+            monthOfEndOfTheWeek = view.intervalEnd.startOf('month')
+            return monthOfEndOfTheWeek.format format.MONTH_URL_HASH_FORMAT
+        else
+            return view.intervalStart.format format.MONTH_URL_HASH_FORMAT
+
 
     onSelect: (startDate, endDate, jsEvent, view) =>
 
@@ -210,6 +290,7 @@ module.exports = class CalendarView extends BaseView
         if @view is 'month'
             startDate.time('10:00:00.000')
             endDate.subtract(1, 'days').time('11:00:00.000')
+        content = @getPopoverContainer()
 
         @trigger 'event:dialog', {
             type: 'event'
@@ -218,9 +299,8 @@ module.exports = class CalendarView extends BaseView
             target: $ jsEvent.target
             openerEvent: jsEvent.originalEvent
             container: @cal
-            content: @$ '.fc-day-grid-container'
+            content: content
         }
-
 
     onEventRender: (event, $element) ->
         # TODO: use the new spinner, instead of this.
@@ -291,6 +371,7 @@ module.exports = class CalendarView extends BaseView
 
         model = if fcEvent.type is 'event' then @eventCollection.get fcEvent.id
         else throw new Error('wrong typed event in fc')
+        content = @getPopoverContainer()
 
         @trigger 'event:dialog', {
             type: model.fcEventType
@@ -298,5 +379,5 @@ module.exports = class CalendarView extends BaseView
             target: $ jsEvent.currentTarget
             openerEvent: jsEvent.originalEvent
             container: @cal
-            content: @$ '.fc-day-grid-container'
+            content: content
         }

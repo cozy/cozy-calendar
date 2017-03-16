@@ -1,4 +1,5 @@
 app = require 'application'
+format = require 'format'
 
 ListView = require 'views/list_view'
 CalendarView = require 'views/calendar_view'
@@ -22,6 +23,8 @@ module.exports = class Router extends Backbone.Router
 
     routes:
         ''                                : 'month'
+        'week'                            : 'week'
+        'week/:year/:month/:day'          : 'week'
         'month'                           : 'month'
         'month/:year/:month'              : 'month'
         'month/:year/:month/:eventid'     : 'month_event'
@@ -51,13 +54,23 @@ module.exports = class Router extends Backbone.Router
             super route, options
 
 
+    week: (year, month, day) ->
+        if year?
+            monthToLoad = moment("#{year}/#{month}", "YYYY/MM")
+            window.app.events.loadMonth monthToLoad, =>
+                @displayCalendar 'agendaWeek', year, month, day
+        else
+            hash = moment().format format.WEEK_URL_HASH_FORMAT
+            @navigate hash, trigger: true
+
+
     month: (year, month) ->
         if year?
-            monthToLoad = moment("#{year}/#{month}", "YYYY/M")
+            monthToLoad = moment("#{year}/#{month}", "YYYY/MM")
             window.app.events.loadMonth monthToLoad, =>
                 @displayCalendar 'month', year, month, 1
         else
-            hash = moment().format('[month]/YYYY/M')
+            hash = moment().format format.MONTH_URL_HASH_FORMAT
             @navigate hash, trigger: true
 
 

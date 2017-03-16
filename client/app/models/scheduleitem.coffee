@@ -277,10 +277,10 @@ module.exports = class ScheduleItem extends Backbone.Model
 
         # Recurring event should be displayed without the timezone taken into
         # account.
-        else if @isRecurrent()
+        #else if @isRecurrent()
             # .utc() changes the `start` object, so it's cloned to prevent side
             # effects.
-            displayedTime = moment(start).utc().format('H:mm')
+            # displayedTime = moment(start).utc().format('H:mm')
 
         # Otherwise time is displayed, and timezoned (.format applies timezone)
         else
@@ -295,7 +295,7 @@ module.exports = class ScheduleItem extends Backbone.Model
             start: start
             end: end
             allDay: @isAllDay()
-            startEditable: not @isRecurrent() #disable dragNdrop
+            startEditable: not @isRecurrent() # disable dragNdrop
             durationEditable: true
             diff: @get 'diff'
             place: @get 'place'
@@ -303,6 +303,3 @@ module.exports = class ScheduleItem extends Backbone.Model
             type: @fcEventType
             backgroundColor: @getColor()
             borderColor: @getColor()
-
-
-

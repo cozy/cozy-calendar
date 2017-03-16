@@ -20,9 +20,12 @@ module.exports = class ListView extends ViewCollection
         super
 
     afterRender: ->
-        @calHeader = new Header isMobile: @isMobile
+        @calHeader = new Header
+            view: 'list'
+            isMobile: @isMobile
         @$('#calheader').html @calHeader.render().$el
-        @calHeader.on 'month', -> app.router.navigate '', trigger:true
+        @calHeader.on 'month', -> app.router.navigate 'month', trigger: true
+        @calHeader.on 'week', -> app.router.navigate 'week', trigger: true
 
         @$('#list-container').scroll @checkScroll
 
@@ -32,9 +35,9 @@ module.exports = class ListView extends ViewCollection
             @lastAlreadyLoaded = false
             @keepScreenFull()
 
-        super
-
         @keepScreenFull()
+
+        super
 
 
     showPopover: (jsEvent) =>
