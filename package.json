@@ -71,10 +71,10 @@
   },
   "cozy-permissions": {
     "Alarm": {
-      "description": "Creates and edits your alarms."
+      "description": "Create and edit your alarms."
     },
     "Event": {
-      "description": "Creates and edits your events."
+      "description": "Create and edit your events."
     },
     "Sharing": {
       "description": "Creates and edits what you share to others and what is shared to you"
