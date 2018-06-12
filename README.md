@@ -1,3 +1,8 @@
+This repository was part of CozyV2 which has been deprecated. [Read more](https://blog.cozycloud.cc/post/2016/11/21/On-the-road-to-Cozy-version-3).
+
+---
+
+
 # [Cozy](https://cozy.io) Calendar
 
 Cozy Calendar makes your event management easy. Main features are:
